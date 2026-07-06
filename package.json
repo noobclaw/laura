@@ -1,0 +1,13 @@
+{
+  "name": "toolapp-intel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Daily trending-tool-app intelligence collectors (GitHub / App Store / Google Play)",
+  "scripts": {
+    "collect": "node collectors/run_all.mjs"
+  },
+  "dependencies": {
+    "google-play-scraper": "^10.0.0"
+  }
+}
