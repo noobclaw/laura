@@ -29,8 +29,9 @@
 2. **克隆壳**:`node scripts/new_app.mjs <name> <applicationId> "<显示名>"` → 产出 `apps/<name>/`(复制 shell、改包名/显示名/目录)。
 3. **写芯**:AI 在 `apps/<name>/lib/tool/` 下实现工具逻辑(遵守 ToolModule 契约,纯本地)。
 4. **品牌**:生成图标(1024px 主图标 → `dart run flutter_launcher_icons`)、主题色、商店文案(标题30字/简述80字/长描述4000字,中英双语)存 `apps/<name>/store/`。
-5. **验收**:`flutter analyze` 零 error → `flutter test` → `flutter build apk --release` 出包 → 真机/模拟器过一遍核心流程。
-6. **签名**:release keystore 在 `D:\dev\keys\`(不进 git!),`key.properties` 指向。上 Play 用 `flutter build appbundle`。
+5. **验收(本地)**:`flutter analyze` 零 error → `flutter test`。**⚠️ 本机(8GB RAM,多会话共存)出不了 release 包**——Gradle JVM 已连崩 4 次(系统提交内存耗尽,压到 Xmx1024m+SerialGC 仍崩),**出包一律走 CI**。
+6. **出包(CI)**:`gh workflow run build-app.yml -R noobclaw/laura --ref main -f app=apps/<name>`(先 push!CI 从 main 拉代码)→ `gh run watch` → APK/AAB 在 run 的 artifacts(`<slug>-apk`/`<slug>-aab`)。壳验证过:shell 5m49s 出包成功。仓库是 public,Actions 免费。
+7. **签名**:当前 CI 出的是 debug 签名(能装能测)。上 Play 前要配 release keystore:keystore 存 GitHub Secrets(base64)+workflow 里解码写 `key.properties`,**别把 keystore 提交进这个 public 仓库**。
 
 ## 三期(未做):上架
 
