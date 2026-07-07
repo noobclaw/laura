@@ -1,2 +1,7 @@
 ﻿node_modules/
 data/
+
+*.jks
+*.keystore
+key.properties
+key-credentials.txt
