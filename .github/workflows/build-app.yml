@@ -1,0 +1,56 @@
+name: Build App
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'App directory to build (e.g. shell, apps/echo-jot)'
+        required: true
+        default: 'shell'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute artifact slug
+        id: slug
+        working-directory: .
+        run: echo "slug=$(echo '${{ inputs.app }}' | tr '/' '-')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.4
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter analyze
+
+      - run: flutter test
+
+      - run: flutter build apk --release
+
+      - run: flutter build appbundle --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.slug.outputs.slug }}-apk
+          path: ${{ inputs.app }}/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.slug.outputs.slug }}-aab
+          path: ${{ inputs.app }}/build/app/outputs/bundle/release/app-release.aab
