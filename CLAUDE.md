@@ -11,9 +11,14 @@ collectors/          # 采集脚本(Node 24+, ESM)
   appstore_rss.mjs      # Apple 官方 RSS(us/cn × top-free/top-paid,含工具类标记 isToolLike)
   google_play.mjs       # google-play-scraper(us × tools/productivity/photography TOP_FREE)
   hn_showhn.mjs         # HN Algolia API,近7天 Show HN ≥50分
-data/YYYY-MM-DD/     # 当日原始数据(json)
-reports/YYYY-MM-DD.md  # 当日报告(最终交付物)
+data/YYYY-MM-DD/     # 当日原始数据(json,gitignore 不入库)
+reports/YYYY-MM-DD.md  # 当日报告(最终交付物,推 GitHub)
+shell/               # Flutter 壳工程模板(见 PIPELINE.md)
+apps/<name>/         # 每个生成的 app 一个独立文件夹(推 GitHub)
+scripts/new_app.mjs  # 克隆壳→新 app
 ```
+
+远程仓库:`https://github.com/noobclaw/laura`(main)。报告与 apps/ 每次产出后都要 push。
 
 ## 每日定时任务的作业流程
 
@@ -21,7 +26,8 @@ reports/YYYY-MM-DD.md  # 当日报告(最终交付物)
 2. 读当日 `data/YYYY-MM-DD/` 下各 json(大文件别整读,用 node -e 浓缩打印再分析)。
 3. 与**前几天的报告**(reports/ 下最近 2-3 份)对比,识别「新上榜/持续升温/掉榜」。
 4. 写 `reports/YYYY-MM-DD.md`,格式见下。
-5. 报告写完后,在回复里给用户一段 5 行以内的中文摘要(今日最值得做的 1 个选题 + 理由)。
+5. **推 GitHub**:本仓库远程是 `https://github.com/noobclaw/laura`(main 分支)。`git add reports/ apps/ && git commit && git push origin main`(commit message 全英文;push 前先 `git fetch` 确认 fast-forward;PowerShell 里 push 的红字 NativeCommandError 是假错误,以 `git log origin/main` 为准)。
+6. 报告写完后,在回复里给用户一段 5 行以内的中文摘要(今日最值得做的 1 个选题 + 理由)。
 
 ## 报告格式(reports/YYYY-MM-DD.md)
 
