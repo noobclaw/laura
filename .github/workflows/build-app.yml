@@ -49,6 +49,10 @@ jobs:
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
+      - name: Accept Android SDK licenses
+        working-directory: .
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
       - name: Prepare assets
         run: |
           if [ -f prepare_assets.sh ]; then bash prepare_assets.sh; fi

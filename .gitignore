@@ -5,3 +5,9 @@ data/
 *.keystore
 key.properties
 key-credentials.txt
+
+# JVM crash dumps from local Gradle build attempts (never commit)
+hs_err_pid*
+replay_pid*
+*.mdmp
+.kotlin/
