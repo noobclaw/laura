@@ -44,7 +44,7 @@ const SHELL_PKG = 'tool_shell';
 const SHELL_APP_ID = 'com.noobclaw.tool_shell'; // must be replaced before SHELL_PKG (it contains it)
 const SHELL_DISPLAY = 'Tool Shell';
 
-const textFileRe = /\.(dart|yaml|yml|xml|gradle|kts|properties|json|md|html|plist|pbxproj|xcconfig|xcscheme|entitlements)$/i;
+const textFileRe = /\.(dart|kt|kts|swift|java|yaml|yml|xml|gradle|properties|json|md|html|plist|pbxproj|xcconfig|xcscheme|entitlements)$/i;
 
 async function* walk(dir) {
   const { readdir } = await import('node:fs/promises');

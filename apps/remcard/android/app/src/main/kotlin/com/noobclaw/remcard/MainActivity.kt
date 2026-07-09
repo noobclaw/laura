@@ -1,4 +1,4 @@
-package com.noobclaw.tool_shell
+package com.noobclaw.remcard
 
 import io.flutter.embedding.android.FlutterActivity
 
