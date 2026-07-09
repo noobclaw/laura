@@ -1,0 +1,1 @@
+Model ggml-base.bin is downloaded by prepare_assets.sh in CI. Not committed to git (57MB).

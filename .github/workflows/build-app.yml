@@ -46,6 +46,10 @@ jobs:
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
+      - name: Prepare assets
+        run: |
+          if [ -f prepare_assets.sh ]; then bash prepare_assets.sh; fi
+
       - run: flutter pub get
 
       - run: flutter analyze
