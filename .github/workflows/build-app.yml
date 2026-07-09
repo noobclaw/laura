@@ -34,10 +34,13 @@ jobs:
           cache: true
 
       - name: Set up release signing
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "No keystore secret — building with debug signing."
+            exit 0
+          fi
           echo "$KEYSTORE_B64" | base64 -d > android/upload-keystore.jks
           cat > android/key.properties <<EOF
           storeFile=upload-keystore.jks
