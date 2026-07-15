@@ -41,13 +41,22 @@ jobs:
             echo "No keystore secret — building with debug signing."
             exit 0
           fi
-          echo "$KEYSTORE_B64" | base64 -d > android/upload-keystore.jks
-          cat > android/key.properties <<EOF
+          # Decode tolerantly: if the secret is not valid base64 (or empty once
+          # decoded), fall back to debug signing instead of failing the build.
+          # Debug-signed APKs still install for acceptance testing; a real
+          # release keystore can be added later for Play uploads.
+          if echo "$KEYSTORE_B64" | base64 -d > android/upload-keystore.jks 2>/dev/null && [ -s android/upload-keystore.jks ]; then
+            cat > android/key.properties <<EOF
           storeFile=upload-keystore.jks
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
+            echo "Release keystore configured."
+          else
+            echo "Keystore secret is not valid base64 — falling back to debug signing."
+            rm -f android/upload-keystore.jks android/key.properties
+          fi
 
       - name: Accept Android SDK licenses
         working-directory: .
