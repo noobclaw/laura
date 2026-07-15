@@ -1,0 +1,38 @@
+name: fieldstamp
+description: "Offline GPS field-evidence camera."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Camera preview + still capture (offline).
+  camera: ^0.11.0
+  # GPS position + altitude (offline device sensor).
+  geolocator: ^14.0.0
+  # Magnetometer heading for the compass bearing stamp.
+  flutter_compass: ^0.8.1
+  # Local storage of photos + metadata in the app sandbox.
+  path_provider: ^2.1.5
+  # Pure-Dart JPEG re-encode after burning the watermark into the pixels.
+  image: ^4.3.0
+  # Pure-Dart PDF inspection-report generation.
+  pdf: ^3.11.0
+  # Native share sheet to export photos / PDF / CSV (no INTERNET permission).
+  share_plus: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
