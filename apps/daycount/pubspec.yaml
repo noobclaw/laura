@@ -1,0 +1,28 @@
+name: daycount
+description: "Offline countdown & anniversary tracker with a home-screen widget."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  # Local storage of the event list as a JSON file in the app sandbox.
+  path_provider: ^2.1.6
+  # Android home-screen widget bridge (pushes the featured countdown to the
+  # native AppWidgetProvider). No network — writes shared prefs the widget reads.
+  home_widget: ^0.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
