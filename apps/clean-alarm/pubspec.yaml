@@ -1,0 +1,30 @@
+name: clean_alarm
+description: "A clean, offline, ad-free alarm clock."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  # Local storage of the alarm list as a JSON file in the app sandbox.
+  path_provider: ^2.1.6
+  # Exact scheduled full-screen alarm notifications, fully on-device. No network.
+  flutter_local_notifications: ^18.0.1
+  # Timezone database + device-local zone for zonedSchedule wall-clock accuracy.
+  timezone: ^0.9.4
+  flutter_timezone: ^3.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
