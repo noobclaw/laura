@@ -52,6 +52,12 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // Keep WorkManager/Room intact — R8 otherwise strips the generated
+            // WorkDatabase and the app crashes on launch (see proguard-rules.pro).
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
