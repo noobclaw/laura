@@ -61,12 +61,19 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final c = _controller;
-    if (c == null || !c.value.isInitialized) return;
     if (state == AppLifecycleState.inactive) {
-      c.dispose();
-      _controller = null;
+      // Release the camera when leaving the foreground.
+      if (c != null && c.value.isInitialized) {
+        c.dispose();
+        _controller = null;
+      }
     } else if (state == AppLifecycleState.resumed) {
-      _initCamera();
+      // Re-acquire it on return. The controller was nulled above, so the
+      // old guard (`c == null` → return) wrongly skipped re-init and left the
+      // preview stuck forever — re-init whenever there's no live controller.
+      if (c == null || !c.value.isInitialized) {
+        _initCamera();
+      }
     }
   }
 

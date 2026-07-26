@@ -107,7 +107,7 @@ class _HomeBodyState extends State<_HomeBody> {
       return;
     }
     final draft = await Navigator.of(context).push<EventDraft>(
-      MaterialPageRoute(builder: (_) => const EventEditPage()),
+      MaterialPageRoute(builder: (_) => EventEditPage(pro: store.pro)),
     );
     if (draft != null) {
       store.add(
