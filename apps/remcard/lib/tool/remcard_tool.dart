@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'deck_detail.dart';
 import 'models.dart';
 import 'store.dart';
@@ -20,6 +21,7 @@ class RemcardTool extends ToolModule {
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
+        const _PurchaseNotices(),
         ListTile(
           leading: const Icon(Icons.school_outlined),
           title: Text(tr(zh: '间隔重复原理', en: 'How spaced repetition works')),
@@ -41,43 +43,62 @@ class RemcardTool extends ToolModule {
             subtitle: Text(store.pro
                 ? tr(zh: '感谢支持', en: 'Thanks for your support')
                 : tr(
-                    zh: '免费版 ${RemcardStore.freeDeckLimit} 个牌组;卡片数量无限制',
-                    en: 'Free version: ${RemcardStore.freeDeckLimit} decks; '
-                        'unlimited cards',
+                    zh: '一次买断 · 免费版 ${RemcardStore.freeDeckLimit} 个牌组,'
+                        '卡片数量无限制',
+                    en: 'One-time purchase · free version: '
+                        '${RemcardStore.freeDeckLimit} decks, unlimited cards',
                   )),
-            onTap: store.pro ? null : () => _confirmUnlock(context),
+            onTap: store.pro ? null : () => PurchaseService.instance.buyPro(),
           ),
         ),
+        ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => store.pro
+              ? const SizedBox.shrink()
+              : ListTile(
+                  leading: const Icon(Icons.restore),
+                  title: Text(tr(zh: '恢复购买', en: 'Restore purchases')),
+                  subtitle: Text(tr(
+                    zh: '换机或重装后找回已购的 Pro',
+                    en: 'Recover Pro after a reinstall or new device',
+                  )),
+                  onTap: () => PurchaseService.instance.restore(),
+                ),
+        ),
       ];
+}
 
-  void _confirmUnlock(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
-        content: Text(tr(
-          zh: '一次性买断,解锁无限牌组。\n\n'
-              '(正式版将接入应用内购买;当前为本地占位开关。)',
-          en: 'A one-time purchase unlocks unlimited decks.\n\n'
-              '(The release build will use in-app purchase; '
-              'this is a local placeholder toggle.)',
-        )),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(tr(zh: '取消', en: 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () {
-              store.unlockPro();
-              Navigator.pop(ctx);
-            },
-            child: Text(tr(zh: '解锁', en: 'Unlock')),
-          ),
-        ],
-      ),
-    );
+/// Invisible settings-list entry that surfaces purchase results (errors,
+/// pending, unlocked) as snackbars while the settings page is open.
+class _PurchaseNotices extends StatefulWidget {
+  const _PurchaseNotices();
+
+  @override
+  State<_PurchaseNotices> createState() => _PurchaseNoticesState();
+}
+
+class _PurchaseNoticesState extends State<_PurchaseNotices> {
+  void _show() {
+    final msg = PurchaseService.instance.notice.value;
+    if (msg == null || !mounted) return;
+    PurchaseService.instance.notice.value = null;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
+
+  @override
+  void initState() {
+    super.initState();
+    PurchaseService.instance.notice.addListener(_show);
+  }
+
+  @override
+  void dispose() {
+    PurchaseService.instance.notice.removeListener(_show);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 class DeckListScreen extends StatelessWidget {
