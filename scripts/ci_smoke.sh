@@ -17,14 +17,22 @@ adb logcat -c || true
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
 # Give Flutter time to reach the first frame (cold start on swiftshader).
 sleep 30
-# Gate 1: the process must still be alive (pidof exits non-zero otherwise).
-adb shell pidof "$PKG"
+# Evidence first, gates second — so a failure still leaves a screenshot and
+# the crash log in the job output for diagnosis.
+adb exec-out screencap -p > smoke-home.png || true
+# Gate 1: the process must still be alive.
+if ! adb shell pidof "$PKG"; then
+  echo "::error::App process died within 30s of launch"
+  echo "=== crash-relevant logcat ==="
+  adb logcat -d | grep -B 2 -A 30 -E "FATAL EXCEPTION|AndroidRuntime|Fatal signal" || true
+  echo "=== last 120 logcat lines ==="
+  adb logcat -d | tail -120 || true
+  exit 1
+fi
 # Gate 2: no fatal Java/Kotlin crash in the log.
 if adb logcat -d | grep -q "FATAL EXCEPTION"; then
   echo "::error::App crashed on launch"
   adb logcat -d | grep -B 2 -A 20 "FATAL EXCEPTION" || true
   exit 1
 fi
-# Evidence: screenshot of whatever the app is showing.
-adb exec-out screencap -p > smoke-home.png
 echo "Smoke test passed."
