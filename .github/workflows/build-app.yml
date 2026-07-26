@@ -11,6 +11,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    outputs:
+      slug: ${{ steps.slug.outputs.slug }}
     defaults:
       run:
         working-directory: ${{ inputs.app }}
@@ -87,3 +89,61 @@ jobs:
         with:
           name: ${{ steps.slug.outputs.slug }}-aab
           path: ${{ inputs.app }}/build/app/outputs/bundle/release/app-release.aab
+
+  # Machine acceptance gate: boot an Android emulator, install the freshly
+  # built APK, launch it, and fail the run if the app crashes on startup.
+  # `flutter analyze` + `flutter test` prove the code compiles and the logic is
+  # right — this proves the APK actually runs on a device. A screenshot of the
+  # home screen is uploaded so a human can eyeball that real UI rendered.
+  smoke-test:
+    needs: build-android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build-android.outputs.slug }}-apk
+
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Boot emulator, install and launch the app
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_5
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            set -e
+            AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort | tail -n1)
+            PKG=$("$AAPT" dump badging app-release.apk | sed -n "s/package: name='\([^']*\)'.*/\1/p")
+            echo "Package: $PKG"
+            adb install -r app-release.apk
+            adb logcat -c || true
+            adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
+            # Give Flutter time to reach the first frame (cold start on swiftshader).
+            sleep 30
+            # Gate 1: the process must still be alive (pidof exits non-zero otherwise).
+            adb shell pidof "$PKG"
+            # Gate 2: no fatal Java/Kotlin crash in the log.
+            if adb logcat -d | grep -q "FATAL EXCEPTION"; then
+              echo "::error::App crashed on launch"
+              adb logcat -d | grep -B 2 -A 20 "FATAL EXCEPTION"
+              exit 1
+            fi
+            # Evidence: screenshot of whatever the app is showing.
+            adb exec-out screencap -p > smoke-home.png
+
+      - name: Upload smoke screenshot
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ needs.build-android.outputs.slug }}-smoke
+          path: smoke-home.png
+          if-no-files-found: ignore

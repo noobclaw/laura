@@ -46,14 +46,28 @@ class SensorHub extends ChangeNotifier {
     if (perm == LocationPermission.denied) {
       perm = await Geolocator.requestPermission();
     }
-    if (perm == LocationPermission.denied ||
-        perm == LocationPermission.deniedForever) {
+    if (perm == LocationPermission.deniedForever) {
+      throw 'Location permission permanently denied — enable it in system settings, or enter coordinates manually';
+    }
+    if (perm == LocationPermission.denied) {
       throw 'Location permission denied';
     }
-    final p = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
-    );
-    return (lat: p.latitude, lon: p.longitude);
+    try {
+      // Medium accuracy acquires much faster than high and is far more precise
+      // than the almanac needs; the timeLimit stops the indoor/cold-GPS case
+      // from spinning forever.
+      final p = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 20),
+        ),
+      );
+      return (lat: p.latitude, lon: p.longitude);
+    } on TimeoutException {
+      final last = await Geolocator.getLastKnownPosition();
+      if (last != null) return (lat: last.latitude, lon: last.longitude);
+      throw 'GPS timed out — move somewhere with sky view, or enter coordinates manually';
+    }
   }
 
   @override

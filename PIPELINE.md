@@ -30,7 +30,9 @@
 3. **写芯**:AI 在 `apps/<name>/lib/tool/` 下实现工具逻辑(遵守 ToolModule 契约,纯本地)。
 4. **品牌**:生成图标(1024px 主图标 → `dart run flutter_launcher_icons`)、主题色、商店文案(标题30字/简述80字/长描述4000字,中英双语)存 `apps/<name>/store/`。
 5. **验收(本地)**:`flutter analyze` 零 error → `flutter test`。**⚠️ 本机(8GB RAM,多会话共存)出不了 release 包**——Gradle JVM 已连崩 4 次(系统提交内存耗尽,压到 Xmx1024m+SerialGC 仍崩),**出包一律走 CI**。
+   - **⚠️ analyze+test 过 ≠ 装机能用**(2026-07-24 教训:5 个 app 审计出 3 个真机 bug、1 个核心功能不成立)。写码前必须过两道**纸面评审**:① **招牌功能架构评审**——凡涉及「可靠性」的核心机制(闹钟必须准时响=setAlarmClock/前台服务而非通知调度、小组件必须自刷新=provider 端实时算而非 Flutter 端烤死数值、相机必须能 resume),先确认所选方案在 Doze/国产 ROM/生命周期下真的成立再动手;② **运行时权限流程评审**——每个用到的危险权限(通知/相机/定位)要有显式请求+被拒时的可见反馈+去系统设置的出口,禁止静默失败。完成后**必须请独立审计 agent 通读代码**按「真机会不会坏」出报告,修完才算过。
 6. **出包(CI)**:`gh workflow run build-app.yml -R noobclaw/laura --ref main -f app=apps/<name>`(先 push!CI 从 main 拉代码)→ `gh run watch` → APK/AAB 在 run 的 artifacts(`<slug>-apk`/`<slug>-aab`)。壳验证过:shell 5m49s 出包成功。仓库是 public,Actions 免费。
+   - **机器验收关卡(smoke-test job,2026-07-24 加)**:出包后 CI 自动起 Android 34 模拟器,装 APK → 启动 → 30s 后进程必须还活着 → logcat 无 FATAL EXCEPTION → 截屏传 artifact(`<slug>-smoke`)。**smoke 挂 = 本轮不算完成**,修到绿为止;绿了也只证明「能装能启动」,传感器/闹钟/小组件等仍需真机。**用语纪律:过了 smoke 只能标「待真机验收」,真机核心功能验过才准写「待上架」。**
    - **⚠️ 插件多的 app 要调大 Gradle 内存**:壳默认 `android/gradle.properties` 是为 8GB 本机压小的(Xmx1024m / MaxMetaspaceSize=384m),CI 上跑轻量 app 够用,但**装了多个原生插件(相机/定位/PDF/图像等)的 app,R8 阶段会 `OutOfMemoryError: Metaspace` 挂掉**。CI 跑在 16GB runner 上,给该 app 的 `android/gradle.properties` 提到 `Xmx4096m / MaxMetaspaceSize=1024m` 即可(见 apps/fieldstamp)。母版不动,只改该 app 自己的。
 7. **签名**:当前 CI 出的是 debug 签名(能装能测)。上 Play 前要配 release keystore:keystore 存 GitHub Secrets(base64)+workflow 里解码写 `key.properties`,**别把 keystore 提交进这个 public 仓库**。signing 步骤已做容错:secret 缺失**或非法 base64** 时自动回退 debug 签名,不再中断整个 build(2026-07-15 修:曾因 `ANDROID_KEYSTORE_BASE64` 非法 base64 令 `bash -e` 直接失败)。
 
