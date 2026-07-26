@@ -134,25 +134,9 @@ jobs:
           profile: pixel_5
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: |
-            set -e
-            PKG='${{ steps.pkg.outputs.pkg }}'
-            echo "Package: $PKG"
-            adb install -r app-release.apk
-            adb logcat -c || true
-            adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
-            # Give Flutter time to reach the first frame (cold start on swiftshader).
-            sleep 30
-            # Gate 1: the process must still be alive (pidof exits non-zero otherwise).
-            adb shell pidof "$PKG"
-            # Gate 2: no fatal Java/Kotlin crash in the log.
-            if adb logcat -d | grep -q "FATAL EXCEPTION"; then
-              echo "::error::App crashed on launch"
-              adb logcat -d | grep -B 2 -A 20 "FATAL EXCEPTION"
-              exit 1
-            fi
-            # Evidence: screenshot of whatever the app is showing.
-            adb exec-out screencap -p > smoke-home.png
+          # NB: this action runs each script line as a separate `sh -c`, so all
+          # real logic lives in scripts/ci_smoke.sh — keep this a single line.
+          script: bash scripts/ci_smoke.sh '${{ steps.pkg.outputs.pkg }}'
 
       - name: Upload smoke screenshot
         uses: actions/upload-artifact@v4
