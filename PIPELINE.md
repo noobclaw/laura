@@ -2,6 +2,50 @@
 
 从日报选题到可上架 APK/AAB 的标准流程。原则:**壳不动、只换芯**——所有 app 共用一个壳工程,每个新 app 只替换 `lib/tool/` 里的工具模块和品牌资源。
 
+## ⭐ 工厂标准作业流程 SOP(2026-07-26 定版,每轮工厂逐条执行、缺一不可)
+
+> 背景:干净闹钟真机验收失败(不响)暴露「analyze+test 过 ≠ 能用」;本 SOP 把质量关卡全部机器化/成文化。**顺序执行,每关不过不得进下一关。**
+
+**G0 防撞车**:`git log --oneline --since="2.5 days ago" -- apps/`,近 2.5 天有新 app 提交则本轮跳过。
+
+**G1 取题**:取 BACKLOG「⚪排队」指数最高项,**执行当日决策门备注**(跳取/退取规则)。硬性否决:①系统自带 app 可基本替代且无付费榜实证差异化;②缺口 <5/15 或付费验证 <15/25(只进观察池);③依赖服务端。
+
+**G2 立项评审(写码前,写进 PLAN.md)**:
+- **差异化楔子一句话**:「用户为什么选我而不是竞品X」——写不出来 = 退回换题。
+- **招牌功能架构评审**:核心可靠性机制选型定死(闹钟=`setAlarmClock`/前台服务,非通知调度;桌面小组件=provider 端实时计算,非 Flutter 端烤死数值;相机=生命周期 resume 必须重建;后台任务=WorkManager/前台服务)。
+- **权限流程评审**:每个危险权限(通知/相机/定位/麦克风)必须:显式请求 → 拒绝有可见提示 → 永久拒绝给「去系统设置」出口。**禁止静默失败。**
+- **定价**(见「变现与定价标准」),写进 PLAN.md。
+
+**G3 开发**:`node scripts/new_app.mjs` 克隆壳 → 实现 `lib/tool/`。强制:
+- **多语言(2026-07-26 起铁律)**:所有用户可见字符串一律 `tr(zh:, en:)`(壳 `core/l10n.dart`,ja 可选),跟随系统语言、英文兜底;`MaterialApp` 带 `GlobalMaterialLocalizations.delegates`+`supportedLocales`;安卓桌面名走 `@string/app_name`(`values/`+`values-zh/` 分别填英文名/中文名,取自 store/listing.md);Branding 的 aboutText/privacyPolicy 双语。日志/JSON key/文件名不翻。
+- 零联网默认:`tools:node="remove"` 剥 INTERNET;确需网络单独立项说明。
+- 免费层必须真可用(核心功能+数量上限),Pro 解锁「无限+进阶」;禁广告 SDK。
+
+**G4 本地验收**:`flutter analyze` 零 issue + `flutter test` 全过(PUB_CACHE=D:\dev\pub-cache;严禁本机 flutter build)。
+
+**G5 独立审计**:请独立审计 agent 通读全部代码,按「**装到真机上什么会坏**」出报告(权限流/生命周期/持久化/边界值/Pro 门);修完复审才过关。
+
+**G6 出包+机器冒烟**:push → `gh workflow run build-app.yml -f app=apps/<name>` → **smoke-test job 必须绿**(模拟器装包→启动→30s 验活→扫 FATAL EXCEPTION→截屏);冒烟逻辑在 `scripts/ci_smoke.sh`(emulator-runner 逐行 sh -c,workflow 里只准一行调用)。**下载 smoke 截屏亲眼确认 UI 真渲染**,不许只看绿勾。
+
+**G7 记账与用语纪律**:BACKLOG 状态流转 ⚪→✅已做;**过冒烟只准写「待真机验收」,用户真机核心功能验过才准写「待上架」**;真机验收失败标 ⛔ 附根因,重做前不上架。PLAN.md 附「真机验收清单」(权限弹窗/核心功能/传感器/边界各 1 行,给用户照着点)。
+
+**G8 上架(节奏独立)**:每周 1-2 个防商店反垃圾;上架前必须:真机验收通过 + **本地 Pro 占位换成真内购**(见下)+ release keystore 签名。
+
+## 变现与定价标准(2026-07-26 定版)
+
+- **模式**:默认「免费+Pro 一次性买断」;B 端搜索转化型(如 FieldStamp)可用纯付费下载(零代码,Console 定价);**禁广告**(与隐私/干净卖点冲突)。
+- **定价阶梯**:练手/填充 $0.99-1.99;标准工具 $2.99-4.99;B 端刚需 $5.99-9.99。锚定法:**对标头部竞品价的 1/3~1/2 切入**(AnkiMobile $29.99→Remcard $4.99;PhotoPills $10.99→GoldenScout $3.99)。中区价取 ¥ 整数(6/12/18/28)。上架 3 个月按转化复盘调价。
+- **支付接入(Play)**:数字商品**必须走 Google Play Billing**(商店政策强制,不得接支付宝/微信/Stripe);Flutter 用官方 `in_app_purchase` 插件,产品统一 non-consumable **`pro_unlock`**;设置页必须有「恢复购买」(restorePurchases)。**App 无需 INTERNET 权限**(结算经 Play Store 进程完成),零联网卖点保留;BILLING 权限由插件自动并入。抽成 15%(年 ≤$100 万 small business 档)。**当前各 app 的 Pro 解锁是本地占位标志,G8 前必须替换**;经 Play Console 内部测试轨 + license tester 真机走通「购买→解锁→卸载重装→恢复购买」才准上生产轨。
+- **大陆安卓商店**(华为/小米/OPPO/vivo):各家自有结算 SDK+软著+备案,是独立后续项目,**首发只做 Google Play**(海外+中文区用户靠 zh 本地化覆盖)。
+- **iOS**:同 `in_app_purchase` 走 StoreKit,Apple 小企业档 15%;iOS 工程未配置,归三期。
+
+## 上架自动化路线(三期,未做)
+
+1. **一次性人工前置**:release keystore 生成→base64 进 GitHub Secrets(workflow 已支持自动切真签名);每个 app 首次在 Play Console 人工建应用+数据安全表单+内容分级(Google 政策要求,无法绕);Play Developer API 开 service account,JSON 进 Secrets。
+2. **CI 自动上传**:build-app.yml 加 `publish` 可选 job——fastlane supply(或 gradle-play-publisher)把 AAB+双语商店文案(`store/listing.md` 转 `fastlane/metadata/android/{en-US,zh-CN}/` 结构)推 **internal 测试轨**;**晋级 production 保留人工点击**(最后闸门)。
+3. **App Store**:macos runner + fastlane deliver + App Store Connect API key;需 Apple 开发者账号($99/年)+ iOS 工程补配;排在 Play 通道跑顺之后。
+4. 节奏纪律不变:每周 1-2 个。
+
 ## 本机工具链(D:\dev)
 
 | 组件 | 位置 | 备注 |
