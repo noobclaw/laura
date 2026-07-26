@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'event_edit.dart';
 import 'models.dart';
 import 'store.dart';
@@ -56,17 +57,20 @@ class _DetailView extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除这个日子？'),
-        content: Text('「${event.title}」将被删除，无法恢复。'),
+        title: Text(tr(zh: '删除这个日子？', en: 'Delete this day?')),
+        content: Text(tr(
+          zh: '「${event.title}」将被删除，无法恢复。',
+          en: '"${event.title}" will be deleted. This cannot be undone.',
+        )),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(tr(zh: '取消', en: 'Cancel')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
+            child: Text(tr(zh: '删除', en: 'Delete')),
           ),
         ],
       ),
@@ -84,24 +88,26 @@ class _DetailView extends StatelessWidget {
     final onColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? Colors.white
         : Colors.black87;
-    final label = s.isToday ? '就是今天' : (s.isFuture ? '还有' : '已过去');
+    final label = s.isToday
+        ? tr(zh: '就是今天', en: 'Today!')
+        : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(event.title.isEmpty ? '日子' : event.title),
+        title: Text(event.title.isEmpty ? tr(zh: '日子', en: 'Day') : event.title),
         actions: [
           IconButton(
-            tooltip: event.pinned ? '取消置顶' : '置顶',
+            tooltip: event.pinned ? tr(zh: '取消置顶', en: 'Unpin') : tr(zh: '置顶', en: 'Pin'),
             icon: Icon(event.pinned ? Icons.push_pin : Icons.push_pin_outlined),
             onPressed: () => store.togglePin(event),
           ),
           IconButton(
-            tooltip: '编辑',
+            tooltip: tr(zh: '编辑', en: 'Edit'),
             icon: const Icon(Icons.edit_outlined),
             onPressed: () => _edit(context),
           ),
           IconButton(
-            tooltip: '删除',
+            tooltip: tr(zh: '删除', en: 'Delete'),
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _delete(context),
           ),
@@ -122,7 +128,7 @@ class _DetailView extends StatelessWidget {
                 Text(event.emoji, style: const TextStyle(fontSize: 44)),
                 const SizedBox(height: 8),
                 Text(
-                  event.title.isEmpty ? '未命名' : event.title,
+                  event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, color: onColor.withValues(alpha: 0.95)),
                 ),
@@ -138,28 +144,35 @@ class _DetailView extends StatelessWidget {
                   ),
                 ),
                 if (!s.isToday)
-                  Text('天', style: TextStyle(fontSize: 16, color: onColor.withValues(alpha: 0.9))),
+                  Text(tr(zh: '天', en: 'days'),
+                      style: TextStyle(fontSize: 16, color: onColor.withValues(alpha: 0.9))),
               ],
             ),
           ),
           const SizedBox(height: 20),
           _InfoRow(
             icon: Icons.event,
-            label: '目标日期',
+            label: tr(zh: '目标日期', en: 'Date'),
             value: '${s.target.year}-${_two(s.target.month)}-${_two(s.target.day)} ${weekdayLabel(s.target)}',
           ),
           if (event.yearlyRepeat)
-            const _InfoRow(icon: Icons.repeat, label: '重复', value: '每年'),
+            _InfoRow(
+              icon: Icons.repeat,
+              label: tr(zh: '重复', en: 'Repeat'),
+              value: tr(zh: '每年', en: 'Yearly'),
+            ),
           _InfoRow(
             icon: Icons.today_outlined,
-            label: '距今',
+            label: tr(zh: '距今', en: 'From today'),
             value: s.isToday
-                ? '就是今天'
-                : (s.isFuture ? '还有 ${s.absDays} 天' : '已过去 ${s.absDays} 天'),
+                ? tr(zh: '就是今天', en: 'Today!')
+                : (s.isFuture
+                    ? tr(zh: '还有 ${s.absDays} 天', en: 'in ${s.absDays} days')
+                    : tr(zh: '已过去 ${s.absDays} 天', en: '${s.absDays} days ago')),
           ),
           if (event.note.isNotEmpty) ...[
             const SizedBox(height: 8),
-            _InfoRow(icon: Icons.notes_outlined, label: '备注', value: event.note),
+            _InfoRow(icon: Icons.notes_outlined, label: tr(zh: '备注', en: 'Note'), value: event.note),
           ],
         ],
       ),

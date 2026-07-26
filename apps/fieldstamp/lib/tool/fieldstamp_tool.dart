@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'camera_screen.dart';
 import 'gallery_screen.dart';
 import 'models.dart';
@@ -27,11 +28,15 @@ class FieldStampTool extends ToolModule {
           listenable: store,
           builder: (context, _) => ListTile(
             leading: Icon(store.pro ? Icons.verified : Icons.lock_open_outlined),
-            title: Text(store.pro ? 'Pro unlocked' : 'Unlock Pro'),
+            title: Text(store.pro
+                ? tr(zh: '已解锁 Pro', en: 'Pro unlocked')
+                : tr(zh: '解锁 Pro', en: 'Unlock Pro')),
             subtitle: Text(store.pro
-                ? 'Thanks for your support'
-                : 'One-time purchase: multiple projects, PDF/CSV export, '
-                    'DMS coordinates, no watermark tag'),
+                ? tr(zh: '感谢你的支持', en: 'Thanks for your support')
+                : tr(
+                    zh: '一次买断:多项目、PDF/CSV 导出、度分秒坐标、去除水印角标',
+                    en: 'One-time purchase: multiple projects, PDF/CSV export, '
+                        'DMS coordinates, no watermark tag')),
             onTap: store.pro ? null : () => _confirmUnlock(context),
           ),
         ),
@@ -39,10 +44,12 @@ class FieldStampTool extends ToolModule {
           listenable: store,
           builder: (context, _) => ListTile(
             leading: const Icon(Icons.explore_outlined),
-            title: const Text('Coordinate format'),
+            title: Text(tr(zh: '坐标格式', en: 'Coordinate format')),
             subtitle: Text(store.coordFormat == CoordFormat.decimal
-                ? 'Decimal degrees'
-                : 'Degrees / minutes / seconds (Pro)'),
+                ? tr(zh: '十进制度', en: 'Decimal degrees')
+                : tr(
+                    zh: '度 / 分 / 秒(Pro)',
+                    en: 'Degrees / minutes / seconds (Pro)')),
             onTap: () => _pickCoordFormat(context),
           ),
         ),
@@ -50,9 +57,10 @@ class FieldStampTool extends ToolModule {
           listenable: store,
           builder: (context, _) => ListTile(
             leading: const Icon(Icons.height),
-            title: const Text('Altitude unit'),
-            subtitle:
-                Text(store.altUnit == AltUnit.meters ? 'Meters' : 'Feet'),
+            title: Text(tr(zh: '海拔单位', en: 'Altitude unit')),
+            subtitle: Text(store.altUnit == AltUnit.meters
+                ? tr(zh: '米', en: 'Meters')
+                : tr(zh: '英尺', en: 'Feet')),
             onTap: () => store.setAltUnit(
                 store.altUnit == AltUnit.meters ? AltUnit.feet : AltUnit.meters),
           ),
@@ -61,8 +69,10 @@ class FieldStampTool extends ToolModule {
           listenable: store,
           builder: (context, _) => ListTile(
             leading: const Icon(Icons.folder_outlined),
-            title: const Text('Projects'),
-            subtitle: Text('${store.projects.length} project(s)'),
+            title: Text(tr(zh: '项目', en: 'Projects')),
+            subtitle: Text(tr(
+                zh: '${store.projects.length} 个项目',
+                en: '${store.projects.length} project(s)')),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => ProjectsPage(store: store),
             )),
@@ -70,7 +80,7 @@ class FieldStampTool extends ToolModule {
         ),
         ListTile(
           leading: const Icon(Icons.info_outline),
-          title: const Text('How stamping works'),
+          title: Text(tr(zh: '水印是如何烧入的', en: 'How stamping works')),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => const _HowItWorksPage(),
           )),
@@ -81,25 +91,32 @@ class FieldStampTool extends ToolModule {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Unlock Pro'),
-        content: const Text(
-          'A one-time purchase unlocks:\n'
-          '• Multiple projects / work orders\n'
-          '• PDF inspection reports & CSV ledgers\n'
-          '• Degrees-minutes-seconds coordinates\n'
-          '• Removes the small FieldStamp tag on photos\n\n'
-          '(The store purchase is added before release; this is a local switch '
-          'for now.)',
-        ),
+        title: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
+        content: Text(tr(
+          zh: '一次买断即可解锁:\n'
+              '• 多个项目 / 工单\n'
+              '• PDF 巡检报告与 CSV 台账\n'
+              '• 度分秒坐标\n'
+              '• 去除照片上的 FieldStamp 小角标\n\n'
+              '(正式版会接入商店内购;目前为本地开关。)',
+          en: 'A one-time purchase unlocks:\n'
+              '• Multiple projects / work orders\n'
+              '• PDF inspection reports & CSV ledgers\n'
+              '• Degrees-minutes-seconds coordinates\n'
+              '• Removes the small FieldStamp tag on photos\n\n'
+              '(The store purchase is added before release; this is a local switch '
+              'for now.)',
+        )),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
             onPressed: () {
               store.unlockPro();
               Navigator.pop(ctx);
             },
-            child: const Text('Unlock'),
+            child: Text(tr(zh: '解锁', en: 'Unlock')),
           ),
         ],
       ),
@@ -118,8 +135,9 @@ class FieldStampTool extends ToolModule {
               leading: Icon(store.coordFormat == CoordFormat.decimal
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked),
-              title: const Text('Decimal degrees'),
-              subtitle: const Text('e.g. 37.774900, -122.419400'),
+              title: Text(tr(zh: '十进制度', en: 'Decimal degrees')),
+              subtitle: Text(
+                  tr(zh: '例如:37.774900, -122.419400', en: 'e.g. 37.774900, -122.419400')),
               onTap: () {
                 store.setCoordFormat(CoordFormat.decimal);
                 Navigator.pop(ctx);
@@ -130,14 +148,20 @@ class FieldStampTool extends ToolModule {
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked),
               title: Text(store.pro
-                  ? 'Degrees / minutes / seconds'
-                  : 'Degrees / minutes / seconds (Pro)'),
-              subtitle: const Text("e.g. 37°46'29.6\"N  122°25'09.8\"W"),
+                  ? tr(zh: '度 / 分 / 秒', en: 'Degrees / minutes / seconds')
+                  : tr(
+                      zh: '度 / 分 / 秒(Pro)',
+                      en: 'Degrees / minutes / seconds (Pro)')),
+              subtitle: Text(tr(
+                  zh: "例如:37°46'29.6\"N  122°25'09.8\"W",
+                  en: "e.g. 37°46'29.6\"N  122°25'09.8\"W")),
               onTap: () {
                 if (!store.pro) {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('DMS coordinates are a Pro feature.'),
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(tr(
+                        zh: '度分秒坐标为 Pro 功能。',
+                        en: 'DMS coordinates are a Pro feature.')),
                   ));
                   return;
                 }
@@ -186,15 +210,15 @@ class _HomeShellState extends State<HomeShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-              icon: Icon(Icons.camera_alt_outlined),
-              selectedIcon: Icon(Icons.camera_alt),
-              label: 'Camera'),
+              icon: const Icon(Icons.camera_alt_outlined),
+              selectedIcon: const Icon(Icons.camera_alt),
+              label: tr(zh: '相机', en: 'Camera')),
           NavigationDestination(
-              icon: Icon(Icons.photo_library_outlined),
-              selectedIcon: Icon(Icons.photo_library),
-              label: 'Gallery'),
+              icon: const Icon(Icons.photo_library_outlined),
+              selectedIcon: const Icon(Icons.photo_library),
+              label: tr(zh: '相册', en: 'Gallery')),
         ],
       ),
     );
@@ -209,7 +233,7 @@ class ProjectsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Projects')),
+      appBar: AppBar(title: Text(tr(zh: '项目', en: 'Projects'))),
       body: ListenableBuilder(
         listenable: store,
         builder: (context, _) => ListView(
@@ -220,39 +244,46 @@ class ProjectsPage extends StatelessWidget {
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked),
                 title: Text(p.name),
-                subtitle: Text(
-                    '${store.photosForProject(p.id).length} photos'),
+                subtitle: Text(tr(
+                    zh: '${store.photosForProject(p.id).length} 张照片',
+                    en: '${store.photosForProject(p.id).length} photos')),
                 onTap: () => store.selectProject(p.id),
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) async {
                     if (v == 'rename') {
-                      final name = await _prompt(context, 'Rename project', p.name);
+                      final name = await _prompt(context,
+                          tr(zh: '重命名项目', en: 'Rename project'), p.name);
                       if (name != null && name.trim().isNotEmpty) {
                         store.renameProject(p, name);
                       }
                     } else if (v == 'delete') {
                       if (store.projects.length <= 1) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Keep at least one project.')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(tr(
+                                zh: '至少保留一个项目。',
+                                en: 'Keep at least one project.'))));
                         return;
                       }
                       final ok = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: Text('Delete "${p.name}"?'),
-                          content: Text(
-                              'Deletes the project and its '
-                              '${store.photosForProject(p.id).length} photos.'),
+                          title: Text(tr(
+                              zh: '删除「${p.name}」?',
+                              en: 'Delete "${p.name}"?')),
+                          content: Text(tr(
+                              zh: '将删除该项目及其 '
+                                  '${store.photosForProject(p.id).length} 张照片。',
+                              en: 'Deletes the project and its '
+                                  '${store.photosForProject(p.id).length} photos.')),
                           actions: [
                             TextButton(
                                 onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('Cancel')),
+                                child: Text(tr(zh: '取消', en: 'Cancel'))),
                             FilledButton(
                               style: FilledButton.styleFrom(
                                   backgroundColor: Colors.red),
                               onPressed: () => Navigator.pop(ctx, true),
-                              child: const Text('Delete'),
+                              child: Text(tr(zh: '删除', en: 'Delete')),
                             ),
                           ],
                         ),
@@ -260,9 +291,13 @@ class ProjectsPage extends StatelessWidget {
                       if (ok == true) await store.deleteProject(p);
                     }
                   },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'rename', child: Text('Rename')),
-                    PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                        value: 'rename',
+                        child: Text(tr(zh: '重命名', en: 'Rename'))),
+                    PopupMenuItem(
+                        value: 'delete',
+                        child: Text(tr(zh: '删除', en: 'Delete'))),
                   ],
                 ),
               ),
@@ -272,19 +307,21 @@ class ProjectsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           if (!store.pro) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content:
-                  Text('Multiple projects are a Pro feature. Unlock in Settings.'),
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(tr(
+                  zh: '多项目为 Pro 功能,请在设置中解锁。',
+                  en: 'Multiple projects are a Pro feature. Unlock in Settings.')),
             ));
             return;
           }
-          final name = await _prompt(context, 'New project', '');
+          final name =
+              await _prompt(context, tr(zh: '新建项目', en: 'New project'), '');
           if (name != null && name.trim().isNotEmpty) {
             store.addProject(name);
           }
         },
         icon: const Icon(Icons.add),
-        label: const Text('New project'),
+        label: Text(tr(zh: '新建项目', en: 'New project')),
       ),
     );
   }
@@ -304,10 +341,11 @@ class ProjectsPage extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text),
-              child: const Text('OK')),
+              child: Text(tr(zh: '确定', en: 'OK'))),
         ],
       ),
     );
@@ -319,7 +357,22 @@ class _HowItWorksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const body = '''
+    final body = tr(
+      zh: '''
+FieldStamp 把每张照片都变成一份小小的现场证据。
+
+按下快门时,应用会读取设备的 GPS(经纬度、海拔和精度)、磁力计方位和当前时间,连同项目名一起直接烧入照片的像素里。因为水印是在拍摄瞬间合成的(不是事后叠加),照片本身就承载着这份记录。
+
+这些数值也会随每张照片一起保存,之后可以导出 PDF 巡检报告或 CSV 台账。
+
+拍出好水印的小技巧:
+• 在户外给 GPS 几秒钟时间,让精度(显示为 ±米)达到理想值。
+• 如果方位看起来不对,把手机按"8"字形晃动以校准罗盘。
+• 海拔来自 GPS,可能有波动,仅供参考。
+
+隐私:一切都在本机完成。FieldStamp 不申请网络权限——你的照片和坐标永远不会离开你的手机。
+''',
+      en: '''
 FieldStamp turns every photo into a small piece of field evidence.
 
 When you tap the shutter, the app reads your device's GPS (latitude, longitude, altitude and accuracy), the magnetometer bearing, and the current time — then burns them, together with the project name, directly into the photo's pixels. Because the stamp is composited at the moment of capture (not added afterward), the image itself carries the record.
@@ -332,12 +385,14 @@ Tips for good stamps:
 • Altitude comes from GPS and can vary; treat it as approximate.
 
 Privacy: everything happens on this device. FieldStamp requests no network permission — your photos and coordinates never leave your phone.
-''';
+''',
+    );
     return Scaffold(
-      appBar: AppBar(title: const Text('How stamping works')),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Text(body, style: TextStyle(height: 1.5)),
+      appBar: AppBar(
+          title: Text(tr(zh: '水印是如何烧入的', en: 'How stamping works'))),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Text(body, style: const TextStyle(height: 1.5)),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'models.dart';
 
 /// Result of the editor — the home/detail screen applies it to the store.
@@ -92,11 +93,11 @@ class _EventEditPageState extends State<EventEditPage> {
     final editing = widget.initial != null;
     return Scaffold(
       appBar: AppBar(
-        title: Text(editing ? '编辑日子' : '新的日子'),
+        title: Text(editing ? tr(zh: '编辑日子', en: 'Edit day') : tr(zh: '新的日子', en: 'New day')),
         actions: [
           TextButton(
             onPressed: _valid ? _submit : null,
-            child: const Text('保存'),
+            child: Text(tr(zh: '保存', en: 'Save')),
           ),
         ],
       ),
@@ -106,16 +107,16 @@ class _EventEditPageState extends State<EventEditPage> {
           TextField(
             controller: _title,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              labelText: '标题',
-              hintText: '例如：生日、考试、纪念日',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: tr(zh: '标题', en: 'Title'),
+              hintText: tr(zh: '例如：生日、考试、纪念日', en: 'e.g. birthday, exam, anniversary'),
+              border: const OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 20),
           _Section(
-            title: '日期',
+            title: tr(zh: '日期', en: 'Date'),
             child: OutlinedButton.icon(
               onPressed: _pickDate,
               icon: const Icon(Icons.calendar_today_outlined),
@@ -126,21 +127,27 @@ class _EventEditPageState extends State<EventEditPage> {
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('每年重复'),
-            subtitle: const Text('生日 / 纪念日会自动跳到下一年'),
+            title: Text(tr(zh: '每年重复', en: 'Repeat yearly')),
+            subtitle: Text(tr(
+              zh: '生日 / 纪念日会自动跳到下一年',
+              en: 'Birthdays / anniversaries roll to the next year',
+            )),
             value: _yearly,
             onChanged: (v) => setState(() => _yearly = v),
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('置顶'),
-            subtitle: const Text('置顶的日子排在最前，并显示在小组件'),
+            title: Text(tr(zh: '置顶', en: 'Pin')),
+            subtitle: Text(tr(
+              zh: '置顶的日子排在最前，并显示在小组件',
+              en: 'Pinned days sort first and drive the widget',
+            )),
             value: _pinned,
             onChanged: (v) => setState(() => _pinned = v),
           ),
           const SizedBox(height: 8),
           _Section(
-            title: '图标',
+            title: tr(zh: '图标', en: 'Icon'),
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -156,7 +163,7 @@ class _EventEditPageState extends State<EventEditPage> {
           ),
           const SizedBox(height: 16),
           _Section(
-            title: '颜色',
+            title: tr(zh: '颜色', en: 'Color'),
             child: Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -181,9 +188,9 @@ class _EventEditPageState extends State<EventEditPage> {
           TextField(
             controller: _note,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: '备注（可选）',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: tr(zh: '备注（可选）', en: 'Note (optional)'),
+              border: const OutlineInputBorder(),
             ),
           ),
         ],
@@ -193,7 +200,12 @@ class _EventEditPageState extends State<EventEditPage> {
 
   void _showColorLocked() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('该颜色需解锁 Pro，可在「设置」中解锁')),
+      SnackBar(
+        content: Text(tr(
+          zh: '该颜色需解锁 Pro，可在「设置」中解锁',
+          en: 'This color requires Pro — unlock it in Settings',
+        )),
+      ),
     );
   }
 

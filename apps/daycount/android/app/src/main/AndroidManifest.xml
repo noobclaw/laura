@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
 
     <application
-        android:label="倒数日"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

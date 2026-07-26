@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'location_store.dart';
 
 /// Presents the one-time Pro buyout. Real in-app purchase wiring is deferred;
@@ -23,11 +24,18 @@ void showProSheet(BuildContext context, LocationStore store) {
             ],
           ),
           const SizedBox(height: 16),
-          const _Perk('Plan the light for any date, past or future'),
-          const _Perk('Save unlimited shooting spots'),
-          const _Perk('Full moon details: rise, set & phase'),
+          _Perk(tr(
+              zh: '规划任意日期的光线,过去或未来',
+              en: 'Plan the light for any date, past or future')),
+          _Perk(tr(zh: '保存无限拍摄机位', en: 'Save unlimited shooting spots')),
+          _Perk(tr(
+              zh: '完整月亮详情:月升、月落与月相',
+              en: 'Full moon details: rise, set & phase')),
           const SizedBox(height: 8),
-          Text('One-time purchase — no subscription, no account.',
+          Text(
+              tr(
+                  zh: '一次性买断——无订阅、无账号。',
+                  en: 'One-time purchase — no subscription, no account.'),
               style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 20),
           SizedBox(
@@ -37,10 +45,13 @@ void showProSheet(BuildContext context, LocationStore store) {
                 store.unlockPro();
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('GoldenScout Pro unlocked')),
+                  SnackBar(
+                      content: Text(tr(
+                          zh: '已解锁 GoldenScout Pro',
+                          en: 'GoldenScout Pro unlocked'))),
                 );
               },
-              child: const Text('Unlock — \$3.99'),
+              child: Text(tr(zh: '解锁——\$3.99', en: 'Unlock — \$3.99')),
             ),
           ),
         ],

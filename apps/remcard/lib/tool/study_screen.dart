@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'models.dart';
 import 'store.dart';
+
+/// Localized button labels for the four SM-2 grades (Anki-style terms).
+String _ratingLabel(Rating r) => switch (r) {
+      Rating.again => tr(zh: '重来', en: 'Again'),
+      Rating.hard => tr(zh: '困难', en: 'Hard'),
+      Rating.good => tr(zh: '良好', en: 'Good'),
+      Rating.easy => tr(zh: '简单', en: 'Easy'),
+    };
 
 /// A review session over the cards that were due when the session started.
 /// Tap the card to reveal the answer, then grade it; grading reschedules the
@@ -50,7 +59,10 @@ class _StudyScreenState extends State<StudyScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('复习 · 剩 $remaining 张'),
+        title: Text(tr(
+          zh: '复习 · 剩 $remaining 张',
+          en: 'Review · $remaining left',
+        )),
       ),
       body: Column(
         children: [
@@ -89,7 +101,8 @@ class _StudyScreenState extends State<StudyScreen> {
                         ] else
                           Padding(
                             padding: const EdgeInsets.only(top: 24),
-                            child: Text('点击显示答案',
+                            child: Text(
+                                tr(zh: '点击显示答案', en: 'Tap to show answer'),
                                 style: TextStyle(color: scheme.outline)),
                           ),
                       ],
@@ -113,7 +126,7 @@ class _StudyScreenState extends State<StudyScreen> {
                                   const EdgeInsets.symmetric(horizontal: 4),
                               child: FilledButton.tonal(
                                 onPressed: () => _grade(r),
-                                child: Text(r.label),
+                                child: Text(_ratingLabel(r)),
                               ),
                             ),
                           ),
@@ -123,7 +136,7 @@ class _StudyScreenState extends State<StudyScreen> {
                       width: double.infinity,
                       child: FilledButton(
                         onPressed: () => setState(() => _revealed = true),
-                        child: const Text('显示答案'),
+                        child: Text(tr(zh: '显示答案', en: 'Show answer')),
                       ),
                     ),
             ),
@@ -142,7 +155,7 @@ class _DoneScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('复习完成')),
+      appBar: AppBar(title: Text(tr(zh: '复习完成', en: 'Review done'))),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -150,12 +163,18 @@ class _DoneScreen extends StatelessWidget {
             Icon(Icons.celebration_outlined,
                 size: 72, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('本轮复习了 $reviewed 张',
+            Text(
+                tr(
+                  zh: '本轮复习了 $reviewed 张',
+                  en: reviewed == 1
+                      ? 'Reviewed 1 card this session'
+                      : 'Reviewed $reviewed cards this session',
+                ),
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('返回'),
+              child: Text(tr(zh: '返回', en: 'Back')),
             ),
           ],
         ),

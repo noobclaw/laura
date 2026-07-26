@@ -1,17 +1,17 @@
 import 'dart:math' as math;
 
 /// The four review grades shown to the user, mapped to SM-2 quality values.
+/// Display labels live in the UI layer (study_screen.dart) so they localize.
 enum Rating {
-  again(1, '重来'),
-  hard(3, '困难'),
-  good(4, '良好'),
-  easy(5, '简单');
+  again(1),
+  hard(3),
+  good(4),
+  easy(5);
 
-  const Rating(this.quality, this.label);
+  const Rating(this.quality);
 
   /// SM-2 quality score (0..5). Anything < 3 is treated as a lapse.
   final int quality;
-  final String label;
 }
 
 /// Number of whole days since the Unix epoch for a given local moment.

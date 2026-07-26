@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'geo_format.dart';
 import 'models.dart';
 import 'sensors.dart';
@@ -37,7 +38,10 @@ class _CameraScreenState extends State<CameraScreen>
     try {
       final cams = await availableCameras();
       if (cams.isEmpty) {
-        if (mounted) setState(() => _cameraError = 'No camera found on this device');
+        if (mounted) {
+          setState(() => _cameraError =
+              tr(zh: '此设备上未找到相机', en: 'No camera found on this device'));
+        }
         return;
       }
       final back = cams.firstWhere(
@@ -54,7 +58,10 @@ class _CameraScreenState extends State<CameraScreen>
       await controller.initialize();
       if (mounted) setState(() => _cameraError = null);
     } catch (e) {
-      if (mounted) setState(() => _cameraError = 'Camera unavailable: $e');
+      if (mounted) {
+        setState(() => _cameraError =
+            tr(zh: '相机不可用:$e', en: 'Camera unavailable: $e'));
+      }
     }
   }
 
@@ -98,22 +105,26 @@ class _CameraScreenState extends State<CameraScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(photo == null
-            ? 'Could not save photo'
+            ? tr(zh: '照片保存失败', en: 'Could not save photo')
             : reading.hasFix
-                ? 'Saved with GPS stamp'
-                : 'Saved — no GPS fix yet'),
+                ? tr(zh: '已保存,含 GPS 水印', en: 'Saved with GPS stamp')
+                : tr(zh: '已保存 — 尚未获得 GPS 定位', en: 'Saved — no GPS fix yet')),
         duration: const Duration(seconds: 2),
       ));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Capture failed: $e')));
+            .showSnackBar(SnackBar(
+                content:
+                    Text(tr(zh: '拍摄失败:$e', en: 'Capture failed: $e'))));
       }
     } finally {
       if (mounted) setState(() => _capturing = false);
     }
   }
 
+  // NOTE: watermark text is burned into the photo as evidence — its labels and
+  // formats deliberately stay fixed (English/units) regardless of UI locale.
   WatermarkContent _watermarkFor(StampReading r) {
     final store = widget.store;
     final acc =
@@ -177,7 +188,7 @@ class _CameraScreenState extends State<CameraScreen>
               const SizedBox(height: 16),
               FilledButton.tonal(
                 onPressed: _initCamera,
-                child: const Text('Retry'),
+                child: Text(tr(zh: '重试', en: 'Retry')),
               ),
             ],
           ),
@@ -271,8 +282,10 @@ class _CameraScreenState extends State<CameraScreen>
               ),
               const SizedBox(height: 2),
               Text(
-                'Alt ${formatAltitude(r.altitude, store.altUnit)}   '
-                'Bearing ${formatHeading(r.heading)}   '
+                // On-screen only — the burned-in watermark keeps its own
+                // fixed English labels (see _watermarkFor).
+                '${tr(zh: '海拔', en: 'Alt')} ${formatAltitude(r.altitude, store.altUnit)}   '
+                '${tr(zh: '方位', en: 'Bearing')} ${formatHeading(r.heading)}   '
                 '${formatTimestamp(r.time)}',
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
@@ -333,9 +346,9 @@ class _CameraScreenState extends State<CameraScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const ListTile(
-                title: Text('Project / work order',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ListTile(
+                title: Text(tr(zh: '项目 / 工单', en: 'Project / work order'),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
               ...store.projects.map((p) => ListTile(
                     leading: Icon(p.id == store.currentProjectId
@@ -351,14 +364,15 @@ class _CameraScreenState extends State<CameraScreen>
               ListTile(
                 leading: Icon(store.pro ? Icons.add : Icons.lock_outline),
                 title: Text(store.pro
-                    ? 'New project'
-                    : 'New project (Pro)'),
+                    ? tr(zh: '新建项目', en: 'New project')
+                    : tr(zh: '新建项目(Pro)', en: 'New project (Pro)')),
                 onTap: () async {
                   Navigator.pop(ctx);
                   if (!store.pro) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                          'Multiple projects are a Pro feature. Unlock in Settings.'),
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(tr(
+                          zh: '多项目为 Pro 功能,请在设置中解锁。',
+                          en: 'Multiple projects are a Pro feature. Unlock in Settings.')),
                     ));
                     return;
                   }
@@ -381,23 +395,24 @@ Future<String?> _promptName(BuildContext context) {
   return showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('New project'),
+      title: Text(tr(zh: '新建项目', en: 'New project')),
       content: TextField(
         controller: ctrl,
         autofocus: true,
         textCapitalization: TextCapitalization.sentences,
-        decoration: const InputDecoration(
-          hintText: 'e.g. 12 Elm St inspection',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          hintText: tr(zh: '例如:幸福路12号巡检', en: 'e.g. 12 Elm St inspection'),
+          border: const OutlineInputBorder(),
         ),
         onSubmitted: (v) => Navigator.pop(ctx, v),
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(zh: '取消', en: 'Cancel'))),
         FilledButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text),
-            child: const Text('Create')),
+            child: Text(tr(zh: '创建', en: 'Create'))),
       ],
     ),
   );

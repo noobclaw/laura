@@ -1,3 +1,5 @@
+import '../core/l10n.dart';
+
 /// A saved shooting location. Coordinates are stored in decimal degrees.
 class SavedLocation {
   final String id;
@@ -23,7 +25,7 @@ class SavedLocation {
         id: j['id'] as String,
         name: (j['name'] as String?)?.trim().isNotEmpty == true
             ? j['name'] as String
-            : 'Saved spot',
+            : tr(zh: '未命名机位', en: 'Saved spot'),
         lat: (j['lat'] as num).toDouble(),
         lon: (j['lon'] as num).toDouble(),
       );

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label shown on Chinese-language devices. Short form of the store
+     listing title "GoldenScout 天光规划器". -->
+<resources>
+    <string name="app_name">天光规划器</string>
+</resources>

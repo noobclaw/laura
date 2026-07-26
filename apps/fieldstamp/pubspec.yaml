@@ -10,6 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Locale-aware Material/Cupertino widgets (date pickers etc.); our own
+  # strings are localized inline via core/l10n.dart `tr()`.
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
 

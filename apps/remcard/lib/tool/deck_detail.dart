@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'models.dart';
 import 'store.dart';
 import 'study_screen.dart';
@@ -35,7 +36,14 @@ class DeckDetailScreen extends StatelessWidget {
                             ))
                         : null,
                     icon: const Icon(Icons.play_arrow),
-                    label: Text(due > 0 ? '开始复习($due 张到期)' : '今日已复习完'),
+                    label: Text(due > 0
+                        ? tr(
+                            zh: '开始复习($due 张到期)',
+                            en: due == 1
+                                ? 'Start review (1 card due)'
+                                : 'Start review ($due cards due)',
+                          )
+                        : tr(zh: '今日已复习完', en: 'All done for today')),
                   ),
                 ),
               ),
@@ -78,7 +86,7 @@ class DeckDetailScreen extends StatelessWidget {
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _addCard(context),
             icon: const Icon(Icons.add),
-            label: const Text('加卡片'),
+            label: Text(tr(zh: '加卡片', en: 'Add card')),
           ),
         );
       },
@@ -86,7 +94,8 @@ class DeckDetailScreen extends StatelessWidget {
   }
 
   Future<void> _addCard(BuildContext context) async {
-    final result = await _cardEditor(context, title: '新建卡片');
+    final result =
+        await _cardEditor(context, title: tr(zh: '新建卡片', en: 'New card'));
     if (result != null) {
       store.addCard(deck, result.$1, result.$2);
     }
@@ -94,7 +103,9 @@ class DeckDetailScreen extends StatelessWidget {
 
   Future<void> _editCard(BuildContext context, Flashcard card) async {
     final result = await _cardEditor(context,
-        title: '编辑卡片', front: card.front, back: card.back);
+        title: tr(zh: '编辑卡片', en: 'Edit card'),
+        front: card.front,
+        back: card.back);
     if (result != null) {
       store.updateCard(card, result.$1, result.$2);
     }
@@ -115,7 +126,12 @@ class _NoCards extends StatelessWidget {
             Icon(Icons.note_add_outlined,
                 size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 12),
-            const Text('这个牌组还没有卡片\n点右下角加一张吧',
+            Text(
+                tr(
+                  zh: '这个牌组还没有卡片\n点右下角加一张吧',
+                  en: 'No cards in this deck yet.\n'
+                      'Tap the button below to add one.',
+                ),
                 textAlign: TextAlign.center),
           ],
         ),
@@ -147,9 +163,9 @@ Future<(String, String)?> _cardEditor(
               minLines: 1,
               maxLines: 4,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: '正面(问题)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: tr(zh: '正面(问题)', en: 'Front (question)'),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -158,9 +174,9 @@ Future<(String, String)?> _cardEditor(
               minLines: 1,
               maxLines: 6,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: '背面(答案)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: tr(zh: '背面(答案)', en: 'Back (answer)'),
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -168,7 +184,8 @@ Future<(String, String)?> _cardEditor(
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(zh: '取消', en: 'Cancel'))),
         FilledButton(
           onPressed: () {
             final f = frontCtrl.text.trim();
@@ -179,7 +196,7 @@ Future<(String, String)?> _cardEditor(
               Navigator.pop(ctx, (f, b));
             }
           },
-          child: const Text('保存'),
+          child: Text(tr(zh: '保存', en: 'Save')),
         ),
       ],
     ),

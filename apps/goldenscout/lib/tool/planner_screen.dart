@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'light_view.dart';
 import 'location_store.dart';
 import 'sensors.dart';
@@ -77,7 +78,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                 IconButton(
                   onPressed: () => _shift(-1),
                   icon: const Icon(Icons.chevron_left),
-                  tooltip: 'Previous day',
+                  tooltip: tr(zh: '前一天', en: 'Previous day'),
                 ),
                 Expanded(
                   child: InkWell(
@@ -90,7 +91,10 @@ class _PlannerScreenState extends State<PlannerScreen> {
                           Text(_fmtDate(_date),
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.titleMedium),
-                          Text(_isToday ? 'Today · tap to pick a date' : 'Tap to pick a date',
+                          Text(
+                              _isToday
+                                  ? tr(zh: '今天 · 点按选择日期', en: 'Today · tap to pick a date')
+                                  : tr(zh: '点按选择日期', en: 'Tap to pick a date'),
                               style: Theme.of(context).textTheme.bodySmall),
                         ],
                       ),
@@ -100,7 +104,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                 IconButton(
                   onPressed: () => _shift(1),
                   icon: const Icon(Icons.chevron_right),
-                  tooltip: 'Next day',
+                  tooltip: tr(zh: '后一天', en: 'Next day'),
                 ),
               ],
             ),
@@ -122,6 +126,10 @@ class _PlannerScreenState extends State<PlannerScreen> {
   }
 
   String _fmtDate(DateTime d) {
+    if (isZhLocale) {
+      const weekdaysZh = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+      return '${d.year}年${d.month}月${d.day}日 ${weekdaysZh[d.weekday - 1]}';
+    }
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -147,7 +155,7 @@ class _ProHint extends StatelessWidget {
             const Icon(Icons.lock_open, size: 18, color: Color(0xFFF5A623)),
             const SizedBox(width: 8),
             Expanded(
-              child: Text('Unlock Pro to plan any date',
+              child: Text(tr(zh: '解锁 Pro,规划任意日期', en: 'Unlock Pro to plan any date'),
                   style: Theme.of(context).textTheme.bodyMedium),
             ),
             Text('\$3.99',

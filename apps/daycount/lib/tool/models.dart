@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
+
 /// A single tracked day: either a countdown to a future date or a count-up
 /// since a past date. Anniversaries/birthdays set [yearlyRepeat] so the target
 /// rolls forward to the next occurrence automatically.
@@ -153,8 +155,10 @@ const List<String> kEventEmojis = [
   '💍', '👶', '🩺', '📝', '🏃', '🌟', '🎯', '🎄',
 ];
 
-/// Localized weekday label for a date (周一 … 周日).
+/// Localized weekday label for a date (周一 … 周日 / Mon … Sun).
 String weekdayLabel(DateTime d) {
-  const names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  return names[(d.weekday - 1) % 7];
+  const zhNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  const enNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final i = (d.weekday - 1) % 7;
+  return tr(zh: zhNames[i], en: enNames[i]);
 }

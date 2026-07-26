@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'astro.dart';
 import 'compass_rose.dart';
 import 'location_store.dart';
@@ -106,6 +107,8 @@ class _LocationHeader extends StatelessWidget {
     final ew = store.activeLon! >= 0 ? 'E' : 'W';
     final coord =
         '${store.activeLat!.abs().toStringAsFixed(3)}°$ns, ${store.activeLon!.abs().toStringAsFixed(3)}°$ew';
+    // 'Current location' is the store's persisted sentinel; translate only at
+    // display time so the stored JSON stays locale-independent.
     final isHere = store.activeName == 'Current location';
     return Row(
       children: [
@@ -116,11 +119,16 @@ class _LocationHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(store.activeName,
+              Text(
+                  isHere
+                      ? tr(zh: '当前位置', en: 'Current location')
+                      : store.activeName,
                   style: Theme.of(context).textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis),
               Text(
-                isHere ? coord : '$coord · times in device timezone',
+                isHere
+                    ? coord
+                    : '$coord · ${tr(zh: '时间按设备时区显示', en: 'times in device timezone')}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -142,10 +150,13 @@ class _RoseLegend extends StatelessWidget {
       spacing: 14,
       runSpacing: 4,
       children: [
-        _dot(const Color(0xFFF5A623), 'Sun', style),
-        _dot(const Color(0xFFD86B4A), 'Sunset dir', style),
-        _dot(Theme.of(context).colorScheme.primary, 'Moon', style),
-        Text(heading != null ? 'Rose aligned to your heading' : 'North up',
+        _dot(const Color(0xFFF5A623), tr(zh: '太阳', en: 'Sun'), style),
+        _dot(const Color(0xFFD86B4A), tr(zh: '日落方向', en: 'Sunset dir'), style),
+        _dot(Theme.of(context).colorScheme.primary, tr(zh: '月亮', en: 'Moon'), style),
+        Text(
+            heading != null
+                ? tr(zh: '罗盘已对齐你的朝向', en: 'Rose aligned to your heading')
+                : tr(zh: '正北朝上', en: 'North up'),
             style: style),
       ],
     );
@@ -170,9 +181,13 @@ class _NowRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _bodyChip(context, '☀︎ Sun now', sun, const Color(0xFFF5A623))),
+        Expanded(
+            child: _bodyChip(context, tr(zh: '☀︎ 当前太阳', en: '☀︎ Sun now'), sun,
+                const Color(0xFFF5A623))),
         const SizedBox(width: 12),
-        Expanded(child: _bodyChip(context, '☾ Moon now', moon, Theme.of(context).colorScheme.primary)),
+        Expanded(
+            child: _bodyChip(context, tr(zh: '☾ 当前月亮', en: '☾ Moon now'), moon,
+                Theme.of(context).colorScheme.primary)),
       ],
     );
   }
@@ -190,9 +205,17 @@ class _NowRow extends StatelessWidget {
         children: [
           Text(title, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: color)),
           const SizedBox(height: 6),
-          Text(below ? 'Below horizon' : 'Alt ${p.altitude.toStringAsFixed(0)}°',
+          Text(
+              below
+                  ? tr(zh: '在地平线下', en: 'Below horizon')
+                  : tr(
+                      zh: '高度 ${p.altitude.toStringAsFixed(0)}°',
+                      en: 'Alt ${p.altitude.toStringAsFixed(0)}°'),
               style: Theme.of(context).textTheme.titleMedium),
-          Text('Az ${p.azimuth.toStringAsFixed(0)}° ${compassLabel(p.azimuth)}',
+          Text(
+              tr(
+                  zh: '方位 ${p.azimuth.toStringAsFixed(0)}° ${compassLabel(p.azimuth)}',
+                  en: 'Az ${p.azimuth.toStringAsFixed(0)}° ${compassLabel(p.azimuth)}'),
               style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
@@ -208,24 +231,44 @@ class _Timeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (day.polarNight) {
-      return _banner(context, Icons.dark_mode, 'Polar night',
-          'The Sun stays below the horizon all day at this location and date.');
+      return _banner(
+          context,
+          Icons.dark_mode,
+          tr(zh: '极夜', en: 'Polar night'),
+          tr(
+              zh: '在该地点和日期,太阳整天都在地平线以下。',
+              en: 'The Sun stays below the horizon all day at this location and date.'));
     }
     if (day.polarDay) {
-      return _banner(context, Icons.wb_sunny, 'Midnight sun',
-          'The Sun never sets at this location and date — golden light lingers near the horizon.');
+      return _banner(
+          context,
+          Icons.wb_sunny,
+          tr(zh: '极昼(午夜太阳)', en: 'Midnight sun'),
+          tr(
+              zh: '在该地点和日期,太阳整天不落——金色的光线长时间徘徊在地平线附近。',
+              en: 'The Sun never sets at this location and date — golden light lingers near the horizon.'));
     }
 
     final rows = <Widget>[
-      _row(context, Icons.brightness_3, 'First light', 'Blue hour begins', day.dawnCivil),
-      _row(context, Icons.brightness_4, 'Golden hour', 'Morning starts', day.goldenStartAm),
-      _row(context, Icons.wb_twilight, 'Sunrise', _azText(day.sunrise), day.sunrise, highlight: true),
-      _row(context, Icons.wb_sunny_outlined, 'Golden hour ends', 'Morning', day.goldenEndAm),
+      _row(context, Icons.brightness_3, tr(zh: '晨光初现', en: 'First light'),
+          tr(zh: '蓝调时刻开始', en: 'Blue hour begins'), day.dawnCivil),
+      _row(context, Icons.brightness_4, tr(zh: '黄金时段', en: 'Golden hour'),
+          tr(zh: '早晨开始', en: 'Morning starts'), day.goldenStartAm),
+      _row(context, Icons.wb_twilight, tr(zh: '日出', en: 'Sunrise'),
+          _azText(day.sunrise), day.sunrise, highlight: true),
+      _row(context, Icons.wb_sunny_outlined,
+          tr(zh: '黄金时段结束', en: 'Golden hour ends'),
+          tr(zh: '早晨', en: 'Morning'), day.goldenEndAm),
       _noonRow(context),
-      _row(context, Icons.wb_sunny_outlined, 'Golden hour', 'Evening starts', day.goldenStartPm),
-      _row(context, Icons.wb_twilight, 'Sunset', _azText(day.sunset), day.sunset, highlight: true),
-      _row(context, Icons.brightness_4, 'Golden hour ends', 'Blue hour begins', day.goldenEndPm),
-      _row(context, Icons.brightness_3, 'Last light', 'Night begins', day.duskCivil),
+      _row(context, Icons.wb_sunny_outlined, tr(zh: '黄金时段', en: 'Golden hour'),
+          tr(zh: '傍晚开始', en: 'Evening starts'), day.goldenStartPm),
+      _row(context, Icons.wb_twilight, tr(zh: '日落', en: 'Sunset'),
+          _azText(day.sunset), day.sunset, highlight: true),
+      _row(context, Icons.brightness_4,
+          tr(zh: '黄金时段结束', en: 'Golden hour ends'),
+          tr(zh: '蓝调时刻开始', en: 'Blue hour begins'), day.goldenEndPm),
+      _row(context, Icons.brightness_3, tr(zh: '最后天光', en: 'Last light'),
+          tr(zh: '夜晚开始', en: 'Night begins'), day.duskCivil),
     ];
 
     return Container(
@@ -237,16 +280,23 @@ class _Timeline extends StatelessWidget {
     );
   }
 
-  String _azText(LightMoment m) =>
-      m.azimuth == null ? '' : 'Sun at ${m.azimuth!.toStringAsFixed(0)}° ${compassLabel(m.azimuth!)}';
+  String _azText(LightMoment m) => m.azimuth == null
+      ? ''
+      : tr(
+          zh: '太阳方位 ${m.azimuth!.toStringAsFixed(0)}° ${compassLabel(m.azimuth!)}',
+          en: 'Sun at ${m.azimuth!.toStringAsFixed(0)}° ${compassLabel(m.azimuth!)}');
 
   Widget _noonRow(BuildContext context) {
     final t = day.solarNoon;
     return _tile(
       context,
       Icons.light_mode,
-      'Solar noon',
-      day.noonAltitude != null ? 'Sun peaks at ${day.noonAltitude!.toStringAsFixed(0)}°' : '',
+      tr(zh: '正午', en: 'Solar noon'),
+      day.noonAltitude != null
+          ? tr(
+              zh: '太阳最高仰角 ${day.noonAltitude!.toStringAsFixed(0)}°',
+              en: 'Sun peaks at ${day.noonAltitude!.toStringAsFixed(0)}°')
+          : '',
       t == null ? '—' : _fmt(t),
       false,
       _isPast(t),
@@ -348,14 +398,21 @@ class _MoonCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(phase.name, style: Theme.of(context).textTheme.titleMedium),
-                Text('${(phase.illumination * 100).round()}% illuminated'
-                    '${phase.waxing ? ' · waxing' : ' · waning'}',
+                Text(_phaseLabel(phase.name),
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                    tr(
+                        zh: '照亮 ${(phase.illumination * 100).round()}%'
+                            '${phase.waxing ? ' · 渐盈' : ' · 渐亏'}',
+                        en: '${(phase.illumination * 100).round()}% illuminated'
+                            '${phase.waxing ? ' · waxing' : ' · waning'}'),
                     style: Theme.of(context).textTheme.bodySmall),
                 if (pro) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Moonrise ${_fmt(times.rise)} · Moonset ${_fmt(times.set)}',
+                    tr(
+                        zh: '月升 ${_fmt(times.rise)} · 月落 ${_fmt(times.set)}',
+                        en: 'Moonrise ${_fmt(times.rise)} · Moonset ${_fmt(times.set)}'),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -370,6 +427,31 @@ class _MoonCard extends StatelessWidget {
   String _fmt(DateTime? t) => t == null
       ? '—'
       : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  /// astro.dart keeps the English phase names as stable keys (also used by
+  /// [_glyph]); translate only at display time.
+  String _phaseLabel(String name) {
+    switch (name) {
+      case 'New Moon':
+        return tr(zh: '新月', en: name);
+      case 'Waxing Crescent':
+        return tr(zh: '娥眉月', en: name);
+      case 'First Quarter':
+        return tr(zh: '上弦月', en: name);
+      case 'Waxing Gibbous':
+        return tr(zh: '盈凸月', en: name);
+      case 'Full Moon':
+        return tr(zh: '满月', en: name);
+      case 'Waning Gibbous':
+        return tr(zh: '亏凸月', en: name);
+      case 'Last Quarter':
+        return tr(zh: '下弦月', en: name);
+      case 'Waning Crescent':
+        return tr(zh: '残月', en: name);
+      default:
+        return name;
+    }
+  }
 
   String _glyph(MoonPhase p) {
     switch (p.name) {
@@ -407,11 +489,15 @@ class _NoLocation extends StatelessWidget {
             Icon(Icons.explore_outlined, size: 56,
                 color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('Set a location', style: Theme.of(context).textTheme.titleLarge),
+            Text(tr(zh: '设置一个机位', en: 'Set a location'),
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              'GoldenScout needs a location to compute the light. '
-              'Use your current GPS position or add a shooting spot.',
+              tr(
+                  zh: 'GoldenScout 需要一个位置才能计算光线。'
+                      '使用当前 GPS 定位,或添加一个拍摄机位。',
+                  en: 'GoldenScout needs a location to compute the light. '
+                      'Use your current GPS position or add a shooting spot.'),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -419,7 +505,7 @@ class _NoLocation extends StatelessWidget {
             FilledButton.icon(
               onPressed: onSet,
               icon: const Icon(Icons.place),
-              label: const Text('Choose location'),
+              label: Text(tr(zh: '选择机位', en: 'Choose location')),
             ),
           ],
         ),

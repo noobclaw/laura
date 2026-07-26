@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../core/l10n.dart';
 import 'models.dart';
 
 /// Persists the user's saved shooting locations, the currently selected
@@ -54,7 +55,8 @@ class LocationStore extends ChangeNotifier {
         if (al is num && ao is num) {
           activeLat = al.toDouble();
           activeLon = ao.toDouble();
-          activeName = raw['activeName'] as String? ?? 'Saved location';
+          activeName =
+              raw['activeName'] as String? ?? tr(zh: '已存位置', en: 'Saved location');
         }
       }
     } catch (e) {
@@ -105,7 +107,7 @@ class LocationStore extends ChangeNotifier {
     if (atSavedLimit) return null;
     final loc = SavedLocation(
       id: _newId(),
-      name: name.trim().isEmpty ? 'Saved spot' : name.trim(),
+      name: name.trim().isEmpty ? tr(zh: '未命名机位', en: 'Saved spot') : name.trim(),
       lat: lat,
       lon: lon,
     );

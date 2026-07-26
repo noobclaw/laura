@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'location_store.dart';
 import 'models.dart';
 import 'sensors.dart';
@@ -25,7 +26,7 @@ class _LocationScreenState extends State<LocationScreen> {
       widget.store.useCurrentLocation(fix.lat, fix.lon);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Using your current location')),
+          SnackBar(content: Text(tr(zh: '已使用你的当前位置', en: 'Using your current location'))),
         );
       }
     } catch (e) {
@@ -68,17 +69,20 @@ class _LocationScreenState extends State<LocationScreen> {
                   ? const SizedBox(
                       width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.my_location),
-              label: Text(_locating ? 'Locating…' : 'Use current location'),
+              label: Text(_locating
+                  ? tr(zh: '定位中…', en: 'Locating…')
+                  : tr(zh: '使用当前位置', en: 'Use current location')),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: _addManual,
               icon: const Icon(Icons.add_location_alt_outlined),
-              label: const Text('Add a shooting spot'),
+              label: Text(tr(zh: '添加拍摄机位', en: 'Add a shooting spot')),
             ),
             const SizedBox(height: 20),
             if (store.hasActive) ...[
-              Text('Active', style: Theme.of(context).textTheme.titleSmall),
+              Text(tr(zh: '当前使用', en: 'Active'),
+                  style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 4),
               Card(
                 child: ListTile(
@@ -87,7 +91,11 @@ class _LocationScreenState extends State<LocationScreen> {
                           ? Icons.my_location
                           : Icons.place,
                       color: Theme.of(context).colorScheme.primary),
-                  title: Text(store.activeName),
+                  // 'Current location' is the store's persisted sentinel;
+                  // translate at display time only.
+                  title: Text(store.activeName == 'Current location'
+                      ? tr(zh: '当前位置', en: 'Current location')
+                      : store.activeName),
                   subtitle: Text(_coord(store.activeLat!, store.activeLon!)),
                 ),
               ),
@@ -95,10 +103,14 @@ class _LocationScreenState extends State<LocationScreen> {
             ],
             Row(
               children: [
-                Text('Saved spots', style: Theme.of(context).textTheme.titleSmall),
+                Text(tr(zh: '已存机位', en: 'Saved spots'),
+                    style: Theme.of(context).textTheme.titleSmall),
                 const Spacer(),
                 if (!store.pro)
-                  Text('Free: ${store.saved.length}/${LocationStore.freeSavedLimit}',
+                  Text(
+                      tr(
+                          zh: '免费版:${store.saved.length}/${LocationStore.freeSavedLimit}',
+                          en: 'Free: ${store.saved.length}/${LocationStore.freeSavedLimit}'),
                       style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
@@ -106,7 +118,7 @@ class _LocationScreenState extends State<LocationScreen> {
             if (store.saved.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text('No saved spots yet.',
+                child: Text(tr(zh: '还没有已存机位。', en: 'No saved spots yet.'),
                     style: Theme.of(context).textTheme.bodyMedium),
               )
             else
@@ -117,13 +129,16 @@ class _LocationScreenState extends State<LocationScreen> {
                       subtitle: Text(loc.coordLabel),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline),
-                        tooltip: 'Delete',
+                        tooltip: tr(zh: '删除', en: 'Delete'),
                         onPressed: () => store.deleteSaved(loc),
                       ),
                       onTap: () {
                         store.selectSaved(loc);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Planning light for ${loc.name}')),
+                          SnackBar(
+                              content: Text(tr(
+                                  zh: '正在为「${loc.name}」规划光线',
+                                  en: 'Planning light for ${loc.name}'))),
                         );
                       },
                     ),
@@ -133,7 +148,7 @@ class _LocationScreenState extends State<LocationScreen> {
               TextButton.icon(
                 onPressed: () => showProSheet(context, store),
                 icon: const Icon(Icons.lock_open, size: 18),
-                label: const Text('Unlock Pro for unlimited spots'),
+                label: Text(tr(zh: '解锁 Pro,保存无限机位', en: 'Unlock Pro for unlimited spots')),
               ),
             ],
           ],
@@ -173,7 +188,9 @@ class _AddLocationDialogState extends State<_AddLocationDialog> {
     final lat = double.tryParse(_lat.text.trim());
     final lon = double.tryParse(_lon.text.trim());
     if (lat == null || lon == null || !validCoord(lat, lon)) {
-      setState(() => _error = 'Enter valid latitude (-90..90) and longitude (-180..180)');
+      setState(() => _error = tr(
+          zh: '请输入有效的纬度(-90..90)和经度(-180..180)',
+          en: 'Enter valid latitude (-90..90) and longitude (-180..180)'));
       return;
     }
     Navigator.of(context).pop(SavedLocation(id: '', name: _name.text, lat: lat, lon: lon));
@@ -182,24 +199,27 @@ class _AddLocationDialogState extends State<_AddLocationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add a spot'),
+      title: Text(tr(zh: '添加机位', en: 'Add a spot')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _name,
-            decoration: const InputDecoration(labelText: 'Name (e.g. Cliff viewpoint)'),
+            decoration: InputDecoration(
+                labelText: tr(zh: '名称(如:悬崖观景位)', en: 'Name (e.g. Cliff viewpoint)')),
             textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _lat,
-            decoration: const InputDecoration(labelText: 'Latitude', hintText: '37.8199'),
+            decoration: InputDecoration(
+                labelText: tr(zh: '纬度', en: 'Latitude'), hintText: '37.8199'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
           ),
           TextField(
             controller: _lon,
-            decoration: const InputDecoration(labelText: 'Longitude', hintText: '-122.4783'),
+            decoration: InputDecoration(
+                labelText: tr(zh: '经度', en: 'Longitude'), hintText: '-122.4783'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
           ),
           if (_error != null) ...[
@@ -210,8 +230,10 @@ class _AddLocationDialogState extends State<_AddLocationDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-        FilledButton(onPressed: _submit, child: const Text('Add')),
+        TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(tr(zh: '取消', en: 'Cancel'))),
+        FilledButton(onPressed: _submit, child: Text(tr(zh: '添加', en: 'Add'))),
       ],
     );
   }

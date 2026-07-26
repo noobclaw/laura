@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'event_detail.dart';
 import 'event_edit.dart';
 import 'models.dart';
@@ -19,13 +20,13 @@ class DaycountTool extends ToolModule {
         _ProTile(store: store),
         ListTile(
           leading: const Icon(Icons.widgets_outlined),
-          title: const Text('刷新桌面小组件'),
-          subtitle: const Text('把最近的日子同步到主屏小组件'),
+          title: Text(tr(zh: '刷新桌面小组件', en: 'Refresh home-screen widget')),
+          subtitle: Text(tr(zh: '把最近的日子同步到主屏小组件', en: 'Sync the nearest day to the widget')),
           onTap: () async {
             await WidgetBridge.push(store.events);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('已刷新小组件')),
+                SnackBar(content: Text(tr(zh: '已刷新小组件', en: 'Widget refreshed'))),
               );
             }
           },
@@ -43,19 +44,22 @@ class _ProTile extends StatelessWidget {
       listenable: store,
       builder: (context, _) {
         if (store.pro) {
-          return const ListTile(
-            leading: Icon(Icons.verified, color: Colors.amber),
-            title: Text('已解锁 Pro'),
-            subtitle: Text('无限日子 · 全部主题色 · 感谢支持'),
+          return ListTile(
+            leading: const Icon(Icons.verified, color: Colors.amber),
+            title: Text(tr(zh: '已解锁 Pro', en: 'Pro unlocked')),
+            subtitle: Text(tr(
+              zh: '无限日子 · 全部主题色 · 感谢支持',
+              en: 'Unlimited days · All theme colors · Thank you',
+            )),
           );
         }
         return ListTile(
           leading: const Icon(Icons.workspace_premium_outlined),
-          title: const Text('解锁 Pro（一次买断）'),
-          subtitle: const Text('无限日子 + 全部主题色'),
+          title: Text(tr(zh: '解锁 Pro（一次买断）', en: 'Unlock Pro (one-time purchase)')),
+          subtitle: Text(tr(zh: '无限日子 + 全部主题色', en: 'Unlimited days + all theme colors')),
           trailing: FilledButton(
             onPressed: () => _confirmUnlock(context),
-            child: const Text('解锁'),
+            child: Text(tr(zh: '解锁', en: 'Unlock')),
           ),
           onTap: () => _confirmUnlock(context),
         );
@@ -67,22 +71,24 @@ class _ProTile extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('解锁 Pro'),
-        content: const Text(
-          '解锁后可添加无限数量的日子，并使用全部主题色。'
-          '（内购接入前为本地解锁占位）',
-        ),
+        title: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
+        content: Text(tr(
+          zh: '解锁后可添加无限数量的日子，并使用全部主题色。'
+              '（内购接入前为本地解锁占位）',
+          en: 'Unlock to add unlimited days and use all theme colors. '
+              '(Local unlock placeholder until in-app purchase lands.)',
+        )),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(tr(zh: '取消', en: 'Cancel')),
           ),
           FilledButton(
             onPressed: () {
               store.unlockPro();
               Navigator.pop(context);
             },
-            child: const Text('确认解锁'),
+            child: Text(tr(zh: '确认解锁', en: 'Unlock now')),
           ),
         ],
       ),
@@ -126,19 +132,22 @@ class _HomeBodyState extends State<_HomeBody> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('已达免费上限'),
-        content: Text('免费版最多记录 ${EventStore.freeLimit} 个日子。解锁 Pro 可添加无限数量。'),
+        title: Text(tr(zh: '已达免费上限', en: 'Free limit reached')),
+        content: Text(tr(
+          zh: '免费版最多记录 ${EventStore.freeLimit} 个日子。解锁 Pro 可添加无限数量。',
+          en: 'The free version keeps up to ${EventStore.freeLimit} days. Unlock Pro for unlimited days.',
+        )),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('知道了'),
+            child: Text(tr(zh: '知道了', en: 'Got it')),
           ),
           FilledButton(
             onPressed: () {
               store.unlockPro();
               Navigator.pop(context);
             },
-            child: const Text('解锁 Pro'),
+            child: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
           ),
         ],
       ),
@@ -169,7 +178,7 @@ class _HomeBodyState extends State<_HomeBody> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addEvent,
         icon: const Icon(Icons.add),
-        label: const Text('添加日子'),
+        label: Text(tr(zh: '添加日子', en: 'Add a day')),
       ),
     );
   }
@@ -189,10 +198,14 @@ class _EmptyState extends StatelessWidget {
           children: [
             Icon(Icons.event_available_outlined, size: 72, color: muted),
             const SizedBox(height: 16),
-            Text('还没有日子', style: Theme.of(context).textTheme.titleLarge),
+            Text(tr(zh: '还没有日子', en: 'No days yet'),
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
-              '点击右下角「添加日子」，记录生日、纪念日、\n考试倒计时……并放上桌面小组件。',
+              tr(
+                zh: '点击右下角「添加日子」，记录生日、纪念日、\n考试倒计时……并放上桌面小组件。',
+                en: 'Tap "Add a day" to track birthdays, anniversaries,\nexam countdowns… and put them on your widget.',
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(color: muted),
             ),
@@ -215,7 +228,9 @@ class _EventCard extends StatelessWidget {
     final onColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? Colors.white
         : Colors.black87;
-    final label = s.isToday ? '就是今天' : (s.isFuture ? '还有' : '已过去');
+    final label = s.isToday
+        ? tr(zh: '就是今天', en: 'Today!')
+        : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -254,7 +269,7 @@ class _EventCard extends StatelessWidget {
                           ),
                         Expanded(
                           child: Text(
-                            event.title.isEmpty ? '未命名' : event.title,
+                            event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleMedium,
@@ -265,7 +280,7 @@ class _EventCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${s.target.year}-${_two(s.target.month)}-${_two(s.target.day)} ${weekdayLabel(s.target)}'
-                      '${event.yearlyRepeat ? ' · 每年' : ''}',
+                      '${event.yearlyRepeat ? ' · ${tr(zh: '每年', en: 'yearly')}' : ''}',
                       style: TextStyle(
                         fontSize: 12.5,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -321,7 +336,8 @@ class _DayBadge extends StatelessWidget {
             ),
           ),
           if (!status.isToday)
-            Text('天', style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.9))),
+            Text(tr(zh: '天', en: 'days'),
+                style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.9))),
         ],
       ),
     );

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../core/l10n.dart';
+
 /// Streams the device magnetometer heading so the compass rose can rotate to
 /// match where the phone is pointing. Location is fetched on demand (one-shot)
 /// rather than streamed — the almanac only needs a fix, not continuous updates.
@@ -40,17 +42,19 @@ class SensorHub extends ChangeNotifier {
   /// caller can surface it.
   static Future<({double lat, double lon})> currentFix() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-      throw 'Location services are turned off';
+      throw tr(zh: '定位服务未开启', en: 'Location services are turned off');
     }
     var perm = await Geolocator.checkPermission();
     if (perm == LocationPermission.denied) {
       perm = await Geolocator.requestPermission();
     }
     if (perm == LocationPermission.deniedForever) {
-      throw 'Location permission permanently denied — enable it in system settings, or enter coordinates manually';
+      throw tr(
+          zh: '定位权限被永久拒绝——请到系统设置开启,或手动输入坐标',
+          en: 'Location permission permanently denied — enable it in system settings, or enter coordinates manually');
     }
     if (perm == LocationPermission.denied) {
-      throw 'Location permission denied';
+      throw tr(zh: '定位权限被拒绝', en: 'Location permission denied');
     }
     try {
       // Medium accuracy acquires much faster than high and is far more precise
@@ -66,7 +70,9 @@ class SensorHub extends ChangeNotifier {
     } on TimeoutException {
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) return (lat: last.latitude, lon: last.longitude);
-      throw 'GPS timed out — move somewhere with sky view, or enter coordinates manually';
+      throw tr(
+          zh: 'GPS 定位超时——请到开阔处重试,或手动输入坐标',
+          en: 'GPS timed out — move somewhere with sky view, or enter coordinates manually');
     }
   }
 

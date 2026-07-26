@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label, default (English). Per-locale names come from
+     store/listing.md. -->
+<resources>
+    <string name="app_name">DayCount</string>
+</resources>

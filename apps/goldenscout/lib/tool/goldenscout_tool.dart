@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'location_store.dart';
 import 'sensors.dart';
 import 'light_view.dart';
@@ -27,10 +28,16 @@ class GoldenscoutTool implements ToolModule {
           listenable: store,
           builder: (context, _) => ListTile(
             leading: Icon(store.pro ? Icons.workspace_premium : Icons.lock_open),
-            title: Text(store.pro ? 'GoldenScout Pro — unlocked' : 'Unlock GoldenScout Pro'),
+            title: Text(store.pro
+                ? tr(zh: 'GoldenScout Pro——已解锁', en: 'GoldenScout Pro — unlocked')
+                : tr(zh: '解锁 GoldenScout Pro', en: 'Unlock GoldenScout Pro')),
             subtitle: Text(store.pro
-                ? 'Any date, unlimited saved spots, moon details'
-                : 'Plan any date + save unlimited shooting spots'),
+                ? tr(
+                    zh: '任意日期、无限机位、完整月亮详情',
+                    en: 'Any date, unlimited saved spots, moon details')
+                : tr(
+                    zh: '规划任意日期 + 保存无限拍摄机位',
+                    en: 'Plan any date + save unlimited shooting spots')),
             onTap: store.pro ? null : () => showProSheet(context, store),
           ),
         ),
@@ -83,19 +90,19 @@ class _HomeState extends State<_Home> {
           bottomNavigationBar: NavigationBar(
             selectedIndex: _tab,
             onDestinationSelected: (i) => setState(() => _tab = i),
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                  icon: Icon(Icons.wb_sunny_outlined),
-                  selectedIcon: Icon(Icons.wb_sunny),
-                  label: 'Today'),
+                  icon: const Icon(Icons.wb_sunny_outlined),
+                  selectedIcon: const Icon(Icons.wb_sunny),
+                  label: tr(zh: '今日', en: 'Today')),
               NavigationDestination(
-                  icon: Icon(Icons.event_outlined),
-                  selectedIcon: Icon(Icons.event),
-                  label: 'Planner'),
+                  icon: const Icon(Icons.event_outlined),
+                  selectedIcon: const Icon(Icons.event),
+                  label: tr(zh: '规划', en: 'Planner')),
               NavigationDestination(
-                  icon: Icon(Icons.place_outlined),
-                  selectedIcon: Icon(Icons.place),
-                  label: 'Location'),
+                  icon: const Icon(Icons.place_outlined),
+                  selectedIcon: const Icon(Icons.place),
+                  label: tr(zh: '机位', en: 'Location')),
             ],
           ),
         );

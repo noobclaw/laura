@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../core/l10n.dart';
 import 'export.dart';
 import 'geo_format.dart';
 import 'models.dart';
@@ -66,29 +67,31 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         }),
               ),
               Expanded(
-                child: Text('${_selected.length} selected',
+                child: Text(
+                    tr(zh: '已选 ${_selected.length} 项',
+                        en: '${_selected.length} selected'),
                     style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
               IconButton(
-                tooltip: 'Share images',
+                tooltip: tr(zh: '分享图片', en: 'Share images'),
                 icon: const Icon(Icons.ios_share),
                 onPressed:
                     _selected.isEmpty || _busy ? null : () => _shareImages(store),
               ),
               IconButton(
-                tooltip: 'PDF report',
+                tooltip: tr(zh: 'PDF 报告', en: 'PDF report'),
                 icon: const Icon(Icons.picture_as_pdf_outlined),
                 onPressed:
                     _selected.isEmpty || _busy ? null : () => _exportPdf(store),
               ),
               IconButton(
-                tooltip: 'CSV ledger',
+                tooltip: tr(zh: 'CSV 台账', en: 'CSV ledger'),
                 icon: const Icon(Icons.table_chart_outlined),
                 onPressed:
                     _selected.isEmpty || _busy ? null : () => _exportCsv(store),
               ),
               IconButton(
-                tooltip: 'Delete',
+                tooltip: tr(zh: '删除', en: 'Delete'),
                 icon: const Icon(Icons.delete_outline),
                 onPressed: _selected.isEmpty || _busy
                     ? null
@@ -109,7 +112,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '${store.projectName(store.currentProjectId)} · ${photos.length} photos',
+                tr(zh: '${store.projectName(store.currentProjectId)} · ${photos.length} 张照片',
+                    en: '${store.projectName(store.currentProjectId)} · ${photos.length} photos'),
                 style: const TextStyle(fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -117,7 +121,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             if (photos.isNotEmpty)
               TextButton.icon(
                 icon: const Icon(Icons.checklist, size: 18),
-                label: const Text('Select'),
+                label: Text(tr(zh: '选择', en: 'Select')),
                 onPressed: () => setState(() => _selecting = true),
               ),
           ],
@@ -208,9 +212,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
   bool _enforceLimit(FieldStampStore store, int count) {
     if (store.pro || count <= FieldStampStore.freeExportLimit) return true;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-          'Free reports are limited to ${FieldStampStore.freeExportLimit} photos. '
-          'Unlock Pro in Settings for unlimited exports.'),
+      content: Text(tr(
+          zh: '免费版报告最多包含 ${FieldStampStore.freeExportLimit} 张照片。'
+              '请在设置中解锁 Pro 以不限量导出。',
+          en: 'Free reports are limited to ${FieldStampStore.freeExportLimit} photos. '
+              'Unlock Pro in Settings for unlimited exports.')),
     ));
     return false;
   }
@@ -230,7 +236,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final photos = _selectedPhotos(store);
     if (photos.isEmpty) return;
     if (!store.pro) {
-      _proNeeded('PDF report');
+      _proNeeded(tr(zh: 'PDF 报告', en: 'PDF report'));
       return;
     }
     if (!_enforceLimit(store, photos.length)) return;
@@ -238,9 +244,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
     try {
       final bytes = await buildPdf(photos, store);
       final name = _fileStamp('fieldstamp-report', 'pdf');
-      await shareBytes(bytes, name, text: 'FieldStamp inspection report');
+      await shareBytes(bytes, name,
+          text: tr(zh: 'FieldStamp 巡检报告', en: 'FieldStamp inspection report'));
     } catch (e) {
-      _snack('PDF export failed: $e');
+      _snack(tr(zh: 'PDF 导出失败:$e', en: 'PDF export failed: $e'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -250,7 +257,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final photos = _selectedPhotos(store);
     if (photos.isEmpty) return;
     if (!store.pro) {
-      _proNeeded('CSV export');
+      _proNeeded(tr(zh: 'CSV 导出', en: 'CSV export'));
       return;
     }
     if (!_enforceLimit(store, photos.length)) return;
@@ -258,9 +265,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
     try {
       final csv = buildCsv(photos, store);
       final name = _fileStamp('fieldstamp-ledger', 'csv');
-      await shareBytes(utf8.encode(csv), name, text: 'FieldStamp CSV ledger');
+      await shareBytes(utf8.encode(csv), name,
+          text: tr(zh: 'FieldStamp CSV 台账', en: 'FieldStamp CSV ledger'));
     } catch (e) {
-      _snack('CSV export failed: $e');
+      _snack(tr(zh: 'CSV 导出失败:$e', en: 'CSV export failed: $e'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -272,16 +280,20 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete ${photos.length} photos?'),
-        content: const Text('This permanently removes them from this device.'),
+        title: Text(tr(
+            zh: '删除 ${photos.length} 张照片?',
+            en: 'Delete ${photos.length} photos?')),
+        content: Text(tr(
+            zh: '将从此设备上永久删除。',
+            en: 'This permanently removes them from this device.')),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(tr(zh: '删除', en: 'Delete')),
           ),
         ],
       ),
@@ -302,7 +314,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   void _proNeeded(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$feature is a Pro feature. Unlock it in Settings.'),
+      content: Text(tr(
+          zh: '$feature 为 Pro 功能,请在设置中解锁。',
+          en: '$feature is a Pro feature. Unlock it in Settings.')),
     ));
   }
 
@@ -334,11 +348,15 @@ class _EmptyGallery extends StatelessWidget {
             Icon(Icons.photo_library_outlined,
                 size: 72, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('No photos yet', style: Theme.of(context).textTheme.titleLarge),
+            Text(tr(zh: '还没有照片', en: 'No photos yet'),
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text(
-              'Switch to the Camera tab and tap the shutter.\n'
-              'Each photo is stamped with GPS, time and bearing.',
+            Text(
+              tr(
+                  zh: '切换到「相机」标签页,按下快门。\n'
+                      '每张照片都会烧入 GPS、时间和方位水印。',
+                  en: 'Switch to the Camera tab and tap the shutter.\n'
+                      'Each photo is stamped with GPS, time and bearing.'),
               textAlign: TextAlign.center,
             ),
           ],
@@ -367,7 +385,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     final file = File(store.photoPath(p.fileName));
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Photo'),
+        title: Text(tr(zh: '照片', en: 'Photo')),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share),
@@ -379,17 +397,18 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               final ok = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Delete photo?'),
-                  content: const Text('This cannot be undone.'),
+                  title: Text(tr(zh: '删除这张照片?', en: 'Delete photo?')),
+                  content: Text(
+                      tr(zh: '此操作无法撤销。', en: 'This cannot be undone.')),
                   actions: [
                     TextButton(
                         onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel')),
+                        child: Text(tr(zh: '取消', en: 'Cancel'))),
                     FilledButton(
                       style:
                           FilledButton.styleFrom(backgroundColor: Colors.red),
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Delete'),
+                      child: Text(tr(zh: '删除', en: 'Delete')),
                     ),
                   ],
                 ),
@@ -412,17 +431,20 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                     height: 240,
                     child: Center(child: Icon(Icons.broken_image_outlined))),
           ),
-          _meta('Project', store.projectName(p.projectId)),
-          _meta('Timestamp', formatTimestamp(p.capturedAt)),
-          _meta('Coordinates',
+          _meta(tr(zh: '项目', en: 'Project'), store.projectName(p.projectId)),
+          _meta(tr(zh: '时间', en: 'Timestamp'), formatTimestamp(p.capturedAt)),
+          _meta(tr(zh: '坐标', en: 'Coordinates'),
               formatLatLon(p.latitude, p.longitude, store.coordFormat)),
-          _meta('Altitude', formatAltitude(p.altitude, store.altUnit)),
-          _meta('Bearing', formatHeading(p.heading)),
-          _meta('GPS accuracy',
+          _meta(tr(zh: '海拔', en: 'Altitude'),
+              formatAltitude(p.altitude, store.altUnit)),
+          _meta(tr(zh: '方位', en: 'Bearing'), formatHeading(p.heading)),
+          _meta(tr(zh: 'GPS 精度', en: 'GPS accuracy'),
               p.accuracy != null ? '±${p.accuracy!.toStringAsFixed(0)} m' : '—'),
           ListTile(
-            title: const Text('Note'),
-            subtitle: Text(p.note.isEmpty ? 'Tap to add a note' : p.note),
+            title: Text(tr(zh: '备注', en: 'Note')),
+            subtitle: Text(p.note.isEmpty
+                ? tr(zh: '点按添加备注', en: 'Tap to add a note')
+                : p.note),
             trailing: const Icon(Icons.edit_outlined),
             onTap: () => _editNote(store, p),
           ),
@@ -444,7 +466,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     final v = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Note'),
+        title: Text(tr(zh: '备注', en: 'Note')),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -453,10 +475,11 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, ctrl.text),
-              child: const Text('Save')),
+              child: Text(tr(zh: '保存', en: 'Save'))),
         ],
       ),
     );

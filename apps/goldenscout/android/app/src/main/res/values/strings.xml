@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label, default (English). Per-locale names live in
+     values-zh/strings.xml etc. (store/listing.md has both). -->
+<resources>
+    <string name="app_name">GoldenScout</string>
+</resources>

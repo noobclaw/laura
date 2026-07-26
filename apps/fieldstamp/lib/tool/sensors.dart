@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../core/l10n.dart';
 import 'models.dart';
 
 /// Streams the device GPS position (with altitude/accuracy) and magnetometer
@@ -47,7 +48,8 @@ class SensorHub extends ChangeNotifier {
   Future<void> _startLocation() async {
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
-        _locationError = 'Location services are turned off';
+        _locationError =
+            tr(zh: '定位服务已关闭', en: 'Location services are turned off');
         notifyListeners();
         return;
       }
@@ -57,7 +59,8 @@ class SensorHub extends ChangeNotifier {
       }
       if (perm == LocationPermission.denied ||
           perm == LocationPermission.deniedForever) {
-        _locationError = 'Location permission denied';
+        _locationError =
+            tr(zh: '定位权限被拒绝', en: 'Location permission denied');
         notifyListeners();
         return;
       }
@@ -77,12 +80,12 @@ class SensorHub extends ChangeNotifier {
           notifyListeners();
         },
         onError: (Object e) {
-          _locationError = 'GPS error: $e';
+          _locationError = tr(zh: 'GPS 错误:$e', en: 'GPS error: $e');
           notifyListeners();
         },
       );
     } catch (e) {
-      _locationError = 'GPS unavailable: $e';
+      _locationError = tr(zh: 'GPS 不可用:$e', en: 'GPS unavailable: $e');
       notifyListeners();
     }
   }
