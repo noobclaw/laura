@@ -99,10 +99,25 @@ jobs:
     needs: build-android
     runs-on: ubuntu-latest
     steps:
+      # Checked out only to read the app's applicationId from its Gradle file —
+      # deterministic, unlike hunting for aapt on the runner image.
+      - uses: actions/checkout@v4
+
       - name: Download APK
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-android.outputs.slug }}-apk
+
+      - name: Resolve package id
+        id: pkg
+        run: |
+          PKG=$(grep -oE 'applicationId *= *"[^"]+"' '${{ inputs.app }}/android/app/build.gradle.kts' | sed 's/.*"\(.*\)"/\1/')
+          if [ -z "$PKG" ]; then
+            echo "::error::Could not resolve applicationId from ${{ inputs.app }}/android/app/build.gradle.kts"
+            exit 1
+          fi
+          echo "Package: $PKG"
+          echo "pkg=$PKG" >> "$GITHUB_OUTPUT"
 
       - name: Enable KVM for the emulator
         run: |
@@ -121,8 +136,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             set -e
-            AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort | tail -n1)
-            PKG=$("$AAPT" dump badging app-release.apk | sed -n "s/package: name='\([^']*\)'.*/\1/p")
+            PKG='${{ steps.pkg.outputs.pkg }}'
             echo "Package: $PKG"
             adb install -r app-release.apk
             adb logcat -c || true
