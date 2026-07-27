@@ -116,11 +116,7 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
             const SizedBox(height: 4),
             if (store.saved.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(tr(zh: '还没有已存机位。', en: 'No saved spots yet.'),
-                    style: Theme.of(context).textTheme.bodyMedium),
-              )
+              const _NoSavedSpots()
             else
               ...store.saved.map((loc) => Card(
                     child: ListTile(
@@ -161,6 +157,50 @@ class _LocationScreenState extends State<LocationScreen> {
     final ns = lat >= 0 ? 'N' : 'S';
     final ew = lon >= 0 ? 'E' : 'W';
     return '${lat.abs().toStringAsFixed(4)}°$ns, ${lon.abs().toStringAsFixed(4)}°$ew';
+  }
+}
+
+/// Warm empty state for the saved-spots list — a soft tinted icon, a heading
+/// and a supporting line, matching the tone of the no-location view rather than
+/// a single cold sentence.
+class _NoSavedSpots extends StatelessWidget {
+  const _NoSavedSpots();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.bookmark_add_outlined, size: 30, color: cs.primary),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            tr(zh: '还没有已存机位', en: 'No saved spots yet'),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            tr(
+                zh: '添加你钟爱的拍摄机位,随时查看那里的黄金时段与日月方位。',
+                en: 'Add a shooting spot you love to see its golden hour and '
+                    'sun & moon bearings any day.'),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.65)),
+          ),
+        ],
+      ),
+    );
   }
 }
 

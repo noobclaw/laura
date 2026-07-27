@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
 import 'astro.dart';
 
 /// A sundial-style compass that plots the Sun's rise/set directions and the
@@ -39,9 +40,11 @@ class CompassRose extends StatelessWidget {
           ring: scheme.outlineVariant,
           onSurface: scheme.onSurface,
           faint: scheme.onSurfaceVariant,
-          sunColor: const Color(0xFFF5A623),
+          sunColor: kGoldenAmber,
           moonColor: scheme.primary,
           horizon: scheme.surfaceContainerHighest,
+          skyWarm: kGoldenAmber,
+          skyCool: kDuskIndigo,
         ),
       ),
     );
@@ -61,6 +64,8 @@ class _RosePainter extends CustomPainter {
     required this.sunColor,
     required this.moonColor,
     required this.horizon,
+    required this.skyWarm,
+    required this.skyCool,
   });
 
   final double? sunriseAz;
@@ -69,6 +74,7 @@ class _RosePainter extends CustomPainter {
   final SkyPosition? moon;
   final double? deviceHeading;
   final Color ring, onSurface, faint, sunColor, moonColor, horizon;
+  final Color skyWarm, skyCool;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -83,8 +89,23 @@ class _RosePainter extends CustomPainter {
       return center + Offset(math.cos(a) * radius, math.sin(a) * radius);
     }
 
-    // Horizon disc.
+    // Horizon disc: a base surface fill (so ticks and labels stay legible in
+    // either theme) with a soft dusk-sky radial glow washed over it — warm near
+    // the centre where the sun climbs, cooling to blue-hour indigo at the rim.
     canvas.drawCircle(center, r, Paint()..color = horizon.withValues(alpha: 0.35));
+    final skyRect = Rect.fromCircle(center: center, radius: r);
+    canvas.drawCircle(
+      center,
+      r,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            skyWarm.withValues(alpha: 0.20),
+            skyCool.withValues(alpha: 0.16),
+          ],
+          stops: const [0.0, 1.0],
+        ).createShader(skyRect),
+    );
     canvas.drawCircle(
         center, r, Paint()
           ..style = PaintingStyle.stroke
@@ -109,8 +130,8 @@ class _RosePainter extends CustomPainter {
       _dot(canvas, at(sunriseAz!, r), sunColor, 4);
     }
     if (sunsetAz != null) {
-      _ray(canvas, center, at(sunsetAz!, r), const Color(0xFFD86B4A));
-      _dot(canvas, at(sunsetAz!, r), const Color(0xFFD86B4A), 4);
+      _ray(canvas, center, at(sunsetAz!, r), kDuskRose);
+      _dot(canvas, at(sunsetAz!, r), kDuskRose, 4);
     }
 
     // Current Sun: radius shrinks toward the centre as altitude rises (90° at
@@ -119,6 +140,15 @@ class _RosePainter extends CustomPainter {
       final below = sun!.altitude < 0;
       final rr = below ? r : r * (1 - (sun!.altitude.clamp(0, 90) / 90));
       final p = at(sun!.azimuth, rr);
+      if (!below) {
+        // Soft golden halo so the sun reads as light, not a flat pin.
+        canvas.drawCircle(
+            p,
+            18,
+            Paint()
+              ..color = sunColor.withValues(alpha: 0.55)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7));
+      }
       _dot(canvas, p, sunColor.withValues(alpha: below ? 0.35 : 1), below ? 7 : 10);
       if (!below) {
         canvas.drawCircle(p, 14,

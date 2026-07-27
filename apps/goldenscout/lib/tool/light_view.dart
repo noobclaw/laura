@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'astro.dart';
 import 'compass_rose.dart';
 import 'location_store.dart';
@@ -73,6 +74,8 @@ class _LightViewState extends State<LightView> {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
+            _GoldenHero(day: day, now: widget.isToday ? now : null),
+            const SizedBox(height: 16),
             _LocationHeader(store: store),
             const SizedBox(height: 12),
             CompassRose(
@@ -93,6 +96,182 @@ class _LightViewState extends State<LightView> {
           ],
         );
       },
+    );
+  }
+}
+
+/// The hero: a dusk-sky gradient card that leads the view with the day's
+/// signature golden-hour window in large tabular type, over a soft sun glyph.
+/// On the live Today view it prefers the *upcoming* golden hour (morning until
+/// it has passed, otherwise the evening one); on a planned date it shows the
+/// evening window. Falls back gracefully on polar days.
+class _GoldenHero extends StatelessWidget {
+  const _GoldenHero({required this.day, required this.now});
+  final DayLight day;
+  final DateTime? now;
+
+  static String _clock(DateTime? t) => t == null
+      ? '--:--'
+      : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) {
+    final white = Colors.white;
+    final tab = const [FontFeature.tabularFigures()];
+
+    // Resolve the headline: label + the two ends of the window (or a special
+    // polar message).
+    String label;
+    String? special;
+    DateTime? start;
+    DateTime? end;
+
+    if (day.polarNight) {
+      label = tr(zh: '极夜', en: 'Polar night');
+      special = tr(zh: '太阳整天在地平线下', en: 'The Sun stays below the horizon');
+    } else if (day.polarDay) {
+      label = tr(zh: '午夜太阳', en: 'Midnight sun');
+      special = tr(zh: '金色的光线整日徘徊', en: 'Golden light lingers all day');
+    } else {
+      final amOk = day.goldenStartAm.exists && day.goldenEndAm.exists;
+      final pmOk = day.goldenStartPm.exists && day.goldenEndPm.exists;
+      final n = now;
+      final morningUpcoming =
+          amOk && n != null && day.goldenEndAm.time!.isAfter(n);
+      if (morningUpcoming) {
+        label = tr(zh: '清晨黄金时段', en: 'Morning golden hour');
+        start = day.goldenStartAm.time;
+        end = day.goldenEndAm.time;
+      } else if (pmOk) {
+        label = tr(zh: '傍晚黄金时段', en: 'Evening golden hour');
+        start = day.goldenStartPm.time;
+        end = day.goldenEndPm.time;
+      } else if (amOk) {
+        label = tr(zh: '清晨黄金时段', en: 'Morning golden hour');
+        start = day.goldenStartAm.time;
+        end = day.goldenEndAm.time;
+      } else {
+        label = tr(zh: '日出与日落', en: 'Sunrise & sunset');
+        start = day.sunrise.time;
+        end = day.sunset.time;
+      }
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [kDuskIndigo, kDuskRose, kGoldenAmber],
+            stops: [0.0, 0.62, 1.0],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Sun sinking into the corner — the emotional backdrop.
+            Positioned(
+              right: -30,
+              bottom: -36,
+              child: Icon(Icons.wb_sunny_rounded,
+                  size: 188, color: white.withValues(alpha: 0.14)),
+            ),
+            Positioned(
+              right: 26,
+              top: 16,
+              child: Icon(Icons.brightness_2,
+                  size: 34, color: white.withValues(alpha: 0.13)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.wb_twilight,
+                          size: 18, color: white.withValues(alpha: 0.92)),
+                      const SizedBox(width: 8),
+                      Text(
+                        label.toUpperCase(),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: white.withValues(alpha: 0.92),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.8,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  if (special != null)
+                    Text(
+                      special,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: white,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
+                          ),
+                    )
+                  else
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${_clock(start)} – ${_clock(end)}',
+                        style:
+                            Theme.of(context).textTheme.displaySmall?.copyWith(
+                                  color: white,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: tab,
+                                  letterSpacing: -0.5,
+                                ),
+                      ),
+                    ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      _stat(context, Icons.north_east,
+                          tr(zh: '日出', en: 'Sunrise'), day.sunrise.time),
+                      const SizedBox(width: 22),
+                      _stat(context, Icons.south_east,
+                          tr(zh: '日落', en: 'Sunset'), day.sunset.time),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stat(BuildContext context, IconData icon, String label, DateTime? t) {
+    final white = Colors.white;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: white.withValues(alpha: 0.85)),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: white.withValues(alpha: 0.78),
+                    letterSpacing: 0.3)),
+            Text(
+              _clock(t),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: white,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -150,8 +329,8 @@ class _RoseLegend extends StatelessWidget {
       spacing: 14,
       runSpacing: 4,
       children: [
-        _dot(const Color(0xFFF5A623), tr(zh: '太阳', en: 'Sun'), style),
-        _dot(const Color(0xFFD86B4A), tr(zh: '日落方向', en: 'Sunset dir'), style),
+        _dot(kGoldenAmber, tr(zh: '太阳', en: 'Sun'), style),
+        _dot(kDuskRose, tr(zh: '日落方向', en: 'Sunset dir'), style),
         _dot(Theme.of(context).colorScheme.primary, tr(zh: '月亮', en: 'Moon'), style),
         Text(
             heading != null
@@ -183,7 +362,7 @@ class _NowRow extends StatelessWidget {
       children: [
         Expanded(
             child: _bodyChip(context, tr(zh: '☀︎ 当前太阳', en: '☀︎ Sun now'), sun,
-                const Color(0xFFF5A623))),
+                kGoldenAmber)),
         const SizedBox(width: 12),
         Expanded(
             child: _bodyChip(context, tr(zh: '☾ 当前月亮', en: '☾ Moon now'), moon,
@@ -319,7 +498,7 @@ class _Timeline extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon, size: 20,
-                color: highlight ? const Color(0xFFF5A623) : scheme.onSurfaceVariant),
+                color: highlight ? kGoldenAmber : scheme.onSurfaceVariant),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -334,8 +513,12 @@ class _Timeline extends StatelessWidget {
               ),
             ),
             Text(value,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontFeatures: const [], fontWeight: FontWeight.w600)),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    fontWeight: FontWeight.w700,
+                    color: highlight
+                        ? kGoldenAmber
+                        : Theme.of(context).colorScheme.onSurface)),
           ],
         ),
       ),
