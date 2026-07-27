@@ -271,13 +271,16 @@ class _CameraScreenState extends State<CameraScreen>
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13),
+                          fontSize: 13,
+                          fontFeatures: [FontFeature.tabularFigures()]),
                     ),
                   ),
                   if (acc.isNotEmpty)
                     Text(acc,
                         style: const TextStyle(
-                            color: Colors.white70, fontSize: 12)),
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontFeatures: [FontFeature.tabularFigures()])),
                 ],
               ),
               const SizedBox(height: 2),
@@ -287,7 +290,10 @@ class _CameraScreenState extends State<CameraScreen>
                 '${tr(zh: '海拔', en: 'Alt')} ${formatAltitude(r.altitude, store.altUnit)}   '
                 '${tr(zh: '方位', en: 'Bearing')} ${formatHeading(r.heading)}   '
                 '${formatTimestamp(r.time)}',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontFeatures: [FontFeature.tabularFigures()]),
               ),
               if (widget.sensors.locationError != null) ...[
                 const SizedBox(height: 4),

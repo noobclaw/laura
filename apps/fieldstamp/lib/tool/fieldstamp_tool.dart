@@ -281,7 +281,8 @@ class ProjectsPage extends StatelessWidget {
                                 child: Text(tr(zh: '取消', en: 'Cancel'))),
                             FilledButton(
                               style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.red),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error),
                               onPressed: () => Navigator.pop(ctx, true),
                               child: Text(tr(zh: '删除', en: 'Delete')),
                             ),

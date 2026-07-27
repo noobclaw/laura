@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
 import 'core/settings_page.dart';
+import 'tool/app_theme.dart';
 import 'tool/fieldstamp_tool.dart';
 import 'tool/tool_module.dart';
 
@@ -22,10 +23,8 @@ class FieldStampApp extends StatelessWidget {
       // language; our own strings do too via core/l10n.dart `tr()`.
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor)),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor, brightness: Brightness.dark),
-      ),
+      theme: buildFieldStampTheme(Brightness.light),
+      darkTheme: buildFieldStampTheme(Brightness.dark),
       home: const _HomeScaffold(),
     );
   }

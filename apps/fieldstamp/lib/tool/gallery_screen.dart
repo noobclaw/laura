@@ -132,11 +132,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   Widget _grid(FieldStampStore store, List<StampPhoto> photos) {
     return GridView.builder(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: 6,
-        mainAxisSpacing: 6,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
       ),
       itemCount: photos.length,
       itemBuilder: (context, i) {
@@ -162,29 +162,33 @@ class _GalleryScreenState extends State<GalleryScreen> {
             _selecting = true;
             _selected.add(p.id);
           }),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _thumb(store, p),
-              if (!p.hasFix)
-                const Positioned(
-                  left: 4,
-                  top: 4,
-                  child: Icon(Icons.gps_off,
-                      size: 16, color: Colors.orangeAccent),
-                ),
-              if (_selecting)
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Icon(
-                    selected
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    color: selected ? Colors.lightGreenAccent : Colors.white70,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _thumb(store, p),
+                if (!p.hasFix)
+                  const Positioned(
+                    left: 4,
+                    top: 4,
+                    child: Icon(Icons.gps_off,
+                        size: 16, color: Colors.orangeAccent),
                   ),
-                ),
-            ],
+                if (_selecting)
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Icon(
+                      selected
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      color:
+                          selected ? Colors.lightGreenAccent : Colors.white70,
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -291,7 +295,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(tr(zh: '删除', en: 'Delete')),
           ),
@@ -405,8 +410,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                         onPressed: () => Navigator.pop(ctx, false),
                         child: Text(tr(zh: '取消', en: 'Cancel'))),
                     FilledButton(
-                      style:
-                          FilledButton.styleFrom(backgroundColor: Colors.red),
+                      style: FilledButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.error),
                       onPressed: () => Navigator.pop(ctx, true),
                       child: Text(tr(zh: '删除', en: 'Delete')),
                     ),
@@ -431,15 +437,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                     height: 240,
                     child: Center(child: Icon(Icons.broken_image_outlined))),
           ),
-          _meta(tr(zh: '项目', en: 'Project'), store.projectName(p.projectId)),
-          _meta(tr(zh: '时间', en: 'Timestamp'), formatTimestamp(p.capturedAt)),
-          _meta(tr(zh: '坐标', en: 'Coordinates'),
-              formatLatLon(p.latitude, p.longitude, store.coordFormat)),
-          _meta(tr(zh: '海拔', en: 'Altitude'),
-              formatAltitude(p.altitude, store.altUnit)),
-          _meta(tr(zh: '方位', en: 'Bearing'), formatHeading(p.heading)),
-          _meta(tr(zh: 'GPS 精度', en: 'GPS accuracy'),
-              p.accuracy != null ? '±${p.accuracy!.toStringAsFixed(0)} m' : '—'),
+          _metaCard(context, store, p),
           ListTile(
             title: Text(tr(zh: '备注', en: 'Note')),
             subtitle: Text(p.note.isEmpty
@@ -453,13 +451,67 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     );
   }
 
-  Widget _meta(String k, String v) => ListTile(
-        dense: true,
-        title: Text(k, style: const TextStyle(fontSize: 13)),
-        subtitle: Text(v,
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.w500)),
-      );
+  /// The photo's geo-evidence as one rounded card: label/value rows separated
+  /// by hairline dividers, values set in tabular figures so coordinates align.
+  Widget _metaCard(BuildContext context, FieldStampStore store, StampPhoto p) {
+    final rows = <(String, String)>[
+      (tr(zh: '项目', en: 'Project'), store.projectName(p.projectId)),
+      (tr(zh: '时间', en: 'Timestamp'), formatTimestamp(p.capturedAt)),
+      (
+        tr(zh: '坐标', en: 'Coordinates'),
+        formatLatLon(p.latitude, p.longitude, store.coordFormat)
+      ),
+      (
+        tr(zh: '海拔', en: 'Altitude'),
+        formatAltitude(p.altitude, store.altUnit)
+      ),
+      (tr(zh: '方位', en: 'Bearing'), formatHeading(p.heading)),
+      (
+        tr(zh: 'GPS 精度', en: 'GPS accuracy'),
+        p.accuracy != null ? '±${p.accuracy!.toStringAsFixed(0)} m' : '—'
+      ),
+    ];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      child: Card(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Column(
+          children: [
+            for (var i = 0; i < rows.length; i++) ...[
+              if (i > 0) const Divider(height: 1),
+              _metaRow(context, rows[i].$1, rows[i].$2),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _metaRow(BuildContext context, String k, String v) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 96,
+            child: Text(k,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(v,
+                textAlign: TextAlign.right,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: const [FontFeature.tabularFigures()])),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _editNote(FieldStampStore store, StampPhoto p) async {
     final ctrl = TextEditingController(text: p.note);

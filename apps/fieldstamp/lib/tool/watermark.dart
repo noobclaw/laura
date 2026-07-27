@@ -42,6 +42,7 @@ Future<Uint8List> burnWatermark(
           fontSize: body,
           fontWeight: FontWeight.w600,
           height: 1.15,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
       textDirection: TextDirection.ltr,
