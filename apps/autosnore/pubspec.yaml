@@ -57,6 +57,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+# path_provider (via path_provider_android) pulls in the native `jni` package.
+# jni 1.0.1's android/build.gradle is incompatible with our AGP 9 / Gradle 9
+# toolchain (`Could not find method kotlin()`), while 1.0.0 builds cleanly —
+# it's the version the other factory apps (e.g. fieldstamp) ship. jni_util
+# would otherwise drag jni up to 1.0.1, so pin it back.
+dependency_overrides:
+  jni: 1.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
