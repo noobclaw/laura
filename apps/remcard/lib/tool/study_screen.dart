@@ -12,6 +12,16 @@ String _ratingLabel(Rating r) => switch (r) {
       Rating.easy => tr(zh: '简单', en: 'Easy'),
     };
 
+/// Distinct (background, foreground) per grade so the four buttons read at a
+/// glance: Again=error, Hard=tertiary, Good=primary (the brand teal), Easy=
+/// secondary — the tonal container roles keep them coherent with the theme.
+(Color, Color) _ratingColors(ColorScheme s, Rating r) => switch (r) {
+      Rating.again => (s.errorContainer, s.onErrorContainer),
+      Rating.hard => (s.tertiaryContainer, s.onTertiaryContainer),
+      Rating.good => (s.primaryContainer, s.onPrimaryContainer),
+      Rating.easy => (s.secondaryContainer, s.onSecondaryContainer),
+    };
+
 /// A review session over the cards that were due when the session started.
 /// Tap the card to reveal the answer, then grade it; grading reschedules the
 /// card and advances to the next one.
@@ -124,10 +134,17 @@ class _StudyScreenState extends State<StudyScreen> {
                             child: Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 4),
-                              child: FilledButton.tonal(
-                                onPressed: () => _grade(r),
-                                child: Text(_ratingLabel(r)),
-                              ),
+                              child: Builder(builder: (context) {
+                                final (bg, fg) = _ratingColors(scheme, r);
+                                return FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: bg,
+                                    foregroundColor: fg,
+                                  ),
+                                  onPressed: () => _grade(r),
+                                  child: Text(_ratingLabel(r)),
+                                );
+                              }),
                             ),
                           ),
                       ],

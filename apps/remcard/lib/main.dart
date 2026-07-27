@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
 import 'core/purchase.dart';
 import 'core/settings_page.dart';
+import 'tool/app_theme.dart';
 import 'tool/remcard_tool.dart';
 
 /// The one line a generated app changes to plug in its tool.
@@ -28,10 +29,8 @@ class RemcardApp extends StatelessWidget {
       // language; our own strings do too via core/l10n.dart `tr()`.
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor)),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor, brightness: Brightness.dark),
-      ),
+      theme: buildRemcardTheme(Brightness.light),
+      darkTheme: buildRemcardTheme(Brightness.dark),
       home: const _HomeScaffold(),
     );
   }

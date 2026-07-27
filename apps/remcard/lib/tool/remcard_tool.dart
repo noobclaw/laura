@@ -115,27 +115,29 @@ class DeckListScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         final today = epochDayOf(DateTime.now());
+        final totalDue =
+            store.decks.fold<int>(0, (sum, d) => sum + d.dueCount(today));
         return Scaffold(
           body: store.decks.isEmpty
               ? _EmptyState(onCreate: () => _createDeck(context))
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: store.decks.length,
-                  itemBuilder: (context, i) {
-                    final deck = store.decks[i];
-                    return _DeckTile(
-                      deck: deck,
-                      today: today,
-                      onOpen: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              DeckDetailScreen(store: store, deck: deck),
+              : ListView(
+                  padding: const EdgeInsets.only(top: 8, bottom: 96),
+                  children: [
+                    _DueTodayHero(totalDue: totalDue),
+                    for (final deck in store.decks)
+                      _DeckTile(
+                        deck: deck,
+                        today: today,
+                        onOpen: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                DeckDetailScreen(store: store, deck: deck),
+                          ),
                         ),
+                        onRename: () => _renameDeck(context, deck),
+                        onDelete: () => _deleteDeck(context, deck),
                       ),
-                      onRename: () => _renameDeck(context, deck),
-                      onDelete: () => _deleteDeck(context, deck),
-                    );
-                  },
+                  ],
                 ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _createDeck(context),
@@ -185,7 +187,10 @@ class DeckListScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(tr(zh: '删除', en: 'Delete')),
           ),
@@ -238,6 +243,81 @@ Future<String?> _promptName(BuildContext context,
   );
 }
 
+/// A compact teal hero at the top of the deck list: the total cards due today,
+/// as a big tabular number over a gradient `primaryContainer`, with a short
+/// label (and a reassuring note once you're caught up).
+class _DueTodayHero extends StatelessWidget {
+  const _DueTodayHero({required this.totalDue});
+
+  final int totalDue;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final caughtUp = totalDue == 0;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                scheme.primaryContainer,
+                Color.alphaBlend(
+                  scheme.primary.withValues(alpha: 0.30),
+                  scheme.primaryContainer,
+                ),
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -18,
+                top: -18,
+                child: Icon(
+                  Icons.style_rounded,
+                  size: 132,
+                  color: scheme.onPrimaryContainer.withValues(alpha: 0.08),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$totalDue',
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            color: scheme.onPrimaryContainer,
+                            height: 1.0,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      caughtUp
+                          ? tr(zh: '今日已全部复习完 🎉', en: 'All caught up for today 🎉')
+                          : tr(zh: '今日待复习卡片', en: 'cards due to review today'),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color:
+                                scheme.onPrimaryContainer.withValues(alpha: 0.85),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _DeckTile extends StatelessWidget {
   const _DeckTile({
     required this.deck,
@@ -257,20 +337,51 @@ class _DeckTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final due = deck.dueCount(today);
     final scheme = Theme.of(context).colorScheme;
+    final total = deck.cards.length;
+    // Fraction of the deck that has entered the schedule (been reviewed at
+    // least once) — a quiet sense of progress per deck.
+    final reviewed = deck.cards.where((c) => c.repetitions > 0).length;
+    final progress = total == 0 ? 0.0 : reviewed / total;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: ListTile(
         onTap: onOpen,
         title: Text(deck.name,
             style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(tr(
-          zh: '${deck.cards.length} 张卡片',
-          en: deck.cards.length == 1 ? '1 card' : '${deck.cards.length} cards',
-        )),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(tr(
+              zh: '$total 张卡片',
+              en: total == 1 ? '1 card' : '$total cards',
+            )),
+            if (total > 0) ...[
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 5,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                ),
+              ),
+            ],
+          ],
+        ),
         leading: CircleAvatar(
-          backgroundColor: due > 0 ? scheme.primary : scheme.surfaceContainerHighest,
-          foregroundColor: due > 0 ? scheme.onPrimary : scheme.onSurfaceVariant,
-          child: Text('$due'),
+          radius: 24,
+          backgroundColor:
+              due > 0 ? scheme.primary : scheme.surfaceContainerHighest,
+          foregroundColor:
+              due > 0 ? scheme.onPrimary : scheme.onSurfaceVariant,
+          child: Text(
+            '$due',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
         ),
         trailing: PopupMenuButton<String>(
           onSelected: (v) {
