@@ -223,7 +223,9 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = statusOf(event, DateTime.now());
+    final now = DateTime.now();
+    final s = statusOf(event, now);
+    final progress = progressOf(event, now);
     final color = event.color;
     final onColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? Colors.white
@@ -234,6 +236,9 @@ class _EventCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      // Flat tile with a faint wash of the event's own accent — reads as a
+      // premium countdown card rather than a generic list row.
+      color: color.withValues(alpha: 0.06),
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
         onTap: () => Navigator.of(context).push(
@@ -251,7 +256,7 @@ class _EventCard extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(event.emoji, style: const TextStyle(fontSize: 26)),
               ),
@@ -286,6 +291,18 @@ class _EventCard extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
+                    if (progress != null) ...[
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: color.withValues(alpha: 0.15),
+                          valueColor: AlwaysStoppedAnimation(color),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -320,7 +337,7 @@ class _DayBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -329,9 +346,10 @@ class _DayBadge extends StatelessWidget {
           Text(
             status.isToday ? '🎉' : '${status.absDays}',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 30,
               height: 1.05,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              fontFeatures: const [FontFeature.tabularFigures()],
               color: fg,
             ),
           ),

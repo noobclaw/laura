@@ -110,6 +110,23 @@ EventStatus statusOf(CountdownEvent e, DateTime today) {
   return EventStatus(days: daysBetween(today, target), target: target);
 }
 
+/// Fraction elapsed (0..1) through the current cycle toward the effective
+/// target, or null when there is no meaningful origin to measure from.
+///
+/// For yearly-repeating events the cycle runs from the previous occurrence to
+/// the next one, so the indicator fills steadily as the anniversary
+/// approaches. One-off dates have no natural start point (and past count-ups
+/// keep growing without a ceiling), so they return null and skip the viz.
+double? progressOf(CountdownEvent e, DateTime today) {
+  if (!e.yearlyRepeat) return null;
+  final target = nextYearlyOccurrence(e.date, today);
+  final prev = clampToMonth(target.year - 1, e.date.month, e.date.day);
+  final total = daysBetween(prev, target);
+  if (total <= 0) return null;
+  final elapsed = daysBetween(prev, today);
+  return (elapsed / total).clamp(0.0, 1.0);
+}
+
 /// Sort key: pinned first, then nearest upcoming (incl. today) ascending, then
 /// past events by how recent they are (closest to today first).
 int compareEvents(CountdownEvent a, CountdownEvent b, DateTime today) {

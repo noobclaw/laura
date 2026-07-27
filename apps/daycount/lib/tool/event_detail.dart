@@ -83,7 +83,9 @@ class _DetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = statusOf(event, DateTime.now());
+    final now = DateTime.now();
+    final s = statusOf(event, now);
+    final progress = progressOf(event, now);
     final color = event.color;
     final onColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? Colors.white
@@ -134,13 +136,36 @@ class _DetailView extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 Text(label, style: TextStyle(fontSize: 14, color: onColor.withValues(alpha: 0.9))),
-                Text(
-                  s.isToday ? '🎉' : '${s.absDays}',
-                  style: TextStyle(
-                    fontSize: 76,
-                    height: 1.05,
-                    fontWeight: FontWeight.w800,
-                    color: onColor,
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: 172,
+                  height: 172,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (progress != null)
+                        SizedBox(
+                          width: 172,
+                          height: 172,
+                          child: CircularProgressIndicator(
+                            value: progress,
+                            strokeWidth: 6,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: onColor.withValues(alpha: 0.2),
+                            valueColor: AlwaysStoppedAnimation(onColor.withValues(alpha: 0.9)),
+                          ),
+                        ),
+                      Text(
+                        s.isToday ? '🎉' : '${s.absDays}',
+                        style: TextStyle(
+                          fontSize: 76,
+                          height: 1.05,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: onColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (!s.isToday)
