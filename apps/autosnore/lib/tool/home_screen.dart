@@ -42,20 +42,18 @@ class HomeScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
-            ] else
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                child: Center(
-                  child: Text(
-                    tr(
-                      zh: '把手机放在床头,点上方开始今晚的记录 🌙',
-                      en: 'Put the phone by your bed and tap above to record tonight 🌙',
-                    ),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+            ] else ...[
+              const SizedBox(height: 24),
+              EmptyState(
+                icon: Icons.bedtime_outlined,
+                title: tr(zh: '今晚开始第一次记录', en: 'Record your first night'),
+                body: tr(
+                  zh: '把手机放在床头、接通电源,点上方开始。早晨你会看到一份鼾声报告 🌙',
+                  en: 'Put the phone by your bed, keep it charging, and tap above. '
+                      'A snore report will be waiting in the morning 🌙',
                 ),
               ),
+            ],
           ],
         );
       },
@@ -69,45 +67,83 @@ class _StartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Card(
-      color: cs.primaryContainer,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => RecordingScreen(store: store),
-        )),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: cs.primary,
-                child: Icon(Icons.mic, size: 32, color: cs.onPrimary),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(tr(zh: '开始记录', en: 'Start recording'),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(
-                                color: cs.onPrimaryContainer,
-                                fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(
-                      tr(zh: '整夜离线记录鼾声', en: 'Record snoring all night, offline'),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: cs.onPrimaryContainer.withValues(alpha: 0.8)),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2C2F73), Color(0xFF5661E0)],
+            ),
+          ),
+          child: InkWell(
+            splashColor: Colors.white24,
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => RecordingScreen(store: store),
+            )),
+            child: SizedBox(
+              height: 208,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -24,
+                    top: -24,
+                    child: Icon(Icons.nightlight_round,
+                        size: 170, color: Colors.white.withValues(alpha: 0.06)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withValues(alpha: 0.30),
+                                blurRadius: 26,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.mic,
+                              size: 34, color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          tr(zh: '开始记录', en: 'Start recording'),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          tr(
+                            zh: '整夜离线记录鼾声 · 零联网',
+                            en: 'Record all night · fully offline',
+                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.82)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

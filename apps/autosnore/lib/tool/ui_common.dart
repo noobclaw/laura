@@ -41,6 +41,57 @@ String bandLabel(SnoreBand b) {
   }
 }
 
+/// A warm, consistent empty state: an icon in a soft tinted circle, a heading,
+/// and a supporting line. Reused across home / report / trends so blank screens
+/// feel designed, not abandoned.
+class EmptyState extends StatelessWidget {
+  const EmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 36, color: cs.primary),
+            ),
+            const SizedBox(height: 18),
+            Text(title,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.65)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 Color bandColor(SnoreBand b) {
   switch (b) {
     case SnoreBand.quiet:

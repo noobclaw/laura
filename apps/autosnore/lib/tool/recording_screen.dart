@@ -104,7 +104,7 @@ class _RecordingScreenState extends State<RecordingScreen>
         if (!didPop && _phase == _Phase.recording) _finish(navigate: true);
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(child: _body()),
       ),
     );
@@ -113,8 +113,7 @@ class _RecordingScreenState extends State<RecordingScreen>
   Widget _body() {
     switch (_phase) {
       case _Phase.requesting:
-        return const Center(
-            child: CircularProgressIndicator(color: Colors.white70));
+        return const Center(child: CircularProgressIndicator());
       case _Phase.denied:
         return _PermissionPanel(
           message: tr(
@@ -172,23 +171,34 @@ class _PermissionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.mic_off_outlined, size: 56, color: Colors.white54),
-          const SizedBox(height: 20),
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.mic_off_outlined, size: 40, color: cs.primary),
+          ),
+          const SizedBox(height: 22),
           Text(message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white, fontSize: 16)),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: cs.onSurface, height: 1.4)),
           const SizedBox(height: 24),
           FilledButton(onPressed: onPrimary, child: Text(primaryLabel)),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(tr(zh: '取消', en: 'Cancel'),
-                style: const TextStyle(color: Colors.white70)),
+            child: Text(tr(zh: '取消', en: 'Cancel')),
           ),
         ],
       ),
@@ -204,6 +214,7 @@ class _RecordingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
@@ -212,31 +223,47 @@ class _RecordingView extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(),
-              const Icon(Icons.nightlight_round,
-                  color: Colors.white24, size: 40),
-              const SizedBox(height: 24),
+              // Glowing night orb — the "we're listening" focal point.
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: cs.primary.withValues(alpha: 0.14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: cs.primary.withValues(alpha: 0.30),
+                      blurRadius: 32,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Icon(Icons.nightlight_round, color: cs.primary, size: 38),
+              ),
+              const SizedBox(height: 26),
               Text(
                 formatDuration(controller.elapsedMs),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 52,
-                    fontWeight: FontWeight.w300,
-                    fontFeatures: [FontFeature.tabularFigures()]),
+                style: Theme.of(context)
+                    .textTheme
+                    .displayMedium
+                    ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w300),
               ),
               const SizedBox(height: 6),
               Text(tr(zh: '正在记录…', en: 'Recording…'),
-                  style: const TextStyle(color: Colors.white54, fontSize: 15)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: cs.onSurfaceVariant)),
               const SizedBox(height: 40),
               // Live loudness meter.
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   height: 12,
-                  color: Colors.white12,
+                  color: cs.surfaceContainerHighest,
                   child: FractionallySizedBox(
                     alignment: Alignment.centerLeft,
                     widthFactor: controller.level,
-                    child: Container(color: Colors.tealAccent),
+                    child: Container(color: cs.primary),
                   ),
                 ),
               ),
@@ -263,15 +290,19 @@ class _RecordingView extends StatelessWidget {
                   en: 'Screen stays on to keep recording — keep the phone charging.',
                 ),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white38, fontSize: 12),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.8)),
               ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                   icon: const Icon(Icons.stop),
                   label: Text(tr(zh: '停止并生成报告', en: 'Stop & see report')),
@@ -293,14 +324,19 @@ class _Live extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         Text(value,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.w500)),
-        Text(label, style: const TextStyle(color: Colors.white54)),
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: cs.onSurface)),
+        Text(label,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: cs.onSurfaceVariant)),
       ],
     );
   }

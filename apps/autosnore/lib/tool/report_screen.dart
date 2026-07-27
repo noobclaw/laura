@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'export.dart';
+import 'gauge_painter.dart';
 import 'models.dart';
 import 'store.dart';
 import 'timeline_painter.dart';
@@ -52,6 +53,7 @@ class ReportScreen extends StatelessWidget {
                         session: session,
                         barColor: cs.primary,
                         trackColor: cs.outlineVariant,
+                        labelColor: cs.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -78,14 +80,12 @@ class ReportScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           if (session.events.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Text(
-                  tr(zh: '这一夜很安静,没有记录到明显响声 🌙',
-                      en: 'A quiet night — no notable noise recorded 🌙'),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+            EmptyState(
+              icon: Icons.nights_stay_outlined,
+              title: tr(zh: '安静的一夜', en: 'A quiet night'),
+              body: tr(
+                zh: '没有记录到明显的鼾声或响声 🌙',
+                en: 'No notable snoring or noise was recorded 🌙',
               ),
             )
           else
@@ -176,26 +176,24 @@ class _ScoreCard extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: 84,
-              height: 84,
+              width: 92,
+              height: 92,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  SizedBox(
-                    width: 84,
-                    height: 84,
-                    child: CircularProgressIndicator(
-                      value: session.score / 100,
-                      strokeWidth: 8,
-                      backgroundColor: color.withValues(alpha: 0.18),
-                      valueColor: AlwaysStoppedAnimation(color),
+                  CustomPaint(
+                    size: const Size.square(92),
+                    painter: ScoreGaugePainter(
+                      value: session.score.toDouble(),
+                      color: color,
+                      trackColor: color.withValues(alpha: 0.16),
                     ),
                   ),
                   Text('${session.score}',
                       style: Theme.of(context)
                           .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                          .headlineMedium
+                          ?.copyWith(color: color)),
                 ],
               ),
             ),
