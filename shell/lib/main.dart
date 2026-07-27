@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/app_theme.dart';
 import 'core/branding.dart';
 import 'core/settings_page.dart';
 import 'tool/sample_tool.dart';
@@ -22,10 +23,10 @@ class ShellApp extends StatelessWidget {
       // language; our own strings do too via core/l10n.dart `tr()`.
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor)),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor, brightness: Brightness.dark),
-      ),
+      // Premium default theme (G6b bar) — see core/app_theme.dart. Every new app
+      // starts here instead of bare fromSeed; give it a real hero/empty states.
+      theme: buildAppTheme(Brightness.light),
+      darkTheme: buildAppTheme(Brightness.dark),
       home: const _HomeScaffold(),
     );
   }

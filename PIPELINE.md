@@ -49,6 +49,8 @@
 
 > 现实约束:CI 冒烟只截「启动屏」,故**首页/核心屏的美观是硬指标**(必被截到);冒烟截不到的屏(报告/详情/趋势)按源码评审 + 必要时本地 `flutter run` 驱动截图补看。**别用「冒烟只截首页」当借口放过其它屏。**
 
+> **起点已抬高(2026-07-27)**:壳 `shell/lib/core/app_theme.dart` 现提供 `buildAppTheme(brightness)`(扁平填充卡/圆角 20/数字等宽+加粗字阶),new_app 出来的 app 默认就用它——**主题这层不再是零分起点**。但主题只解决「不丑」,rubric 的 hero/空状态/数据可视化/art direction 仍要**每个 app 自己 bespoke**(见 apps/autosnore 的 app_theme+渐变 hero+自绘表盘为范例)。历史 6 个 app 已于 2026-07-27 逐个 retrofit 到此标准(clean-alarm 搁置除外)。
+
 ## 变现与定价标准(2026-07-26 定版)
 
 - **模式**:默认「免费+Pro 一次性买断」;B 端搜索转化型(如 FieldStamp)可用纯付费下载(零代码,Console 定价);**禁广告**(与隐私/干净卖点冲突)。
