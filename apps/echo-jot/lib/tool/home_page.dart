@@ -161,13 +161,14 @@ class _EchoJotHomeState extends State<EchoJotHome> {
         ),
         Expanded(
           child: notes.isEmpty
-              ? Center(
-                  child: Text(
-                    _searchCtrl.text.isEmpty
-                        ? '点下面的按钮,说出你的第一条笔记'
-                        : '没有匹配的笔记',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+              ? _EmptyState(
+                  icon: _searchCtrl.text.isEmpty
+                      ? Icons.mic_none
+                      : Icons.search_off,
+                  title: _searchCtrl.text.isEmpty ? '还没有笔记' : '没有匹配的笔记',
+                  body: _searchCtrl.text.isEmpty
+                      ? '点下面的按钮,说出你的第一条笔记——松手即转成文字,全程离线。'
+                      : '换个关键词再试试。',
                 )
               : ListView.builder(
                   itemCount: notes.length,
@@ -189,27 +190,28 @@ class _EchoJotHomeState extends State<EchoJotHome> {
         SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (_recording)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      '录音中 ${_fmtElapsed()}',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                if (_recording) ...[
+                  // Live level meter driven by the recorder's amplitude stream —
+                  // the moving bars are the app's "we're listening" signal.
+                  _AmplitudeMeter(recorder: _recorder),
+                  const SizedBox(height: 14),
+                  Text(
+                    '录音中 ${_fmtElapsed()}',
+                    style:
+                        Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
                   ),
-                FloatingActionButton.large(
-                  onPressed: _toggleRecording,
-                  backgroundColor: _recording
-                      ? Theme.of(context).colorScheme.error
-                      : null,
-                  child: Icon(_recording ? Icons.stop : Icons.mic, size: 36),
+                  const SizedBox(height: 12),
+                ],
+                _RecordButton(
+                  recording: _recording,
+                  onTap: _toggleRecording,
                 ),
               ],
             ),
@@ -247,20 +249,30 @@ class _NoteCard extends StatelessWidget {
     final dateText =
         '${date.month}/${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
 
+    final cs = Theme.of(context).colorScheme;
+
     return Dismissible(
       key: ValueKey(note.id),
       direction: DismissDirection.endToStart,
       onDismissed: (_) => onDelete(),
       background: Container(
-        color: Theme.of(context).colorScheme.error,
+        color: cs.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         child: ListTile(
           onTap: onTap,
+          leading: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.graphic_eq, color: cs.primary, size: 22),
+          ),
           title: Text(
             note.status == NoteStatus.done ? note.title : _statusLabel,
             maxLines: 1,
@@ -275,10 +287,229 @@ class _NoteCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(dateText, style: Theme.of(context).textTheme.bodySmall),
-              Text(durText, style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 2),
+              Text(
+                durText,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A warm, consistent empty state: an icon in a soft tinted circle, a heading,
+/// and a supporting line — so a blank list feels designed, not abandoned.
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 36, color: cs.primary),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.65),
+                    height: 1.4,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A live loudness meter driven by the recorder's amplitude stream: a rolling
+/// row of bars that dance with the incoming level. Purely visual — if the
+/// platform has no amplitude support the bars simply stay flat (no crash).
+class _AmplitudeMeter extends StatefulWidget {
+  const _AmplitudeMeter({required this.recorder});
+
+  final AudioRecorder recorder;
+
+  @override
+  State<_AmplitudeMeter> createState() => _AmplitudeMeterState();
+}
+
+class _AmplitudeMeterState extends State<_AmplitudeMeter> {
+  static const int _barCount = 27;
+  static const double _minDb = -45; // quieter than this reads as silence
+
+  final List<double> _levels = List<double>.filled(_barCount, 0);
+  StreamSubscription<Amplitude>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      _sub = widget.recorder
+          .onAmplitudeChanged(const Duration(milliseconds: 120))
+          .listen(_onAmp, onError: (Object _) {});
+    } catch (_) {
+      // Some platforms / no-mic devices don't emit amplitude — leave it flat.
+    }
+  }
+
+  void _onAmp(Amplitude amp) {
+    final db = amp.current;
+    final double norm = (db.isNaN || db.isInfinite)
+        ? 0
+        : ((db - _minDb) / (0 - _minDb)).clamp(0.0, 1.0);
+    if (!mounted) return;
+    setState(() {
+      _levels.removeAt(0);
+      _levels.add(norm);
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      height: 40,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (final level in _levels)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1.5),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                curve: Curves.easeOut,
+                width: 4,
+                height: 4 + level * 34,
+                decoration: BoxDecoration(
+                  color: Color.lerp(
+                    cs.primary.withValues(alpha: 0.5),
+                    cs.primary,
+                    level,
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The record button, wrapped in a soft pulsing ring while recording so the
+/// live state reads at a glance even away from the meter.
+class _RecordButton extends StatefulWidget {
+  const _RecordButton({required this.recording, required this.onTap});
+
+  final bool recording;
+  final VoidCallback onTap;
+
+  @override
+  State<_RecordButton> createState() => _RecordButtonState();
+}
+
+class _RecordButtonState extends State<_RecordButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.recording) _pulse.repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant _RecordButton old) {
+    super.didUpdateWidget(old);
+    if (widget.recording && !_pulse.isAnimating) {
+      _pulse.repeat();
+    } else if (!widget.recording && _pulse.isAnimating) {
+      _pulse
+        ..stop()
+        ..reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 132,
+      height: 132,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (widget.recording)
+            AnimatedBuilder(
+              animation: _pulse,
+              builder: (context, _) {
+                final t = _pulse.value;
+                return Container(
+                  width: 96 + t * 36,
+                  height: 96 + t * 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: cs.error.withValues(alpha: (1 - t) * 0.22),
+                  ),
+                );
+              },
+            ),
+          FloatingActionButton.large(
+            onPressed: widget.onTap,
+            backgroundColor: widget.recording ? cs.error : null,
+            child: Icon(widget.recording ? Icons.stop : Icons.mic, size: 36),
+          ),
+        ],
       ),
     );
   }

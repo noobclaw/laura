@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'core/branding.dart';
 import 'core/settings_page.dart';
+import 'tool/app_theme.dart';
 import 'tool/echo_jot_tool.dart';
 import 'tool/tool_module.dart';
 
@@ -17,10 +18,8 @@ class ShellApp extends StatelessWidget {
     return MaterialApp(
       title: Branding.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor)),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Branding.seedColor, brightness: Brightness.dark),
-      ),
+      theme: buildEchoJotTheme(Brightness.light),
+      darkTheme: buildEchoJotTheme(Brightness.dark),
       home: const _HomeScaffold(),
     );
   }
