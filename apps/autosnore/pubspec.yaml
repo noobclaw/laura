@@ -40,8 +40,10 @@ dependencies:
   in_app_purchase: ^3.2.0
 
   # Microphone PCM stream (offline). We read raw amplitude and never write an
-  # audio file — only loudness metadata is kept.
-  record: ^5.1.2
+  # audio file — only loudness metadata is kept. 7.x ships a self-consistent
+  # federation; the 5.x set had a lagging record_linux that broke the Android
+  # kernel snapshot (its endorsed Linux impl is compiled regardless of target).
+  record: ^7.0.0
   # Explicit runtime permission flow for the microphone (grant / denied /
   # permanently-denied → open settings).
   permission_handler: ^11.3.1
@@ -64,13 +66,6 @@ dependencies:
 # would otherwise drag jni up to 1.0.1, so pin it back.
 dependency_overrides:
   jni: 1.0.0
-  # record's federated packages are version-skewed: record_platform_interface
-  # 1.6.0 added a named arg to hasPermission that the endorsed record_linux
-  # 0.7.2 (compiled even for Android builds) never implemented → kernel snapshot
-  # fails. record_android 1.5.2 only needs ^1.5.0, so pin the interface to 1.5.0
-  # to make the whole set consistent. We don't call hasPermission ourselves
-  # (permission_handler owns the mic permission flow).
-  record_platform_interface: 1.5.0
 
 dev_dependencies:
   flutter_test:
