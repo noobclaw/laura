@@ -56,7 +56,10 @@ class EmptyState extends StatelessWidget {
       builder: (context, constraints) => SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Center(
+          // Slightly above centre: a first-run screen centred in a tall column
+          // reads as a void with a small cluster floating in it.
+          child: Align(
+            alignment: const Alignment(0, -0.25),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               child: Column(
@@ -64,8 +67,8 @@ class EmptyState extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -77,9 +80,9 @@ class EmptyState extends StatelessWidget {
                         ],
                       ),
                     ),
-                    child: Icon(icon, size: 38, color: cs.primary),
+                    child: Icon(icon, size: 44, color: cs.primary),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 20),
                   Text(title,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium),
@@ -114,27 +117,67 @@ class LevelMeter extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (final level in levels)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1.5),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 140),
-                curve: Curves.easeOut,
-                width: 4,
-                height: 4 + level * 34,
-                decoration: BoxDecoration(
-                  color: Color.lerp(
-                    cs.primary.withValues(alpha: 0.45),
-                    cs.primary,
-                    level,
+      // Bars are sized from the available width so the meter spans the panel
+      // instead of floating as a narrow strip in the middle.
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final slot = constraints.maxWidth / levels.length;
+          final barWidth = (slot - 3).clamp(3.0, 8.0);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final level in levels)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 140),
+                  curve: Curves.easeOut,
+                  width: barWidth,
+                  height: 4 + level * 34,
+                  decoration: BoxDecoration(
+                    color: Color.lerp(
+                      cs.primary.withValues(alpha: 0.45),
+                      cs.primary,
+                      level,
+                    ),
+                    borderRadius: BorderRadius.circular(barWidth / 2),
                   ),
-                  borderRadius: BorderRadius.circular(2),
                 ),
-              ),
-            ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Small tinted metric chip (duration, length…). Shared so the note card and
+/// the note screen speak the same visual language.
+class InfoChip extends StatelessWidget {
+  const InfoChip({super.key, required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: cs.primary),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
         ],
       ),
     );
@@ -186,11 +229,20 @@ class _MicButtonState extends State<MicButton>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final light = theme.brightness == Brightness.light;
     final accent = widget.listening ? cs.error : cs.primary;
+    // The glyph must contrast with the accent in BOTH themes: in dark mode
+    // cs.primary is a light tone, so a hardcoded white mic would vanish.
+    final onAccent = widget.listening ? cs.onError : cs.onPrimary;
+    // Only lighten the gradient when the accent is dark (light theme); in dark
+    // mode go slightly the other way so the sheen still reads.
+    final sheen = Color.lerp(accent, light ? Colors.white : Colors.black, 0.16)!;
     return SizedBox(
-      width: 140,
-      height: 128,
+      // 144 so the pulse ring (96 + 42) is never clipped by the Stack.
+      width: 144,
+      height: 144,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -224,15 +276,12 @@ class _MicButtonState extends State<MicButton>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Color.lerp(accent, Colors.white, 0.18)!,
-                      accent,
-                    ],
+                    colors: [sheen, accent],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: accent.withValues(alpha: 0.32),
-                      blurRadius: 22,
+                      color: accent.withValues(alpha: light ? 0.32 : 0.45),
+                      blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
                   ],
@@ -240,7 +289,7 @@ class _MicButtonState extends State<MicButton>
                 child: Icon(
                   widget.listening ? Icons.stop_rounded : Icons.mic_rounded,
                   size: 42,
-                  color: Colors.white,
+                  color: onAccent,
                 ),
               ),
             ),

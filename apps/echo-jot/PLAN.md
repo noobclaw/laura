@@ -116,6 +116,24 @@
 
 审计确认**无缺陷**的方面:Dart↔Kotlin 契约(方法名/事件名/键名/三个错误码)完全一致;识别器缺失(CI 模拟器)不崩且渲染诚实横幅;API 33 面已用 `@TargetApi` + SDK 检查 + 常量字面量正确隔离;`MethodChannel.Result` 无重复回复;EventSink 卸载后无 use-after-detach;pre-release 迁移正确。
 
+## 4c. G6b 视觉美观二次 check(2026-07-30:第一轮被打回 → 已改 → 第二轮出包复看)
+
+独立设计评审 agent 看 CI 冒烟截屏 + 通读全部 UI 源码,按 PIPELINE 视觉 rubric 8 项打分:**第一轮 SEND-BACK**(层级3/配色2/字阶4/形状3/空状态4/hero3/数据4/一致性3),3 个致命项 + 4 个必修项已全部改完:
+
+| 必修项 | 问题 | 改法 |
+|---|---|---|
+| 深色模式 hero 失效 | 话筒图标硬编码 `Colors.white`、渐变向白 lerp;深色下 `cs.primary` 是浅色调 → 招牌按钮对比度约 1.3:1,等于坏掉 | 图标改 `cs.onPrimary`/`cs.onError`;渐变按亮暗分别向白/黑 lerp |
+| 脉冲光环被裁 | 环长到 138px 但 `SizedBox` 只有 140×128 + `Stack` 默认硬裁 → 整个听写过程环是「平顶」 | 盒子改 144×144 |
+| hero 面板不可见 | 渐变起点 `cs.surface` == 脚手架底色、elevation 0、无边框 → 28px 圆角与面板边缘根本看不见(截屏确认没有边界) | 起点改 `surfaceContainerLow`→`surfaceContainerHigh` + 顶部 `outlineVariant` 细线 |
+| live 文本框几乎不存在 | `surfaceContainerHighest` 叠 0.75 alpha 压在 High 面板上 ≈ 3 个色阶,而它是本 app 的情绪主体 | 改 `cs.surface` 实底 + 1px `outlineVariant` 边框 |
+| 四种内容内缩 | 卡片 12 / 搜索框 16 / 横幅 12 / 面板 20 / 详情页 16 与 12 混用 → 左边缘互相错位(「拼出来的」典型信号) | 全 app 统一 16(卡片 margin 也改 16),弹窗 20 |
+| 同数据两套语言 | 首页时长/字数是着色 chip,详情页却是灰色小字行 | `InfoChip` 提到 `ui_common.dart`,两处共用 |
+| 横幅撞色 | teal 种子下 `tertiaryContainer` 是淡紫,压在 teal hero 上方,按钮又继承 teal 前景 | 改 `secondaryContainer` + 显式 `foregroundColor` |
+
+顺带做掉的 nice-to-have:电平条按可用宽度铺满(原来只占 54%)、hero tagline 提到 `titleLarge`(原与卡片标题同级)、空状态上移到 -0.25 并放大图标圈 + 加一句示例引导、付费页补上**价格数字**(原来最该出现的数字缺失)+ 权益卡片化、「离线听写原理」由五段散文改成 4 张带图标的卡片、间距归到 4/8/12/16/20/24 网格。
+
+**评审覆盖警示(已记档)**:CI 冒烟只截「浅色 + idle + 空列表」,live 听写态/有笔记列表/详情页/付费页/深色模式都是**源码评审**得出的结论;真机验收时请按 §7 清单一并核对深色模式与听写态外观。
+
 ## 5. 定价与商店
 
 - **定价**:免费 30 条笔记;一次性内购 **Pro $4.99 / ¥28** 解锁无限笔记 + 全量导出(免费版单次导出最近 3 条)。不做订阅(反着云端竞品来),不接广告。
@@ -131,8 +149,8 @@
 |---|---|---|
 | M1 代码完成 | `flutter analyze` 零 issue + `flutter test` 全过 | ✅ 2026-07-30 |
 | M2 独立审计 | 独立 agent 按「真机会不会坏」通读修完 | ✅ 2026-07-30 |
-| M3 CI 出包 + 冒烟 | APK/AAB 出包、smoke-test 绿、截屏亲验 UI 真渲染 | ✅ 2026-07-30(run 见 BACKLOG) |
-| M4 G6b 视觉复审 | 截屏 + 源码按视觉 rubric 逐条过 | ✅ 2026-07-30 |
+| M3 CI 出包 + 冒烟 | APK/AAB 出包、smoke-test 绿、截屏亲验 UI 真渲染 | ✅ 2026-07-30(run 30510927513) |
+| M4 G6b 视觉复审 | 截屏 + 源码按视觉 rubric 逐条过 | ✅ 2026-07-30(第一轮打回 → 改完重出包复看,见 §4c) |
 | M5 真机验收 | 见下清单(用户装机照着点) | ⬜ 待用户 |
 | M6 上架 | Play 内部测试轨验完内购 → 生产轨 | ⬜ |
 

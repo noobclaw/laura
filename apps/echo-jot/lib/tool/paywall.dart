@@ -47,15 +47,15 @@ class _UnlockSheet extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 4, 24, 20),
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Container(
-                width: 66,
-                height: 66,
+                width: 64,
+                height: 64,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: cs.primary.withValues(alpha: 0.14),
@@ -84,22 +84,56 @@ class _UnlockSheet extends StatelessWidget {
                     ),
               ),
             ),
-            const SizedBox(height: 20),
-            for (final (icon, label) in perks)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    Icon(icon, size: 20, color: cs.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(label,
-                          style: Theme.of(context).textTheme.bodyLarge),
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 16),
+            // The price is the number this screen exists for — show it, and show
+            // that it is one-time. (Display only; the store is the source of
+            // truth at purchase time.)
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    tr(zh: '¥28', en: r'$4.99'),
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  Text(
+                    tr(zh: '一次付清 · 永久有效', en: 'One-time · yours forever'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                ],
               ),
-            const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  for (final (icon, label) in perks)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Icon(icon, size: 20, color: cs.primary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(label,
+                                style: Theme.of(context).textTheme.bodyLarge),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: FilledButton(

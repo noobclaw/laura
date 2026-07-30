@@ -249,9 +249,11 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
                   body: searching
                       ? tr(zh: '换个关键词再试试。', en: 'Try another keyword.')
                       : tr(
-                          zh: '点下面的话筒开始说,文字会边说边出现——全程在这台手机上完成,不保存录音。',
+                          zh: '点下面的话筒开始说,文字会边说边出现——全程在这台手机上完成,不保存录音。\n\n'
+                              '试试说:「提醒我明天上午给房东打电话」',
                           en: 'Tap the mic and start talking. Text appears as you '
-                              'speak — all on this phone, and no audio is kept.',
+                              'speak — all on this phone, and no audio is kept.\n\n'
+                              'Try: "remind me to call the landlord tomorrow"',
                         ),
                 )
               : ListView.builder(
@@ -288,7 +290,7 @@ class _LoadErrorNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: cs.errorContainer,
@@ -331,11 +333,13 @@ class _CapabilityNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final permanentlyDenied = controller.permissionPermanentlyDenied;
+    // secondaryContainer keeps the banner inside the teal palette — the default
+    // tertiary tone lands on lilac and fights the hero.
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       decoration: BoxDecoration(
-        color: cs.tertiaryContainer,
+        color: cs.secondaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -344,20 +348,20 @@ class _CapabilityNotice extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.privacy_tip_outlined,
-                  size: 20, color: cs.onTertiaryContainer),
+                  size: 20, color: cs.onSecondaryContainer),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   tr(zh: '需要系统的设备端语音识别', en: 'On-device recognition needed'),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: cs.onTertiaryContainer,
+                        color: cs.onSecondaryContainer,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             tr(
               zh: '为了让声音不出这台手机,听写只用系统内置的设备端识别。'
@@ -367,7 +371,7 @@ class _CapabilityNotice extends StatelessWidget {
                   'System → Languages & input → On-device speech recognition.',
             ),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onTertiaryContainer.withValues(alpha: 0.85),
+                  color: cs.onSecondaryContainer.withValues(alpha: 0.85),
                   height: 1.35,
                 ),
           ),
@@ -376,11 +380,15 @@ class _CapabilityNotice extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: onRecheck,
+                style: TextButton.styleFrom(
+                    foregroundColor: cs.onSecondaryContainer),
                 child: Text(tr(zh: '重新检测', en: 'Check again')),
               ),
               if (permanentlyDenied)
                 TextButton(
                   onPressed: controller.openSystemSettings,
+                  style: TextButton.styleFrom(
+                      foregroundColor: cs.onSecondaryContainer),
                   child: Text(tr(zh: '去系统设置', en: 'Open settings')),
                 ),
             ],
@@ -404,24 +412,30 @@ class _DictationPanel extends StatelessWidget {
     final listening = controller.listening;
     final finishing = controller.state == DictationState.finishing;
 
+    // The panel must read as a container: starting the gradient at cs.surface
+    // (== scaffold background) made its 28px radius and top edge invisible.
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            cs.surface,
+            cs.surfaceContainerLow,
             listening
-                ? Color.alphaBlend(cs.primary.withValues(alpha: 0.16), cs.surface)
+                ? Color.alphaBlend(
+                    cs.primary.withValues(alpha: 0.18),
+                    cs.surfaceContainerHigh,
+                  )
                 : cs.surfaceContainerHigh,
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -431,7 +445,7 @@ class _DictationPanel extends StatelessWidget {
                 Flexible(
                   child: _LiveTranscript(text: controller.previewText),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 LevelMeter(levels: controller.levels),
                 const SizedBox(height: 12),
                 Text(
@@ -457,13 +471,14 @@ class _DictationPanel extends StatelessWidget {
               ] else ...[
                 Text(
                   tr(
-                    zh: '点一下开始说,松开手机也在转文字',
+                    zh: '点一下开始说,文字边说边出',
                     en: 'Tap to talk — it types while you speak',
                   ),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  // The hero line must outrank card titles in the type scale.
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   tr(
                     zh: '设备端识别 · 声音不出这台手机',
@@ -530,8 +545,11 @@ class _LiveTranscriptState extends State<_LiveTranscript> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.75),
+        // The live transcript is the emotional payload — give it a real surface
+        // with an edge, not a barely-there tint.
+        color: cs.surface,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: SingleChildScrollView(
         controller: _scroll,
@@ -623,16 +641,16 @@ class NoteCard extends StatelessWidget {
                         ),
                   ),
                 ],
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Chip(
+                    InfoChip(
                       icon: Icons.timer_outlined,
                       label: formatElapsed(
                           Duration(milliseconds: note.durationMs)),
                     ),
                     const SizedBox(width: 8),
-                    _Chip(
+                    InfoChip(
                       icon: Icons.short_text,
                       label: formatLength(units, cjk: cjk),
                     ),
@@ -642,38 +660,6 @@ class NoteCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 14, color: cs.primary),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
       ),
     );
   }

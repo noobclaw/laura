@@ -103,44 +103,38 @@ class _NoteDetailPageState extends State<NoteDetailPage>
         ),
         body: Column(
           children: [
+            // Same tinted chips as the timeline card — one visual language for
+            // the same three facts.
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Row(
                 children: [
-                  Icon(Icons.schedule, size: 15, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Text(
-                    formatNoteStamp(note.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall,
+                  InfoChip(
+                    icon: Icons.schedule,
+                    label: formatNoteStamp(note.createdAt),
                   ),
-                  const SizedBox(width: 14),
-                  Icon(Icons.timer_outlined,
-                      size: 15, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Text(
-                    formatElapsed(Duration(milliseconds: note.durationMs)),
-                    style: Theme.of(context).textTheme.bodySmall,
+                  const SizedBox(width: 8),
+                  InfoChip(
+                    icon: Icons.timer_outlined,
+                    label: formatElapsed(Duration(milliseconds: note.durationMs)),
                   ),
                   const Spacer(),
-                  Text(
-                    () {
-                      final cjk = isCjkText(_textCtrl.text);
-                      return formatLength(
+                  Builder(builder: (context) {
+                    final cjk = isCjkText(_textCtrl.text);
+                    return InfoChip(
+                      icon: Icons.short_text,
+                      label: formatLength(
                         countUnits(_textCtrl.text, cjk: cjk),
                         cjk: cjk,
-                      );
-                    }(),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Container(
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,

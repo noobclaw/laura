@@ -212,48 +212,109 @@ class _RecognizerStatusTile extends StatelessWidget {
   }
 }
 
+/// The screen that sells the privacy claim — structured as cards with a leading
+/// icon and a bolded lead line, not one wall of prose.
 class _HowItWorksPage extends StatelessWidget {
   const _HowItWorksPage();
 
   @override
   Widget build(BuildContext context) {
+    final sections = <(IconData, String, String)>[
+      (
+        Icons.phone_android,
+        tr(zh: '转写在你的手机上完成', en: 'Transcribed on your phone'),
+        tr(
+          zh: '你按下话筒后,声音交给 Android 系统内置的「设备端语音识别」'
+              '(Android 12 及以上提供),直接在本机转成文字。应用不下载任何语音模型,'
+              '也没有网络权限——声音和文字都不出这台手机。',
+          en: 'When you tap the mic, your speech goes to Android\'s built-in '
+              'on-device speech recognizer (Android 12+) and becomes text right '
+              'here. The app downloads no speech model and holds no network '
+              'permission — neither the audio nor the text leaves this device.',
+        ),
+      ),
+      (
+        Icons.mic_off_outlined,
+        tr(zh: '不保存任何录音', en: 'No recording is kept'),
+        tr(
+          zh: '系统识别器只能边说边识别、读不了已保存的音频文件,'
+              '所以本应用采用「边说边出字」,并且完全不保存音频。'
+              '这也意味着:没有录音可以泄露。',
+          en: 'The system recognizer only listens live — it cannot read a saved '
+              'audio file — so EchoJot dictates as you speak and stores no audio '
+              'at all. Which also means: there is no recording to leak.',
+        ),
+      ),
+      (
+        Icons.auto_fix_high_outlined,
+        tr(zh: '标点由本地规则补上', en: 'Punctuation added locally'),
+        tr(
+          zh: '系统识别器通常不带标点,应用用本地规则给每句补句号、'
+              '英文自动首字母大写;听错的地方在笔记页可以直接改。',
+          en: 'System recognizers usually return no punctuation, so the app adds '
+              'sentence endings locally and capitalises Latin sentences. Anything '
+              'misheard can be fixed on the note screen.',
+        ),
+      ),
+      (
+        Icons.shield_outlined,
+        tr(zh: '不可用时会明说,不偷偷联网', en: 'Honest when unavailable'),
+        tr(
+          zh: '如果系统里没装设备端语言包,应用会告诉你去哪里下载并停止听写——'
+              '绝不会为了「能用」改成联网识别。语种取决于你系统里装了哪些语言包,'
+              '不是应用自带的。',
+          en: 'If no on-device language pack is installed, the app tells you where '
+              'to get one and stops — it never switches to online recognition just '
+              'to appear to work. Which languages work depends on the packs your '
+              'system has, not on the app.',
+        ),
+      ),
+    ];
+
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(tr(zh: '离线听写原理', en: 'How it works'))),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          tr(
-            zh: '你按下话筒后,声音交给 Android 系统内置的「设备端语音识别」'
-                '(Android 12 及以上提供),在你的手机上直接转成文字。'
-                '应用不下载任何语音模型,也没有网络权限——声音和文字都不出这台手机。\n\n'
-                '因为系统识别器只能边说边识别、不能读取已保存的录音文件,'
-                '所以本应用采用「边说边出字」的听写方式,并且不保存任何音频文件。'
-                '这也意味着:没有录音可以泄露。\n\n'
-                '系统识别器通常不带标点,应用会用本地规则给每句补上句号、'
-                '英文自动首字母大写;识别错的地方在详情页可以直接改。\n\n'
-                '如果系统里没有装设备端语言包,应用会明确告诉你去哪里下载,'
-                '并且停止听写——绝不会为了「能用」改成联网识别。\n\n'
-                '语种取决于你系统里装了哪些设备端语言包,不是应用自带的。',
-            en: 'When you tap the mic, your speech goes to Android\'s built-in '
-                'on-device speech recognizer (available on Android 12+) and is '
-                'turned into text right on your phone. The app downloads no '
-                'speech model and holds no network permission — neither the '
-                'audio nor the text leaves this device.\n\n'
-                'Because the system recognizer only listens live and cannot read '
-                'a saved audio file, EchoJot dictates as you speak and keeps no '
-                'audio file at all. Which also means: there is no recording to '
-                'leak.\n\n'
-                'System recognizers usually return no punctuation, so the app '
-                'adds sentence endings locally and capitalises Latin sentences; '
-                'anything misheard can be fixed on the note screen.\n\n'
-                'If no on-device language pack is installed, the app tells you '
-                'exactly where to get one and stops — it will never switch to '
-                'online recognition just to appear to work.\n\n'
-                'Which languages work depends on the on-device packs installed '
-                'in your system, not on the app.',
-          ),
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
-        ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: sections.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (context, i) {
+          final (icon, lead, body) = sections[i];
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, size: 20, color: cs.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        lead,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  body,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(height: 1.5),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

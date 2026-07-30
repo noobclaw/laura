@@ -25,7 +25,9 @@ ThemeData buildEchoJotTheme(Brightness brightness) {
       elevation: 0,
       color: scheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      // One content inset across the app (search field, banners, cards, panel):
+      // misaligned left edges are what makes a screen look assembled, not designed.
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
     appBarTheme: AppBarTheme(
