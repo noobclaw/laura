@@ -91,12 +91,17 @@ class _UnlockSheet extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  Text(
-                    tr(zh: '¥28', en: r'$4.99'),
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: cs.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  // The store's own localized price when it is known — a user
+                  // billed in EUR must not read a ¥ figure here.
+                  ValueListenableBuilder<String?>(
+                    valueListenable: PurchaseService.instance.price,
+                    builder: (context, storePrice, _) => Text(
+                      storePrice ?? tr(zh: '¥28', en: r'$4.99'),
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            color: cs.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
                   ),
                   Text(
                     tr(zh: '一次付清 · 永久有效', en: 'One-time · yours forever'),

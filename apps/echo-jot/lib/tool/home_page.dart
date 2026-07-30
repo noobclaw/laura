@@ -469,14 +469,19 @@ class _DictationPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
               ] else ...[
-                Text(
-                  tr(
-                    zh: '点一下开始说,文字边说边出',
-                    en: 'Tap to talk — it types while you speak',
+                // Extra inset: at titleLarge this line otherwise reaches the
+                // panel's rounded corners on narrow (360dp) devices.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    tr(
+                      zh: '点一下开始说,边说边出字',
+                      en: 'Tap to talk, watch it type',
+                    ),
+                    textAlign: TextAlign.center,
+                    // The hero line must outrank card titles in the type scale.
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  textAlign: TextAlign.center,
-                  // The hero line must outrank card titles in the type scale.
-                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -593,7 +598,9 @@ class NoteCard extends StatelessWidget {
       direction: DismissDirection.endToStart,
       onDismissed: (_) => onDelete(),
       background: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        // Must match cardTheme.margin, or the red backdrop pokes out past the
+        // card while swiping.
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
           color: cs.errorContainer,
           borderRadius: BorderRadius.circular(20),

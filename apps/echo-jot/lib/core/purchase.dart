@@ -27,6 +27,11 @@ class PurchaseService {
   /// it via a listener and may clear it after display.
   final ValueNotifier<String?> notice = ValueNotifier<String?>(null);
 
+  /// The store's own localized price for [kProProductId] ("¥28.00", "€4,99"),
+  /// once known. Null until the store answers; the paywall then falls back to
+  /// its written price. Never show a currency the store will not charge.
+  final ValueNotifier<String?> price = ValueNotifier<String?>(null);
+
   VoidCallback? _onUnlocked;
   StreamSubscription<List<PurchaseDetails>>? _sub;
   bool _available = false;
@@ -49,10 +54,25 @@ class PurchaseService {
         onError: (Object e) => debugPrint('purchase stream error: $e'),
       );
       _available = await InAppPurchase.instance.isAvailable();
+      if (_available) await _loadPrice();
     } catch (e) {
       // No billing backend (emulator, tests, sideload) — stay silent.
       debugPrint('PurchaseService.init skipped: $e');
       _available = false;
+    }
+  }
+
+  /// Ask the store what it will actually charge, so the paywall can show that
+  /// instead of a hardcoded figure. Failure just leaves [price] null.
+  Future<void> _loadPrice() async {
+    try {
+      final resp =
+          await InAppPurchase.instance.queryProductDetails({kProProductId});
+      if (resp.productDetails.isNotEmpty) {
+        price.value = resp.productDetails.first.price;
+      }
+    } catch (e) {
+      debugPrint('price lookup failed: $e');
     }
   }
 

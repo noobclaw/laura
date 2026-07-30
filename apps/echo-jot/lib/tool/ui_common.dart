@@ -131,7 +131,9 @@ class LevelMeter extends StatelessWidget {
                   duration: const Duration(milliseconds: 140),
                   curve: Curves.easeOut,
                   width: barWidth,
-                  height: 4 + level * 34,
+                  // Resting height == width, so silence reads as a row of dots
+                  // rather than squashed dashes.
+                  height: barWidth + level * 32,
                   decoration: BoxDecoration(
                     color: Color.lerp(
                       cs.primary.withValues(alpha: 0.45),
