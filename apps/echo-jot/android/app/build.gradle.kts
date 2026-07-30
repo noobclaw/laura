@@ -26,9 +26,12 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.noobclaw.echojot"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // API 31 (Android 12) is where SpeechRecognizer gained
+        // createOnDeviceSpeechRecognizer / isOnDeviceRecognitionAvailable — the
+        // only recognition path this app uses. On older devices the alternative
+        // would be a cloud recognizer, which breaks the product promise, so the
+        // app is simply not offered there (see PLAN.md §4).
+        minSdk = 31
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

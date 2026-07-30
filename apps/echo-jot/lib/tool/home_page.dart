@@ -1,53 +1,79 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:record/record.dart';
 
+import '../core/l10n.dart';
+import 'dictation_controller.dart';
 import 'note.dart';
 import 'note_detail_page.dart';
 import 'paywall.dart';
-import 'transcriber.dart';
+import 'transcript_text.dart';
+import 'ui_common.dart';
 
 class EchoJotHome extends StatefulWidget {
-  const EchoJotHome({super.key});
+  const EchoJotHome({super.key, required this.store, this.controller});
+
+  final NoteStore store;
+
+  /// Shared app-wide controller (owned by EchoJotTool). Tests may omit it.
+  final DictationController? controller;
 
   @override
   State<EchoJotHome> createState() => _EchoJotHomeState();
 }
 
-class _EchoJotHomeState extends State<EchoJotHome> {
-  NoteStore? _store;
-  Transcriber? _transcriber;
-  final _recorder = AudioRecorder();
+class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
+  late final DictationController _controller =
+      widget.controller ?? DictationController();
+  late final bool _ownsController = widget.controller == null;
   final _searchCtrl = TextEditingController();
-  Object? _initError;
-
-  bool _recording = false;
-  DateTime? _recordStart;
   Timer? _ticker;
+
+  /// True while [_finishSession] is running — keeps the controller's own
+  /// state change from triggering a second save of the same session.
+  bool _finishing = false;
+
+  /// Last known "a session is live" state, so a session the recognizer ends on
+  /// its own (fatal error) still gets saved instead of vanishing.
+  bool _wasLive = false;
+
+  NoteStore get _store => widget.store;
 
   @override
   void initState() {
     super.initState();
-    _init();
+    WidgetsBinding.instance.addObserver(this);
+    _controller.addListener(_onControllerChanged);
+    _store.addListener(_onStoreChanged);
+    // Probe the on-device recognizer up front so the home screen can tell the
+    // user the truth before they tap the button.
+    unawaited(_controller.probe());
   }
 
-  Future<void> _init() async {
-    try {
-      final store = await NoteStore.open();
-      final transcriber = Transcriber(store);
-      setState(() {
-        _store = store;
-        _transcriber = transcriber;
-      });
-      store.addListener(_onStoreChanged);
-      // Install the model and pick up notes interrupted mid-transcription.
-      unawaited(transcriber.ensureModelInstalled().then((_) {
-        if (mounted) transcriber.drainQueue();
-      }));
-    } catch (e) {
-      setState(() => _initError = e);
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _controller.removeListener(_onControllerChanged);
+    _store.removeListener(_onStoreChanged);
+    if (_ownsController) _controller.dispose();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (!mounted) return;
+    setState(() {});
+    final live =
+        _controller.listening || _controller.state == DictationState.finishing;
+    if (_wasLive && !live && !_finishing) {
+      // The session ended without us asking (recognizer failure): save what was
+      // already dictated and surface the reason.
+      _wasLive = false;
+      unawaited(_finishSession());
+      return;
     }
+    _wasLive = live;
   }
 
   void _onStoreChanged() {
@@ -55,245 +81,404 @@ class _EchoJotHomeState extends State<EchoJotHome> {
   }
 
   @override
-  void dispose() {
-    _ticker?.cancel();
-    _searchCtrl.dispose();
-    _recorder.dispose();
-    _store?.removeListener(_onStoreChanged);
-    super.dispose();
-  }
-
-  Future<void> _toggleRecording() async {
-    final store = _store;
-    final transcriber = _transcriber;
-    if (store == null || transcriber == null) return;
-
-    if (_recording) {
-      _ticker?.cancel();
-      final path = await _recorder.stop();
-      final start = _recordStart;
-      setState(() => _recording = false);
-      if (path == null || start == null) return;
-      final note = Note(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        createdAt: start,
-        audioPath: path,
-        durationMs: DateTime.now().difference(start).inMilliseconds,
-      );
-      await store.add(note);
-      unawaited(transcriber.drainQueue());
-      return;
-    }
-
-    if (!await checkNoteQuota(context, store.notes.length)) return;
-    if (!await _recorder.hasPermission()) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('需要麦克风权限才能录音')),
-        );
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The system recognizer is a foreground-only facility: finish and save
+    // rather than leave a session half-listening in the background.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      if (_controller.listening ||
+          _controller.state == DictationState.finishing) {
+        unawaited(_finishSession(background: true));
       }
+    } else if (state == AppLifecycleState.resumed) {
+      // The user may have installed a language pack while we were away.
+      if (_controller.capabilities?.ready != true) {
+        unawaited(_controller.probe());
+      }
+    }
+  }
+
+  Future<void> _toggle() async {
+    if (_controller.listening ||
+        _controller.state == DictationState.finishing) {
+      await _finishSession();
       return;
     }
-    final dir = store.audioDir.path;
-    final path = '$dir/${DateTime.now().millisecondsSinceEpoch}.wav';
-    // 16kHz mono PCM WAV: whisper's native input, no conversion step.
-    await _recorder.start(
-      const RecordConfig(
-        encoder: AudioEncoder.wav,
-        sampleRate: 16000,
-        numChannels: 1,
-      ),
-      path: path,
-    );
-    setState(() {
-      _recording = true;
-      _recordStart = DateTime.now();
+    if (!await checkNoteQuota(context, _store)) return;
+    final started = await _controller.start();
+    if (!started) {
+      _showControllerMessage();
+      return;
+    }
+    _wasLive = true;
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
     });
-    _ticker = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) => setState(() {}),
+  }
+
+  Future<void> _finishSession({bool background = false}) async {
+    if (_finishing) return;
+    _finishing = true;
+    try {
+      _ticker?.cancel();
+      _ticker = null;
+      final startedAt = DateTime.now().subtract(_controller.elapsed);
+      final durationMs = _controller.elapsed.inMilliseconds;
+      final text = background
+          ? await _controller.stopForBackground()
+          : await _controller.stop();
+      final trimmed = (text ?? '').trim();
+      if (trimmed.isNotEmpty) {
+        await _store.add(Note(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          createdAt: startedAt,
+          durationMs: durationMs,
+          text: trimmed,
+          language: _controller.language,
+        ));
+      } else if (!background && _controller.message == null) {
+        _snack(tr(
+          zh: '没听到内容,这条没有保存。',
+          en: 'Nothing was heard — no note saved.',
+        ));
+      }
+      _showControllerMessage();
+    } finally {
+      _finishing = false;
+      _wasLive = false;
+    }
+  }
+
+  void _showControllerMessage() {
+    final msg = _controller.message;
+    if (msg == null) return;
+    final denied = _controller.permissionPermanentlyDenied;
+    _controller.clearMessage();
+    // A permanently denied microphone must always have a way out of the app —
+    // the banner only shows when the recognizer itself is missing.
+    _snack(
+      msg,
+      action: denied
+          ? SnackBarAction(
+              label: tr(zh: '去设置', en: 'Settings'),
+              onPressed: _controller.openSystemSettings,
+            )
+          : null,
     );
   }
 
-  String _fmtElapsed() {
-    final start = _recordStart;
-    if (start == null) return '0:00';
-    final s = DateTime.now().difference(start).inSeconds;
-    return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+  void _snack(String message, {SnackBarAction? action}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(message),
+        action: action,
+        duration: Duration(seconds: action == null ? 4 : 8),
+      ));
+  }
+
+  /// A note is often the only copy of a thought, and a swipe is easy to trigger
+  /// by accident while scrolling — so deletion is always undoable.
+  Future<void> _deleteWithUndo(Note note) async {
+    final index = _store.indexOf(note);
+    await _store.remove(note);
+    if (!mounted) return;
+    _snack(
+      tr(zh: '已删除「${note.title}」', en: 'Deleted "${note.title}"'),
+      action: SnackBarAction(
+        label: tr(zh: '撤销', en: 'Undo'),
+        onPressed: () => _store.insertAt(index < 0 ? 0 : index, note),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_initError != null) {
-      return Center(child: Text('初始化失败:$_initError'));
-    }
-    final store = _store;
-    if (store == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    final notes = store.search(_searchCtrl.text);
+    final notes = _store.search(_searchCtrl.text);
+    final caps = _controller.capabilities;
+    final searching = _searchCtrl.text.isNotEmpty;
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: TextField(
-            controller: _searchCtrl,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: '搜索笔记内容…',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchCtrl.text.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchCtrl.clear();
-                        setState(() {});
-                      },
-                    ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(24),
+        if (_store.loadError != null) const _LoadErrorNotice(),
+        if (caps != null && !caps.ready && !_controller.listening)
+          _CapabilityNotice(
+            controller: _controller,
+            onRecheck: () async {
+              await _controller.probe();
+              if (!mounted) return;
+              _snack(_controller.capabilities?.ready == true
+                  ? tr(zh: '设备端识别已就绪', en: 'On-device recognition is ready')
+                  : tr(
+                      zh: '仍未检测到设备端语言包',
+                      en: 'Still no on-device language pack',
+                    ));
+            },
+          ),
+        if (_store.notes.length > 4 || searching)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: TextField(
+              controller: _searchCtrl,
+              onChanged: (_) => setState(() {}),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: tr(zh: '搜索笔记内容…', en: 'Search notes…'),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: searching
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() {});
+                        },
+                      )
+                    : null,
               ),
-              isDense: true,
             ),
           ),
-        ),
         Expanded(
           child: notes.isEmpty
-              ? _EmptyState(
-                  icon: _searchCtrl.text.isEmpty
-                      ? Icons.mic_none
-                      : Icons.search_off,
-                  title: _searchCtrl.text.isEmpty ? '还没有笔记' : '没有匹配的笔记',
-                  body: _searchCtrl.text.isEmpty
-                      ? '点下面的按钮,说出你的第一条笔记——松手即转成文字,全程离线。'
-                      : '换个关键词再试试。',
+              ? EmptyState(
+                  icon: searching ? Icons.search_off : Icons.graphic_eq,
+                  title: searching
+                      ? tr(zh: '没有匹配的笔记', en: 'No matching notes')
+                      : tr(zh: '说出第一条笔记', en: 'Speak your first note'),
+                  body: searching
+                      ? tr(zh: '换个关键词再试试。', en: 'Try another keyword.')
+                      : tr(
+                          zh: '点下面的话筒开始说,文字会边说边出现——全程在这台手机上完成,不保存录音。',
+                          en: 'Tap the mic and start talking. Text appears as you '
+                              'speak — all on this phone, and no audio is kept.',
+                        ),
                 )
               : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 8),
                   itemCount: notes.length,
-                  itemBuilder: (context, i) => _NoteCard(
+                  itemBuilder: (context, i) => NoteCard(
                     note: notes[i],
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => NoteDetailPage(
-                          note: notes[i],
-                          store: store,
-                          transcriber: _transcriber!,
-                        ),
+                        builder: (_) =>
+                            NoteDetailPage(note: notes[i], store: _store),
                       ),
                     ),
-                    onDelete: () => store.remove(notes[i]),
+                    onDelete: () => _deleteWithUndo(notes[i]),
                   ),
                 ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_recording) ...[
-                  // Live level meter driven by the recorder's amplitude stream —
-                  // the moving bars are the app's "we're listening" signal.
-                  _AmplitudeMeter(recorder: _recorder),
-                  const SizedBox(height: 14),
-                  Text(
-                    '录音中 ${_fmtElapsed()}',
-                    style:
-                        Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
-                              fontWeight: FontWeight.w600,
-                            ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                _RecordButton(
-                  recording: _recording,
-                  onTap: _toggleRecording,
-                ),
-              ],
-            ),
-          ),
+        _DictationPanel(
+          controller: _controller,
+          onToggle: _toggle,
         ),
       ],
     );
   }
 }
 
-class _NoteCard extends StatelessWidget {
-  const _NoteCard({
-    required this.note,
-    required this.onTap,
-    required this.onDelete,
-  });
-
-  final Note note;
-  final VoidCallback onTap;
-  final VoidCallback onDelete;
-
-  String get _statusLabel => switch (note.status) {
-        NoteStatus.pending => '排队转写中…',
-        NoteStatus.transcribing => '转写中…',
-        NoteStatus.failed => '转写失败,点开重试',
-        NoteStatus.done => '',
-      };
+/// Shown when the notes file could not be read at launch. The bad file is kept
+/// (renamed) rather than overwritten, and the user is told — losing notes
+/// silently would be the worst failure this app can have.
+class _LoadErrorNotice extends StatelessWidget {
+  const _LoadErrorNotice();
 
   @override
   Widget build(BuildContext context) {
-    final d = Duration(milliseconds: note.durationMs);
-    final durText =
-        '${d.inMinutes}:${(d.inSeconds % 60).toString().padLeft(2, '0')}';
-    final date = note.createdAt;
-    final dateText =
-        '${date.month}/${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-
     final cs = Theme.of(context).colorScheme;
-
-    return Dismissible(
-      key: ValueKey(note.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        color: cs.error,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        child: const Icon(Icons.delete, color: Colors.white),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: BoxDecoration(
+        color: cs.errorContainer,
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Card(
-        child: ListTile(
-          onTap: onTap,
-          leading: Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: cs.onErrorContainer),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              tr(
+                zh: '上次的笔记文件读不出来,已原样备份到应用目录(notes.json.corrupt-…),'
+                    '这里从空列表开始。新笔记会正常保存。',
+                en: 'The previous notes file could not be read. It was kept as '
+                    'notes.json.corrupt-… in the app folder and the list starts '
+                    'empty. New notes save normally.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onErrorContainer,
+                    height: 1.35,
+                  ),
             ),
-            child: Icon(Icons.graphic_eq, color: cs.primary, size: 22),
           ),
-          title: Text(
-            note.status == NoteStatus.done ? note.title : _statusLabel,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          subtitle: note.text.isEmpty
-              ? null
-              : Text(note.text, maxLines: 2, overflow: TextOverflow.ellipsis),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
+        ],
+      ),
+    );
+  }
+}
+
+/// Honest, actionable banner when the system has no on-device recognizer: the
+/// one thing we must never do is quietly transcribe in the cloud instead.
+class _CapabilityNotice extends StatelessWidget {
+  const _CapabilityNotice({required this.controller, required this.onRecheck});
+
+  final DictationController controller;
+  final VoidCallback onRecheck;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final permanentlyDenied = controller.permissionPermanentlyDenied;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      decoration: BoxDecoration(
+        color: cs.tertiaryContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Text(dateText, style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 2),
-              Text(
-                durText,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+              Icon(Icons.privacy_tip_outlined,
+                  size: 20, color: cs.onTertiaryContainer),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  tr(zh: '需要系统的设备端语音识别', en: 'On-device recognition needed'),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: cs.onTertiaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            tr(
+              zh: '为了让声音不出这台手机,听写只用系统内置的设备端识别。'
+                  '请在「系统设置 → 系统 → 语言与输入法 → 设备端语音识别」下载一个语言包。',
+              en: 'So your voice never leaves this phone, dictation only uses the '
+                  'system on-device recognizer. Add a language pack in Settings → '
+                  'System → Languages & input → On-device speech recognition.',
+            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onTertiaryContainer.withValues(alpha: 0.85),
+                  height: 1.35,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              TextButton(
+                onPressed: onRecheck,
+                child: Text(tr(zh: '重新检测', en: 'Check again')),
+              ),
+              if (permanentlyDenied)
+                TextButton(
+                  onPressed: controller.openSystemSettings,
+                  child: Text(tr(zh: '去系统设置', en: 'Open settings')),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The hero: a tinted panel that turns into a live transcript while dictating.
+class _DictationPanel extends StatelessWidget {
+  const _DictationPanel({required this.controller, required this.onToggle});
+
+  final DictationController controller;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final listening = controller.listening;
+    final finishing = controller.state == DictationState.finishing;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            cs.surface,
+            listening
+                ? Color.alphaBlend(cs.primary.withValues(alpha: 0.16), cs.surface)
+                : cs.surfaceContainerHigh,
+          ],
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (listening || finishing) ...[
+                // Flexible so a very large system font (or a short screen) can
+                // shrink the transcript box instead of overflowing the panel.
+                Flexible(
+                  child: _LiveTranscript(text: controller.previewText),
+                ),
+                const SizedBox(height: 14),
+                LevelMeter(levels: controller.levels),
+                const SizedBox(height: 12),
+                Text(
+                  finishing
+                      ? tr(zh: '正在收尾…', en: 'Wrapping up…')
+                      : formatElapsed(controller.elapsed),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  tr(
+                    zh: '边说边转文字 · 不保存录音',
+                    en: 'Transcribing as you speak · no audio kept',
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 10),
+              ] else ...[
+                Text(
+                  tr(
+                    zh: '点一下开始说,松开手机也在转文字',
+                    en: 'Tap to talk — it types while you speak',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  tr(
+                    zh: '设备端识别 · 声音不出这台手机',
+                    en: 'On-device recognition · your voice stays here',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              MicButton(
+                listening: listening || finishing,
+                onTap: onToggle,
               ),
             ],
           ),
@@ -303,211 +488,190 @@ class _NoteCard extends StatelessWidget {
   }
 }
 
-/// A warm, consistent empty state: an icon in a soft tinted circle, a heading,
-/// and a supporting line — so a blank list feels designed, not abandoned.
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.body,
-  });
+/// The words as they arrive. Auto-scrolls to the newest line and keeps a fixed
+/// height so the button below never jumps around.
+class _LiveTranscript extends StatefulWidget {
+  const _LiveTranscript({required this.text});
 
-  final IconData icon;
-  final String title;
-  final String body;
+  final String text;
+
+  @override
+  State<_LiveTranscript> createState() => _LiveTranscriptState();
+}
+
+class _LiveTranscriptState extends State<_LiveTranscript> {
+  final _scroll = ScrollController();
+
+  @override
+  void didUpdateWidget(covariant _LiveTranscript old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scroll.hasClients) {
+          _scroll.jumpTo(_scroll.position.maxScrollExtent);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.14),
-                shape: BoxShape.circle,
+    final empty = widget.text.trim().isEmpty;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 64, maxHeight: 116),
+      child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: SingleChildScrollView(
+        controller: _scroll,
+        child: Text(
+          empty
+              ? tr(zh: '开始说话吧,文字会出现在这里…', en: 'Start talking — text appears here…')
+              : widget.text,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                height: 1.45,
+                color: empty ? cs.onSurfaceVariant : cs.onSurface,
+                fontStyle: empty ? FontStyle.italic : FontStyle.normal,
               ),
-              child: Icon(icon, size: 36, color: cs.primary),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              body,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.65),
-                    height: 1.4,
+        ),
+      ),
+      ),
+    );
+  }
+}
+
+/// Timeline card for one note.
+class NoteCard extends StatelessWidget {
+  const NoteCard({
+    super.key,
+    required this.note,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  final Note note;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final cjk = isCjkText(note.text);
+    final units = countUnits(note.text, cjk: cjk);
+
+    return Dismissible(
+      key: ValueKey(note.id),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => onDelete(),
+      background: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: cs.errorContainer,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        child: Icon(Icons.delete_outline, color: cs.onErrorContainer),
+      ),
+      child: Card(
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        note.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      formatNoteStamp(note.createdAt),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+                if (note.text.trim().isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    note.text,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurface.withValues(alpha: 0.72),
+                          height: 1.35,
+                        ),
                   ),
+                ],
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _Chip(
+                      icon: Icons.timer_outlined,
+                      label: formatElapsed(
+                          Duration(milliseconds: note.durationMs)),
+                    ),
+                    const SizedBox(width: 8),
+                    _Chip(
+                      icon: Icons.short_text,
+                      label: formatLength(units, cjk: cjk),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// A live loudness meter driven by the recorder's amplitude stream: a rolling
-/// row of bars that dance with the incoming level. Purely visual — if the
-/// platform has no amplitude support the bars simply stay flat (no crash).
-class _AmplitudeMeter extends StatefulWidget {
-  const _AmplitudeMeter({required this.recorder});
+class _Chip extends StatelessWidget {
+  const _Chip({required this.icon, required this.label});
 
-  final AudioRecorder recorder;
-
-  @override
-  State<_AmplitudeMeter> createState() => _AmplitudeMeterState();
-}
-
-class _AmplitudeMeterState extends State<_AmplitudeMeter> {
-  static const int _barCount = 27;
-  static const double _minDb = -45; // quieter than this reads as silence
-
-  final List<double> _levels = List<double>.filled(_barCount, 0);
-  StreamSubscription<Amplitude>? _sub;
-
-  @override
-  void initState() {
-    super.initState();
-    try {
-      _sub = widget.recorder
-          .onAmplitudeChanged(const Duration(milliseconds: 120))
-          .listen(_onAmp, onError: (Object _) {});
-    } catch (_) {
-      // Some platforms / no-mic devices don't emit amplitude — leave it flat.
-    }
-  }
-
-  void _onAmp(Amplitude amp) {
-    final db = amp.current;
-    final double norm = (db.isNaN || db.isInfinite)
-        ? 0
-        : ((db - _minDb) / (0 - _minDb)).clamp(0.0, 1.0);
-    if (!mounted) return;
-    setState(() {
-      _levels.removeAt(0);
-      _levels.add(norm);
-    });
-  }
-
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return SizedBox(
-      height: 40,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (final level in _levels)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1.5),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 120),
-                curve: Curves.easeOut,
-                width: 4,
-                height: 4 + level * 34,
-                decoration: BoxDecoration(
-                  color: Color.lerp(
-                    cs.primary.withValues(alpha: 0.5),
-                    cs.primary,
-                    level,
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-        ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
-}
-
-/// The record button, wrapped in a soft pulsing ring while recording so the
-/// live state reads at a glance even away from the meter.
-class _RecordButton extends StatefulWidget {
-  const _RecordButton({required this.recording, required this.onTap});
-
-  final bool recording;
-  final VoidCallback onTap;
-
-  @override
-  State<_RecordButton> createState() => _RecordButtonState();
-}
-
-class _RecordButtonState extends State<_RecordButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1400),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.recording) _pulse.repeat();
-  }
-
-  @override
-  void didUpdateWidget(covariant _RecordButton old) {
-    super.didUpdateWidget(old);
-    if (widget.recording && !_pulse.isAnimating) {
-      _pulse.repeat();
-    } else if (!widget.recording && _pulse.isAnimating) {
-      _pulse
-        ..stop()
-        ..reset();
-    }
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: 132,
-      height: 132,
-      child: Stack(
-        alignment: Alignment.center,
+      child: Row(
         children: [
-          if (widget.recording)
-            AnimatedBuilder(
-              animation: _pulse,
-              builder: (context, _) {
-                final t = _pulse.value;
-                return Container(
-                  width: 96 + t * 36,
-                  height: 96 + t * 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: cs.error.withValues(alpha: (1 - t) * 0.22),
-                  ),
-                );
-              },
-            ),
-          FloatingActionButton.large(
-            onPressed: widget.onTap,
-            backgroundColor: widget.recording ? cs.error : null,
-            child: Icon(widget.recording ? Icons.stop : Icons.mic, size: 36),
+          Icon(icon, size: 14, color: cs.primary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.primary,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),

@@ -1,17 +1,29 @@
-# echo_jot
+# echo_jot — 回声笔记 / EchoJot
 
-A new Flutter project.
+Offline voice notes: tap the mic, talk, and the text appears as you speak. No
+network permission, no bundled speech model, and no audio file is ever stored.
 
-## Getting Started
+- Product plan, architecture review and the device-acceptance checklist: [PLAN.md](PLAN.md)
+- Store copy (zh + en): [store/listing.md](store/listing.md)
 
-This project is a starting point for a Flutter application.
+## How transcription works (the short version)
 
-A few resources to get you started if this is your first Flutter project:
+Dictation goes through the **Android system on-device recognizer**
+(`SpeechRecognizer.createOnDeviceSpeechRecognizer`, API 31+), bridged in
+[`android/app/src/main/kotlin/com/noobclaw/echojot/DictationBridge.kt`](android/app/src/main/kotlin/com/noobclaw/echojot/DictationBridge.kt).
+There is deliberately **no cloud path**: if the system offers no on-device
+recognition, the app says so and stops. Because that recognizer only listens
+live (it cannot read a saved file), notes are dictated in real time and no audio
+is kept.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Punctuation and sentence splitting are plain local Dart rules in
+[`lib/tool/transcript_text.dart`](lib/tool/transcript_text.dart) (unit-tested).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Build
+
+```
+flutter pub get && flutter analyze && flutter test
+```
+
+Release packaging runs in CI only (`.github/workflows/build-app.yml`, input
+`app=apps/echo-jot`) — never on the 8GB dev machine (see PIPELINE.md).

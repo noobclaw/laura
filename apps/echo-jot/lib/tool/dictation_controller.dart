@@ -1,0 +1,298 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import '../core/l10n.dart';
+import 'dictation.dart';
+import 'transcript_text.dart';
+
+enum DictationState { idle, starting, listening, finishing }
+
+/// Drives one dictation session: permission → on-device recognizer → live text.
+///
+/// Every failure path ends in a user-visible [message]; nothing fails silently
+/// and there is no online fallback (see dictation.dart for why).
+class DictationController extends ChangeNotifier {
+  DictationController({DictationService? service})
+      : _service = service ?? DictationService();
+
+  final DictationService _service;
+
+  static const int _levelBars = 27;
+
+  DictationState _state = DictationState.idle;
+  String _committed = '';
+  String _partial = '';
+  String? _message;
+  bool _permissionPermanentlyDenied = false;
+  DateTime? _startedAt;
+  StreamSubscription<DictationEvent>? _sub;
+  Completer<void>? _finalWait;
+  String _language = DictationService.deviceLanguageTag;
+
+  final List<double> _levels = List<double>.filled(_levelBars, 0);
+
+  DictationState get state => _state;
+  bool get listening =>
+      _state == DictationState.listening || _state == DictationState.starting;
+
+  /// Text finalised so far in this session.
+  String get committedText => _committed;
+
+  /// Committed text plus the recognizer's live guess for the current utterance.
+  String get previewText => previewTranscript(_committed, _partial);
+
+  /// Rolling loudness history (0..1) for the level meter.
+  List<double> get levels => List.unmodifiable(_levels);
+
+  /// Last user-facing message (permission denied, no language pack, …).
+  String? get message => _message;
+
+  bool get permissionPermanentlyDenied => _permissionPermanentlyDenied;
+
+  DictationCapabilities? get capabilities => _service.capabilities;
+
+  String get language => _language;
+
+  Duration get elapsed => _startedAt == null
+      ? Duration.zero
+      : DateTime.now().difference(_startedAt!);
+
+  Future<DictationCapabilities> probe() async {
+    // Subscribing here (not in start()) means the native EventSink is attached
+    // long before the first `start` call — the method and event channels are
+    // independent, so a late subscription could miss the opening events.
+    _ensureSubscribed();
+    final caps = await _service.refreshCapabilities();
+    notifyListeners();
+    return caps;
+  }
+
+  void _ensureSubscribed() {
+    _sub ??= _service.events().listen(_onEvent);
+  }
+
+  void clearMessage() {
+    if (_message == null) return;
+    _message = null;
+    notifyListeners();
+  }
+
+  /// Opens the system app-settings page so a permanently-denied microphone
+  /// permission has a way out.
+  Future<void> openSystemSettings() => openAppSettings();
+
+  /// Returns true when the session actually started listening.
+  Future<bool> start({String? languageTag}) async {
+    if (_state != DictationState.idle) return false;
+    _message = null;
+    _state = DictationState.starting;
+    notifyListeners();
+
+    final caps = _service.capabilities ?? await _service.refreshCapabilities();
+    if (!caps.ready) {
+      _fail(caps.platformSupported
+          ? _msgNoOnDevice
+          : tr(
+              zh: '这台设备不支持设备端语音识别,本版本暂无法听写。',
+              en: 'This device has no on-device speech recognition, so dictation '
+                  'is unavailable in this build.',
+            ));
+      return false;
+    }
+
+    if (!await _ensureMicPermission()) return false;
+
+    _language = languageTag ?? _language;
+    _committed = '';
+    _partial = '';
+    _levels.fillRange(0, _levels.length, 0);
+    _ensureSubscribed();
+
+    final err = await _service.start(languageTag: _language);
+    if (err != null) {
+      _fail(_messageFor(err));
+      return false;
+    }
+    if (_state != DictationState.starting) {
+      // stop() (or a lifecycle change) landed while we were still starting up —
+      // don't leave the native recognizer listening behind an idle UI.
+      await _service.stop();
+      _state = DictationState.idle;
+      _startedAt = null;
+      notifyListeners();
+      return false;
+    }
+    _startedAt = DateTime.now();
+    _state = DictationState.listening;
+    notifyListeners();
+    return true;
+  }
+
+  /// Stops listening and returns the finished note text (may be empty if the
+  /// user said nothing).
+  Future<String> stop() async {
+    if (_state == DictationState.idle) return finalizeTranscript(_committed);
+    _state = DictationState.finishing;
+    notifyListeners();
+
+    // The recognizer delivers one last result after stopListening; give it a
+    // moment, but never hang the UI on it.
+    _finalWait = Completer<void>();
+    await _service.stop();
+    await _finalWait!.future
+        .timeout(const Duration(milliseconds: 1200), onTimeout: () {});
+    _finalWait = null;
+
+    final text = finalizeTranscript(previewTranscript(_committed, _partial));
+    _partial = '';
+    _committed = text;
+    _state = DictationState.idle;
+    _startedAt = null;
+    _levels.fillRange(0, _levels.length, 0);
+    notifyListeners();
+    return text;
+  }
+
+  /// Called when the app leaves the foreground: the recognizer cannot be
+  /// trusted in the background, so finish honestly instead of pretending.
+  Future<String?> stopForBackground() async {
+    if (_state == DictationState.idle) return null;
+    final text = await stop();
+    _message = tr(
+      zh: '应用切到后台,听写已结束并保存。',
+      en: 'App left the foreground — dictation ended and was saved.',
+    );
+    notifyListeners();
+    return text;
+  }
+
+  void _onEvent(DictationEvent e) {
+    switch (e.type) {
+      case DictationEventType.partial:
+        _partial = e.text;
+        notifyListeners();
+      case DictationEventType.finalText:
+        if (e.text.trim().isNotEmpty) {
+          _committed = appendSegment(_committed, e.text);
+        }
+        _partial = '';
+        if (_finalWait != null && !_finalWait!.isCompleted) {
+          _finalWait!.complete();
+        }
+        notifyListeners();
+      case DictationEventType.level:
+        _pushLevel(e.level);
+      case DictationEventType.status:
+        // Deliberately NOT completing `_finalWait` on 'stopped': the native side
+        // emits it as soon as stopListening() is called, while the last (and
+        // best) utterance result arrives afterwards via `final`. Waiting for the
+        // real result — or the timeout — is what keeps the last sentence.
+        break;
+      case DictationEventType.error:
+        if (_finalWait != null && !_finalWait!.isCompleted) {
+          _finalWait!.complete();
+        }
+        _message = _messageFor(e.code ?? DictationError.unknown);
+        // The native side has already torn the session down, so end ours too —
+        // leaving the UI in "listening" would be a silent failure. `_startedAt`
+        // is kept so the caller can still record how long the session ran and
+        // save whatever was already transcribed.
+        _state = DictationState.idle;
+        notifyListeners();
+    }
+  }
+
+  void _pushLevel(double db) {
+    // The recognizer reports roughly -2 dB (silence) .. 10 dB (loud speech).
+    final norm = ((db + 2) / 12).clamp(0.0, 1.0);
+    _levels.removeAt(0);
+    _levels.add(norm);
+    notifyListeners();
+  }
+
+  Future<bool> _ensureMicPermission() async {
+    PermissionStatus status;
+    try {
+      status = await Permission.microphone.status;
+      if (!status.isGranted) status = await Permission.microphone.request();
+    } catch (e) {
+      debugPrint('microphone permission check failed: $e');
+      _fail(tr(
+        zh: '无法检查麦克风权限,请在系统设置中确认。',
+        en: 'Could not check the microphone permission — please check system '
+            'settings.',
+      ));
+      return false;
+    }
+    if (status.isGranted || status.isLimited) {
+      _permissionPermanentlyDenied = false;
+      return true;
+    }
+    _permissionPermanentlyDenied =
+        status.isPermanentlyDenied || status.isRestricted;
+    _fail(_permissionPermanentlyDenied
+        ? tr(
+            zh: '麦克风权限已被永久拒绝,请到系统设置里开启。',
+            en: 'Microphone access is permanently denied — enable it in system '
+                'settings.',
+          )
+        : tr(
+            zh: '需要麦克风权限才能听写。',
+            en: 'Dictation needs the microphone permission.',
+          ));
+    return false;
+  }
+
+  void _fail(String message) {
+    _message = message;
+    _state = DictationState.idle;
+    _startedAt = null;
+    notifyListeners();
+  }
+
+  static String get _msgNoOnDevice => tr(
+        zh: '系统还没有可用的设备端语音识别语言包。请到「系统设置 → 系统 → 语言与输入法 → '
+            '设备端语音识别」下载一个语言包后再回来——为了保证声音不出手机,'
+            '本应用不会改用联网识别。',
+        en: 'The system has no on-device speech language pack yet. Add one in '
+            'Settings → System → Languages & input → On-device speech '
+            'recognition, then come back — this app will not switch to online '
+            'recognition, so your voice stays on the phone.',
+      );
+
+  static String _messageFor(DictationError e) => switch (e) {
+        DictationError.permission => tr(
+            zh: '需要麦克风权限才能听写。',
+            en: 'Dictation needs the microphone permission.',
+          ),
+        DictationError.onDeviceUnavailable => _msgNoOnDevice,
+        DictationError.recognizerFailed => tr(
+            zh: '系统语音识别中断了,请重试。',
+            en: 'The system recognizer stopped — please try again.',
+          ),
+        DictationError.noSpeech => tr(
+            zh: '一直没听到语音,已结束听写。请确认麦克风没被其它应用占用、'
+                '或换个安静一点的环境再试。',
+            en: 'No speech was recognised, so dictation ended. Check that no other '
+                'app is holding the microphone, then try again.',
+          ),
+        DictationError.unimplemented => tr(
+            zh: '这个版本没装上听写模块(设备端识别桥接缺失),请重新安装应用。',
+            en: 'This build is missing the dictation module (the on-device '
+                'recognizer bridge is not registered) — please reinstall.',
+          ),
+        DictationError.unknown => tr(
+            zh: '听写失败,请重试。',
+            en: 'Dictation failed — please try again.',
+          ),
+      };
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    _sub = null;
+    super.dispose();
+  }
+}

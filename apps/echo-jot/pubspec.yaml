@@ -1,44 +1,48 @@
 name: echo_jot
-description: "A new Flutter project."
+description: "Offline voice notes — dictated by the system's on-device recognizer."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
 environment:
   sdk: ^3.12.2
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
     sdk: flutter
+  # Locale-aware Material/Cupertino widgets; our own strings are localized
+  # inline via core/l10n.dart `tr()`.
+  flutter_localizations:
+    sdk: flutter
+  # Play Billing / StoreKit for the single Pro unlock (core/purchase.dart).
+  # Billing goes through the store app's process — no INTERNET permission
+  # needed, so the zero-network claim holds.
+  in_app_purchase: ^3.2.0
+  # Explicit runtime permission flow for the microphone (grant / denied /
+  # permanently-denied → open settings).
+  permission_handler: ^11.3.1
+  # Notes live in a single JSON file in the app sandbox.
+  path_provider: ^2.1.6
+  # System share sheet for text export (no INTERNET permission).
+  share_plus: ^13.2.0
+
+  # NB: transcription needs NO package at all — it goes through the system's
+  # on-device SpeechRecognizer via android/.../DictationBridge.kt. That replaced
+  # whisper_flutter_new, which downloaded its weights at runtime and therefore
+  # could never honour the zero-network promise.
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  record: ^7.1.1
-  path_provider: ^2.1.6
-  audioplayers: ^6.8.1
-  share_plus: ^13.2.0
-  whisper_flutter_new: ^1.0.1
+
+# path_provider (via path_provider_android) pulls in the native `jni` package.
+# jni 1.0.1's android/build.gradle is incompatible with our AGP 9 / Gradle 9
+# toolchain (`Could not find method kotlin()`), while 1.0.0 builds cleanly — the
+# version the other factory apps ship.
+dependency_overrides:
+  jni: 1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -61,34 +65,3 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
-  # ggml-base.bin is NOT in git — CI downloads it via prepare_assets.sh
-  # before building. Local analyze/test never load it.
-  assets:
-    - assets/models/
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/to/asset-from-package
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label, default (English). Chinese devices get values-zh. -->
+<resources>
+    <string name="app_name">EchoJot</string>
+</resources>

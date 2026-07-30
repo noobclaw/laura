@@ -1,9 +1,22 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Deliberately NO android.permission.INTERNET: the "your voice never
-         leaves this phone" store claim depends on it. -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Microphone: the only sensitive permission. Requested at runtime with a
+         visible flow (see dictation_controller.dart) and used solely to feed the
+         system's ON-DEVICE recognizer. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <!-- Privacy guarantee: EchoJot never uses the network. If any bundled
+         library declares INTERNET, strip it from the merged manifest so the
+         store listing's "your voice never leaves this phone" claim stays
+         verifiable. Play Billing works without it (billing runs in the Play
+         Store process). -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
+
+    <uses-feature android:name="android.hardware.microphone" android:required="true"/>
+
     <application
-        android:label="回声笔记"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -34,12 +47,17 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-    <!-- Required to query activities that can process text, see:
-         https://developer.android.com/training/package-visibility and
-         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
-
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- Package visibility for the system speech recognition service: without
+             this, resolving/binding the on-device recognizer can fail on API 30+. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
+        <!-- Required to query activities that can process text, see:
+             https://developer.android.com/training/package-visibility and
+             https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+             In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
