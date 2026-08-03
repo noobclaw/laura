@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label shown on Chinese-language devices. Short form of the store
+     listing title "Orbit 卫星过境预报". -->
+<resources>
+    <string name="app_name">卫星过境</string>
+</resources>

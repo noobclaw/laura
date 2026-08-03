@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nothing here is worth restoring to another device, and until the Pro unlock
+     goes through Play Billing the local flag must not ride a cloud backup onto
+     a second phone. Settings are one screen to re-enter. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+    </device-transfer>
+</data-extraction-rules>
