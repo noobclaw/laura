@@ -49,11 +49,24 @@ async function fetchTrending(since) {
   if (!res.ok) throw new Error(`github trending ${since}: HTTP ${res.status}`);
   const html = await res.text();
   const repos = parseTrendingHtml(html);
+  // 页面自身的条目数(ground truth)。条数偏少时用它区分「解析故障」与「GitHub 本身就只发了这么多」:
+  // repos.length < pageRows 才是解析故障;两者相等只说明当期条目少。
+  const pageRows = (html.match(/<article class="Box-row"/g) || []).length;
   if (repos.length === 0) throw new Error(`github trending ${since}: parsed 0 repos (page structure changed?)`);
-  return repos;
+  return { repos, pageRows };
 }
 
 export async function collectGithub() {
   const [daily, weekly] = await Promise.all([fetchTrending('daily'), fetchTrending('weekly')]);
-  return { source: 'github_trending', fetchedAt: new Date().toISOString(), daily, weekly };
+  return {
+    source: 'github_trending',
+    fetchedAt: new Date().toISOString(),
+    daily: daily.repos,
+    weekly: weekly.repos,
+    // 解析自检:parsed 与 pageRows 不等 = parseTrendingHtml 需要修
+    rowCounts: {
+      daily: { parsed: daily.repos.length, pageRows: daily.pageRows },
+      weekly: { parsed: weekly.repos.length, pageRows: weekly.pageRows },
+    },
+  };
 }
