@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'location_store.dart';
 import 'sensors.dart';
 import 'light_view.dart';
@@ -24,6 +25,8 @@ class GoldenscoutTool implements ToolModule {
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
+        // Renders nothing; surfaces store errors/pending/unlocked as snackbars.
+        const PurchaseNotices(),
         ListenableBuilder(
           listenable: store,
           builder: (context, _) => ListTile(
@@ -40,6 +43,10 @@ class GoldenscoutTool implements ToolModule {
                     en: 'Plan any date + save unlimited shooting spots')),
             onTap: store.pro ? null : () => showProSheet(context, store),
           ),
+        ),
+        ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => RestorePurchasesTile(pro: store.pro),
         ),
       ];
 }

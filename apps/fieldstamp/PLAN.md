@@ -57,7 +57,7 @@ BACKLOG 排名 #3(指数 78),是 ⚪排队 中指数最高、且「落地无外�
 ## 定价
 - **免费**:可拍、全水印(带小 "FieldStamp" 角标)、单默认项目、看相册、分享原图。
 - **一次性买断 Pro $6.99**(偏刚需定价,对标 Solocator 订阅疲劳):解锁多项目 / PDF 巡检报告 / CSV 台账 / DMS 坐标 / 去掉照片上的 FieldStamp 角标。
-- (v1 内购为本地占位开关,正式版接入应用内购买。)
+- ✅ 2026-08-22 已接真内购:壳 `PurchaseService` + `in_app_purchase`,非消耗型商品 `pro_unlock`,设置页含「恢复购买」;价格由商店下发,UI 不硬编码。
 
 ## 商店关键词
 gps camera, geotag camera, field camera, timestamp camera, survey photo, geotag photo, gps photo stamp, 取证相机, 定位水印相机, 工地拍照, 巡检, 现场取证

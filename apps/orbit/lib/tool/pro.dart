@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'app_theme.dart';
 import 'store.dart';
 
-/// The one-time Pro unlock. Real store billing (product `pro_unlock`) is wired
-/// in before release; v1 flips a local flag so the gated paths can be exercised
-/// end to end. See PLAN.md — this placeholder must not survive to the store.
+/// The one-time Pro unlock, sold through the store as the non-consumable
+/// `pro_unlock`. The sheet only launches the store sheet; the Pro flag is
+/// flipped by [PurchaseService]'s `onUnlocked` (wired in main.dart), so a
+/// purchase made on another device restores through exactly the same path.
 void showProSheet(BuildContext context, OrbitStore store) {
   showModalBottomSheet(
     context: context,
@@ -72,18 +74,33 @@ void showProSheet(BuildContext context, OrbitStore store) {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () async {
+                  onPressed: () {
                     Navigator.of(sheetContext).pop();
-                    await store.unlockPro();
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            tr(zh: '已解锁 Orbit Pro', en: 'Orbit Pro unlocked')),
-                      ),
-                    );
+                    // Hands off to the store sheet. The result arrives on the
+                    // purchase stream, not from this call.
+                    PurchaseService.instance.buyPro();
                   },
-                  child: Text(tr(zh: '解锁 —— \$3.99', en: 'Unlock — \$3.99')),
+                  // The store's own localized price once it answers; the
+                  // written price only until then.
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: PurchaseService.instance.price,
+                    builder: (context, price, _) => Text(
+                      tr(
+                        zh: '解锁 —— ${price ?? '\$3.99'}',
+                        en: 'Unlock — ${price ?? '\$3.99'}',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    PurchaseService.instance.restore();
+                  },
+                  child: Text(tr(zh: '恢复购买', en: 'Restore purchases')),
                 ),
               ),
             ],

@@ -109,7 +109,7 @@
 
 **免费 + Pro 一次性买断 $3.99 / ¥28**（PIPELINE「标准工具」档 $2.99–4.99）。
 锚定：SkyView Lite 免费、SkyView $2.99–3.99，Heavens-Above Pro 走订阅——Orbit 用**买断对标订阅疲劳**。产品 id 统一 `pro_unlock`（non-consumable），设置页有「恢复购买」。
-⚠️ 当前是本地占位解锁标志，G8 上架前必须换成真 Play Billing（PIPELINE 变现标准）。
+✅ 2026-08-22 已换成真 Play Billing：壳 `PurchaseService` + `in_app_purchase`，非消耗型商品 `pro_unlock`，Pro 弹层与设置页均含「恢复购买」；价格由商店下发，UI 不硬编码。
 
 ## 商店关键词
 

@@ -80,6 +80,22 @@ jobs:
 
       - run: flutter build appbundle --release
 
+      # The whole product line is sold as "no network access": the store
+      # listings say it and the privacy policies tell users they can verify it
+      # in system settings. Nothing checked it until now — a dependency added
+      # later can merge INTERNET back in silently and turn that into a false
+      # claim. Read the permissions out of the APK that actually ships.
+      - name: Verify shipped permissions (no INTERNET)
+        run: |
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt2 | sort -V | tail -1)
+          echo "--- permissions in the shipped APK ---"
+          "$AAPT" dump permissions build/app/outputs/flutter-apk/app-release.apk | tee perms.txt
+          if grep -q "android.permission.INTERNET" perms.txt; then
+            echo "::error::INTERNET is in the shipped APK, but this app is sold as offline-only. Check that AndroidManifest.xml still carries the tools:node=\"remove\" line, and find which dependency pulled INTERNET in."
+            exit 1
+          fi
+          echo "OK: no INTERNET permission."
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'location_store.dart';
 
-/// Presents the one-time Pro buyout. Real in-app purchase wiring is deferred;
-/// v1 unlocks a local flag so the gated screens can be exercised end-to-end.
+/// Presents the one-time Pro buyout, sold through the store as the
+/// non-consumable `pro_unlock`. This sheet only launches the store sheet; the
+/// Pro flag is flipped by [PurchaseService]'s `onUnlocked` (wired in main.dart),
+/// so a purchase made on another device restores through the same path.
 void showProSheet(BuildContext context, LocationStore store) {
   showModalBottomSheet(
     context: context,
@@ -42,16 +45,31 @@ void showProSheet(BuildContext context, LocationStore store) {
             width: double.infinity,
             child: FilledButton(
               onPressed: () {
-                store.unlockPro();
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(tr(
-                          zh: '已解锁 GoldenScout Pro',
-                          en: 'GoldenScout Pro unlocked'))),
-                );
+                // Hands off to the store sheet. The result arrives on the
+                // purchase stream, not from this call.
+                PurchaseService.instance.buyPro();
               },
-              child: Text(tr(zh: '解锁——\$3.99', en: 'Unlock — \$3.99')),
+              // The store's own localized price once it answers; the written
+              // price only until then.
+              child: ValueListenableBuilder<String?>(
+                valueListenable: PurchaseService.instance.price,
+                builder: (context, price, _) => Text(
+                  tr(
+                    zh: '解锁——${price ?? '\$3.99'}',
+                    en: 'Unlock — ${price ?? '\$3.99'}',
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                PurchaseService.instance.restore();
+              },
+              child: Text(tr(zh: '恢复购买', en: 'Restore purchases')),
             ),
           ),
         ],

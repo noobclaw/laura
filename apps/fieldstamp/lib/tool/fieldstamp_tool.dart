@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'camera_screen.dart';
 import 'gallery_screen.dart';
 import 'models.dart';
@@ -24,6 +25,8 @@ class FieldStampTool extends ToolModule {
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
+        // Renders nothing; surfaces store errors/pending/unlocked as snackbars.
+        const PurchaseNotices(),
         ListenableBuilder(
           listenable: store,
           builder: (context, _) => ListTile(
@@ -39,6 +42,10 @@ class FieldStampTool extends ToolModule {
                         'DMS coordinates, no watermark tag')),
             onTap: store.pro ? null : () => _confirmUnlock(context),
           ),
+        ),
+        ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => RestorePurchasesTile(pro: store.pro),
         ),
         ListenableBuilder(
           listenable: store,
@@ -98,14 +105,13 @@ class FieldStampTool extends ToolModule {
               '• PDF 巡检报告与 CSV 台账\n'
               '• 度分秒坐标\n'
               '• 去除照片上的 FieldStamp 小角标\n\n'
-              '(正式版会接入商店内购;目前为本地开关。)',
+              '没有订阅、没有账号,买断后永久有效。',
           en: 'A one-time purchase unlocks:\n'
               '• Multiple projects / work orders\n'
               '• PDF inspection reports & CSV ledgers\n'
               '• Degrees-minutes-seconds coordinates\n'
               '• Removes the small FieldStamp tag on photos\n\n'
-              '(The store purchase is added before release; this is a local switch '
-              'for now.)',
+              'No subscription, no account — buy once, keep it.',
         )),
         actions: [
           TextButton(
@@ -113,10 +119,13 @@ class FieldStampTool extends ToolModule {
               child: Text(tr(zh: '取消', en: 'Cancel'))),
           FilledButton(
             onPressed: () {
-              store.unlockPro();
               Navigator.pop(ctx);
+              // Hands off to the store sheet; the unlock arrives on the
+              // purchase stream and flips the flag via main.dart's onUnlocked.
+              PurchaseService.instance.buyPro();
             },
-            child: Text(tr(zh: '解锁', en: 'Unlock')),
+            // The store's own localized price once it answers.
+            child: const ProPriceText(fallback: r'$6.99'),
           ),
         ],
       ),

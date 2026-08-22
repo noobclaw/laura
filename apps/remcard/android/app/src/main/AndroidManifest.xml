@@ -1,4 +1,14 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Privacy guarantee: Remcard never uses the network. If any bundled
+         library declares INTERNET, strip it from the merged manifest so the
+         store listing's "no network access" claim stays verifiable.
+         Play Billing is unaffected: it runs inside the Play Store's own
+         process and needs only com.android.vending.BILLING, which the
+         in_app_purchase plugin merges in by itself. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
+
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"

@@ -45,6 +45,9 @@ dependencies:
   flutter_compass: ^0.8.1
   # Local storage of saved spots + Pro flag in the app sandbox (no network).
   path_provider: ^2.1.5
+  # Play Billing / StoreKit for the single `pro_unlock` non-consumable. Billing
+  # runs inside the store app's process, so this needs no INTERNET permission.
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:

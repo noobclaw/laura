@@ -34,7 +34,7 @@
 - CI 内存：`android/gradle.properties` 提到 Xmx4096m/Metaspace1024m（母版不动，仅本 app）。
 
 ## 定价
-免费 + 一次性内购买断（默认口径）。建议中区 **¥8 / 海外 $1.99** 解锁 Pro（无限日子 + 全部主题色）。参考 BACKLOG 中区 ¥6-12 买断带。内购 SDK 尚未接入，当前为本地解锁占位。
+免费 + 一次性内购买断（默认口径）。建议中区 **¥8 / 海外 $1.99** 解锁 Pro（无限日子 + 全部主题色）。参考 BACKLOG 中区 ¥6-12 买断带。内购已接入(壳 PurchaseService + in_app_purchase,非消耗型商品 `pro_unlock`,设置页含「恢复购买」),2026-08-22 完成;价格以商店下发为准,UI 不硬编码。
 
 ### ⚠️ 上架前必改：中区 ¥8 须重定（2026-08-21 主词实搜；2026-08-22 补配平）
 
@@ -61,5 +61,5 @@
 ## 待办（非 v1）
 - 本地通知（当天/前 N 天提醒，flutter_local_notifications；native 面较大，v2）。
 - iOS WidgetKit 小组件（当前小组件仅 Android）。
-- 真实内购（in_app_purchase）接入替换本地解锁占位。
+- ✅ 真实内购（in_app_purchase）已接入,替换了本地解锁占位（2026-08-22）。
 - 装机验收：小组件添加与刷新、`home_widget` 共享偏好键名、emoji 在小组件 RemoteViews 的显示、颜色对比。

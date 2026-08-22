@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
+import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/app_theme.dart';
 import 'tool/fieldstamp_tool.dart';
-import 'tool/tool_module.dart';
 
-/// The one line a generated app changes to plug in its tool.
-final ToolModule tool = FieldStampTool();
+/// The one line a generated app changes to plug in its tool. Typed as the
+/// concrete tool (not `ToolModule`) so the purchase wiring can reach its store.
+final FieldStampTool tool = FieldStampTool();
 
-void main() => runApp(const FieldStampApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Real IAP: a purchase or restore of `pro_unlock` flips the persisted Pro
+  // flag. Safe on devices without a store — the service degrades silently.
+  PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());
+  runApp(const FieldStampApp());
+}
 
 class FieldStampApp extends StatelessWidget {
   const FieldStampApp({super.key});

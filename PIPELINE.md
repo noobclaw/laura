@@ -55,7 +55,7 @@
 
 - **模式**:默认「免费+Pro 一次性买断」;B 端搜索转化型(如 FieldStamp)可用纯付费下载(零代码,Console 定价);**禁广告**(与隐私/干净卖点冲突)。
 - **定价阶梯**:练手/填充 $0.99-1.99;标准工具 $2.99-4.99;B 端刚需 $5.99-9.99。锚定法:**对标头部竞品价的 1/3~1/2 切入**(AnkiMobile $29.99→Remcard $4.99;PhotoPills $10.99→GoldenScout $3.99)。中区价取 ¥ 整数(6/12/18/28)。上架 3 个月按转化复盘调价。
-- **支付接入(Play)**:数字商品**必须走 Google Play Billing**(商店政策强制,不得接支付宝/微信/Stripe);Flutter 用官方 `in_app_purchase` 插件,产品统一 non-consumable **`pro_unlock`**;设置页必须有「恢复购买」(restorePurchases)。**App 无需 INTERNET 权限**(结算经 Play Store 进程完成),零联网卖点保留;BILLING 权限由插件自动并入。抽成 15%(年 ≤$100 万 small business 档)。**当前各 app 的 Pro 解锁是本地占位标志,G8 前必须替换**;经 Play Console 内部测试轨 + license tester 真机走通「购买→解锁→卸载重装→恢复购买」才准上生产轨。
+- **支付接入(Play)**:数字商品**必须走 Google Play Billing**(商店政策强制,不得接支付宝/微信/Stripe);Flutter 用官方 `in_app_purchase` 插件,产品统一 non-consumable **`pro_unlock`**;设置页必须有「恢复购买」(restorePurchases)。**App 无需 INTERNET 权限**(结算经 Play Store 进程完成),零联网卖点保留;BILLING 权限由插件自动并入。抽成 15%(年 ≤$100 万 small business 档)。**✅ 2026-08-22:7 个在架 app(remcard/autosnore/echo-jot/orbit/daycount/fieldstamp/goldenscout)已全部接真内购,本地占位后门清零**(clean-alarm ⛔搁置未接)。**新 app 出厂即须接,不再留占位**——壳 `core/purchase.dart` 提供 `PurchaseService`(买/恢复/pending/错误降级)+ `PurchaseNotices`(把结果弹成 snackbar,不放就等于错误全部静默)+ `RestorePurchasesTile` + `ProPriceText`。**价格一律用 `ProPriceText`/`PurchaseService.price` 取商店下发的本地化价,禁止在 UI 里硬编码**(Play 按用户所在区计价,写死「¥18」给一个实际被扣 €4.99 的人看 = 客诉)。仍须经 Play Console 内部测试轨 + license tester 真机走通「购买→解锁→卸载重装→恢复购买」才准上生产轨。
 - **大陆安卓商店**(华为/小米/OPPO/vivo):各家自有结算 SDK+软著+备案,是独立后续项目,**首发只做 Google Play**(海外+中文区用户靠 zh 本地化覆盖)。
 - **iOS**:同 `in_app_purchase` 走 StoreKit,Apple 小企业档 15%;iOS 工程未配置,归三期。
 

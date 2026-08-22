@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
+import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/app_theme.dart';
 import 'tool/daycount_tool.dart';
-import 'tool/tool_module.dart';
 
-/// The one line a generated app changes to plug in its tool.
-final ToolModule tool = DaycountTool();
+/// The one line a generated app changes to plug in its tool. Typed as the
+/// concrete tool (not `ToolModule`) so the purchase wiring can reach its store.
+final DaycountTool tool = DaycountTool();
 
-void main() => runApp(const DaycountApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Real IAP: a purchase or restore of `pro_unlock` flips the persisted Pro
+  // flag. Safe on devices without a store — the service degrades silently.
+  PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());
+  runApp(const DaycountApp());
+}
 
 class DaycountApp extends StatelessWidget {
   const DaycountApp({super.key});

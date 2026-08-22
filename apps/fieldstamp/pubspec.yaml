@@ -31,6 +31,9 @@ dependencies:
   pdf: ^3.11.0
   # Native share sheet to export photos / PDF / CSV (no INTERNET permission).
   share_plus: ^11.0.0
+  # Play Billing / StoreKit for the single `pro_unlock` non-consumable. Billing
+  # runs inside the store app's process, so this needs no INTERNET permission.
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:

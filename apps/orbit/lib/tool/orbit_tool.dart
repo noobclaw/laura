@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'align_screen.dart';
 import 'catalog_screen.dart';
 import 'home_screen.dart';
@@ -31,6 +32,8 @@ class OrbitTool implements ToolModule {
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
+        // Renders nothing; surfaces store errors/pending/unlocked as snackbars.
+        const PurchaseNotices(),
         ListenableBuilder(
           listenable: store,
           builder: (context, _) => ListTile(
@@ -47,6 +50,10 @@ class OrbitTool implements ToolModule {
                     en: 'All ${store.catalog.length} targets + a 10-day forecast')),
             onTap: store.pro ? null : () => showProSheet(context, store),
           ),
+        ),
+        ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => RestorePurchasesTile(pro: store.pro),
         ),
       ];
 }

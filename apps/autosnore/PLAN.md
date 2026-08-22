@@ -93,7 +93,7 @@ BACKLOG 2026-07-27 决策门叙述建议本轮取 **#9 Orbit**,但 Orbit 的**�
 
 - **免费 + Pro 一次性买断 `pro_unlock`**:**$3.99 / ¥18**。
 - 阶梯:标准工具 $2.99–4.99;锚定 SnoreLab Premium ~$9.99/年订阅,以「一次买断 ≈ 半价」切入。禁广告(与隐私/干净卖点冲突)。
-- v1 Pro 为本地占位标志;**G8 上架前换真 Play Billing**(壳 `PurchaseService` + `in_app_purchase`,产品 `pro_unlock`,设置页含「恢复购买」)。
+- ✅ Pro 走真 Play Billing(壳 `PurchaseService` + `in_app_purchase`,非消耗型商品 `pro_unlock`,设置页含「恢复购买」)。
 
 ## 7. 商店定位
 

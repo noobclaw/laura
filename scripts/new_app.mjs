@@ -44,6 +44,16 @@ const SHELL_PKG = 'tool_shell';
 const SHELL_APP_ID = 'com.noobclaw.tool_shell'; // must be replaced before SHELL_PKG (it contains it)
 const SHELL_DISPLAY = 'Tool Shell';
 
+// `flutter create` strips underscores out of the iOS bundle identifier and
+// camel-cases what followed, so the Xcode project says `com.noobclaw.toolShell`
+// where Android says `com.noobclaw.tool_shell`. Replacing only the Android
+// spelling leaves every generated app sharing the shell's bundle id — they then
+// collide in App Store Connect and none of them can be uploaded. (This is
+// exactly what happened to the first eight apps; fixed 2026-08-22.)
+const iosCase = (id) => id.replaceAll(/_(\w)/g, (_, c) => c.toUpperCase());
+const SHELL_APP_ID_IOS = iosCase(SHELL_APP_ID);
+const iosAppId = iosCase(appId);
+
 const textFileRe = /\.(dart|kt|kts|swift|java|yaml|yml|xml|gradle|properties|json|md|html|plist|pbxproj|xcconfig|xcscheme|entitlements)$/i;
 
 async function* walk(dir) {
@@ -64,6 +74,7 @@ for await (const file of walk(destDir)) {
   const before = await readFile(file, 'utf8');
   const after = before
     .replaceAll(SHELL_APP_ID, appId)
+    .replaceAll(SHELL_APP_ID_IOS, iosAppId)
     .replaceAll(SHELL_PKG, snake)
     .replaceAll(SHELL_DISPLAY, displayName);
   if (after !== before) {
@@ -92,6 +103,7 @@ try {
 console.log(`Created apps/${name}`);
 console.log(`  package:       ${snake}`);
 console.log(`  applicationId: ${appId}`);
+console.log(`  iOS bundle id: ${iosAppId}`);
 console.log(`  display name:  ${displayName}`);
 console.log(`  files updated: ${replaced}`);
 console.log(`\nNext: implement lib/tool/ in apps/${name}, then: flutter pub get && flutter build apk --release`);

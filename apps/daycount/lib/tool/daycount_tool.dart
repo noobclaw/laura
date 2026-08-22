@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'event_detail.dart';
 import 'event_edit.dart';
 import 'models.dart';
@@ -17,7 +18,13 @@ class DaycountTool extends ToolModule {
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
+        // Renders nothing; surfaces store errors/pending/unlocked as snackbars.
+        const PurchaseNotices(),
         _ProTile(store: store),
+        ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => RestorePurchasesTile(pro: store.pro),
+        ),
         ListTile(
           leading: const Icon(Icons.widgets_outlined),
           title: Text(tr(zh: '刷新桌面小组件', en: 'Refresh home-screen widget')),
@@ -57,41 +64,15 @@ class _ProTile extends StatelessWidget {
           leading: const Icon(Icons.workspace_premium_outlined),
           title: Text(tr(zh: '解锁 Pro（一次买断）', en: 'Unlock Pro (one-time purchase)')),
           subtitle: Text(tr(zh: '无限日子 + 全部主题色', en: 'Unlimited days + all theme colors')),
+          // The store's own localized price, so nobody is quoted a currency
+          // they will not be charged in.
           trailing: FilledButton(
-            onPressed: () => _confirmUnlock(context),
-            child: Text(tr(zh: '解锁', en: 'Unlock')),
+            onPressed: () => PurchaseService.instance.buyPro(),
+            child: const ProPriceText(fallback: r'$1.99'),
           ),
-          onTap: () => _confirmUnlock(context),
+          onTap: () => PurchaseService.instance.buyPro(),
         );
       },
-    );
-  }
-
-  void _confirmUnlock(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
-        content: Text(tr(
-          zh: '解锁后可添加无限数量的日子，并使用全部主题色。'
-              '（内购接入前为本地解锁占位）',
-          en: 'Unlock to add unlimited days and use all theme colors. '
-              '(Local unlock placeholder until in-app purchase lands.)',
-        )),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(tr(zh: '取消', en: 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () {
-              store.unlockPro();
-              Navigator.pop(context);
-            },
-            child: Text(tr(zh: '确认解锁', en: 'Unlock now')),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -144,8 +125,10 @@ class _HomeBodyState extends State<_HomeBody> {
           ),
           FilledButton(
             onPressed: () {
-              store.unlockPro();
               Navigator.pop(context);
+              // Hands off to the store sheet; the unlock arrives on the
+              // purchase stream and flips the flag via main.dart's onUnlocked.
+              PurchaseService.instance.buyPro();
             },
             child: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
           ),
