@@ -11,6 +11,16 @@
          store listing's "no network access" claim stays verifiable. -->
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
 
+    <!-- The `camera` plugin declares these for video recording, which we never
+         do (`enableAudio: false`, stills only), and photos are written to the
+         app's private sandbox via path_provider — no external storage needed.
+         Left in, the store page would tell users this evidence camera wants
+         their microphone, and the privacy policy's permission list would be a
+         lie. Caught 2026-08-23 by the CI permission dump. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
     <uses-feature android:name="android.hardware.sensor.compass" android:required="false"/>
