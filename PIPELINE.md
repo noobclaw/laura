@@ -19,6 +19,7 @@
 **G3 开发**:`node scripts/new_app.mjs` 克隆壳 → 实现 `lib/tool/`。强制:
 - **视觉设计(2026-07-27 起铁律):UI 必须美,不只是能用。** 见下「视觉设计标准」。核心操作要有 hero 感,间距/层级/字阶/圆角/配色成体系,空状态有温度而非一行冷字,深浅色都好看,数据展示(图表/评分/表盘)干净不廉价。写码时就按标准做,别指望事后补;丑的实现到 G6b 会被打回重做。
 - **多语言(2026-07-26 起铁律)**:所有用户可见字符串一律 `tr(zh:, en:)`(壳 `core/l10n.dart`,ja 可选),跟随系统语言、英文兜底;`MaterialApp` 带 `GlobalMaterialLocalizations.delegates`+`supportedLocales`;安卓桌面名走 `@string/app_name`(`values/`+`values-zh/` 分别填英文名/中文名,取自 store/listing.md);Branding 的 aboutText/privacyPolicy 双语。日志/JSON key/文件名不翻。
+- **专属图标(2026-08-30 起铁律,用户拍板)**:每个新 app 必须有**贴近产品自身**的专属图标——产品功能符号 + 该 app seed 色渐变,1024px 源图写入 Android mipmap 5 档(48/72/96/144/192)+ iOS AppIcon.appiconset 全尺寸(iOS 侧去 alpha),顺手出 512px(Play 商店图标)与 1024×500(feature graphic)存 `store/`。**禁止用壳默认 Flutter 图标出包**(由来:08-30 装机验收发现 7 个已做 app 图标 md5 全同,G3「生成图标」从未真正执行过;同图标还加重 Apple 4.3 重复判定)。范本:2026-08-30 会话的 `icons.mjs`(SVG→sharp)。
 - 零联网默认:`tools:node="remove"` 剥 INTERNET;确需网络单独立项说明。
 - 免费层必须真可用(核心功能+数量上限),Pro 解锁「无限+进阶」;禁广告 SDK。
 
