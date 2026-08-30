@@ -33,6 +33,15 @@ jobs:
           flutter-version: 3.44.4
           cache: true
 
+      - name: Select newest Xcode (Apple requires the iOS 26 SDK for uploads)
+        working-directory: .
+        run: |
+          ls -d /Applications/Xcode*.app
+          LATEST=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+
       - name: Write App Store Connect API key
         working-directory: .
         env:
