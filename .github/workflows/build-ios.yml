@@ -54,6 +54,24 @@ jobs:
           mkdir -p ~/asc
           printf '%s' "$ASC_KEY_P8" > ~/asc/AuthKey.p8
 
+      - name: Import persistent signing certificate
+        working-directory: .
+        env:
+          P12_B64: ${{ secrets.IOS_DEV_CERT_P12 }}
+          P12_PASS: ${{ secrets.IOS_CERT_PASSWORD }}
+        run: |
+          # Reuse one Apple Development cert across runs; without this, cloud
+          # signing mints a new cert per ephemeral runner until the account cap.
+          if [ -z "$P12_B64" ]; then echo "IOS_DEV_CERT_P12 missing"; exit 1; fi
+          echo "$P12_B64" | base64 -d > ~/asc/dev.p12
+          security create-keychain -p ci build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p ci build.keychain
+          security import ~/asc/dev.p12 -k build.keychain -P "$P12_PASS" -A -f pkcs12
+          security list-keychains -d user -s build.keychain login.keychain
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci build.keychain >/dev/null
+          security find-identity -v build.keychain
+
       - name: Flutter configure (no compile)
         run: |
           flutter pub get
