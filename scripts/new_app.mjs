@@ -76,7 +76,8 @@ for await (const file of walk(destDir)) {
     .replaceAll(SHELL_APP_ID, appId)
     .replaceAll(SHELL_APP_ID_IOS, iosAppId)
     .replaceAll(SHELL_PKG, snake)
-    .replaceAll(SHELL_DISPLAY, displayName);
+    .replaceAll(SHELL_DISPLAY, displayName)
+    .replaceAll('REPLACE_WITH_APPLICATION_ID.pro_unlock', appId + '.pro_unlock');
   if (after !== before) {
     await writeFile(file, after, 'utf8');
     replaced++;

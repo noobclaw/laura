@@ -8,7 +8,7 @@ import 'l10n.dart';
 /// Every factory app sells exactly one non-consumable: the Pro unlock.
 /// The product must exist in Play Console (and later App Store Connect)
 /// under this id for every app.
-const String kProProductId = 'pro_unlock';
+const String kProProductId = 'com.noobclaw.autosnore.pro_unlock';
 
 /// Thin wrapper around the official in_app_purchase plugin (Play Billing /
 /// StoreKit). Billing runs through the store app's own process, so the app

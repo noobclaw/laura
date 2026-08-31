@@ -8,7 +8,9 @@ import 'l10n.dart';
 /// Every factory app sells exactly one non-consumable: the Pro unlock.
 /// The product must exist in Play Console (and later App Store Connect)
 /// under this id for every app.
-const String kProProductId = 'pro_unlock';
+// ⚠️ App Store 的商品 ID 全账号唯一(Play 是按 app 隔离)。每个新 app 必须用
+// '<applicationId>.pro_unlock'(new_app.mjs 会替换);裸 'pro_unlock' 已被 remcard 占用。
+const String kProProductId = 'REPLACE_WITH_APPLICATION_ID.pro_unlock';
 
 /// Thin wrapper around the official in_app_purchase plugin (Play Billing /
 /// StoreKit). Billing runs through the store app's own process, so the app
