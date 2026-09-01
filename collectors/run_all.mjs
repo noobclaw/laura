@@ -10,7 +10,14 @@ import { collectGooglePlay } from './google_play.mjs';
 import { collectShowHN } from './hn_showhn.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const today = new Date().toISOString().slice(0, 10);
+// Local date, not UTC: a run before 08:00 CST would otherwise land in the
+// previous UTC day's folder and overwrite that day's snapshot (happened 09-01).
+const now = new Date();
+const today = [
+  now.getFullYear(),
+  String(now.getMonth() + 1).padStart(2, '0'),
+  String(now.getDate()).padStart(2, '0'),
+].join('-');
 const outDir = path.join(ROOT, 'data', today);
 await mkdir(outDir, { recursive: true });
 
