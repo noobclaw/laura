@@ -217,6 +217,12 @@ class DictationController extends ChangeNotifier {
     try {
       status = await Permission.microphone.status;
       if (!status.isGranted) status = await Permission.microphone.request();
+      // iOS asks separately for speech recognition, on-device included.
+      if (status.isGranted && DictationService.needsSpeechPermission) {
+        var speech = await Permission.speech.status;
+        if (!speech.isGranted) speech = await Permission.speech.request();
+        if (!speech.isGranted && !speech.isLimited) status = speech;
+      }
     } catch (e) {
       debugPrint('microphone permission check failed: $e');
       _fail(tr(
@@ -230,13 +236,15 @@ class DictationController extends ChangeNotifier {
       _permissionPermanentlyDenied = false;
       return true;
     }
-    _permissionPermanentlyDenied =
-        status.isPermanentlyDenied || status.isRestricted;
+    _permissionPermanentlyDenied = status.isPermanentlyDenied ||
+        status.isRestricted ||
+        // iOS never re-prompts after one refusal: Settings is the only way.
+        DictationService.needsSpeechPermission;
     _fail(_permissionPermanentlyDenied
         ? tr(
-            zh: '麦克风权限已被永久拒绝,请到系统设置里开启。',
-            en: 'Microphone access is permanently denied — enable it in system '
-                'settings.',
+            zh: '需要「麦克风」和「语音识别」两项权限才能听写,请到系统设置里为 EchoJot 开启。',
+            en: 'Dictation needs both Microphone and Speech Recognition — '
+                'enable them for EchoJot in Settings.',
           )
         : tr(
             zh: '需要麦克风权限才能听写。',
@@ -252,15 +260,33 @@ class DictationController extends ChangeNotifier {
     notifyListeners();
   }
 
-  static String get _msgNoOnDevice => tr(
-        zh: '系统还没有可用的设备端语音识别语言包。请到「系统设置 → 系统 → 语言与输入法 → '
-            '设备端语音识别」下载一个语言包后再回来——为了保证声音不出手机,'
-            '本应用不会改用联网识别。',
-        en: 'The system has no on-device speech language pack yet. Add one in '
-            'Settings → System → Languages & input → On-device speech '
-            'recognition, then come back — this app will not switch to online '
-            'recognition, so your voice stays on the phone.',
-      );
+  static String get _msgNoOnDevice => noOnDeviceHelp;
+
+  /// Where on-device recognition comes from differs by platform, and so does
+  /// what the user can do about it. Android downloads language packs; iOS
+  /// ships a fixed set of offline languages and the fix is to dictate in one
+  /// of them. Sending an iPhone user to an Android settings path is worse
+  /// than saying nothing.
+  static String get noOnDeviceHelp => DictationService.needsSpeechPermission
+      ? tr(
+          zh: '这台 iPhone 不支持当前语言的离线语音识别。请在系统设置里把语言切换到支持'
+              '离线听写的语言(如简体中文、English、日本語、한국어 等)后再试——'
+              '为了保证声音不出手机,本应用不会改用联网识别。',
+          en: 'This iPhone has no offline speech recognition for the current '
+              'language. Switch to a language with offline dictation (Chinese, '
+              'English, Japanese, Korean, German, French, Spanish…) in Settings '
+              'and try again — this app will not switch to online recognition, '
+              'so your voice stays on the phone.',
+        )
+      : tr(
+          zh: '系统还没有可用的设备端语音识别语言包。请到「系统设置 → 系统 → 语言与输入法 → '
+              '设备端语音识别」下载一个语言包后再回来——为了保证声音不出手机,'
+              '本应用不会改用联网识别。',
+          en: 'The system has no on-device speech language pack yet. Add one in '
+              'Settings → System → Languages & input → On-device speech '
+              'recognition, then come back — this app will not switch to online '
+              'recognition, so your voice stays on the phone.',
+        );
 
   static String _messageFor(DictationError e) => switch (e) {
         DictationError.permission => tr(

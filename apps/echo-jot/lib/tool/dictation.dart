@@ -41,7 +41,7 @@ class DictationCapabilities {
         installedLanguages = const <String>[],
         supportedLanguages = const <String>[];
 
-  /// This build has a native implementation (Android today; iOS is v1.1).
+  /// This build has a native implementation (Android and iOS).
   final bool platformSupported;
 
   /// The system offers on-device recognition — the only mode we ever use.
@@ -132,7 +132,7 @@ class DictationService {
   DictationCapabilities? get capabilities => _caps;
 
   Future<DictationCapabilities> refreshCapabilities() async {
-    if (!_isAndroid) {
+    if (!_hasNativeBridge) {
       return _caps = const DictationCapabilities.unsupported(
         detail: 'no native on-device recognizer on this platform',
       );
@@ -240,10 +240,27 @@ class DictationService {
       ? raw.whereType<String>().toList(growable: false)
       : const <String>[];
 
-  static bool get _isAndroid {
+  /// Android: DictationBridge.kt (SpeechRecognizer, on-device). iOS:
+  /// DictationBridge.swift (SFSpeechRecognizer with
+  /// requiresOnDeviceRecognition). Anything else has no bridge.
+  ///
+  /// This used to be `Platform.isAndroid` alone, which short-circuited the
+  /// channel on iPhone before the Swift side existed — and would have kept
+  /// doing so after it was written (2026-09-02 audit R1).
+  static bool get _hasNativeBridge {
     // Platform throws in a pure-Dart test environment on some hosts; guard it.
     try {
-      return Platform.isAndroid;
+      return Platform.isAndroid || Platform.isIOS;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// iOS needs a second grant on top of the microphone: speech recognition
+  /// itself (even on-device). Android's RECORD_AUDIO covers both.
+  static bool get needsSpeechPermission {
+    try {
+      return Platform.isIOS;
     } catch (_) {
       return false;
     }

@@ -212,8 +212,8 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
               _snack(_controller.capabilities?.ready == true
                   ? tr(zh: '设备端识别已就绪', en: 'On-device recognition is ready')
                   : tr(
-                      zh: '仍未检测到设备端语言包',
-                      en: 'Still no on-device language pack',
+                      zh: '仍不可用 — 设备端识别还没就绪',
+                      en: 'Still unavailable — on-device recognition is not ready',
                     ));
             },
           ),
@@ -363,13 +363,7 @@ class _CapabilityNotice extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            tr(
-              zh: '为了让声音不出这台手机,听写只用系统内置的设备端识别。'
-                  '请在「系统设置 → 系统 → 语言与输入法 → 设备端语音识别」下载一个语言包。',
-              en: 'So your voice never leaves this phone, dictation only uses the '
-                  'system on-device recognizer. Add a language pack in Settings → '
-                  'System → Languages & input → On-device speech recognition.',
-            ),
+            DictationController.noOnDeviceHelp,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSecondaryContainer.withValues(alpha: 0.85),
                   height: 1.35,

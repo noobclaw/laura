@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../core/l10n.dart';
 import '../core/purchase.dart';
+import 'dictation.dart';
 import 'dictation_controller.dart';
 import 'home_page.dart';
 import 'note.dart';
@@ -176,11 +177,16 @@ class _RecognizerStatusTile extends StatelessWidget {
         final subtitle = caps == null
             ? tr(zh: '检测中…', en: 'Checking…')
             : !ready
-                ? tr(
-                    zh: '不可用 — 请到系统设置下载设备端语音识别语言包',
-                    en: 'Unavailable — add an on-device speech language pack in '
-                        'system settings',
-                  )
+                ? (DictationService.needsSpeechPermission
+                    ? tr(
+                        zh: '不可用 — 当前语言在 iOS 上没有离线识别',
+                        en: 'Unavailable — no offline recognition for the current language on iOS',
+                      )
+                    : tr(
+                        zh: '不可用 — 请到系统设置下载设备端语音识别语言包',
+                        en: 'Unavailable — add an on-device speech language pack in '
+                            'system settings',
+                      ))
                 : installed.isEmpty
                     ? tr(
                         zh: '可用 · 使用系统已安装的语言包',

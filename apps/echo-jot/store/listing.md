@@ -21,7 +21,7 @@
 • **零网络权限**:应用未申请联网权限,你可以在系统设置里自己验证
 • **一次买断**:免费 30 条笔记,一次付费永久解锁无限笔记 + 全量导出,拒绝订阅
 
-**使用要求**:Android 12 及以上,且系统中已安装「设备端语音识别」语言包(在「系统设置 → 系统 → 语言与输入法 → 设备端语音识别」下载,通常中英文都可下载)。若系统没有该能力,应用会明确提示——我们绝不会为了"能用"把你的声音传到云端。
+**使用要求**:Android 12 及以上且系统已安装「设备端语音识别」语言包;或 iOS 15 及以上(离线听写语言由 iOS 提供,含中文、英文、日文、韩文等,不可自行下载)。Android 语言包(在「系统设置 → 系统 → 语言与输入法 → 设备端语音识别」下载,通常中英文都可下载)。若系统没有该能力,应用会明确提示——我们绝不会为了"能用"把你的声音传到云端。
 
 适合:会议速记、灵感捕捉、口述草稿,以及在意隐私的你。
 
@@ -46,7 +46,7 @@ EchoJot: tap the mic and start talking — **the text appears as you speak**, an
 • **Zero network permission** — verify it yourself in system settings
 • **Pay once** — 30 free notes; one unlock for unlimited notes and full export. Never a subscription
 
-**Requirements**: Android 12+ with an on-device speech recognition language pack installed (Settings → System → Languages & input → On-device speech recognition). If your system has no on-device recognition, the app tells you plainly — it will never send your voice to a server just to appear to work.
+**Requirements**: Android 12+ with an on-device speech recognition language pack installed, or iOS 15+ (offline dictation languages are provided by iOS — Chinese, English, Japanese, Korean, German, French, Spanish and more — and cannot be downloaded separately). On Android the pack is (Settings → System → Languages & input → On-device speech recognition). If your system has no on-device recognition, the app tells you plainly — it will never send your voice to a server just to appear to work.
 
 For meetings, ideas, spoken drafts, and anyone who cares about privacy.
 
