@@ -8,6 +8,11 @@
 	<string>EchoJot listens through the microphone to turn your speech into text on this device. Audio is never stored or uploaded.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>zh-Hans</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>EchoJot</string>
 	<key>CFBundleExecutable</key>

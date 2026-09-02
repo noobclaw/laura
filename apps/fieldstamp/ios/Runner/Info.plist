@@ -12,6 +12,11 @@
 	<string>FieldStamp saves a stamped photo to your Photos library only when you choose Save Image in the share sheet.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>zh-Hans</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>FieldStamp</string>
 	<key>CFBundleExecutable</key>

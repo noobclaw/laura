@@ -1,0 +1,3 @@
+/* Localized launcher name. The Android side keeps the same pair in
+   res/values/strings.xml and res/values-zh/strings.xml. */
+"CFBundleDisplayName" = "卫星过境";
