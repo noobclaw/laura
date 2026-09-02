@@ -80,10 +80,27 @@ class Tle {
   /// Parses the classic 3-line (name + 2 element lines) or bare 2-line form.
   /// Returns null when the lines are not a well-formed element set — callers
   /// treat that as "skip this record", never as a crash.
+  /// TLE modulo-10 checksum: digits summed, each '-' counts 1, everything
+  /// else 0; column 69 holds the result. A line that was OCR'd or hand-typed
+  /// with one wrong digit used to parse "successfully" into a silently wrong
+  /// orbit — now it is rejected.
+  static bool checksumOk(String line) {
+    if (line.length < 69) return true; // short lines were never checksummed
+    var sum = 0;
+    for (var i = 0; i < 68; i++) {
+      final c = line.codeUnitAt(i);
+      if (c >= 0x30 && c <= 0x39) sum += c - 0x30;
+      if (c == 0x2D) sum += 1;
+    }
+    final want = line.codeUnitAt(68) - 0x30;
+    return sum % 10 == want;
+  }
+
   static Tle? parse(String name, String l1, String l2) {
     try {
       if (l1.length < 63 || l2.length < 63) return null;
       if (!l1.startsWith('1 ') || !l2.startsWith('2 ')) return null;
+      if (!checksumOk(l1) || !checksumOk(l2)) return null;
 
       final satnum = l1.substring(2, 7).trim();
       if (satnum.isEmpty) return null;
@@ -129,10 +146,15 @@ class Tle {
   /// from copying a CelesTrak page. Tolerates blank lines, CRLF, and a missing
   /// name line (the satellite number stands in).
   static List<Tle> parseAll(String text) {
+    // Text copied out of Notes, a chat app or a browser's reader mode
+    // arrives with leading indentation, tabs and NBSPs; a TLE line never
+    // legitimately starts with whitespace, so trimming both ends is safe.
+    // CelesTrak's 3LE form prefixes the name line with "0 " — drop it.
     final lines = text
-        .split(RegExp(r'\r?\n'))
-        .map((l) => l.trimRight())
-        .where((l) => l.trim().isNotEmpty)
+        .split(RegExp(r'\r?\n|\r'))
+        .map((l) => l.replaceAll(' ', ' ').replaceAll('\t', ' ').trim())
+        .where((l) => l.isNotEmpty)
+        .map((l) => l.startsWith('0 ') && !l.startsWith('0 0') ? l.substring(2) : l)
         .toList();
     final out = <Tle>[];
     var i = 0;

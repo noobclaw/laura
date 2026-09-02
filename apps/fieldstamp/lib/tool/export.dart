@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -123,23 +124,42 @@ Uint8List _downscaleJpg(Uint8List bytes) {
   return img.encodeJpg(resized, quality: 80);
 }
 
+/// Where the share sheet should anchor. iPad presents it as a popover and
+/// share_plus refuses to open one without an origin rect — every export on
+/// iPad failed with a FlutterError before this was passed (audit R3).
+/// Call from a button's own context so the popover points at it.
+Rect shareOriginOf(BuildContext context) {
+  final box = context.findRenderObject() as RenderBox?;
+  if (box == null || !box.hasSize) {
+    final size = MediaQuery.sizeOf(context);
+    return Rect.fromCenter(
+        center: Offset(size.width / 2, size.height / 2), width: 1, height: 1);
+  }
+  return box.localToGlobal(Offset.zero) & box.size;
+}
+
 /// Write [data] to a temp file and open the native share sheet.
-Future<void> shareBytes(Uint8List data, String fileName, {String? text}) async {
+Future<void> shareBytes(Uint8List data, String fileName,
+    {String? text, Rect? origin}) async {
   final dir = await getTemporaryDirectory();
   final f = File('${dir.path}/$fileName');
   await f.writeAsBytes(data, flush: true);
-  await SharePlus.instance
-      .share(ShareParams(files: [XFile(f.path)], text: text));
+  await SharePlus.instance.share(ShareParams(
+    files: [XFile(f.path)],
+    text: text,
+    sharePositionOrigin: origin,
+  ));
 }
 
 /// Share the raw stamped JPEG files (the watermark is already burned in).
-Future<void> sharePhotos(
-    List<StampPhoto> photos, FieldStampStore store) async {
+Future<void> sharePhotos(List<StampPhoto> photos, FieldStampStore store,
+    {Rect? origin}) async {
   final files = <XFile>[];
   for (final p in photos) {
     final path = store.photoPath(p.fileName);
     if (await File(path).exists()) files.add(XFile(path));
   }
   if (files.isEmpty) return;
-  await SharePlus.instance.share(ShareParams(files: files));
+  await SharePlus.instance
+      .share(ShareParams(files: files, sharePositionOrigin: origin));
 }

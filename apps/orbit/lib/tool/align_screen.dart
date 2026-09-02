@@ -124,7 +124,11 @@ class _AlignScreenState extends State<AlignScreen>
     final finished = now.isAfter(pass.end);
     final inProgress = now.isAfter(pass.start) && !finished;
     final live = _live;
-    final declination = widget.store.site?.magneticDeclinationDeg ?? 0.0;
+    // Only a magnetic heading needs the user's declination; iOS hands us
+    // true north already, and adding it there double-corrects.
+    final declination = SensorHub.headingIsTrueNorth
+        ? 0.0
+        : (widget.store.site?.magneticDeclinationDeg ?? 0.0);
 
     // While the pass is running, aim at where the satellite actually is. Before
     // it starts, aim at the horizon point it will rise from.
@@ -532,7 +536,9 @@ class _Guidance extends StatelessWidget {
                       fontWeight: onTarget ? FontWeight.w600 : null,
                     ),
               ),
-            if (!noSensors && declination == 0) ...[
+            if (!noSensors &&
+                declination == 0 &&
+                !SensorHub.headingIsTrueNorth) ...[
               const SizedBox(height: 12),
               Text(
                 SensorHub.magneticNote,

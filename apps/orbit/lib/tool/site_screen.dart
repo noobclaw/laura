@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../core/l10n.dart';
 import 'app_theme.dart';
@@ -26,6 +27,7 @@ class _SiteScreenState extends State<SiteScreen> {
   bool _locating = false;
   bool _applying = false;
   String? _error;
+  LocationFailureKind? _errorKind;
   String? _manualError;
 
   @override
@@ -74,12 +76,48 @@ class _SiteScreenState extends State<SiteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr(zh: '观测点已更新', en: 'Observing site updated'))),
       );
+    } on LocationFailure catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _locating = false;
+        _error = e.message;
+        _errorKind = e.kind;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _locating = false;
         _error = e.toString();
+        _errorKind = LocationFailureKind.other;
       });
+    }
+  }
+
+  /// The exit that matches the failure — G2: a permanent refusal must lead
+  /// somewhere, not to a red box and nothing else.
+  Widget? _errorAction() {
+    switch (_errorKind) {
+      case LocationFailureKind.deniedForever:
+        return TextButton.icon(
+          onPressed: Geolocator.openAppSettings,
+          icon: const Icon(Icons.settings_outlined, size: 18),
+          label: Text(tr(zh: '去系统设置', en: 'Open Settings')),
+        );
+      case LocationFailureKind.serviceOff:
+        return TextButton.icon(
+          onPressed: Geolocator.openLocationSettings,
+          icon: const Icon(Icons.location_on_outlined, size: 18),
+          label: Text(tr(zh: '打开定位设置', en: 'Location settings')),
+        );
+      case LocationFailureKind.denied:
+        return TextButton.icon(
+          onPressed: _useGps,
+          icon: const Icon(Icons.refresh, size: 18),
+          label: Text(tr(zh: '重新申请', en: 'Ask again')),
+        );
+      case LocationFailureKind.other:
+      case null:
+        return null;
     }
   }
 
@@ -182,12 +220,25 @@ class _SiteScreenState extends State<SiteScreen> {
                             size: 18, color: scheme.onErrorContainer),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            _error!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: scheme.onErrorContainer,
-                                  height: 1.4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _error!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: scheme.onErrorContainer,
+                                      height: 1.4,
+                                    ),
+                              ),
+                              if (_errorAction() case final action?)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: action,
                                 ),
+                            ],
                           ),
                         ),
                       ],

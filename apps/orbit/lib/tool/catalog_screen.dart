@@ -62,7 +62,12 @@ class CatalogScreen extends StatelessWidget {
                 ),
         ),
         for (final e in rest.take(store.pro ? rest.length : 24))
-          _SatRow(entry: e, now: now, locked: !store.pro),
+          _SatRow(
+            entry: e,
+            now: now,
+            locked: !store.pro,
+            onLockedTap: () => showProSheet(context, store),
+          ),
         if (!store.pro && rest.length > 24)
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 12, 4, 0),
@@ -279,11 +284,20 @@ class _GroupHeader extends StatelessWidget {
 }
 
 class _SatRow extends StatelessWidget {
-  const _SatRow({required this.entry, required this.now, required this.locked});
+  const _SatRow({
+    required this.entry,
+    required this.now,
+    required this.locked,
+    this.onLockedTap,
+  });
 
   final SatEntry entry;
   final DateTime now;
   final bool locked;
+
+  /// A dimmed, padlocked row reads as tappable; it must lead to the paywall
+  /// rather than do nothing (acceptance item 6).
+  final VoidCallback? onLockedTap;
 
   @override
   Widget build(BuildContext context) {
@@ -300,7 +314,13 @@ class _SatRow extends StatelessWidget {
       opacity: locked ? 0.5 : 1.0,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Container(
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: locked ? onLockedTap : null,
+          child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: scheme.surfaceContainerHigh,
@@ -357,6 +377,8 @@ class _SatRow extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        ),
         ),
       ),
     );

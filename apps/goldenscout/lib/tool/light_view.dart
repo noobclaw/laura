@@ -60,7 +60,11 @@ class _LightViewState extends State<LightView> {
     }
     final lat = store.activeLat!;
     final lon = store.activeLon!;
-    final day = computeDayLight(widget.date, lat, lon);
+    // The device's own surroundings always show in the device zone; a saved
+    // far-away site shows in its own (longitude-estimated) clock instead of
+    // the meaningless "New York sunrise at 17:25 Beijing time".
+    final isHere = store.activeName == 'Current location';
+    final day = computeDayLight(widget.date, lat, lon, deviceZone: isHere);
     final now = DateTime.now();
     final refTime = widget.isToday ? now : DateTime(widget.date.year, widget.date.month, widget.date.day, 12);
     final sun = sunPosition(refTime.toUtc(), lat, lon);
@@ -76,7 +80,7 @@ class _LightViewState extends State<LightView> {
           children: [
             _GoldenHero(day: day, now: widget.isToday ? now : null),
             const SizedBox(height: 16),
-            _LocationHeader(store: store),
+            _LocationHeader(store: store, day: day),
             const SizedBox(height: 12),
             CompassRose(
               sunriseAz: day.sunrise.azimuth,
@@ -92,7 +96,10 @@ class _LightViewState extends State<LightView> {
             if (widget.isToday) const SizedBox(height: 16),
             _Timeline(day: day, now: widget.isToday ? now : null),
             const SizedBox(height: 16),
-            _MoonCard(phase: phase, times: computeMoonTimes(widget.date, lat, lon), pro: store.pro),
+            _MoonCard(
+                phase: phase,
+                times: computeMoonTimes(widget.date, lat, lon, deviceZone: isHere),
+                pro: store.pro),
           ],
         );
       },
@@ -276,8 +283,24 @@ class _GoldenHero extends StatelessWidget {
   }
 }
 
+/// What clock a far-away site's times are in. Honest about the estimate:
+/// longitude gives the zone to within an hour but knows nothing about DST.
+String _zoneNote(DayLight day) {
+  if (!day.zoneEstimated) {
+    return tr(zh: '时间按设备时区显示', en: 'times in device timezone');
+  }
+  final h = day.zone.inHours;
+  final sign = h >= 0 ? '+' : '−';
+  return tr(
+    zh: '按经度估算 UTC$sign${h.abs()} 显示,未计夏令时',
+    en: 'shown in UTC$sign${h.abs()} (estimated from longitude, no DST)',
+  );
+}
+
 class _LocationHeader extends StatelessWidget {
-  const _LocationHeader({required this.store});
+  const _LocationHeader({required this.store, required this.day});
+
+  final DayLight day;
   final LocationStore store;
 
   @override
@@ -305,9 +328,7 @@ class _LocationHeader extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis),
               Text(
-                isHere
-                    ? coord
-                    : '$coord · ${tr(zh: '时间按设备时区显示', en: 'times in device timezone')}',
+                isHere ? coord : '$coord · ${_zoneNote(day)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -525,12 +546,18 @@ class _Timeline extends StatelessWidget {
     );
   }
 
-  bool _isPast(DateTime? t) => t != null && now != null && t.isBefore(now!);
+  bool _isPast(DateTime? t) =>
+      t != null && now != null && day.instantOf(t).isBefore(now!);
 
+  /// "23:58", or "00:04 +1" when the event belongs to the next calendar
+  /// day (midnight sun) — so a photographer in Reykjavik in June is not
+  /// told the Sun sets before it rises.
   String _fmt(DateTime t) {
     final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
-    return '$h:$m';
+    final off = day.dayOffset(t);
+    if (off == 0) return '$h:$m';
+    return '$h:$m ${off > 0 ? '+' : '−'}${off.abs()}';
   }
 
   Widget _banner(BuildContext context, IconData icon, String title, String body) {

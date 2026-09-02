@@ -228,9 +228,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Future<void> _shareImages(FieldStampStore store) async {
     final photos = _selectedPhotos(store);
     if (photos.isEmpty) return;
+    final origin = shareOriginOf(context);
     setState(() => _busy = true);
     try {
-      await sharePhotos(photos, store);
+      await sharePhotos(photos, store, origin: origin);
+    } catch (e) {
+      _snack(tr(zh: '分享失败:$e', en: 'Share failed: $e'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -244,12 +247,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
       return;
     }
     if (!_enforceLimit(store, photos.length)) return;
+    final origin = shareOriginOf(context);
     setState(() => _busy = true);
     try {
       final bytes = await buildPdf(photos, store);
       final name = _fileStamp('fieldstamp-report', 'pdf');
       await shareBytes(bytes, name,
-          text: tr(zh: 'FieldStamp 巡检报告', en: 'FieldStamp inspection report'));
+          text: tr(zh: 'FieldStamp 巡检报告', en: 'FieldStamp inspection report'),
+          origin: origin);
     } catch (e) {
       _snack(tr(zh: 'PDF 导出失败:$e', en: 'PDF export failed: $e'));
     } finally {
@@ -265,12 +270,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
       return;
     }
     if (!_enforceLimit(store, photos.length)) return;
+    final origin = shareOriginOf(context);
     setState(() => _busy = true);
     try {
       final csv = buildCsv(photos, store);
       final name = _fileStamp('fieldstamp-ledger', 'csv');
       await shareBytes(utf8.encode(csv), name,
-          text: tr(zh: 'FieldStamp CSV 台账', en: 'FieldStamp CSV ledger'));
+          text: tr(zh: 'FieldStamp CSV 台账', en: 'FieldStamp CSV ledger'),
+          origin: origin);
     } catch (e) {
       _snack(tr(zh: 'CSV 导出失败:$e', en: 'CSV export failed: $e'));
     } finally {
@@ -392,9 +399,21 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       appBar: AppBar(
         title: Text(tr(zh: '照片', en: 'Photo')),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.ios_share),
-            onPressed: () => sharePhotos([p], store),
+          Builder(
+            builder: (btnCtx) => IconButton(
+              icon: const Icon(Icons.ios_share),
+              onPressed: () async {
+                try {
+                  await sharePhotos([p], store,
+                      origin: shareOriginOf(btnCtx));
+                } catch (e) {
+                  if (!btnCtx.mounted) return;
+                  ScaffoldMessenger.of(btnCtx).showSnackBar(SnackBar(
+                      content: Text(
+                          tr(zh: '分享失败:$e', en: 'Share failed: $e'))));
+                }
+              },
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),

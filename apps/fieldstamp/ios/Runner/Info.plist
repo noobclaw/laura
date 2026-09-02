@@ -8,6 +8,8 @@
 	<string>FieldStamp uses the camera to take geo-stamped field photos. Images stay on your device.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>FieldStamp stamps your photos with GPS coordinates and altitude. Your location stays on your device and is never uploaded.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>FieldStamp saves a stamped photo to your Photos library only when you choose Save Image in the share sheet.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

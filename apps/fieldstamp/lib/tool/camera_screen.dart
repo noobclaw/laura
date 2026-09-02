@@ -25,7 +25,19 @@ class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
   CameraController? _controller;
   String? _cameraError;
+
+  /// True when the error is a permission refusal, which gets a "Settings"
+  /// button instead of a pointless "Retry".
+  bool _cameraDenied = false;
   bool _capturing = false;
+
+  /// Only one initialisation may be in flight. The permission prompt that
+  /// `initialize()` itself raises sends the app inactive → resumed while
+  /// the first call is still pending; without this guard `resumed` started a
+  /// second controller and the two raced for the device (black preview,
+  /// error page, or a leaked session — 2026-09-02 audit R2).
+  Future<void>? _initFuture;
+  int _initGen = 0;
 
   @override
   void initState() {
@@ -34,14 +46,27 @@ class _CameraScreenState extends State<CameraScreen>
     _initCamera();
   }
 
-  Future<void> _initCamera() async {
+  Future<void> _initCamera() {
+    final inFlight = _initFuture;
+    if (inFlight != null) return inFlight;
+    final f = _doInitCamera();
+    _initFuture = f;
+    return f.whenComplete(() {
+      if (identical(_initFuture, f)) _initFuture = null;
+    });
+  }
+
+  Future<void> _doInitCamera() async {
+    final gen = ++_initGen;
+    // Drop whatever controller exists before making a new one, so there is
+    // never a moment with two live sessions.
+    final old = _controller;
+    _controller = null;
+    if (old != null) await old.dispose();
     try {
       final cams = await availableCameras();
       if (cams.isEmpty) {
-        if (mounted) {
-          setState(() => _cameraError =
-              tr(zh: '此设备上未找到相机', en: 'No camera found on this device'));
-        }
+        _fail(tr(zh: '此设备上未找到相机', en: 'No camera found on this device'));
         return;
       }
       final back = cams.firstWhere(
@@ -54,33 +79,70 @@ class _CameraScreenState extends State<CameraScreen>
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
-      _controller = controller;
       await controller.initialize();
-      if (mounted) setState(() => _cameraError = null);
-    } catch (e) {
-      if (mounted) {
-        setState(() => _cameraError =
-            tr(zh: '相机不可用:$e', en: 'Camera unavailable: $e'));
+      if (gen != _initGen || !mounted) {
+        // Superseded (e.g. the screen went to the background meanwhile);
+        // make sure the orphan releases the device.
+        await controller.dispose();
+        return;
       }
+      setState(() {
+        _controller = controller;
+        _cameraError = null;
+        _cameraDenied = false;
+      });
+    } on CameraException catch (e) {
+      if (gen != _initGen) return;
+      // Codes from camera_android_camerax / camera_avfoundation.
+      const denied = {
+        'CameraAccessDenied',
+        'CameraAccessDeniedWithoutPrompt',
+        'CameraAccessRestricted',
+        'cameraPermission',
+      };
+      if (denied.contains(e.code)) {
+        _fail(
+          tr(
+            zh: '未授予相机权限。FieldStamp 需要相机才能拍摄取证照片。',
+            en: 'Camera permission not granted. FieldStamp needs the camera '
+                'to take stamped photos.',
+          ),
+          denied: true,
+        );
+      } else {
+        _fail(tr(
+          zh: '相机不可用:${e.description ?? e.code}',
+          en: 'Camera unavailable: ${e.description ?? e.code}',
+        ));
+      }
+    } catch (e) {
+      if (gen != _initGen) return;
+      _fail(tr(zh: '相机不可用:$e', en: 'Camera unavailable: $e'));
     }
+  }
+
+  void _fail(String message, {bool denied = false}) {
+    if (!mounted) return;
+    setState(() {
+      _cameraError = message;
+      _cameraDenied = denied;
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final c = _controller;
-    if (state == AppLifecycleState.inactive) {
-      // Release the camera when leaving the foreground.
-      if (c != null && c.value.isInitialized) {
-        c.dispose();
-        _controller = null;
-      }
+    // `inactive` also fires for the permission dialog and the notification
+    // shade; tearing the camera down for those caused the double-init race.
+    // Only a real trip to the background releases the device.
+    if (state == AppLifecycleState.paused) {
+      _initGen++; // invalidate any init still in flight
+      final c = _controller;
+      _controller = null;
+      c?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      // Re-acquire it on return. The controller was nulled above, so the
-      // old guard (`c == null` → return) wrongly skipped re-init and left the
-      // preview stuck forever — re-init whenever there's no live controller.
-      if (c == null || !c.value.isInitialized) {
-        _initCamera();
-      }
+      if (_controller == null) _initCamera();
+      // The user may have just flipped the switch we asked them to.
+      if (!widget.sensors.locationReady) widget.sensors.retryLocation();
     }
   }
 
@@ -186,9 +248,22 @@ class _CameraScreenState extends State<CameraScreen>
                 style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 16),
-              FilledButton.tonal(
-                onPressed: _initCamera,
-                child: Text(tr(zh: '重试', en: 'Retry')),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  if (_cameraDenied)
+                    FilledButton.icon(
+                      onPressed: SensorHub.openAppSettings,
+                      icon: const Icon(Icons.settings_outlined),
+                      label: Text(tr(zh: '去系统设置', en: 'Open Settings')),
+                    ),
+                  FilledButton.tonal(
+                    onPressed: _initCamera,
+                    child: Text(tr(zh: '重试', en: 'Retry')),
+                  ),
+                ],
               ),
             ],
           ),
@@ -296,12 +371,8 @@ class _CameraScreenState extends State<CameraScreen>
                     fontFeatures: [FontFeature.tabularFigures()]),
               ),
               if (widget.sensors.locationError != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  widget.sensors.locationError!,
-                  style: const TextStyle(
-                      color: Colors.orangeAccent, fontSize: 11),
-                ),
+                const SizedBox(height: 8),
+                _LocationIssue(sensors: widget.sensors),
               ],
             ],
           ),
@@ -422,4 +493,92 @@ Future<String?> _promptName(BuildContext context) {
       ],
     ),
   );
+}
+
+/// The positioning problem, with the one button that fixes it. Replaces the
+/// 11 px orange line that told users "permission denied" and left them there.
+class _LocationIssue extends StatelessWidget {
+  const _LocationIssue({required this.sensors});
+
+  final SensorHub sensors;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = sensors.locationState;
+    final message = sensors.locationError ?? '';
+    String? hint;
+    String? action;
+    VoidCallback? onAction;
+    switch (state) {
+      case LocationState.serviceOff:
+        hint = tr(zh: '打开系统定位开关后会自动恢复。', en: 'Turn on location and it will resume.');
+        action = tr(zh: '打开定位设置', en: 'Location settings');
+        onAction = SensorHub.openLocationSettings;
+      case LocationState.deniedForever:
+        hint = tr(
+          zh: '请在系统设置里允许 FieldStamp 使用定位。',
+          en: 'Allow FieldStamp to use location in Settings.',
+        );
+        action = tr(zh: '去系统设置', en: 'Open Settings');
+        onAction = SensorHub.openAppSettings;
+      case LocationState.denied:
+        hint = tr(zh: '没有定位,照片只会烧入时间。', en: 'Without it photos carry only a timestamp.');
+        action = tr(zh: '重新申请', en: 'Ask again');
+        onAction = sensors.retryLocation;
+      case LocationState.error:
+        hint = sensors.locationDetail;
+        action = tr(zh: '重试', en: 'Retry');
+        onAction = sensors.retryLocation;
+      case LocationState.ok:
+        // Stale fix: keep the last coordinates visible above, explain here.
+        final s = sensors.secondsSinceFix;
+        hint = s == null
+            ? null
+            : tr(
+                zh: '上次定位 ${s ~/ 60} 分钟前;在此之前拍的照片不会烧入坐标。',
+                en: 'Last fix ${s ~/ 60} min ago; photos taken now carry no coordinates.',
+              );
+      case LocationState.pending:
+        break;
+    }
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.6)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.location_off_outlined, size: 18, color: Colors.orangeAccent),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(message,
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                if (hint != null)
+                  Text(hint,
+                      style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              ],
+            ),
+          ),
+          if (action != null) ...[
+            const SizedBox(width: 8),
+            FilledButton.tonal(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                visualDensity: VisualDensity.compact,
+              ),
+              onPressed: onAction,
+              child: Text(action),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }

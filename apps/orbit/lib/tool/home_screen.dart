@@ -619,8 +619,11 @@ class _StaleBanner extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      // A nudge, not an alarm: month-old elements still predict a pass to
+      // within a few minutes, and every fresh install is weeks old by the
+      // time it reaches a phone. Red made the app look broken on day one.
       child: Material(
-        color: scheme.errorContainer.withValues(alpha: 0.55),
+        color: scheme.tertiaryContainer.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -629,21 +632,21 @@ class _StaleBanner extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
             child: Row(
               children: [
-                Icon(Icons.update, size: 20, color: scheme.onErrorContainer),
+                Icon(Icons.update, size: 20, color: scheme.onTertiaryContainer),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     tr(
-                      zh: '轨道数据已超过 30 天,过境时刻可能偏差几分钟。点这里更新。',
-                      en: 'Orbital data is over 30 days old — times may drift by minutes. Tap to update.',
+                      zh: '轨道数据已超过 30 天,过境时刻可能偏差几分钟。粘贴一段新的 TLE 即可更新。',
+                      en: 'Orbital data is over 30 days old — times may drift by a few minutes. Paste fresh TLEs to update.',
                     ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onErrorContainer,
+                          color: scheme.onTertiaryContainer,
                           height: 1.35,
                         ),
                   ),
                 ),
-                Icon(Icons.chevron_right, color: scheme.onErrorContainer),
+                Icon(Icons.chevron_right, color: scheme.onTertiaryContainer),
               ],
             ),
           ),

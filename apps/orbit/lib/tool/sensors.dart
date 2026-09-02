@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,21 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 import '../core/l10n.dart';
 
+/// Why a one-shot fix failed, so the screen can offer the matching exit.
+enum LocationFailureKind { denied, deniedForever, serviceOff, other }
+
+class LocationFailure implements Exception {
+  LocationFailure(this.kind, this.message);
+
+  final LocationFailureKind kind;
+
+  /// Finished, translated sentence for the user.
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// The two numbers the alignment screen needs: which way the phone points
 /// (magnetometer) and how far back it is tilted (accelerometer). Together they
 /// turn "azimuth 312, elevation 47" into "turn until the needle lines up, then
@@ -16,9 +32,15 @@ import '../core/l10n.dart';
 /// Both are optional. A device with no magnetometer still gets the numbers and
 /// a written instruction — the screen degrades, it never blanks.
 ///
-/// ⚠️ The heading reported here is **magnetic**, not true north. See
-/// [magneticNote] and the declination setting on the site screen.
+/// ⚠️ Heading reference differs by platform — see [headingIsTrueNorth]. On
+/// Android it is **magnetic** and the alignment screen adds the user's
+/// declination; on iOS Core Location already applies declination, so adding
+/// it again would double-correct (2026-09-02 audit).
 class SensorHub extends ChangeNotifier {
+  /// iOS: `CLHeading.trueHeading` (declination applied by the OS from the
+  /// device's location). Android: the rotation-vector azimuth, i.e. magnetic.
+  static final bool headingIsTrueNorth = Platform.isIOS;
+
   double? _headingDeg;
   double? _pitchDeg;
   StreamSubscription<CompassEvent>? _compassSub;
@@ -41,10 +63,15 @@ class SensorHub extends ChangeNotifier {
   bool get hasTilt => _pitchDeg != null;
   bool get running => _users > 0;
 
-  static String get magneticNote => tr(
-        zh: '罗盘读的是磁北。你所在地的磁偏角可以在观测点页里填,填了才是真方位。',
-        en: 'The compass reads magnetic north. Set your local magnetic declination on the site screen to align against true bearings.',
-      );
+  static String get magneticNote => headingIsTrueNorth
+      ? tr(
+          zh: '罗盘已按你所在地自动换算为真北。',
+          en: 'The compass is already corrected to true north for your location.',
+        )
+      : tr(
+          zh: '罗盘读的是磁北。你所在地的磁偏角可以在观测点页里填,填了才是真方位。',
+          en: 'The compass reads magnetic north. Set your local magnetic declination on the site screen to align against true bearings.',
+        );
 
   /// Begin (or join) a sensor session. Every [acquire] must be matched by a
   /// [release].
@@ -73,10 +100,20 @@ class SensorHub extends ChangeNotifier {
       if (events == null) return;
       _compassSub = events.listen(
         (e) {
-          final h = e.heading;
+          // This screen aims with the BACK of the phone (see pitch below).
+          // On iOS `heading` is the bearing of the phone's top edge, which
+          // is up to 180° off once the phone is held upright to point at
+          // the sky; `headingForCameraMode` is the plugin's yaw out of the
+          // back, exactly the axis we want. Android fills only `heading`,
+          // and its rotation-vector azimuth is fine for an upright phone.
+          final h = Platform.isIOS
+              ? (e.headingForCameraMode ?? e.heading)
+              : e.heading;
           if (h == null) return;
-          // iOS reports -1 when heading is unavailable; treating that as a
-          // bearing would peg the dial to 359 degrees and look confident.
+          // Core Location reports -1 while the heading is unavailable (no
+          // location permission yet, needs calibration). The old guard of
+          // `< -180` let that through and pegged the dial at 359°.
+          if (Platform.isIOS && h < 0) return;
           if (h < -180 || h > 360) return;
           final normalised = h < 0 ? h + 360.0 : h;
           if (_headingDeg != null && (_headingDeg! - normalised).abs() < 0.3) {
@@ -121,32 +158,46 @@ class SensorHub extends ChangeNotifier {
     }
   }
 
-  /// A one-shot GPS fix. Throws a ready-to-display message on every failure
-  /// path, so no caller can accidentally fail silently.
+  /// A one-shot GPS fix. Throws a [LocationFailure] on every failure path —
+  /// a message the UI can show plus the [LocationFailureKind] that decides
+  /// which button to put next to it — so no caller can fail silently or
+  /// leave the user without an exit.
   static Future<({double lat, double lon, double altKm})> currentFix() async {
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
-        throw tr(
-          zh: '定位服务未开启——请到系统设置打开定位,或手动输入坐标',
-          en: 'Location services are off — turn them on in system settings, or enter coordinates manually',
-        );
-      }
+      // Permission first, service switch second: the OS prompt is what
+      // creates the Settings toggle on iOS, and a user who turns the
+      // service on afterwards should not be asked from scratch.
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.unableToDetermine) {
         permission = await Geolocator.requestPermission();
       }
       if (permission == LocationPermission.deniedForever) {
-        throw tr(
-          zh: '定位权限被永久拒绝——请到系统设置里开启,或手动输入坐标',
-          en: 'Location permission permanently denied — enable it in system settings, or enter coordinates manually',
+        throw LocationFailure(
+          LocationFailureKind.deniedForever,
+          tr(
+            zh: '定位权限已被永久拒绝——请到系统设置里开启,或手动输入坐标',
+            en: 'Location permission permanently denied — enable it in Settings, or enter coordinates manually',
+          ),
         );
       }
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.unableToDetermine) {
-        throw tr(
-          zh: '定位权限被拒绝——可以手动输入坐标继续',
-          en: 'Location permission denied — you can enter coordinates manually instead',
+        throw LocationFailure(
+          LocationFailureKind.denied,
+          tr(
+            zh: '定位权限被拒绝——可以手动输入坐标继续',
+            en: 'Location permission denied — you can enter coordinates manually instead',
+          ),
+        );
+      }
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        throw LocationFailure(
+          LocationFailureKind.serviceOff,
+          tr(
+            zh: '定位服务未开启——请打开系统定位,或手动输入坐标',
+            en: 'Location services are off — turn them on, or enter coordinates manually',
+          ),
         );
       }
       try {
@@ -168,21 +219,27 @@ class SensorHub extends ChangeNotifier {
             altKm: last.altitude / 1000.0
           );
         }
-        throw tr(
-          zh: 'GPS 定位超时——到窗边或室外再试,或手动输入坐标',
-          en: 'GPS timed out — try near a window or outdoors, or enter coordinates manually',
+        throw LocationFailure(
+          LocationFailureKind.other,
+          tr(
+            zh: 'GPS 定位超时——到窗边或室外再试,或手动输入坐标',
+            en: 'GPS timed out — try near a window or outdoors, or enter coordinates manually',
+          ),
         );
       }
-    } on String {
-      rethrow; // already a finished, translated sentence
+    } on LocationFailure {
+      rethrow; // already classified and translated
     } catch (e) {
       // Anything else the platform can raise — the service being switched off
       // mid-fix, a permission request already in flight, an OEM quirk. Never
       // let a raw PlatformException string reach a Chinese-language screen.
       debugPrint('location failed: $e');
-      throw tr(
-        zh: '定位失败——可以手动输入坐标继续',
-        en: 'Could not get a location fix — you can enter coordinates manually instead',
+      throw LocationFailure(
+        LocationFailureKind.other,
+        tr(
+          zh: '定位失败——可以手动输入坐标继续',
+          en: 'Could not get a location fix — you can enter coordinates manually instead',
+        ),
       );
     }
   }

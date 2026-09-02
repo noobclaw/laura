@@ -16,7 +16,7 @@ ISS (ZARYA)
 const String _hstTle = '''
 HST
 1 20580U 90037B   26214.16388447  .00005559  00000+0  17148-3 0  9997
-2 20580  28.4694 179.5121 0002418 268.8425  91.1832 15.14063834782404
+2 20580  28.4694 179.5121 0002418 268.8425  91.1832 15.14063834782406
 ''';
 
 /// Beijing, a mid-latitude site well inside the ISS ground track.
@@ -217,7 +217,7 @@ void main() {
       // Same object, epoch a day later.
       final newer = SatelliteCatalog.parse('''
 ISS (ZARYA)
-1 25544U 98067A   26215.50635181  .00006342  00000+0  12183-3 0  9996
+1 25544U 98067A   26215.50635181  .00006342  00000+0  12183-3 0  9997
 2 25544  51.6315  70.8679 0007172   4.7554 355.3502 15.49313226578933
 ''', imported: true);
       final merged = SatelliteCatalog.merge(bundled, newer);
@@ -233,8 +233,8 @@ ISS (ZARYA)
     test('deep-space objects are refused at the door', () {
       final entries = SatelliteCatalog.parse('''
 GEO TEST
-1 40000U 14001A   26214.50000000  .00000000  00000+0  00000+0 0  9995
-2 40000   0.0200  95.0000 0002000 100.0000 260.0000  1.00270000 40000
+1 40000U 14001A   26214.50000000  .00000000  00000+0  00000+0 0  9998
+2 40000   0.0200  95.0000 0002000 100.0000 260.0000  1.00270000 40007
 ''');
       expect(entries, isEmpty);
     });

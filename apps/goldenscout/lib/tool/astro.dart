@@ -258,11 +258,20 @@ class SunAltitudes {
   static const double goldenHigh = 6.0; // golden hour upper edge
 }
 
-/// The full day's Sun schedule for one location, in local time.
+/// The full day's Sun schedule for one location.
+///
+/// Every time in here is a *wall-clock* value in [zone]: when [zoneEstimated]
+/// is false that is the device's own zone and the DateTimes are ordinary
+/// local ones; when true the location is far from the device and the times
+/// are shifted UTC DateTimes whose `.hour/.minute/.day` read as the
+/// location's clock (estimated from longitude, no DST). Use [instantOf] to
+/// get back a real instant for "is this in the past" comparisons.
 class DayLight {
-  final DateTime date; // local calendar day (date-only)
+  final DateTime date; // the requested calendar day (date-only)
   final double lat;
   final double lon;
+  final Duration zone;
+  final bool zoneEstimated;
 
   final LightMoment dawnCivil; // first light, blue hour begins (-6 rising)
   final LightMoment goldenStartAm; // -4 rising
@@ -281,6 +290,8 @@ class DayLight {
     required this.date,
     required this.lat,
     required this.lon,
+    required this.zone,
+    required this.zoneEstimated,
     required this.dawnCivil,
     required this.goldenStartAm,
     required this.sunrise,
@@ -302,16 +313,64 @@ class DayLight {
     if (r == null || s == null) return null;
     return s.difference(r);
   }
+
+  /// The real instant behind a displayed time (see class doc).
+  DateTime instantOf(DateTime shown) =>
+      zoneEstimated ? shown.subtract(zone) : shown;
+
+  /// Calendar-day offset of a displayed time from [date]: +1 for the
+  /// midnight-sun case where sunset is 00:04 tomorrow, −1 for a dawn that
+  /// belongs to the previous date; 0 otherwise. The UI appends "+1"/"−1".
+  int dayOffset(DateTime shown) =>
+      DateTime.utc(shown.year, shown.month, shown.day)
+          .difference(DateTime.utc(date.year, date.month, date.day))
+          .inDays;
+}
+
+/// Which clock to show a far-away location's times in.
+///
+/// For the device's own surroundings (and anywhere within a couple of hours
+/// of it, which covers DST and wide zones like Spain-on-CET) the device
+/// zone is exactly right. Beyond that the device zone is meaningless to a
+/// photographer planning a shoot in New York from Beijing, so estimate the
+/// location's zone from longitude — labelled as such, no DST.
+({Duration zone, bool estimated}) zoneForLocation(double lon, DateTime onDate,
+    {bool forceDevice = false}) {
+  final device = onDate.timeZoneOffset;
+  final solar = Duration(minutes: (lon / 15 * 60).round());
+  if (forceDevice || (device - solar).abs() <= const Duration(minutes: 150)) {
+    return (zone: device, estimated: false);
+  }
+  return (zone: Duration(hours: (lon / 15).round()), estimated: true);
 }
 
 /// Compute the Sun schedule for [localDate] at ([lat], [lon]).
 ///
-/// Samples the Sun's altitude minute-by-minute across the local calendar day
-/// and interpolates threshold crossings. Times come back in the device's local
-/// timezone (correct for the current-location case; for a far manual location
-/// they are still the device timezone — the UI notes this).
-DayLight computeDayLight(DateTime localDate, double lat, double lon) {
-  final dayStart = DateTime(localDate.year, localDate.month, localDate.day);
+/// Samples the Sun's altitude minute-by-minute across the location's *solar
+/// day* — the 24 h centred on its mean solar noon — and interpolates
+/// threshold crossings. Centring on solar noon (instead of the device's
+/// calendar midnight, which 2026-09-02 audit showed drops sunrise for New
+/// York viewed from Beijing and sunset for Iceland in June) guarantees the
+/// morning events sit before the peak and the evening ones after it, for any
+/// location and any latitude short of the polar cases.
+///
+/// [deviceZone] forces display in the device's zone (the current-location
+/// case); [zoneOverride] pins an explicit UTC offset (tests, and any future
+/// per-site zone setting). Otherwise see [zoneForLocation].
+DayLight computeDayLight(DateTime localDate, double lat, double lon,
+    {bool deviceZone = false, Duration? zoneOverride}) {
+  final z = zoneOverride != null
+      ? (zone: zoneOverride, estimated: true)
+      : zoneForLocation(lon, localDate, forceDevice: deviceZone);
+  final zone = z.zone;
+  final date = DateTime(localDate.year, localDate.month, localDate.day);
+
+  // Mean solar noon of the requested date at this longitude, as an instant.
+  final noonUtc = DateTime.utc(localDate.year, localDate.month, localDate.day, 12)
+      .subtract(Duration(minutes: (lon / 15 * 60).round()));
+  final windowStart = noonUtc.subtract(const Duration(hours: 12));
+  DateTime show(DateTime utc) => z.estimated ? utc.add(zone) : utc.toLocal();
+
   const stepMinutes = 1;
   const samples = 24 * 60 ~/ stepMinutes; // 1440
 
@@ -319,9 +378,9 @@ DayLight computeDayLight(DateTime localDate, double lat, double lon) {
   final alts = <double>[];
   final azis = <double>[];
   for (var i = 0; i <= samples; i++) {
-    final t = dayStart.add(Duration(minutes: i * stepMinutes));
-    final p = sunPosition(t.toUtc(), lat, lon);
-    times.add(t);
+    final utc = windowStart.add(Duration(minutes: i * stepMinutes));
+    final p = sunPosition(utc, lat, lon);
+    times.add(show(utc));
     alts.add(p.altitude);
     azis.add(p.azimuth);
   }
@@ -359,9 +418,11 @@ DayLight computeDayLight(DateTime localDate, double lat, double lon) {
   final polarNight = noonAltitude < SunAltitudes.sunrise;
 
   return DayLight(
-    date: dayStart,
+    date: date,
     lat: lat,
     lon: lon,
+    zone: zone,
+    zoneEstimated: z.estimated,
     dawnCivil: cross(SunAltitudes.civil, rising: true),
     goldenStartAm: cross(SunAltitudes.goldenLow, rising: true),
     sunrise: cross(SunAltitudes.sunrise, rising: true),
@@ -384,13 +445,17 @@ LightMoment _interp(List<DateTime> times, List<double> alts, List<double> azis,
   final t0 = times[i - 1].millisecondsSinceEpoch;
   final t1 = times[i].millisecondsSinceEpoch;
   final tMs = (t0 + (t1 - t0) * frac).round();
+  // Keep the same frame as the samples: they are shifted-UTC DateTimes when
+  // the zone is estimated, and building a local DateTime from those ms
+  // would add the device offset a second time.
+  final isUtc = times[i].isUtc;
   // Azimuth can wrap 360->0 between samples; interpolate on the short arc.
   var z0 = azis[i - 1], z1 = azis[i];
   var dz = z1 - z0;
   if (dz > 180) dz -= 360;
   if (dz < -180) dz += 360;
   final az = normDeg(z0 + dz * frac);
-  return LightMoment(DateTime.fromMillisecondsSinceEpoch(tMs), az);
+  return LightMoment(DateTime.fromMillisecondsSinceEpoch(tMs, isUtc: isUtc), az);
 }
 
 /// Moonrise / moonset for [localDate] at ([lat], [lon]) by the same sampling
@@ -402,8 +467,19 @@ class MoonTimes {
   const MoonTimes(this.rise, this.set);
 }
 
-MoonTimes computeMoonTimes(DateTime localDate, double lat, double lon) {
-  final dayStart = DateTime(localDate.year, localDate.month, localDate.day);
+/// Moonrise / moonset for the same solar-day window and display zone as
+/// [computeDayLight] (see there for why the window is centred on the
+/// location's noon rather than the device's midnight).
+MoonTimes computeMoonTimes(DateTime localDate, double lat, double lon,
+    {bool deviceZone = false, Duration? zoneOverride}) {
+  final z = zoneOverride != null
+      ? (zone: zoneOverride, estimated: true)
+      : zoneForLocation(lon, localDate, forceDevice: deviceZone);
+  final noonUtc = DateTime.utc(localDate.year, localDate.month, localDate.day, 12)
+      .subtract(Duration(minutes: (lon / 15 * 60).round()));
+  final windowStart = noonUtc.subtract(const Duration(hours: 12));
+  DateTime show(DateTime utc) => z.estimated ? utc.add(z.zone) : utc.toLocal();
+
   const stepMinutes = 5;
   const samples = 24 * 60 ~/ stepMinutes;
   const moonRiseAlt = 0.125; // approx horizon incl. refraction + parallax net
@@ -411,20 +487,20 @@ MoonTimes computeMoonTimes(DateTime localDate, double lat, double lon) {
   DateTime? rise;
   DateTime? set;
   double? prevAlt;
-  DateTime? prevTime;
+  DateTime? prevUtc;
   for (var i = 0; i <= samples; i++) {
-    final t = dayStart.add(Duration(minutes: i * stepMinutes));
-    final alt = moonPosition(t.toUtc(), lat, lon).altitude;
-    if (prevAlt != null && prevTime != null) {
+    final utc = windowStart.add(Duration(minutes: i * stepMinutes));
+    final alt = moonPosition(utc, lat, lon).altitude;
+    if (prevAlt != null && prevUtc != null) {
       if (prevAlt < moonRiseAlt && alt >= moonRiseAlt && rise == null) {
-        rise = _lerpTime(prevTime, t, prevAlt, alt, moonRiseAlt);
+        rise = show(_lerpTime(prevUtc, utc, prevAlt, alt, moonRiseAlt));
       }
       if (prevAlt >= moonRiseAlt && alt < moonRiseAlt && set == null) {
-        set = _lerpTime(prevTime, t, prevAlt, alt, moonRiseAlt);
+        set = show(_lerpTime(prevUtc, utc, prevAlt, alt, moonRiseAlt));
       }
     }
     prevAlt = alt;
-    prevTime = t;
+    prevUtc = utc;
   }
   return MoonTimes(rise, set);
 }
@@ -433,7 +509,7 @@ DateTime _lerpTime(DateTime t0, DateTime t1, double a0, double a1, double thr) {
   final frac = (thr - a0) / (a1 - a0);
   final ms = t0.millisecondsSinceEpoch +
       ((t1.millisecondsSinceEpoch - t0.millisecondsSinceEpoch) * frac).round();
-  return DateTime.fromMillisecondsSinceEpoch(ms);
+  return DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
 }
 
 /// Map a compass azimuth to a 16-point rose label (e.g. "NE", "SSW").

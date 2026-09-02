@@ -255,9 +255,9 @@ ElementFreshness freshnessOf(double ageDays) {
 String freshnessLabel(ElementFreshness f) {
   switch (f) {
     case ElementFreshness.fresh:
-      return tr(zh: '精确', en: 'Accurate');
+      return tr(zh: '秒级精度', en: 'Accurate to seconds');
     case ElementFreshness.aging:
-      return tr(zh: '分钟级偏差', en: 'Minutes of drift');
+      return tr(zh: '分钟级精度', en: 'Accurate to minutes');
     case ElementFreshness.stale:
       return tr(zh: '建议更新', en: 'Update recommended');
   }
