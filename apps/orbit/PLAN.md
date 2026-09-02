@@ -148,3 +148,11 @@ English: satellite tracker, ISS pass, space station spotting, satellite pass pre
 7. 「更新轨道数据」→ 粘贴任意一段 TLE 文本，显示解析成功条数；粘贴垃圾文本，显示失败原因而不是崩溃。
 8. 边界：把系统时区改到别的时区，过境时刻应整体平移而不是错乱；飞行模式下全部功能照常（本来就不联网）。
 9. 深色/浅色模式各看一遍首页与详情页，都不该有看不清的文字或糊掉的图。
+
+## 2026-09-02 审计修复轮(G5 审计 → 修复 → G5 复审 → 双平台出包)
+
+> 用户当日全权委托(「用你的判断修到功能强/好用/无 bug/界面美/能收费,push 到 TestFlight,我验收」)。首轮五维审计 `audit/2026-09-02.md`,复审 `audit/2026-09-02-reaudit.md`。壳层同日改动(七个 app 共享):内购反馈挂到 `MaterialApp.builder`(任意页面可见,恢复无记录也有提示,iOS 文案不再写 Google Play)、`core/json_file_store.dart` 原子存盘、`core/day_change.dart` 跨零点/回前台刷新、iOS `InfoPlist.strings` 中文显示名。出包结果与真机验收状态以 BACKLOG「工厂复核:2026-09-02」条为准。
+
+**本 app 修了什么**:R1 iOS 对齐页改读 `headingForCameraMode`(机背轴)并丢弃 −1 哨兵;复审纠正:该值在插件里按**磁北**参考系算,故两端都按磁北 + 用户磁偏角(不再假设 iOS 是真北);定位失败带对应出口;TLE 粘贴容忍缩进/Tab/NBSP、剥 CelesTrak「0 」前缀、校验和不对即拒(157 条内置 + 改坏一位实测);锁定目标行点击进付费墙;内置 TLE 刷新到 2026-09-01 历元(CelesTrak visual 组,157 颗);过期横幅改为中性提示。
+**仍开**:🟡 <69 列截断行绕过校验和;锁定行水波被 Container 盖住;listing「精确到秒」文案;PLAN/listing 商品 ID 写法过期(代码是 `com.noobclaw.orbit.pro_unlock`)。
+**iOS 验收补充**:① 对齐页举起手机对准已知天体方位(如日落方向)读数一致,45°/60° 仰角各试一次;② 未授权定位时罗盘不指 359°。

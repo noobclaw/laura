@@ -142,3 +142,11 @@
 
 - **iOS 侧**：iOS **没有 WidgetKit 小组件**（第 5 条在 iOS 上不成立）。所以本 app 目前**只建议验 Android**；iOS 要么补 WidgetKit 再发，要么 iOS 侧不发它——**请你拍板**。
 - **中区定价 ¥8 须改 ¥2–¥3**（已有 5 组同类价格证据），上架前必改。
+
+## 2026-09-02 审计修复轮(G5 审计 → 修复 → G5 复审 → 双平台出包)
+
+> 用户当日全权委托(「用你的判断修到功能强/好用/无 bug/界面美/能收费,push 到 TestFlight,我验收」)。首轮五维审计 `audit/2026-09-02.md`,复审 `audit/2026-09-02-reaudit.md`。壳层同日改动(七个 app 共享):内购反馈挂到 `MaterialApp.builder`(任意页面可见,恢复无记录也有提示,iOS 文案不再写 Google Play)、`core/json_file_store.dart` 原子存盘、`core/day_change.dart` 跨零点/回前台刷新、iOS `InfoPlist.strings` 中文显示名。出包结果与真机验收状态以 BACKLOG「工厂复核:2026-09-02」条为准。
+
+**本 app 修了什么**:R1/R2 小组件改为 Flutter 只写原始数据、Kotlin `CountdownWidgetProvider` 用 `java.time` 现算天数(每年重复含 2/29 钳位),零点 inexact 闹钟 + TIME_SET/TIMEZONE_CHANGED + 30 分钟周期兜底;App 回前台/跨零点重算并推小组件;minSdk 提到 26(`java.time` 所需,复审抓出);存盘原子化 + Pro-before-load 守卫;详情页 5 位数天数自适应缩放;深色卡片可见。
+**仍开**:🔴 **iOS WidgetKit 未做**(用户已拍板要做,排下一轮;架构须与 Android 一样「Provider 端实时算」);🟡 iOS 上「刷新小组件」入口仍显示;`exportJson/importJson` 已备好但无 UI。
+**iOS 验收补充**:本轮首次出 iOS 包,但**小组件在 iOS 不存在** —— 只验列表/详情/编辑/购买四条,不验第 5 条。

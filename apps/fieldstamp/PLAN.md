@@ -125,3 +125,11 @@ gps camera, geotag camera, field camera, timestamp camera, survey photo, geotag 
 ### ⚠️ 本次验收要额外拍板的一件事
 
 - **只发美区，中区不上架**（08-22 主词实搜：中区两个主词付费在位者 **0 支**，且免费侧有 195 万条 ★4.87 的 `今日水印相机`）。中文本地化保留但不在中区上架——**请你确认这个发行范围决定**。
+
+## 2026-09-02 审计修复轮(G5 审计 → 修复 → G5 复审 → 双平台出包)
+
+> 用户当日全权委托(「用你的判断修到功能强/好用/无 bug/界面美/能收费,push 到 TestFlight,我验收」)。首轮五维审计 `audit/2026-09-02.md`,复审 `audit/2026-09-02-reaudit.md`。壳层同日改动(七个 app 共享):内购反馈挂到 `MaterialApp.builder`(任意页面可见,恢复无记录也有提示,iOS 文案不再写 Google Play)、`core/json_file_store.dart` 原子存盘、`core/day_change.dart` 跨零点/回前台刷新、iOS `InfoPlist.strings` 中文显示名。出包结果与真机验收状态以 BACKLOG「工厂复核:2026-09-02」条为准。
+
+**本 app 修了什么**:R1 定位状态机(serviceOff/denied/deniedForever/error/陈旧)+ 信息带上对应按钮(去设置 / 打开定位 / 重新申请),iOS 先查定位总开关再查权限(否则被映射成永久拒绝);R2 相机初始化单飞 + 代次守卫,只在 paused 释放、inactive 不动,切后台清掉在飞 future;R3 分享传 `sharePositionOrigin`(iPad 弹窗)+ try/catch;R4 `NSPhotoLibraryAddUsageDescription`;超过 120 s 的定位不再烧进照片;iOS 出片 ultraHigh(4K,与 Android 一致);拍完删掉插件留下的无水印原图;元数据台账原子存盘;iOS 方位读 headingForCameraMode(两端都是磁北)。
+**仍开**(用户已决定「取证」措辞降级):🟠 listing 的「evidence you can trust / law-enforcement」文案未改;O5 完整性机制(模拟定位检测 / 时区 / EXIF)未做;O8 横屏水印带、O10 备份导出、O11 免费导出门死代码。
+**iOS 验收补充**:① iPad 上分享 / PDF / CSV 都能弹出面板;② 分享面板「存储图像」不闪退;③ 关闭系统定位 → 信息带显示「定位服务已关闭 + 打开定位」而不是「权限永久拒绝」。
