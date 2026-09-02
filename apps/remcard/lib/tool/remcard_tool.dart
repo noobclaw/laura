@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/day_change.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'deck_detail.dart';
@@ -13,16 +14,22 @@ import 'tool_module.dart';
 class RemcardTool extends ToolModule {
   RemcardTool() {
     store.load();
+    dayChange.start();
   }
 
   final RemcardStore store = RemcardStore();
 
+  /// Re-derives "due today" at midnight and when the app comes back to the
+  /// foreground on a new day — otherwise an app left open overnight keeps
+  /// saying "all caught up" about yesterday.
+  final DayChangeNotifier dayChange = DayChangeNotifier();
+
   @override
-  Widget buildHome(BuildContext context) => DeckListScreen(store: store);
+  Widget buildHome(BuildContext context) =>
+      DeckListScreen(store: store, dayChange: dayChange);
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
-        const _PurchaseNotices(),
         ListTile(
           leading: const Icon(Icons.file_open_outlined),
           title: Text(tr(zh: '导入牌组文件', en: 'Import a deck file')),
@@ -58,91 +65,168 @@ class RemcardTool extends ToolModule {
                     en: 'One-time purchase · free version: '
                         '${RemcardStore.freeDeckLimit} decks, unlimited cards',
                   )),
-            onTap: store.pro ? null : () => PurchaseService.instance.buyPro(),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => showPaywall(context),
+                    child: const ProPriceText(fallback: r'$4.99'),
+                  ),
+            onTap: store.pro ? null : () => showPaywall(context),
           ),
         ),
         ListenableBuilder(
           listenable: store,
-          builder: (context, _) => store.pro
-              ? const SizedBox.shrink()
-              : ListTile(
-                  leading: const Icon(Icons.restore),
-                  title: Text(tr(zh: '恢复购买', en: 'Restore purchases')),
-                  subtitle: Text(tr(
-                    zh: '换机或重装后找回已购的 Pro',
-                    en: 'Recover Pro after a reinstall or new device',
-                  )),
-                  onTap: () => PurchaseService.instance.restore(),
-                ),
+          builder: (context, _) => RestorePurchasesTile(pro: store.pro),
         ),
       ];
+}
+
+/// The paywall: what Pro adds, the store's real price, one buy button, and
+/// the restore path for people who already paid. Reached from every free
+/// gate (new deck, import) so hitting the cap never dead-ends in a snackbar.
+Future<void> showPaywall(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  final text = Theme.of(context).textTheme;
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.fromLTRB(
+          24, 4, 24, 24 + MediaQuery.of(ctx).viewPadding.bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Icon(Icons.workspace_premium_outlined, size: 44, color: scheme.primary),
+          const SizedBox(height: 10),
+          Text(
+            tr(zh: 'Remcard Pro', en: 'Remcard Pro'),
+            textAlign: TextAlign.center,
+            style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            tr(
+              zh: '一次买断,永久使用。没有订阅,没有账号,数据永远只在你的手机里。',
+              en: 'Pay once, keep it forever. No subscription, no account — '
+                  'your data never leaves your phone.',
+            ),
+            textAlign: TextAlign.center,
+            style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 18),
+          _Benefit(
+            icon: Icons.all_inclusive,
+            title: tr(zh: '无限牌组', en: 'Unlimited decks'),
+            body: tr(
+              zh: '免费版 ${RemcardStore.freeDeckLimit} 个;Pro 不限。卡片数量两者都不限。',
+              en: 'Free allows ${RemcardStore.freeDeckLimit}; Pro removes the cap. '
+                  'Cards are unlimited either way.',
+            ),
+          ),
+          _Benefit(
+            icon: Icons.file_open_outlined,
+            title: tr(zh: '导入无限量', en: 'Import without limits'),
+            body: tr(
+              zh: '把 Anki 共享牌组、CSV 词表直接导进手机,想导几个导几个。',
+              en: 'Bring in as many Anki shared decks and CSV lists as you like.',
+            ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            onPressed: () {
+              Navigator.pop(ctx);
+              PurchaseService.instance.buyPro();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(tr(zh: '解锁 Pro · ', en: 'Unlock Pro · ')),
+                const ProPriceText(fallback: r'$4.99'),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              PurchaseService.instance.restore();
+            },
+            child: Text(tr(zh: '已经买过?恢复购买', en: 'Already paid? Restore')),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _Benefit extends StatelessWidget {
+  const _Benefit({required this.icon, required this.title, required this.body});
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 20, color: scheme.onPrimaryContainer),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: text.titleSmall),
+                Text(body,
+                    style: text.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Import honours the same free-tier deck cap as "New deck": the picker is
 /// never even opened when a new deck could not be created.
 Future<void> _importGuarded(BuildContext context, RemcardStore store) async {
   if (store.atDeckLimit) {
-    _showLimitSnack(context);
+    await showPaywall(context);
     return;
   }
   await runImportFlow(context, store);
 }
 
-void _showLimitSnack(BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(tr(
-        zh: '免费版最多 ${RemcardStore.freeDeckLimit} 个牌组,'
-            '在设置里解锁 Pro 以创建更多。',
-        en: 'The free version allows up to ${RemcardStore.freeDeckLimit} '
-            'decks. Unlock Pro in Settings to create more.',
-      )),
-    ),
-  );
-}
-
-/// Invisible settings-list entry that surfaces purchase results (errors,
-/// pending, unlocked) as snackbars while the settings page is open.
-class _PurchaseNotices extends StatefulWidget {
-  const _PurchaseNotices();
-
-  @override
-  State<_PurchaseNotices> createState() => _PurchaseNoticesState();
-}
-
-class _PurchaseNoticesState extends State<_PurchaseNotices> {
-  void _show() {
-    final msg = PurchaseService.instance.notice.value;
-    if (msg == null || !mounted) return;
-    PurchaseService.instance.notice.value = null;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    PurchaseService.instance.notice.addListener(_show);
-  }
-
-  @override
-  void dispose() {
-    PurchaseService.instance.notice.removeListener(_show);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
-}
-
 class DeckListScreen extends StatelessWidget {
-  const DeckListScreen({super.key, required this.store});
+  const DeckListScreen({super.key, required this.store, this.dayChange});
 
   final RemcardStore store;
+  final Listenable? dayChange;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: store,
+      listenable: dayChange == null
+          ? store
+          : Listenable.merge([store, dayChange!]),
       builder: (context, _) {
         if (!store.loaded) {
           return const Center(child: CircularProgressIndicator());
@@ -188,7 +272,7 @@ class DeckListScreen extends StatelessWidget {
 
   Future<void> _createDeck(BuildContext context) async {
     if (store.atDeckLimit) {
-      _showLimit(context);
+      await showPaywall(context);
       return;
     }
     final name =
@@ -237,7 +321,6 @@ class DeckListScreen extends StatelessWidget {
     if (ok == true) store.deleteDeck(deck);
   }
 
-  void _showLimit(BuildContext context) => _showLimitSnack(context);
 }
 
 /// One quiet, full-width tonal button under the hero: the deck list is where

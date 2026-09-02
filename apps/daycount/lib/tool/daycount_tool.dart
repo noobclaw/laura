@@ -19,7 +19,6 @@ class DaycountTool extends ToolModule {
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
         // Renders nothing; surfaces store errors/pending/unlocked as snackbars.
-        const PurchaseNotices(),
         _ProTile(store: store),
         ListenableBuilder(
           listenable: store,

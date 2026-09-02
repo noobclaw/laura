@@ -20,7 +20,6 @@ class AutoSnoreTool extends ToolModule {
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
-        const _PurchaseNotices(),
         _SensitivityTile(store: store),
         ListTile(
           leading: const Icon(Icons.help_outline),
@@ -173,35 +172,3 @@ class _HowItWorksPage extends StatelessWidget {
   }
 }
 
-/// Invisible settings entry that surfaces purchase results as snackbars while
-/// the settings page is open (mirrors the other factory apps).
-class _PurchaseNotices extends StatefulWidget {
-  const _PurchaseNotices();
-
-  @override
-  State<_PurchaseNotices> createState() => _PurchaseNoticesState();
-}
-
-class _PurchaseNoticesState extends State<_PurchaseNotices> {
-  @override
-  void initState() {
-    super.initState();
-    PurchaseService.instance.notice.addListener(_show);
-  }
-
-  void _show() {
-    final msg = PurchaseService.instance.notice.value;
-    if (msg == null || !mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    PurchaseService.instance.notice.value = null;
-  }
-
-  @override
-  void dispose() {
-    PurchaseService.instance.notice.removeListener(_show);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
-}

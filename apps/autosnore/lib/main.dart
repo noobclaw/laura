@@ -34,6 +34,8 @@ class AutoSnoreApp extends StatelessWidget {
       theme: theme,
       darkTheme: theme,
       themeMode: ThemeMode.dark,
+      // Purchase results surface as snackbars on whatever screen is open.
+      builder: (_, child) => PurchaseNotices(child: child),
       home: const _HomeScaffold(),
     );
   }

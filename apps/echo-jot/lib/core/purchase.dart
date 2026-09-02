@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -8,6 +9,8 @@ import 'l10n.dart';
 /// Every factory app sells exactly one non-consumable: the Pro unlock.
 /// The product must exist in Play Console (and later App Store Connect)
 /// under this id for every app.
+// ⚠️ App Store 的商品 ID 全账号唯一(Play 是按 app 隔离)。每个新 app 必须用
+// '<applicationId>.pro_unlock'(new_app.mjs 会替换);裸 'pro_unlock' 已被 remcard 占用。
 const String kProProductId = 'com.noobclaw.echojot.pro_unlock';
 
 /// Thin wrapper around the official in_app_purchase plugin (Play Billing /
@@ -37,10 +40,23 @@ class PurchaseService {
   bool _available = false;
   bool _inited = false;
 
-  String get _unavailableMsg => tr(
-        zh: '应用商店不可用(需要从 Google Play 安装并登录)',
-        en: 'Store unavailable (install via Google Play and sign in)',
-      );
+  /// Set by the purchase stream whenever a restore delivers something, so
+  /// [restore] can tell the user when it delivered nothing. Both stores
+  /// stay silent in that case, and Apple's reviewers tap "Restore" on a
+  /// fresh account expecting a response.
+  bool _restoreDelivered = false;
+
+  static bool get _isApple => Platform.isIOS || Platform.isMacOS;
+
+  String get _unavailableMsg => _isApple
+      ? tr(
+          zh: '应用商店不可用(请确认已登录 App Store)',
+          en: 'Store unavailable (make sure you are signed in to the App Store)',
+        )
+      : tr(
+          zh: '应用商店不可用(需要从 Google Play 安装并登录)',
+          en: 'Store unavailable (install via Google Play and sign in)',
+        );
 
   /// Call once at startup. [onUnlocked] flips the app's persisted Pro flag;
   /// it fires for both fresh purchases and restores.
@@ -80,9 +96,12 @@ class PurchaseService {
     for (final p in purchases) {
       if (p.status == PurchaseStatus.purchased ||
           p.status == PurchaseStatus.restored) {
+        if (p.status == PurchaseStatus.restored) _restoreDelivered = true;
         if (p.productID == kProProductId) {
           _onUnlocked?.call();
-          notice.value = tr(zh: 'Pro 已解锁,感谢支持!', en: 'Pro unlocked — thank you!');
+          notice.value = p.status == PurchaseStatus.restored
+              ? tr(zh: '已恢复 Pro,欢迎回来!', en: 'Pro restored — welcome back!')
+              : tr(zh: 'Pro 已解锁,感谢支持!', en: 'Pro unlocked — thank you!');
         }
       } else if (p.status == PurchaseStatus.error) {
         notice.value = p.error?.message ??
@@ -128,17 +147,28 @@ class PurchaseService {
   }
 
   /// Re-deliver past purchases (new device, reinstall). Results arrive on the
-  /// purchase stream as [PurchaseStatus.restored].
+  /// purchase stream as [PurchaseStatus.restored]; if nothing has arrived a
+  /// few seconds later, say so — silence reads as a broken button.
   Future<void> restore() async {
     if (!_available) {
       notice.value = _unavailableMsg;
       return;
     }
+    _restoreDelivered = false;
+    notice.value = tr(zh: '正在查找已购记录…', en: 'Looking for past purchases…');
     try {
       await InAppPurchase.instance.restorePurchases();
     } catch (e) {
       debugPrint('restore failed: $e');
       notice.value = tr(zh: '恢复购买失败', en: 'Could not restore purchases');
+      return;
+    }
+    await Future<void>.delayed(const Duration(seconds: 5));
+    if (!_restoreDelivered) {
+      notice.value = tr(
+        zh: '这个商店账号下没有找到可恢复的购买',
+        en: 'No previous purchase was found for this store account',
+      );
     }
   }
 
@@ -150,13 +180,18 @@ class PurchaseService {
   }
 }
 
-/// Drop this into a settings list to surface purchase results (errors, pending,
-/// unlocked) as snackbars while that page is open. Renders nothing itself.
+/// Surfaces purchase results (errors, pending, unlocked, restored) as
+/// snackbars. Mount it ONCE, above every route, via
+/// `MaterialApp(builder: (_, child) => PurchaseNotices(child: child))`: the
+/// snackbar then appears on whichever screen the user is on — the paywall,
+/// a report page, settings — instead of only while settings is open.
 ///
 /// Without it the store's failures are invisible: [PurchaseService] only writes
 /// to [PurchaseService.notice] and something has to read it.
 class PurchaseNotices extends StatefulWidget {
-  const PurchaseNotices({super.key});
+  const PurchaseNotices({super.key, this.child});
+
+  final Widget? child;
 
   @override
   State<PurchaseNotices> createState() => _PurchaseNoticesState();
@@ -167,13 +202,20 @@ class _PurchaseNoticesState extends State<PurchaseNotices> {
     final msg = PurchaseService.instance.notice.value;
     if (msg == null || !mounted) return;
     PurchaseService.instance.notice.value = null;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   void initState() {
     super.initState();
     PurchaseService.instance.notice.addListener(_show);
+    // A notice that arrived before this widget existed (StoreKit replays
+    // transactions at launch) is still worth showing.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _show());
   }
 
   @override
@@ -183,7 +225,8 @@ class _PurchaseNoticesState extends State<PurchaseNotices> {
   }
 
   @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
+  Widget build(BuildContext context) =>
+      widget.child ?? const SizedBox.shrink();
 }
 
 /// "Restore purchases" — required by both stores for non-consumables, and the

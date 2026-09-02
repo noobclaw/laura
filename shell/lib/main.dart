@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/app_theme.dart';
 import 'core/branding.dart';
+import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/sample_tool.dart';
 import 'tool/tool_module.dart';
@@ -27,6 +28,9 @@ class ShellApp extends StatelessWidget {
       // starts here instead of bare fromSeed; give it a real hero/empty states.
       theme: buildAppTheme(Brightness.light),
       darkTheme: buildAppTheme(Brightness.dark),
+      // Purchase results surface as snackbars on whatever screen is open —
+      // a paywall that swallows "payment failed" is a support ticket.
+      builder: (_, child) => PurchaseNotices(child: child),
       home: const _HomeScaffold(),
     );
   }

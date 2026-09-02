@@ -55,6 +55,46 @@ void main() {
     expect(hard.ease, greaterThanOrEqualTo(1.3));
   });
 
+  test('grades spread: Hard < Good < Easy, and preview never mutates', () {
+    final c = _fresh();
+    c.review(Rating.good, today);
+    c.review(Rating.good, today); // rep 2, interval 6
+    final before = c.toJson();
+    final hard = c.previewInterval(Rating.hard);
+    final good = c.previewInterval(Rating.good);
+    final easy = c.previewInterval(Rating.easy);
+    expect(c.toJson(), before); // preview is pure
+    expect(hard, lessThan(good));
+    expect(good, lessThan(easy));
+    expect(hard, greaterThan(c.intervalDays)); // always moves forward
+    // The mutation matches what was previewed.
+    c.review(Rating.easy, today);
+    expect(c.intervalDays, easy);
+  });
+
+  test('a new card graded Easy is not shown again tomorrow', () {
+    final c = _fresh();
+    expect(c.previewInterval(Rating.good), 1);
+    expect(c.previewInterval(Rating.easy), greaterThan(1));
+  });
+
+  test('epochDayOf is pure calendar arithmetic', () {
+    // Same calendar day at different local times → same epoch day.
+    final a = epochDayOf(DateTime(2026, 3, 29, 0, 30));
+    final b = epochDayOf(DateTime(2026, 3, 29, 23, 30));
+    expect(a, b);
+    expect(epochDayOf(DateTime(2026, 3, 30)), a + 1);
+    expect(epochDayOf(DateTime(1970, 1, 1)), 0);
+  });
+
+  test('intervalLabel scales days → months → years', () {
+    expect(intervalLabel(0), isNotEmpty);
+    expect(intervalLabel(1), isNot(intervalLabel(2)));
+    expect(intervalLabel(29), contains('29'));
+    expect(intervalLabel(60), contains('2'));
+    expect(intervalLabel(730), contains('2'));
+  });
+
   test('isDue reflects the scheduled day', () {
     final c = _fresh();
     expect(c.isDue(today), isTrue); // due today (dueDay 0 <= 100)

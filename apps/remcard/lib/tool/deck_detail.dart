@@ -72,9 +72,13 @@ class DeckDetailScreen extends StatelessWidget {
                               subtitle: Text(card.back,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
-                              trailing: card.isDue(today)
-                                  ? const Icon(Icons.schedule, size: 18)
-                                  : null,
+                              // When the card comes back — the schedule
+                              // made visible, so "did Easy push it out
+                              // further?" has an answer on screen.
+                              trailing: _DueChip(
+                                days: card.daysUntilDue(today),
+                                isNew: card.repetitions == 0,
+                              ),
                               onTap: () => _editCard(context, card),
                             ),
                           );
@@ -109,6 +113,40 @@ class DeckDetailScreen extends StatelessWidget {
     if (result != null) {
       store.updateCard(card, result.$1, result.$2);
     }
+  }
+}
+
+/// "today" / "tomorrow" / "12d" — due now is emphasised, everything else is
+/// quiet; a card never reviewed says "new" instead of a misleading "today".
+class _DueChip extends StatelessWidget {
+  const _DueChip({required this.days, required this.isNew});
+
+  final int days;
+  final bool isNew;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final due = days <= 0;
+    final label = isNew
+        ? tr(zh: '新', en: 'new')
+        : due
+            ? tr(zh: '今天到期', en: 'due')
+            : intervalLabel(days);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: due ? scheme.primaryContainer : scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: due ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+      ),
+    );
   }
 }
 
@@ -149,56 +187,74 @@ Future<(String, String)?> _cardEditor(
 }) {
   final frontCtrl = TextEditingController(text: front);
   final backCtrl = TextEditingController(text: back);
+  // Which side is missing, if Save was tapped with one empty. Shown inline
+  // under that field; the dialog stays open so nothing typed is lost.
+  String? frontError;
+  String? backError;
+  final required = tr(zh: '这一面不能为空', en: 'This side cannot be empty');
   return showDialog<(String, String)>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(title),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: frontCtrl,
-              autofocus: true,
-              minLines: 1,
-              maxLines: 4,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: tr(zh: '正面(问题)', en: 'Front (question)'),
-                border: const OutlineInputBorder(),
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: frontCtrl,
+                autofocus: true,
+                minLines: 1,
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
+                onChanged: (_) {
+                  if (frontError != null) setState(() => frontError = null);
+                },
+                decoration: InputDecoration(
+                  labelText: tr(zh: '正面(问题)', en: 'Front (question)'),
+                  border: const OutlineInputBorder(),
+                  errorText: frontError,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: backCtrl,
-              minLines: 1,
-              maxLines: 6,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: tr(zh: '背面(答案)', en: 'Back (answer)'),
-                border: const OutlineInputBorder(),
+              const SizedBox(height: 12),
+              TextField(
+                controller: backCtrl,
+                minLines: 1,
+                maxLines: 6,
+                textCapitalization: TextCapitalization.sentences,
+                onChanged: (_) {
+                  if (backError != null) setState(() => backError = null);
+                },
+                decoration: InputDecoration(
+                  labelText: tr(zh: '背面(答案)', en: 'Back (answer)'),
+                  border: const OutlineInputBorder(),
+                  errorText: backError,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      actions: [
-        TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(tr(zh: '取消', en: 'Cancel'))),
-        FilledButton(
-          onPressed: () {
-            final f = frontCtrl.text.trim();
-            final b = backCtrl.text.trim();
-            if (f.isEmpty || b.isEmpty) {
-              Navigator.pop(ctx);
-            } else {
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(tr(zh: '取消', en: 'Cancel'))),
+          FilledButton(
+            onPressed: () {
+              final f = frontCtrl.text.trim();
+              final b = backCtrl.text.trim();
+              if (f.isEmpty || b.isEmpty) {
+                setState(() {
+                  frontError = f.isEmpty ? required : null;
+                  backError = b.isEmpty ? required : null;
+                });
+                return;
+              }
               Navigator.pop(ctx, (f, b));
-            }
-          },
-          child: Text(tr(zh: '保存', en: 'Save')),
-        ),
-      ],
+            },
+            child: Text(tr(zh: '保存', en: 'Save')),
+          ),
+        ],
+      ),
     ),
   );
 }

@@ -31,6 +31,8 @@ class RemcardApp extends StatelessWidget {
       supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
       theme: buildRemcardTheme(Brightness.light),
       darkTheme: buildRemcardTheme(Brightness.dark),
+      // Purchase results surface as snackbars on whatever screen is open.
+      builder: (_, child) => PurchaseNotices(child: child),
       home: const _HomeScaffold(),
     );
   }

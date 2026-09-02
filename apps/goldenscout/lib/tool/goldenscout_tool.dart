@@ -26,7 +26,6 @@ class GoldenscoutTool implements ToolModule {
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
         // Renders nothing; surfaces store errors/pending/unlocked as snackbars.
-        const PurchaseNotices(),
         ListenableBuilder(
           listenable: store,
           builder: (context, _) => ListTile(
