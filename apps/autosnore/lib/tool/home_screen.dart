@@ -20,6 +20,21 @@ class HomeScreen extends StatelessWidget {
         if (!store.loaded) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (store.recoveredOnLaunch) {
+          // A night that was being recorded when the app died has just been
+          // promoted from its last checkpoint. Say so once.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            store.acknowledgeRecovery();
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              duration: const Duration(seconds: 6),
+              content: Text(tr(
+                zh: '上次记录没有正常结束,已按最后一次保存的进度找回,标为「提前结束」。',
+                en: 'The last night did not end normally; it was restored from its last checkpoint and marked "ended early".',
+              )),
+            ));
+          });
+        }
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -65,6 +80,25 @@ class _StartCard extends StatelessWidget {
   const _StartCard({required this.store});
   final AutoSnoreStore store;
 
+  /// First night only: the three things that decide whether the recording
+  /// survives until morning, said before the user commits — not discovered
+  /// at 06:00 from a report that stopped at 00:47.
+  Future<void> _startNight(BuildContext context) async {
+    if (!store.briefingSeen) {
+      final go = await showModalBottomSheet<bool>(
+        context: context,
+        showDragHandle: true,
+        builder: (ctx) => _Briefing(),
+      );
+      if (go != true || !context.mounted) return;
+      store.markBriefingSeen();
+    }
+    if (!context.mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => RecordingScreen(store: store),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -81,9 +115,7 @@ class _StartCard extends StatelessWidget {
           ),
           child: InkWell(
             splashColor: Colors.white24,
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => RecordingScreen(store: store),
-            )),
+            onTap: () => _startNight(context),
             child: SizedBox(
               height: 208,
               width: double.infinity,
@@ -199,6 +231,115 @@ class _NightTile extends StatelessWidget {
             child: Text(tr(zh: '删除', en: 'Delete')),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The pre-flight briefing shown once before the first night.
+class _Briefing extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final ios = Theme.of(context).platform == TargetPlatform.iOS;
+    Widget item(IconData icon, String title, String body) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: cs.onPrimaryContainer, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: text.titleSmall),
+                    const SizedBox(height: 2),
+                    Text(body,
+                        style: text.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant, height: 1.4)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 4, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              tr(zh: '睡前三件事', en: 'Three things before you sleep'),
+              style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              tr(
+                zh: '做到了,早上的报告才是完整的一夜。',
+                en: 'Do these and the morning report covers the whole night.',
+              ),
+              style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+            ),
+            const SizedBox(height: 14),
+            item(
+              Icons.power_outlined,
+              tr(zh: '插上电', en: 'Plug it in'),
+              tr(
+                zh: '整夜采麦会耗电,别让手机半夜关机。',
+                en: 'Listening all night uses battery; do not let the phone die at 3 am.',
+              ),
+            ),
+            item(
+              ios ? Icons.lock_outline : Icons.brightness_high_outlined,
+              ios
+                  ? tr(zh: '可以锁屏', en: 'You can lock the screen')
+                  : tr(zh: '屏幕会保持常亮', en: 'The screen stays on'),
+              ios
+                  ? tr(
+                      zh: '记录在后台继续。把手机屏幕朝下放在床头即可。',
+                      en: 'Recording continues in the background. Just put the phone face down on the nightstand.',
+                    )
+                  : tr(
+                      zh: '安卓没有后台录音,App 会锁住屏幕不熄。把亮度调到最低,屏幕朝下放。',
+                      en: 'Android cannot record in the background, so the app keeps the screen awake. Turn brightness down and put it face down.',
+                    ),
+            ),
+            item(
+              Icons.do_not_disturb_on_outlined,
+              ios
+                  ? tr(zh: '开勿扰', en: 'Turn on Do Not Disturb')
+                  : tr(zh: '别切走、开勿扰', en: 'Stay in the app, turn on Do Not Disturb'),
+              ios
+                  ? tr(
+                      zh: '来电会打断录音,通话结束后自动继续。',
+                      en: 'A call interrupts the recording; it resumes when the call ends.',
+                    )
+                  : tr(
+                      zh: '切到别的 App 或接电话都会结束今晚的记录(已录部分会保留)。',
+                      en: 'Switching apps or taking a call ends the night (what was recorded is kept).',
+                    ),
+            ),
+            const SizedBox(height: 18),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14)),
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(tr(zh: '知道了,开始记录', en: 'Got it, start recording')),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -46,12 +46,21 @@ class SleepSession {
     required this.events,
     this.sensitivity = 0.5,
     this.endedEarly = false,
+    this.interruptedMs = 0,
   });
 
   final String id;
   final int startMs;
   final int endMs;
   final List<SnoreEvent> events;
+
+  /// Time during which the microphone stream delivered nothing (audio focus
+  /// lost to a chime, an interruption the OS did not hand back, a stall).
+  /// Shown in the report so a quiet night and a broken night look different.
+  final int interruptedMs;
+
+  /// Time the microphone was actually listening.
+  int get listenedMs => math.max(0, durationMs - interruptedMs);
 
   /// Detector sensitivity in effect for this session (0..1), stored so a report
   /// can explain how it was measured.
@@ -142,6 +151,7 @@ class SleepSession {
         'endMs': endMs,
         'sensitivity': sensitivity,
         'endedEarly': endedEarly,
+        'interruptedMs': interruptedMs,
         'events': events.map((e) => e.toJson()).toList(),
       };
 
@@ -151,6 +161,7 @@ class SleepSession {
         endMs: (j['endMs'] as num).toInt(),
         sensitivity: (j['sensitivity'] as num?)?.toDouble() ?? 0.5,
         endedEarly: j['endedEarly'] as bool? ?? false,
+        interruptedMs: (j['interruptedMs'] as num?)?.toInt() ?? 0,
         events: (j['events'] as List<dynamic>? ?? [])
             .map((e) => SnoreEvent.fromJson(e as Map<String, dynamic>))
             .toList(),

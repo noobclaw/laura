@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 
+import '../core/json_file_store.dart';
 import 'models.dart';
 import 'widget_bridge.dart';
 
@@ -19,6 +16,13 @@ class EventStore extends ChangeNotifier {
   bool pro = false;
   bool loaded = false;
 
+  final JsonFileStore _file = JsonFileStore('daycount.json');
+
+  /// Pro reported by the store before [load] finished (StoreKit replays
+  /// transactions at launch); applied after load so it never triggers a
+  /// save over a file we have not read yet.
+  bool _proPending = false;
+
   int _idSeq = 0;
 
   String _newId() {
@@ -28,18 +32,13 @@ class EventStore extends ChangeNotifier {
 
   bool get atLimit => !pro && events.length >= freeLimit;
 
-  Future<File> _file() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/daycount.json');
-  }
-
   /// Load state from disk. Any failure (first launch, plugin missing in a test
-  /// harness) leaves an empty store — the app still runs.
+  /// harness, damaged file — which is kept aside) leaves an empty store; the
+  /// app still runs.
   Future<void> load() async {
     try {
-      final f = await _file();
-      if (await f.exists()) {
-        final raw = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
+      final raw = await _file.read();
+      if (raw != null) {
         pro = raw['pro'] as bool? ?? false;
         events
           ..clear()
@@ -50,26 +49,57 @@ class EventStore extends ChangeNotifier {
       debugPrint('daycount load skipped: $e');
     } finally {
       loaded = true;
-      notifyListeners();
+      if (_proPending) {
+        _proPending = false;
+        pro = true;
+        _save();
+      } else {
+        notifyListeners();
+      }
       WidgetBridge.push(events);
     }
   }
 
-  Future<void> _save() async {
+  /// Persist atomically (see [JsonFileStore]) and refresh the widget. Never
+  /// writes before [load] has run.
+  void _save() {
     notifyListeners();
     WidgetBridge.push(events);
-    try {
-      final f = await _file();
-      await f.writeAsString(
-        jsonEncode({
-          'pro': pro,
-          'events': events.map((e) => e.toJson()).toList(),
-        }),
-        flush: true,
-      );
-    } catch (e) {
-      debugPrint('daycount save skipped: $e');
+    if (!loaded) return;
+    _file.write({
+      'pro': pro,
+      'events': events.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  /// All events, exported as one JSON document (share / backup).
+  Map<String, dynamic> exportJson() => {
+        'app': 'daycount',
+        'version': 1,
+        'exportedAt': DateTime.now().toIso8601String(),
+        'events': events.map((e) => e.toJson()).toList(),
+      };
+
+  /// Merge events from an [exportJson] document. Returns how many were added;
+  /// entries whose id already exists are skipped so re-importing a backup
+  /// does not duplicate.
+  int importJson(Map<String, dynamic> doc) {
+    final existing = events.map((e) => e.id).toSet();
+    var added = 0;
+    for (final raw in (doc['events'] as List<dynamic>? ?? [])) {
+      try {
+        final e = CountdownEvent.fromJson(raw as Map<String, dynamic>);
+        if (existing.contains(e.id)) continue;
+        if (atLimit) break;
+        events.add(e);
+        existing.add(e.id);
+        added++;
+      } catch (err) {
+        debugPrint('daycount import skipped one entry: $err');
+      }
     }
+    if (added > 0) _save();
+    return added;
   }
 
   CountdownEvent add({
@@ -113,7 +143,15 @@ class EventStore extends ChangeNotifier {
     _save();
   }
 
+  /// Re-broadcast state without changing it — for the day-change notifier,
+  /// so every "N days" on screen is recomputed against the new date.
+  void touch() => notifyListeners();
+
   void unlockPro() {
+    if (!loaded) {
+      _proPending = true;
+      return;
+    }
     pro = true;
     _save();
   }

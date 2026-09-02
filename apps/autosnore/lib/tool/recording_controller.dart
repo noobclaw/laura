@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -15,9 +16,21 @@ enum MicPermission { granted, denied, permanentlyDenied }
 /// Drives a recording session end-to-end: microphone permission, the live PCM
 /// stream from `record`, dBFS windowing, snore detection and the UI-facing
 /// live values. Touches plugins, so the *maths* it relies on lives in the pure
-/// [SnoreDetector] / [rmsDbfsPcm16] (those are unit-tested). Recording stays in
-/// the foreground with the screen kept on — no background service — which is
-/// why it dodges Doze/background-mic restrictions (see PLAN.md architecture).
+/// [SnoreDetector] / [rmsDbfsPcm16] (those are unit-tested).
+///
+/// Android records in the foreground with the screen kept on (no foreground
+/// service, so it dodges Doze/background-mic restrictions). iOS declares the
+/// `audio` background mode, so the stream survives the lock screen there.
+///
+/// An all-night recorder's worst failure is a *silent* one: the stream stops
+/// and the clock keeps running, producing a "7 h, 0 snores" report that is
+/// indistinguishable from a quiet night. Three things guard against that:
+/// - no audio-focus request on Android ([AudioInterruptionMode.none]) and
+///   automatic resume on iOS, so a notification chime or an alarm cannot
+///   pause the mic for good;
+/// - a stall watchdog that notices when no PCM has arrived for a few seconds,
+///   attempts a resume, and books the gap as [interruptedMs];
+/// - the report shows that gap, so a night with a 40-minute hole says so.
 class RecordingController extends ChangeNotifier {
   RecordingController({required this.sensitivity});
 
@@ -25,6 +38,7 @@ class RecordingController extends ChangeNotifier {
 
   final AudioRecorder _recorder = AudioRecorder();
   StreamSubscription<Uint8List>? _sub;
+  StreamSubscription<RecordState>? _stateSub;
   Timer? _ticker;
   BytesBuilder _buf = BytesBuilder(copy: false);
   SnoreDetector? _detector;
@@ -34,6 +48,9 @@ class RecordingController extends ChangeNotifier {
   // ~200 ms of mono PCM16 → detector sample cadence.
   static const int _windowBytes = _sampleRate ~/ 5 * 2;
   static const int _windowMs = 200;
+
+  /// No PCM for this long while [running] counts as a stall.
+  static const Duration stallAfter = Duration(seconds: 5);
 
   bool running = false;
   double currentDb = kSilenceDb;
@@ -46,6 +63,19 @@ class RecordingController extends ChangeNotifier {
   /// immune to platform-channel delivery jitter (a burst of windows arriving in
   /// one callback would otherwise share a wall-clock instant → 0 ms events).
   int _audioMs = 0;
+
+  /// Wall-clock time of the last PCM chunk, for the stall watchdog.
+  int _lastChunkWallMs = 0;
+
+  /// Milliseconds during which the stream was not delivering audio.
+  int interruptedMs = 0;
+
+  /// True while the watchdog considers the stream stalled — the recording
+  /// screen shows a warning instead of a confident "listening".
+  bool stalled = false;
+
+  int _stallStartWallMs = 0;
+  bool _resuming = false;
 
   /// Current loudness mapped to 0..1 for a live meter (−60 dBFS → 0, 0 → 1).
   double get level => ((currentDb + 60) / 60).clamp(0.0, 1.0);
@@ -71,25 +101,40 @@ class RecordingController extends ChangeNotifier {
       _buf = BytesBuilder(copy: false);
       _startMs = DateTime.now().millisecondsSinceEpoch;
       _audioMs = 0;
+      _lastChunkWallMs = _startMs;
+      interruptedMs = 0;
+      stalled = false;
       currentDb = kSilenceDb;
       elapsedMs = 0;
       eventCount = 0;
 
-      final stream = await _recorder.startStream(const RecordConfig(
+      final stream = await _recorder.startStream(RecordConfig(
         encoder: AudioEncoder.pcm16bits,
         sampleRate: _sampleRate,
         numChannels: 1,
+        // Android: never request audio focus, so system sounds cannot pause
+        // us (the plugin default pauses on focus loss and only resumes on a
+        // transient gain — a plain notification chime paused the mic for the
+        // rest of the night). It also leaves the user's white-noise app alone.
+        // iOS: interruptions (calls, alarms) are OS-level; let the plugin
+        // resume the session automatically when they end.
+        audioInterruption: Platform.isIOS
+            ? AudioInterruptionMode.pauseResume
+            : AudioInterruptionMode.none,
+        iosConfig: const IosRecordConfig(
+          // Do not stop the user's sleep sounds; do not force the speaker.
+          categoryOptions: [IosAudioCategoryOption.mixWithOthers],
+        ),
       ));
       _sub = stream.listen(_onChunk, onError: (Object e) {
         debugPrint('record stream error: $e');
       });
-      // Keep the screen on so the OS never backgrounds us mid-night.
+      _stateSub = _recorder.onStateChanged().listen(_onState);
+      // Keep the screen on so Android never backgrounds us mid-night.
       await WakelockPlus.enable();
-      // Refresh the elapsed clock even during long quiet stretches.
-      _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-        elapsedMs = DateTime.now().millisecondsSinceEpoch - _startMs;
-        notifyListeners();
-      });
+      // Refresh the elapsed clock even during long quiet stretches, and run
+      // the stall watchdog on the same tick.
+      _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
       running = true;
       notifyListeners();
       return true;
@@ -100,7 +145,50 @@ class RecordingController extends ChangeNotifier {
     }
   }
 
+  void _tick() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    elapsedMs = now - _startMs;
+    final gap = now - _lastChunkWallMs;
+    if (!stalled && gap > stallAfter.inMilliseconds) {
+      stalled = true;
+      _stallStartWallMs = _lastChunkWallMs;
+      _tryResume();
+    } else if (stalled) {
+      // Keep nudging; the plugin's own resume may need the interruption to end.
+      _tryResume();
+    }
+    notifyListeners();
+  }
+
+  void _onState(RecordState s) {
+    if (!running) return;
+    if (s == RecordState.pause) _tryResume();
+  }
+
+  Future<void> _tryResume() async {
+    if (_resuming || !running) return;
+    _resuming = true;
+    try {
+      if (await _recorder.isPaused()) await _recorder.resume();
+    } catch (e) {
+      debugPrint('resume failed: $e');
+    } finally {
+      _resuming = false;
+    }
+  }
+
   void _onChunk(Uint8List chunk) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (stalled) {
+      // Book the hole honestly and move the detector's clock past it so the
+      // next window is not stamped inside the gap.
+      final hole = now - _stallStartWallMs;
+      interruptedMs += hole;
+      _audioMs += hole;
+      stalled = false;
+      _detector?.reset();
+    }
+    _lastChunkWallMs = now;
     _buf.add(chunk);
     while (_buf.length >= _windowBytes) {
       final Uint8List all = _buf.takeBytes();
@@ -127,11 +215,25 @@ class RecordingController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The session as it stands right now, without stopping — written to disk
+  /// every minute by the recording screen so a crash or a dead battery at
+  /// 05:00 does not throw away the whole night.
+  SleepSession snapshotSession() => SleepSession(
+        id: 'night-$_startMs',
+        startMs: _startMs,
+        endMs: DateTime.now().millisecondsSinceEpoch,
+        sensitivity: sensitivity,
+        endedEarly: true,
+        interruptedMs: interruptedMs,
+        events: List<SnoreEvent>.from(_events),
+      );
+
   /// Stop and return the completed session (null if nothing was recorded).
   /// [endedEarly] marks a session cut short by losing the foreground.
   Future<SleepSession?> stop({bool endedEarly = false}) async {
     if (!running) return null;
     final int endMs = DateTime.now().millisecondsSinceEpoch;
+    if (stalled) interruptedMs += endMs - _stallStartWallMs;
     final SnoreEvent? tail = _detector?.finish();
     if (tail != null) _events.add(tail);
     await _cleanup();
@@ -143,6 +245,7 @@ class RecordingController extends ChangeNotifier {
       endMs: endMs,
       sensitivity: sensitivity,
       endedEarly: endedEarly,
+      interruptedMs: interruptedMs,
       events: List<SnoreEvent>.from(_events),
     );
   }
@@ -152,6 +255,8 @@ class RecordingController extends ChangeNotifier {
     _ticker = null;
     await _sub?.cancel();
     _sub = null;
+    await _stateSub?.cancel();
+    _stateSub = null;
     try {
       if (await _recorder.isRecording()) await _recorder.stop();
     } catch (e) {

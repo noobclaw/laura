@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/day_change.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'event_detail.dart';
@@ -11,7 +12,21 @@ import 'widget_bridge.dart';
 
 /// 倒数日 — offline countdown & anniversary tracker.
 class DaycountTool extends ToolModule {
+  DaycountTool() {
+    // Every "N days" on screen is computed from DateTime.now() at build
+    // time; without this an app left open overnight (or brought back from
+    // the background the next morning) kept showing yesterday's numbers
+    // and never told the home-screen widget to re-render either.
+    dayChange
+      ..start()
+      ..addListener(() {
+        store.touch();
+        WidgetBridge.refresh();
+      });
+  }
+
   final EventStore store = EventStore()..load();
+  final DayChangeNotifier dayChange = DayChangeNotifier();
 
   @override
   Widget buildHome(BuildContext context) => _HomeBody(store: store);

@@ -106,6 +106,16 @@ class SnoreDetector {
   /// Flush any open event at end of stream. Call once when recording stops.
   SnoreEvent? finish() => _inEvent ? _closeEvent() : null;
 
+  /// Drop any half-built event without emitting it, keeping the learned
+  /// baseline. Used after a gap in the audio stream: a run that started
+  /// before the gap cannot be trusted to have continued through it.
+  void reset() {
+    _inEvent = false;
+    _peak = kSilenceDb;
+    _sum = 0;
+    _cnt = 0;
+  }
+
   SnoreEvent? _closeEvent() {
     final int dur = _lastAbove - _evtStart;
     final SnoreEvent? evt = dur >= _cfg.minEventMs

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
@@ -29,6 +32,9 @@ class _RecordingScreenState extends State<RecordingScreen>
   bool _saved = false;
   SleepSession? _pending;
 
+  /// Checkpoints the night to disk once a minute (see store.inProgress).
+  Timer? _checkpoint;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +50,13 @@ class _RecordingScreenState extends State<RecordingScreen>
       final ok = await controller.start();
       if (!mounted) return;
       setState(() => _phase = ok ? _Phase.recording : _Phase.error);
+      if (ok) {
+        _checkpoint = Timer.periodic(const Duration(minutes: 1), (_) {
+          if (controller.running && !_saved) {
+            widget.store.saveInProgress(controller.snapshotSession());
+          }
+        });
+      }
     } else {
       setState(() => _phase = perm == MicPermission.permanentlyDenied
           ? _Phase.permanentlyDenied
@@ -51,13 +64,64 @@ class _RecordingScreenState extends State<RecordingScreen>
     }
   }
 
+  /// A single tap or a stray back-swipe on the nightstand used to end the
+  /// night with no way back. Stopping is now a deliberate act: confirm, or
+  /// keep recording.
+  Future<void> _confirmStop() async {
+    final hours = controller.elapsedMs / 3600000;
+    final short = hours < 4;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr(zh: '结束今晚的记录?', en: 'End tonight\'s recording?')),
+        content: Text(short
+            ? tr(
+                zh: '目前只记录了 ${_fmtH(hours)}。停止后会生成报告,无法继续。',
+                en: 'Only ${_fmtH(hours)} recorded so far. Stopping makes the '
+                    'report final — it cannot be resumed.',
+              )
+            : tr(
+                zh: '已记录 ${_fmtH(hours)}。停止后会生成报告。',
+                en: '${_fmtH(hours)} recorded. Stopping makes the report.',
+              )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr(zh: '继续记录', en: 'Keep recording')),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr(zh: '停止并看报告', en: 'Stop & see report')),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && mounted) await _finish(navigate: true);
+  }
+
+  static String _fmtH(double h) {
+    final m = (h * 60).round();
+    if (m < 60) return tr(zh: '$m 分钟', en: '$m min');
+    return tr(
+      zh: '${m ~/ 60} 小时 ${m % 60} 分',
+      en: '${m ~/ 60} h ${m % 60} min',
+    );
+  }
+
   Future<void> _finish({required bool navigate, bool endedEarly = false}) async {
     if (_saved) return;
     _saved = true;
+    _checkpoint?.cancel();
     final s = await controller.stop(endedEarly: endedEarly);
     if (s != null && s.durationMs > 500) {
       widget.store.addSession(s);
       _pending = s;
+    } else {
+      widget.store.clearInProgress();
     }
     if (navigate) _goReport();
   }
@@ -78,9 +142,13 @@ class _RecordingScreenState extends State<RecordingScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused &&
         _phase == _Phase.recording &&
-        !_saved) {
-      // Leaving the app ends the night gracefully and keeps what was recorded,
-      // flagged as an early stop so the report doesn't overstate coverage.
+        !_saved &&
+        // iOS keeps the mic alive in the background (UIBackgroundModes
+        // audio), so locking the phone is exactly what a user should do.
+        // Android has no foreground service in v1: the OS cuts background
+        // microphone access, so leaving the app ends the night gracefully,
+        // flagged as an early stop so the report doesn't overstate coverage.
+        !Platform.isIOS) {
       _finish(navigate: false, endedEarly: true);
     } else if (state == AppLifecycleState.resumed &&
         _saved &&
@@ -91,6 +159,7 @@ class _RecordingScreenState extends State<RecordingScreen>
 
   @override
   void dispose() {
+    _checkpoint?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     controller.dispose();
     super.dispose();
@@ -101,7 +170,7 @@ class _RecordingScreenState extends State<RecordingScreen>
     return PopScope(
       canPop: _phase != _Phase.recording,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && _phase == _Phase.recording) _finish(navigate: true);
+        if (!didPop && _phase == _Phase.recording) _confirmStop();
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -152,7 +221,7 @@ class _RecordingScreenState extends State<RecordingScreen>
       case _Phase.recording:
         return _RecordingView(
           controller: controller,
-          onStop: () => _finish(navigate: true),
+          onStop: _confirmStop,
         );
     }
   }
@@ -248,11 +317,18 @@ class _RecordingView extends StatelessWidget {
                     ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w300),
               ),
               const SizedBox(height: 6),
-              Text(tr(zh: '正在记录…', en: 'Recording…'),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: cs.onSurfaceVariant)),
+              // The watchdog's verdict, not a decorative label: if the
+              // stream has gone quiet the screen says so instead of
+              // pretending to listen.
+              Text(
+                controller.stalled
+                    ? tr(zh: '麦克风被打断,正在恢复…', en: 'Microphone interrupted, resuming…')
+                    : tr(zh: '正在记录…', en: 'Recording…'),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: controller.stalled ? cs.error : cs.onSurfaceVariant,
+                      fontWeight: controller.stalled ? FontWeight.w600 : null,
+                    ),
+              ),
               const SizedBox(height: 40),
               // Live loudness meter.
               ClipRRect(

@@ -39,6 +39,12 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <!-- The day count is computed natively at render time; these
+                     keep it right across midnight, clock and zone changes. -->
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="com.noobclaw.daycount.WIDGET_MIDNIGHT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

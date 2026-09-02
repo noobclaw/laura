@@ -32,6 +32,10 @@ class ReportScreen extends StatelessWidget {
             const SizedBox(height: 12),
             _EndedEarlyBanner(),
           ],
+          if (session.interruptedMs >= 60000) ...[
+            const SizedBox(height: 12),
+            _InterruptedBanner(ms: session.interruptedMs),
+          ],
           const SizedBox(height: 16),
           _ScoreCard(session: session),
           const SizedBox(height: 16),
@@ -126,13 +130,18 @@ class _EndedEarlyBanner extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              tr(
-                zh: '记录提前结束了(应用离开了前台)。这份报告只覆盖到结束时刻。'
-                    '整夜记录请保持应用在前台、屏幕常亮。',
-                en: 'Recording ended early (the app left the foreground). This '
-                    'report only covers up to that point. For all-night '
-                    'recording keep the app in the foreground with the screen on.',
-              ),
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? tr(
+                      zh: '记录没有正常结束(应用被关闭或手机重启)。这份报告只覆盖到最后一次保存的时刻。',
+                      en: 'Recording did not end normally (the app was closed or the phone restarted). This report covers up to the last checkpoint.',
+                    )
+                  : tr(
+                      zh: '记录提前结束了(应用离开了前台)。这份报告只覆盖到结束时刻。'
+                          '整夜记录请保持应用在前台、屏幕常亮。',
+                      en: 'Recording ended early (the app left the foreground). This '
+                          'report only covers up to that point. For all-night '
+                          'recording keep the app in the foreground with the screen on.',
+                    ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -402,6 +411,47 @@ class _ProActions extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// The microphone delivered nothing for this long. Without it, a night the
+/// system muted at 01:10 would read as a perfectly quiet night.
+class _InterruptedBanner extends StatelessWidget {
+  const _InterruptedBanner({required this.ms});
+  final int ms;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final minutes = (ms / 60000).round();
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.errorContainer.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.mic_off_outlined, size: 20, color: cs.onErrorContainer),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              tr(
+                zh: '有 $minutes 分钟麦克风没有收到声音(被通知、来电或系统打断)。'
+                    '这段时间的鼾声没有计入。',
+                en: 'The microphone received nothing for $minutes min (a '
+                    'notification, call or the system interrupted it). Snoring '
+                    'in that window is not counted.',
+              ),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: cs.onErrorContainer),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
