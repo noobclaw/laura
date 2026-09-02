@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/purchase.dart';
 import 'light_view.dart';
 import 'location_store.dart';
 import 'sensors.dart';
@@ -158,7 +159,9 @@ class _ProHint extends StatelessWidget {
               child: Text(tr(zh: '解锁 Pro,规划任意日期', en: 'Unlock Pro to plan any date'),
                   style: Theme.of(context).textTheme.bodyMedium),
             ),
-            Text('\$3.99',
+            // The store's own localized price; never a hard-coded figure.
+            ProPriceText(
+                fallback: r'$3.99',
                 style: Theme.of(context).textTheme.labelLarge
                     ?.copyWith(color: const Color(0xFFF5A623))),
           ],

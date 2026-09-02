@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/day_change.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'location_store.dart';
@@ -15,13 +16,20 @@ import 'tool_module.dart';
 class GoldenscoutTool implements ToolModule {
   GoldenscoutTool() {
     store.load();
+    dayChange.start();
   }
 
   final LocationStore store = LocationStore();
   final SensorHub sensors = SensorHub();
 
+  /// "Today" is read at build time; this re-runs the build at midnight and
+  /// on foreground-resume on a new day so the Today tab never shows
+  /// yesterday's light.
+  final DayChangeNotifier dayChange = DayChangeNotifier();
+
   @override
-  Widget buildHome(BuildContext context) => _Home(store: store, sensors: sensors);
+  Widget buildHome(BuildContext context) =>
+      _Home(store: store, sensors: sensors, dayChange: dayChange);
 
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
@@ -51,27 +59,52 @@ class GoldenscoutTool implements ToolModule {
 }
 
 class _Home extends StatefulWidget {
-  const _Home({required this.store, required this.sensors});
+  const _Home({
+    required this.store,
+    required this.sensors,
+    required this.dayChange,
+  });
   final LocationStore store;
   final SensorHub sensors;
+  final Listenable dayChange;
 
   @override
   State<_Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<_Home> {
+class _HomeState extends State<_Home> with WidgetsBindingObserver {
   int _tab = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     widget.sensors.startCompass();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    widget.sensors.stopCompass();
+    super.dispose();
+  }
+
+  /// The magnetometer is only useful while someone is looking at the rose;
+  /// leaving it sampling in the background is a battery drain on an app
+  /// whose pitch is that it does nothing behind your back.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      widget.sensors.stopCompass();
+    } else if (state == AppLifecycleState.resumed) {
+      widget.sensors.startCompass();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: widget.store,
+      listenable: Listenable.merge([widget.store, widget.dayChange]),
       builder: (context, _) {
         if (!widget.store.loaded) {
           return const Center(child: CircularProgressIndicator());

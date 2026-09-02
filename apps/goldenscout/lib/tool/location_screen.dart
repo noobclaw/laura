@@ -29,6 +29,31 @@ class _LocationScreenState extends State<LocationScreen> {
           SnackBar(content: Text(tr(zh: '已使用你的当前位置', en: 'Using your current location'))),
         );
       }
+    } on LocationFailure catch (e) {
+      if (!mounted) return;
+      // The failure names its own way out (G2: a refusal must never dead-end).
+      final (label, action) = switch (e.kind) {
+        LocationFailureKind.deniedForever => (
+            tr(zh: '去设置', en: 'Settings'),
+            SensorHub.openAppSettings,
+          ),
+        LocationFailureKind.serviceOff => (
+            tr(zh: '打开定位', en: 'Turn on'),
+            SensorHub.openLocationSettings,
+          ),
+        LocationFailureKind.denied => (
+            tr(zh: '重新申请', en: 'Ask again'),
+            _useCurrent,
+          ),
+        LocationFailureKind.other => (null, null),
+      };
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        duration: const Duration(seconds: 6),
+        action: label == null
+            ? null
+            : SnackBarAction(label: label, onPressed: () => action!()),
+      ));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)

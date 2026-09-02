@@ -65,6 +65,9 @@ class _LightViewState extends State<LightView> {
     // the meaningless "New York sunrise at 17:25 Beijing time".
     final isHere = store.activeName == 'Current location';
     final day = computeDayLight(widget.date, lat, lon, deviceZone: isHere);
+    // Computed once per build, outside the sensor-driven builder below: the
+    // compass fires several times a second and the moon does not move.
+    final moonTimes = computeMoonTimes(widget.date, lat, lon, deviceZone: isHere);
     final now = DateTime.now();
     final refTime = widget.isToday ? now : DateTime(widget.date.year, widget.date.month, widget.date.day, 12);
     final sun = sunPosition(refTime.toUtc(), lat, lon);
@@ -96,10 +99,7 @@ class _LightViewState extends State<LightView> {
             if (widget.isToday) const SizedBox(height: 16),
             _Timeline(day: day, now: widget.isToday ? now : null),
             const SizedBox(height: 16),
-            _MoonCard(
-                phase: phase,
-                times: computeMoonTimes(widget.date, lat, lon, deviceZone: isHere),
-                pro: store.pro),
+            _MoonCard(phase: phase, times: moonTimes, pro: store.pro),
           ],
         );
       },
