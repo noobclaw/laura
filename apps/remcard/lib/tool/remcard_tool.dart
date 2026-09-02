@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'deck_detail.dart';
+import 'import_flow.dart';
 import 'models.dart';
 import 'store.dart';
 import 'tool_module.dart';
@@ -22,6 +23,15 @@ class RemcardTool extends ToolModule {
   @override
   List<Widget> buildSettingsItems(BuildContext context) => [
         const _PurchaseNotices(),
+        ListTile(
+          leading: const Icon(Icons.file_open_outlined),
+          title: Text(tr(zh: '导入牌组文件', en: 'Import a deck file')),
+          subtitle: Text(tr(
+            zh: 'CSV / TSV / Anki 牌组包(.apkg),全部在手机上完成',
+            en: 'CSV / TSV / Anki package (.apkg), entirely on this phone',
+          )),
+          onTap: () => _importGuarded(context, store),
+        ),
         ListTile(
           leading: const Icon(Icons.school_outlined),
           title: Text(tr(zh: '间隔重复原理', en: 'How spaced repetition works')),
@@ -66,6 +76,29 @@ class RemcardTool extends ToolModule {
                 ),
         ),
       ];
+}
+
+/// Import honours the same free-tier deck cap as "New deck": the picker is
+/// never even opened when a new deck could not be created.
+Future<void> _importGuarded(BuildContext context, RemcardStore store) async {
+  if (store.atDeckLimit) {
+    _showLimitSnack(context);
+    return;
+  }
+  await runImportFlow(context, store);
+}
+
+void _showLimitSnack(BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(tr(
+        zh: '免费版最多 ${RemcardStore.freeDeckLimit} 个牌组,'
+            '在设置里解锁 Pro 以创建更多。',
+        en: 'The free version allows up to ${RemcardStore.freeDeckLimit} '
+            'decks. Unlock Pro in Settings to create more.',
+      )),
+    ),
+  );
 }
 
 /// Invisible settings-list entry that surfaces purchase results (errors,
@@ -119,11 +152,15 @@ class DeckListScreen extends StatelessWidget {
             store.decks.fold<int>(0, (sum, d) => sum + d.dueCount(today));
         return Scaffold(
           body: store.decks.isEmpty
-              ? _EmptyState(onCreate: () => _createDeck(context))
+              ? _EmptyState(
+                  onCreate: () => _createDeck(context),
+                  onImport: () => _importGuarded(context, store),
+                )
               : ListView(
                   padding: const EdgeInsets.only(top: 8, bottom: 96),
                   children: [
                     _DueTodayHero(totalDue: totalDue),
+                    _ImportRow(onImport: () => _importGuarded(context, store)),
                     for (final deck in store.decks)
                       _DeckTile(
                         deck: deck,
@@ -200,15 +237,31 @@ class DeckListScreen extends StatelessWidget {
     if (ok == true) store.deleteDeck(deck);
   }
 
-  void _showLimit(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(tr(
-          zh: '免费版最多 ${RemcardStore.freeDeckLimit} 个牌组,'
-              '在设置里解锁 Pro 以创建更多。',
-          en: 'The free version allows up to ${RemcardStore.freeDeckLimit} '
-              'decks. Unlock Pro in Settings to create more.',
-        )),
+  void _showLimit(BuildContext context) => _showLimitSnack(context);
+}
+
+/// One quiet, full-width tonal button under the hero: the deck list is where
+/// people look for "how do I get my Anki decks in here", so the answer sits
+/// right there instead of only in Settings.
+class _ImportRow extends StatelessWidget {
+  const _ImportRow({required this.onImport});
+
+  final VoidCallback onImport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton.tonalIcon(
+          onPressed: onImport,
+          icon: const Icon(Icons.file_open_outlined),
+          label: Text(tr(
+            zh: '从 CSV / Anki 牌组导入',
+            en: 'Import from CSV / Anki deck',
+          )),
+        ),
       ),
     );
   }
@@ -401,9 +454,10 @@ class _DeckTile extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onCreate});
+  const _EmptyState({required this.onCreate, required this.onImport});
 
   final VoidCallback onCreate;
+  final VoidCallback onImport;
 
   @override
   Widget build(BuildContext context) {
@@ -432,6 +486,27 @@ class _EmptyState extends StatelessWidget {
               onPressed: onCreate,
               icon: const Icon(Icons.add),
               label: Text(tr(zh: '新建第一个牌组', en: 'Create your first deck')),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: onImport,
+              icon: const Icon(Icons.file_open_outlined),
+              label: Text(tr(
+                zh: '导入 CSV / Anki 牌组',
+                en: 'Import CSV / Anki deck',
+              )),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              tr(
+                zh: '已有 Anki 牌组?直接在手机上导入,不用电脑。',
+                en: 'Already have Anki decks? Import them right here — '
+                    'no desktop needed.',
+              ),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),

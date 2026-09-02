@@ -42,6 +42,17 @@ dependencies:
   cupertino_icons: ^1.0.8
   path_provider: ^2.1.6
 
+  # "Bring your own deck" import (CSV / TSV / .apkg) — the one thing AnkiMobile
+  # reviewers say they cannot do on the phone. file_picker uses the system
+  # document picker (SAF / UIDocumentPicker): no storage permission, no
+  # INTERNET. archive unzips .apkg in pure Dart; sqlite3 reads the bundled
+  # collection.anki2 / .anki21 database. Newer zstd-compressed .anki21b
+  # exports are detected and refused with guidance, not silently mis-read.
+  file_picker: ^10.1.9
+  archive: ^4.0.9
+  sqlite3: ^2.7.6
+  sqlite3_flutter_libs: ^0.5.34
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
