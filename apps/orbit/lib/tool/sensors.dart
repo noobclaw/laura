@@ -32,14 +32,18 @@ class LocationFailure implements Exception {
 /// Both are optional. A device with no magnetometer still gets the numbers and
 /// a written instruction — the screen degrades, it never blanks.
 ///
-/// ⚠️ Heading reference differs by platform — see [headingIsTrueNorth]. On
-/// Android it is **magnetic** and the alignment screen adds the user's
-/// declination; on iOS Core Location already applies declination, so adding
-/// it again would double-correct (2026-09-02 audit).
+/// ⚠️ The heading reported here is **magnetic** on both platforms and the
+/// alignment screen adds the user's declination. Android's rotation-vector
+/// azimuth is magnetic by definition; on iOS we read the plugin's
+/// `headingForCameraMode`, which flutter_compass derives from the attitude
+/// matrix in the *xMagneticNorthZVertical* reference frame — also magnetic
+/// (only its plain `heading` is Core Location's true heading, and that one
+/// is the wrong axis for aiming). Re-audit 2026-09-02 caught the earlier
+/// assumption that iOS was already true north.
 class SensorHub extends ChangeNotifier {
-  /// iOS: `CLHeading.trueHeading` (declination applied by the OS from the
-  /// device's location). Android: the rotation-vector azimuth, i.e. magnetic.
-  static final bool headingIsTrueNorth = Platform.isIOS;
+  /// Kept as a named constant so the declination logic reads as a decision
+  /// rather than a missing branch. See the class comment.
+  static const bool headingIsTrueNorth = false;
 
   double? _headingDeg;
   double? _pitchDeg;
@@ -63,15 +67,10 @@ class SensorHub extends ChangeNotifier {
   bool get hasTilt => _pitchDeg != null;
   bool get running => _users > 0;
 
-  static String get magneticNote => headingIsTrueNorth
-      ? tr(
-          zh: '罗盘已按你所在地自动换算为真北。',
-          en: 'The compass is already corrected to true north for your location.',
-        )
-      : tr(
-          zh: '罗盘读的是磁北。你所在地的磁偏角可以在观测点页里填,填了才是真方位。',
-          en: 'The compass reads magnetic north. Set your local magnetic declination on the site screen to align against true bearings.',
-        );
+  static String get magneticNote => tr(
+        zh: '罗盘读的是磁北。你所在地的磁偏角可以在观测点页里填,填了才是真方位。',
+        en: 'The compass reads magnetic north. Set your local magnetic declination on the site screen to align against true bearings.',
+      );
 
   /// Begin (or join) a sensor session. Every [acquire] must be matched by a
   /// [release].

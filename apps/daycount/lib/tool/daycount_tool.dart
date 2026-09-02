@@ -234,8 +234,10 @@ class _EventCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       // Flat tile with a faint wash of the event's own accent — reads as a
-      // premium countdown card rather than a generic list row.
-      color: color.withValues(alpha: 0.06),
+      // premium countdown card rather than a generic list row. A 6% wash is
+      // invisible on a dark surface, so the tint is stronger there.
+      color: color.withValues(
+          alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.06),
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
         onTap: () => Navigator.of(context).push(

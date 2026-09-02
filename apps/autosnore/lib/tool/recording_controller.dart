@@ -108,30 +108,22 @@ class RecordingController extends ChangeNotifier {
       elapsedMs = 0;
       eventCount = 0;
 
-      final stream = await _recorder.startStream(RecordConfig(
-        encoder: AudioEncoder.pcm16bits,
-        sampleRate: _sampleRate,
-        numChannels: 1,
-        // Android: never request audio focus, so system sounds cannot pause
-        // us (the plugin default pauses on focus loss and only resumes on a
-        // transient gain — a plain notification chime paused the mic for the
-        // rest of the night). It also leaves the user's white-noise app alone.
-        // iOS: interruptions (calls, alarms) are OS-level; let the plugin
-        // resume the session automatically when they end.
-        audioInterruption: Platform.isIOS
-            ? AudioInterruptionMode.pauseResume
-            : AudioInterruptionMode.none,
-        iosConfig: const IosRecordConfig(
-          // Do not stop the user's sleep sounds; do not force the speaker.
-          categoryOptions: [IosAudioCategoryOption.mixWithOthers],
-        ),
-      ));
+      // Android: never request audio focus, so system sounds cannot pause
+      // us (the plugin default pauses on focus loss and only resumes on a
+      // transient gain — a plain notification chime paused the mic for the
+      // rest of the night). It also leaves the user's white-noise app alone.
+      // iOS: interruptions (calls, alarms) are OS-level; let the plugin
+      // resume the session automatically when they end. mixWithOthers keeps
+      // the user's sleep sounds playing.
+      final stream = await _recorder.startStream(_config());
       _sub = stream.listen(_onChunk, onError: (Object e) {
         debugPrint('record stream error: $e');
       });
       _stateSub = _recorder.onStateChanged().listen(_onState);
-      // Keep the screen on so Android never backgrounds us mid-night.
-      await WakelockPlus.enable();
+      // Keep the screen on so Android never backgrounds us mid-night. iOS
+      // records in the background (UIBackgroundModes audio), so the phone
+      // may — and should — lock there.
+      if (!Platform.isIOS) await WakelockPlus.enable();
       // Refresh the elapsed clock even during long quiet stretches, and run
       // the stall watchdog on the same tick.
       _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
@@ -162,20 +154,44 @@ class RecordingController extends ChangeNotifier {
 
   void _onState(RecordState s) {
     if (!running) return;
-    if (s == RecordState.pause) _tryResume();
+    if (s == RecordState.pause || s == RecordState.stop) _tryResume();
   }
 
+  /// Bring the stream back: resume a paused recorder, or — when the platform
+  /// stopped it outright (read failure, another app seized the mic on
+  /// Android) — open a fresh stream and re-attach. Neither is guaranteed to
+  /// succeed; the watchdog keeps nudging and the gap is booked either way.
   Future<void> _tryResume() async {
     if (_resuming || !running) return;
     _resuming = true;
     try {
-      if (await _recorder.isPaused()) await _recorder.resume();
+      if (await _recorder.isPaused()) {
+        await _recorder.resume();
+      } else if (!await _recorder.isRecording()) {
+        await _sub?.cancel();
+        final stream = await _recorder.startStream(_config());
+        _sub = stream.listen(_onChunk, onError: (Object e) {
+          debugPrint('record stream error: $e');
+        });
+      }
     } catch (e) {
       debugPrint('resume failed: $e');
     } finally {
       _resuming = false;
     }
   }
+
+  RecordConfig _config() => RecordConfig(
+        encoder: AudioEncoder.pcm16bits,
+        sampleRate: _sampleRate,
+        numChannels: 1,
+        audioInterruption: Platform.isIOS
+            ? AudioInterruptionMode.pauseResume
+            : AudioInterruptionMode.none,
+        iosConfig: const IosRecordConfig(
+          categoryOptions: [IosAudioCategoryOption.mixWithOthers],
+        ),
+      );
 
   void _onChunk(Uint8List chunk) {
     final now = DateTime.now().millisecondsSinceEpoch;

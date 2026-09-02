@@ -33,6 +33,11 @@ class AutoSnoreStore extends ChangeNotifier {
   bool recoveredOnLaunch = false;
 
   final JsonFileStore _file = JsonFileStore('autosnore.json');
+
+  /// The minute-by-minute checkpoint lives in its own small file: rewriting
+  /// the whole history (Pro users keep every night) sixty times an hour
+  /// would be gigabytes of I/O and a JSON encode on the UI isolate each time.
+  final JsonFileStore _checkpoint = JsonFileStore('autosnore-inprogress.json');
   bool _proPending = false;
 
   Future<void> load() async {
@@ -51,30 +56,34 @@ class AutoSnoreStore extends ChangeNotifier {
             debugPrint('autosnore skipped bad session: $err');
           }
         }
-        final ip = raw['inProgress'];
-        if (ip is Map<String, dynamic>) {
-          try {
-            final s = SleepSession.fromJson(ip);
-            if (s.durationMs > 60000 && !sessions.any((x) => x.id == s.id)) {
-              sessions.add(s);
-              recoveredOnLaunch = true;
-            }
-          } catch (err) {
-            debugPrint('autosnore could not recover in-progress night: $err');
-          }
-        }
         _sortAndPrune();
+      }
+      // A night that was being recorded when the app died: promote its last
+      // checkpoint to a real session, flagged as ended early.
+      final ip = await _checkpoint.read();
+      final session = ip?['session'];
+      if (session is Map<String, dynamic>) {
+        try {
+          final s = SleepSession.fromJson(session);
+          if (s.durationMs > 60000 && !sessions.any((x) => x.id == s.id)) {
+            sessions.add(s);
+            recoveredOnLaunch = true;
+            _sortAndPrune();
+          }
+        } catch (err) {
+          debugPrint('autosnore could not recover in-progress night: $err');
+        }
       }
     } catch (e) {
       debugPrint('autosnore load skipped: $e');
     } finally {
       loaded = true;
-      if (_proPending) {
-        _proPending = false;
-        pro = true;
-      }
-      // Persist the recovery (and drop the in-progress record) right away.
-      if (recoveredOnLaunch || _proPending) {
+      final applyPro = _proPending;
+      _proPending = false;
+      if (applyPro) pro = true;
+      if (recoveredOnLaunch) _checkpoint.write({});
+      // Persist the recovery / late Pro right away.
+      if (recoveredOnLaunch || applyPro) {
         _save();
       } else {
         notifyListeners();
@@ -90,7 +99,6 @@ class AutoSnoreStore extends ChangeNotifier {
       'sensitivity': sensitivity,
       'briefingSeen': briefingSeen,
       'sessions': sessions.map((s) => s.toJson()).toList(),
-      if (inProgress != null) 'inProgress': inProgress!.toJson(),
     });
   }
 
@@ -105,23 +113,24 @@ class AutoSnoreStore extends ChangeNotifier {
   bool get atFreeLimit => !pro && sessions.length >= freeSessionLimit;
 
   void addSession(SleepSession s) {
-    inProgress = null;
+    clearInProgress();
     sessions.removeWhere((x) => x.id == s.id);
     sessions.add(s);
     _sortAndPrune();
     _save();
   }
 
-  /// Checkpoint the night being recorded (see [inProgress]).
+  /// Checkpoint the night being recorded (see [inProgress]). Only the
+  /// checkpoint file is touched, never the main history.
   void saveInProgress(SleepSession s) {
     inProgress = s;
-    _save();
+    _checkpoint.write({'session': s.toJson()});
   }
 
   void clearInProgress() {
     if (inProgress == null) return;
     inProgress = null;
-    _save();
+    _checkpoint.write({});
   }
 
   void acknowledgeRecovery() {

@@ -89,6 +89,24 @@ class Flashcard {
     return math.max(intervalDays + 1, days.round());
   }
 
+  /// Interval for grading a card that already lapsed *in this session* and
+  /// is being shown again. The lapse already reset the streak and docked
+  /// ease; the relearn grade only decides how soon it comes back, so ease
+  /// must not be docked a second time (Again ×3 in one sitting used to pin
+  /// it at 1.3 for good).
+  int previewRelearnInterval(Rating rating) => switch (rating) {
+        Rating.again => 1,
+        Rating.easy => 2,
+        _ => 1,
+      };
+
+  /// See [previewRelearnInterval]: reschedule without touching ease or the
+  /// repetition count.
+  void relearn(Rating rating, int today) {
+    intervalDays = previewRelearnInterval(rating);
+    dueDay = today + intervalDays;
+  }
+
   /// Apply one review with [rating] on the day [today], mutating this card's
   /// schedule per SM-2 with the grade spread described on [previewInterval].
   ///

@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../core/json_file_store.dart';
 import 'models.dart';
 
 /// In-memory model of projects, photos and settings, backed by a JSON file in
@@ -50,10 +50,10 @@ class FieldStampStore extends ChangeNotifier {
     return list;
   }
 
-  Future<File> _stateFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/fieldstamp.json');
-  }
+  /// Atomic, serialised persistence; a damaged file is kept aside rather
+  /// than overwritten by the next save (the whole evidence ledger used to
+  /// vanish after one torn write).
+  final JsonFileStore _state = JsonFileStore('fieldstamp.json');
 
   /// Load state from disk. Any failure (first launch, or plugins unavailable in
   /// a test harness) leaves an empty but usable store with a default project.
@@ -64,9 +64,8 @@ class FieldStampStore extends ChangeNotifier {
       if (!await _photosDir!.exists()) {
         await _photosDir!.create(recursive: true);
       }
-      final f = await _stateFile();
-      if (await f.exists()) {
-        final raw = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
+      final raw = await _state.read();
+      if (raw != null) {
         pro = raw['pro'] as bool? ?? false;
         currentProjectId = raw['currentProjectId'] as String? ?? 'default';
         coordFormat = CoordFormat.values[(raw['coordFormat'] as int? ?? 0)
@@ -97,24 +96,17 @@ class FieldStampStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _save() async {
+  void _save() {
     notifyListeners();
-    try {
-      final f = await _stateFile();
-      await f.writeAsString(
-        jsonEncode({
-          'pro': pro,
-          'currentProjectId': currentProjectId,
-          'coordFormat': coordFormat.index,
-          'altUnit': altUnit.index,
-          'projects': projects.map((p) => p.toJson()).toList(),
-          'photos': photos.map((p) => p.toJson()).toList(),
-        }),
-        flush: true,
-      );
-    } catch (e) {
-      debugPrint('fieldstamp save skipped: $e');
-    }
+    if (!loaded) return; // never overwrite a file we have not read yet
+    _state.write({
+      'pro': pro,
+      'currentProjectId': currentProjectId,
+      'coordFormat': coordFormat.index,
+      'altUnit': altUnit.index,
+      'projects': projects.map((p) => p.toJson()).toList(),
+      'photos': photos.map((p) => p.toJson()).toList(),
+    });
   }
 
   /// Persist a freshly stamped JPEG and its metadata. Returns the record, or
@@ -139,7 +131,7 @@ class FieldStampStore extends ChangeNotifier {
         heading: reading.heading,
       );
       photos.add(photo);
-      await _save();
+      _save();
       return photo;
     } catch (e) {
       debugPrint('saveCapture failed: $e');
@@ -153,7 +145,7 @@ class FieldStampStore extends ChangeNotifier {
       if (await file.exists()) await file.delete();
     } catch (_) {}
     photos.remove(p);
-    await _save();
+    _save();
   }
 
   Project addProject(String name) {
@@ -176,7 +168,7 @@ class FieldStampStore extends ChangeNotifier {
     }
     projects.remove(p);
     if (currentProjectId == p.id) currentProjectId = projects.first.id;
-    await _save();
+    _save();
   }
 
   void selectProject(String id) {

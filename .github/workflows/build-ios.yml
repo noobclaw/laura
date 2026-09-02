@@ -83,6 +83,16 @@ jobs:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+          # permission_handler compiles each iOS permission behind a macro that
+          # defaults to OFF. Plugins link through Swift Package Manager here
+          # (no Podfile), where the plugin's Package.swift reads these env
+          # vars — and, failing that, the app's Info.plist usage keys. Both
+          # are set so the microphone/speech prompts actually appear.
+          PERMISSION_MICROPHONE: "1"
+          PERMISSION_SPEECH_RECOGNIZER: "1"
+          PERMISSION_LOCATION_WHENINUSE: "1"
+          PERMISSION_CAMERA: "1"
+          PERMISSION_PHOTOS_ADD_ONLY: "1"
         run: |
           xcodebuild \
             -workspace ios/Runner.xcworkspace \

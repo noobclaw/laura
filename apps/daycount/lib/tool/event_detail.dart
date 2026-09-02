@@ -155,14 +155,22 @@ class _DetailView extends StatelessWidget {
                             valueColor: AlwaysStoppedAnimation(onColor.withValues(alpha: 0.9)),
                           ),
                         ),
-                      Text(
-                        s.isToday ? '🎉' : '${s.absDays}',
-                        style: TextStyle(
-                          fontSize: 76,
-                          height: 1.05,
-                          fontWeight: FontWeight.w800,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                          color: onColor,
+                      // Shrinks to fit inside the ring: 10,000+ days (a 27-year
+                      // anniversary) used to lose its last digit to the clip.
+                      SizedBox(
+                        width: 140,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            s.isToday ? '🎉' : '${s.absDays}',
+                            style: TextStyle(
+                              fontSize: 76,
+                              height: 1.05,
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: const [FontFeature.tabularFigures()],
+                              color: onColor,
+                            ),
+                          ),
                         ),
                       ),
                     ],

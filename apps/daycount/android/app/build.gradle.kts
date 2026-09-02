@@ -28,7 +28,9 @@ android {
         applicationId = "com.noobclaw.daycount"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // The home-screen widget provider computes dates with java.time (API 26).
+        // Flutter's default floor is 24; without desugaring that crashes on 7.x.
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

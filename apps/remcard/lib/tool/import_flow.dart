@@ -160,6 +160,16 @@ class _ParsingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Not dismissible by the back gesture: the flow pops this dialog itself
+    // when parsing ends, and a user-initiated pop would make that call pop
+    // the route underneath instead (black screen from the home route).
+    return PopScope(
+      canPop: false,
+      child: _body(context),
+    );
+  }
+
+  Widget _body(BuildContext context) {
     return AlertDialog(
       content: Row(
         children: [

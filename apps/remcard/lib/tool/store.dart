@@ -183,6 +183,13 @@ class RemcardStore extends ChangeNotifier {
     _save();
   }
 
+  /// Record the grade of a card shown again after lapsing in this session
+  /// (see [Flashcard.relearn]).
+  void relearnCard(Flashcard card, Rating rating) {
+    card.relearn(rating, epochDayOf(DateTime.now()));
+    _save();
+  }
+
   void unlockPro() {
     if (!loaded) {
       _proPending = true;

@@ -99,7 +99,11 @@ class _LightViewState extends State<LightView> {
             if (widget.isToday) const SizedBox(height: 16),
             _Timeline(day: day, now: widget.isToday ? now : null),
             const SizedBox(height: 16),
-            _MoonCard(phase: phase, times: moonTimes, pro: store.pro),
+            _MoonCard(
+                phase: phase,
+                times: moonTimes,
+                pro: store.pro,
+                date: widget.date),
           ],
         );
       },
@@ -117,9 +121,14 @@ class _GoldenHero extends StatelessWidget {
   final DayLight day;
   final DateTime? now;
 
-  static String _clock(DateTime? t) => t == null
-      ? '--:--'
-      : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+  /// "23:58", or "00:03 +1" when the event falls on the next calendar day
+  /// (midnight sun) — same convention as the timeline below.
+  String _clock(DateTime? t) {
+    if (t == null) return '--:--';
+    final hm = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    final off = day.dayOffset(t);
+    return off == 0 ? hm : '$hm ${off > 0 ? '+' : '−'}${off.abs()}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,8 +152,12 @@ class _GoldenHero extends StatelessWidget {
       final amOk = day.goldenStartAm.exists && day.goldenEndAm.exists;
       final pmOk = day.goldenStartPm.exists && day.goldenEndPm.exists;
       final n = now;
-      final morningUpcoming =
-          amOk && n != null && day.goldenEndAm.time!.isAfter(n);
+      // Compare real instants: for a far-away site the displayed times are
+      // shifted into that site's clock and must not be compared to `now`
+      // directly (that turned an upcoming morning window into "past").
+      final morningUpcoming = amOk &&
+          n != null &&
+          day.instantOf(day.goldenEndAm.time!).isAfter(n);
       if (morningUpcoming) {
         label = tr(zh: '清晨黄金时段', en: 'Morning golden hour');
         start = day.goldenStartAm.time;
@@ -587,10 +600,23 @@ class _Timeline extends StatelessWidget {
 }
 
 class _MoonCard extends StatelessWidget {
-  const _MoonCard({required this.phase, required this.times, required this.pro});
+  const _MoonCard({
+    required this.phase,
+    required this.times,
+    required this.pro,
+    required this.date,
+  });
   final MoonPhase phase;
   final MoonTimes times;
   final bool pro;
+
+  /// The requested calendar day, so a moonrise at 00:40 tomorrow (common in
+  /// the solar-day window) is labelled "+1" instead of passing as tonight.
+  final DateTime date;
+
+  int _dayOffset(DateTime t) => DateTime.utc(t.year, t.month, t.day)
+      .difference(DateTime.utc(date.year, date.month, date.day))
+      .inDays;
 
   @override
   Widget build(BuildContext context) {
@@ -634,9 +660,12 @@ class _MoonCard extends StatelessWidget {
     );
   }
 
-  String _fmt(DateTime? t) => t == null
-      ? '—'
-      : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+  String _fmt(DateTime? t) {
+    if (t == null) return '—';
+    final hm = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    final off = _dayOffset(t);
+    return off == 0 ? hm : '$hm ${off > 0 ? '+' : '−'}${off.abs()}';
+  }
 
   /// astro.dart keeps the English phase names as stable keys (also used by
   /// [_glyph]); translate only at display time.

@@ -269,14 +269,15 @@ class DictationController extends ChangeNotifier {
   /// than saying nothing.
   static String get noOnDeviceHelp => DictationService.needsSpeechPermission
       ? tr(
-          zh: '这台 iPhone 不支持当前语言的离线语音识别。请在系统设置里把语言切换到支持'
-              '离线听写的语言(如简体中文、English、日本語、한국어 等)后再试——'
-              '为了保证声音不出手机,本应用不会改用联网识别。',
-          en: 'This iPhone has no offline speech recognition for the current '
-              'language. Switch to a language with offline dictation (Chinese, '
-              'English, Japanese, Korean, German, French, Spanish…) in Settings '
-              'and try again — this app will not switch to online recognition, '
-              'so your voice stays on the phone.',
+          zh: 'iPhone 上的离线识别还没就绪。请打开「设置 → 通用 → 键盘 → 启用听写」,'
+              '并确认当前语言支持离线听写(简体中文、English、日本語、한국어 等;'
+              '首次启用会下载一次语言资源)。为了保证声音不出手机,本应用不会改用联网识别。',
+          en: 'Offline recognition is not ready on this iPhone. Turn on '
+              'Settings → General → Keyboard → Enable Dictation and make sure '
+              'the current language supports offline dictation (Chinese, '
+              'English, Japanese, Korean, German, French, Spanish…; the first '
+              'enable downloads the language once). This app will not switch '
+              'to online recognition, so your voice stays on the phone.',
         )
       : tr(
           zh: '系统还没有可用的设备端语音识别语言包。请到「系统设置 → 系统 → 语言与输入法 → '

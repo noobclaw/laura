@@ -8,15 +8,25 @@ import 'study_screen.dart';
 /// Shows one deck's cards, lets the user add/edit/delete them, and starts a
 /// review session for the cards that are due today.
 class DeckDetailScreen extends StatelessWidget {
-  const DeckDetailScreen({super.key, required this.store, required this.deck});
+  const DeckDetailScreen({
+    super.key,
+    required this.store,
+    required this.deck,
+    this.dayChange,
+  });
 
   final RemcardStore store;
   final Deck deck;
 
+  /// Re-derives "due today" at midnight / on resume (see RemcardTool).
+  final Listenable? dayChange;
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: store,
+      listenable: dayChange == null
+          ? store
+          : Listenable.merge([store, dayChange!]),
       builder: (context, _) {
         final today = epochDayOf(DateTime.now());
         final due = deck.dueCount(today);

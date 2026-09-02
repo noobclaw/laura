@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -75,7 +78,9 @@ class _CameraScreenState extends State<CameraScreen>
       );
       final controller = CameraController(
         back,
-        ResolutionPreset.veryHigh,
+        // camera_avfoundation maps veryHigh to 1080p while camera_android
+        // gives 2160p; ultraHigh brings iOS up to the same 4K evidence frame.
+        Platform.isIOS ? ResolutionPreset.ultraHigh : ResolutionPreset.veryHigh,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
@@ -136,9 +141,13 @@ class _CameraScreenState extends State<CameraScreen>
     // Only a real trip to the background releases the device.
     if (state == AppLifecycleState.paused) {
       _initGen++; // invalidate any init still in flight
+      // ...and forget its future, or `resumed` would await a controller that
+      // the generation check is about to throw away and spin forever.
+      _initFuture = null;
       final c = _controller;
       _controller = null;
       c?.dispose();
+      if (mounted) setState(() {});
     } else if (state == AppLifecycleState.resumed) {
       if (_controller == null) _initCamera();
       // The user may have just flipped the switch we asked them to.
@@ -161,6 +170,10 @@ class _CameraScreenState extends State<CameraScreen>
       final reading = widget.sensors.snapshot();
       final xfile = await c.takePicture();
       final bytes = await xfile.readAsBytes();
+      // The plugin leaves the unstamped original in the cache directory;
+      // an evidence camera must not keep a second, un-watermarked copy
+      // of every photo lying around.
+      unawaited(File(xfile.path).delete().catchError((_) => File(xfile.path)));
       final stamped = await burnWatermark(bytes, _watermarkFor(reading));
       final photo = await widget.store
           .saveCapture(stamped, reading, widget.store.currentProjectId);

@@ -252,7 +252,10 @@ class DeckListScreen extends StatelessWidget {
                         onOpen: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) =>
-                                DeckDetailScreen(store: store, deck: deck),
+                                DeckDetailScreen(
+                                    store: store,
+                                    deck: deck,
+                                    dayChange: dayChange),
                           ),
                         ),
                         onRename: () => _renameDeck(context, deck),

@@ -56,11 +56,18 @@ class _StudyScreenState extends State<StudyScreen> {
 
   void _grade(Rating rating) {
     final card = _queue[_index];
-    widget.store.reviewCard(card, rating);
+    final repeat = _seen.contains(card.id);
+    if (repeat) {
+      // Already lapsed this session: the relearn grade only sets when it
+      // comes back, it must not dock ease again.
+      widget.store.relearnCard(card, rating);
+    } else {
+      widget.store.reviewCard(card, rating);
+    }
     setState(() {
       _seen.add(card.id);
       if (rating == Rating.again) {
-        _lapses += 1;
+        if (!repeat) _lapses += 1;
         _queue.add(card);
       }
       _index += 1;
@@ -124,7 +131,9 @@ class _StudyScreenState extends State<StudyScreen> {
                                 // The number under each label is the card's
                                 // next interval for that grade — what the
                                 // user is actually choosing between.
-                                final days = card.previewInterval(r);
+                                final days = isRepeat
+                                    ? card.previewRelearnInterval(r)
+                                    : card.previewInterval(r);
                                 return FilledButton(
                                   style: FilledButton.styleFrom(
                                     backgroundColor: bg,

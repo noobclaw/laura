@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -110,10 +111,15 @@ class SensorHub extends ChangeNotifier {
       await _posSub?.cancel();
       _posSub = null;
 
-      // Ask for permission before checking the service switch: the OS
-      // prompt is what makes the toggle appear in iOS Settings at all, and
-      // a user who turns the service on later should not have to be asked
-      // again from scratch.
+      // iOS reports "denied" for the *authorisation* whenever the system
+      // location switch is off, which geolocator maps to deniedForever — so
+      // there the service check must come first or the user is told to fix
+      // a permission that is fine. Android is the other way round: asking
+      // for permission first is what makes the Settings toggle exist.
+      if (Platform.isIOS && !await Geolocator.isLocationServiceEnabled()) {
+        _set(LocationState.serviceOff);
+        return;
+      }
       var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied ||
           perm == LocationPermission.unableToDetermine) {
@@ -176,7 +182,16 @@ class SensorHub extends ChangeNotifier {
       if (events == null) return;
       _compassSub = events.listen(
         (e) {
-          final h = e.heading;
+          // The bearing that matters is where the *camera* points. On iOS
+          // `heading` is the top edge of an upright phone (skyward); the
+          // plugin's headingForCameraMode is the yaw out of the back —
+          // exactly the lens axis. Android's azimuth is fine for an
+          // upright phone. Both are magnetic north (the plugin derives the
+          // camera-mode yaw in a magnetic reference frame), so the burned
+          // bearing means the same thing on both platforms.
+          final h = Platform.isIOS
+              ? (e.headingForCameraMode ?? e.heading)
+              : e.heading;
           // iOS reports -1 while heading is unavailable (no location
           // permission yet); burning that in as "359° N" would be wrong.
           if (h == null || h < 0) {

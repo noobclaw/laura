@@ -1,6 +1,7 @@
 import AVFoundation
 import Flutter
 import Speech
+import UIKit
 
 /// On-device dictation bridge for iOS — the counterpart of
 /// android/.../DictationBridge.kt, speaking the same channel contract so the
@@ -112,18 +113,31 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
 
   // MARK: - Capabilities
 
+  /// Cached: probing ~60 locales means constructing ~60 recognizers.
+  private static var installedCache: [String]?
+
   private func reportCapabilities(_ result: @escaping FlutterResult) {
     DispatchQueue.global(qos: .userInitiated).async {
       let locales = SFSpeechRecognizer.supportedLocales()
       let supported = locales.map { Self.bcp47($0) }.sorted()
-      var installed: [String] = []
-      for loc in locales {
-        if let r = SFSpeechRecognizer(locale: loc), r.supportsOnDeviceRecognition {
-          installed.append(Self.bcp47(loc))
+      let installed: [String]
+      if let cached = Self.installedCache {
+        installed = cached
+      } else {
+        var found: [String] = []
+        for loc in locales {
+          if let r = SFSpeechRecognizer(locale: loc), r.supportsOnDeviceRecognition {
+            found.append(Self.bcp47(loc))
+          }
         }
+        found.sort()
+        Self.installedCache = found
+        installed = found
       }
-      installed.sort()
-      let current = Self.resolveLocale(self.language)
+      // Probe the language Dart will dictate in (the device's preferred
+      // language, e.g. "zh-Hans-CN"), not a stale `language` from a previous
+      // session.
+      let current = Self.resolveLocale(Locale.preferredLanguages.first ?? self.language)
       let onDevice = current != nil
       let detail: String
       if let cur = current {
@@ -155,9 +169,26 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
        r.isAvailable, r.supportsOnDeviceRecognition {
       return Locale(identifier: normalised)
     }
-    let lang = tag.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init)?.lowercased()
-    for loc in SFSpeechRecognizer.supportedLocales() {
-      guard let l = loc.languageCode?.lowercased(), l == lang else { continue }
+    let parts = tag.split(whereSeparator: { $0 == "-" || $0 == "_" }).map(String.init)
+    let lang = parts.first?.lowercased()
+    // Same language, deterministic preference: the tag's own region first
+    // (zh-Hans-CN → zh_CN), then the device region, then alphabetical — a
+    // Simplified-Chinese user must never be handed zh_HK by Set ordering.
+    let wantedRegion = parts.dropFirst().first(where: { $0.count == 2 })?.uppercased()
+    let deviceRegion = Locale.current.regionCode?.uppercased()
+    let candidates = SFSpeechRecognizer.supportedLocales()
+      .filter { $0.languageCode?.lowercased() == lang }
+      .sorted { a, b in
+        func rank(_ l: Locale) -> Int {
+          let r = l.regionCode?.uppercased()
+          if r != nil && r == wantedRegion { return 0 }
+          if r != nil && r == deviceRegion { return 1 }
+          return 2
+        }
+        let ra = rank(a), rb = rank(b)
+        return ra != rb ? ra < rb : a.identifier < b.identifier
+      }
+    for loc in candidates {
       if let r = SFSpeechRecognizer(locale: loc), r.isAvailable, r.supportsOnDeviceRecognition {
         return loc
       }
@@ -359,6 +390,16 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
         finishSegment()
         return
       }
+      // 102 / 1101: the on-device assets for this language are not on the
+      // phone (dictation never enabled, or the language pack still
+      // downloading). `supportsOnDeviceRecognition` said yes, the request
+      // says no — that is the single most likely dead-on-arrival path on
+      // a fresh iPhone, so it gets the "how to fix" message, not "retry".
+      if error.code == 102 || error.code == 1101 {
+        failSession(code: "on_device_unavailable",
+                    message: "offline speech assets not ready: \(error.localizedDescription)")
+        return
+      }
       if segmentEnding {
         // Errors that arrive while we are already closing the segment are
         // just the request being torn down.
@@ -423,28 +464,41 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
 
   // MARK: - Interruptions & routes
 
+  // Notifications and the recognizer delegate arrive on arbitrary threads;
+  // all session state (timers included) lives on the main thread.
+
   @objc private func onInterruption(_ note: Notification) {
-    guard sessionActive,
-          let info = note.userInfo,
+    guard let info = note.userInfo,
           let raw = info[AVAudioSessionInterruptionTypeKey] as? UInt,
           let type = AVAudioSession.InterruptionType(rawValue: raw) else { return }
-    if type == .began {
-      // A call or Siri took the microphone. Keep the words we have and end
-      // the session visibly; Dart offers "try again".
-      failSession(code: "recognizer_failed", message: "interrupted")
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self, self.sessionActive else { return }
+      if type == .began {
+        // A call or Siri took the microphone. Keep the words we have and end
+        // the session visibly; Dart offers "try again".
+        self.failSession(code: "recognizer_failed", message: "interrupted")
+      }
     }
   }
 
   @objc private func onRouteChange(_ note: Notification) {
-    guard sessionActive,
-          let info = note.userInfo,
+    guard let info = note.userInfo,
           let raw = info[AVAudioSessionRouteChangeReasonKey] as? UInt,
           let reason = AVAudioSession.RouteChangeReason(rawValue: raw) else { return }
-    if reason == .oldDeviceUnavailable || reason == .newDeviceAvailable {
-      // Headset plugged/unplugged: reinstall the tap with the new hardware
-      // format instead of letting the next buffer assert.
-      do { try installTap() } catch {
-        failSession(code: "recognizer_failed", message: error.localizedDescription)
+    guard reason == .oldDeviceUnavailable || reason == .newDeviceAvailable else { return }
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self, self.sessionActive else { return }
+      // Headset plugged/unplugged: the engine stops itself on a route
+      // change. Reinstall the tap with the new hardware format AND restart
+      // the engine, or the session sits silent until the 120 s timeout.
+      do {
+        try self.installTap()
+        if !self.engine.isRunning {
+          self.engine.prepare()
+          try self.engine.start()
+        }
+      } catch {
+        self.failSession(code: "recognizer_failed", message: error.localizedDescription)
       }
     }
   }
@@ -452,8 +506,10 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   // MARK: - SFSpeechRecognizerDelegate
 
   func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
-    guard sessionActive, !available else { return }
-    failSession(code: "on_device_unavailable", message: "speech recognizer became unavailable")
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self, self.sessionActive, !available else { return }
+      self.failSession(code: "on_device_unavailable", message: "speech recognizer became unavailable")
+    }
   }
 
   // MARK: - FlutterStreamHandler
