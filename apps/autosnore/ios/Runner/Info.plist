@@ -68,5 +68,7 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>AutoSnore records audio overnight to detect and count snoring. Recordings never leave this device.</string>
 </dict>
 </plist>

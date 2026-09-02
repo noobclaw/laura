@@ -68,5 +68,7 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>GoldenScout uses your location to calculate sunrise, sunset and golden hour times for where you are. Your location never leaves this device.</string>
 </dict>
 </plist>
