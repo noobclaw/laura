@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/app_theme.dart';
 import 'core/branding.dart';
+import 'core/l10n.dart';
 import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/sample_tool.dart';
@@ -10,28 +11,39 @@ import 'tool/tool_module.dart';
 /// The one line a generated app changes to plug in its tool.
 final ToolModule tool = SampleTool();
 
-void main() => runApp(const ShellApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppLanguage.load();
+  runApp(const ShellApp());
+}
 
 class ShellApp extends StatelessWidget {
   const ShellApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: Branding.appName,
-      debugShowCheckedModeBanner: false,
-      // System widgets (date/time pickers, tooltips…) follow the device
-      // language; our own strings do too via core/l10n.dart `tr()`.
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
-      // Premium default theme (G6b bar) — see core/app_theme.dart. Every new app
-      // starts here instead of bare fromSeed; give it a real hero/empty states.
-      theme: buildAppTheme(Brightness.light),
-      darkTheme: buildAppTheme(Brightness.dark),
-      // Purchase results surface as snackbars on whatever screen is open —
-      // a paywall that swallows "payment failed" is a support ticket.
-      builder: (_, child) => PurchaseNotices(child: child),
-      home: const _HomeScaffold(),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppLanguage.override,
+      // A new key per language rebuilds the whole tree so every tr()
+      // string and Material widget switches at once.
+      builder: (context, code, _) => MaterialApp(
+        key: ValueKey('lang-$code'),
+        locale: AppLanguage.locale,
+        title: Branding.appName,
+        debugShowCheckedModeBanner: false,
+        // System widgets (date/time pickers, tooltips…) follow the device
+        // language; our own strings do too via core/l10n.dart `tr()`.
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
+        // Premium default theme (G6b bar) — see core/app_theme.dart. Every new app
+        // starts here instead of bare fromSeed; give it a real hero/empty states.
+        theme: buildAppTheme(Brightness.light),
+        darkTheme: buildAppTheme(Brightness.dark),
+        // Purchase results surface as snackbars on whatever screen is open —
+        // a paywall that swallows "payment failed" is a support ticket.
+        builder: (_, child) => PurchaseNotices(child: child),
+        home: const _HomeScaffold(),
+      ),
     );
   }
 }
@@ -47,9 +59,9 @@ class _HomeScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => SettingsPage(tool: tool)),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
           ),
         ],
       ),

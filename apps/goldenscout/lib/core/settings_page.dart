@@ -15,6 +15,7 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         children: [
           ...tool.buildSettingsItems(context),
+          const LanguageTile(),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
             title: Text(tr(zh: '隐私政策', en: 'Privacy policy', ja: 'プライバシーポリシー')),
@@ -41,6 +42,51 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// "Language": follow the system, or pin one. Applies immediately — the app
+/// rebuilds from the root (see main.dart), so the user lands back on the
+/// home screen in the new language.
+class LanguageTile extends StatelessWidget {
+  const LanguageTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppLanguage.override,
+      builder: (context, code, _) => ListTile(
+        leading: const Icon(Icons.translate),
+        title: Text(tr(zh: '语言', en: 'Language', ja: '言語')),
+        subtitle: Text(AppLanguage.label(code)),
+        onTap: () => _pick(context, code),
+      ),
+    );
+  }
+
+  Future<void> _pick(BuildContext context, String? current) async {
+    const system = '_system';
+    final chosen = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(tr(zh: '语言', en: 'Language', ja: '言語')),
+        children: [
+          for (final c in <String?>[null, ...AppLanguage.choices])
+            ListTile(
+              leading: Icon(
+                c == current
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
+                color: c == current ? Theme.of(ctx).colorScheme.primary : null,
+              ),
+              title: Text(AppLanguage.label(c)),
+              onTap: () => Navigator.pop(ctx, c ?? system),
+            ),
+        ],
+      ),
+    );
+    if (chosen == null) return; // dismissed
+    await AppLanguage.set(chosen == system ? null : chosen);
   }
 }
 

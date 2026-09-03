@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
+import 'core/l10n.dart';
 import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/app_theme.dart';
@@ -14,6 +15,8 @@ Future<void> main() async {
   // Real IAP: a purchase or restore of `pro_unlock` flips the persisted Pro
   // flag. Safe on devices without a store — the service degrades silently.
   PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());
+  // The saved language must be known before the first frame.
+  await AppLanguage.load();
   runApp(const AutoSnoreApp());
 }
 
@@ -23,20 +26,27 @@ class AutoSnoreApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = buildNightTheme();
-    return MaterialApp(
-      title: Branding.appName,
-      debugShowCheckedModeBanner: false,
-      // System widgets (date/time pickers, tooltips…) follow the device
-      // language; our own strings do too via core/l10n.dart `tr()`.
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
-      // A sleep app is nocturnal by design — always the deep-indigo night theme.
-      theme: theme,
-      darkTheme: theme,
-      themeMode: ThemeMode.dark,
-      // Purchase results surface as snackbars on whatever screen is open.
-      builder: (_, child) => PurchaseNotices(child: child),
-      home: const _HomeScaffold(),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppLanguage.override,
+      // A new key per language rebuilds the whole tree so every tr()
+      // string and Material widget switches at once.
+      builder: (context, code, _) => MaterialApp(
+        key: ValueKey('lang-$code'),
+        locale: AppLanguage.locale,
+        title: Branding.appName,
+        debugShowCheckedModeBanner: false,
+        // System widgets (date/time pickers, tooltips…) follow the device
+        // language; our own strings do too via core/l10n.dart `tr()`.
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [Locale('en'), Locale('zh'), Locale('ja')],
+        // A sleep app is nocturnal by design — always the deep-indigo night theme.
+        theme: theme,
+        darkTheme: theme,
+        themeMode: ThemeMode.dark,
+        // Purchase results surface as snackbars on whatever screen is open.
+        builder: (_, child) => PurchaseNotices(child: child),
+        home: const _HomeScaffold(),
+      ),
     );
   }
 }
@@ -52,9 +62,9 @@ class _HomeScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => SettingsPage(tool: tool)),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
           ),
         ],
       ),

@@ -33,15 +33,20 @@ class CleanAlarmApp extends StatelessWidget {
       child: AnimatedBuilder(
         animation: store,
         builder: (context, _) {
-          final seed = Color(accentPalette[
-              store.accent.clamp(0, accentPalette.length - 1)]);
+          final seed = Color(
+            accentPalette[store.accent.clamp(0, accentPalette.length - 1)],
+          );
           return MaterialApp(
             title: Branding.appName,
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: seed)),
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: seed),
+            ),
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                  seedColor: seed, brightness: Brightness.dark),
+                seedColor: seed,
+                brightness: Brightness.dark,
+              ),
             ),
             home: const _HomeScaffold(),
           );
@@ -62,9 +67,9 @@ class _HomeScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => SettingsPage(tool: tool)),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
           ),
         ],
       ),

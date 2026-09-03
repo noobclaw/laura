@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/branding.dart';
+import 'core/l10n.dart';
 import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/app_theme.dart';
@@ -28,6 +29,8 @@ Future<void> main() async {
   PurchaseService.instance.init(
     onUnlocked: () => tool.storeOrNull?.unlockPro(),
   );
+  // The saved language must be known before the first frame.
+  await AppLanguage.load();
   runApp(const EchoJotApp());
 }
 
@@ -36,19 +39,26 @@ class EchoJotApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: Branding.appName,
-      debugShowCheckedModeBanner: false,
-      // System widgets (pickers, tooltips…) follow the device language; our own
-      // strings do too via core/l10n.dart `tr()`. Only zh/en are declared —
-      // every string in this app exists in exactly those two.
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: const [Locale('en'), Locale('zh')],
-      theme: buildEchoJotTheme(Brightness.light),
-      darkTheme: buildEchoJotTheme(Brightness.dark),
-      // Purchase results surface as snackbars on whatever screen is open.
-      builder: (_, child) => PurchaseNotices(child: child),
-      home: const _HomeScaffold(),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppLanguage.override,
+      // A new key per language rebuilds the whole tree so every tr()
+      // string and Material widget switches at once.
+      builder: (context, code, _) => MaterialApp(
+        key: ValueKey('lang-$code'),
+        locale: AppLanguage.locale,
+        title: Branding.appName,
+        debugShowCheckedModeBanner: false,
+        // System widgets (pickers, tooltips…) follow the device language; our own
+        // strings do too via core/l10n.dart `tr()`. Only zh/en are declared —
+        // every string in this app exists in exactly those two.
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [Locale('en'), Locale('zh')],
+        theme: buildEchoJotTheme(Brightness.light),
+        darkTheme: buildEchoJotTheme(Brightness.dark),
+        // Purchase results surface as snackbars on whatever screen is open.
+        builder: (_, child) => PurchaseNotices(child: child),
+        home: const _HomeScaffold(),
+      ),
     );
   }
 }
@@ -64,16 +74,18 @@ class _HomeScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => SettingsPage(tool: tool)),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
           ),
         ],
       ),
       // Purchase results are surfaced app-wide, not only on the settings page:
       // the paywall is reached from the home screen, so that is exactly where
       // "store unavailable" / "Pro unlocked" has to be visible.
-      body: _PurchaseNoticeHost(child: SafeArea(child: tool.buildHome(context))),
+      body: _PurchaseNoticeHost(
+        child: SafeArea(child: tool.buildHome(context)),
+      ),
     );
   }
 }
@@ -100,10 +112,9 @@ class _PurchaseNoticeHostState extends State<_PurchaseNoticeHost> {
     PurchaseService.instance.notice.value = null;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(msg),
-        duration: const Duration(seconds: 5),
-      ));
+      ..showSnackBar(
+        SnackBar(content: Text(msg), duration: const Duration(seconds: 5)),
+      );
   }
 
   @override
