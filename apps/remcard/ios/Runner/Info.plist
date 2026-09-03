@@ -4,6 +4,12 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- file_picker (deck import) links UIImagePickerController; Apple rejects the
+	     upload (ITMS-90683) without these even though the app never opens them. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Remcard only reads deck files you choose in the document picker; it does not access your photos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Remcard does not use the camera; this text is required by a file-picker component.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleLocalizations</key>

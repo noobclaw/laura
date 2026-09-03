@@ -85,14 +85,12 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
           # permission_handler compiles each iOS permission behind a macro that
           # defaults to OFF. Plugins link through Swift Package Manager here
-          # (no Podfile), where the plugin's Package.swift reads these env
-          # vars — and, failing that, the app's Info.plist usage keys. Both
-          # are set so the microphone/speech prompts actually appear.
-          PERMISSION_MICROPHONE: "1"
-          PERMISSION_SPEECH_RECOGNIZER: "1"
-          PERMISSION_LOCATION_WHENINUSE: "1"
-          PERMISSION_CAMERA: "1"
-          PERMISSION_PHOTOS_ADD_ONLY: "1"
+          # (no Podfile), and the plugin's Package.swift turns a macro on when
+          # the app's Info.plist carries the matching usage key — so every app
+          # gets exactly the handlers it declares. Do NOT set PERMISSION_* env
+          # here: a global value compiles that handler into every app and
+          # Apple then rejects the upload (ITMS-90683, purpose string missing
+          # for an API the app never uses).
         run: |
           xcodebuild \
             -workspace ios/Runner.xcworkspace \
@@ -151,8 +149,16 @@ jobs:
           # altool looks for the key under ~/.appstoreconnect/private_keys/AuthKey_<ID>.p8
           mkdir -p ~/.appstoreconnect/private_keys
           cp ~/asc/AuthKey.p8 ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
-          if ! xcrun altool --upload-app -f "$IPA" -t ios \
-              --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"; then
+          # altool exits 0 even when it prints an ERROR (e.g. no App Store
+          # Connect record for the bundle id), which let a failed upload show
+          # as a green step. Capture its output and judge that instead.
+          set +e
+          out=$(xcrun altool --upload-app -f "$IPA" -t ios \
+              --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1)
+          rc=$?
+          set -e
+          echo "$out"
+          if [ $rc -ne 0 ] || echo "$out" | grep -q "ERROR:"; then
             echo "altool failed — falling back to fastlane pilot"
             node -e '
               const fs = require("fs"), os = require("os");
