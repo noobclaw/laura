@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -22,8 +24,27 @@ class WidgetBridge {
   /// Kotlin class name of the AppWidgetProvider (relative to applicationId).
   static const String _androidProvider = 'CountdownWidgetProvider';
 
+  /// WidgetKit `kind` of ios/CountdownWidget/CountdownWidget.swift.
+  static const String _iosKind = 'CountdownWidget';
+
+  /// App Group shared by Runner and the widget extension on iOS — the plugin
+  /// writes into this suite's UserDefaults, the extension reads from it.
+  /// Must match both entitlements files.
+  static const String _iosAppGroup = 'group.com.noobclaw.daycount';
+
+  static bool _groupReady = false;
+
+  static Future<void> _ensureGroup() async {
+    if (_groupReady) return;
+    if (!kIsWeb && Platform.isIOS) {
+      await HomeWidget.setAppGroupId(_iosAppGroup);
+    }
+    _groupReady = true;
+  }
+
   static Future<void> push(List<CountdownEvent> events) async {
     try {
+      await _ensureGroup();
       final sorted = sortedEvents(events, DateTime.now());
       if (sorted.isEmpty) {
         await _save('dc_has_event', 'false');
@@ -49,7 +70,8 @@ class WidgetBridge {
         await _save('dc_label_past_1', tr(zh: '已过去 1 天', en: '1 day ago'));
         await _save('dc_label_today', tr(zh: '就是今天', en: 'Today!'));
       }
-      await HomeWidget.updateWidget(androidName: _androidProvider);
+      await HomeWidget.updateWidget(
+          androidName: _androidProvider, iOSName: _iosKind);
     } catch (e) {
       debugPrint('widget push skipped: $e');
     }
@@ -60,7 +82,8 @@ class WidgetBridge {
   /// never lags the app.
   static Future<void> refresh() async {
     try {
-      await HomeWidget.updateWidget(androidName: _androidProvider);
+      await HomeWidget.updateWidget(
+          androidName: _androidProvider, iOSName: _iosKind);
     } catch (e) {
       debugPrint('widget refresh skipped: $e');
     }
