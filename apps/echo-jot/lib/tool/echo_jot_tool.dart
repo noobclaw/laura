@@ -102,6 +102,12 @@ class EchoJotTool extends ToolModule {
                     en: 'One-time · unlimited notes + full export (free tier: '
                         '$freeNoteLimit)',
                   )),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => showProSheet(context),
+                    child: const ProPriceText(fallback: r'$4.99'),
+                  ),
             onTap: store.pro ? null : () => showProSheet(context),
           ),
         ),

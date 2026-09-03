@@ -87,6 +87,7 @@ class RemcardTool extends ToolModule {
 Future<void> showPaywall(BuildContext context) {
   final scheme = Theme.of(context).colorScheme;
   final text = Theme.of(context).textTheme;
+  PurchaseService.instance.ensurePrice();
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,

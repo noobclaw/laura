@@ -47,6 +47,12 @@ class OrbitTool implements ToolModule {
                 : tr(
                     zh: '全部 ${store.catalog.length} 个目标 + 10 天预报',
                     en: 'All ${store.catalog.length} targets + a 10-day forecast')),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => showProSheet(context, store),
+                    child: const ProPriceText(fallback: r'$3.99'),
+                  ),
             onTap: store.pro ? null : () => showProSheet(context, store),
           ),
         ),

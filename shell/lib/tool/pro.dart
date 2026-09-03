@@ -14,6 +14,7 @@ import '../core/purchase.dart';
 /// the same path. `reason` is the one-line explanation of which gate was hit
 /// ("免费版最多 5 个日子,你已经用满了。").
 Future<void> showProSheet(BuildContext context, {String? reason}) {
+  PurchaseService.instance.ensurePrice();
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,

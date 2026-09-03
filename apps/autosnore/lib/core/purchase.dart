@@ -78,17 +78,54 @@ class PurchaseService {
     }
   }
 
+  bool _priceLoading = false;
+  DateTime? _lastPriceAttempt;
+
   /// Ask the store what it will actually charge, so the paywall can show that
-  /// instead of a hardcoded figure. Failure just leaves [price] null.
+  /// instead of a hardcoded figure. StoreKit is often not ready in the first
+  /// seconds after launch and Play answers late on a cold start, so one
+  /// failed lookup must not leave the price empty for the whole session:
+  /// retry with a short backoff, and let the UI ask again via [ensurePrice].
   Future<void> _loadPrice() async {
+    if (_priceLoading) return;
+    _priceLoading = true;
+    _lastPriceAttempt = DateTime.now();
     try {
-      final resp =
-          await InAppPurchase.instance.queryProductDetails({kProProductId});
-      if (resp.productDetails.isNotEmpty) {
-        price.value = resp.productDetails.first.price;
+      for (final delay in const [0, 2, 5, 10]) {
+        if (delay > 0) await Future<void>.delayed(Duration(seconds: delay));
+        try {
+          final resp =
+              await InAppPurchase.instance.queryProductDetails({kProProductId});
+          if (resp.productDetails.isNotEmpty) {
+            price.value = resp.productDetails.first.price;
+            return;
+          }
+          debugPrint('price lookup: product not found (${resp.notFoundIDs})');
+        } catch (e) {
+          debugPrint('price lookup failed: $e');
+        }
       }
+    } finally {
+      _priceLoading = false;
+    }
+  }
+
+  /// Called by every widget that displays the price. A no-op once the store
+  /// has answered; otherwise re-checks store availability and looks the price
+  /// up again (at most once per 20 s), so opening Settings or the Pro sheet
+  /// after the network came up shows the real figure instead of the fallback.
+  Future<void> ensurePrice() async {
+    if (price.value != null || _priceLoading) return;
+    final last = _lastPriceAttempt;
+    if (last != null &&
+        DateTime.now().difference(last) < const Duration(seconds: 20)) {
+      return;
+    }
+    try {
+      if (!_available) _available = await InAppPurchase.instance.isAvailable();
+      if (_available) await _loadPrice();
     } catch (e) {
-      debugPrint('price lookup failed: $e');
+      debugPrint('ensurePrice failed: $e');
     }
   }
 
@@ -253,10 +290,15 @@ class RestorePurchasesTile extends StatelessWidget {
 }
 
 /// The store's real localized price for the Pro unlock once known, otherwise
-/// [fallback] (the price written in PLAN.md). Rebuilds when the store answers.
+/// [fallback] (the USD base price written in PLAN.md). Rebuilds when the
+/// store answers, and nudges [PurchaseService.ensurePrice] on every build so
+/// a lookup that failed at launch is retried the moment a price is shown.
 ///
-/// Never hardcode a price in the UI: Play charges in the user's currency, and a
-/// tile reading "¥18" to someone who will be charged €4.99 is a support ticket.
+/// The currency is whatever the user's App Store / Play account is billed
+/// in — a Chinese UI with a US account correctly shows "$4.99". Never write
+/// a "¥" figure into [fallback]: the apps are not sold in mainland China,
+/// so a yuan fallback is wrong for everyone and only shows up while the
+/// store has not answered yet.
 class ProPriceText extends StatelessWidget {
   const ProPriceText({super.key, required this.fallback, this.style});
 
@@ -265,6 +307,7 @@ class ProPriceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PurchaseService.instance.ensurePrice();
     return ValueListenableBuilder<String?>(
       valueListenable: PurchaseService.instance.price,
       builder: (context, price, _) => Text(price ?? fallback, style: style),

@@ -47,6 +47,12 @@ class AutoSnoreTool extends ToolModule {
                     zh: '一次买断 · 无限历史 / 趋势 / 对比 / CSV 导出',
                     en: 'One-time · unlimited history / trends / comparison / CSV',
                   )),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => showProSheet(context),
+                    child: const ProPriceText(fallback: r'$3.99'),
+                  ),
             onTap: store.pro ? null : () => showProSheet(context),
           ),
         ),

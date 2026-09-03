@@ -10,6 +10,7 @@ import 'store.dart';
 /// flipped by [PurchaseService]'s `onUnlocked` (wired in main.dart), so a
 /// purchase made on another device restores through exactly the same path.
 void showProSheet(BuildContext context, OrbitStore store) {
+  PurchaseService.instance.ensurePrice();
   showModalBottomSheet(
     context: context,
     showDragHandle: true,

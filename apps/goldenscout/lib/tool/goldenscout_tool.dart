@@ -48,6 +48,12 @@ class GoldenscoutTool implements ToolModule {
                 : tr(
                     zh: '规划任意日期 + 保存无限拍摄机位',
                     en: 'Plan any date + save unlimited shooting spots')),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => showProSheet(context, store),
+                    child: const ProPriceText(fallback: r'$3.99'),
+                  ),
             onTap: store.pro ? null : () => showProSheet(context, store),
           ),
         ),

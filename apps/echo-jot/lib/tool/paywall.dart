@@ -29,6 +29,7 @@ Future<bool> checkNoteQuota(BuildContext context, NoteStore store) async {
 /// what Pro adds and the store's real price before anything is charged.
 /// [reason] is the one-line explanation of which gate was hit.
 Future<void> showProSheet(BuildContext context, {String? reason}) async {
+  PurchaseService.instance.ensurePrice();
   final buy = await showModalBottomSheet<bool>(
     context: context,
     showDragHandle: true,
@@ -114,7 +115,10 @@ class _UnlockSheet extends StatelessWidget {
                   ValueListenableBuilder<String?>(
                     valueListenable: PurchaseService.instance.price,
                     builder: (context, storePrice, _) => Text(
-                      storePrice ?? tr(zh: '¥28', en: r'$4.99'),
+                      // USD base price until the store answers; the apps are
+                      // not sold in mainland China, so a ¥ figure here was
+                      // wrong for every real account.
+                      storePrice ?? r'$4.99',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             color: cs.primary,
                             fontWeight: FontWeight.w700,

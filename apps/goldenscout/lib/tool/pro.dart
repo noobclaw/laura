@@ -9,6 +9,7 @@ import 'location_store.dart';
 /// Pro flag is flipped by [PurchaseService]'s `onUnlocked` (wired in main.dart),
 /// so a purchase made on another device restores through the same path.
 void showProSheet(BuildContext context, LocationStore store) {
+  PurchaseService.instance.ensurePrice();
   showModalBottomSheet(
     context: context,
     showDragHandle: true,

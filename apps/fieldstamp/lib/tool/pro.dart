@@ -10,6 +10,7 @@ import '../core/purchase.dart';
 /// [PurchaseService]'s `onUnlocked` (wired in main.dart), so a purchase made on
 /// another device restores through exactly the same path.
 Future<void> showProSheet(BuildContext context, {String? reason}) {
+  PurchaseService.instance.ensurePrice();
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,

@@ -40,6 +40,12 @@ class FieldStampTool extends ToolModule {
                     zh: '一次买断:多项目、PDF/CSV 导出、度分秒坐标、去除水印角标',
                     en: 'One-time purchase: multiple projects, PDF/CSV export, '
                         'DMS coordinates, no watermark tag')),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => _confirmUnlock(context),
+                    child: const ProPriceText(fallback: r'$6.99'),
+                  ),
             onTap: store.pro ? null : () => _confirmUnlock(context),
           ),
         ),
