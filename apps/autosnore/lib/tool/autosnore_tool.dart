@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'home_screen.dart';
+import 'pro.dart';
 import 'store.dart';
 import 'tool_module.dart';
 
@@ -46,7 +47,7 @@ class AutoSnoreTool extends ToolModule {
                     zh: '一次买断 · 无限历史 / 趋势 / 对比 / CSV 导出',
                     en: 'One-time · unlimited history / trends / comparison / CSV',
                   )),
-            onTap: store.pro ? null : () => PurchaseService.instance.buyPro(),
+            onTap: store.pro ? null : () => showProSheet(context),
           ),
         ),
         ListenableBuilder(

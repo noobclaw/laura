@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
-import '../core/purchase.dart';
 import 'export.dart';
 import 'gauge_painter.dart';
 import 'models.dart';
+import 'pro.dart';
 import 'store.dart';
 import 'timeline_painter.dart';
 import 'trends_screen.dart';
@@ -407,7 +407,11 @@ class _ProActions extends StatelessWidget {
               en: 'Unlimited history · trends · night comparison · CSV export',
             )),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => PurchaseService.instance.buyPro(),
+            onTap: () => showProSheet(context,
+                reason: tr(
+                  zh: '免费版保留最近 3 晚的报告。',
+                  en: 'The free tier keeps the last 3 nights of reports.',
+                )),
           ),
         );
       },

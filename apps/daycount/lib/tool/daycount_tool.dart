@@ -6,6 +6,7 @@ import '../core/purchase.dart';
 import 'event_detail.dart';
 import 'event_edit.dart';
 import 'models.dart';
+import 'pro.dart';
 import 'store.dart';
 import 'tool_module.dart';
 import 'widget_bridge.dart';
@@ -81,10 +82,10 @@ class _ProTile extends StatelessWidget {
           // The store's own localized price, so nobody is quoted a currency
           // they will not be charged in.
           trailing: FilledButton(
-            onPressed: () => PurchaseService.instance.buyPro(),
+            onPressed: () => showProSheet(context),
             child: const ProPriceText(fallback: r'$1.99'),
           ),
-          onTap: () => PurchaseService.instance.buyPro(),
+          onTap: () => showProSheet(context),
         );
       },
     );
@@ -124,29 +125,14 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 
   void _showLimitDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(tr(zh: '已达免费上限', en: 'Free limit reached')),
-        content: Text(tr(
-          zh: '免费版最多记录 ${EventStore.freeLimit} 个日子。解锁 Pro 可添加无限数量。',
-          en: 'The free version keeps up to ${EventStore.freeLimit} days. Unlock Pro for unlimited days.',
-        )),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(tr(zh: '知道了', en: 'Got it')),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Hands off to the store sheet; the unlock arrives on the
-              // purchase stream and flips the flag via main.dart's onUnlocked.
-              PurchaseService.instance.buyPro();
-            },
-            child: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
-          ),
-        ],
+    // The Pro sheet explains the cap and shows the store price; the unlock
+    // arrives on the purchase stream and flips the flag via main.dart's
+    // onUnlocked.
+    showProSheet(
+      context,
+      reason: tr(
+        zh: '免费版最多记录 ${EventStore.freeLimit} 个日子,你已经用满了。',
+        en: 'The free version keeps up to ${EventStore.freeLimit} days — you have filled it.',
       ),
     );
   }

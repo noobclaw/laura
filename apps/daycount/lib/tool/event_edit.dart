@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
 import 'models.dart';
+import 'pro.dart';
 
 /// Result of the editor — the home/detail screen applies it to the store.
 class EventDraft {
@@ -199,12 +200,11 @@ class _EventEditPageState extends State<EventEditPage> {
   }
 
   void _showColorLocked() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(tr(
-          zh: '该颜色需解锁 Pro，可在「设置」中解锁',
-          en: 'This color requires Pro — unlock it in Settings',
-        )),
+    showProSheet(
+      context,
+      reason: tr(
+        zh: '这个颜色是 Pro 主题色,免费版可用前 $kFreeColorCount 种。',
+        en: 'This is a Pro theme color; the free tier has the first $kFreeColorCount.',
       ),
     );
   }

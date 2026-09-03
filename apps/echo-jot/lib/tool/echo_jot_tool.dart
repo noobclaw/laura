@@ -102,7 +102,7 @@ class EchoJotTool extends ToolModule {
                     en: 'One-time · unlimited notes + full export (free tier: '
                         '$freeNoteLimit)',
                   )),
-            onTap: store.pro ? null : () => PurchaseService.instance.buyPro(),
+            onTap: store.pro ? null : () => showProSheet(context),
           ),
         ),
       if (store != null)
@@ -142,7 +142,11 @@ class EchoJotTool extends ToolModule {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
-              PurchaseService.instance.buyPro();
+              showProSheet(context,
+                  reason: tr(
+                    zh: '免费版一次只导出最近 3 条,Pro 一次导出全部。',
+                    en: 'The free tier exports the 3 most recent notes; Pro exports all of them.',
+                  ));
             },
             child: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
           ),

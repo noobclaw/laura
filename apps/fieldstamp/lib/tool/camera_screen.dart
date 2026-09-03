@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../core/l10n.dart';
 import 'geo_format.dart';
 import 'models.dart';
+import 'pro.dart';
 import 'sensors.dart';
 import 'store.dart';
 import 'watermark.dart';
@@ -459,11 +460,10 @@ class _CameraScreenState extends State<CameraScreen>
                 onTap: () async {
                   Navigator.pop(ctx);
                   if (!store.pro) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr(
-                          zh: '多项目为 Pro 功能,请在设置中解锁。',
-                          en: 'Multiple projects are a Pro feature. Unlock in Settings.')),
-                    ));
+                    showProSheet(context,
+                        reason: tr(
+                            zh: '免费版只有一个项目,多项目 / 工单是 Pro 功能。',
+                            en: 'The free tier has one project; multiple projects are a Pro feature.'));
                     return;
                   }
                   final name = await _promptName(context);

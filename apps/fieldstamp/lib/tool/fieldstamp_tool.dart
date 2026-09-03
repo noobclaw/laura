@@ -5,6 +5,7 @@ import '../core/purchase.dart';
 import 'camera_screen.dart';
 import 'gallery_screen.dart';
 import 'models.dart';
+import 'pro.dart';
 import 'sensors.dart';
 import 'store.dart';
 import 'tool_module.dart';
@@ -93,43 +94,7 @@ class FieldStampTool extends ToolModule {
         ),
       ];
 
-  void _confirmUnlock(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
-        content: Text(tr(
-          zh: '一次买断即可解锁:\n'
-              '• 多个项目 / 工单\n'
-              '• PDF 巡检报告与 CSV 台账\n'
-              '• 度分秒坐标\n'
-              '• 去除照片上的 FieldStamp 小角标\n\n'
-              '没有订阅、没有账号,买断后永久有效。',
-          en: 'A one-time purchase unlocks:\n'
-              '• Multiple projects / work orders\n'
-              '• PDF inspection reports & CSV ledgers\n'
-              '• Degrees-minutes-seconds coordinates\n'
-              '• Removes the small FieldStamp tag on photos\n\n'
-              'No subscription, no account — buy once, keep it.',
-        )),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(tr(zh: '取消', en: 'Cancel'))),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              // Hands off to the store sheet; the unlock arrives on the
-              // purchase stream and flips the flag via main.dart's onUnlocked.
-              PurchaseService.instance.buyPro();
-            },
-            // The store's own localized price once it answers.
-            child: const ProPriceText(fallback: r'$6.99'),
-          ),
-        ],
-      ),
-    );
-  }
+  void _confirmUnlock(BuildContext context) => showProSheet(context);
 
   void _pickCoordFormat(BuildContext context) {
     showModalBottomSheet<void>(
@@ -166,11 +131,10 @@ class FieldStampTool extends ToolModule {
               onTap: () {
                 if (!store.pro) {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(tr(
-                        zh: '度分秒坐标为 Pro 功能。',
-                        en: 'DMS coordinates are a Pro feature.')),
-                  ));
+                  showProSheet(context,
+                      reason: tr(
+                          zh: '度 / 分 / 秒坐标格式是 Pro 功能。',
+                          en: 'DMS coordinates are a Pro feature.'));
                   return;
                 }
                 store.setCoordFormat(CoordFormat.dms);
@@ -316,11 +280,10 @@ class ProjectsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           if (!store.pro) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(tr(
-                  zh: '多项目为 Pro 功能,请在设置中解锁。',
-                  en: 'Multiple projects are a Pro feature. Unlock in Settings.')),
-            ));
+            showProSheet(context,
+                reason: tr(
+                    zh: '免费版只有一个项目,多项目 / 工单是 Pro 功能。',
+                    en: 'The free tier has one project; multiple projects are a Pro feature.'));
             return;
           }
           final name =

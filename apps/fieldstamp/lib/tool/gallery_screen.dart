@@ -7,6 +7,7 @@ import '../core/l10n.dart';
 import 'export.dart';
 import 'geo_format.dart';
 import 'models.dart';
+import 'pro.dart';
 import 'store.dart';
 
 /// Local archive for the current project: a photo grid grouped by date, with a
@@ -215,13 +216,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   bool _enforceLimit(FieldStampStore store, int count) {
     if (store.pro || count <= FieldStampStore.freeExportLimit) return true;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(tr(
-          zh: '免费版报告最多包含 ${FieldStampStore.freeExportLimit} 张照片。'
-              '请在设置中解锁 Pro 以不限量导出。',
-          en: 'Free reports are limited to ${FieldStampStore.freeExportLimit} photos. '
-              'Unlock Pro in Settings for unlimited exports.')),
-    ));
+    showProSheet(context,
+        reason: tr(
+            zh: '免费版报告最多包含 ${FieldStampStore.freeExportLimit} 张照片,Pro 不限量。',
+            en: 'Free reports are limited to ${FieldStampStore.freeExportLimit} photos; Pro has no cap.'));
     return false;
   }
 
@@ -325,11 +323,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   void _proNeeded(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(tr(
-          zh: '$feature 为 Pro 功能,请在设置中解锁。',
-          en: '$feature is a Pro feature. Unlock it in Settings.')),
-    ));
+    showProSheet(context,
+        reason: tr(
+            zh: '$feature 是 Pro 功能。',
+            en: '$feature is a Pro feature.'));
   }
 
   void _snack(String msg) {

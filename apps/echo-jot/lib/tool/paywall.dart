@@ -12,20 +12,37 @@ const int freeNoteLimit = 30;
 /// the free tier is full.
 Future<bool> checkNoteQuota(BuildContext context, NoteStore store) async {
   if (store.pro || store.notes.length < freeNoteLimit) return true;
-  final buy = await showModalBottomSheet<bool>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) => const _UnlockSheet(),
+  await showProSheet(
+    context,
+    reason: tr(
+      zh: '免费版可保存 $freeNoteLimit 条笔记,你已经用满了。',
+      en: 'The free tier keeps $freeNoteLimit notes — you have filled it.',
+    ),
   );
-  if (buy == true) await PurchaseService.instance.buyPro();
   // A purchase that went through flips the persisted flag, so let the user start
   // dictating right away instead of making them tap the mic again.
   return store.pro;
 }
 
+/// The one-time Pro unlock sheet. Every gate (settings tile, note cap, partial
+/// export) opens this rather than the store sheet directly, so the user sees
+/// what Pro adds and the store's real price before anything is charged.
+/// [reason] is the one-line explanation of which gate was hit.
+Future<void> showProSheet(BuildContext context, {String? reason}) async {
+  final buy = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (context) => _UnlockSheet(reason: reason),
+  );
+  // Hands off to the store sheet. The result arrives on the purchase stream
+  // (main.dart's onUnlocked), not from this call.
+  if (buy == true) await PurchaseService.instance.buyPro();
+}
+
 class _UnlockSheet extends StatelessWidget {
-  const _UnlockSheet();
+  const _UnlockSheet({this.reason});
+  final String? reason;
 
   @override
   Widget build(BuildContext context) {
@@ -74,10 +91,11 @@ class _UnlockSheet extends StatelessWidget {
             const SizedBox(height: 6),
             Center(
               child: Text(
-                tr(
-                  zh: '免费版可保存 $freeNoteLimit 条笔记,你已经用满了。',
-                  en: 'The free tier keeps $freeNoteLimit notes — you have filled it.',
-                ),
+                reason ??
+                    tr(
+                      zh: '免费版可保存 $freeNoteLimit 条笔记。一次买断,永久使用。',
+                      en: 'The free tier keeps $freeNoteLimit notes. Pay once, keep it forever.',
+                    ),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
