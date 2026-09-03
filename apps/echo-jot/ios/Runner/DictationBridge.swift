@@ -38,7 +38,9 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   private static let emptySegmentSeconds: TimeInterval = 8
   /// No text anywhere for this long ends the session.
   private static let quietTimeoutSeconds: TimeInterval = 120
-  private static let maxConsecutiveErrors = 4
+  private static let maxConsecutiveErrors = 6
+  /// Pause between recycling a segment after a recognizer error, see onResult.
+  private static let errorRetryDelaySeconds: TimeInterval = 0.7
   private static let levelMinInterval: TimeInterval = 0.08
   private static let finalGraceSeconds: TimeInterval = 0.7
 
@@ -246,14 +248,22 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
 
     do {
       let session = AVAudioSession.sharedInstance()
-      try session.setCategory(.record, mode: .measurement, options: [.duckOthers])
+      // `.duckOthers` is what Apple's own dictation sample uses with `.record`,
+      // but a few configurations reject the combination; plain `.record`
+      // captures just as well, so never let the option alone sink a session.
+      do {
+        try session.setCategory(.record, mode: .measurement, options: [.duckOthers])
+      } catch {
+        try session.setCategory(.record, mode: .measurement)
+      }
       try session.setActive(true, options: .notifyOthersOnDeactivation)
       try installTap()
       engine.prepare()
       try engine.start()
     } catch {
       tearDown(emitStopped: false)
-      result(FlutterError(code: "recognizer_failed", message: error.localizedDescription, details: nil))
+      result(FlutterError(code: "recognizer_failed",
+                          message: "audio start: \(Self.describe(error))", details: nil))
       return
     }
 
@@ -338,7 +348,7 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   }
 
   private func tickSegment() {
-    guard sessionActive, !segmentEnding else { return }
+    guard sessionActive, !segmentEnding, !interrupted else { return }
     let now = Date()
     let sinceChange = now.timeIntervalSince(lastTextChangeAt)
     let age = now.timeIntervalSince(segmentStartedAt)
@@ -397,7 +407,20 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
       // a fresh iPhone, so it gets the "how to fix" message, not "retry".
       if error.code == 102 || error.code == 1101 {
         failSession(code: "on_device_unavailable",
-                    message: "offline speech assets not ready: \(error.localizedDescription)")
+                    message: "offline speech assets not ready: \(Self.describe(error))")
+        return
+      }
+      // 201 (kLSRErrorDomain): "Siri and Dictation are disabled" — the
+      // recognizer exists but the user switched dictation off in Settings.
+      // 1700: speech recognition access denied for this app. Neither is a
+      // "retry" situation; both need the Settings guidance.
+      if error.code == 201 {
+        failSession(code: "on_device_unavailable",
+                    message: "dictation disabled in Settings: \(Self.describe(error))")
+        return
+      }
+      if error.code == 1700 {
+        failSession(code: "permission", message: Self.describe(error))
         return
       }
       if segmentEnding {
@@ -408,10 +431,19 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
       }
       consecutiveErrors += 1
       if consecutiveErrors >= Self.maxConsecutiveErrors {
-        failSession(code: "recognizer_failed", message: error.localizedDescription)
+        failSession(code: "recognizer_failed", message: Self.describe(error))
       } else {
-        // Recycle the segment; keep what it produced.
-        finishSegment()
+        // Recycle the segment; keep what it produced. Not immediately: the
+        // first on-device request after install (or after a language pack
+        // update) can fail a few times while the model loads, and four
+        // back-to-back retries burn through the budget in well under a
+        // second. A short breath between attempts turns that into a
+        // successful start instead of "interrupted".
+        let gen = generation
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.errorRetryDelaySeconds) { [weak self] in
+          guard let self = self, self.sessionActive, gen == self.generation else { return }
+          self.finishSegment()
+        }
       }
     }
   }
@@ -438,6 +470,13 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
     }
   }
 
+  /// Domain + code + text, so a report from the field can be matched to the
+  /// speech framework's error tables instead of guessing from "(null)".
+  private static func describe(_ error: Error) -> String {
+    let e = error as NSError
+    return "\(e.domain) \(e.code): \(e.localizedDescription)"
+  }
+
   private func failSession(code: String, message: String) {
     let wasActive = sessionActive
     // Flush whatever the open segment holds before reporting the failure.
@@ -451,6 +490,8 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   private func tearDown(emitStopped: Bool) {
     sessionActive = false
     stopping = false
+    interrupted = false
+    interruptionTimer?.invalidate(); interruptionTimer = nil
     segmentTimer?.invalidate(); segmentTimer = nil
     finalGraceTimer?.invalidate(); finalGraceTimer = nil
     task?.cancel(); task = nil
@@ -467,16 +508,69 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   // Notifications and the recognizer delegate arrive on arbitrary threads;
   // all session state (timers included) lives on the main thread.
 
+  /// Set while an audio interruption (call, Siri, alarm) holds the mic.
+  private var interrupted = false
+  private var interruptionTimer: Timer?
+  /// An interruption that is not over after this long ends the session.
+  private static let interruptionGraceSeconds: TimeInterval = 20
+
   @objc private func onInterruption(_ note: Notification) {
     guard let info = note.userInfo,
           let raw = info[AVAudioSessionInterruptionTypeKey] as? UInt,
           let type = AVAudioSession.InterruptionType(rawValue: raw) else { return }
+    // iOS 14.5+ replays a `.began` when the app comes back from suspension;
+    // that one is bookkeeping, not a lost microphone.
+    if #available(iOS 14.5, *), type == .began,
+       let reasonRaw = info[AVAudioSessionInterruptionReasonKey] as? UInt,
+       let reason = AVAudioSession.InterruptionReason(rawValue: reasonRaw),
+       reason == .appWasSuspended {
+      return
+    }
+    let shouldResume: Bool = {
+      guard let optRaw = info[AVAudioSessionInterruptionOptionKey] as? UInt else { return true }
+      return AVAudioSession.InterruptionOptions(rawValue: optRaw).contains(.shouldResume)
+    }()
     DispatchQueue.main.async { [weak self] in
       guard let self = self, self.sessionActive else { return }
-      if type == .began {
-        // A call or Siri took the microphone. Keep the words we have and end
-        // the session visibly; Dart offers "try again".
-        self.failSession(code: "recognizer_failed", message: "interrupted")
+      switch type {
+      case .began:
+        // A call or Siri took the microphone. Hold the session instead of
+        // failing it: most interruptions end within seconds and the words
+        // so far are worth more than a "try again" banner.
+        guard !self.interrupted else { return }
+        self.interrupted = true
+        self.engine.pause()
+        self.emit(["type": "status", "value": "paused"])
+        self.interruptionTimer?.invalidate()
+        self.interruptionTimer = Timer.scheduledTimer(
+          withTimeInterval: Self.interruptionGraceSeconds, repeats: false) { [weak self] _ in
+          guard let self = self, self.interrupted, self.sessionActive else { return }
+          self.failSession(code: "recognizer_failed", message: "interrupted for too long")
+        }
+      case .ended:
+        guard self.interrupted else { return }
+        self.interrupted = false
+        self.interruptionTimer?.invalidate(); self.interruptionTimer = nil
+        guard shouldResume else {
+          self.failSession(code: "recognizer_failed", message: "interrupted (no resume)")
+          return
+        }
+        do {
+          try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+          try self.installTap()
+          if !self.engine.isRunning {
+            self.engine.prepare()
+            try self.engine.start()
+          }
+          // The pause counted as silence for the segment timers; start clean.
+          self.lastTextChangeAt = Date()
+          self.lastAnyTextAt = Date()
+          self.emit(["type": "status", "value": "listening"])
+        } catch {
+          self.failSession(code: "recognizer_failed", message: "resume: \(Self.describe(error))")
+        }
+      @unknown default:
+        break
       }
     }
   }
@@ -498,7 +592,7 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
           try self.engine.start()
         }
       } catch {
-        self.failSession(code: "recognizer_failed", message: error.localizedDescription)
+        self.failSession(code: "recognizer_failed", message: "route change: \(Self.describe(error))")
       }
     }
   }

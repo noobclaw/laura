@@ -127,6 +127,11 @@ class DictationService {
 
   DictationCapabilities? _caps;
 
+  /// The native side's own words for the last [start] failure (error domain,
+  /// code, text). Shown under the user-facing message so a field report can
+  /// be matched to the platform's error tables.
+  String? lastStartDetail;
+
   /// Cached capabilities; call [refreshCapabilities] to re-probe (the user may
   /// have installed a language pack while the app was in the background).
   DictationCapabilities? get capabilities => _caps;
@@ -166,6 +171,7 @@ class DictationService {
   ///
   /// Returns null on success, or the reason it could not start.
   Future<DictationError?> start({String? languageTag}) async {
+    lastStartDetail = null;
     try {
       await _method.invokeMethod<void>('start', <String, Object?>{
         'language': languageTag ?? deviceLanguageTag,
@@ -174,9 +180,11 @@ class DictationService {
     } on MissingPluginException {
       return DictationError.unimplemented;
     } on PlatformException catch (e) {
+      lastStartDetail = e.message;
       return _errorFromCode(e.code);
     } catch (e) {
       debugPrint('dictation start failed: $e');
+      lastStartDetail = '$e';
       return DictationError.unknown;
     }
   }

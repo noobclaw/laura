@@ -112,7 +112,7 @@ class DictationController extends ChangeNotifier {
 
     final err = await _service.start(languageTag: _language);
     if (err != null) {
-      _fail(_messageFor(err));
+      _fail(_withDetail(_messageFor(err), _service.lastStartDetail));
       return false;
     }
     if (_state != DictationState.starting) {
@@ -194,7 +194,8 @@ class DictationController extends ChangeNotifier {
         if (_finalWait != null && !_finalWait!.isCompleted) {
           _finalWait!.complete();
         }
-        _message = _messageFor(e.code ?? DictationError.unknown);
+        _message = _withDetail(
+            _messageFor(e.code ?? DictationError.unknown), e.text);
         // The native side has already torn the session down, so end ours too —
         // leaving the UI in "listening" would be a silent failure. `_startedAt`
         // is kept so the caller can still record how long the session ran and
@@ -258,6 +259,14 @@ class DictationController extends ChangeNotifier {
     _state = DictationState.idle;
     _startedAt = null;
     notifyListeners();
+  }
+
+  /// The native error text under the friendly message. Small, but it is the
+  /// difference between "it says interrupted" and a fixable bug report.
+  static String _withDetail(String message, String? detail) {
+    final d = detail?.trim();
+    if (d == null || d.isEmpty) return message;
+    return '$message\n($d)';
   }
 
   static String get _msgNoOnDevice => noOnDeviceHelp;
