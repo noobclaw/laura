@@ -41,6 +41,7 @@ jobs:
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
+          echo "keystore secret length: ${#KEYSTORE_B64}"
           if [ -z "$KEYSTORE_B64" ]; then
             echo "No keystore secret — building with debug signing."
             exit 0
