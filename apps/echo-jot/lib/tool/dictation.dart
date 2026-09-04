@@ -98,6 +98,10 @@ enum DictationError {
   /// No on-device recognizer / no language pack installed.
   onDeviceUnavailable,
 
+  /// iOS only: Siri is switched off, and the system dictation engine the
+  /// on-device recognizer rides on is disabled with it (kLSRErrorDomain 201).
+  siriDisabled,
+
   /// The recognizer service died or kept failing; the session was stopped.
   recognizerFailed,
 
@@ -251,6 +255,7 @@ class DictationService {
   static DictationError _errorFromCode(String? code) => switch (code) {
         'permission' => DictationError.permission,
         'on_device_unavailable' => DictationError.onDeviceUnavailable,
+        'siri_disabled' => DictationError.siriDisabled,
         'recognizer_failed' => DictationError.recognizerFailed,
         'no_speech' => DictationError.noSpeech,
         _ => DictationError.unknown,

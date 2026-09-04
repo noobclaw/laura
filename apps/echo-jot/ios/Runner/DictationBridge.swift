@@ -424,8 +424,9 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
       // 1700: speech recognition access denied for this app. Neither is a
       // "retry" situation; both need the Settings guidance.
       if error.code == 201 {
-        failSession(code: "on_device_unavailable",
-                    message: "dictation disabled in Settings: \(Self.describe(error))")
+        // Not the keyboard's Dictation toggle: on real phones this fires when
+        // Siri itself is switched off, which iOS's dictation engine hangs on.
+        failSession(code: "siri_disabled", message: Self.describe(error))
         return
       }
       if error.code == 1700 {

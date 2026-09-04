@@ -204,7 +204,8 @@ class DictationController extends ChangeNotifier {
           _finalWait!.complete();
         }
         _needsSettings = e.code == DictationError.permission ||
-            e.code == DictationError.onDeviceUnavailable;
+            e.code == DictationError.onDeviceUnavailable ||
+            e.code == DictationError.siriDisabled;
         _message = _withDetail(
             _messageFor(e.code ?? DictationError.unknown), e.text);
         // The native side has already torn the session down, so end ours too —
@@ -318,6 +319,14 @@ class DictationController extends ChangeNotifier {
             en: 'Dictation needs the microphone permission.',
           ),
         DictationError.onDeviceUnavailable => _msgNoOnDevice,
+        DictationError.siriDisabled => tr(
+            zh: 'iPhone 的 Siri 是关着的,iOS 的离线听写引擎依赖它。请打开'
+                '「设置 → Apple 智能与 Siri → Siri」后再试;听写内容仍只在本机处理。',
+            en: 'Siri is switched off on this iPhone, and iOS runs its offline '
+                'dictation engine through it. Turn on Settings → Apple '
+                'Intelligence & Siri → Siri and try again; your speech is still '
+                'processed on the phone only.',
+          ),
         DictationError.recognizerFailed => tr(
             zh: '系统语音识别中断了,请重试。',
             en: 'The system recognizer stopped — please try again.',
