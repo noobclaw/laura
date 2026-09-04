@@ -5,6 +5,7 @@ import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'dictation.dart';
 import 'dictation_controller.dart';
+import 'dictation_language.dart';
 import 'home_page.dart';
 import 'note.dart';
 import 'paywall.dart';
@@ -126,6 +127,15 @@ class EchoJotTool extends ToolModule {
                   onTap: () => PurchaseService.instance.restore(),
                 ),
         ),
+      ListenableBuilder(
+        listenable: DictationLanguage.override,
+        builder: (context, _) => ListTile(
+          leading: const Icon(Icons.translate),
+          title: Text(tr(zh: '听写语言', en: 'Dictation language')),
+          subtitle: Text(DictationLanguage.currentLabel()),
+          onTap: () => DictationLanguage.pick(context, dictation),
+        ),
+      ),
       _RecognizerStatusTile(controller: dictation),
     ];
   }

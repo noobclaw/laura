@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
 import 'dictation_controller.dart';
+import 'dictation_language.dart';
 import 'note.dart';
 import 'note_detail_page.dart';
 import 'paywall.dart';
@@ -490,7 +491,16 @@ class _DictationPanel extends StatelessWidget {
                         color: cs.onSurfaceVariant,
                       ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
+                // Which language the recognizer listens for — the single most
+                // common "it only understands English" complaint is a Chinese
+                // speaker on an English-system phone.
+                ActionChip(
+                  avatar: const Icon(Icons.translate, size: 18),
+                  label: Text(DictationLanguage.currentLabel()),
+                  onPressed: () => DictationLanguage.pick(context, controller),
+                ),
+                const SizedBox(height: 8),
               ],
               MicButton(
                 listening: listening || finishing,

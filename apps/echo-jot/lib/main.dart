@@ -7,6 +7,7 @@ import 'core/l10n.dart';
 import 'core/purchase.dart';
 import 'core/settings_page.dart';
 import 'tool/app_theme.dart';
+import 'tool/dictation_language.dart';
 import 'tool/echo_jot_tool.dart';
 
 /// The one line a generated app changes to plug in its tool.
@@ -31,6 +32,7 @@ Future<void> main() async {
   );
   // The saved language must be known before the first frame.
   await AppLanguage.load();
+  await DictationLanguage.load();
   runApp(const EchoJotApp());
 }
 

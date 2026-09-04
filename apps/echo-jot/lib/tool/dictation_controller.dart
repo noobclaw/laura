@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../core/l10n.dart';
 import 'dictation.dart';
+import 'dictation_language.dart';
 import 'transcript_text.dart';
 
 enum DictationState { idle, starting, listening, finishing }
@@ -29,7 +30,7 @@ class DictationController extends ChangeNotifier {
   DateTime? _startedAt;
   StreamSubscription<DictationEvent>? _sub;
   Completer<void>? _finalWait;
-  String _language = DictationService.deviceLanguageTag;
+  String _language = DictationLanguage.effectiveTag;
 
   final List<double> _levels = List<double>.filled(_levelBars, 0);
 
@@ -54,6 +55,12 @@ class DictationController extends ChangeNotifier {
   DictationCapabilities? get capabilities => _service.capabilities;
 
   String get language => _language;
+
+  /// Picked in the language sheet; takes effect from the next session.
+  void setLanguage(String tag) {
+    _language = tag;
+    notifyListeners();
+  }
 
   Duration get elapsed => _startedAt == null
       ? Duration.zero
@@ -113,7 +120,7 @@ class DictationController extends ChangeNotifier {
 
     if (!await _ensureMicPermission()) return false;
 
-    _language = languageTag ?? _language;
+    _language = languageTag ?? DictationLanguage.effectiveTag;
     _committed = '';
     _partial = '';
     _levels.fillRange(0, _levels.length, 0);
