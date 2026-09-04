@@ -189,6 +189,18 @@ class DictationService {
     }
   }
 
+  /// Jump to the system page where the user can fix a missing recognizer:
+  /// Android's voice-input settings (language packs), iOS's Settings app.
+  /// Returns false when the platform could not open anything.
+  Future<bool> openSpeechSettings() async {
+    try {
+      return await _method.invokeMethod<bool>('openSpeechSettings') ?? false;
+    } catch (e) {
+      debugPrint('openSpeechSettings failed: $e');
+      return false;
+    }
+  }
+
   /// Stop listening and let the recognizer finalise what it has.
   Future<void> stop() async {
     try {

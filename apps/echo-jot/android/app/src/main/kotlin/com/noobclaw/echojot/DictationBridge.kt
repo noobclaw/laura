@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.provider.Settings
 import android.speech.RecognitionListener
 import android.speech.RecognitionSupport
 import android.speech.RecognitionSupportCallback
@@ -122,6 +123,17 @@ class DictationBridge(
 
     // ---------------------------------------------------------------- methods
 
+    private fun openSpeechSettings(): Boolean {
+        for (action in listOf(Settings.ACTION_VOICE_INPUT_SETTINGS, Settings.ACTION_SETTINGS)) {
+            try {
+                context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                return true
+            } catch (_: Exception) {
+            }
+        }
+        return false
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "capabilities" -> reportCapabilities(result)
@@ -134,6 +146,9 @@ class DictationBridge(
                 stop()
                 result.success(null)
             }
+            // The language pack lives under the system's voice-input settings;
+            // one tap there beats a four-level path in a banner.
+            "openSpeechSettings" -> result.success(openSpeechSettings())
             else -> result.notImplemented()
         }
     }

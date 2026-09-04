@@ -108,6 +108,15 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
     case "stop":
       stop()
       result(nil)
+    case "openSpeechSettings":
+      // iOS offers no public deep link to General > Keyboard > Enable
+      // Dictation; the app's own Settings page is the closest sanctioned
+      // jump, and the banner spells out the remaining taps.
+      if let url = URL(string: UIApplication.openSettingsURLString) {
+        UIApplication.shared.open(url) { ok in result(ok) }
+      } else {
+        result(false)
+      }
     default:
       result(FlutterMethodNotImplemented)
     }

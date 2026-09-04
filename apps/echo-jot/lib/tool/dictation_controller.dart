@@ -81,7 +81,16 @@ class DictationController extends ChangeNotifier {
 
   /// Opens the system app-settings page so a permanently-denied microphone
   /// permission has a way out.
-  Future<void> openSystemSettings() => openAppSettings();
+  Future<void> openSystemSettings() async {
+    if (await _service.openSpeechSettings()) return;
+    await openAppSettings();
+  }
+
+  /// True when the last failure is something the user fixes in system
+  /// settings (permission, dictation switched off, missing language pack),
+  /// so the UI can offer a "Settings" shortcut next to the message.
+  bool get lastErrorNeedsSettings => _needsSettings;
+  bool _needsSettings = false;
 
   /// Returns true when the session actually started listening.
   Future<bool> start({String? languageTag}) async {
@@ -194,6 +203,8 @@ class DictationController extends ChangeNotifier {
         if (_finalWait != null && !_finalWait!.isCompleted) {
           _finalWait!.complete();
         }
+        _needsSettings = e.code == DictationError.permission ||
+            e.code == DictationError.onDeviceUnavailable;
         _message = _withDetail(
             _messageFor(e.code ?? DictationError.unknown), e.text);
         // The native side has already torn the session down, so end ours too —
@@ -255,6 +266,9 @@ class DictationController extends ChangeNotifier {
   }
 
   void _fail(String message) {
+    _needsSettings = message == _msgNoOnDevice ||
+        message.contains('设置') ||
+        message.contains('Settings');
     _message = message;
     _state = DictationState.idle;
     _startedAt = null;

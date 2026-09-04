@@ -153,10 +153,11 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   void _showControllerMessage() {
     final msg = _controller.message;
     if (msg == null) return;
-    final denied = _controller.permissionPermanentlyDenied;
+    final denied = _controller.permissionPermanentlyDenied ||
+        _controller.lastErrorNeedsSettings;
     _controller.clearMessage();
-    // A permanently denied microphone must always have a way out of the app —
-    // the banner only shows when the recognizer itself is missing.
+    // Anything the user fixes in system settings (permission, dictation
+    // switched off, no language pack) gets a shortcut right on the message.
     _snack(
       msg,
       action: denied
@@ -175,7 +176,7 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
       ..showSnackBar(SnackBar(
         content: Text(message),
         action: action,
-        duration: Duration(seconds: action == null ? 4 : 8),
+        duration: Duration(seconds: action == null ? 4 : 12),
       ));
   }
 
@@ -378,13 +379,14 @@ class _CapabilityNotice extends StatelessWidget {
                     foregroundColor: cs.onSecondaryContainer),
                 child: Text(tr(zh: '重新检测', en: 'Check again')),
               ),
-              if (permanentlyDenied)
-                TextButton(
-                  onPressed: controller.openSystemSettings,
-                  style: TextButton.styleFrom(
-                      foregroundColor: cs.onSecondaryContainer),
-                  child: Text(tr(zh: '去系统设置', en: 'Open settings')),
-                ),
+              TextButton(
+                onPressed: controller.openSystemSettings,
+                style: TextButton.styleFrom(
+                    foregroundColor: cs.onSecondaryContainer),
+                child: Text(permanentlyDenied
+                    ? tr(zh: '去系统设置', en: 'Open settings')
+                    : tr(zh: '打开设置', en: 'Open settings')),
+              ),
             ],
           ),
         ],
