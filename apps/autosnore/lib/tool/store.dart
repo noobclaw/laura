@@ -102,12 +102,22 @@ class AutoSnoreStore extends ChangeNotifier {
     });
   }
 
+  /// Nights the current tier may show: everything for Pro, the newest
+  /// [freeSessionLimit] otherwise. Older nights stay on disk so unlocking
+  /// Pro reveals them instead of finding them gone.
+  List<SleepSession> get visibleSessions =>
+      pro ? sessions : sessions.take(freeSessionLimit).toList(growable: false);
+
+  /// Nights hidden behind the free cap (drives the locked-history tile).
+  int get hiddenSessionCount =>
+      pro ? 0 : (sessions.length - freeSessionLimit).clamp(0, sessions.length);
+
   void _sortAndPrune() {
     sessions.sort((a, b) => b.startMs.compareTo(a.startMs));
-    if (!pro && sessions.length > freeSessionLimit) {
-      sessions.removeRange(freeSessionLimit, sessions.length);
-    }
+    // Nothing is pruned any more (2026-09-04): the free cap is applied at
+    // display time via [visibleSessions].
   }
+
 
   /// True when the free history cap is full — the UI nudges toward Pro.
   bool get atFreeLimit => !pro && sessions.length >= freeSessionLimit;

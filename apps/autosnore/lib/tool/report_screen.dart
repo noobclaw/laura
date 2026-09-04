@@ -403,8 +403,8 @@ class _ProActions extends StatelessWidget {
             leading: const Icon(Icons.workspace_premium_outlined),
             title: Text(tr(zh: '解锁 Pro', en: 'Unlock Pro')),
             subtitle: Text(tr(
-              zh: '无限历史 · 跨夜趋势 · 两晚对比 · CSV 导出',
-              en: 'Unlimited history · trends · night comparison · CSV export',
+              zh: '无限历史 · 跨夜趋势 · CSV 导出',
+              en: 'Unlimited history · trends · CSV export',
             )),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => showProSheet(context,

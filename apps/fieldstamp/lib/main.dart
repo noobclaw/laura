@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
 import 'core/l10n.dart';
@@ -13,6 +14,9 @@ final FieldStampTool tool = FieldStampTool();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The camera screen hard-codes a portrait preview and the info band /
+  // shutter bar stack; landscape squeezes the viewfinder to nothing.
+  await SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
   // Real IAP: a purchase or restore of `pro_unlock` flips the persisted Pro
   // flag. Safe on devices without a store — the service degrades silently.
   PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
 import 'core/l10n.dart';
@@ -12,6 +13,12 @@ final AutoSnoreTool tool = AutoSnoreTool();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Recording / report screens are fixed portrait columns with Spacers;
+  // landscape overflows them.
+  await SystemChrome.setPreferredOrientations(const [
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   // Real IAP: a purchase or restore of `pro_unlock` flips the persisted Pro
   // flag. Safe on devices without a store — the service degrades silently.
   PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());

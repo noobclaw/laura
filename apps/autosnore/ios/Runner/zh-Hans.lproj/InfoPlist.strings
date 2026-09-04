@@ -1,3 +1,4 @@
 /* Localized launcher name. The Android side keeps the same pair in
    res/values/strings.xml and res/values-zh/strings.xml. */
 "CFBundleDisplayName" = "鼾声记录";
+"NSMicrophoneUsageDescription" = "鼾声记录整夜通过麦克风测量响度来识别和统计打鼾。录音不会离开这台设备。";

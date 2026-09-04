@@ -123,7 +123,16 @@ Future<void> runImportFlow(BuildContext context, RemcardStore store) async {
       initialName: suggestedName ?? deckNameFromFileName(file.name, fallback),
     ),
   );
-  if (name == null || name.trim().isEmpty) return;
+  if (name == null) return;
+  if (name.trim().isEmpty) {
+    messenger.showSnackBar(SnackBar(
+      content: Text(tr(
+        zh: '牌组名不能为空,已取消导入',
+        en: 'Deck name is empty — import cancelled',
+      )),
+    ));
+    return;
+  }
 
   final deck = store.importDeck(name, result.cards);
   messenger.showSnackBar(SnackBar(

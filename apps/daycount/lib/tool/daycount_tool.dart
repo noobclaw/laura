@@ -22,8 +22,14 @@ class DaycountTool extends ToolModule {
       ..start()
       ..addListener(() {
         store.touch();
-        WidgetBridge.refresh();
+        // Re-push, not just re-render: the *choice* of featured event is made
+        // at push time, so once a one-off day has passed the widget must move
+        // on to the next nearest one.
+        WidgetBridge.push(store.events);
       });
+    // Label templates are written in the app language; switching it must
+    // reach the widget too.
+    AppLanguage.override.addListener(() => WidgetBridge.push(store.events));
   }
 
   final EventStore store = EventStore()..load();

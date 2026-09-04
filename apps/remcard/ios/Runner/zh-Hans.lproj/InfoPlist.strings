@@ -1,3 +1,5 @@
 /* Localized launcher name. The Android side keeps the same pair in
    res/values/strings.xml and res/values-zh/strings.xml. */
 "CFBundleDisplayName" = "记得";
+"NSPhotoLibraryUsageDescription" = "仅在你从相册选择牌组文件时使用;记得不会浏览你的照片。";
+"NSCameraUsageDescription" = "仅在你选择拍摄牌组文件导入时使用;记得不会自行打开相机。";

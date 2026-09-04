@@ -4,6 +4,7 @@ import '../core/l10n.dart';
 import 'models.dart';
 import 'recording_screen.dart';
 import 'report_screen.dart';
+import 'pro.dart';
 import 'store.dart';
 import 'ui_common.dart';
 
@@ -44,17 +45,35 @@ class HomeScreen extends StatelessWidget {
               Text(tr(zh: '记录', en: 'Nights'),
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              ...store.sessions.map((s) => _NightTile(session: s, store: store)),
+              ...store.visibleSessions
+                  .map((s) => _NightTile(session: s, store: store)),
               if (store.atFreeLimit)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    tr(
-                      zh: '免费版保留最近 ${AutoSnoreStore.freeSessionLimit} 晚,解锁 Pro 保存全部历史。',
-                      en: 'Free keeps the last ${AutoSnoreStore.freeSessionLimit} nights — '
+                // The history gate itself: tappable, opens the Pro sheet
+                // (a plain caption here was the one free-tier wall that
+                // dead-ended without a way to unlock).
+                Card(
+                  margin: const EdgeInsets.only(top: 8),
+                  child: ListTile(
+                    leading: const Icon(Icons.lock_outline),
+                    title: Text(store.hiddenSessionCount > 0
+                        ? tr(
+                            zh: '还有 ${store.hiddenSessionCount} 晚在 Pro 里',
+                            en: '${store.hiddenSessionCount} more night(s) in Pro',
+                          )
+                        : tr(zh: '保存全部历史', en: 'Keep every night')),
+                    subtitle: Text(tr(
+                      zh: '免费版显示最近 ${AutoSnoreStore.freeSessionLimit} 晚,解锁 Pro 查看全部历史。',
+                      en: 'Free shows the last ${AutoSnoreStore.freeSessionLimit} nights — '
                           'unlock Pro for full history.',
+                    )),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => showProSheet(
+                      context,
+                      reason: tr(
+                        zh: '免费版只显示最近 ${AutoSnoreStore.freeSessionLimit} 晚,更早的记录都还在,Pro 可以全部查看。',
+                        en: 'The free tier shows the last ${AutoSnoreStore.freeSessionLimit} nights; older ones are kept and Pro shows them all.',
+                      ),
                     ),
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
             ] else ...[

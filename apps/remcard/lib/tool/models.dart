@@ -135,7 +135,9 @@ class Flashcard {
       };
 
   factory Flashcard.fromJson(Map<String, dynamic> j) => Flashcard(
-        id: j['id'] as String,
+        // A missing id must not throw: that would make load() judge the whole
+        // file corrupt and hide every deck.
+        id: j['id'] as String? ?? _fallbackId('card'),
         front: j['front'] as String? ?? '',
         back: j['back'] as String? ?? '',
         ease: (j['ease'] as num?)?.toDouble() ?? 2.5,
@@ -144,6 +146,12 @@ class Flashcard {
         dueDay: (j['dueDay'] as num?)?.toInt() ?? 0,
       );
 }
+
+int _fallbackSeq = 0;
+
+/// Id for a stored record that lost its own (hand-edited or truncated file).
+String _fallbackId(String prefix) =>
+    '$prefix-recovered-${DateTime.now().microsecondsSinceEpoch}-${_fallbackSeq++}';
 
 /// A named collection of cards.
 class Deck {
@@ -166,7 +174,7 @@ class Deck {
       };
 
   factory Deck.fromJson(Map<String, dynamic> j) => Deck(
-        id: j['id'] as String,
+        id: j['id'] as String? ?? _fallbackId('deck'),
         name: j['name'] as String? ?? '',
         cards: (j['cards'] as List<dynamic>? ?? [])
             .map((e) => Flashcard.fromJson(e as Map<String, dynamic>))

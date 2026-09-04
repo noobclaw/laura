@@ -71,7 +71,8 @@ class DictationController extends ChangeNotifier {
     // long before the first `start` call — the method and event channels are
     // independent, so a late subscription could miss the opening events.
     _ensureSubscribed();
-    final caps = await _service.refreshCapabilities();
+    final caps = await _service.refreshCapabilities(
+        languageTag: DictationLanguage.effectiveTag);
     notifyListeners();
     return caps;
   }
@@ -89,6 +90,12 @@ class DictationController extends ChangeNotifier {
   /// Opens the system app-settings page so a permanently-denied microphone
   /// permission has a way out.
   Future<void> openSystemSettings() async {
+    // A permanently denied microphone is fixed on the app's own permission
+    // page; the voice-input page would send that user to the wrong place.
+    if (_permissionPermanentlyDenied) {
+      await openAppSettings();
+      return;
+    }
     if (await _service.openSpeechSettings()) return;
     await openAppSettings();
   }
@@ -106,7 +113,11 @@ class DictationController extends ChangeNotifier {
     _state = DictationState.starting;
     notifyListeners();
 
-    final caps = _service.capabilities ?? await _service.refreshCapabilities();
+    final wanted = languageTag ?? DictationLanguage.effectiveTag;
+    final cached = _service.capabilities;
+    final caps = (cached != null && _service.capabilitiesLanguage == wanted)
+        ? cached
+        : await _service.refreshCapabilities(languageTag: wanted);
     if (!caps.ready) {
       _fail(caps.platformSupported
           ? _msgNoOnDevice
@@ -149,7 +160,11 @@ class DictationController extends ChangeNotifier {
   /// Stops listening and returns the finished note text (may be empty if the
   /// user said nothing).
   Future<String> stop() async {
-    if (_state == DictationState.idle) return finalizeTranscript(_committed);
+    // Idle here usually means the native side failed mid-session: keep the
+    // last partial too, it is real speech the user never saw committed.
+    if (_state == DictationState.idle) {
+      return finalizeTranscript(previewTranscript(_committed, _partial));
+    }
     _state = DictationState.finishing;
     notifyListeners();
 

@@ -171,13 +171,18 @@ class _CameraScreenState extends State<CameraScreen>
       final reading = widget.sensors.snapshot();
       final xfile = await c.takePicture();
       final bytes = await xfile.readAsBytes();
-      // The plugin leaves the unstamped original in the cache directory;
-      // an evidence camera must not keep a second, un-watermarked copy
-      // of every photo lying around.
-      unawaited(File(xfile.path).delete().catchError((_) => File(xfile.path)));
-      final stamped = await burnWatermark(bytes, _watermarkFor(reading));
-      final photo = await widget.store
-          .saveCapture(stamped, reading, widget.store.currentProjectId);
+      final StampPhoto? photo;
+      try {
+        final stamped = await burnWatermark(bytes, _watermarkFor(reading));
+        photo = await widget.store
+            .saveCapture(stamped, reading, widget.store.currentProjectId);
+      } finally {
+        // The plugin leaves the unstamped original in the cache directory;
+        // an evidence camera must not keep a second, un-watermarked copy
+        // of every photo lying around. Removed only once the stamped copy
+        // had its chance to land, so a failed save does not lose the shot.
+        unawaited(File(xfile.path).delete().catchError((_) => File(xfile.path)));
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(photo == null
@@ -356,7 +361,8 @@ class _CameraScreenState extends State<CameraScreen>
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      formatLatLon(r.latitude, r.longitude, store.coordFormat),
+                      formatLatLon(r.latitude, r.longitude, store.coordFormat,
+                          noFix: tr(zh: '尚未定位', en: 'No GPS fix')),
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,

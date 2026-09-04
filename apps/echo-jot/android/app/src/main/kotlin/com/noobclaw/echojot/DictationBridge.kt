@@ -109,6 +109,11 @@ class DictationBridge(
     /** True between `start` and `stop`: drives the restart loop. */
     private var sessionActive = false
     private var consecutiveErrors = 0
+    /** Any partial or final text since `start` — distinguishes "engine keeps
+     *  failing" from "nothing ever came back" (missing language pack). */
+    private var anyTextThisSession = false
+    /** Last partial not yet delivered as final, flushed on a fatal error. */
+    private var pendingPartial = ""
 
     /** Guards against two startListening calls landing on one recognizer. */
     private var listening = false
@@ -279,6 +284,8 @@ class DictationBridge(
                 recognizer = createRecognizer()
                 sessionActive = true
                 consecutiveErrors = 0
+                anyTextThisSession = false
+                pendingPartial = ""
                 benignCycles = 0
                 lastProgressAt = SystemClock.elapsedRealtime()
                 // Report failure through the Result, never as "success" plus an
@@ -382,6 +389,11 @@ class DictationBridge(
         listening = false
         main.removeCallbacks(restartRunnable)
         releaseRecognizer()
+        // Whatever the user said before the engine died is still their words.
+        if (pendingPartial.isNotBlank()) {
+            emit(mapOf("type" to "final", "text" to pendingPartial))
+            pendingPartial = ""
+        }
         emit(mapOf("type" to "error", "code" to code, "message" to message))
         emit(mapOf("type" to "status", "value" to "stopped"))
     }
@@ -523,7 +535,14 @@ class DictationBridge(
                 else -> {
                     consecutiveErrors++
                     if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                        failSession("recognizer_failed", "error $error")
+                        // API 31/32 has no ERROR_LANGUAGE_* codes: a missing pack
+                        // for the picked language shows up as this loop with no
+                        // text at all, so point at the language pack, not "retry".
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && !anyTextThisSession) {
+                            failSession("on_device_unavailable", "no text after $consecutiveErrors errors; language pack for $language probably missing")
+                        } else {
+                            failSession("recognizer_failed", "error $error")
+                        }
                     } else {
                         restartAfterUtterance()
                     }
@@ -538,6 +557,8 @@ class DictationBridge(
             if (text.isNotBlank()) {
                 consecutiveErrors = 0
                 benignCycles = 0
+                anyTextThisSession = true
+                pendingPartial = ""
                 lastProgressAt = SystemClock.elapsedRealtime()
                 emit(mapOf("type" to "final", "text" to text))
             }
@@ -549,6 +570,8 @@ class DictationBridge(
             val text = firstResult(partial)
             if (text.isNotBlank()) {
                 lastProgressAt = SystemClock.elapsedRealtime()
+                anyTextThisSession = true
+                pendingPartial = text
                 emit(mapOf("type" to "partial", "text" to text))
             }
         }

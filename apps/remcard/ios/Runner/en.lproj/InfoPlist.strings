@@ -1,3 +1,5 @@
 /* Localized launcher name. The Android side keeps the same pair in
    res/values/strings.xml and res/values-zh/strings.xml. */
 "CFBundleDisplayName" = "Remcard";
+"NSPhotoLibraryUsageDescription" = "Used only if you pick a deck file from your photo library; Remcard never browses your photos.";
+"NSCameraUsageDescription" = "Used only if you choose to photograph a deck file to import; Remcard never opens the camera on its own.";

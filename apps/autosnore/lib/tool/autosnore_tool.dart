@@ -44,8 +44,8 @@ class AutoSnoreTool extends ToolModule {
             subtitle: Text(store.pro
                 ? tr(zh: '感谢支持', en: 'Thanks for your support')
                 : tr(
-                    zh: '一次买断 · 无限历史 / 趋势 / 对比 / CSV 导出',
-                    en: 'One-time · unlimited history / trends / comparison / CSV',
+                    zh: '一次买断 · 无限历史 / 跨夜趋势 / CSV 导出',
+                    en: 'One-time · unlimited history / trends / CSV export',
                   )),
             trailing: store.pro
                 ? null

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
@@ -36,7 +37,14 @@ String buildCsv(List<StampPhoto> photos, FieldStampStore store) {
 /// Build a one-photo-per-page PDF inspection report.
 Future<Uint8List> buildPdf(
     List<StampPhoto> photos, FieldStampStore store) async {
-  final doc = pw.Document();
+  // pdf's built-in Helvetica covers Latin-1 only: Chinese project names and
+  // even the "—" dash rendered as boxes. Noto Sans SC (GB2312 subset, 2 MB)
+  // is bundled so every string in the report is real glyphs.
+  final fontData = await rootBundle.load('assets/fonts/NotoSansSC-Subset.ttf');
+  final font = pw.Font.ttf(fontData);
+  final doc = pw.Document(
+    theme: pw.ThemeData.withFont(base: font, bold: font, italic: font, boldItalic: font),
+  );
   for (final p in photos) {
     Uint8List? thumb;
     try {
@@ -92,7 +100,7 @@ Future<Uint8List> buildPdf(
             ),
             pw.Spacer(),
             pw.Text(
-              'Generated offline by FieldStamp — this data never left the device.',
+              'Generated offline by FieldStamp - this data never left the device.',
               style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
           ],

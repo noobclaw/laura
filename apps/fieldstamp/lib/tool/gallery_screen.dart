@@ -475,7 +475,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       (tr(zh: '时间', en: 'Timestamp'), formatTimestamp(p.capturedAt)),
       (
         tr(zh: '坐标', en: 'Coordinates'),
-        formatLatLon(p.latitude, p.longitude, store.coordFormat)
+        formatLatLon(p.latitude, p.longitude, store.coordFormat,
+            noFix: tr(zh: '无定位', en: 'No GPS fix'))
       ),
       (
         tr(zh: '海拔', en: 'Altitude'),

@@ -33,6 +33,9 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   private static let pauseSegmentSeconds: TimeInterval = 1.8
   /// Hard cap per recognition request, see rule 2.
   private static let maxSegmentSeconds: TimeInterval = 55
+  /// The length cut waits for this much quiet so it never lands mid-word
+  /// (audio during the hand-over is lost, and a "。" would be inserted).
+  private static let lengthCutLullSeconds: TimeInterval = 0.5
   /// A segment with no text at all is recycled after this long (Android's
   /// NO_MATCH cycle).
   private static let emptySegmentSeconds: TimeInterval = 8
@@ -99,7 +102,9 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "capabilities":
-      reportCapabilities(result)
+      let args = call.arguments as? [String: Any]
+      let asked = (args?["language"] as? String)?.trimmingCharacters(in: .whitespaces)
+      reportCapabilities(for: (asked?.isEmpty == false) ? asked : nil, result)
     case "start":
       let args = call.arguments as? [String: Any]
       let requested = (args?["language"] as? String)?.trimmingCharacters(in: .whitespaces)
@@ -127,7 +132,7 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
   /// Cached: probing ~60 locales means constructing ~60 recognizers.
   private static var installedCache: [String]?
 
-  private func reportCapabilities(_ result: @escaping FlutterResult) {
+  private func reportCapabilities(for asked: String?, _ result: @escaping FlutterResult) {
     DispatchQueue.global(qos: .userInitiated).async {
       let locales = SFSpeechRecognizer.supportedLocales()
       let supported = locales.map { Self.bcp47($0) }.sorted()
@@ -145,16 +150,17 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
         Self.installedCache = found
         installed = found
       }
-      // Probe the language Dart will dictate in (the device's preferred
-      // language, e.g. "zh-Hans-CN"), not a stale `language` from a previous
-      // session.
-      let current = Self.resolveLocale(Locale.preferredLanguages.first ?? self.language)
+      // Probe the language Dart will dictate in: the picked one when given,
+      // else the device's preferred language (e.g. "zh-Hans-CN") — never a
+      // stale `language` from a previous session.
+      let probeTag = asked ?? Locale.preferredLanguages.first ?? self.language
+      let current = Self.resolveLocale(probeTag)
       let onDevice = current != nil
       let detail: String
       if let cur = current {
         detail = "on-device recognizer available for \(Self.bcp47(cur)) (iOS \(UIDevice.current.systemVersion))"
       } else {
-        detail = "no on-device recognizer for \(self.language) (iOS \(UIDevice.current.systemVersion))"
+        detail = "no on-device recognizer for \(probeTag) (iOS \(UIDevice.current.systemVersion))"
       }
       let payload: [String: Any] = [
         "onDevice": onDevice,
@@ -367,7 +373,7 @@ final class DictationBridge: NSObject, FlutterStreamHandler, SFSpeechRecognizerD
     }
     if !segmentText.isEmpty && sinceChange >= Self.pauseSegmentSeconds {
       endSegment(reason: "pause")
-    } else if age >= Self.maxSegmentSeconds {
+    } else if age >= Self.maxSegmentSeconds && sinceChange >= Self.lengthCutLullSeconds {
       endSegment(reason: "length")
     } else if segmentText.isEmpty && age >= Self.emptySegmentSeconds {
       endSegment(reason: "empty")

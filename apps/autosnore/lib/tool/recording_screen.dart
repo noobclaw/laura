@@ -209,8 +209,8 @@ class _RecordingScreenState extends State<RecordingScreen>
       case _Phase.error:
         return _PermissionPanel(
           message: tr(
-            zh: '无法启动麦克风录音,请重试。',
-            en: 'Could not start microphone recording. Please try again.',
+            zh: '无法启动麦克风录音。请结束通话、关闭其他正在使用麦克风的 App 后重试。',
+            en: 'Could not start microphone recording. End any call or close other apps using the microphone, then retry.',
           ),
           primaryLabel: tr(zh: '重试', en: 'Retry'),
           onPrimary: () {
@@ -361,10 +361,15 @@ class _RecordingView extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                tr(
-                  zh: '屏幕保持常亮以持续记录,建议接通电源。',
-                  en: 'Screen stays on to keep recording — keep the phone charging.',
-                ),
+                Platform.isIOS
+                    ? tr(
+                        zh: '可以锁屏,记录会在后台继续;建议接通电源。',
+                        en: 'You can lock the screen — recording continues in the background. Keep the phone charging.',
+                      )
+                    : tr(
+                        zh: '屏幕保持常亮以持续记录,建议接通电源。',
+                        en: 'Screen stays on to keep recording — keep the phone charging.',
+                      ),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant.withValues(alpha: 0.8)),

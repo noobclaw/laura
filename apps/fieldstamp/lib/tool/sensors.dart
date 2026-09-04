@@ -149,7 +149,11 @@ class SensorHub extends ChangeNotifier {
         (p) {
           _lat = p.latitude;
           _lon = p.longitude;
-          _alt = p.altitude;
+          // geolocator omits altitude when the fix has none (indoor / network
+          // location) and the platform side then reads it as 0.0 — which
+          // would be burned into the photo as "Alt 0 m". Only trust it when
+          // the fix reports a vertical accuracy.
+          _alt = p.altitudeAccuracy > 0 ? p.altitude : null;
           _acc = p.accuracy;
           _fixAt = DateTime.now();
           if (_state != LocationState.ok) _state = LocationState.ok;

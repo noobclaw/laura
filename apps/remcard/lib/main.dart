@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/branding.dart';
 import 'core/l10n.dart';
@@ -12,6 +13,12 @@ final RemcardTool tool = RemcardTool();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Every screen is a fixed portrait column (paywall, empty state, session
+  // summary); landscape just clips the buttons off the bottom.
+  await SystemChrome.setPreferredOrientations(const [
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   // Real IAP: a purchase or restore of `pro_unlock` flips the persisted Pro
   // flag. Safe on devices without a store — the service degrades silently.
   PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());

@@ -1,3 +1,6 @@
 /* Localized launcher name. The Android side keeps the same pair in
    res/values/strings.xml and res/values-zh/strings.xml. */
-"CFBundleDisplayName" = "FieldStamp";
+"CFBundleDisplayName" = "定位水印相机";
+"NSCameraUsageDescription" = "定位水印相机用相机拍摄带定位水印的现场照片。照片只保存在你的设备上。";
+"NSLocationWhenInUseUsageDescription" = "定位水印相机把 GPS 坐标和海拔烧进照片。位置只留在你的设备上,不会上传。";
+"NSPhotoLibraryAddUsageDescription" = "只有当你在分享面板里选择「存储图像」时,才会把带水印的照片存入相册。";

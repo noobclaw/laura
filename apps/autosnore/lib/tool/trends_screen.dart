@@ -19,7 +19,7 @@ class TrendsScreen extends StatelessWidget {
         listenable: store,
         builder: (context, _) {
           // Oldest → newest so the chart reads left-to-right in time.
-          final nights = store.sessions.reversed.toList();
+          final nights = store.visibleSessions.reversed.toList();
           if (nights.length < 2) {
             return EmptyState(
               icon: Icons.show_chart,
@@ -150,7 +150,7 @@ class _TrendChart extends StatelessWidget {
                   Positioned(
                     right: 0,
                     top: (avgY - 15).clamp(0.0, h - 14),
-                    child: Text('avg',
+                    child: Text(tr(zh: '平均', en: 'avg'),
                         style: Theme.of(context)
                             .textTheme
                             .labelSmall

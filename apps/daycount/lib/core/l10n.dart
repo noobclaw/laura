@@ -36,9 +36,11 @@ bool get isZhLocale => AppLanguage.effectiveCode == 'zh';
 class AppLanguage {
   AppLanguage._();
 
-  /// Choices offered in Settings. `ja` is only useful for apps that pass
-  /// `ja:` strings; unlabelled strings fall back to English.
-  static const List<String> choices = ['zh', 'en', 'ja'];
+  /// Choices offered in Settings. Only languages every string of the app
+  /// actually has: offering `ja` here while the tool passes no `ja:` strings
+  /// gave the user a "日本語" option that turned the app English (2026-09-04
+  /// audit). Add `ja` back per app only once its strings carry `ja:`.
+  static const List<String> choices = ['zh', 'en'];
 
   static final ValueNotifier<String?> override = ValueNotifier<String?>(null);
   static final JsonFileStore _file = JsonFileStore('language.json');

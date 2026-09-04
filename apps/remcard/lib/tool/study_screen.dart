@@ -55,6 +55,9 @@ class _StudyScreenState extends State<StudyScreen> {
   }
 
   void _grade(Rating rating) {
+    // A second tap can land before the rebuild that hides the buttons
+    // (saving is synchronous and a big deck makes that frame late).
+    if (_index >= _queue.length) return;
     final card = _queue[_index];
     final repeat = _seen.contains(card.id);
     if (repeat) {

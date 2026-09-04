@@ -12,7 +12,7 @@ abstract final class Branding {
   static const String appNameZh = '记得';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
-  static const String version = '1.0.0';
+  static const String version = '1.1.2';
 
   /// Seed for the Material 3 color scheme.
   static const Color seedColor = Color(0xFF00897B); // teal — calm, study-friendly

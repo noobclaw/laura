@@ -59,7 +59,10 @@ void main() {
   group('formatTimestamp', () {
     test('zero-pads fields', () {
       final t = DateTime(2026, 7, 5, 9, 3, 7);
-      expect(formatTimestamp(t), '2026-07-05 09:03:07');
+      final out = formatTimestamp(t);
+      // Local time followed by the zone offset (evidence across time zones).
+      expect(out, startsWith('2026-07-05 09:03:07 '));
+      expect(out, matches(RegExp(r' [+-]\d\d:\d\d$')));
     });
   });
 

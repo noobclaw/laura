@@ -15,7 +15,7 @@ if (s.includes('CountdownWidgetExtension')) {
 }
 
 const id = (n) => 'DC' + '0'.repeat(20) + n.toString(16).toUpperCase().padStart(2, '0');
-const F_SWIFT = id(1), F_PLIST = id(2), F_ENT = id(3), F_RUNNER_ENT = id(4), F_APPEX = id(5);
+const F_SWIFT = id(1), F_PLIST = id(2), F_ENT = id(3), F_RUNNER_ENT = id(4), F_APPEX = id(5), F_PRIVACY = id(21), B_PRIVACY = id(22);
 const B_SWIFT = id(6), B_APPEX = id(7);
 const G_WIDGET = id(8);
 const T_WIDGET = id(9);
@@ -38,6 +38,7 @@ function replaceOnce(from, to) {
 // PBXBuildFile
 insertBefore('/* End PBXBuildFile section */',
 `\t\t${B_SWIFT} /* CountdownWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ${F_SWIFT} /* CountdownWidget.swift */; };
+\t\t${B_PRIVACY} /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = ${F_PRIVACY} /* PrivacyInfo.xcprivacy */; };
 \t\t${B_APPEX} /* CountdownWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ${F_APPEX} /* CountdownWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 `);
 
@@ -70,6 +71,7 @@ insertBefore('/* End PBXCopyFilesBuildPhase section */',
 // PBXFileReference
 insertBefore('/* End PBXFileReference section */',
 `\t\t${F_SWIFT} /* CountdownWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownWidget.swift; sourceTree = "<group>"; };
+\t\t${F_PRIVACY} /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 \t\t${F_PLIST} /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 \t\t${F_ENT} /* CountdownWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CountdownWidget.entitlements; sourceTree = "<group>"; };
 \t\t${F_RUNNER_ENT} /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
@@ -95,6 +97,7 @@ insertBefore('/* End PBXGroup section */',
 \t\t\t\t${F_SWIFT} /* CountdownWidget.swift */,
 \t\t\t\t${F_PLIST} /* Info.plist */,
 \t\t\t\t${F_ENT} /* CountdownWidget.entitlements */,
+\t\t\t\t${F_PRIVACY} /* PrivacyInfo.xcprivacy */,
 \t\t\t);
 \t\t\tpath = CountdownWidget;
 \t\t\tsourceTree = "<group>";
@@ -199,6 +202,7 @@ insertBefore('/* End PBXResourcesBuildPhase section */',
 \t\t\tisa = PBXResourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
+\t\t\t\t${B_PRIVACY} /* PrivacyInfo.xcprivacy in Resources */,
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t};

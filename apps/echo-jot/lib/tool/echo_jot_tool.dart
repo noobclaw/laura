@@ -249,15 +249,25 @@ class _HowItWorksPage extends StatelessWidget {
       (
         Icons.phone_android,
         tr(zh: '转写在你的手机上完成', en: 'Transcribed on your phone'),
-        tr(
-          zh: '你按下话筒后,声音交给 Android 系统内置的「设备端语音识别」'
-              '(Android 12 及以上提供),直接在本机转成文字。应用不下载任何语音模型,'
-              '也没有网络权限——声音和文字都不出这台手机。',
-          en: 'When you tap the mic, your speech goes to Android\'s built-in '
-              'on-device speech recognizer (Android 12+) and becomes text right '
-              'here. The app downloads no speech model and holds no network '
-              'permission — neither the audio nor the text leaves this device.',
-        ),
+        DictationService.needsSpeechPermission
+            ? tr(
+                zh: '你按下话筒后,声音交给 iOS 系统内置的设备端语音识别,'
+                    '直接在本机转成文字。应用不下载任何语音模型,'
+                    '也不联网——声音和文字都不出这台手机。',
+                en: 'When you tap the mic, your speech goes to the system\'s '
+                    'built-in on-device speech recognizer and becomes text right '
+                    'here. The app downloads no speech model and never goes '
+                    'online — neither the audio nor the text leaves this device.',
+              )
+            : tr(
+                zh: '你按下话筒后,声音交给系统内置的「设备端语音识别」'
+                    '(Android 12 及以上提供),直接在本机转成文字。应用不下载任何语音模型,'
+                    '也没有网络权限——声音和文字都不出这台手机。',
+                en: 'When you tap the mic, your speech goes to the system\'s built-in '
+                    'on-device speech recognizer (Android 12+) and becomes text right '
+                    'here. The app downloads no speech model and holds no network '
+                    'permission — neither the audio nor the text leaves this device.',
+              ),
       ),
       (
         Icons.mic_off_outlined,

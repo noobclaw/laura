@@ -155,12 +155,23 @@ class NoteStore extends ChangeNotifier {
     }
   }
 
+  /// The last failed write, if any (disk full, sandbox I/O error). Set here
+  /// and shown by the screen that triggered the save; cleared by [takeSaveError].
+  String? _saveError;
+  String? takeSaveError() {
+    final e = _saveError;
+    _saveError = null;
+    return e;
+  }
+
   /// Queued + atomic save. Returns when this particular save has landed.
   Future<void> _persist() {
     final done = _writeQueue.then((_) => _write());
-    // Keep the chain alive even if one write fails.
+    // Keep the chain alive even if one write fails — but remember why, so the
+    // caller can tell the user instead of silently losing the note.
     _writeQueue = done.catchError((Object e) {
       debugPrint('note persist failed: $e');
+      _saveError = '$e';
     });
     return _writeQueue;
   }

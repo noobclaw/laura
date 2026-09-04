@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../core/json_file_store.dart';
+import '../core/l10n.dart';
 import 'models.dart';
 
 /// In-memory model of projects, photos and settings, backed by a JSON file in
@@ -34,11 +35,11 @@ class FieldStampStore extends ChangeNotifier {
   Project get currentProject => projects.firstWhere(
         (p) => p.id == currentProjectId,
         orElse: () =>
-            projects.isNotEmpty ? projects.first : Project(id: 'default', name: 'Default'),
+            projects.isNotEmpty ? projects.first : Project(id: 'default', name: tr(zh: '默认项目', en: 'Default')),
       );
 
   String projectName(String id) => projects
-      .firstWhere((p) => p.id == id, orElse: () => Project(id: id, name: 'Default'))
+      .firstWhere((p) => p.id == id, orElse: () => Project(id: id, name: tr(zh: '默认项目', en: 'Default')))
       .name;
 
   String photoPath(String fileName) => '${_photosDir?.path ?? ''}/$fileName';
@@ -66,7 +67,9 @@ class FieldStampStore extends ChangeNotifier {
       }
       final raw = await _state.read();
       if (raw != null) {
-        pro = raw['pro'] as bool? ?? false;
+        // StoreKit may replay a purchase before load() finishes; never let the
+        // stale value on disk undo an unlock that already happened.
+        pro = pro || (raw['pro'] as bool? ?? false);
         currentProjectId = raw['currentProjectId'] as String? ?? 'default';
         coordFormat = CoordFormat.values[(raw['coordFormat'] as int? ?? 0)
             .clamp(0, CoordFormat.values.length - 1)];
@@ -85,7 +88,7 @@ class FieldStampStore extends ChangeNotifier {
       debugPrint('fieldstamp load skipped: $e');
     } finally {
       if (projects.isEmpty) {
-        projects.add(Project(id: 'default', name: 'Default project'));
+        projects.add(Project(id: 'default', name: tr(zh: '默认项目', en: 'Default project')));
         currentProjectId = 'default';
       }
       if (!projects.any((p) => p.id == currentProjectId)) {

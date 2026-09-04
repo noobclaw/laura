@@ -12,7 +12,7 @@ abstract final class Branding {
   static const String appNameZh = '鼾声记录';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
-  static const String version = '1.0.0';
+  static const String version = '1.1.2';
 
   /// Seed for the Material 3 color scheme — a calm night indigo.
   static const Color seedColor = Color(0xFF5661E0);

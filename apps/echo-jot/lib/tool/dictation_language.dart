@@ -108,6 +108,7 @@ class DictationLanguage {
                 set(null);
                 controller.setLanguage(effectiveTag);
                 Navigator.of(ctx).pop();
+                controller.probe();
               },
             ),
             for (final (tag, label) in choices)
@@ -121,15 +122,21 @@ class DictationLanguage {
                   set(tag);
                   controller.setLanguage(tag);
                   Navigator.of(ctx).pop();
+                  controller.probe();
                 },
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
               child: Text(
-                tr(
-                  zh: '需要系统装有该语言的离线识别资源:iPhone 在「设置 → 通用 → 键盘 → 听写语言」添加;Android 在「设备端语音识别」下载语言包。',
-                  en: 'The system must have offline recognition for that language: iPhone under Settings → General → Keyboard → Dictation Languages; Android under On-device speech recognition.',
-                ),
+                DictationService.needsSpeechPermission
+                    ? tr(
+                        zh: '需要系统装有该语言的离线听写资源:在「设置 → 通用 → 键盘 → 听写语言」添加。',
+                        en: 'The system must have offline dictation for that language: add it under Settings → General → Keyboard → Dictation Languages.',
+                      )
+                    : tr(
+                        zh: '需要系统装有该语言的离线识别语言包:在系统「设备端语音识别」里下载。',
+                        en: 'The system must have an offline language pack for that language: download it under On-device speech recognition.',
+                      ),
                 style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                     color: Theme.of(ctx).colorScheme.onSurfaceVariant),
               ),

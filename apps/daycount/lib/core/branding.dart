@@ -11,7 +11,7 @@ abstract final class Branding {
   static const String appNameZh = '倒数日';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
-  static const String version = '1.0.0';
+  static const String version = '1.1.3';
 
   /// Seed for the Material 3 color scheme — a warm coral that reads well both
   /// in the app and on the home-screen widget background.

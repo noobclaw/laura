@@ -92,7 +92,7 @@ Future<void> showPaywall(BuildContext context) {
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (ctx) => Padding(
+    builder: (ctx) => SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
           24, 4, 24, 24 + MediaQuery.of(ctx).viewPadding.bottom),
       child: Column(

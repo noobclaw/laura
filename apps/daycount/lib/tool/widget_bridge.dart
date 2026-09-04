@@ -47,15 +47,15 @@ class WidgetBridge {
       await _ensureGroup();
       final sorted = sortedEvents(events, DateTime.now());
       if (sorted.isEmpty) {
-        await _save('dc_has_event', 'false');
         await _save('dc_title', Branding.appName);
         await _save('dc_emoji', '');
         await _save('dc_empty_label', tr(zh: '还没有添加日子', en: 'No days yet'));
         await _save(
             'dc_empty_date', tr(zh: '打开 App 添加', en: 'Open the app to add one'));
+        // Written last: a render between the keys must never see a half state.
+        await _save('dc_has_event', 'false');
       } else {
         final e = sorted.first;
-        await _save('dc_has_event', 'true');
         await _save('dc_title', e.title);
         await _save('dc_emoji', e.emoji);
         // ISO date + repeat flag: the provider rolls yearly events forward
@@ -69,6 +69,7 @@ class WidgetBridge {
         await _save('dc_label_past', tr(zh: '已过去 {n} 天', en: '{n} days ago'));
         await _save('dc_label_past_1', tr(zh: '已过去 1 天', en: '1 day ago'));
         await _save('dc_label_today', tr(zh: '就是今天', en: 'Today!'));
+        await _save('dc_has_event', 'true');
       }
       await HomeWidget.updateWidget(
           androidName: _androidProvider, iOSName: _iosKind);

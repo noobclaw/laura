@@ -3,8 +3,9 @@ import 'models.dart';
 /// Pure formatting helpers for coordinates, altitude, bearing and time.
 /// Kept free of Flutter/plugin imports so they can be unit tested directly.
 
-String formatLatLon(double? lat, double? lon, CoordFormat fmt) {
-  if (lat == null || lon == null) return 'No GPS fix';
+String formatLatLon(double? lat, double? lon, CoordFormat fmt,
+    {String noFix = 'No GPS fix'}) {
+  if (lat == null || lon == null) return noFix;
   switch (fmt) {
     case CoordFormat.decimal:
       return '${lat.toStringAsFixed(6)}, ${lon.toStringAsFixed(6)}';
@@ -17,12 +18,13 @@ String _dms(double value, bool isLat) {
   final hemi = isLat
       ? (value >= 0 ? 'N' : 'S')
       : (value >= 0 ? 'E' : 'W');
-  final abs = value.abs();
-  final deg = abs.floor();
-  final minFull = (abs - deg) * 60;
-  final min = minFull.floor();
-  final sec = (minFull - min) * 60;
-  return "$deg°${min.toString().padLeft(2, '0')}'${sec.toStringAsFixed(1)}\"$hemi";
+  // Round to 0.1" first, then carry, so 59.96" becomes 1'00.0" and never
+  // the impossible 60.0".
+  final tenths = (value.abs() * 3600 * 10).round();
+  final deg = tenths ~/ 36000;
+  final min = (tenths % 36000) ~/ 600;
+  final sec = (tenths % 600) / 10;
+  return "$deg°${min.toString().padLeft(2, '0')}'${sec.toStringAsFixed(1).padLeft(4, '0')}\"$hemi";
 }
 
 String formatAltitude(double? altMeters, AltUnit unit) {
@@ -44,8 +46,13 @@ String formatHeading(double? deg) {
 
 String formatTimestamp(DateTime t) {
   String two(int n) => n.toString().padLeft(2, '0');
+  // Evidence across time zones is unreadable without the offset.
+  final off = t.timeZoneOffset;
+  final sign = off.isNegative ? '-' : '+';
+  final oh = two(off.inHours.abs());
+  final om = two(off.inMinutes.abs() % 60);
   return '${t.year}-${two(t.month)}-${two(t.day)} '
-      '${two(t.hour)}:${two(t.minute)}:${two(t.second)}';
+      '${two(t.hour)}:${two(t.minute)}:${two(t.second)} $sign$oh:$om';
 }
 
 String formatDateHeader(DateTime t) {

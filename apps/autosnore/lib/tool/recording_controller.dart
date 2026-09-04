@@ -64,8 +64,19 @@ class RecordingController extends ChangeNotifier {
   /// one callback would otherwise share a wall-clock instant → 0 ms events).
   int _audioMs = 0;
 
-  /// Wall-clock time of the last PCM chunk, for the stall watchdog.
+  /// Monotonic time of the last PCM chunk, for the stall watchdog.
+  /// (Was wall-clock: an NTP correction or time-zone change of a few
+  /// seconds faked a stall and booked the jump as an interruption.)
   int _lastChunkWallMs = 0;
+
+  /// Monotonic clock for elapsed time and the watchdog; wall-clock is kept
+  /// only for the session's start/end stamps.
+  final Stopwatch _clock = Stopwatch();
+
+  /// After this long stalled with the plugin still claiming "recording", the
+  /// engine is dead underneath it (iOS route change, interruption without
+  /// resume): tear the stream down and open a fresh one.
+  static const Duration forceRestartAfter = Duration(seconds: 10);
 
   /// Milliseconds during which the stream was not delivering audio.
   int interruptedMs = 0;
@@ -100,8 +111,11 @@ class RecordingController extends ChangeNotifier {
       _events.clear();
       _buf = BytesBuilder(copy: false);
       _startMs = DateTime.now().millisecondsSinceEpoch;
+      _clock
+        ..reset()
+        ..start();
       _audioMs = 0;
-      _lastChunkWallMs = _startMs;
+      _lastChunkWallMs = 0;
       interruptedMs = 0;
       stalled = false;
       currentDb = kSilenceDb;
@@ -138,8 +152,8 @@ class RecordingController extends ChangeNotifier {
   }
 
   void _tick() {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    elapsedMs = now - _startMs;
+    final now = _clock.elapsedMilliseconds;
+    elapsedMs = now;
     final gap = now - _lastChunkWallMs;
     if (!stalled && gap > stallAfter.inMilliseconds) {
       stalled = true;
@@ -165,8 +179,24 @@ class RecordingController extends ChangeNotifier {
     if (_resuming || !running) return;
     _resuming = true;
     try {
+      final stalledFor = stalled ? _clock.elapsedMilliseconds - _stallStartWallMs : 0;
       if (await _recorder.isPaused()) {
         await _recorder.resume();
+      } else if (stalled && stalledFor > forceRestartAfter.inMilliseconds && await _recorder.isRecording()) {
+        // The plugin still says "recording" but nothing has arrived for a
+        // long time: the audio engine underneath it stopped (route change,
+        // ended interruption). Only a fresh stream re-activates the session.
+        debugPrint('recorder stalled ${stalledFor}ms while "recording" — restarting stream');
+        await _sub?.cancel();
+        try {
+          await _recorder.stop();
+        } catch (e) {
+          debugPrint('stop before restart failed: $e');
+        }
+        final stream = await _recorder.startStream(_config());
+        _sub = stream.listen(_onChunk, onError: (Object e) {
+          debugPrint('record stream error: $e');
+        });
       } else if (!await _recorder.isRecording()) {
         await _sub?.cancel();
         final stream = await _recorder.startStream(_config());
@@ -194,7 +224,7 @@ class RecordingController extends ChangeNotifier {
       );
 
   void _onChunk(Uint8List chunk) {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = _clock.elapsedMilliseconds;
     if (stalled) {
       // Book the hole honestly and move the detector's clock past it so the
       // next window is not stamped inside the gap.
@@ -249,7 +279,8 @@ class RecordingController extends ChangeNotifier {
   Future<SleepSession?> stop({bool endedEarly = false}) async {
     if (!running) return null;
     final int endMs = DateTime.now().millisecondsSinceEpoch;
-    if (stalled) interruptedMs += endMs - _stallStartWallMs;
+    if (stalled) interruptedMs += _clock.elapsedMilliseconds - _stallStartWallMs;
+    _clock.stop();
     final SnoreEvent? tail = _detector?.finish();
     if (tail != null) _events.add(tail);
     await _cleanup();

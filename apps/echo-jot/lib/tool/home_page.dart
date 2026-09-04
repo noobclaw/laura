@@ -138,6 +138,13 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
           text: trimmed,
           language: _controller.language,
         ));
+        final saveErr = _store.takeSaveError();
+        if (saveErr != null) {
+          _snack(tr(
+            zh: '笔记没能写入存储($saveErr)。请先复制文字,再检查手机空间。',
+            en: 'The note could not be written to storage ($saveErr). Copy the text, then check free space.',
+          ));
+        }
       } else if (!background && _controller.message == null) {
         _snack(tr(
           zh: '没听到内容,这条没有保存。',
@@ -219,7 +226,7 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
                     ));
             },
           ),
-        if (_store.notes.length > 4 || searching)
+        if (_store.notes.length > 1 || searching)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: TextField(

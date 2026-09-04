@@ -62,10 +62,6 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                   en: 'Night-to-night trends, to see whether it is improving',
                 )),
                 _Perk(tr(
-                  zh: '两晚对比 —— 换枕头、戒酒后到底有没有用',
-                  en: 'Compare two nights — did the new pillow actually help?',
-                )),
-                _Perk(tr(
                   zh: 'CSV 导出,带去给医生看',
                   en: 'CSV export to bring to your doctor',
                 )),

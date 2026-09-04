@@ -9,7 +9,7 @@ import 'l10n.dart';
 /// android side: android/app/src/main/res/values{,-zh}/strings.xml.
 abstract final class Branding {
   static const String appNameEn = 'FieldStamp';
-  static const String appNameZh = 'FieldStamp';
+  static const String appNameZh = '定位水印相机';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
   static const String version = '1.0.0';

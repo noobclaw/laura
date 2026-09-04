@@ -131,6 +131,9 @@ class DictationService {
 
   DictationCapabilities? _caps;
 
+  /// Language the cached [capabilities] were probed for.
+  String? capabilitiesLanguage;
+
   /// The native side's own words for the last [start] failure (error domain,
   /// code, text). Shown under the user-facing message so a field report can
   /// be matched to the platform's error tables.
@@ -140,14 +143,19 @@ class DictationService {
   /// have installed a language pack while the app was in the background).
   DictationCapabilities? get capabilities => _caps;
 
-  Future<DictationCapabilities> refreshCapabilities() async {
+  /// [languageTag] is the language the user will dictate in; the native
+  /// side reports whether *that* language has on-device recognition (the
+  /// system language alone was the wrong question once a picker existed).
+  Future<DictationCapabilities> refreshCapabilities({String? languageTag}) async {
+    capabilitiesLanguage = languageTag ?? deviceLanguageTag;
     if (!_hasNativeBridge) {
       return _caps = const DictationCapabilities.unsupported(
         detail: 'no native on-device recognizer on this platform',
       );
     }
     try {
-      final raw = await _method.invokeMapMethod<String, Object?>('capabilities');
+      final raw = await _method.invokeMapMethod<String, Object?>(
+          'capabilities', <String, Object?>{'language': capabilitiesLanguage});
       if (raw == null) {
         return _caps = const DictationCapabilities.unsupported(
           detail: 'capabilities returned null',

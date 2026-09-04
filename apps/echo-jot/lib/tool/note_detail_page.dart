@@ -54,7 +54,17 @@ class _NoteDetailPageState extends State<NoteDetailPage>
     if (!_dirty) return;
     widget.note.text = _textCtrl.text.trim();
     await widget.store.update(widget.note);
-    if (!quiet && mounted) {
+    final saveErr = widget.store.takeSaveError();
+    if (!mounted) return;
+    if (saveErr != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(tr(
+          zh: '保存失败:$saveErr。请复制文字后检查手机空间。',
+          en: 'Save failed: $saveErr. Copy the text, then check free space.',
+        )),
+        duration: const Duration(seconds: 8),
+      ));
+    } else if (!quiet) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr(zh: '已保存', en: 'Saved'))),
       );

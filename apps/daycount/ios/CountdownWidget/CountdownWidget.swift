@@ -46,9 +46,12 @@ private struct SharedData {
     func s(_ key: String, _ fallback: String = "") -> String {
       d?.string(forKey: key) ?? fallback
     }
+    // Fallbacks only matter before the app has ever pushed data (widget
+    // placed before first launch); pick the language from the system then.
+    let zh = Locale.preferredLanguages.first?.lowercased().hasPrefix("zh") ?? false
     return SharedData(
       hasEvent: s("dc_has_event") == "true",
-      title: s("dc_title", "倒数日"),
+      title: s("dc_title", zh ? "倒数日" : "DayCount"),
       emoji: s("dc_emoji"),
       dateIso: s("dc_date_iso"),
       yearly: s("dc_yearly") == "true",
@@ -57,8 +60,8 @@ private struct SharedData {
       labelPast: s("dc_label_past", "{n}"),
       labelPast1: s("dc_label_past_1", "1"),
       labelToday: s("dc_label_today", "🎉"),
-      emptyLabel: s("dc_empty_label", "还没有添加日子"),
-      emptyDate: s("dc_empty_date", "打开 App 添加"))
+      emptyLabel: s("dc_empty_label", zh ? "还没有添加日子" : "No days yet"),
+      emptyDate: s("dc_empty_date", zh ? "打开 App 添加" : "Open the app to add one"))
   }
 }
 
@@ -162,7 +165,9 @@ struct CountdownWidgetEntryView: View {
         .font(.system(size: family == .systemSmall ? 44 : 52, weight: .bold, design: .rounded))
         .minimumScaleFactor(0.5)
         .lineLimit(1)
-        .foregroundStyle(entry.hasEvent ? Color.accentColor : Color.secondary)
+        // The extension has no asset catalog, so .accentColor would be system
+        // blue; match the app's coral (0xE7625F) instead.
+        .foregroundStyle(entry.hasEvent ? Color(red: 0.906, green: 0.384, blue: 0.373) : Color.secondary)
       Text(entry.label)
         .font(.footnote.weight(.medium))
         .lineLimit(1)
