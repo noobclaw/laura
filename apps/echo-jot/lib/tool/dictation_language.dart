@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../core/json_file_store.dart';
@@ -96,27 +95,29 @@ class DictationLanguage {
               child: Text(tr(zh: '听写语言', en: 'Dictation language'),
                   style: Theme.of(ctx).textTheme.titleMedium),
             ),
-            RadioListTile<String?>(
-              value: null,
-              groupValue: current,
+            ListTile(
+              leading: Icon(current == null
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_off),
               title: Text(tr(zh: '自动', en: 'Automatic')),
               subtitle: Text(tr(
                 zh: '跟随 App 语言,否则跟随系统语言',
                 en: 'Follows the app language, else the system language',
               )),
-              onChanged: (v) {
+              onTap: () {
                 set(null);
                 controller.setLanguage(effectiveTag);
                 Navigator.of(ctx).pop();
               },
             ),
             for (final (tag, label) in choices)
-              RadioListTile<String?>(
-                value: tag,
-                groupValue: current,
+              ListTile(
+                leading: Icon(current == tag
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off),
                 title: Text(label),
                 subtitle: Text(tag),
-                onChanged: (v) {
+                onTap: () {
                   set(tag);
                   controller.setLanguage(tag);
                   Navigator.of(ctx).pop();
