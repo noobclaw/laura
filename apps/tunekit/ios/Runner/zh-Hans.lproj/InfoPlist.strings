@@ -1,0 +1,4 @@
+/* Localized launcher name. The Android side keeps the same pair in
+   res/values/strings.xml and res/values-zh/strings.xml. */
+"CFBundleDisplayName" = "调音节拍器";
+"NSMicrophoneUsageDescription" = "调音节拍器需要使用麦克风来测量你弹奏音符的音高,用于调音器和「弹奏检查」练习模式。声音只在本机即时分析,不会录制、保存或上传。";

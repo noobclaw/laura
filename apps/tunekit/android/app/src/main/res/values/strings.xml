@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label, default (English). new_app.mjs seeds the display name into
+     every locale file; hand-tune per-locale names afterwards (store/listing.md
+     has both). -->
+<resources>
+    <string name="app_name">TuneBench</string>
+</resources>
