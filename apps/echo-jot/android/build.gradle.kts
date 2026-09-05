@@ -24,11 +24,14 @@ subprojects {
 // Lift every library module to the app's level; the plugin sources are fine
 // with it.
 subprojects {
-    afterEvaluate {
+    fun liftCompileSdk() {
         extensions.findByType<com.android.build.gradle.LibraryExtension>()?.apply {
             if ((compileSdk ?: 0) < 36) compileSdk = 36
         }
     }
+    // evaluationDependsOn(":app") above already evaluated some modules, and
+    // afterEvaluate throws on an evaluated project — apply directly then.
+    if (state.executed) liftCompileSdk() else afterEvaluate { liftCompileSdk() }
 }
 
 tasks.register<Delete>("clean") {
