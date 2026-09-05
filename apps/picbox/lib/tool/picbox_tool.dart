@@ -250,11 +250,17 @@ class _ToolCard extends StatelessWidget {
               const Spacer(),
               Text(meta.title, style: text.titleMedium),
               const SizedBox(height: 3),
-              Text(
-                meta.subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.25),
+              // Reserve two lines so titles line up across the grid whether the
+              // subtitle wraps or not (smoke screenshot showed Watermark sitting
+              // lower than Strip Metadata).
+              SizedBox(
+                height: (text.bodySmall?.fontSize ?? 12) * 1.25 * 2 + 2,
+                child: Text(
+                  meta.subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.25),
+                ),
               ),
             ],
           ),
