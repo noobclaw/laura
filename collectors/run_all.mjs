@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { collectGithub } from './github_trending.mjs';
 import { collectGithubSearch } from './github_search.mjs';
 import { collectEzindie } from './ezindie_weekly.mjs';
+import { collectIndieLaunches } from './indie_launches.mjs';
 import { collectAppStore } from './appstore_rss.mjs';
 import { collectGooglePlay } from './google_play.mjs';
 import { collectShowHN } from './hn_showhn.mjs';
@@ -27,6 +28,7 @@ const collectors = [
   ['github', collectGithub],
   ['github_search', collectGithubSearch],
   ['ezindie', collectEzindie],
+  ['indie_launches', collectIndieLaunches],
   ['appstore', collectAppStore],
   ['googleplay', collectGooglePlay],
   ['hn_showhn', collectShowHN],

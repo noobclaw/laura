@@ -29,6 +29,7 @@ scripts/new_app.mjs  # 克隆壳→新 app
 2. 读当日 `data/YYYY-MM-DD/` 下各 json(大文件别整读,用 node -e 浓缩打印再分析)。
    - **(2026-09-05 用户拍板)调研重心放在 GitHub:找「优秀开源项目 → 能做成纯本地工具 app」。** 数据在 `github_search.json`(`collectors/github_search.mjs`,按 40 余个能力问题查 Search API:OCR/PDF/图像/音频/转换/加密/记账/天文/端侧模型…,每条带 stars/license/licenseClass/topics/pushedAt)+ `github.json`(trending)。评估一个 GitHub 项目是否值得移植,按顺序问:① **核心是不是纯本地计算**(算法/文件处理/端侧模型;需要服务端的直接跳过);② **许可证**:`permissive`(MIT/Apache/BSD/MPL)可直接内嵌 + 署名;`copyleft`(GPL/AGPL)只能借「思路」重实现或整 app 开源,报告里必须标明;`none` 视同不可用;③ **手机端有没有像样的对应物**:去 App Store/Play 数据里查同能力的 app 评分/价格/评价数(缺口判据同「选题硬性标准」);④ **移植量**:Dart/Kotlin/Swift/Rust/C++ 库 → 小;Python/JS 算法 → 需重写,按行数估;整套桌面 app → 只取核心能力;⑤ **维护度**:pushedAt 一年内、issues 不失控。GitHub 星数只证明「开发者喜欢」,**不证明消费者付费**,付费验证仍必须回到商店榜。
    - **⭐ 产出硬要求(用户 09-05 原话「调研半天都没有好项目出来」)**:每日报告「六、GitHub 可移植项目」至少评估 3 个、**至少 1 个给出可入队的完整指数拆解**(信号持续性可用 GitHub 星数/维护度 + 商店主词补搜代替榜单);连续两天 0 新候选时,下一天必须换能力问题(改 `github_search.mjs` 的 QUERIES 加 5 个新方向)。纪律条款是为了少犯错,不是产出本身;报告篇幅里「纪律/记账」不得超过「候选评估」。首批 5 个候选见 `reports/2026-09-05-github-shortlist.md`。
+   - **独立开发者动态(用户 09-05:「看看别的开发者在做什么」)**:`indie_launches.json`(Product Hunt 当日 Atom + Reddit r/SideProject / r/indiehackers / r/iOSProgramming / r/androidapps 新帖,`collectors/indie_launches.mjs`)。报告加「七、独立开发者动态」:≥3 条观察(别人在做什么、用户为什么付钱、能否搬到纯本地手机工具)。
    - **独立开发者信号**(用户 09-05 提议):`ezindie.json`(ezindie.com「独立开发变现周刊」最近 4 期,每期 5 个有真实收入数字的小产品 + 一篇创始人复盘)。用法:看**收入模式与用户是谁**(谁在为什么小问题付钱),不是照抄产品(多数是 Web SaaS);能改成纯本地手机工具的才进候选。Indie Hackers 的产品库自报收入全是假数,已验证不可用。
 3. 与**前几天的报告**(reports/ 下最近 2-3 份)对比,识别「新上榜/持续升温/掉榜」。
 4. 写 `reports/YYYY-MM-DD.md`,格式见下。
@@ -45,6 +46,7 @@ scripts/new_app.mjs  # 克隆壳→新 app
 ## 四、今日原型(从候选中选 1 个展开:页面结构、核心交互流程、技术要点、商店定位[分类/关键词/定价])
 ## 五、观察池(还不够成熟但值得跟踪的信号)
 ## 六、GitHub 可移植项目(2026-09-05 起必写;每天 3-5 个:仓库/星数/许可证类别/核心能力一句话/手机端对应物与缺口/移植量估计/结论[进候选|观察|否决及原因])
+## 七、独立开发者动态(2026-09-05 起必写;≥3 条:谁在做什么、为什么有人付钱、对纯本地手机工具的启发)
 ```
 
 ## App 落地节奏(用户 2026-07-07 拍板)
