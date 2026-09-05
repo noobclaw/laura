@@ -1837,6 +1837,8 @@
 
 ### 2026-09-05 增改
 
+0a. **✅ 09-05 当日工厂产出(用户拍板 5 项全做,已 push、CI 出包)**:`apps/tunekit`(TuneBench 调音节拍器,🧪待验收)、`apps/picbox`(PicWorks 图片万能箱,🧪待验收)、`apps/photolift`(PhotoLift 离线老照片修复,🧪待验收)、remcard 1.2.0(FSRS)、echo-jot 1.2.0(Whisper 引擎)。三个新 app 各有 PLAN.md / store/ / D:
+oobpp\<中文名>ppstore.md;下一步是总览表入行(状态 🧪)、真机验收、排进提审节奏(每周 1–2 个,09-22 之后)。
 0. **⭐⭐⭐ GitHub 移植候选首批(用户 09-05 拍板「调研重心放 GitHub」;完整评估见 `reports/2026-09-05-github-shortlist.md`;明日日报按标准指数打分并决定入队顺序,不得以「按条款没去找」为由跳过)**:
    - **[GH:patzly/tack-android + ZaneH/piano-trainer] 音乐练习工具箱(调音器/节拍器/和弦音阶练习)** —— 付费实证:`TonalEnergy Tuner & Metronome` 今日美区付费 **#4**($3.99)。tack 无许可证、tonal 无许可证 → 按 CLAUDE.md 规则读代码后自行重写;音高检测自实现 YIN。楔子:中文 + 一次买断 + 练习记录。**建议入队。**
    - **[GH:T8RIN/ImageToolbox] 图片工具箱(Apache,14.5k★,仅 Android)** —— iOS 无同级离线一站式工具箱;M1 缩放/压缩/转换/去EXIF/批处理。付费主词待明日补搜「iOS 图片压缩 / 转换」。**建议入队(待付费补搜)。**
