@@ -19,6 +19,8 @@ class PhotoLiftStore extends ChangeNotifier {
   static const int freeDailyLimit = 3;
 
   bool pro = false;
+  /// What the file said at load time; false until load() has read it.
+  bool proOnDisk = false;
   bool useGpu = true;
   DenoiseLevel defaultDenoise = DenoiseLevel.light;
   final List<LiftRecord> history = [];
@@ -55,7 +57,8 @@ class PhotoLiftStore extends ChangeNotifier {
       if (raw != null) {
         // StoreKit may replay a purchase before load() finishes; never let the
         // stale value on disk undo an unlock that already happened.
-        pro = pro || (raw['pro'] as bool? ?? false);
+        proOnDisk = raw['pro'] as bool? ?? false;
+        pro = pro || proOnDisk;
         useGpu = raw['useGpu'] as bool? ?? true;
         defaultDenoise = DenoiseLevel.fromIndex((raw['defaultDenoise'] as num?)?.toInt());
         _quotaState = DailyQuota.fromJson(
@@ -80,7 +83,42 @@ class PhotoLiftStore extends ChangeNotifier {
       debugPrint('photolift load skipped: $e');
     } finally {
       loaded = true;
-      notifyListeners();
+      // An unlock that arrived before the file was read was only applied in
+      // memory (writes are refused until load completes) - persist it now.
+      if (pro && !proOnDisk) {
+        _save();
+      } else {
+        notifyListeners();
+      }
+      _sweepOrphans();
+    }
+  }
+
+  /// Deletes files in `lifted/` that no history entry references: leftovers
+  /// of a job that died between writing and booking (crash, OOM kill).
+  Future<void> _sweepOrphans() async {
+    final d = _dir;
+    if (d == null) return;
+    final keep = <String>{
+      for (final r in history) ...[r.sourceName, r.outputName],
+    };
+    try {
+      await for (final e in d.list()) {
+        if (e is! File) continue;
+        final name = e.uri.pathSegments.last;
+        final orphan = name.endsWith('.tmp') ||
+            ((name.startsWith('src_') || name.startsWith('out_')) &&
+                !keep.contains(name));
+        if (orphan) {
+          try {
+            await e.delete();
+          } catch (err) {
+            debugPrint('orphan delete $name failed: $err');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('orphan sweep skipped: $e');
     }
   }
 
@@ -112,7 +150,7 @@ class PhotoLiftStore extends ChangeNotifier {
   void unlockPro() {
     if (pro) return;
     pro = true;
-    _save();
+    _save(); // no-op before load(); load()'s finally persists it then
   }
 
   void setUseGpu(bool v) {
@@ -126,14 +164,15 @@ class PhotoLiftStore extends ChangeNotifier {
   }
 
   void recordEta(LiftRecord r) {
-    eta.record(r.outWidth * r.outHeight, r.engine, r.elapsedMs);
+    eta.record(r.outWidth * r.outHeight, r.engine, r.elapsedMs, scale: r.scale);
     lastEngine = r.engine;
     _save();
   }
 
-  /// Estimated seconds for an output of [outPixels] on the engine that ran
-  /// last (or the conservative default before any run).
-  double estimateSeconds(int outPixels) => eta.estimateSeconds(outPixels, lastEngine);
+  /// Estimated seconds for an output of [outPixels] at [scale] on the engine
+  /// that ran last (or the conservative default before any run).
+  double estimateSeconds(int outPixels, int scale) =>
+      eta.estimateSeconds(outPixels, lastEngine, scale: scale);
 
   Future<void> clearHistory() async {
     final all = List.of(history);

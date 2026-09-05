@@ -79,7 +79,7 @@ class _LiftScreenState extends State<LiftScreen> {
     setState(() {
       _phase = _Phase.running;
       _startedAt = DateTime.now();
-      _estimateSec = store.estimateSeconds(_outSize.pixels);
+      _estimateSec = store.estimateSeconds(_outSize.pixels, _scale);
       _progress = const UpscaleProgress(done: 0, total: 1, stage: 'decode');
       _cancelling = false;
     });
@@ -164,7 +164,7 @@ class _LiftScreenState extends State<LiftScreen> {
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final store = widget.store;
-    final eta = store.estimateSeconds(_outSize.pixels);
+    final eta = store.estimateSeconds(_outSize.pixels, _scale);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PhotoLift only reads the single photo you pick through the system picker, to upscale it on this device. It never browses your library and never uploads anything.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>PhotoLift saves an enhanced photo to your Photos library only when you tap Save. Nothing is read from your library and nothing is uploaded.</string>
 	<key>CFBundleLocalizations</key>

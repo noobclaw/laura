@@ -15,7 +15,7 @@
 AI 把模糊老照片放大 2x/4x 并降噪,模型内置手机本地运行,照片从不上传。一次买断,无订阅。
 
 **长描述**
-离线老照片修复(PhotoLift)是一款完全在手机上运行的 AI 照片放大与修复工具。它把 Real-ESRGAN 超分辨率模型直接装进了应用里:翻拍的老相片、扫描件、早期手机拍的低分辨率照片,选一张、点一下,几十秒后得到 2 倍或 4 倍尺寸、更清晰、噪点更少的新版本——整个过程不需要网络,照片一个字节都不会离开你的手机。
+离线老照片修复(PhotoLift)是一款完全在手机上运行的 AI 照片放大与修复工具。它把 Real-ESRGAN 超分辨率模型直接装进了应用里:翻拍的老相片、扫描件、早期手机拍的低分辨率照片,选一张、点一下,通常一两分钟内得到 2 倍或 4 倍尺寸、更清晰、噪点更少的新版本——整个过程不需要网络,照片一个字节都不会离开你的手机。
 
 市面上多数「老照片修复」应用要把你的家庭照片上传到服务器,再按周订阅收费。PhotoLift 反其道而行:模型在本地、不申请网络权限(你可以在系统设置里核实)、一次买断永久使用。
 
@@ -56,7 +56,7 @@ PhotoLift: Offline AI Upscaler
 AI upscale & denoise old photos 2x/4x, fully on-device. No upload, no subscription.
 
 **Full description**
-PhotoLift is an AI photo upscaler that runs entirely on your phone. The Real-ESRGAN super-resolution model is bundled inside the app: pick a re-photographed print, a scan, or a low-resolution shot from an early phone, tap once, and in well under a minute you get a 2x or 4x version that is sharper and cleaner — with no network involved. Not a single byte of your photo leaves the device.
+PhotoLift is an AI photo upscaler that runs entirely on your phone. The Real-ESRGAN super-resolution model is bundled inside the app: pick a re-photographed print, a scan, or a low-resolution shot from an early phone, tap once, and usually within a couple of minutes you get a 2x or 4x version that is sharper and cleaner — with no network involved. Not a single byte of your photo leaves the device.
 
 Most "photo enhancer" apps upload your family pictures to a server and charge by the week. PhotoLift does the opposite: the model is local, the app requests no network permission (check it in system settings), and Pro is a one-time purchase.
 

@@ -291,8 +291,8 @@ class _EmptyHistory extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             tr(
-              zh: '找一张模糊的翻拍或扫描老照片试试,\n半分钟就能看到前后对比。',
-              en: 'Try a blurry scan or re-photographed print —\nyou\'ll see a before/after in about half a minute.',
+              zh: '找一张模糊的翻拍或扫描老照片试试,\n通常一两分钟内就能看到前后对比。',
+              en: 'Try a blurry scan or re-photographed print —\nyou\'ll usually see a before/after within a couple of minutes.',
             ),
             textAlign: TextAlign.center,
             style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.45),

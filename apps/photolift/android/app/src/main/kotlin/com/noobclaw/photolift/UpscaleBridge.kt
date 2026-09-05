@@ -168,7 +168,13 @@ class UpscaleBridge(
         val loader = FlutterInjector.instance().flutterLoader()
         val param = loader.getLookupKeyForAsset("assets/models/$model.param")
         val bin = loader.getLookupKeyForAsset("assets/models/$model.bin")
+        // A Vulkan device that exists but fails to build the pipelines (odd
+        // drivers) must not take the whole feature down: fall back to CPU.
         val e = NcnnUpscaler.create(context.assets, param, bin, useGpu, MODEL_SCALE)
+            ?: (if (useGpu) {
+                Log.w(TAG, "GPU engine failed for $model, retrying on CPU")
+                NcnnUpscaler.create(context.assets, param, bin, false, MODEL_SCALE)
+            } else null)
             ?: throw JobError("engine_load_failed", "could not load $model")
         engine = e
         engineKey = key
@@ -219,6 +225,8 @@ class UpscaleBridge(
                 targetH = th
                 if (tw != origW || th != origH) decoder.setTargetSize(tw, th)
             }
+        } catch (e: OutOfMemoryError) {
+            throw JobError("too_large", "not enough memory to decode the photo")
         } catch (e: Exception) {
             throw JobError("decode_failed", e.toString())
         }

@@ -39,7 +39,12 @@ class LiftJobRunner {
     ProgressCallback? onProgress,
   }) async {
     final id = store.newId();
-    final srcName = await store.importSource(photo.path, id);
+    final String srcName;
+    try {
+      srcName = await store.importSource(photo.path, id);
+    } on FileSystemException catch (e) {
+      throw UpscaleException('write_failed', e.message);
+    }
     final outName = store.outputNameFor(id);
     final eng = await engine();
     final tag = !store.pro;
@@ -106,9 +111,13 @@ String describeUpscaleError(Object error) {
           zh: '结果写入失败,请检查手机存储空间。',
           en: 'Could not write the result — check free storage on the phone.'),
       'busy' => tr(zh: '上一张还在处理中。', en: 'The previous photo is still processing.'),
-      _ => tr(
-          zh: '处理失败(${error.code})。请再试一次;若仍失败可关闭 GPU 加速后重试。',
-          en: 'Processing failed (${error.code}). Try again; if it keeps failing, turn off GPU acceleration.'),
+      _ => Platform.isAndroid
+          ? tr(
+              zh: '处理失败(${error.code})。请再试一次;若仍失败可在设置里关闭 GPU 加速后重试。',
+              en: 'Processing failed (${error.code}). Try again; if it keeps failing, turn off GPU acceleration in Settings.')
+          : tr(
+              zh: '处理失败(${error.code})。请再试一次。',
+              en: 'Processing failed (${error.code}). Please try again.'),
     };
   }
   if (error is MediaException) {

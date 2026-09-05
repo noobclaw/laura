@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'l10n.dart';
 
@@ -26,6 +28,11 @@ abstract final class Branding {
             'No account, no ads, one-time purchase.',
       );
 
+  /// The store this binary is sold through - App Review reads a mention of
+  /// the other platform in an iOS build as guideline 2.3.10.
+  static String get _storeName =>
+      Platform.isIOS || Platform.isMacOS ? 'App Store' : 'Google Play';
+
   static String get privacyPolicy => tr(
         zh: '''
 本应用不收集、不存储、不传输任何个人数据。
@@ -34,7 +41,7 @@ abstract final class Branding {
 
 你选择的照片和修复后的结果只保存在本应用的私有目录中;只有当你点击「保存到相册」时,结果才会写入系统相册。卸载应用即删除应用内的全部数据。
 
-内购通过 App Store / Google Play 完成,应用本身不会接触你的支付信息。
+内购通过 $_storeName 完成,应用本身不会接触你的支付信息。
 ''',
         en: '''
 This app does not collect, store, or transmit any personal data.
@@ -43,7 +50,7 @@ All photo processing (upscaling, denoising) is done by the bundled AI model loca
 
 Photos you pick and their enhanced results are kept only in the app's private folder; a result is written to your system photo library only when you tap "Save to Photos". Uninstalling the app removes all of its data.
 
-In-app purchases go through the App Store / Google Play; the app itself never sees your payment details.
+In-app purchases go through $_storeName; the app itself never sees your payment details.
 ''',
       );
 }
