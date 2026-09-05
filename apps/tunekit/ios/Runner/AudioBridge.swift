@@ -187,6 +187,9 @@ final class AudioBridge: NSObject {
   private func startMetro() -> Bool {
     if metroPlaying, let engine = metroEngine, engine.isRunning { return true }
     metroPlaying = true
+    // A fresh start counts from beat 1; only route/config rebuilds keep the
+    // bar position (see restartMetroEngine -> reset(sampleRate:)).
+    metro.restart()
     do {
       try configureSession()
       try buildMetroEngine()
@@ -319,6 +322,15 @@ final class Sequencer {
     beats = min(16, max(1, (m["beats"] as? Int) ?? 4))
     subPerBeat = min(4, max(1, (m["subdivision"] as? Int) ?? 1))
     if let a = m["accents"] as? [Int], !a.isEmpty { accents = Set(a) } else { accents = [0] }
+  }
+
+  /// Start over from beat 1 (user pressed play).
+  func restart() {
+    lock.lock(); defer { lock.unlock() }
+    tickIndex = 0
+    pos = 0
+    nextTick = 0
+    voices.removeAll()
   }
 
   func reset(sampleRate: Double) {

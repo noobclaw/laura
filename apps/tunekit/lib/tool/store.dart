@@ -100,19 +100,17 @@ class TuneKitStore extends ChangeNotifier {
 
   Future<void> load() async {
     // StoreKit replays transactions at launch, so an unlock can arrive
-    // before the file is read; it must survive the read.
-    final unlockedEarly = pro;
+    // before the file is read (or before any file exists); it must survive
+    // the read and reach the disk.
+    Map<String, dynamic>? raw;
     try {
-      final raw = await _file.read();
+      raw = await _file.read();
       if (raw != null) _apply(raw);
     } catch (e) {
       debugPrint('tunekit load failed: $e');
     } finally {
       loaded = true;
-      if (unlockedEarly && !pro) {
-        pro = true;
-        _save();
-      }
+      if (pro && raw?['pro'] != true) _save();
       notifyListeners();
     }
   }
@@ -120,7 +118,7 @@ class TuneKitStore extends ChangeNotifier {
   void _apply(Map<String, dynamic> raw) {
     // Every field is read defensively: a type that changes in a later
     // version must cost that preference, never the whole log.
-    pro = raw['pro'] == true;
+    pro = pro || raw['pro'] == true;
     if (raw['a4'] is num) a4 = (raw['a4'] as num).toDouble().clamp(430, 450);
     if (raw['instrument'] is String) instrumentId = raw['instrument'] as String;
     if (raw['practiceInstrument'] is String) practiceInstrumentId = raw['practiceInstrument'] as String;

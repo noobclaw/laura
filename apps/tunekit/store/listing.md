@@ -23,10 +23,10 @@
 弹一根弦,大表盘立刻指出偏高还是偏低,精确到音分;进入 ±5 音分的绿色区间就亮绿。半音模式给任何乐器调音;吉他、尤克里里、小提琴、贝斯预设把每根弦做成按钮,自动识别你正在弹的是哪根。标准音 A4 可在 430–450 Hz 之间调整。
 
 **■ 节拍器:按采样排程,不飘**
-节拍不是靠定时器「大概到点」,而是由音频引擎按采样精确排程,快到 300 也稳。2/4、3/4、4/4、6/8 拍号,四分、八分、三连音、十六分细分,第一拍重音,拍点跟着亮灯。打拍测速、长按微调。锁屏后继续走拍,来电时自动停止。
+节拍不是靠定时器「大概到点」,而是由音频引擎按采样精确排程,快到 300 也稳。2/4、3/4、4/4、6/8 拍号,四分、八分、三连音、十六分细分,第一拍重音,拍点跟着亮灯。打拍测速、长按微调。熄屏后继续走拍(部分省电策略可能中断),来电时自动停止。
 
 **■ 和弦与音阶:看得到,也弹得对**
-近 50 种和弦、音阶与调式类型,12 个根音,每一个都标出组成音和音级,画在吉他 / 尤克里里指板或键盘上。吉他和尤克里里还给出自动推导的第一把位指法。
+近 50 种和弦、音阶与调式类型,12 个根音,每一个都标出组成音和音级,画在吉他 / 尤克里里指板或键盘上。吉他和尤克里里还给出自动推导的开放/横按指法。
 「弹奏检查」模式打开麦克风:逐根弦弹,它逐根弦确认对不对、偏了几音分;音阶就顺着弹一遍,它一个音一个音跟着打勾。
 「随机训练」十题一轮:看音认和弦,看名字认音,连对有加分。
 
@@ -69,10 +69,10 @@ Tuner, metronome and chord/scale practice in one. Offline, one-time purchase.
 Play a string and the big dial shows flat or sharp to the cent; inside ±5 cents it turns green. Chromatic mode tunes any instrument; guitar, ukulele, violin and bass presets turn every string into a button and recognise which one you are playing. Reference A4 adjusts from 430 to 450 Hz.
 
 **■ Metronome: scheduled by the audio engine, not a timer**
-Beats are placed sample-accurately inside the audio stream, so 300 BPM is as steady as 60. Metres 2/4, 3/4, 4/4 and 6/8; quarter, eighth, triplet and sixteenth subdivisions; an accented downbeat and a beat light that follows the click. Tap tempo, long-press to nudge by ten. Keeps ticking with the screen locked; stops itself for a phone call.
+Beats are placed sample-accurately inside the audio stream, so 300 BPM is as steady as 60. Metres 2/4, 3/4, 4/4 and 6/8; quarter, eighth, triplet and sixteenth subdivisions; an accented downbeat and a beat light that follows the click. Tap tempo, long-press to nudge by ten. Keeps ticking with the screen off (some battery-saver policies may interrupt it); stops itself for a phone call.
 
 **■ Chords and scales: see them, then play them right**
-About 50 chord, scale and mode types on 12 roots, each with its notes and degrees drawn on a guitar or ukulele fretboard or a keyboard. Guitar and ukulele also get an auto-derived first-position shape.
+About 50 chord, scale and mode types on 12 roots, each with its notes and degrees drawn on a guitar or ukulele fretboard or a keyboard. Guitar and ukulele also get automatically derived open and barre shapes.
 Play and check opens the microphone: pluck string by string and it confirms each one and how many cents it was off; for a scale, play it ascending and it ticks note by note.
 Random drill: ten questions a round — name the chord from its notes, pick the notes from the name, bonus for streaks.
 

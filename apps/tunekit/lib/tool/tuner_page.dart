@@ -48,7 +48,9 @@ class _TunerPageState extends State<TunerPage> {
       if (mic.permission == MicPermission.granted && !mic.running) {
         mic.start(attributeTo: PracticeTool.tuner);
       }
-    } else if (mic.running) {
+    } else {
+      // Unconditional and idempotent: a start() still in flight sees
+      // _wantRunning drop and closes the microphone itself.
       mic.stop();
     }
   }

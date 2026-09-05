@@ -93,8 +93,20 @@ class MicPitchController extends ChangeNotifier with WidgetsBindingObserver {
       }
       tracker.a4 = store.a4;
       final rate = await _bridge.micStart();
+      if (!_wantRunning || _disposed) {
+        // The page went away (tab switch, background) while the OS was
+        // opening the microphone: do not leave it capturing.
+        await _bridge.micStop();
+        return false;
+      }
       _worker?.dispose();
       _worker = await PitchWorker.start(rate);
+      if (!_wantRunning || _disposed) {
+        _worker?.dispose();
+        _worker = null;
+        await _bridge.micStop();
+        return false;
+      }
       _estimates = _worker!.estimates.listen((e) {
         reading = tracker.push(e);
         _readings.add(reading);

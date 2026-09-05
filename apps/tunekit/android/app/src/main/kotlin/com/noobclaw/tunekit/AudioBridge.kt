@@ -179,40 +179,49 @@ class AudioBridge(
 
         // UNPROCESSED bypasses AGC / noise suppression where the device
         // supports it (they smear the pitch); VOICE_RECOGNITION is the
-        // closest fallback.
+        // closest fallback, plain MIC the last resort - some OEM builds
+        // refuse the first two even though they advertise them.
         val am = activity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val unprocessed = "true" == am.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED)
-        val source = if (unprocessed) MediaRecorder.AudioSource.UNPROCESSED else MediaRecorder.AudioSource.VOICE_RECOGNITION
+        val sources = ArrayList<Int>()
+        if (unprocessed) sources.add(MediaRecorder.AudioSource.UNPROCESSED)
+        sources.add(MediaRecorder.AudioSource.VOICE_RECOGNITION)
+        sources.add(MediaRecorder.AudioSource.MIC)
 
-        val rec = try {
-            AudioRecord(source, MIC_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_FLOAT, max(minBuf, MIC_CHUNK * 4 * 4))
-        } catch (e: Exception) {
-            result.error("mic_unavailable", e.message, null); return
+        var rec: AudioRecord? = null
+        var lastError: String? = null
+        for (source in sources) {
+            val candidate = try {
+                AudioRecord(source, MIC_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_FLOAT, max(minBuf, MIC_CHUNK * 4 * 4))
+            } catch (e: Exception) {
+                lastError = e.message; continue
+            }
+            if (candidate.state != AudioRecord.STATE_INITIALIZED) {
+                candidate.release(); lastError = "AudioRecord failed to initialise (source $source)"; continue
+            }
+            try {
+                candidate.startRecording()
+            } catch (e: Exception) {
+                candidate.release(); lastError = e.message; continue
+            }
+            if (candidate.recordingState != AudioRecord.RECORDSTATE_RECORDING) {
+                candidate.release(); lastError = "Microphone is busy"; continue
+            }
+            rec = candidate
+            break
         }
-        if (rec.state != AudioRecord.STATE_INITIALIZED) {
-            rec.release()
-            result.error("mic_unavailable", "AudioRecord failed to initialise", null)
+        if (rec == null) {
+            result.error("mic_unavailable", lastError ?: "No microphone available", null)
             return
         }
-        try {
-            rec.startRecording()
-        } catch (e: Exception) {
-            rec.release()
-            result.error("mic_unavailable", e.message, null)
-            return
-        }
-        if (rec.recordingState != AudioRecord.RECORDSTATE_RECORDING) {
-            rec.release()
-            result.error("mic_unavailable", "Microphone is busy", null)
-            return
-        }
-        record = rec
+        val opened: AudioRecord = rec
+        record = opened
         micRunning = true
         micThread = Thread({
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
             val buf = FloatArray(MIC_CHUNK)
             while (micRunning) {
-                val n = rec.read(buf, 0, MIC_CHUNK, AudioRecord.READ_BLOCKING)
+                val n = opened.read(buf, 0, MIC_CHUNK, AudioRecord.READ_BLOCKING)
                 if (n > 0) {
                     val copy = if (n == MIC_CHUNK) buf.copyOf() else buf.copyOf(n)
                     main.post { micSink?.success(copy) }
@@ -265,33 +274,50 @@ class AudioBridge(
         fun start(): Boolean {
             if (running) return true
             val sr = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC).takeIf { it > 0 } ?: 48000
-            val minBuf = AudioTrack.getMinBufferSize(sr, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_FLOAT)
-            if (minBuf <= 0) return false
             val attrs = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build()
+            // Float + low latency first; fall back to a default-mode track,
+            // then to 16-bit PCM - some devices refuse the float/low-latency
+            // combination even though the API accepts it.
+            var t: AudioTrack? = null
+            var isFloat = true
+            for (attempt in listOf(Pair(true, true), Pair(true, false), Pair(false, false))) {
+                val built = buildTrack(sr, attrs, float = attempt.first, lowLatency = attempt.second) ?: continue
+                t = built
+                isFloat = attempt.first
+                break
+            }
+            if (t == null) return false
+            requestFocus(attrs)
+            track = t
+            running = true
+            try { t.play() } catch (e: Exception) { Log.e(TAG, "play", e); t.release(); track = null; running = false; return false }
+            thread = Thread({ renderLoop(t, sr, isFloat) }, "tunekit-metro").also { it.start() }
+            return true
+        }
+
+        private fun buildTrack(sr: Int, attrs: AudioAttributes, float: Boolean, lowLatency: Boolean): AudioTrack? {
+            val encoding = if (float) AudioFormat.ENCODING_PCM_FLOAT else AudioFormat.ENCODING_PCM_16BIT
+            val minBuf = AudioTrack.getMinBufferSize(sr, AudioFormat.CHANNEL_OUT_MONO, encoding)
+            if (minBuf <= 0) return null
             val format = AudioFormat.Builder()
-                .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
+                .setEncoding(encoding)
                 .setSampleRate(sr)
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build()
             val builder = AudioTrack.Builder()
                 .setAudioAttributes(attrs)
                 .setAudioFormat(format)
-                .setBufferSizeInBytes(max(minBuf, 2048 * 4))
+                .setBufferSizeInBytes(max(minBuf, 2048 * (if (float) 4 else 2)))
                 .setTransferMode(AudioTrack.MODE_STREAM)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (lowLatency && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 builder.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             }
-            val t = try { builder.build() } catch (e: Exception) { Log.e(TAG, "AudioTrack", e); return false }
-            if (t.state != AudioTrack.STATE_INITIALIZED) { t.release(); return false }
-            requestFocus(attrs)
-            track = t
-            running = true
-            try { t.play() } catch (e: Exception) { Log.e(TAG, "play", e); t.release(); track = null; running = false; return false }
-            thread = Thread({ renderLoop(t, sr) }, "tunekit-metro").also { it.start() }
-            return true
+            val t = try { builder.build() } catch (e: Exception) { Log.w(TAG, "AudioTrack build failed (float=$float, lowLatency=$lowLatency)", e); return null }
+            if (t.state != AudioTrack.STATE_INITIALIZED) { t.release(); return null }
+            return t
         }
 
         fun stop(notify: Boolean) {
@@ -362,9 +388,10 @@ class AudioBridge(
             return (g * sin(2 * PI * f * t) * exp(-t / tau)).toFloat()
         }
 
-        private fun renderLoop(t: AudioTrack, sr: Int) {
+        private fun renderLoop(t: AudioTrack, sr: Int, isFloat: Boolean) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
             val chunk = FloatArray(256)
+            val shorts = if (isFloat) null else ShortArray(chunk.size)
             var pos = 0L
             var nextTick = 0.0
             var tickIndex = 0L
@@ -393,7 +420,12 @@ class AudioBridge(
                     }
                     chunk[i] = s.coerceIn(-1f, 1f)
                 }
-                val written = t.write(chunk, 0, chunk.size, AudioTrack.WRITE_BLOCKING)
+                val written = if (shorts == null) {
+                    t.write(chunk, 0, chunk.size, AudioTrack.WRITE_BLOCKING)
+                } else {
+                    for (i in chunk.indices) shorts[i] = (chunk[i] * 32767f).toInt().toShort()
+                    t.write(shorts, 0, shorts.size, AudioTrack.WRITE_BLOCKING)
+                }
                 if (written < 0) {
                     Log.w(TAG, "AudioTrack.write error $written")
                     emit(mapOf("type" to "error", "what" to "metro", "message" to "write error $written"))

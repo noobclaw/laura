@@ -144,7 +144,7 @@ class YinDetector {
     }
 
     final freq = sampleRate / refined;
-    if (freq < minHz || freq > maxHz) return null;
+    if (!freq.isFinite || freq < minHz || freq > maxHz) return null;
     return PitchEstimate(
       frequency: freq,
       confidence: (1.0 - cmnd[tau]).clamp(0.0, 1.0),
