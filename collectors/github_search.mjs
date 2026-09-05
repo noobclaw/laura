@@ -30,7 +30,8 @@ export const QUERIES = [
   { key: 'image-editor', q: 'topic:image-editor stars:>1500' },
   { key: 'image-compression', q: 'image compression in:description topic:image-processing stars:>1000' },
   { key: 'background-removal', q: 'background removal in:description stars:>1500' },
-  { key: 'upscale', q: 'image upscale OR super-resolution in:description stars:>2000' },
+  { key: 'upscale', q: 'topic:super-resolution stars:>1500' },
+  { key: 'upscaler', q: 'image upscaler in:name,description stars:>1500' },
   { key: 'qrcode', q: 'topic:qrcode generator OR scanner stars:>1000' },
   { key: 'exif', q: 'exif in:description,topics stars:>500' },
   { key: 'color-picker', q: 'topic:color-picker stars:>500' },
@@ -45,9 +46,10 @@ export const QUERIES = [
   // Data / files
   { key: 'file-converter', q: 'file converter in:description offline OR local stars:>1000' },
   { key: 'archive', q: 'topic:compression archive extract in:description stars:>1000' },
-  { key: 'json-csv-tools', q: 'json OR csv viewer OR editor in:description topic:tool stars:>800' },
-  { key: 'sqlite-viewer', q: 'sqlite browser OR viewer in:description stars:>800' },
-  { key: 'encryption', q: 'topic:encryption file in:description stars:>1500' },
+  { key: 'json-viewer', q: 'topic:json-viewer stars:>500' },
+  { key: 'csv-tools', q: 'topic:csv editor OR viewer in:description stars:>500' },
+  { key: 'sqlite-viewer', q: 'topic:sqlite browser OR viewer in:name,description stars:>500' },
+  { key: 'encryption', q: 'topic:encryption file encryption in:description stars:>1500' },
   { key: 'password', q: 'topic:password-manager stars:>1500' },
   { key: 'hash-checksum', q: 'checksum in:description,topics stars:>500' },
   // Personal productivity (local-first)
@@ -60,7 +62,8 @@ export const QUERIES = [
   { key: 'calendar-tools', q: 'ical OR icalendar parser generator in:description stars:>500' },
   // Science / measurement / hobby
   { key: 'astronomy', q: 'topic:astronomy calculation OR ephemeris in:description stars:>300' },
-  { key: 'gps-tools', q: 'gpx OR geodesy OR coordinate in:description,topics stars:>500' },
+  { key: 'gpx', q: 'topic:gpx stars:>300' },
+  { key: 'geodesy', q: 'topic:geodesy stars:>200' },
   { key: 'unit-convert', q: 'unit conversion in:description library OR tool stars:>500' },
   { key: 'calculator-advanced', q: 'topic:calculator scientific OR graphing OR symbolic stars:>800' },
   { key: 'regex-tools', q: 'topic:regex tester OR visualizer in:description stars:>800' },
@@ -68,7 +71,7 @@ export const QUERIES = [
   { key: 'fonts-typography', q: 'font inspector OR glyph OR typography tool in:description stars:>500' },
   // On-device models (the enabling tech for the above)
   { key: 'on-device-ml', q: 'on-device inference mobile in:description stars:>2000' },
-  { key: 'whisper-mobile', q: 'whisper cpp OR mobile in:description stars:>2000' },
+  { key: 'whisper-mobile', q: 'whisper in:name,description mobile OR cpp OR ios OR android in:description stars:>1500' },
   { key: 'llm-mobile', q: 'llm mobile on-device in:description stars:>2000' },
 ];
 
@@ -91,7 +94,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Curated lists, courses and interview prep dominate any broad search and
 // are never something to port. Filtered by name/description/topics.
-const NOISE = /(awesome|curated|cheat ?sheet|roadmap|interview|tutorial|course|handbook|collection of|list of|learning path)/i;
+const NOISE = /\b(awesome|curated|cheat ?sheet|roadmap|interview|tutorials?|courses?|handbook|collection of|list of|learning path)\b/i;
 function isNoise(item) {
   if (NOISE.test(item.name) || NOISE.test(item.description || '')) return true;
   const t = item.topics || [];
