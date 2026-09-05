@@ -4,7 +4,7 @@ import '../core/l10n.dart';
 import 'models.dart';
 import 'store.dart';
 
-/// Localized button labels for the four SM-2 grades (Anki-style terms).
+/// Localized button labels for the four FSRS grades (Anki-style terms).
 String _ratingLabel(Rating r) => switch (r) {
       Rating.again => tr(zh: '重来', en: 'Again'),
       Rating.hard => tr(zh: '困难', en: 'Hard'),
@@ -26,9 +26,10 @@ String _ratingLabel(Rating r) => switch (r) {
 /// Tap the card to reveal the answer, then grade it; grading reschedules the
 /// card and advances to the next one.
 ///
-/// "Again" puts the card back at the end of this session's queue (the SM-2
-/// paper's "repeat until every item scores ≥ 4", and what Anki users
-/// expect): a missed card is not gone until you have actually recalled it.
+/// "Again" puts the card back at the end of this session's queue — the
+/// app's learning step, what Anki users expect: a missed card is not gone
+/// until you have actually recalled it. The grade on that second showing is
+/// a same-day review, which FSRS schedules with its short-term formula.
 class StudyScreen extends StatefulWidget {
   const StudyScreen({super.key, required this.store, required this.deck});
 
@@ -62,7 +63,7 @@ class _StudyScreenState extends State<StudyScreen> {
     final repeat = _seen.contains(card.id);
     if (repeat) {
       // Already lapsed this session: the relearn grade only sets when it
-      // comes back, it must not dock ease again.
+      // comes back, it must not count as a second lapse.
       widget.store.relearnCard(card, rating);
     } else {
       widget.store.reviewCard(card, rating);
@@ -88,6 +89,8 @@ class _StudyScreenState extends State<StudyScreen> {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final isRepeat = _seen.contains(card.id);
+    final today = epochDayOf(DateTime.now());
+    final fsrs = widget.store.scheduler;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,8 +138,9 @@ class _StudyScreenState extends State<StudyScreen> {
                                 // next interval for that grade — what the
                                 // user is actually choosing between.
                                 final days = isRepeat
-                                    ? card.previewRelearnInterval(r)
-                                    : card.previewInterval(r);
+                                    ? card.previewRelearnInterval(
+                                        r, today, fsrs)
+                                    : card.previewInterval(r, today, fsrs);
                                 return FilledButton(
                                   style: FilledButton.styleFrom(
                                     backgroundColor: bg,
@@ -300,10 +304,10 @@ class _DoneScreen extends StatelessWidget {
                 lapses == 0
                     ? tr(zh: '全部一次记住,漂亮。', en: 'All recalled first time. Nice.')
                     : tr(
-                        zh: '$lapses 次「重来」已当场补练,明天再来一遍。',
+                        zh: '$lapses 次「重来」已当场补练,过几天再来一遍。',
                         en: lapses == 1
-                            ? '1 miss was practised again on the spot; it comes back tomorrow.'
-                            : '$lapses misses were practised again on the spot; they come back tomorrow.',
+                            ? '1 miss was practised again on the spot; it comes back within days.'
+                            : '$lapses misses were practised again on the spot; they come back within days.',
                       ),
                 style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                 textAlign: TextAlign.center,

@@ -12,7 +12,7 @@ abstract final class Branding {
   static const String appNameZh = '记得';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
-  static const String version = '1.1.2';
+  static const String version = '1.2.0';
 
   /// Seed for the Material 3 color scheme.
   static const Color seedColor = Color(0xFF00897B); // teal — calm, study-friendly
@@ -21,10 +21,10 @@ abstract final class Branding {
   /// the app ships without the INTERNET permission.
   static String get aboutText => tr(
         zh: '记得(Remcard)— 纯离线的间隔重复记忆卡。'
-            '建牌组、按 SM-2 算法复习,把知识记得更牢。'
+            '建牌组、按 FSRS 算法复习,把知识记得更牢。'
             '无账号、无广告、无订阅,你的卡片永远不出这台手机。',
         en: 'Remcard — offline spaced-repetition flashcards. '
-            'Build decks, review with the SM-2 schedule, and remember more. '
+            'Build decks, review on the FSRS schedule, and remember more. '
             'No account, no ads, no subscription; your cards never leave this phone.',
       );
 

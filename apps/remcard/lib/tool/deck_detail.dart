@@ -87,7 +87,7 @@ class DeckDetailScreen extends StatelessWidget {
                               // further?" has an answer on screen.
                               trailing: _DueChip(
                                 days: card.daysUntilDue(today),
-                                isNew: card.repetitions == 0,
+                                isNew: card.isNew,
                               ),
                               onTap: () => _editCard(context, card),
                             ),

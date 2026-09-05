@@ -1,20 +1,12 @@
 import 'dart:math' as math;
 
 import '../core/l10n.dart';
+import 'fsrs.dart';
 
-/// The four review grades shown to the user, mapped to SM-2 quality values.
-/// Display labels live in the UI layer (study_screen.dart) so they localize.
-enum Rating {
-  again(1),
-  hard(3),
-  good(4),
-  easy(5);
-
-  const Rating(this.quality);
-
-  /// SM-2 quality score (0..5). Anything < 3 is treated as a lapse.
-  final int quality;
-}
+/// The four review grades shown to the user — FSRS's Again / Hard / Good /
+/// Easy. Display labels live in the UI layer (study_screen.dart) so they
+/// localize.
+enum Rating { again, hard, good, easy }
 
 /// Number of whole days since the Unix epoch for a given local calendar day.
 ///
@@ -41,8 +33,16 @@ String intervalLabel(int days) {
 
 /// A single flashcard plus its spaced-repetition state.
 ///
-/// The SM-2 fields ([ease], [intervalDays], [repetitions], [dueDay]) are the
-/// scheduler's memory. A freshly created card is due immediately.
+/// Scheduling is FSRS (see `fsrs.dart`): [stability], [difficulty],
+/// [repetitions], [lapses] and [lastReviewDay] are the scheduler's memory,
+/// [dueDay] is where it put the card. The SM-2 fields ([ease],
+/// [intervalDays]) are kept in step with the FSRS state and written to JSON
+/// so a data file produced by this version still schedules sensibly in an
+/// app version that only knows SM-2 (and vice versa: a file without FSRS
+/// keys is converted on load, see [Flashcard.fromJson]).
+///
+/// A freshly created card is due immediately and has no memory state
+/// ([isNew]).
 class Flashcard {
   Flashcard({
     required this.id,
@@ -52,75 +52,112 @@ class Flashcard {
     this.ease = 2.5,
     this.intervalDays = 0,
     this.repetitions = 0,
+    this.stability = 0,
+    this.difficulty = 0,
+    this.lapses = 0,
+    this.lastReviewDay,
   });
 
   final String id;
   String front;
   String back;
 
+  /// SM-2 ease factor, derived from [difficulty] after every review. Only
+  /// read back when a file has no FSRS keys.
   double ease;
+
+  /// Interval the last review assigned, in days (`dueDay - lastReviewDay`).
   int intervalDays;
+
+  /// Number of reviews recorded, including same-day relearn grades. Unlike
+  /// SM-2's streak it never resets: a lapsed card is not a new card.
   int repetitions;
+
+  /// FSRS stability in days; `0` until the first review.
+  double stability;
+
+  /// FSRS difficulty 1..10; `0` until the first review.
+  double difficulty;
+
+  /// Times the card was forgotten on a scheduled review.
+  int lapses;
+
+  /// Epoch day of the most recent review, or null if never reviewed.
+  int? lastReviewDay;
 
   /// Epoch day on which this card next becomes due for review.
   int dueDay;
+
+  /// Never reviewed: due now, no memory state yet.
+  bool get isNew => repetitions == 0 || stability <= 0;
 
   bool isDue(int today) => dueDay <= today;
 
   /// Days until this card is next due, relative to [today] (0 = due now).
   int daysUntilDue(int today) => math.max(0, dueDay - today);
 
-  /// The interval [review] would assign for [rating], without mutating —
-  /// shown on the grade buttons so the user sees the consequence of each
-  /// choice before tapping, the way Anki does.
-  ///
-  /// Plain SM-2 gives Hard/Good/Easy the same interval and only moves ease,
-  /// so a new card graded Easy would still say "tomorrow". The spread below
-  /// is Anki's: Easy skips ahead, Hard grows by 1.2 instead of × ease.
-  int previewInterval(Rating rating) {
-    if (rating == Rating.again) return 1;
-    if (repetitions == 0) return rating == Rating.easy ? 4 : 1;
-    if (repetitions == 1) return rating == Rating.easy ? 8 : 6;
-    final days = switch (rating) {
-      Rating.hard => intervalDays * 1.2,
-      Rating.easy => intervalDays * ease * 1.3,
-      _ => intervalDays * ease,
-    };
-    return math.max(intervalDays + 1, days.round());
+  FsrsMemory? get memory => isNew
+      ? null
+      : FsrsMemory(
+          stability: stability,
+          difficulty: difficulty,
+          reps: repetitions,
+          lapses: lapses,
+        );
+
+  /// Days since the last review as seen by the scheduler on [today]. Zero
+  /// for a card never reviewed or reviewed earlier today.
+  int _elapsed(int today) {
+    final last = lastReviewDay;
+    if (last == null) return 0;
+    return math.max(0, today - last);
+  }
+
+  /// Fuzz seed: fixed for one card, one memory state and one day, so the
+  /// interval shown on the grade button is the interval the tap assigns.
+  int _fuzzSeed(int today) => Object.hash(id, repetitions, lastReviewDay, today);
+
+  /// The interval [review] would assign for [rating] on [today], without
+  /// mutating — shown on the grade buttons so the user sees the consequence
+  /// of each choice before tapping, the way Anki does.
+  int previewInterval(Rating rating, int today, Fsrs fsrs) {
+    final next = fsrs.next(memory, rating, _elapsed(today));
+    return fsrs.intervalFor(next.stability, fuzzSeed: _fuzzSeed(today));
   }
 
   /// Interval for grading a card that already lapsed *in this session* and
-  /// is being shown again. The lapse already reset the streak and docked
-  /// ease; the relearn grade only decides how soon it comes back, so ease
-  /// must not be docked a second time (Again ×3 in one sitting used to pin
-  /// it at 1.3 for good).
-  int previewRelearnInterval(Rating rating) => switch (rating) {
-        Rating.again => 1,
-        Rating.easy => 2,
-        _ => 1,
-      };
-
-  /// See [previewRelearnInterval]: reschedule without touching ease or the
-  /// repetition count.
-  void relearn(Rating rating, int today) {
-    intervalDays = previewRelearnInterval(rating);
-    dueDay = today + intervalDays;
+  /// is being shown again: a same-day review, which FSRS treats as a
+  /// learning step (short-term stability) rather than a fresh recall on
+  /// the forgetting curve. The lapse was already counted by [review].
+  int previewRelearnInterval(Rating rating, int today, Fsrs fsrs) {
+    final next = fsrs.next(memory, rating, 0);
+    return fsrs.intervalFor(next.stability, fuzzSeed: _fuzzSeed(today));
   }
 
-  /// Apply one review with [rating] on the day [today], mutating this card's
-  /// schedule per SM-2 with the grade spread described on [previewInterval].
+  /// See [previewRelearnInterval]: apply the relearn grade.
+  void relearn(Rating rating, int today, Fsrs fsrs) =>
+      _apply(fsrs.next(memory, rating, 0), today, fsrs);
+
+  /// Apply one review with [rating] on the day [today].
   ///
-  /// - Again resets the streak; the study screen re-shows the card in the
-  ///   same session, and it is due again tomorrow regardless.
-  /// - Otherwise the interval grows: 1 day, then 6 days, then × ease.
-  /// - Ease is nudged by the grade and never drops below 1.3.
-  void review(Rating rating, int today) {
-    final q = rating.quality;
-    intervalDays = previewInterval(rating);
-    repetitions = q < 3 ? 0 : repetitions + 1;
-    // SM-2 ease adjustment.
-    ease += 0.1 - (5 - q) * (0.08 + (5 - q) * 0.02);
-    if (ease < 1.3) ease = 1.3;
+  /// - Again: stability collapses to the post-lapse value; the study screen
+  ///   re-shows the card in the same session, and the relearn grade then
+  ///   decides when it comes back (usually within a few days).
+  /// - Hard / Good / Easy: stability grows, more the closer the card was to
+  ///   being forgotten and the easier the grade; difficulty drifts down on
+  ///   Easy and up on Hard.
+  void review(Rating rating, int today, Fsrs fsrs) =>
+      _apply(fsrs.next(memory, rating, _elapsed(today)), today, fsrs);
+
+  void _apply(FsrsMemory next, int today, Fsrs fsrs) {
+    intervalDays =
+        fsrs.intervalFor(next.stability, fuzzSeed: _fuzzSeed(today));
+    stability = next.stability;
+    difficulty = next.difficulty;
+    repetitions = next.reps;
+    lapses = next.lapses;
+    ease = fsrs.easeFromDifficulty(next.difficulty);
+    lastReviewDay = today;
     dueDay = today + intervalDays;
   }
 
@@ -128,23 +165,63 @@ class Flashcard {
         'id': id,
         'front': front,
         'back': back,
+        // Legacy SM-2 keys, kept so an older app version can still read the
+        // file. Do not remove before every shipped version knows FSRS.
         'ease': ease,
         'intervalDays': intervalDays,
         'repetitions': repetitions,
         'dueDay': dueDay,
+        // FSRS keys (schema 1).
+        'fsrs': 1,
+        'stability': stability,
+        'difficulty': difficulty,
+        'lapses': lapses,
+        if (lastReviewDay != null) 'lastReviewDay': lastReviewDay,
       };
 
-  factory Flashcard.fromJson(Map<String, dynamic> j) => Flashcard(
-        // A missing id must not throw: that would make load() judge the whole
-        // file corrupt and hide every deck.
-        id: j['id'] as String? ?? _fallbackId('card'),
-        front: j['front'] as String? ?? '',
-        back: j['back'] as String? ?? '',
-        ease: (j['ease'] as num?)?.toDouble() ?? 2.5,
-        intervalDays: (j['intervalDays'] as num?)?.toInt() ?? 0,
-        repetitions: (j['repetitions'] as num?)?.toInt() ?? 0,
-        dueDay: (j['dueDay'] as num?)?.toInt() ?? 0,
-      );
+  /// Reads either schema. A card with SM-2 fields only (written by 1.1.x)
+  /// is converted without changing when it is due:
+  ///
+  /// * stability = interval — at 90% retention FSRS's interval *is* the
+  ///   stability, so the old schedule is carried over exactly;
+  /// * difficulty from ease (see [Fsrs.difficultyFromEase]);
+  /// * last review = due day − interval, so the elapsed time the next
+  ///   review sees is the interval the old scheduler intended;
+  /// * a card with no interval yet stays new.
+  factory Flashcard.fromJson(Map<String, dynamic> j) {
+    final ease = (j['ease'] as num?)?.toDouble() ?? 2.5;
+    final interval = (j['intervalDays'] as num?)?.toInt() ?? 0;
+    final reps = (j['repetitions'] as num?)?.toInt() ?? 0;
+    final due = (j['dueDay'] as num?)?.toInt() ?? 0;
+    final card = Flashcard(
+      // A missing id must not throw: that would make load() judge the whole
+      // file corrupt and hide every deck.
+      id: j['id'] as String? ?? _fallbackId('card'),
+      front: j['front'] as String? ?? '',
+      back: j['back'] as String? ?? '',
+      ease: ease,
+      intervalDays: interval,
+      repetitions: reps,
+      dueDay: due,
+    );
+    final stability = (j['stability'] as num?)?.toDouble();
+    if (stability != null && stability > 0) {
+      card.stability = stability;
+      card.difficulty =
+          ((j['difficulty'] as num?)?.toDouble() ?? 0).clamp(1.0, 10.0);
+      card.lapses = (j['lapses'] as num?)?.toInt() ?? 0;
+      card.lastReviewDay = (j['lastReviewDay'] as num?)?.toInt();
+      if (card.repetitions == 0) card.repetitions = 1;
+    } else if (interval > 0) {
+      // SM-2 → FSRS. A lapsed-and-relearned card has repetitions 0 but an
+      // interval; it has been reviewed, so it is not new.
+      card.stability = interval.toDouble();
+      card.difficulty = const Fsrs().difficultyFromEase(ease);
+      card.lastReviewDay = due - interval;
+      if (card.repetitions == 0) card.repetitions = 1;
+    }
+    return card;
+  }
 }
 
 int _fallbackSeq = 0;

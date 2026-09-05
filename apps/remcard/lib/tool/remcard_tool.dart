@@ -4,6 +4,7 @@ import '../core/day_change.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'deck_detail.dart';
+import 'fsrs.dart';
 import 'import_flow.dart';
 import 'models.dart';
 import 'store.dart';
@@ -49,6 +50,19 @@ class RemcardTool extends ToolModule {
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => const _SrsExplainPage(),
           )),
+        ),
+        ListenableBuilder(
+          listenable: store,
+          builder: (context, _) => ListTile(
+            leading: const Icon(Icons.tune),
+            title: Text(tr(zh: '目标记忆保持率', en: 'Target retention')),
+            subtitle: Text(tr(
+              zh: '${_pct(store.desiredRetention)} · 越低复习越少,越高记得越牢',
+              en: '${_pct(store.desiredRetention)} · lower = fewer reviews, '
+                  'higher = stronger memory',
+            )),
+            onTap: () => _pickRetention(context, store),
+          ),
         ),
         ListenableBuilder(
           listenable: store,
@@ -204,6 +218,82 @@ class _Benefit extends StatelessWidget {
       ),
     );
   }
+}
+
+String _pct(double retention) => '${(retention * 100).round()}%';
+
+/// The one FSRS knob worth exposing: what recall probability to aim for at
+/// review time. The slider shows how much longer (or shorter) intervals get
+/// relative to the 90% default so the trade-off is concrete, not abstract.
+Future<void> _pickRetention(BuildContext context, RemcardStore store) async {
+  var value = store.desiredRetention;
+  final chosen = await showDialog<double>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) {
+        final scale = Fsrs.intervalScale(value);
+        final scaleText = scale >= 1
+            ? '×${scale.toStringAsFixed(1)}'
+            : '×${scale.toStringAsFixed(2)}';
+        return AlertDialog(
+          title: Text(tr(zh: '目标记忆保持率', en: 'Target retention')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tr(
+                  zh: '复习时希望还记得的概率。FSRS 会把每张卡排在记忆刚好降到这个值的那天。',
+                  en: 'How likely you want to still remember a card when it '
+                      'comes up. FSRS schedules each card for the day its '
+                      'memory drops to this level.',
+                ),
+                style: Theme.of(ctx).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  _pct(value),
+                  style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        color: Theme.of(ctx).colorScheme.primary,
+                      ),
+                ),
+              ),
+              Slider(
+                value: value,
+                min: Fsrs.minRetention,
+                max: Fsrs.maxRetention,
+                divisions: ((Fsrs.maxRetention - Fsrs.minRetention) * 100)
+                    .round(),
+                label: _pct(value),
+                onChanged: (v) => setState(() => value = v),
+              ),
+              Text(
+                tr(
+                  zh: '复习间隔约为 90% 时的 $scaleText;90% 是 FSRS 的推荐默认值。',
+                  en: 'Intervals about $scaleText those at 90%; 90% is the '
+                      'FSRS-recommended default.',
+                ),
+                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(tr(zh: '取消', en: 'Cancel'))),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, value),
+                child: Text(tr(zh: '确定', en: 'OK'))),
+          ],
+        );
+      },
+    ),
+  );
+  if (chosen != null) store.setDesiredRetention(chosen);
 }
 
 /// Import honours the same free-tier deck cap as "New deck": the picker is
@@ -480,7 +570,7 @@ class _DeckTile extends StatelessWidget {
     final total = deck.cards.length;
     // Fraction of the deck that has entered the schedule (been reviewed at
     // least once) — a quiet sense of progress per deck.
-    final reviewed = deck.cards.where((c) => c.repetitions > 0).length;
+    final reviewed = deck.cards.where((c) => !c.isNew).length;
     final progress = total == 0 ? 0.0 : reviewed / total;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -609,30 +699,38 @@ class _SrsExplainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final body = tr(
       zh: '''
-Remcard 使用经典的 SM-2 间隔重复算法安排复习。
+Remcard 用 FSRS 算法安排复习——Anki 也已内置采用的开源间隔重复算法。
+
+它给每张卡片记两个数:「稳定度」(记忆还能撑多少天)和「难度」(这张卡有多难记)。每次复习后,算法按你给的评价更新这两个数,再算出记忆刚好要降到目标保持率(默认 90%)的那一天,把卡片排在那天。
 
 复习一张卡片后,你会给出 4 档评价:
-• 重来 — 没记住,明天再问一次,并重置记忆进度。
-• 困难 — 勉强想起,间隔小幅增加。
+• 重来 — 没记住,本轮稍后再问一次;稳定度大幅回落,过几天再来。
+• 困难 — 勉强想起,间隔小幅增加,难度上调。
 • 良好 — 顺利答对,间隔按正常节奏拉长。
-• 简单 — 秒答,间隔拉得更长,以后更久才会再出现。
+• 简单 — 秒答,间隔拉得更长,难度下调。
 
-新卡片首次复习后隔 1 天,再对隔 6 天,之后每次乘以一个「熟练度系数」(会随你的表现在 1.3 以上浮动)。答错则回到 1 天重新学起。
+和传统的 SM-2 相比,FSRS 会考虑你复习时离「要忘记」还有多远:拖了几天才复习却仍然记得,间隔会拉得更长;提前复习则增长有限。在公开的复习数据上,达到同样的记忆效果,FSRS 需要的复习次数比 SM-2 少 20–30%。
 
-这样你只会在「快要忘记」时复习,用最少的次数记得最牢——而且全部计算都在这台手机上完成,不联网。
+在设置里可以调「目标记忆保持率」(80%–95%):调低复习更少,调高记得更牢。
+
+全部计算都在这台手机上完成,不联网。
 ''',
       en: '''
-Remcard schedules reviews with the classic SM-2 spaced-repetition algorithm.
+Remcard schedules reviews with FSRS, the open-source spaced-repetition algorithm built into Anki as well.
+
+It tracks two numbers per card: stability (how many days the memory will hold) and difficulty (how hard the card is to keep). After each review the algorithm updates both from your grade, works out the day your recall would drop to the target retention (90% by default), and schedules the card for that day.
 
 After reviewing a card, you grade it on four levels:
-• Again — you forgot; the card comes back tomorrow and its progress resets.
-• Hard — barely recalled; the interval grows a little.
+• Again — you forgot; it comes back later this session, stability falls sharply and it returns within days.
+• Hard — barely recalled; the interval grows a little and difficulty goes up.
 • Good — recalled correctly; the interval grows at the normal pace.
-• Easy — instant recall; the interval grows even more, so the card waits longer.
+• Easy — instant recall; the interval grows more and difficulty goes down.
 
-A new card comes back after 1 day, then 6 days, and after that each interval is multiplied by an "ease factor" that floats above 1.3 based on your performance. A miss sends the card back to 1 day.
+Unlike classic SM-2, FSRS accounts for how close you were to forgetting: recall a card days late and its interval grows more; review early and it grows less. On public review data FSRS reaches the same memory with 20–30% fewer reviews than SM-2.
 
-This way you only review a card right before you would forget it — the fewest reviews for the strongest memory. And every calculation happens on this phone, offline.
+Target retention (80–95%) is adjustable in Settings: lower means fewer reviews, higher means stronger memory.
+
+Every calculation happens on this phone, offline.
 ''',
     );
     return Scaffold(

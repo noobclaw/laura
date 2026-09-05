@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'fsrs.dart';
 import 'import_deck.dart';
 import 'models.dart';
 
@@ -19,6 +20,21 @@ class RemcardStore extends ChangeNotifier {
   final List<Deck> decks = [];
   bool pro = false;
   bool loaded = false;
+
+  /// The FSRS scheduler every review goes through, built from the user's
+  /// desired retention. Free for everyone: it is the algorithm's core
+  /// promise ("fewer reviews for the same memory"), not a Pro extra, and
+  /// the Pro pitch stays "unlimited decks / import".
+  Fsrs get scheduler => Fsrs(desiredRetention: desiredRetention);
+
+  /// Target recall probability at review time, 0.80–0.95 (default 0.90).
+  double desiredRetention = Fsrs.defaultRetention;
+
+  void setDesiredRetention(double value) {
+    desiredRetention =
+        value.clamp(Fsrs.minRetention, Fsrs.maxRetention).toDouble();
+    _save();
+  }
 
   int _idSeq = 0;
 
@@ -60,6 +76,10 @@ class RemcardStore extends ChangeNotifier {
         try {
           final raw = jsonDecode(text) as Map<String, dynamic>;
           pro = raw['pro'] as bool? ?? false;
+          desiredRetention = ((raw['retention'] as num?)?.toDouble() ??
+                  Fsrs.defaultRetention)
+              .clamp(Fsrs.minRetention, Fsrs.maxRetention)
+              .toDouble();
           decks
             ..clear()
             ..addAll((raw['decks'] as List<dynamic>? ?? [])
@@ -98,6 +118,8 @@ class RemcardStore extends ChangeNotifier {
     if (!loaded) return;
     final payload = jsonEncode({
       'pro': pro,
+      // Older versions ignore this key (they only read `pro` and `decks`).
+      'retention': desiredRetention,
       'decks': decks.map((d) => d.toJson()).toList(),
     });
     _saveChain = _saveChain.then((_) => _writeAtomically(payload));
@@ -179,14 +201,14 @@ class RemcardStore extends ChangeNotifier {
 
   /// Record one review and persist the new schedule.
   void reviewCard(Flashcard card, Rating rating) {
-    card.review(rating, epochDayOf(DateTime.now()));
+    card.review(rating, epochDayOf(DateTime.now()), scheduler);
     _save();
   }
 
   /// Record the grade of a card shown again after lapsing in this session
   /// (see [Flashcard.relearn]).
   void relearnCard(Flashcard card, Rating rating) {
-    card.relearn(rating, epochDayOf(DateTime.now()));
+    card.relearn(rating, epochDayOf(DateTime.now()), scheduler);
     _save();
   }
 
