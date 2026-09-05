@@ -1,5 +1,5 @@
 /* Localized launcher name. The Android side keeps the same pair in
    res/values/strings.xml and res/values-zh/strings.xml. */
 "CFBundleDisplayName" = "回声笔记";
-"NSMicrophoneUsageDescription" = "回声笔记通过麦克风把你说的话在本机转成文字。录音不会保存,也不会上传。";
+"NSMicrophoneUsageDescription" = "回声笔记通过麦克风把你说的话在本机转成文字。不会上传;离线 Whisper 引擎只在转写期间暂存录音,转完即删。";
 "NSSpeechRecognitionUsageDescription" = "回声笔记用设备端语音识别把语音笔记转成文字。声音不会离开这台设备。";

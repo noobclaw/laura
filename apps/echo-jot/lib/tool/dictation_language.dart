@@ -4,6 +4,7 @@ import '../core/json_file_store.dart';
 import '../core/l10n.dart';
 import 'dictation.dart';
 import 'dictation_controller.dart';
+import 'dictation_engine.dart';
 
 /// Which language the on-device recognizer listens for.
 ///
@@ -128,7 +129,15 @@ class DictationLanguage {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
               child: Text(
-                DictationService.needsSpeechPermission
+                DictationEnginePref.current.value == DictationEngine.whisper
+                    ? tr(
+                        zh: 'Whisper 离线引擎自带这些语言(以及更多),不需要系统语言包;'
+                            '「自动」时由模型自行判断语种。',
+                        en: 'The Whisper offline engine ships these languages (and '
+                            'more) itself — no system language pack needed; on '
+                            '"Automatic" the model detects the language.',
+                      )
+                    : DictationService.needsSpeechPermission
                     ? tr(
                         zh: '需要系统装有该语言的离线听写资源:在「设置 → 通用 → 键盘 → 听写语言」添加。',
                         en: 'The system must have offline dictation for that language: add it under Settings → General → Keyboard → Dictation Languages.',

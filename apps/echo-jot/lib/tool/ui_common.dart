@@ -189,10 +189,23 @@ class InfoChip extends StatelessWidget {
 /// The app's signature control: a large mic button with a soft pulsing ring
 /// while a session is live.
 class MicButton extends StatefulWidget {
-  const MicButton({super.key, required this.listening, required this.onTap});
+  const MicButton({
+    super.key,
+    required this.listening,
+    required this.onTap,
+    this.icon,
+    this.semanticsLabel,
+  });
 
   final bool listening;
   final VoidCallback onTap;
+
+  /// Overrides the mic/stop glyph (e.g. an hourglass while Whisper works).
+  final IconData? icon;
+
+  /// Overrides the accessibility label when the tap means something other
+  /// than start/stop.
+  final String? semanticsLabel;
 
   @override
   State<MicButton> createState() => _MicButtonState();
@@ -265,9 +278,10 @@ class _MicButtonState extends State<MicButton>
             ),
           Semantics(
             button: true,
-            label: widget.listening
-                ? tr(zh: '停止听写', en: 'Stop dictation')
-                : tr(zh: '开始听写', en: 'Start dictation'),
+            label: widget.semanticsLabel ??
+                (widget.listening
+                    ? tr(zh: '停止听写', en: 'Stop dictation')
+                    : tr(zh: '开始听写', en: 'Start dictation')),
             child: GestureDetector(
               onTap: widget.onTap,
               child: Container(
@@ -289,7 +303,8 @@ class _MicButtonState extends State<MicButton>
                   ],
                 ),
                 child: Icon(
-                  widget.listening ? Icons.stop_rounded : Icons.mic_rounded,
+                  widget.icon ??
+                      (widget.listening ? Icons.stop_rounded : Icons.mic_rounded),
                   size: 42,
                   color: onAccent,
                 ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
 import 'dictation_controller.dart';
+import 'dictation_engine.dart';
 import 'dictation_language.dart';
 import 'note.dart';
 import 'note_detail_page.dart';
@@ -65,8 +66,9 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   void _onControllerChanged() {
     if (!mounted) return;
     setState(() {});
-    final live =
-        _controller.listening || _controller.state == DictationState.finishing;
+    // Whisper's transcribing state counts as live: the session is not over
+    // until the text exists.
+    final live = _controller.busy;
     if (_wasLive && !live && !_finishing) {
       // The session ended without us asking (recognizer failure): save what was
       // already dictated and surface the reason.
@@ -90,6 +92,10 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
       if (_controller.listening ||
           _controller.state == DictationState.finishing) {
         unawaited(_finishSession(background: true));
+      } else if (!_controller.busy) {
+        // A Whisper transcription in flight is left alone (it needs no mic);
+        // an idle app gives the parked model's memory back.
+        unawaited(_controller.releaseWhisperIfIdle());
       }
     } else if (state == AppLifecycleState.resumed) {
       // The user may have installed a language pack while we were away.
@@ -100,6 +106,12 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   }
 
   Future<void> _toggle() async {
+    if (_controller.transcribing) {
+      // The tap while Whisper works = "stop after this chunk, keep what you
+      // have"; _finishSession is already awaiting the same stop().
+      _controller.cancelTranscription();
+      return;
+    }
     if (_controller.listening ||
         _controller.state == DictationState.finishing) {
       await _finishSession();
@@ -212,9 +224,24 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
     return Column(
       children: [
         if (_store.loadError != null) const _LoadErrorNotice(),
-        if (caps != null && !caps.ready && !_controller.listening)
+        // The banner is about the *system* engine; with Whisper selected the
+        // system's language packs are irrelevant.
+        if (caps != null &&
+            !caps.ready &&
+            !_controller.busy &&
+            _controller.engine == DictationEngine.system)
           _CapabilityNotice(
             controller: _controller,
+            onUseWhisper: () async {
+              await DictationEnginePref.set(DictationEngine.whisper);
+              if (!mounted) return;
+              setState(() {});
+              _snack(tr(
+                zh: '已切换到 Whisper 离线引擎:说完停止后开始转写。',
+                en: 'Switched to the Whisper offline engine: transcription '
+                    'starts when you stop.',
+              ));
+            },
             onRecheck: () async {
               await _controller.probe();
               if (!mounted) return;
@@ -258,10 +285,12 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
                   body: searching
                       ? tr(zh: '换个关键词再试试。', en: 'Try another keyword.')
                       : tr(
-                          zh: '点下面的话筒开始说,文字会边说边出现——全程在这台手机上完成,不保存录音。\n\n'
+                          zh: '点下面的话筒开始说,说完就是一条可搜索的文字笔记——'
+                              '转写全程在这台手机上完成,不上传、不留录音。\n\n'
                               '试试说:「提醒我明天上午给房东打电话」',
-                          en: 'Tap the mic and start talking. Text appears as you '
-                              'speak — all on this phone, and no audio is kept.\n\n'
+                          en: 'Tap the mic and start talking; what you say becomes '
+                              'a searchable note — transcribed on this phone, '
+                              'nothing uploaded, no recording kept.\n\n'
                               'Try: "remind me to call the landlord tomorrow"',
                         ),
                 )
@@ -280,9 +309,14 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
                   ),
                 ),
         ),
-        _DictationPanel(
-          controller: _controller,
-          onToggle: _toggle,
+        // The engine chip must follow the preference, which changes outside
+        // the controller (settings page, the banner's switch button).
+        ValueListenableBuilder<DictationEngine>(
+          valueListenable: DictationEnginePref.current,
+          builder: (context, _, _) => _DictationPanel(
+            controller: _controller,
+            onToggle: _toggle,
+          ),
         ),
       ],
     );
@@ -333,10 +367,17 @@ class _LoadErrorNotice extends StatelessWidget {
 /// Honest, actionable banner when the system has no on-device recognizer: the
 /// one thing we must never do is quietly transcribe in the cloud instead.
 class _CapabilityNotice extends StatelessWidget {
-  const _CapabilityNotice({required this.controller, required this.onRecheck});
+  const _CapabilityNotice({
+    required this.controller,
+    required this.onRecheck,
+    required this.onUseWhisper,
+  });
 
   final DictationController controller;
   final VoidCallback onRecheck;
+
+  /// The way out that needs no system change: the bundled Whisper engine.
+  final VoidCallback onUseWhisper;
 
   @override
   Widget build(BuildContext context) {
@@ -379,8 +420,15 @@ class _CapabilityNotice extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 4),
-          Row(
+          Wrap(
+            spacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
+              FilledButton.tonalIcon(
+                onPressed: onUseWhisper,
+                icon: const Icon(Icons.memory_outlined, size: 18),
+                label: Text(tr(zh: '改用 Whisper 离线', en: 'Use Whisper offline')),
+              ),
               TextButton(
                 onPressed: onRecheck,
                 style: TextButton.styleFrom(
@@ -415,6 +463,9 @@ class _DictationPanel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final listening = controller.listening;
     final finishing = controller.state == DictationState.finishing;
+    final transcribing = controller.transcribing;
+    final engine = controller.engine;
+    final whisper = engine == DictationEngine.whisper;
 
     // The panel must read as a container: starting the gradient at cs.surface
     // (== scaffold background) made its 28px radius and top edge invisible.
@@ -425,7 +476,7 @@ class _DictationPanel extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             cs.surfaceContainerLow,
-            listening
+            listening || transcribing
                 ? Color.alphaBlend(
                     cs.primary.withValues(alpha: 0.18),
                     cs.surfaceContainerHigh,
@@ -443,11 +494,25 @@ class _DictationPanel extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (listening || finishing) ...[
+              if (transcribing) ...[
+                _TranscribingStatus(controller: controller),
+                const SizedBox(height: 10),
+              ] else if (listening || finishing) ...[
                 // Flexible so a very large system font (or a short screen) can
                 // shrink the transcript box instead of overflowing the panel.
                 Flexible(
-                  child: _LiveTranscript(text: controller.previewText),
+                  child: _LiveTranscript(
+                    text: controller.previewText,
+                    placeholder: whisper
+                        ? tr(
+                            zh: '正在录音…停止后开始转写',
+                            en: 'Recording… transcription starts when you stop',
+                          )
+                        : tr(
+                            zh: '开始说话吧,文字会出现在这里…',
+                            en: 'Start talking — text appears here…',
+                          ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 LevelMeter(levels: controller.levels),
@@ -463,10 +528,18 @@ class _DictationPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  tr(
-                    zh: '边说边转文字 · 不保存录音',
-                    en: 'Transcribing as you speak · no audio kept',
-                  ),
+                  whisper
+                      ? tr(
+                          zh: 'Whisper 离线 · 停止后转写 · 录音只在本机,转完即删',
+                          en: 'Whisper offline · transcribes after stop · '
+                              'recording stays here, deleted once transcribed',
+                        )
+                      : tr(
+                          zh: '系统识别 · 边说边转文字 · 不保存录音',
+                          en: 'System recognizer · transcribing as you speak · '
+                              'no audio kept',
+                        ),
+                  textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -478,10 +551,15 @@ class _DictationPanel extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    tr(
-                      zh: '点一下开始说,边说边出字',
-                      en: 'Tap to talk, watch it type',
-                    ),
+                    whisper
+                        ? tr(
+                            zh: '点一下开始说,停止后出字',
+                            en: 'Tap to talk, text after you stop',
+                          )
+                        : tr(
+                            zh: '点一下开始说,边说边出字',
+                            en: 'Tap to talk, watch it type',
+                          ),
                     textAlign: TextAlign.center,
                     // The hero line must outrank card titles in the type scale.
                     style: Theme.of(context).textTheme.titleLarge,
@@ -489,28 +567,53 @@ class _DictationPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  tr(
-                    zh: '设备端识别 · 声音不出这台手机',
-                    en: 'On-device recognition · your voice stays here',
-                  ),
+                  whisper
+                      ? tr(
+                          zh: '内置 Whisper 模型 · 声音不出这台手机',
+                          en: 'Bundled Whisper model · your voice stays here',
+                        )
+                      : tr(
+                          zh: '设备端识别 · 声音不出这台手机',
+                          en: 'On-device recognition · your voice stays here',
+                        ),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
                 ),
                 const SizedBox(height: 8),
-                // Which language the recognizer listens for — the single most
-                // common "it only understands English" complaint is a Chinese
-                // speaker on an English-system phone.
-                ActionChip(
-                  avatar: const Icon(Icons.translate, size: 18),
-                  label: Text(DictationLanguage.currentLabel()),
-                  onPressed: () => DictationLanguage.pick(context, controller),
+                // Two chips: which engine, and which language it listens for —
+                // the single most common "it only understands English"
+                // complaint is a Chinese speaker on an English-system phone,
+                // and the second most common is the system engine itself.
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ActionChip(
+                      avatar: Icon(DictationEnginePref.icon(engine), size: 18),
+                      label: Text(DictationEnginePref.label(engine)),
+                      tooltip: tr(zh: '转写引擎', en: 'Transcription engine'),
+                      onPressed: () => DictationEnginePref.pick(context),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.translate, size: 18),
+                      label: Text(DictationLanguage.currentLabel()),
+                      tooltip: tr(zh: '听写语言', en: 'Dictation language'),
+                      onPressed: () =>
+                          DictationLanguage.pick(context, controller),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
               ],
               MicButton(
-                listening: listening || finishing,
+                listening: listening || finishing || transcribing,
+                icon: transcribing ? Icons.hourglass_top_rounded : null,
+                semanticsLabel: transcribing
+                    ? tr(zh: '提前结束转写', en: 'End transcription early')
+                    : null,
                 onTap: onToggle,
               ),
             ],
@@ -521,12 +624,85 @@ class _DictationPanel extends StatelessWidget {
   }
 }
 
+/// Whisper is working on the stopped recording: progress bar, chunk count,
+/// and the one-tap way out (the mic button cancels after the current chunk).
+class _TranscribingStatus extends StatelessWidget {
+  const _TranscribingStatus({required this.controller});
+
+  final DictationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final total = controller.chunkCount;
+    final chunkLine = total > 1
+        ? tr(
+            zh: '第 ${controller.chunk} / $total 段',
+            en: 'part ${controller.chunk} of $total',
+          )
+        : null;
+    final pct = (controller.progress * 100).round();
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          controller.cancelRequested
+              ? tr(zh: '正在结束这一段…', en: 'Finishing this part…')
+              : tr(zh: '正在转写…', en: 'Transcribing…'),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: controller.progress <= 0 ? null : controller.progress,
+            minHeight: 8,
+            semanticsLabel: tr(zh: '转写进度', en: 'Transcription progress'),
+            semanticsValue: '$pct%',
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          [
+            'Whisper',
+            ?chunkLine,
+            if (controller.progress > 0) '$pct%',
+            tr(zh: '只在本机', en: 'on this phone only'),
+          ].join(' · '),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          tr(
+            zh: '点按钮可提前结束,已转好的部分会保存',
+            en: 'Tap the button to end early; what is done so far is kept',
+          ),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
 /// The words as they arrive. Auto-scrolls to the newest line and keeps a fixed
 /// height so the button below never jumps around.
 class _LiveTranscript extends StatefulWidget {
-  const _LiveTranscript({required this.text});
+  const _LiveTranscript({required this.text, required this.placeholder});
 
   final String text;
+
+  /// Shown while there is no text yet — differs per engine (Whisper has
+  /// nothing to show until the recording stops).
+  final String placeholder;
 
   @override
   State<_LiveTranscript> createState() => _LiveTranscriptState();
@@ -572,9 +748,7 @@ class _LiveTranscriptState extends State<_LiveTranscript> {
       child: SingleChildScrollView(
         controller: _scroll,
         child: Text(
-          empty
-              ? tr(zh: '开始说话吧,文字会出现在这里…', en: 'Start talking — text appears here…')
-              : widget.text,
+          empty ? widget.placeholder : widget.text,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 height: 1.45,
                 color: empty ? cs.onSurfaceVariant : cs.onSurface,

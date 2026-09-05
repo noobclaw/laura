@@ -1,10 +1,10 @@
 name: echo_jot
-description: "Offline voice notes — dictated by the system's on-device recognizer."
+description: "Offline voice notes — system on-device recognizer or a bundled whisper.cpp model; nothing leaves the phone."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.2+1
+version: 1.2.0+1
 
 environment:
   sdk: ^3.12.2
@@ -27,11 +27,19 @@ dependencies:
   path_provider: ^2.1.6
   # System share sheet for text export (no INTERNET permission).
   share_plus: ^13.2.0
+  # Whisper engine (M1, 2026-09-05): whisper.cpp via dart:ffi. MIT, compiles
+  # whisper.cpp v1.9.1 from source (podspec on iOS, CMake/NDK on Android),
+  # runs any local ggml model file — we ship ggml-base-q5_1.bin as an asset,
+  # so nothing is ever downloaded. Declares no INTERNET permission.
+  whisper_ggml: ^2.6.0
+  # 16 kHz mono WAV capture for the Whisper engine (same package autosnore
+  # uses for its PCM stream).
+  record: ^7.0.0
 
-  # NB: transcription needs NO package at all — it goes through the system's
-  # on-device SpeechRecognizer via android/.../DictationBridge.kt. That replaced
-  # whisper_flutter_new, which downloaded its weights at runtime and therefore
-  # could never honour the zero-network promise.
+  # NB: the system engine needs NO package — it goes through the OS
+  # SpeechRecognizer / SFSpeechRecognizer via the DictationBridge natives.
+  # whisper_flutter_new (GPL, runtime weight download) was rejected in 2026-07;
+  # whisper_ggml above is different: MIT and fed a local model path.
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -65,3 +73,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Whisper model weights (~57 MB, multilingual base, q5_1). NOT in git:
+  # prepare_assets.sh downloads it (sha256-pinned) before every build — run it
+  # once locally too, `flutter test` refuses to start with a missing asset.
+  # Swap the file name here and in WhisperEngine.modelAsset to change models.
+  assets:
+    - assets/models/ggml-base-q5_1.bin

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:echo_jot/main.dart';
+import 'package:echo_jot/tool/dictation_engine.dart';
 import 'package:echo_jot/tool/home_page.dart';
 import 'package:echo_jot/tool/note.dart';
 import 'package:echo_jot/tool/ui_common.dart';
@@ -32,6 +33,40 @@ void main() {
     expect(find.byType(MicButton), findsOneWidget);
     // Nothing to search yet, so the search field stays out of the way.
     expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('hero shows the active engine and follows the preference',
+      (tester) async {
+    DictationEnginePref.current.value = DictationEngine.system;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: EchoJotHome(store: storeWith([]))),
+    ));
+    await tester.pump();
+
+    expect(find.text(DictationEnginePref.label(DictationEngine.system)),
+        findsOneWidget);
+    expect(find.text(DictationEnginePref.label(DictationEngine.whisper)),
+        findsNothing);
+
+    // Changing the preference (settings page / banner button) must re-label
+    // the chip without any controller activity.
+    DictationEnginePref.current.value = DictationEngine.whisper;
+    await tester.pump();
+    expect(find.text(DictationEnginePref.label(DictationEngine.whisper)),
+        findsOneWidget);
+    DictationEnginePref.current.value = DictationEngine.system;
+  });
+
+  testWidgets('engine picker lists both engines', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: EchoJotHome(store: storeWith([]))),
+    ));
+    await tester.pump();
+    await tester.tap(find.text(DictationEnginePref.label(DictationEngine.system)));
+    await tester.pumpAndSettle();
+    expect(find.text(DictationEnginePref.label(DictationEngine.whisper)),
+        findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(2));
   });
 
   testWidgets('notes render as cards with duration and length chips',

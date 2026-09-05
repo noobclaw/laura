@@ -74,6 +74,8 @@ jobs:
 
       - name: Flutter configure (no compile)
         run: |
+          # Build-time inputs that are not in git (e.g. echo-jot's Whisper model).
+          if [ -f prepare_assets.sh ]; then bash prepare_assets.sh; fi
           flutter pub get
           # Unique ascending build number per CI run; TestFlight rejects reuse.
           flutter build ios --config-only --release --no-codesign --build-number=${{ github.run_number }}

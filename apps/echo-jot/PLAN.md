@@ -1,6 +1,6 @@
 # 回声笔记 EchoJot — 产品规划文档
 
-> 状态:🔴 已做,待真机验收;上架阻塞:listing 须按 2026-09-02 新楔子重写(原 🟢在做,2026-07-30 工厂日取项攻关) · 立项 2026-07-09 · 来源:BACKLOG #2(指数 83,缺口 15/15 + 付费 19/25,队列唯一同时过双硬门项)
+> 状态:🔴 已做,待真机验收;1.2.0 新增 Whisper 离线引擎(见「Whisper 引擎」节,待出包+真机);上架阻塞:listing 须按 2026-09-02 新楔子重写(原 🟢在做,2026-07-30 工厂日取项攻关) · 立项 2026-07-09 · 来源:BACKLOG #2(指数 83,缺口 15/15 + 付费 19/25,队列唯一同时过双硬门项)
 > 一句话:**点一下就说、边说边出字的离线语音笔记——声音不出这台手机,也不留录音。**
 
 ## 0. 本轮(2026-07-30)取项与技术攻关结论
@@ -188,6 +188,36 @@
 6. 把系统语言切到 iOS 不支持离线识别的语言(如越南语)→ 首页横幅说明「当前语言无离线识别」,不联网、不假装能用。
 7. 飞行模式全程可用(纯设备端)。
 8. 切到后台 → 听写结束并保存(与 Android 一致,不假装后台在听)。
+
+## Whisper 引擎(2026-09-05,v1.2.0,用户当日批准)
+
+**为什么加**:09-04 真机反馈「系统语音识别中断了」「只支持英文」——系统引擎在 iPhone 上依赖 Siri/听写开关和系统语言资源,用户没装就不能用,装了也会被系统随时中断。加一个**不依赖系统任何东西**的引擎:随包自带 whisper.cpp 模型。系统引擎保留(它能用时体验更好:边说边出字、不写音频),设置页/首页 chip 二选一(「系统识别」/「Whisper 离线」),默认仍是系统识别;系统识别不可用的横幅上直接给「改用 Whisper 离线」按钮。
+
+**集成选型(评估过的四个 pub 包)**
+
+| 包 | 结论 |
+|---|---|
+| `whisper_flutter_new` 1.0.1 | ✗ GPL-3.0;两年没更新;运行时从 HuggingFace 下模型(07-30 就因此否掉) |
+| `flutter_whisper` 0.1.0 | ✗ 只有 Android,iOS「计划中」;运行时下模型 |
+| `whisper_flutter_plus` 1.0.0 | ✗ 三年没更新;依赖 `ffmpeg_kit_flutter_full_gpl`(GPL) |
+| **`whisper_ggml` 2.6.0** | ✓ **采用**。MIT;2026-08 发布(whisper.cpp v1.9.1);iOS 15.6+/Android 21+;`ffiPlugin`,whisper.cpp **从源码编译**(iOS podspec、Android CMake/NDK 29),无预编译二进制;`Whisper.transcribe(modelPath:)` 接受本地模型路径,不联网(自带的 `downloadModel` 我们不调) |
+
+`whisper_ggml` 的代价(都已接受并记录):① 硬依赖 `ffmpeg_kit_flutter_new_min` 2.1.0(LGPL v3;Android 走 mavenCentral `com.antonkarpenko:ffmpeg-kit-min:1.0.3`,iOS 的 podspec `prepare_command` 在 `pod install` 时从 GitHub Release 下载 xcframework),包体每 ABI 约 +8~10 MB,且它的文件转写路径**总是**先过一遍 FFmpeg(即便已是 16 kHz WAV)——所以我们直接录成 16 kHz 单声道 PCM16 WAV,FFmpeg 那一步只是一次快速重编码;② iOS 侧 `whisper_ggml`、`ffmpeg_kit_flutter_new_min`、`record_darwin` 都只有 podspec(无 `Package.swift`),Flutter 会在 CI 自动生成 Podfile 走 CocoaPods(daycount 的 `home_widget` 已验证此路可行);**仓里照旧不提交 `ios/Podfile`**;③ 关于/原理页写明开源组件(whisper.cpp MIT、FFmpeg LGPL v3)。**没走 dart:ffi 直连**的原因:等于自己维护 xcframework/CMake 两套构建,本机验不了,收益只是省掉 ffmpeg 那 ~8 MB;若日后要瘦身,可 fork `whisper_ggml` 去掉 ffmpeg 依赖(MIT 允许)。
+
+**模型**:`ggml-base-q5_1.bin`(多语种 base,5-bit 量化,**59,707,625 字节 ≈ 57 MB**,sha256 `422f1ae4…8898`),是中文可用的最小多语种模型。**不进 git**:`prepare_assets.sh` 在构建前从 HuggingFace 下载并校验 sha256,`build-app.yml` 已有 `Prepare assets` 步骤会自动跑;`.gitignore` 排除 `assets/models/*.bin`。模型路径只在 `WhisperEngine.modelAsset` 一处,换 `small`(~190 MB)只改那里 + `prepare_assets.sh` 的 URL/sha。运行时:首次用 Whisper 时把 asset 拷到 app-support 目录(whisper.cpp 只读文件路径),旁边写 `.ok` 标记记录长度,之后启动不再加载 57 MB asset;拷贝在**录音期间**预热,停止后不等。安装包体积:Android AAB 按 ABI 分发约 +57 MB(模型)+ ~10 MB(ffmpeg+whisper);fat APK 约 +80 MB。语言:`DictationLanguage.effectiveTag` → `whisperLanguageCode()`(`zh-CN`→`zh`,不认识的→`auto`);中文额外给 `initial_prompt` 定简繁(zh-CN「以下是普通话的句子。」/ zh-TW「以下是繁體中文的句子。」)。
+
+**流程 M1**:点话筒 → `record`(16 kHz 单声道 WAV,写临时目录)+ 电平条(dBFS)+ 计时,文本框显示「正在录音…停止后开始转写」;点停止 → `DictationState.transcribing`:>60 s 的录音按 60 s 切段、相邻段重叠 5 s(`audio_chunks.dart`,纯 Dart、单测),逐段 `Whisper.transcribe`(带时间戳段),按「重叠区中线归属」合并,去掉 `[BLANK_AUDIO]` 类非语音段;进度条按段推进;再点按钮 = 段边界处提前结束、已转部分保留(whisper.cpp 单段不可中断)。转完 `finalizeTranscript` 建笔记,流程与系统引擎完全一致(标题/时长/语言字段同)。临时 WAV(及 ffmpeg 生成的 `.wav.wav`)在 `finally` 里删,成功失败都删。**不做实时 partial**(`whisper_ggml` 有 `transcribeLive`,留 M2)。切后台:录音中 → 与系统引擎一致,结束并转写保存;转写中 → 不打断(不需要麦克风)。空闲切后台 → 释放常驻内存里的模型。
+
+**错误可见**:模型加载失败(包不完整)/ 录音 <0.7 s / 录音文件读不出 / 转写失败 / 麦克风被占用 / 权限,各有独立文案,失败时已转写的部分不丢;Whisper 路径**只要麦克风权限**,不再要 iOS 的「语音识别」权限。
+
+**隐私文案**:原理页、隐私政策、关于、商店 listing 都改为双引擎叙述;「不留录音」改写为「不保留录音」(Whisper 路径有转写期间的临时文件)。Pro 不变(30 条门 `paywall.dart`)。
+
+**CI 需要的改动(本轮未改共享 workflow,须单独提交)**:
+1. `build-ios.yml`:在 `flutter pub get` 前加与 Android 相同的一步 `if [ -f prepare_assets.sh ]; then bash prepare_assets.sh; fi`,否则 iOS 包缺模型资源、`flutter build ios --config-only` 直接报 asset 不存在。
+2. `build-app.yml`:`timeout-minutes: 30` 建议提到 45——whisper.cpp v1.9.1 从源码编三个 ABI 约需 5~10 分钟;AGP 会按插件声明自动装 NDK 29.0.13113456(licenses 步骤已接受)。
+3. 两个 workflow 的 runner 都需要外网(HuggingFace 下模型;iOS 还有 ffmpeg-kit 的 GitHub Release),现状本就联网,不新增要求。
+
+**待真机验证**:① Android/iOS 各录 10 s 中文、英文,看转写正确率与耗时(base-q5_1 预期约 1× 实时);② 录 2 分钟以上验分段合并不丢字、不重复;③ 转写中点按钮提前结束,已转部分成笔记;④ 转写完成后应用私有目录无 wav 残留;⑤ iOS 首次用 Whisper 只弹麦克风权限;⑥ 系统识别不可用横幅上的「改用 Whisper 离线」一键切换;⑦ 来电打断录音后恢复(`pauseResume`);⑧ 深色模式下转写态面板;⑨ 首次转写前的模型拷贝(57 MB)在低端机上的耗时。**M2 候选**:`transcribeLive` 实时出字(那样 Whisper 路径也不用写音频文件)、`small` 模型可选、去 ffmpeg 依赖的 fork。
 
 ## 2026-09-02 审计修复轮(G5 审计 → 修复 → G5 复审 → 双平台出包)
 

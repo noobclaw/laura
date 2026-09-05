@@ -12,7 +12,7 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     # Fail fast on hangs (a stuck R8 once ate the full 6h default).
-    timeout-minutes: 30
+    timeout-minutes: 45
     outputs:
       slug: ${{ steps.slug.outputs.slug }}
     defaults:

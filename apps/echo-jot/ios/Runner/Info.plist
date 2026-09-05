@@ -5,7 +5,7 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>EchoJot listens through the microphone to turn your speech into text on this device. Audio is never stored or uploaded.</string>
+	<string>EchoJot listens through the microphone to turn your speech into text on this device. Nothing is uploaded; the offline Whisper engine keeps a temporary recording only until it is transcribed, then deletes it.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleLocalizations</key>

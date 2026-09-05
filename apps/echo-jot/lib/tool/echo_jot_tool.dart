@@ -5,11 +5,13 @@ import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'dictation.dart';
 import 'dictation_controller.dart';
+import 'dictation_engine.dart';
 import 'dictation_language.dart';
 import 'home_page.dart';
 import 'note.dart';
 import 'paywall.dart';
 import 'tool_module.dart';
+import 'whisper_engine.dart';
 
 /// EchoJot: offline voice notes. The store and the dictation controller are
 /// created once and shared with every screen; everything the shell needs sits
@@ -54,8 +56,9 @@ class EchoJotTool extends ToolModule {
         leading: const Icon(Icons.mic_none_outlined),
         title: Text(tr(zh: '听写是怎么做到离线的', en: 'How offline dictation works')),
         subtitle: Text(tr(
-          zh: '用系统内置的设备端识别,不下模型、不联网',
-          en: 'System on-device recognizer — no model download, no network',
+          zh: '系统设备端识别,或应用自带的 Whisper 模型;都不联网',
+          en: 'System on-device recognizer or the bundled Whisper model — '
+              'neither goes online',
         )),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const _HowItWorksPage()),
@@ -127,6 +130,15 @@ class EchoJotTool extends ToolModule {
                   onTap: () => PurchaseService.instance.restore(),
                 ),
         ),
+      ValueListenableBuilder<DictationEngine>(
+        valueListenable: DictationEnginePref.current,
+        builder: (context, engine, _) => ListTile(
+          leading: Icon(DictationEnginePref.icon(engine)),
+          title: Text(tr(zh: '转写引擎', en: 'Transcription engine')),
+          subtitle: Text(DictationEnginePref.label(engine)),
+          onTap: () => DictationEnginePref.pick(context),
+        ),
+      ),
       ListenableBuilder(
         listenable: DictationLanguage.override,
         builder: (context, _) => ListTile(
@@ -179,7 +191,9 @@ class EchoJotTool extends ToolModule {
 
 /// Live status of the system on-device recognizer, so the promise in the store
 /// listing is checkable from inside the app. Re-probing is blocked while a
-/// session runs (a second recognizer client can disturb the live one).
+/// session runs (a second recognizer client can disturb the live one). With
+/// the Whisper engine selected the row describes the bundled model instead —
+/// the system recognizer's state is then irrelevant to the user.
 class _RecognizerStatusTile extends StatelessWidget {
   const _RecognizerStatusTile({required this.controller});
 
@@ -188,8 +202,23 @@ class _RecognizerStatusTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: controller,
+      listenable: Listenable.merge([controller, DictationEnginePref.current]),
       builder: (context, _) {
+        if (DictationEnginePref.current.value == DictationEngine.whisper) {
+          return ListTile(
+            leading: const Icon(Icons.offline_bolt_outlined),
+            title: Text(tr(zh: 'Whisper 引擎状态', en: 'Whisper engine')),
+            subtitle: Text(tr(
+              zh: '可用 · 内置 ${WhisperEngine.modelDisplayName} 模型'
+                  '(约 ${WhisperEngine.modelSizeMb} MB,随应用安装,不下载)· '
+                  '近百种语言,不依赖系统语音设置',
+              en: 'Available · bundled ${WhisperEngine.modelDisplayName} model '
+                  '(~${WhisperEngine.modelSizeMb} MB, installed with the app, '
+                  'never downloaded) · ~100 languages, independent of system '
+                  'speech settings',
+            )),
+          );
+        }
         final caps = controller.capabilities;
         final busy = controller.state != DictationState.idle;
         final ready = caps?.ready == true;
@@ -223,7 +252,7 @@ class _RecognizerStatusTile extends StatelessWidget {
             ready ? Icons.offline_bolt_outlined : Icons.error_outline,
             color: ready ? null : Theme.of(context).colorScheme.error,
           ),
-          title: Text(tr(zh: '设备端识别状态', en: 'On-device recognizer')),
+          title: Text(tr(zh: '系统识别引擎状态', en: 'System recognizer')),
           subtitle: Text(subtitle),
           trailing: IconButton(
             icon: const Icon(Icons.refresh),
@@ -249,60 +278,98 @@ class _HowItWorksPage extends StatelessWidget {
       (
         Icons.phone_android,
         tr(zh: '转写在你的手机上完成', en: 'Transcribed on your phone'),
+        // Platform-split on purpose: naming the other platform inside the
+        // app is an App Store rejection (guideline 2.3.10).
         DictationService.needsSpeechPermission
             ? tr(
-                zh: '你按下话筒后,声音交给 iOS 系统内置的设备端语音识别,'
-                    '直接在本机转成文字。应用不下载任何语音模型,'
-                    '也不联网——声音和文字都不出这台手机。',
-                en: 'When you tap the mic, your speech goes to the system\'s '
-                    'built-in on-device speech recognizer and becomes text right '
-                    'here. The app downloads no speech model and never goes '
-                    'online — neither the audio nor the text leaves this device.',
+                zh: '两种引擎,都只在本机运行:「系统识别」把声音交给 iOS 内置的设备端语音识别,'
+                    '边说边出字;「Whisper 离线」用随应用打包的 Whisper 语音模型'
+                    '(约 ${WhisperEngine.modelSizeMb} MB,安装时已包含,不会下载),'
+                    '在你停止后转写。应用不联网——声音和文字都不出这台手机。',
+                en: 'Two engines, both running only on this phone: "System '
+                    'recognizer" hands your speech to iOS\'s built-in on-device '
+                    'recognition and types as you speak; "Whisper offline" uses a '
+                    'Whisper speech model bundled inside the app (~'
+                    '${WhisperEngine.modelSizeMb} MB, included at install, never '
+                    'downloaded) and transcribes after you stop. The app never '
+                    'goes online — neither audio nor text leaves this device.',
               )
             : tr(
-                zh: '你按下话筒后,声音交给系统内置的「设备端语音识别」'
-                    '(Android 12 及以上提供),直接在本机转成文字。应用不下载任何语音模型,'
-                    '也没有网络权限——声音和文字都不出这台手机。',
-                en: 'When you tap the mic, your speech goes to the system\'s built-in '
-                    'on-device speech recognizer (Android 12+) and becomes text right '
-                    'here. The app downloads no speech model and holds no network '
-                    'permission — neither the audio nor the text leaves this device.',
+                zh: '两种引擎,都只在本机运行:「系统识别」把声音交给系统内置的「设备端语音识别」'
+                    '(Android 12 及以上提供),边说边出字;「Whisper 离线」用随应用打包的 '
+                    'Whisper 语音模型(约 ${WhisperEngine.modelSizeMb} MB,安装时已包含,'
+                    '不会下载),在你停止后转写。应用没有网络权限——声音和文字都不出这台手机。',
+                en: 'Two engines, both running only on this phone: "System '
+                    'recognizer" hands your speech to the system\'s built-in '
+                    'on-device recognition (Android 12+) and types as you speak; '
+                    '"Whisper offline" uses a Whisper speech model bundled inside '
+                    'the app (~${WhisperEngine.modelSizeMb} MB, included at '
+                    'install, never downloaded) and transcribes after you stop. '
+                    'The app holds no network permission — neither audio nor text '
+                    'leaves this device.',
               ),
       ),
       (
         Icons.mic_off_outlined,
-        tr(zh: '不保存任何录音', en: 'No recording is kept'),
+        tr(zh: '录音怎么处理', en: 'What happens to the audio'),
         tr(
-          zh: '系统识别器只能边说边识别、读不了已保存的音频文件,'
-              '所以本应用采用「边说边出字」,并且完全不保存音频。'
-              '这也意味着:没有录音可以泄露。',
-          en: 'The system recognizer only listens live — it cannot read a saved '
-              'audio file — so EchoJot dictates as you speak and stores no audio '
-              'at all. Which also means: there is no recording to leak.',
+          zh: '系统识别只能边说边听、读不了文件,所以那条路完全不写音频。'
+              'Whisper 需要一段完整的录音:录音以临时文件存在应用私有目录,'
+              '转写一结束就删除,不会出现在任何相册或文件里。两条路都不会留下录音。',
+          en: 'The system recognizer only listens live and cannot read a file, so '
+              'that path writes no audio at all. Whisper needs the whole '
+              'recording: it is held as a temporary file in the app\'s private '
+              'folder and deleted the moment transcription ends — it never shows '
+              'up in any gallery or file browser. Neither path keeps a recording.',
         ),
       ),
       (
         Icons.auto_fix_high_outlined,
-        tr(zh: '标点由本地规则补上', en: 'Punctuation added locally'),
+        tr(zh: '标点从哪来', en: 'Where punctuation comes from'),
         tr(
-          zh: '系统识别器通常不带标点,应用用本地规则给每句补句号、'
-              '英文自动首字母大写;听错的地方在笔记页可以直接改。',
+          zh: '系统识别器通常不带标点,应用用本地规则给每句补句号、英文自动首字母大写;'
+              'Whisper 自己会断句加标点。听错的地方在笔记页可以直接改。',
           en: 'System recognizers usually return no punctuation, so the app adds '
-              'sentence endings locally and capitalises Latin sentences. Anything '
-              'misheard can be fixed on the note screen.',
+              'sentence endings locally and capitalises Latin sentences; Whisper '
+              'punctuates by itself. Anything misheard can be fixed on the note '
+              'screen.',
         ),
       ),
       (
         Icons.shield_outlined,
         tr(zh: '不可用时会明说,不偷偷联网', en: 'Honest when unavailable'),
+        DictationService.needsSpeechPermission
+            ? tr(
+                zh: '如果 iOS 的离线听写没开启、或当前语言没有离线识别,应用会告诉你怎么处理,'
+                    '并提供「改用 Whisper 离线」——绝不会为了「能用」改成联网识别。'
+                    '系统识别的语种取决于 iOS 提供了哪些离线语言;Whisper 自带近百种语言。',
+                en: 'If offline dictation is switched off, or the current language '
+                    'has no offline recognition, the app tells you what to do and '
+                    'offers "Use Whisper offline" — it never switches to online '
+                    'recognition just to appear to work. The system engine\'s '
+                    'languages are the offline ones iOS provides; Whisper brings '
+                    '~100 languages of its own.',
+              )
+            : tr(
+                zh: '如果系统里没装设备端语言包,应用会告诉你去哪里下载,并提供「改用 Whisper 离线」'
+                    '——绝不会为了「能用」改成联网识别。系统识别的语种取决于系统装了哪些语言包;'
+                    'Whisper 自带近百种语言。',
+                en: 'If no on-device language pack is installed, the app tells you '
+                    'where to get one and offers "Use Whisper offline" — it never '
+                    'switches to online recognition just to appear to work. The '
+                    'system engine\'s languages depend on the packs your system '
+                    'has; Whisper brings ~100 languages of its own.',
+              ),
+      ),
+      (
+        Icons.code,
+        tr(zh: '开源组件', en: 'Open-source components'),
         tr(
-          zh: '如果系统里没装设备端语言包,应用会告诉你去哪里下载并停止听写——'
-              '绝不会为了「能用」改成联网识别。语种取决于你系统里装了哪些语言包,'
-              '不是应用自带的。',
-          en: 'If no on-device language pack is installed, the app tells you where '
-              'to get one and stops — it never switches to online recognition just '
-              'to appear to work. Which languages work depends on the packs your '
-              'system has, not on the app.',
+          zh: 'Whisper 引擎基于 whisper.cpp(MIT 许可)与 OpenAI Whisper 模型权重(MIT);'
+              '音频格式处理使用 FFmpeg(LGPL v3)。这些组件同样只在本机运行。',
+          en: 'The Whisper engine is built on whisper.cpp (MIT licence) and the '
+              'OpenAI Whisper model weights (MIT); audio format handling uses '
+              'FFmpeg (LGPL v3). These components, too, run only on this phone.',
         ),
       ),
     ];
