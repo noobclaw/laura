@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collectGithub } from './github_trending.mjs';
 import { collectGithubSearch } from './github_search.mjs';
+import { collectEzindie } from './ezindie_weekly.mjs';
 import { collectAppStore } from './appstore_rss.mjs';
 import { collectGooglePlay } from './google_play.mjs';
 import { collectShowHN } from './hn_showhn.mjs';
@@ -25,6 +26,7 @@ await mkdir(outDir, { recursive: true });
 const collectors = [
   ['github', collectGithub],
   ['github_search', collectGithubSearch],
+  ['ezindie', collectEzindie],
   ['appstore', collectAppStore],
   ['googleplay', collectGooglePlay],
   ['hn_showhn', collectShowHN],
