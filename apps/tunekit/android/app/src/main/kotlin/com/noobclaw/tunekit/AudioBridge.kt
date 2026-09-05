@@ -43,6 +43,9 @@ import kotlin.math.sin
  * from Handler/Timer wake-ups, and keeps running with the screen off for as
  * long as the process lives.
  */
+/** One sounding click: when it started (in output frames) and which accent level. */
+private class Voice(val start: Long, val kind: Int)
+
 class AudioBridge(
     private val activity: Activity,
     messenger: BinaryMessenger,
@@ -337,8 +340,6 @@ class AudioBridge(
                 main.post { stop(notify = true) }
             }
         }
-
-        private class Voice(val start: Long, val kind: Int)
 
         private fun kindAt(tickIndex: Long): Int {
             val perBar = beats * subPerBeat
