@@ -19,6 +19,18 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// Plugin libraries that still declare an old compileSdk (whisper_ggml pins 34)
+// fail AAR-metadata checks against ffmpeg_kit_flutter_new_min, which needs 35+.
+// Lift every library module to the app's level; the plugin sources are fine
+// with it.
+subprojects {
+    afterEvaluate {
+        extensions.findByType<com.android.build.gradle.LibraryExtension>()?.apply {
+            if ((compileSdk ?: 0) < 36) compileSdk = 36
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
