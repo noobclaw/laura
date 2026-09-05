@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher label shown on Chinese-language devices. "老照片修复" alone is
+     used by dozens of App Store listings; the "离线" qualifier is the product
+     wedge and keeps the name distinct. -->
+<resources>
+    <string name="app_name">离线老照片修复</string>
+</resources>

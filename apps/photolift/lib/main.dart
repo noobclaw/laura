@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/branding.dart';
+import 'core/l10n.dart';
+import 'core/purchase.dart';
+import 'core/settings_page.dart';
+import 'tool/app_theme.dart';
+import 'tool/photolift_tool.dart';
+
+/// The one line a generated app changes to plug in its tool. Typed as the
+/// concrete tool (not `ToolModule`) so the purchase wiring can reach its store.
+final PhotoLiftTool tool = PhotoLiftTool();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // The compare slider and the progress screen are laid out for portrait;
+  // Info.plist / AndroidManifest lock it too, this covers rotation on
+  // devices that ignore the manifest hint.
+  await SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
+  // Real IAP: a purchase or restore of the Pro unlock flips the persisted
+  // Pro flag. Safe on devices without a store — the service degrades silently.
+  PurchaseService.instance.init(onUnlocked: () => tool.store.unlockPro());
+  // The saved language must be known before the first frame.
+  await AppLanguage.load();
+  runApp(const ShellApp());
+}
+
+class ShellApp extends StatelessWidget {
+  const ShellApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppLanguage.override,
+      // A new key per language rebuilds the whole tree so every tr()
+      // string and Material widget switches at once.
+      builder: (context, code, _) => MaterialApp(
+        key: ValueKey('lang-$code'),
+        locale: AppLanguage.locale,
+        title: Branding.appName,
+        debugShowCheckedModeBanner: false,
+        // System widgets (tooltips, dialogs…) follow the device language;
+        // our own strings do too via core/l10n.dart `tr()`.
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [Locale('en'), Locale('zh')],
+        theme: buildPhotoLiftTheme(Brightness.light),
+        darkTheme: buildPhotoLiftTheme(Brightness.dark),
+        // Purchase results surface as snackbars on whatever screen is open —
+        // a paywall that swallows "payment failed" is a support ticket.
+        builder: (_, child) => PurchaseNotices(child: child),
+        home: const _HomeScaffold(),
+      ),
+    );
+  }
+}
+
+class _HomeScaffold extends StatelessWidget {
+  const _HomeScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(Branding.appName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: tr(zh: '设置', en: 'Settings'),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
+          ),
+        ],
+      ),
+      body: SafeArea(child: tool.buildHome(context)),
+    );
+  }
+}

@@ -1,0 +1,4 @@
+/* Localized launcher name. The Android side keeps the same pair in
+   res/values/strings.xml and res/values-zh/strings.xml. */
+"CFBundleDisplayName" = "PhotoLift";
+"NSPhotoLibraryAddUsageDescription" = "PhotoLift saves an enhanced photo to your Photos library only when you tap Save. Nothing is read from your library and nothing is uploaded.";

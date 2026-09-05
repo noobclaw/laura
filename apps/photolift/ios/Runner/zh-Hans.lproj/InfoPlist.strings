@@ -1,0 +1,4 @@
+/* Localized launcher name. The Android side keeps the same pair in
+   res/values/strings.xml and res/values-zh/strings.xml. */
+"CFBundleDisplayName" = "离线老照片修复";
+"NSPhotoLibraryAddUsageDescription" = "只有当你点击「保存」时,才会把修复好的照片存入相册。应用不读取相册内容,也不会上传任何照片。";

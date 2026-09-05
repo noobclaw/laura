@@ -1,0 +1,50 @@
+name: photolift
+description: "Offline old-photo upscaler and restorer (on-device Real-ESRGAN)."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Locale-aware Material/Cupertino widgets (date pickers etc.); our own
+  # strings are localized inline via core/l10n.dart `tr()`.
+  flutter_localizations:
+    sdk: flutter
+  # Play Billing / StoreKit for the single Pro unlock (core/purchase.dart).
+  # Billing goes through the store app's process — no INTERNET permission
+  # needed, the zero-network claim holds.
+  in_app_purchase: ^3.2.0
+
+  cupertino_icons: ^1.0.8
+
+  # App-sandbox paths for the processed-photo library and the JSON store.
+  path_provider: ^2.1.5
+  # Pure-Dart FALLBACK resampler (used only when the native ncnn engine is
+  # unavailable) and the synthetic-image unit tests.
+  image: ^4.3.0
+  # Native share sheet for the enhanced photo (no INTERNET permission).
+  share_plus: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Real-ESRGAN realesr-general-x4v3 (BSD-3, xinntao/Real-ESRGAN) converted
+    # to ncnn with pnnx — see scripts/convert_model.py. dn0 = plain,
+    # dn1 = the "wdn" (with-denoise) weights, dn05 = 50/50 weight blend
+    # (what Real-ESRGAN's `-dn 0.5` does at inference time).
+    - assets/models/general-x4v3-dn0.param
+    - assets/models/general-x4v3-dn0.bin
+    - assets/models/general-x4v3-dn05.param
+    - assets/models/general-x4v3-dn05.bin
+    - assets/models/general-x4v3-dn1.param
+    - assets/models/general-x4v3-dn1.bin
