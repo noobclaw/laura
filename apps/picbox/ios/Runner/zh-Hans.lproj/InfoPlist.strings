@@ -1,0 +1,6 @@
+/* Localized launcher name. The Android side keeps the same pair in
+   res/values/strings.xml and res/values-zh/strings.xml. */
+"CFBundleDisplayName" = "图片万能箱";
+"NSPhotoLibraryUsageDescription" = "图片万能箱通过系统照片选择器让你挑选要压缩、缩放、转换、裁剪、去元数据或加水印的图片。图片只在本机处理。";
+"NSPhotoLibraryAddUsageDescription" = "当你点击「保存到相册」时,图片万能箱把处理好的图片存入你的相册。";
+"NSCameraUsageDescription" = "只有当你点击「拍摄」把新照片加入当前工具时,图片万能箱才会使用相机。照片只保存在本机。";
