@@ -76,8 +76,8 @@
 - 平台差异写进代码:iOS WebP 不带 EXIF(UI 提示);iOS HEIC 由 picker 转 JPEG;Android HEIC 需 API 28+。
 
 ## 定价(变现标准)
-- 免费:六个工具全功能,**每次最多 3 张**;无水印预设;无 WebP 导出;设置不记忆。
-- Pro **$4.99**(一次买断,商品 `com.noobclaw.picbox.pro_unlock`,ASC Tier 5):不限张数、WebP 导出、水印预设、每个工具记住上次设置。
+- 免费:六个工具全功能,**每次最多 3 张**;无水印预设;无 WebP 导出;设置不记忆。去元数据对 JPEG/PNG/WebP 无损,HEIC 先转 JPEG(Android 原生 q95;iOS 由 picker 转)。
+- Pro **$4.99**(一次买断,商品 `com.noobclaw.picbox.pro_unlock`,ASC Tier 5):不限张数、WebP 导出、水印预设、压缩/缩放/转换/裁剪/水印记住上次设置。
 - 锚定:iOS 单功能竞品多为订阅($2.99–4.99/月或 $9.99–19.99/年),买断 $4.99 ≈ 其年费 1/3 以下。中区若上架取 ¥28。
 - 所有付费门(批量上限 / WebP 芯片 / 存预设 / 设置页 Pro 行)统一 `showProSheet(context, reason:)`;`buyPro(` 只在 `pro.dart` 与 `core/purchase.dart`。
 

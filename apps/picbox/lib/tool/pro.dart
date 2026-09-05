@@ -72,8 +72,8 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                   en: 'Save watermark presets and apply them in one tap',
                 )),
                 _Perk(tr(
-                  zh: '每个工具记住你上次的设置',
-                  en: 'Every tool remembers your last settings',
+                  zh: '压缩、缩放、转换、裁剪、水印记住你上次的设置',
+                  en: 'Compress, resize, convert, crop and watermark remember your last settings',
                 )),
                 const SizedBox(height: 12),
                 Text(

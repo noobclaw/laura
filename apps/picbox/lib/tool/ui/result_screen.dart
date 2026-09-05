@@ -23,6 +23,7 @@ class ResultScreen extends StatefulWidget {
 class _ResultScreenState extends State<ResultScreen> {
   bool _saving = false;
   bool _saved = false;
+  bool _sharing = false;
 
   int get _okCount => widget.results.where((r) => r.ok).length;
 
@@ -48,8 +49,14 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _share(BuildContext btnContext) async {
-    final err = await shareResults(widget.results, origin: shareOriginOf(btnContext));
-    if (err != null && mounted) showNotice(context, err);
+    if (_sharing) return;
+    setState(() => _sharing = true);
+    try {
+      final err = await shareResults(widget.results, origin: shareOriginOf(btnContext));
+      if (err != null && mounted) showNotice(context, err);
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
   }
 
   @override
@@ -111,7 +118,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   const SizedBox(width: 10),
                   Builder(
                     builder: (btnCtx) => OutlinedButton.icon(
-                      onPressed: _okCount == 0 ? null : () => _share(btnCtx),
+                      onPressed: _okCount == 0 || _sharing ? null : () => _share(btnCtx),
                       style: OutlinedButton.styleFrom(minimumSize: const Size(0, 52)),
                       icon: const Icon(Icons.ios_share_rounded),
                       label: Text(tr(zh: '分享', en: 'Share')),

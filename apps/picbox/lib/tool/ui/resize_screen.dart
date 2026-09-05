@@ -102,7 +102,8 @@ class _ResizeScreenState extends State<ResizeScreen> {
           quality: _quality,
           keepExif: _keepExif,
           fitW: target.width,
-          fitH: target.height);
+          fitH: target.height,
+          orientation: input == src.path ? src.orientation : 1);
       await File(path).writeAsBytes(bytes, flush: true);
       final p = await probeFile(path);
       return JobResult(

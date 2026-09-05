@@ -12,6 +12,7 @@ class ProbeInfo {
     required this.width,
     required this.height,
     required this.hasAlpha,
+    this.orientation = 1,
   });
   final ImageFormat format;
   final int width;
@@ -20,6 +21,9 @@ class ProbeInfo {
   /// True when the container declares an alpha channel (PNG colour type
   /// 4/6 or a tRNS chunk, WebP VP8X alpha flag / VP8L). JPEG never has one.
   final bool hasAlpha;
+
+  /// EXIF orientation (1..8) for JPEG, 1 otherwise.
+  final int orientation;
 }
 
 ImageFormat formatFromSniff(String s) => switch (s) {
@@ -38,6 +42,7 @@ ProbeInfo probeImage(Uint8List bytes) {
   var w = 0;
   var h = 0;
   var alpha = false;
+  var orientation = 1;
   try {
     switch (format) {
       case ImageFormat.jpeg:
@@ -47,6 +52,7 @@ ProbeInfo probeImage(Uint8List bytes) {
         // Report the upright size: an EXIF orientation of 5..8 means the
         // stored pixels are rotated 90°, and every tool works upright.
         final o = _jpegOrientation(bytes);
+        orientation = o.clamp(1, 8);
         if (o >= 5 && o <= 8) {
           final t = w;
           w = h;
@@ -73,7 +79,7 @@ ProbeInfo probeImage(Uint8List bytes) {
     // A truncated header is reported as 0×0; the pipeline rejects it later
     // with a readable error instead of crashing here.
   }
-  return ProbeInfo(format: format, width: w, height: h, hasAlpha: alpha);
+  return ProbeInfo(format: format, width: w, height: h, hasAlpha: alpha, orientation: orientation);
 }
 
 int _jpegOrientation(Uint8List b) {

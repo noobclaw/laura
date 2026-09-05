@@ -79,7 +79,8 @@ class _CompressScreenState extends State<CompressScreen> {
         note = tr(zh: 'PNG 无损,画质设置无效', en: 'PNG is lossless; quality has no effect');
       }
       bytes = await nativeEncode(input,
-          format: fmt, quality: _quality, keepExif: _keepExif, srcW: src.width, srcH: src.height);
+          format: fmt, quality: _quality, keepExif: _keepExif, srcW: src.width, srcH: src.height,
+          orientation: input == src.path ? src.orientation : 1);
     } else {
       final r = await nativeCompressToSize(src,
           format: fmt, targetBytes: _targetBytes, keepExif: _keepExif, inputPath: input);

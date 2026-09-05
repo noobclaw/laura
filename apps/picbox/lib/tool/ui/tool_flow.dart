@@ -26,7 +26,8 @@ class RunContext {
 }
 
 typedef RunOne = Future<JobResult> Function(SourceImage src, RunContext ctx);
-typedef ImagesBuilder = Widget Function(BuildContext context, List<SourceImage> images);
+typedef ImagesBuilder =
+    Widget Function(BuildContext context, List<SourceImage> images);
 
 /// The shared skeleton of every tool screen: header → picked images →
 /// optional preview → options → hero "Process" button; then the progress
@@ -82,7 +83,9 @@ class _ToolScaffoldState extends State<ToolScaffold> {
   Future<void> _import({required bool camera}) async {
     if (_importing) return;
     setState(() => _importing = true);
-    final r = camera ? await _importer.captureFromCamera() : await _importer.pickFromLibrary();
+    final r = camera
+        ? await _importer.captureFromCamera()
+        : await _importer.pickFromLibrary();
     if (!mounted) return;
     setState(() {
       _importing = false;
@@ -90,15 +93,30 @@ class _ToolScaffoldState extends State<ToolScaffold> {
     });
     widget.onImagesChanged?.call(List.unmodifiable(_images));
     if (r.error != null) {
-      showNotice(context, r.error!,
-          action: r.permissionDenied
-              ? SnackBarAction(label: tr(zh: '去设置', en: 'Settings'), onPressed: openSystemSettings)
-              : null);
+      showNotice(
+        context,
+        r.error!,
+        action: r.permissionDenied
+            ? SnackBarAction(
+                label: tr(zh: '去设置', en: 'Settings'),
+                onPressed: openSystemSettings,
+              )
+            : null,
+      );
     } else if (r.skipped.isNotEmpty) {
       showNotice(
-          context,
-          '${tr(zh: '已跳过', en: 'Skipped')} ${r.skipped.length}: ${r.skipped.first}'
-          '${r.skipped.length > 1 ? ' …' : ''}');
+        context,
+        '${tr(zh: '已跳过', en: 'Skipped')} ${r.skipped.length}: ${r.skipped.first}'
+        '${r.skipped.length > 1 ? ' …' : ''}',
+      );
+    } else if (r.converted > 0) {
+      showNotice(
+        context,
+        tr(
+          zh: '${r.converted} 张 HEIC 已转成 JPEG,结果将以 JPEG 输出',
+          en: '${r.converted} HEIC converted to JPEG; results will be JPEG',
+        ),
+      );
     }
   }
 
@@ -114,41 +132,72 @@ class _ToolScaffoldState extends State<ToolScaffold> {
 
   Future<void> _run() async {
     if (_images.isEmpty || _running) return; // double-tap guard
-    _running = true;
+    setState(() => _running = true);
     try {
       await _runBatch();
     } finally {
-      _running = false;
+      if (mounted) setState(() => _running = false);
     }
   }
 
   Future<void> _runBatch() async {
     if (_images.length > kFreeBatchLimit && !widget.store.pro) {
-      await showProSheet(context,
-          reason: tr(
-            zh: '免费版每次最多处理 $kFreeBatchLimit 张,你选了 ${_images.length} 张。解锁 Pro 后不限张数。',
-            en: 'The free version handles up to $kFreeBatchLimit images per run; you picked ${_images.length}. Pro removes the cap.',
-          ));
+      await showProSheet(
+        context,
+        reason: tr(
+          zh: '免费版每次最多处理 $kFreeBatchLimit 张,你选了 ${_images.length} 张。解锁 Pro 后不限张数。',
+          en: 'The free version handles up to $kFreeBatchLimit images per run; you picked ${_images.length}. Pro removes the cap.',
+        ),
+      );
       return;
     }
     widget.onBeforeRun?.call();
     final dir = await WorkDirs.fresh('out');
     final ctx = RunContext(outDir: dir.path, meta: meta);
     final batch = List<SourceImage>.from(_images);
-    final progress = ValueNotifier<_Progress>(_Progress(0, batch.length, batch.first.name));
+    final progress = ValueNotifier<_Progress>(
+      _Progress(0, batch.length, batch.first.name),
+    );
     var cancelled = false;
-    if (!mounted) return;
+    if (!mounted) {
+      progress.dispose();
+      return;
+    }
+    try {
+      await _runWithSheet(
+        batch,
+        ctx,
+        progress,
+        () => cancelled,
+        () => cancelled = true,
+      );
+    } finally {
+      // Disposed only after the result page has been popped, i.e. long
+      // after the progress sheet stopped listening.
+      progress.dispose();
+    }
+  }
+
+  Future<void> _runWithSheet(
+    List<SourceImage> batch,
+    RunContext ctx,
+    ValueNotifier<_Progress> progress,
+    bool Function() isCancelled,
+    VoidCallback cancel,
+  ) async {
     // The sheet is not dismissible by tapping outside; cancel stops after
     // the current image (the isolate finishes its picture, then we stop).
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      builder: (_) => _ProgressSheet(progress: progress, onCancel: () => cancelled = true),
-    ));
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isDismissible: false,
+        enableDrag: false,
+        builder: (_) => _ProgressSheet(progress: progress, onCancel: cancel),
+      ),
+    );
     final results = <JobResult>[];
     for (var i = 0; i < batch.length; i++) {
-      if (cancelled) break;
+      if (isCancelled()) break;
       final src = batch[i];
       progress.value = _Progress(i, batch.length, src.name);
       JobResult r;
@@ -164,9 +213,15 @@ class _ToolScaffoldState extends State<ToolScaffold> {
     Navigator.of(context).pop(); // progress sheet
     if (results.isEmpty) return;
     widget.store.addProcessed(results.where((r) => r.ok).length);
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ResultScreen(meta: meta, results: results, cancelled: cancelled),
-    ));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ResultScreen(
+          meta: meta,
+          results: results,
+          cancelled: isCancelled(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -174,7 +229,11 @@ class _ToolScaffoldState extends State<ToolScaffold> {
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final total = _images.fold<int>(0, (a, b) => a + b.bytes);
-    final canRun = _images.isNotEmpty && widget.blocker == null && !_importing;
+    final canRun =
+        _images.isNotEmpty &&
+        widget.blocker == null &&
+        !_importing &&
+        !_running;
     return Scaffold(
       appBar: AppBar(
         title: Text(meta.title),
@@ -221,7 +280,9 @@ class _ToolScaffoldState extends State<ToolScaffold> {
                         zh: '${_images.length} 张 · 共 ${formatBytes(total)}',
                         en: '${_images.length} image${_images.length == 1 ? '' : 's'} · ${formatBytes(total)} total',
                       ),
-                      style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                      style: text.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -235,11 +296,19 @@ class _ToolScaffoldState extends State<ToolScaffold> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: cs.onSurfaceVariant),
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(widget.blocker!,
-                            style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                        child: Text(
+                          widget.blocker!,
+                          style: text.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -253,11 +322,18 @@ class _ToolScaffoldState extends State<ToolScaffold> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: FilledButton.icon(
                 onPressed: canRun ? _run : null,
-                style: FilledButton.styleFrom(backgroundColor: canRun ? meta.color : null),
+                style: FilledButton.styleFrom(
+                  backgroundColor: canRun ? meta.color : null,
+                ),
                 icon: Icon(meta.icon),
-                label: Text(_images.isEmpty
-                    ? tr(zh: '先选择图片', en: 'Pick images first')
-                    : tr(zh: '开始处理 ${_images.length} 张', en: 'Process ${_images.length}')),
+                label: Text(
+                  _images.isEmpty
+                      ? tr(zh: '先选择图片', en: 'Pick images first')
+                      : tr(
+                          zh: '开始处理 ${_images.length} 张',
+                          en: 'Process ${_images.length}',
+                        ),
+                ),
               ),
             ),
           ),
@@ -292,7 +368,10 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(meta.subtitle, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+          child: Text(
+            meta.subtitle,
+            style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+          ),
         ),
       ],
     );
@@ -300,7 +379,12 @@ class _Header extends StatelessWidget {
 }
 
 class _EmptyPicker extends StatelessWidget {
-  const _EmptyPicker({required this.meta, required this.busy, required this.onPick, required this.onCamera});
+  const _EmptyPicker({
+    required this.meta,
+    required this.busy,
+    required this.onPick,
+    required this.onCamera,
+  });
   final ToolMeta meta;
   final bool busy;
   final VoidCallback onPick;
@@ -315,7 +399,10 @@ class _EmptyPicker extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: cs.surfaceContainerHigh,
-        border: Border.all(color: meta.color.withValues(alpha: 0.35), width: 1.5),
+        border: Border.all(
+          color: meta.color.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
       ),
       child: Column(
         children: [
@@ -326,10 +413,17 @@ class _EmptyPicker extends StatelessWidget {
               shape: BoxShape.circle,
               color: meta.color.withValues(alpha: 0.12),
             ),
-            child: Icon(Icons.add_photo_alternate_outlined, size: 34, color: meta.color),
+            child: Icon(
+              Icons.add_photo_alternate_outlined,
+              size: 34,
+              color: meta.color,
+            ),
           ),
           const SizedBox(height: 14),
-          Text(tr(zh: '选几张图片开始', en: 'Pick some pictures to begin'), style: text.titleMedium),
+          Text(
+            tr(zh: '选几张图片开始', en: 'Pick some pictures to begin'),
+            style: text.titleMedium,
+          ),
           const SizedBox(height: 4),
           Text(
             tr(
@@ -346,7 +440,11 @@ class _EmptyPicker extends StatelessWidget {
                 child: FilledButton.tonalIcon(
                   onPressed: busy ? null : onPick,
                   icon: busy
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Icon(Icons.photo_library_outlined),
                   label: Text(tr(zh: '从相册选择', en: 'From library')),
                 ),
@@ -396,7 +494,10 @@ class _ImageStrip extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Tooltip(message: '${s.name}\n${describeImage(s)}', child: ImageThumb(path: s.path, size: 84, radius: 14)),
+                  Tooltip(
+                    message: '${s.name}\n${describeImage(s)}',
+                    child: ImageThumb(path: s.path, size: 84, radius: 14),
+                  ),
                   if (!pro && i >= kFreeBatchLimit)
                     Positioned.fill(
                       child: Container(
@@ -404,7 +505,10 @@ class _ImageStrip extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                           color: Colors.black.withValues(alpha: 0.45),
                         ),
-                        child: const Icon(Icons.lock_outline, color: Colors.white),
+                        child: const Icon(
+                          Icons.lock_outline,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   Positioned(
@@ -418,7 +522,11 @@ class _ImageStrip extends StatelessWidget {
                         onTap: () => onRemove(s),
                         child: Padding(
                           padding: const EdgeInsets.all(4),
-                          child: Icon(Icons.close, size: 14, color: cs.onInverseSurface),
+                          child: Icon(
+                            Icons.close,
+                            size: 14,
+                            color: cs.onInverseSurface,
+                          ),
                         ),
                       ),
                     ),
@@ -426,9 +534,17 @@ class _ImageStrip extends StatelessWidget {
                 ],
               ),
             ),
-          _AddTile(icon: Icons.add_photo_alternate_outlined, onTap: busy ? null : onAdd, busy: busy),
+          _AddTile(
+            icon: Icons.add_photo_alternate_outlined,
+            onTap: busy ? null : onAdd,
+            busy: busy,
+          ),
           const SizedBox(width: 8),
-          _AddTile(icon: Icons.photo_camera_outlined, onTap: busy ? null : onCamera, busy: false),
+          _AddTile(
+            icon: Icons.photo_camera_outlined,
+            onTap: busy ? null : onCamera,
+            busy: false,
+          ),
         ],
       ),
     );
@@ -454,7 +570,13 @@ class _AddTile extends StatelessWidget {
           width: 84,
           height: 84,
           child: busy
-              ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+              ? const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
               : Icon(icon, color: cs.primary),
         ),
       ),
@@ -494,11 +616,17 @@ class _ProgressSheet extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(tr(zh: '正在处理…', en: 'Processing…'), style: text.titleMedium),
+                        child: Text(
+                          tr(zh: '正在处理…', en: 'Processing…'),
+                          style: text.titleMedium,
+                        ),
                       ),
-                      Text('${p.done} / ${p.total}',
-                          style: text.titleMedium?.copyWith(
-                              fontFeatures: const [FontFeature.tabularFigures()])),
+                      Text(
+                        '${p.done} / ${p.total}',
+                        style: text.titleMedium?.copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
@@ -508,7 +636,9 @@ class _ProgressSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    p.current.isEmpty ? tr(zh: '收尾中', en: 'Finishing') : p.current,
+                    p.current.isEmpty
+                        ? tr(zh: '收尾中', en: 'Finishing')
+                        : p.current,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
@@ -518,7 +648,9 @@ class _ProgressSheet extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: onCancel,
-                      child: Text(tr(zh: '完成当前这张后停止', en: 'Stop after this one')),
+                      child: Text(
+                        tr(zh: '完成当前这张后停止', en: 'Stop after this one'),
+                      ),
                     ),
                   ),
                 ],

@@ -36,6 +36,7 @@ class _WatermarkScreenState extends State<WatermarkScreen> {
   WatermarkSpec _spec = const WatermarkSpec();
   late final TextEditingController _text;
   int _quality = 92;
+  bool _keepExif = false;
 
   static const _key = 'watermark';
 
@@ -46,6 +47,7 @@ class _WatermarkScreenState extends State<WatermarkScreen> {
     if (s != null) {
       _spec = WatermarkSpec.fromJson(Map<String, dynamic>.from(s['spec'] as Map? ?? const {}));
       _quality = (s['quality'] as num?)?.toInt() ?? 92;
+      _keepExif = s['keepExif'] as bool? ?? false;
     }
     _text = TextEditingController(text: _spec.text);
   }
@@ -56,7 +58,7 @@ class _WatermarkScreenState extends State<WatermarkScreen> {
     super.dispose();
   }
 
-  void _remember() => widget.store.rememberSettings(_key, {'spec': _spec.toJson(), 'quality': _quality});
+  void _remember() => widget.store.rememberSettings(_key, {'spec': _spec.toJson(), 'quality': _quality, 'keepExif': _keepExif});
 
   void _set(WatermarkSpec s) => setState(() => _spec = s);
 
@@ -108,7 +110,7 @@ class _WatermarkScreenState extends State<WatermarkScreen> {
       outputPath: tmp,
       format: fmt,
       quality: _quality,
-      keepMetadata: true,
+      keepMetadata: _keepExif,
       edit: DartEdit(
         watermark: WatermarkJob(rgba: sprite.rgba, width: sprite.width, height: sprite.height, spec: _spec),
         fillWhiteIfAlpha: fmt == ImageFormat.jpeg,
@@ -321,6 +323,12 @@ class _WatermarkScreenState extends State<WatermarkScreen> {
                   value: _spec.shadow,
                   onChanged: (v) => _set(_spec.copyWith(shadow: v)),
                 ),
+                SwitchRow(
+                  label: tr(zh: '保留拍摄信息 (EXIF)', en: 'Keep photo info (EXIF)'),
+                  subtitle: tr(zh: '默认关闭:加了水印的图通常是要发出去的', en: 'Off by default: watermarked pictures are usually meant for sharing'),
+                  value: _keepExif,
+                  onChanged: (v) => setState(() => _keepExif = v),
+                ),
               ],
             ),
           ),
@@ -396,8 +404,11 @@ class _PreviewPainter extends CustomPainter {
       shadow: spec.shadow,
       maxWidth: math.max(fontPx, imageSize.width - margin * 2),
     );
-    final sw = tp.width.ceil();
-    final sh = tp.height.ceil();
+    // Same padding the export sprite carries (room for the shadow blur),
+    // so anchors and tile pitch land on the same pixels as the export.
+    final pad = (fontPx * 0.25).ceil();
+    final sw = tp.width.ceil() + pad * 2;
+    final sh = tp.height.ceil() + pad * 2;
     canvas.save();
     canvas.clipRect(offset & imageSize);
     canvas.translate(offset.dx, offset.dy);
@@ -409,12 +420,12 @@ class _PreviewPainter extends CustomPainter {
         canvas.save();
         canvas.translate(p.x + rb.width / 2, p.y + rb.height / 2);
         canvas.rotate(spec.tileAngleDeg * math.pi / 180);
-        tp.paint(canvas, Offset(-sw / 2, -sh / 2));
+        tp.paint(canvas, Offset(-sw / 2 + pad, -sh / 2 + pad));
         canvas.restore();
       }
     } else {
       final o = anchorOffset(w: w, h: h, spriteW: sw, spriteH: sh, margin: margin.round(), anchor: spec.anchor);
-      tp.paint(canvas, Offset(o.x.toDouble(), o.y.toDouble()));
+      tp.paint(canvas, Offset(o.x.toDouble() + pad, o.y.toDouble() + pad));
     }
     canvas.restore();
   }

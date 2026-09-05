@@ -44,6 +44,7 @@ class SourceImage {
     required this.height,
     required this.format,
     this.originalFormat,
+    this.orientation = 1,
   });
 
   final String id;
@@ -62,6 +63,10 @@ class SourceImage {
 
   /// Set when the picked file was converted on import (HEIC → JPEG).
   final ImageFormat? originalFormat;
+
+  /// EXIF orientation of [path] (1 = upright / none). Stored pixels are
+  /// rotated 90° when 5..8; [width]/[height] are already upright.
+  final int orientation;
 
   /// File name without extension, used to build output names.
   String get stem {

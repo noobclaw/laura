@@ -68,6 +68,7 @@ Future<Uint8List> nativeEncode(
   int? fitH,
   int srcW = 0,
   int srcH = 0,
+  int orientation = 1,
 }) async {
   int minW;
   int minH;
@@ -81,6 +82,15 @@ Future<Uint8List> nativeEncode(
     // The plugin's box is a *maximum*; a huge box means "keep size".
     minW = 1 << 20;
     minH = 1 << 20;
+  }
+  // Android computes the scale on the stored (un-rotated) bitmap and only
+  // then applies the EXIF rotation, so for orientation 5..8 the box must be
+  // given in stored space or the result lands ~33 % too large. iOS ImageIO
+  // orients first, so the upright box is correct there.
+  if (Platform.isAndroid && orientation >= 5 && orientation <= 8 && minW < (1 << 20)) {
+    final t = minW;
+    minW = minH;
+    minH = t;
   }
   final out = await FlutterImageCompress.compressWithFile(
     path,
@@ -148,7 +158,8 @@ Future<({Uint8List bytes, SizeSearchResult search})> nativeCompressToSize(
           keepExif: keepExif,
           scale: p.scale,
           srcW: src.width,
-          srcH: src.height);
+          srcH: src.height,
+          orientation: inputPath == null ? src.orientation : 1);
       last = b;
       if (b.length <= target && (best == null || b.length > best!.length)) {
         best = b;
@@ -296,7 +307,7 @@ DartJobOutput _dartWorker(DartJobSpec spec) {
   }
 
   final toJpeg = spec.format == ImageFormat.jpeg;
-  if (toJpeg && image.numChannels == 4) {
+  if (toJpeg && image.hasAlpha) {
     // JPEG cannot carry alpha: composite over white.
     final bg = img.Image(width: image.width, height: image.height, numChannels: 3);
     bg.clear(img.ColorRgb8(255, 255, 255));

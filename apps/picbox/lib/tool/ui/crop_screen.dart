@@ -38,7 +38,11 @@ class _Edit {
   bool flipH = false;
   bool flipV = false;
 
-  bool get isIdentity => rect == const Rect.fromLTWH(0, 0, 1, 1) && rotate == 0 && !flipH && !flipV;
+  bool get isIdentity =>
+      rect == const Rect.fromLTWH(0, 0, 1, 1) &&
+      rotate == 0 &&
+      !flipH &&
+      !flipV;
 
   _Edit copy() => _Edit()
     ..rect = rect
@@ -62,12 +66,60 @@ class _CropScreenState extends State<CropScreen> {
   final Map<String, _Edit> _edits = {};
   String? _currentId;
   List<SourceImage> _images = const [];
+  bool _keepExif = false;
 
-  _Edit _editFor(SourceImage s) => _edits.putIfAbsent(s.id, _Edit.new);
+  // Remembered defaults (Pro): preset, rotation and flips applied to every
+  // newly added image.
+  int _defPreset = 0;
+  int _defRotate = 0;
+  bool _defFlipH = false;
+  bool _defFlipV = false;
+
+  static const _key = 'crop';
+
+  @override
+  void initState() {
+    super.initState();
+    final s = widget.store.settingsFor(_key);
+    if (s != null) {
+      _defPreset = ((s['presetIndex'] as num?)?.toInt() ?? 0).clamp(
+        0,
+        _presets.length - 1,
+      );
+      _defRotate = ((s['rotate'] as num?)?.toInt() ?? 0) % 360;
+      _defFlipH = s['flipH'] as bool? ?? false;
+      _defFlipV = s['flipV'] as bool? ?? false;
+      _keepExif = s['keepExif'] as bool? ?? false;
+    }
+  }
+
+  void _remember() {
+    final s = _current;
+    final e = s == null ? null : _edits[s.id];
+    widget.store.rememberSettings(_key, {
+      'presetIndex': e?.presetIndex ?? _defPreset,
+      'rotate': e?.rotate ?? _defRotate,
+      'flipH': e?.flipH ?? _defFlipH,
+      'flipV': e?.flipV ?? _defFlipV,
+      'keepExif': _keepExif,
+    });
+  }
+
+  _Edit _editFor(SourceImage s) => _edits.putIfAbsent(s.id, () {
+    final e = _Edit()
+      ..rotate = _defRotate
+      ..flipH = _defFlipH
+      ..flipV = _defFlipV;
+    _applyPreset(s, e, _defPreset);
+    return e;
+  });
 
   SourceImage? get _current {
     if (_images.isEmpty) return null;
-    return _images.firstWhere((s) => s.id == _currentId, orElse: () => _images.first);
+    return _images.firstWhere(
+      (s) => s.id == _currentId,
+      orElse: () => _images.first,
+    );
   }
 
   void _onImages(List<SourceImage> images) {
@@ -134,12 +186,20 @@ class _CropScreenState extends State<CropScreen> {
       final ratio = _presets[e.presetIndex].$2;
       if (ratio != null) _applyPreset(s, e, e.presetIndex);
     }
-    showNotice(context, tr(zh: '已应用到全部 ${_images.length} 张', en: 'Applied to all ${_images.length}'));
+    showNotice(
+      context,
+      tr(
+        zh: '已应用到全部 ${_images.length} 张',
+        en: 'Applied to all ${_images.length}',
+      ),
+    );
   }
 
   Future<JobResult> _runOne(SourceImage src, RunContext ctx) async {
-    final e = _edits[src.id] ?? _Edit();
-    final fmt = src.format == ImageFormat.heic || !src.format.writable ? ImageFormat.jpeg : src.format;
+    final e = _editFor(src);
+    final fmt = src.format == ImageFormat.heic || !src.format.writable
+        ? ImageFormat.jpeg
+        : src.format;
     final path = ctx.pathFor(src, fmt.extension);
     final (dw, dh) = _displayed(src, e);
     final r = e.rect;
@@ -148,22 +208,24 @@ class _CropScreenState extends State<CropScreen> {
     final w = math.max(1, (r.width * dw).round());
     final h = math.max(1, (r.height * dh).round());
     final tmp = fmt == ImageFormat.webp ? '$path.png' : path;
-    final out = await runDartJob(DartJobSpec(
-      inputPath: src.path,
-      outputPath: tmp,
-      format: fmt,
-      quality: 92,
-      keepMetadata: true,
-      edit: DartEdit(
-        rotate: e.rotate,
-        flipH: e.flipH,
-        flipV: e.flipV,
-        cropX: x,
-        cropY: y,
-        cropW: w,
-        cropH: h,
+    final out = await runDartJob(
+      DartJobSpec(
+        inputPath: src.path,
+        outputPath: tmp,
+        format: fmt,
+        quality: 92,
+        keepMetadata: _keepExif,
+        edit: DartEdit(
+          rotate: e.rotate,
+          flipH: e.flipH,
+          flipV: e.flipV,
+          cropX: x,
+          cropY: y,
+          cropW: w,
+          cropH: h,
+        ),
       ),
-    ));
+    );
     var bytes = out.bytes;
     if (fmt == ImageFormat.webp) {
       final webp = await pngToWebp(tmp, 92);
@@ -180,7 +242,9 @@ class _CropScreenState extends State<CropScreen> {
       outputWidth: out.width,
       outputHeight: out.height,
       outputFormat: fmt,
-      note: e.isIdentity ? tr(zh: '未做修改,已重新编码', en: 'No edits; re-encoded') : null,
+      note: e.isIdentity
+          ? tr(zh: '未做修改,已重新编码', en: 'No edits; re-encoded')
+          : null,
     );
   }
 
@@ -192,6 +256,7 @@ class _CropScreenState extends State<CropScreen> {
       kind: ToolKind.crop,
       store: widget.store,
       runOne: _runOne,
+      onBeforeRun: _remember,
       onImagesChanged: _onImages,
       preview: (context, images) {
         final s = _current;
@@ -217,7 +282,10 @@ class _CropScreenState extends State<CropScreen> {
                         padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: sel ? cs.primary : Colors.transparent, width: 2),
+                          border: Border.all(
+                            color: sel ? cs.primary : Colors.transparent,
+                            width: 2,
+                          ),
                         ),
                         child: ImageThumb(path: img.path, size: 36, radius: 8),
                       ),
@@ -236,6 +304,7 @@ class _CropScreenState extends State<CropScreen> {
                     key: ValueKey('${s.id}-${e.rotate}-${e.flipH}-${e.flipV}'),
                     image: s,
                     edit: e,
+                    imageRatio: dw / dh,
                     lockedRatio: _lockedRatio(s, e),
                     onChanged: (r) => setState(() => e.rect = r),
                   ),
@@ -249,7 +318,10 @@ class _CropScreenState extends State<CropScreen> {
                   child: Text(
                     '${(e.rect.width * dw).round()}×${(e.rect.height * dh).round()} px'
                     '${images.length > 1 ? tr(zh: ' · 第 ${images.indexOf(s) + 1}/${images.length} 张', en: ' · ${images.indexOf(s) + 1} of ${images.length}') : ''}',
-                    style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, fontFeatures: const [FontFeature.tabularFigures()]),
+                    style: text.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
                 if (images.length > 1)
@@ -289,11 +361,13 @@ class _CropScreenState extends State<CropScreen> {
                 children: [
                   for (final (i, p) in _presets.indexed)
                     ChoiceChip(
-                      label: Text(i == 0
-                          ? tr(zh: '自由', en: 'Free')
-                          : i == 1
-                              ? tr(zh: '原图', en: 'Original')
-                              : p.$1),
+                      label: Text(
+                        i == 0
+                            ? tr(zh: '自由', en: 'Free')
+                            : i == 1
+                            ? tr(zh: '原图', en: 'Original')
+                            : p.$1,
+                      ),
                       selected: e.presetIndex == i,
                       showCheckmark: false,
                       onSelected: (_) => setState(() => _applyPreset(s, e, i)),
@@ -306,8 +380,16 @@ class _CropScreenState extends State<CropScreen> {
               title: tr(zh: '旋转与翻转', en: 'Rotate & flip'),
               child: Row(
                 children: [
-                  _IconAction(icon: Icons.rotate_left_rounded, label: '−90°', onTap: () => setState(() => _rotate(s, e, -90))),
-                  _IconAction(icon: Icons.rotate_right_rounded, label: '+90°', onTap: () => setState(() => _rotate(s, e, 90))),
+                  _IconAction(
+                    icon: Icons.rotate_left_rounded,
+                    label: '−90°',
+                    onTap: () => setState(() => _rotate(s, e, -90)),
+                  ),
+                  _IconAction(
+                    icon: Icons.rotate_right_rounded,
+                    label: '+90°',
+                    onTap: () => setState(() => _rotate(s, e, 90)),
+                  ),
                   _IconAction(
                     icon: Icons.flip_rounded,
                     label: tr(zh: '水平', en: 'Horiz.'),
@@ -324,9 +406,25 @@ class _CropScreenState extends State<CropScreen> {
                   _IconAction(
                     icon: Icons.restart_alt_rounded,
                     label: tr(zh: '重置', en: 'Reset'),
-                    onTap: () => setState(() => _edits[s.id] = _Edit()),
+                    onTap: () => setState(() {
+                      _edits.remove(s.id);
+                      _editFor(s);
+                    }),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SectionCard(
+              title: tr(zh: '输出', en: 'Output'),
+              child: SwitchRow(
+                label: tr(zh: '保留拍摄信息 (EXIF)', en: 'Keep photo info (EXIF)'),
+                subtitle: tr(
+                  zh: '默认关闭,裁剪后的图通常是要发出去的',
+                  en: 'Off by default: cropped pictures are usually meant for sharing',
+                ),
+                value: _keepExif,
+                onChanged: (v) => setState(() => _keepExif = v),
               ),
             ),
           ],
@@ -337,7 +435,13 @@ class _CropScreenState extends State<CropScreen> {
 }
 
 class _IconAction extends StatelessWidget {
-  const _IconAction({required this.icon, required this.label, required this.onTap, this.active = false, this.rotateIcon = false});
+  const _IconAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.active = false,
+    this.rotateIcon = false,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -360,9 +464,20 @@ class _IconAction extends StatelessWidget {
           ),
           child: Column(
             children: [
-              RotatedBox(quarterTurns: rotateIcon ? 1 : 0, child: Icon(icon, color: active ? cs.onPrimaryContainer : cs.onSurface)),
+              RotatedBox(
+                quarterTurns: rotateIcon ? 1 : 0,
+                child: Icon(
+                  icon,
+                  color: active ? cs.onPrimaryContainer : cs.onSurface,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(label, style: text.labelSmall?.copyWith(color: active ? cs.onPrimaryContainer : cs.onSurfaceVariant)),
+              Text(
+                label,
+                style: text.labelSmall?.copyWith(
+                  color: active ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),
@@ -374,9 +489,19 @@ class _IconAction extends StatelessWidget {
 /// The image with rotation/flip applied and a draggable crop rectangle on
 /// top. Rect is normalised to the displayed image bounds.
 class _CropEditor extends StatefulWidget {
-  const _CropEditor({super.key, required this.image, required this.edit, required this.lockedRatio, required this.onChanged});
+  const _CropEditor({
+    super.key,
+    required this.image,
+    required this.edit,
+    required this.imageRatio,
+    required this.lockedRatio,
+    required this.onChanged,
+  });
   final SourceImage image;
   final _Edit edit;
+
+  /// Displayed width / height of the real image (after rotation).
+  final double imageRatio;
   final double? lockedRatio;
   final ValueChanged<Rect> onChanged;
 
@@ -394,7 +519,12 @@ class _CropEditorState extends State<_CropEditor> {
   static const double _minSize = 0.05;
 
   _Handle _hit(Offset p, Rect r, Size size) {
-    final px = Rect.fromLTWH(r.left * size.width, r.top * size.height, r.width * size.width, r.height * size.height);
+    final px = Rect.fromLTWH(
+      r.left * size.width,
+      r.top * size.height,
+      r.width * size.width,
+      r.height * size.height,
+    );
     const grab = 28.0;
     bool near(Offset c) => (p - c).distance <= grab;
     if (near(px.topLeft)) return _Handle.tl;
@@ -410,9 +540,9 @@ class _CropEditorState extends State<_CropEditor> {
     var r = widget.edit.rect;
     final s = _start;
     final ratio = widget.lockedRatio; // in displayed-pixel terms (w/h)
-    // Aspect of the display box, to convert a pixel ratio into normalised
-    // units: normalised w/h = pixel ratio / box ratio.
-    final boxRatio = size.width / size.height;
+    // The gesture surface is exactly the drawn image (BoxFit.contain), so
+    // its ratio is the real image ratio: normalised w/h = pixel ratio / it.
+    final boxRatio = widget.imageRatio;
     switch (_active) {
       case _Handle.move:
         r = Rect.fromLTWH(
@@ -425,10 +555,22 @@ class _CropEditorState extends State<_CropEditor> {
       case _Handle.tr:
       case _Handle.bl:
       case _Handle.tl:
-        final anchorX = _active == _Handle.br || _active == _Handle.tr ? s.left : s.right;
-        final anchorY = _active == _Handle.br || _active == _Handle.bl ? s.top : s.bottom;
-        final movingX = (_active == _Handle.br || _active == _Handle.tr ? s.right : s.left) + dx;
-        final movingY = (_active == _Handle.br || _active == _Handle.bl ? s.bottom : s.top) + dy;
+        final anchorX = _active == _Handle.br || _active == _Handle.tr
+            ? s.left
+            : s.right;
+        final anchorY = _active == _Handle.br || _active == _Handle.bl
+            ? s.top
+            : s.bottom;
+        final movingX =
+            (_active == _Handle.br || _active == _Handle.tr
+                ? s.right
+                : s.left) +
+            dx;
+        final movingY =
+            (_active == _Handle.br || _active == _Handle.bl
+                ? s.bottom
+                : s.top) +
+            dy;
         var w = (movingX - anchorX).abs();
         var h = (movingY - anchorY).abs();
         if (ratio != null) {
@@ -441,7 +583,10 @@ class _CropEditorState extends State<_CropEditor> {
           }
         }
         w = math.max(w, _minSize);
-        h = math.max(h, ratio != null ? _minSize / (ratio / boxRatio) : _minSize);
+        h = math.max(
+          h,
+          ratio != null ? _minSize / (ratio / boxRatio) : _minSize,
+        );
         // Clamp so the moving corner stays inside the canvas.
         final signX = movingX >= anchorX ? 1 : -1;
         final signY = movingY >= anchorY ? 1 : -1;
@@ -475,49 +620,66 @@ class _CropEditorState extends State<_CropEditor> {
     final e = widget.edit;
     return LayoutBuilder(
       builder: (context, c) {
-        final size = Size(c.maxWidth, c.maxHeight);
+        // Fit the image inside the box (BoxFit.contain) and make that drawn
+        // area the whole gesture/paint surface, so every normalised
+        // coordinate maps 1:1 onto real pixels.
+        final fit = math.min(c.maxWidth / widget.imageRatio, c.maxHeight);
+        final size = Size(fit * widget.imageRatio, fit);
         // An eager pan recognizer: it claims the pointer on touch-down so the
         // surrounding ListView cannot turn a vertical drag of the crop box
         // into a scroll (a plain onPan loses that arena to the scrollable).
-        return RawGestureDetector(
-          behavior: HitTestBehavior.opaque,
-          gestures: <Type, GestureRecognizerFactory>{
-            _EagerPanRecognizer: GestureRecognizerFactoryWithHandlers<_EagerPanRecognizer>(
-              _EagerPanRecognizer.new,
-              (r) {
-                r.onStart = (d) {
-                  _active = _hit(d.localPosition, e.rect, size);
-                  _start = e.rect;
-                  _startPos = d.localPosition;
-                };
-                r.onUpdate = (d) => _drag(d.localPosition - _startPos, size);
-                r.onEnd = (_) {
-                  _active = null;
-                };
-                r.onCancel = () {
-                  _active = null;
-                };
+        return Center(
+          child: SizedBox(
+            width: size.width,
+            height: size.height,
+            child: RawGestureDetector(
+              behavior: HitTestBehavior.opaque,
+              gestures: <Type, GestureRecognizerFactory>{
+                _EagerPanRecognizer:
+                    GestureRecognizerFactoryWithHandlers<_EagerPanRecognizer>(
+                      _EagerPanRecognizer.new,
+                      (r) {
+                        r.onStart = (d) {
+                          _active = _hit(d.localPosition, e.rect, size);
+                          _start = e.rect;
+                          _startPos = d.localPosition;
+                        };
+                        r.onUpdate = (d) =>
+                            _drag(d.localPosition - _startPos, size);
+                        r.onEnd = (_) {
+                          _active = null;
+                        };
+                        r.onCancel = () {
+                          _active = null;
+                        };
+                      },
+                    ),
               },
-            ),
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Transform.flip(
-                flipX: e.flipH,
-                flipY: e.flipV,
-                child: RotatedBox(
-                  quarterTurns: e.rotate ~/ 90,
-                  child: Image.file(
-                    File(widget.image.path),
-                    fit: BoxFit.fill,
-                    cacheWidth: 1200,
-                    gaplessPlayback: true,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Transform.flip(
+                    flipX: e.flipH,
+                    flipY: e.flipV,
+                    child: RotatedBox(
+                      quarterTurns: e.rotate ~/ 90,
+                      child: Image.file(
+                        File(widget.image.path),
+                        fit: BoxFit.contain,
+                        cacheWidth: 1200,
+                        gaplessPlayback: true,
+                      ),
+                    ),
                   ),
-                ),
+                  CustomPaint(
+                    painter: _CropPainter(
+                      e.rect,
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-              CustomPaint(painter: _CropPainter(e.rect, Theme.of(context).colorScheme.primary)),
-            ],
+            ),
           ),
         );
       },
@@ -541,10 +703,19 @@ class _CropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final px = Rect.fromLTWH(rect.left * size.width, rect.top * size.height, rect.width * size.width, rect.height * size.height);
+    final px = Rect.fromLTWH(
+      rect.left * size.width,
+      rect.top * size.height,
+      rect.width * size.width,
+      rect.height * size.height,
+    );
     final dim = Paint()..color = Colors.black.withValues(alpha: 0.55);
     canvas.drawPath(
-      Path.combine(PathOperation.difference, Path()..addRect(Offset.zero & size), Path()..addRect(px)),
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Offset.zero & size),
+        Path()..addRect(px),
+      ),
       dim,
     );
     final line = Paint()
@@ -556,8 +727,16 @@ class _CropPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.5)
       ..strokeWidth = 0.8;
     for (var i = 1; i < 3; i++) {
-      canvas.drawLine(Offset(px.left + px.width * i / 3, px.top), Offset(px.left + px.width * i / 3, px.bottom), thin);
-      canvas.drawLine(Offset(px.left, px.top + px.height * i / 3), Offset(px.right, px.top + px.height * i / 3), thin);
+      canvas.drawLine(
+        Offset(px.left + px.width * i / 3, px.top),
+        Offset(px.left + px.width * i / 3, px.bottom),
+        thin,
+      );
+      canvas.drawLine(
+        Offset(px.left, px.top + px.height * i / 3),
+        Offset(px.right, px.top + px.height * i / 3),
+        thin,
+      );
     }
     final handle = Paint()
       ..color = accent
@@ -577,5 +756,6 @@ class _CropPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CropPainter old) => old.rect != rect || old.accent != accent;
+  bool shouldRepaint(_CropPainter old) =>
+      old.rect != rect || old.accent != accent;
 }
