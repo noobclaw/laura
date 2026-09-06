@@ -73,6 +73,16 @@ export const QUERIES = [
   { key: 'on-device-ml', q: 'on-device inference mobile in:description stars:>2000' },
   { key: 'whisper-mobile', q: 'whisper in:name,description mobile OR cpp OR ios OR android in:description stars:>1500' },
   { key: 'llm-mobile', q: 'llm mobile on-device in:description stars:>2000' },
+  // 2026-09-06 batch. The 09-05 pool went static overnight (345 repos, 2 new),
+  // so five directions the old list could not reach. astro-stacking and
+  // image-registration were added because the store side showed a live paid
+  // entry with no counterpart in the pool: AstroShader $1.99 / 4.19 / 102 and
+  // Star Stacker $3.99 / 4.32 / 96, both maintained, free side one 1-rating app.
+  { key: 'astro-stacking', q: 'astrophotography stacking OR alignment in:description,topics stars:>200' },
+  { key: 'image-registration', q: 'image registration OR alignment in:description,topics stars:>300' },
+  { key: 'omr-sheetmusic', q: 'optical music recognition OR sheet music in:description stars:>300' },
+  { key: 'handwriting-recognition', q: 'handwriting recognition in:description,topics stars:>500' },
+  { key: 'engineering-calc', q: 'electrical OR mechanical engineering calculator in:description stars:>200' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with

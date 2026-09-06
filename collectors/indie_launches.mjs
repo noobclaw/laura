@@ -18,10 +18,12 @@ function decode(s) {
 }
 const strip = (html) => decode(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
-async function get(url, tries = 2) {
+// 2026-09-06: 2 tries x 8s lost 3 of the 4 Reddit feeds to 429 on the first
+// real run. Anonymous Reddit RSS needs a longer, escalating wait.
+async function get(url, tries = 3) {
   for (let i = 0; i < tries; i++) {
     const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/rss+xml, application/atom+xml, text/xml, */*' } });
-    if (res.status === 429 && i + 1 < tries) { await sleep(8000); continue; }
+    if (res.status === 429 && i + 1 < tries) { await sleep(10000 * (i + 1)); continue; }
     if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
     return res.text();
   }
@@ -63,7 +65,7 @@ export async function collectIndieLaunches() {
     } catch (e) {
       failed[name] = String(e?.message || e);
     }
-    await sleep(3000);
+    await sleep(9000);
   }
   if (items.length === 0) throw new Error('indie launches: every feed failed: ' + JSON.stringify(failed));
   return { source: 'indie_launches', fetchedAt: new Date().toISOString(), failed, items };
