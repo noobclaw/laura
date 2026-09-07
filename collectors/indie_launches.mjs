@@ -18,12 +18,17 @@ function decode(s) {
 }
 const strip = (html) => decode(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
-// 2026-09-06: 2 tries x 8s lost 3 of the 4 Reddit feeds to 429 on the first
-// real run. Anonymous Reddit RSS needs a longer, escalating wait.
-async function get(url, tries = 3) {
+// 2026-09-06: 2 tries x 8s lost 3 of the 4 Reddit feeds to 429; raised to
+// 3 tries x 10/20s with 9s between feeds. 2026-09-07: that still lost 2 of 4.
+// An old.reddit.com fallback was tried the same day and REVERTED: that host
+// answers /.rss with 200 and a 350KB HTML page, so it turns a loud 429 into a
+// silent "parsed 0 entries" — strictly worse. What actually works is time:
+// a feed that 429s will serve the same request a few minutes later, so the
+// retries are longer and any feed still missing gets a second pass at the end.
+async function get(url, tries = 4) {
   for (let i = 0; i < tries; i++) {
     const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/rss+xml, application/atom+xml, text/xml, */*' } });
-    if (res.status === 429 && i + 1 < tries) { await sleep(10000 * (i + 1)); continue; }
+    if (res.status === 429 && i + 1 < tries) { await sleep(15000 * (i + 1)); continue; }
     if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
     return res.text();
   }
@@ -66,6 +71,22 @@ export async function collectIndieLaunches() {
       failed[name] = String(e?.message || e);
     }
     await sleep(9000);
+  }
+  // Second pass: anything still missing gets one more shot after the whole
+  // first pass has elapsed (~1 min), which is usually enough for Reddit's
+  // anonymous bucket to refill.
+  for (const name of Object.keys(failed)) {
+    const url = FEEDS.find(([n]) => n === name)?.[1];
+    if (!url) continue;
+    await sleep(20000);
+    try {
+      const parsed = parseFeed(await get(url), name);
+      if (parsed.length === 0) throw new Error('parsed 0 entries (feed structure changed?)');
+      items.push(...parsed);
+      delete failed[name];
+    } catch (e) {
+      failed[name] = String(e?.message || e);
+    }
   }
   if (items.length === 0) throw new Error('indie launches: every feed failed: ' + JSON.stringify(failed));
   return { source: 'indie_launches', fetchedAt: new Date().toISOString(), failed, items };

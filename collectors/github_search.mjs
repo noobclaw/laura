@@ -79,10 +79,23 @@ export const QUERIES = [
   // entry with no counterpart in the pool: AstroShader $1.99 / 4.19 / 102 and
   // Star Stacker $3.99 / 4.32 / 96, both maintained, free side one 1-rating app.
   { key: 'astro-stacking', q: 'astrophotography stacking OR alignment in:description,topics stars:>200' },
-  { key: 'image-registration', q: 'image registration OR alignment in:description,topics stars:>300' },
+  // 09-07: rewritten. The free-form `OR alignment` matched every sense of the
+  // word (webpack, stable-diffusion, PaddleOCR, ultralytics); the topic form is
+  // the only one that means image registration.
+  { key: 'image-registration', q: 'topic:image-registration stars:>100' },
   { key: 'omr-sheetmusic', q: 'optical music recognition OR sheet music in:description stars:>300' },
   { key: 'handwriting-recognition', q: 'handwriting recognition in:description,topics stars:>500' },
-  { key: 'engineering-calc', q: 'electrical OR mechanical engineering calculator in:description stars:>200' },
+  // 09-07 batch. The 09-06 pool was completely static overnight (363 -> 363,
+  // zero new repos), so five more directions. Every one of them was picked
+  // because the *store* side already showed paid entries during the tracking
+  // period — the 09-06 lesson was that store-first beats query-first.
+  // `engineering-calc` was dropped here (0 hits on two runs) and moved to the
+  // store-driven route; `trade-calc` is its narrower successor.
+  { key: 'ballistics', q: 'ballistics calculator OR trajectory solver in:description,topics stars:>100' },
+  { key: 'document-scan', q: 'document scanner OR dewarp perspective correction in:description,topics stars:>300' },
+  { key: 'photo-dedupe', q: 'duplicate OR similar image finder in:description,topics stars:>300' },
+  { key: 'nautical-tide', q: 'tide prediction OR nautical almanac in:description,topics stars:>100' },
+  { key: 'trade-calc', q: 'topic:construction OR topic:electrical calculator stars:>100' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
