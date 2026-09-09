@@ -34,13 +34,21 @@ const collectors = [
   ['hn_showhn', collectShowHN],
 ];
 
-const summary = { date: today, ok: [], failed: {} };
+const summary = { date: today, ok: [], failed: {}, silentZero: {} };
 
 for (const [name, fn] of collectors) {
   try {
     const data = await fn();
     await writeFile(path.join(outDir, `${name}.json`), JSON.stringify(data, null, 2), 'utf8');
     summary.ok.push(name);
+    // 09-09: a collector can succeed and still be blind. github_search had four
+    // queries returning zero results for days — HTTP 200 every time, so nothing
+    // was ever recorded as failed. Silent-zero groups get their own summary
+    // field so "7/7 ok" can no longer hide them.
+    if (data?.zeroHitQueries?.length) {
+      summary.silentZero[name] = data.zeroHitQueries;
+      console.warn(`[warn] ${name}: ${data.zeroHitQueries.length} queries returned 0 hits -> ${data.zeroHitQueries.join(', ')}`);
+    }
     console.log(`[ok] ${name}`);
   } catch (e) {
     summary.failed[name] = String(e?.message || e);

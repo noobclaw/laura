@@ -29,7 +29,10 @@ export const QUERIES = [
   // Images / camera
   { key: 'image-editor', q: 'topic:image-editor stars:>1500' },
   { key: 'image-compression', q: 'image compression in:description topic:image-processing stars:>1000' },
-  { key: 'background-removal', q: 'background removal in:description stars:>1500' },
+  // 09-09: was 'background removal in:description stars:>1500' — one repo for
+  // the whole tracking period. The topic form returns 13 on-target repos
+  // (rembg MIT, T8RIN/ImageToolbox Apache-2.0, BiRefNet MIT), verified 09-09.
+  { key: 'background-removal', q: 'topic:background-removal stars:>300' },
   { key: 'upscale', q: 'topic:super-resolution stars:>1500' },
   { key: 'upscaler', q: 'image upscaler in:name,description stars:>1500' },
   { key: 'qrcode', q: 'topic:qrcode generator OR scanner stars:>1000' },
@@ -37,11 +40,15 @@ export const QUERIES = [
   { key: 'color-picker', q: 'topic:color-picker stars:>500' },
   { key: 'palette', q: 'topic:palette-generator stars:>300' },
   // Audio / video
-  { key: 'audio-editor', q: 'topic:audio-editor stars:>800' },
+  // 09-09: 'topic:audio-editor stars:>800' matched 1 repo; the free-text form
+  // returns 24 (lossless-cut, audacity, motionity), verified 09-09.
+  { key: 'audio-editor', q: 'audio editor OR waveform editor in:description,topics stars:>500' },
   { key: 'tuner-metronome', q: 'tuner OR metronome in:description,topics stars:>300' },
   { key: 'video-editing', q: 'topic:video-editing stars:>1500' },
   { key: 'video-converter', q: 'topic:video-converter stars:>800' },
-  { key: 'subtitles', q: 'topic:subtitles editor OR sync in:description stars:>500' },
+  // 09-09: dropping the free-text tail ('editor OR sync in:description') takes
+  // this group from 1 repo to 68, verified 09-09.
+  { key: 'subtitles', q: 'topic:subtitles stars:>300' },
   { key: 'music-theory', q: 'chord OR music-theory in:topics stars:>500' },
   // Data / files
   { key: 'file-converter', q: 'file converter in:description offline OR local stars:>1000' },
@@ -66,13 +73,28 @@ export const QUERIES = [
   { key: 'geodesy', q: 'topic:geodesy stars:>200' },
   { key: 'unit-convert', q: 'unit conversion in:description library OR tool stars:>500' },
   { key: 'calculator-advanced', q: 'topic:calculator scientific OR graphing OR symbolic stars:>800' },
-  { key: 'regex-tools', q: 'topic:regex tester OR visualizer in:description stars:>800' },
-  { key: 'diff-tools', q: 'topic:diff text compare in:description stars:>800' },
+  // 09-09: `regex-tools` and `diff-tools` dropped. Both contributed exactly one
+  // repo across the whole tracking period, and the rewrites make it worse, not
+  // better: `topic:regex stars:>500` returns 73 repos that are all ripgrep/fd
+  // class developer tooling. A regex tester or a diff viewer as a phone app has
+  // no paid face on either store — they never belonged in a consumer-tool pipe.
   { key: 'fonts-typography', q: 'font inspector OR glyph OR typography tool in:description stars:>500' },
   // On-device models (the enabling tech for the above)
-  { key: 'on-device-ml', q: 'on-device inference mobile in:description stars:>2000' },
+  // 09-09: both rewritten. The old forms ('on-device inference mobile
+  // in:description stars:>2000' / 'llm mobile on-device in:description
+  // stars:>2000') returned total_count = 0 on every run from 09-05 to 09-08 —
+  // three free words ANDed inside in:description plus stars:>2000 has no
+  // solution. They failed silently (a successful HTTP 200 with zero items is
+  // not a failedQuery), so the whole on-device-model leg of this project was
+  // uncovered for at least four days without any health check noticing.
+  // New forms verified against the API on 09-09 before wiring in:
+  //   'on-device inference in:description stars:>500' -> total 8
+  //     (alibaba/MNN, react-native-executorch, TinyChatEngine, …)
+  //   'llm on-device in:description stars:>500'       -> total 7
+  //     (MNN, MiniCPM, CoreML-Models, callstackincubator/ai, …)
+  { key: 'on-device-ml', q: 'on-device inference in:description stars:>500' },
   { key: 'whisper-mobile', q: 'whisper in:name,description mobile OR cpp OR ios OR android in:description stars:>1500' },
-  { key: 'llm-mobile', q: 'llm mobile on-device in:description stars:>2000' },
+  { key: 'llm-mobile', q: 'llm on-device in:description stars:>500' },
   // 2026-09-06 batch. The 09-05 pool went static overnight (345 repos, 2 new),
   // so five directions the old list could not reach. astro-stacking and
   // image-registration were added because the store side showed a live paid
@@ -84,18 +106,40 @@ export const QUERIES = [
   // the only one that means image registration.
   { key: 'image-registration', q: 'topic:image-registration stars:>100' },
   { key: 'omr-sheetmusic', q: 'optical music recognition OR sheet music in:description stars:>300' },
-  { key: 'handwriting-recognition', q: 'handwriting recognition in:description,topics stars:>500' },
+  // 09-09: topic form, 2 -> 4 repos and all four are actual HTR (CTCDecoder,
+  // WordDetector, handwritten-text-recognition), verified 09-09.
+  { key: 'handwriting-recognition', q: 'topic:handwriting-recognition stars:>200' },
   // 09-07 batch. The 09-06 pool was completely static overnight (363 -> 363,
   // zero new repos), so five more directions. Every one of them was picked
   // because the *store* side already showed paid entries during the tracking
   // period — the 09-06 lesson was that store-first beats query-first.
   // `engineering-calc` was dropped here (0 hits on two runs) and moved to the
   // store-driven route; `trade-calc` is its narrower successor.
-  { key: 'ballistics', q: 'ballistics calculator OR trajectory solver in:description,topics stars:>100' },
-  { key: 'document-scan', q: 'document scanner OR dewarp perspective correction in:description,topics stars:>300' },
+  // 09-09: `ballistics`, `nautical-tide` and `trade-calc` removed.
+  //   ballistics    — query was broken (total_count 0 on both runs). The
+  //                   working form is `topic:ballistics stars:>20` (14 repos,
+  //                   verified 09-09), but the direction itself was rejected on
+  //                   09-08: the free-side leader is an ammunition maker's
+  //                   marketing app (Hornady, 4.76 / 42,865). Recorded here so
+  //                   the next audit does not re-derive the fix.
+  //   nautical-tide — same shape: working form is `topic:tides stars:>20`
+  //                   (19 repos incl. pyTMD MIT), direction rejected 09-08
+  //                   (9 paid incumbents, zero effective dispersion).
+  //   trade-calc    — genuinely empty on GitHub: two independent formulations
+  //                   both returned total_count 0. Moved to the store-driven
+  //                   route, same handling as `engineering-calc` on 09-06.
+  { key: 'document-scan', q: 'topic:document-scanner stars:>100' }, // 1 -> 14, verified 09-09
   { key: 'photo-dedupe', q: 'duplicate OR similar image finder in:description,topics stars:>300' },
-  { key: 'nautical-tide', q: 'tide prediction OR nautical almanac in:description,topics stars:>100' },
-  { key: 'trade-calc', q: 'topic:construction OR topic:electrical calculator stars:>100' },
+  // 09-09 batch. The pool was byte-identical for four straight days (372 repos,
+  // zero in, zero out) — the old list is exhausted, not the field. Five new
+  // capability directions, each verified against the API before wiring in, and
+  // each chosen because it is a technical leg under an app we already have or
+  // one already in the queue rather than a fresh guess at a category.
+  { key: 'speech-enhancement', q: 'topic:speech-enhancement stars:>300' },   // 28; echo-jot / AutoSnore leg
+  { key: 'image-denoise', q: 'topic:noise-reduction stars:>100' },           // 26; AstroPile / photolift leg
+  { key: 'photogrammetry', q: 'topic:photogrammetry stars:>500' },           // 25; camera-measurement leg
+  { key: 'ephemeris', q: 'topic:ephemeris stars:>50' },                      // 18; Orbit / GoldenScout leg
+  { key: 'audio-analysis', q: 'snoring OR sleep audio analysis in:description,topics stars:>50' }, // 84; AutoSnore leg
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
@@ -164,15 +208,23 @@ export async function collectGithubSearch() {
   const tok = token();
   const byName = new Map();
   const failed = {};
+  // 09-09: per-query hit counts. A query that returns zero items is an HTTP 200
+  // — it never shows up in failedQueries — so four broken queries sat in this
+  // list for days while every health check stayed green (see report 09-08 §六 5).
+  // hits = items the API returned; kept = what survived the noise filter.
+  const hits = {};
   for (const { key, q } of QUERIES) {
     try {
       const items = await search(q, tok);
+      let kept = 0;
       for (const it of items) {
         if (isNoise(it)) continue;
+        kept += 1;
         const cur = byName.get(it.full_name);
         if (cur) cur.queries.push(key);
         else byName.set(it.full_name, shape(it, key));
       }
+      hits[key] = { hits: items.length, kept };
     } catch (e) {
       failed[key] = String(e?.message || e);
     }
@@ -180,12 +232,17 @@ export async function collectGithubSearch() {
   }
   const repos = [...byName.values()].sort((a, b) => b.stars - a.stars);
   if (repos.length === 0) throw new Error('github search: 0 repos across all queries');
+  const zeroHitQueries = Object.keys(hits).filter((k) => hits[k].hits === 0);
+  const lowHitQueries = Object.keys(hits).filter((k) => hits[k].hits > 0 && hits[k].hits <= 3);
   return {
     source: 'github_search',
     fetchedAt: new Date().toISOString(),
     authenticated: Boolean(tok),
     queryCount: QUERIES.length,
     failedQueries: failed,
+    queryHits: hits,
+    zeroHitQueries,
+    lowHitQueries,
     repos,
   };
 }
