@@ -18,17 +18,28 @@ const API = 'https://api.github.com/search/repositories';
 // answers "how do I do X locally" is a port candidate; frameworks are not.
 export const QUERIES = [
   // Documents / text
-  { key: 'ocr', q: 'ocr offline in:description,topics stars:>1500' },
+  // 09-10: was 'ocr offline in:description,topics stars:>1500' — 3 repos for the
+  // whole tracking period, because the free word `offline` ANDed inside
+  // in:description,topics excludes every major engine (none of them advertise
+  // themselves as "offline"; they simply are). topic:ocr stars:>1000 returns 149
+  // (PaddleOCR, tesseract, MinerU, Umi-OCR, EasyOCR, tesseract.js), verified 09-10.
+  { key: 'ocr', q: 'topic:ocr stars:>1000' },
   { key: 'pdf', q: 'topic:pdf tool stars:>1500' },
   { key: 'markdown-editor', q: 'topic:markdown-editor stars:>1500' },
   { key: 'epub', q: 'epub reader OR converter in:description stars:>1000' },
   { key: 'translation-offline', q: 'offline translation in:description stars:>800' },
   { key: 'dictionary', q: 'topic:dictionary offline in:description stars:>500' },
   { key: 'speech-to-text', q: 'speech recognition on-device OR offline in:description stars:>1500' },
-  { key: 'text-to-speech', q: 'text-to-speech offline in:description stars:>1000' },
+  // 09-10: same defect as `ocr` — the word `offline` ANDed in:description cut it
+  // to 2 repos. topic:text-to-speech stars:>1000 returns 108, verified 09-10.
+  { key: 'text-to-speech', q: 'topic:text-to-speech stars:>1000' },
   // Images / camera
   { key: 'image-editor', q: 'topic:image-editor stars:>1500' },
-  { key: 'image-compression', q: 'image compression in:description topic:image-processing stars:>1000' },
+  // 09-10: the old form ANDed a free phrase with topic:image-processing and a
+  // 1000-star floor — 2 repos. topic:image-compression stars:>200 returns 64 and
+  // the head of the list is exactly the leg picbox/photolift need (Luban
+  // Apache-2.0, Compressor, caesium, oxipng MIT, libjxl BSD-3), verified 09-10.
+  { key: 'image-compression', q: 'topic:image-compression stars:>200' },
   // 09-09: was 'background removal in:description stars:>1500' — one repo for
   // the whole tracking period. The topic form returns 13 on-target repos
   // (rembg MIT, T8RIN/ImageToolbox Apache-2.0, BiRefNet MIT), verified 09-09.
@@ -60,7 +71,9 @@ export const QUERIES = [
   { key: 'password', q: 'topic:password-manager stars:>1500' },
   { key: 'hash-checksum', q: 'checksum in:description,topics stars:>500' },
   // Personal productivity (local-first)
-  { key: 'notes-local', q: 'topic:note-taking offline in:description stars:>1500' },
+  // 09-10: `offline in:description` again — 2 repos. topic:note-taking
+  // stars:>1000 returns 74 (AppFlowy is Dart, fsnotes is Swift/iOS), verified 09-10.
+  { key: 'notes-local', q: 'topic:note-taking stars:>1000' },
   { key: 'flashcards', q: 'spaced repetition in:description,topics stars:>500' },
   { key: 'habit-tracker', q: 'topic:habit-tracker stars:>500' },
   { key: 'expense-tracker', q: 'topic:expense-tracker stars:>800' },
@@ -68,10 +81,17 @@ export const QUERIES = [
   { key: 'pomodoro', q: 'topic:pomodoro stars:>500' },
   { key: 'calendar-tools', q: 'ical OR icalendar parser generator in:description stars:>500' },
   // Science / measurement / hobby
-  { key: 'astronomy', q: 'topic:astronomy calculation OR ephemeris in:description stars:>300' },
+  // 09-10: the OR-ed free words next to a topic: filter cut this to 3 repos —
+  // the same shape that returned HTTP 422 for `nautical-tide` on 09-08.
+  // topic:astronomy stars:>200 returns 56, and its third row is
+  // kylecorry31/Trail-Sense (MIT, pushed daily) — an entire offline sensor
+  // toolbox that had been invisible to this pipeline. Verified 09-10.
+  { key: 'astronomy', q: 'topic:astronomy stars:>200' },
   { key: 'gpx', q: 'topic:gpx stars:>300' },
   { key: 'geodesy', q: 'topic:geodesy stars:>200' },
-  { key: 'unit-convert', q: 'unit conversion in:description library OR tool stars:>500' },
+  // 09-10: 3 -> 10. Small, but every row is on target (nholthaus/units,
+  // numbat-class calculators) instead of three unrelated repos. Verified 09-10.
+  { key: 'unit-convert', q: 'topic:unit-conversion stars:>100' },
   { key: 'calculator-advanced', q: 'topic:calculator scientific OR graphing OR symbolic stars:>800' },
   // 09-09: `regex-tools` and `diff-tools` dropped. Both contributed exactly one
   // repo across the whole tracking period, and the rewrites make it worse, not
@@ -100,7 +120,13 @@ export const QUERIES = [
   // image-registration were added because the store side showed a live paid
   // entry with no counterpart in the pool: AstroShader $1.99 / 4.19 / 102 and
   // Star Stacker $3.99 / 4.32 / 96, both maintained, free side one 1-rating app.
-  { key: 'astro-stacking', q: 'astrophotography stacking OR alignment in:description,topics stars:>200' },
+  // 09-10: this one mattered most. The old free-text form returned 2 repos, and
+  // AstroPile — the only ⚪排队 item in the queue — had no reference
+  // implementation in the pool for the entire tracking period. topic:astrophotography
+  // stars:>50 returns 15 including BenJuan26/OpenSkyStacker (MIT, C++, an actual
+  // desktop star stacker), deufrai/als (GPL-3.0, live stacking) and
+  // art-den/astra_lite (MIT, Rust). Verified 09-10.
+  { key: 'astro-stacking', q: 'topic:astrophotography stars:>50' },
   // 09-07: rewritten. The free-form `OR alignment` matched every sense of the
   // word (webpack, stable-diffusion, PaddleOCR, ultralytics); the topic form is
   // the only one that means image registration.
@@ -140,6 +166,29 @@ export const QUERIES = [
   { key: 'photogrammetry', q: 'topic:photogrammetry stars:>500' },           // 25; camera-measurement leg
   { key: 'ephemeris', q: 'topic:ephemeris stars:>50' },                      // 18; Orbit / GoldenScout leg
   { key: 'audio-analysis', q: 'snoring OR sleep audio analysis in:description,topics stars:>50' }, // 84; AutoSnore leg
+  // 09-10: the other six lowHit groups were probed too, and NONE of the
+  // rewrites earned the swap. Recorded verbatim so the next audit does not
+  // re-derive them, and so "we tried" is checkable rather than remembered:
+  //   palette              topic:color-palette stars:>200        -> 45, but all
+  //                        colour *themes* (catppuccin, nord), not extraction.
+  //                        `color palette extract …` -> 5, all abandoned.
+  //   archive              topic:zip stars:>200 -> 80 / topic:compression
+  //                        stars:>1000 -> 75, both dominated by *web* archiving
+  //                        and ML compression, not zip/unzip on a phone.
+  //   csv-tools            topic:csv stars:>500 -> 161 / topic:spreadsheet -> 66,
+  //                        both nocodb/sheetjs class web tooling.
+  //   encryption           topic:file-encryption stars:>200 -> 5;
+  //                        topic:encryption stars:>1000 -> 114 but it is rclone,
+  //                        openssl, algo — infrastructure, not a phone tool.
+  //   calculator-advanced  topic:scientific-calculator stars:>50 -> 10, all
+  //                        student projects; topic:calculator stars:>500 -> 32
+  //                        led with mediapipe and mtail.
+  //   video-converter      topic:video-converter stars:>200 -> 7;
+  //                        topic:ffmpeg … -> 29 desktop GUIs.
+  // These six stay in the list unchanged. They are NOT deleted: 09-09 deleted
+  // regex-tools/diff-tools on *store* evidence (no paid entry on either side),
+  // and no such enumeration has been done for these. Bound clause: enumerate
+  // their主词 before 09-24 and delete only what the store side also kills.
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
