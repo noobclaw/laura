@@ -231,3 +231,21 @@ BACKLOG 把它列为可内嵌的特征匹配备选。**M1 不用**：它是需�
 - **shell 的 `settings_page.dart` 带 `ja:` 串而工具层没有** → 日文系统手机上设置页是日语、其余是英文。这是**壳的问题,四个已上架 app 共有**,不在本 app 单独改(改 `l10n.dart` 的 `effectiveCode` 回落一行即可,但那是壳母版,须单独一轮)。
 - `rowCoverage` 与 `warpRgb` 的边界可能差 1 ulp,极端情况下最边一列会是黑的(肉眼不可见级)。
 - 每条一个 `Isolate.run`(12MP 约 63 次 spawn),可合并成一个长任务 + 端口回报进度 —— 收益是几百毫秒,M2 再说。
+
+## G6 / G6b 出包与视觉复核(2026-09-10)
+
+- **CI run [34440271112](https://github.com/noobclaw/laura/actions/runs/34440271112)**:`build-android` ✅ + `smoke-test` ✅(模拟器装包→启动→30s 验活→logcat 无 FATAL EXCEPTION→截屏)。
+- **G6b 逐条对照「视觉设计标准」rubric**(依据该轮 `apps-astropile-smoke` 的首页截屏 + 通读冒烟截不到的四屏源码):
+  - 层级与留白 ✅ hero → 主行动 → 三步说明 → 离线声明,主次一眼分明,间距走 8/12/16/20/26 的节奏;
+  - 配色 ✅ 夜空渐变 hero + periwinkle 主色,语义色只用在状态(绿/黄/红 = 质量分与失败);深色方案在 `buildAstroTheme` 里单独压过表面色;
+  - 字阶 ✅ headlineSmall / titleSmall / bodySmall 三级分明,数字(星点数、残差、质量分)走等宽加粗;
+  - 形状与质感 ✅ 圆角 20/24/26 一致,卡片扁平填充,进度用环不是条;
+  - 空状态有温度 ✅ 首屏不是一行冷字,是「它做三件事」+ 图标 + 一句主张;
+  - hero ✅ 渐变 + 星芒 + 一句主打句(**楔子原文**),第一眼就说清这个 app 干什么;
+  - 数据可视化 ✅ 进度环 + 逐帧结果流 + 报告页的指标组,有单位(px / °)、有色义;
+  - 一致性 ✅ 五屏共用 `SectionCard` / `StatusPill` / `scoreColor` 一套语言。
+  - **打回重做 1 处**:hero 的装饰星芒用 `Clip.none` 挂在圆角卡外面,窄屏上会在卡片外糊一小片白 → 改 `Clip.antiAlias`,重出包。
+- **最终包 = CI run [34441460214](https://github.com/noobclaw/laura/actions/runs/34441460214)**(含上面那处修复),`build-android` ✅ + `smoke-test` ✅,产物 `apps-astropile-apk` / `apps-astropile-aab`。
+  ⚠️ **这一轮的冒烟截屏被模拟器自身的 `Pixel Launcher isn't responding` 弹窗盖住**(是模拟器桌面 ANR,不是本 app —— 冒烟判定的是本 app 进程存活 + 无 FATAL EXCEPTION,两项都过,截屏里本 app 在弹窗后面渲染正常)。**故 G6b 的有效视觉证据取自上一轮截屏**,两轮之间的代码差异只有那一处 clip。
+
+**用语纪律(G7)**:现在只能写「**🧪待验收**」——过了机器冒烟 ≠ 能用。真机核心功能(见上「真机验收清单」12 条)验过才准写「可发布」。
