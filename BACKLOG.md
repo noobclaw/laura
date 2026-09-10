@@ -337,7 +337,7 @@
 
 **价值预估(非承诺)**：$3.99 × 保守 10–60 次/月 ≈ **$40–240/月**。**方差极大且下沿可能是 0** —— 同型付费面合计只有 199 条评价。
 
-**状态**：**🧪待验收(2026-09-10 三天工厂交付 M1)**。工程 [apps/astropile](apps/astropile)，计划与审计记录 [apps/astropile/PLAN.md](apps/astropile/PLAN.md)，商店文案 [apps/astropile/store/listing.md](apps/astropile/store/listing.md)。M1 = 导入(含 EXIF 曝光一致性预检)+ 参考帧选择 + 星阵配准 + 均值/中值叠加 + 影调三滑杆 + 全分辨率导出 + **逐帧对齐报告**;定价 免费 6 帧 / Pro $3.99 买断(32 帧 + 中值 + 记住设置)。**M2(kappa-sigma、星轨最大值、暗场平场、内置连拍)与 M3(RAW、批次、诊断报告)未做,商店文案里一个字都没提。** 命名 09-10 复检:App Store 美区/中区、Google Play 均无同名。**下一步:真机验收(重点试 HEIC 一叠的方向、停止延迟、免费门弹窗)。页面结构、核心交互、技术要点与参考实现的逐条许可证处置见 `reports/2026-09-08.md` §四与 PLAN.md。**
+**状态**：**🧪待验收(2026-09-10 三天工厂交付 M1)**。工程 [apps/astropile](apps/astropile)，计划与审计记录 [apps/astropile/PLAN.md](apps/astropile/PLAN.md)，商店文案 [apps/astropile/store/listing.md](apps/astropile/store/listing.md)。M1 = 导入(含 EXIF 曝光一致性预检)+ 参考帧选择 + 星阵配准 + 均值/中值叠加 + 影调三滑杆 + 全分辨率导出 + **逐帧对齐报告**;定价 免费 6 帧 / Pro $3.99 买断(32 帧 + 中值 + 记住设置)。**M2(kappa-sigma、星轨最大值、暗场平场、内置连拍)与 M3(RAW、批次、诊断报告)未做,商店文案里一个字都没提。** 命名 09-10 复检:App Store 美区/中区、Google Play 均无同名。出包 CI run [34441460214](https://github.com/noobclaw/laura/actions/runs/34441460214)(build-android ✅ + smoke-test ✅),APK/AAB 在该 run 的 artifacts。**下一步:真机验收(重点试 HEIC 一叠的方向、停止延迟、免费门弹窗)。页面结构、核心交互、技术要点与参考实现的逐条许可证处置见 `reports/2026-09-08.md` §四与 PLAN.md。**
 
 ---
 
