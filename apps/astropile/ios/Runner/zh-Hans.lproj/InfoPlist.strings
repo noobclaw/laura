@@ -1,0 +1,5 @@
+/* Localized launcher name. The Android side keeps the same pair in
+   res/values/strings.xml and res/values-zh/strings.xml. */
+"CFBundleDisplayName" = "星野叠加";
+"NSPhotoLibraryUsageDescription" = "星野叠加通过系统照片选择器让你挑选要对齐叠加的夜空照片。照片只在本机读取与处理。";
+"NSPhotoLibraryAddUsageDescription" = "当你点击「保存到相册」时，星野叠加把叠好的成片存入你的相册。";
