@@ -287,8 +287,11 @@ class _Hero extends StatelessWidget {
           ),
         ],
       ),
+      // Clipped, not Clip.none: the decorative sparkle is deliberately hung
+      // past the card's corner, and on a narrow phone an unclipped one paints
+      // a faint smudge onto the page behind it.
+      clipBehavior: Clip.antiAlias,
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
           Positioned(
             right: -10,
