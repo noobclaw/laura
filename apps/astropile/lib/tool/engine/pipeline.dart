@@ -31,11 +31,21 @@ enum RunFailure {
 /// Peak pixels a single frame may have.
 ///
 /// The decode is pure Dart and transient: an RGBA buffer plus the packed RGB
-/// copy is roughly 7 bytes per pixel. At 24 MP that is ~170 MB, which a phone
+/// copy is roughly 7 bytes per pixel. At 26 MP that is ~185 MB, which a phone
 /// survives; a 108 MP or 200 MP sensor file would be ~750 MB and the process
 /// is simply killed — not an exception anything could catch. So the cap is
 /// checked from the container header, before a single pixel is allocated.
-const int kMaxFramePixels = 24000000;
+///
+/// 26 MP, not 24: the iPhone 15 Pro and the 16 family shoot 5712x4284 by
+/// default, which is 24,470,208 pixels — a hair OVER a 24 MP cap. With that
+/// cap the reference frame of a stack shot on the current mainstream iPhone
+/// fails the header check, `RunFailure.referenceTooLarge` aborts the whole
+/// run, and the app cannot complete a single job on the device an App Review
+/// engineer is holding. Raising the ceiling is the cheap half of the fix; the
+/// other half (making "half resolution" apply at decode time, so it actually
+/// rescues oversized frames instead of only shrinking after the allocation)
+/// is M2 — see PLAN.md.
+const int kMaxFramePixels = 26000000;
 
 /// Frames below this many aligned members are not worth stacking — with one
 /// frame there is nothing to average.

@@ -28,7 +28,9 @@ android {
         applicationId = "com.noobclaw.tunekit"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // AudioBridge uses float PCM capture and Context.checkSelfPermission (both API 23+),
+        // so pin the floor explicitly instead of trusting flutter.minSdkVersion.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -76,7 +76,14 @@ final class MediaBridge: NSObject, PHPickerViewControllerDelegate {
       result(FlutterError(code: "picker_unavailable", message: "no view controller", details: nil))
       return
     }
-    var config = PHPickerConfiguration(photoLibrary: .shared())
+    // Plain init, NOT init(photoLibrary:). The photoLibrary variant is the
+    // read-authorised one: it touches PHPhotoLibrary.shared() and therefore
+    // demands NSPhotoLibraryUsageDescription, which this app deliberately does
+    // not declare (see the header comment — the picker runs out of process and
+    // we only ever take `itemProvider` below, never `assetIdentifier`).
+    // Declaring the library while the key is absent is exactly what
+    // ITMS-90683 and the TCC kill-on-access both key off.
+    var config = PHPickerConfiguration()
     config.filter = .images
     config.selectionLimit = 1
     let picker = PHPickerViewController(configuration: config)

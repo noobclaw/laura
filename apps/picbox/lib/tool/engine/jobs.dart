@@ -16,7 +16,7 @@ import 'watermark_math.dart';
 
 /// Why a worker gave up. Localised on the UI isolate by [jobFailureMessage]
 /// — `tr()` reads the language override, which a fresh isolate does not have.
-enum JobFailure { decode, unsupportedFormat, encode, nativeDecode }
+enum JobFailure { decode, unsupportedFormat, encode, nativeDecode, tooLarge }
 
 class JobError implements Exception {
   JobError(this.failure);
@@ -32,6 +32,9 @@ String jobFailureMessage(JobFailure f) => switch (f) {
       JobFailure.encode => tr(zh: '编码失败', en: 'Encoding failed'),
       JobFailure.nativeDecode =>
         tr(zh: '系统解码失败,可能是不支持的格式', en: 'The system could not decode this file'),
+      JobFailure.tooLarge => tr(
+          zh: '图片像素太大,无法在本机处理,请先缩小后再试',
+          en: 'This image has too many pixels to process on this device; shrink it first'),
     };
 
 /// Turn any worker exception into a user-facing line.
@@ -159,7 +162,7 @@ Future<({Uint8List bytes, SizeSearchResult search})> nativeCompressToSize(
           scale: p.scale,
           srcW: src.width,
           srcH: src.height,
-          orientation: inputPath == null ? src.orientation : 1);
+          orientation: input == src.path ? src.orientation : 1);
       last = b;
       if (b.length <= target && (best == null || b.length > best!.length)) {
         best = b;
@@ -257,8 +260,17 @@ class DartJobOutput {
 /// Run [spec] on a background isolate.
 Future<DartJobOutput> runDartJob(DartJobSpec spec) => Isolate.run(() => _dartWorker(spec));
 
+/// The Dart path decodes to a full RGBA buffer; a hard OOM inside the isolate
+/// cannot be caught, so reject images whose pixel count would blow the buffer
+/// before decoding. ~40 MP -> ~160 MB RGBA.
+const int _kMaxDartPixels = 40000000;
+
 DartJobOutput _dartWorker(DartJobSpec spec) {
   final bytes = File(spec.inputPath).readAsBytesSync();
+  final probe = img.findDecoderForData(bytes)?.startDecode(bytes);
+  if (probe != null && probe.width * probe.height > _kMaxDartPixels) {
+    throw JobError(JobFailure.tooLarge);
+  }
   final decoded = img.decodeImage(bytes);
   if (decoded == null) {
     throw JobError(JobFailure.decode);
