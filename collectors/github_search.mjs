@@ -29,7 +29,15 @@ export const QUERIES = [
   { key: 'epub', q: 'epub reader OR converter in:description stars:>1000' },
   { key: 'translation-offline', q: 'offline translation in:description stars:>800' },
   { key: 'dictionary', q: 'topic:dictionary offline in:description stars:>500' },
-  { key: 'speech-to-text', q: 'speech recognition on-device OR offline in:description stars:>1500' },
+  // 09-11: the EIGHTH instance of the `offline` defect (after ocr,
+  // text-to-speech, notes-local on 09-10). 'speech recognition on-device OR
+  // offline in:description stars:>1500' never returned whisper.cpp — the single
+  // most important reference implementation for echo-jot, this project's own
+  // app — because whisper.cpp's description does not contain the word
+  // "offline"; it simply is. topic:speech-to-text stars:>500 returns 168 and
+  // every row on page 1 is on target (whisper.cpp 53,594★ MIT, Handy 31,347★
+  // MIT, DeepSpeech MPL-2.0, faster-whisper MIT). Verified 09-11.
+  { key: 'speech-to-text', q: 'topic:speech-to-text stars:>500' },
   // 09-10: same defect as `ocr` — the word `offline` ANDed in:description cut it
   // to 2 repos. topic:text-to-speech stars:>1000 returns 108, verified 09-10.
   { key: 'text-to-speech', q: 'topic:text-to-speech stars:>1000' },
@@ -189,6 +197,45 @@ export const QUERIES = [
   // regex-tools/diff-tools on *store* evidence (no paid entry on either side),
   // and no such enumeration has been done for these. Bound clause: enumerate
   // their主词 before 09-24 and delete only what the store side also kills.
+  //
+  // 2026-09-11 batch — five NEW capability directions, required by CLAUDE.md
+  // ("连续两天 0 新候选 → 第三天必须加 5 个新方向"). 09-05..09-10 is six straight
+  // days at zero, and 09-10's action was a *rewrite* of existing groups, not an
+  // addition. Every form below was hit against the API on 09-11 and judged on
+  // the returned rows before being wired in.
+  //
+  // ⭐ The first two exist because of a structural defect found on 09-11:
+  // NOT ONE of the 58 queries above filters by language. Every one asks
+  // `topic:` or `in:description`. 09-10 recorded "Dart implementations are
+  // extremely scarce in open source — 移植量小 can essentially never be
+  // achieved" after seeing 2 Dart repos in 492. That read is FALSE and it was
+  // an artefact of this list: `language:Dart stars:>800` returns 550, led by
+  // localsend/localsend (90,520★, Apache-2.0, an AirDrop alternative written in
+  // Dart). Same class of bug as the `offline` free word — the pool's shape was
+  // a function of the query list, not of the field. Kotlin gets the same
+  // treatment for the same reason: the single best-maintained pure-local mobile
+  // tool app this project has ever seen (kylecorry31/Trail-Sense, MIT, pushed
+  // daily) reached the pool BY ACCIDENT through topic:astronomy on 09-10.
+  // An existing open-source *mobile tool app* is the highest-value shape this
+  // pipeline can find, and until today nothing was looking for one.
+  { key: 'dart-apps', q: 'language:Dart stars:>800' },     // 550; localsend, AppFlowy, spotube
+  { key: 'kotlin-apps', q: 'language:Kotlin stars:>2000' }, // 469; Trail-Sense class Android tool apps
+  { key: 'coreml', q: 'topic:coreml stars:>100' },          // 109; the only query touching Apple's on-device runtime
+  { key: 'bioacoustics', q: 'topic:bioacoustics stars:>50' }, // 20, every row on target; AutoSnore/echo-jot audio-classification leg
+  { key: 'offline-maps', q: 'topic:offline-maps stars:>100' }, // 13, every row on target; incl. maplibre flutter plugin (Dart)
+  // Probed 09-11 and NOT wired in (recorded so the next audit does not re-derive):
+  //   telescope      topic:telescope stars:>50 -> 55, but the head is entirely
+  //                  nvim-telescope plugins. The word belongs to Neovim.
+  //   accessibility  topic:accessibility stars:>500 -> 152, but the head is web
+  //                  a11y tooling (headlessui, radix, react-spectrum). Two rows
+  //                  were on target (gkd-kit/gkd, cjpais/Handy 31k MIT
+  //                  offline STT) — Handy is picked up by the speech-to-text
+  //                  rewrite below instead.
+  //   braille        topic:braille stars:>20 -> 37, but they use braille
+  //                  *characters* for terminal plotting (mapscii, plotille).
+  //                  Only liblouis is real braille — and the store side killed
+  //                  the direction the same day (主词 45 hits / 2 paid, one of
+  //                  them ★0.00 / 0 ratings).
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
