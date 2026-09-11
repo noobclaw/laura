@@ -6,7 +6,7 @@ import 'l10n.dart';
 /// All per-app identity lives here. `scripts/new_app.mjs` rewrites the
 /// string constants; tweak colors/links by hand per app.
 abstract final class Branding {
-  static const String appNameEn = 'PhotoLift';
+  static const String appNameEn = 'PixelLift';
   // "老照片修复" alone is shared by dozens of store listings; the "离线"
   // qualifier is the product wedge and keeps the name distinct.
   static const String appNameZh = '离线老照片修复';

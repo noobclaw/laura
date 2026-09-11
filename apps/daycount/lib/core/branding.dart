@@ -7,7 +7,7 @@ import 'l10n.dart';
 /// i18n: per-locale display names come from store/listing.md. Same for the
 /// android side: android/app/src/main/res/values{,-zh}/strings.xml.
 abstract final class Branding {
-  static const String appNameEn = 'DayCount';
+  static const String appNameEn = 'Daybird';
   static const String appNameZh = '倒数日';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
@@ -22,7 +22,7 @@ abstract final class Branding {
   static String get aboutText => tr(
         zh: '倒数日 — 记录每个重要日子的倒计时与纪念日，全部在本机运行。'
             '桌面小组件一眼看到最近的日子。无账号、无广告、不联网。',
-        en: 'DayCount — countdowns and days-since for every date that matters, '
+        en: 'Daybird — countdowns and days-since for every date that matters, '
             'all on your device. See the nearest day at a glance on the '
             'home-screen widget. No account, no ads, no network.',
       );
@@ -36,7 +36,7 @@ abstract final class Branding {
 你创建的日子只存在这台设备上，卸载 App 即随之删除。
 ''',
         en: '''
-DayCount does not collect, store, or transmit any personal data.
+Daybird does not collect, store, or transmit any personal data.
 
 All events and settings stay on your device. The app does not request network access, contains no analytics or advertising SDKs, and uses no third-party services.
 

@@ -9,6 +9,6 @@ void main() {
     expect(find.byType(DaycountApp), findsOneWidget);
     // The AppBar title renders regardless of async store state.
     // Under `flutter test` the app boots in the 'en' locale.
-    expect(find.widgetWithText(AppBar, 'DayCount'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Daybird'), findsOneWidget);
   });
 }

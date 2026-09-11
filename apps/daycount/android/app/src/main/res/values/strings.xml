@@ -2,5 +2,5 @@
 <!-- Launcher label, default (English). Per-locale names come from
      store/listing.md. -->
 <resources>
-    <string name="app_name">DayCount</string>
+    <string name="app_name">Daybird</string>
 </resources>

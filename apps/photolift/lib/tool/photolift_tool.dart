@@ -56,8 +56,8 @@ class _ProTile extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.workspace_premium, color: cs.primary),
               title: Text(store.pro
-                  ? tr(zh: 'PhotoLift Pro 已解锁', en: 'PhotoLift Pro unlocked')
-                  : tr(zh: '升级 PhotoLift Pro', en: 'Upgrade to PhotoLift Pro')),
+                  ? tr(zh: 'PixelLift Pro 已解锁', en: 'PixelLift Pro unlocked')
+                  : tr(zh: '升级 PixelLift Pro', en: 'Upgrade to PixelLift Pro')),
               subtitle: store.pro
                   ? Text(tr(zh: '不限张数 · 4x · 无标签', en: 'Unlimited · 4x · no tag'))
                   : Row(children: [

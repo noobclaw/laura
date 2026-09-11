@@ -100,7 +100,7 @@ Future<Uint8List> buildPdf(
             ),
             pw.Spacer(),
             pw.Text(
-              'Generated offline by FieldStamp - this data never left the device.',
+              'Generated offline by SiteStamp - this data never left the device.',
               style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
           ],

@@ -51,7 +51,7 @@ class _ResultScreenState extends State<ResultScreen> {
     setState(() => _busy = true);
     try {
       final stamp = r.createdAt.toIso8601String().replaceAll(RegExp(r'[-:]'), '').split('.').first;
-      await MediaBridge.saveToGallery(_out.path, displayName: 'PhotoLift_${stamp}_${r.scale}x.jpg');
+      await MediaBridge.saveToGallery(_out.path, displayName: 'PixelLift_${stamp}_${r.scale}x.jpg');
       if (!mounted) return;
       _snack(tr(zh: '已保存到相册', en: 'Saved to Photos'));
     } on MediaException catch (e) {
@@ -200,8 +200,8 @@ class _ResultScreenState extends State<ResultScreen> {
                 color: cs.surfaceContainerHigh,
                 onColor: cs.onSurfaceVariant,
                 text: tr(
-                  zh: '右下角有一个小小的 PhotoLift 标签。升级 Pro 后不再添加。',
-                  en: 'A small PhotoLift tag sits in the bottom-right corner. Pro results carry no tag.',
+                  zh: '右下角有一个小小的 PixelLift 标签。升级 Pro 后不再添加。',
+                  en: 'A small PixelLift tag sits in the bottom-right corner. Pro results carry no tag.',
                 ),
                 action: TextButton(
                   onPressed: () => showProSheet(context),

@@ -42,7 +42,7 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                           color: cs.primary, size: 22),
                     ),
                     const SizedBox(width: 12),
-                    Text('PhotoLift Pro', style: text.titleLarge),
+                    Text('PixelLift Pro', style: text.titleLarge),
                   ],
                 ),
                 if (reason != null) ...[
@@ -61,8 +61,8 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                   en: '4x upscaling (free is 2x) — poster-size results',
                 )),
                 _Perk(tr(
-                  zh: '去掉结果角落的 PhotoLift 小标签',
-                  en: 'Removes the small PhotoLift tag in the corner',
+                  zh: '去掉结果角落的 PixelLift 小标签',
+                  en: 'Removes the small PixelLift tag in the corner',
                 )),
                 const SizedBox(height: 12),
                 Text(

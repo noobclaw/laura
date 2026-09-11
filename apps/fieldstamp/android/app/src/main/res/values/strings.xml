@@ -2,5 +2,5 @@
 <!-- Launcher label, default (English). Per-locale names live in
      values-zh/strings.xml etc. (store/listing.md has both). -->
 <resources>
-    <string name="app_name">FieldStamp</string>
+    <string name="app_name">SiteStamp</string>
 </resources>

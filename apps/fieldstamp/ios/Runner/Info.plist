@@ -5,11 +5,11 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>FieldStamp uses the camera to take geo-stamped field photos. Images stay on your device.</string>
+	<string>SiteStamp uses the camera to take geo-stamped field photos. Images stay on your device.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FieldStamp stamps your photos with GPS coordinates and altitude. Your location stays on your device and is never uploaded.</string>
+	<string>SiteStamp stamps your photos with GPS coordinates and altitude. Your location stays on your device and is never uploaded.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>FieldStamp saves a stamped photo to your Photos library only when you choose Save Image in the share sheet.</string>
+	<string>SiteStamp saves a stamped photo to your Photos library only when you choose Save Image in the share sheet.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleLocalizations</key>
@@ -18,7 +18,7 @@
 		<string>zh-Hans</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>FieldStamp</string>
+	<string>SiteStamp</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -67,13 +67,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>

@@ -42,7 +42,7 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                           color: cs.primary, size: 22),
                     ),
                     const SizedBox(width: 12),
-                    Text('FieldStamp Pro', style: text.titleLarge),
+                    Text('SiteStamp Pro', style: text.titleLarge),
                   ],
                 ),
                 if (reason != null) ...[
@@ -65,8 +65,8 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                   en: 'Degrees / minutes / seconds coordinates',
                 )),
                 _Perk(tr(
-                  zh: '去掉照片上的 FieldStamp 小角标',
-                  en: 'Removes the small FieldStamp tag on photos',
+                  zh: '去掉照片上的 SiteStamp 小角标',
+                  en: 'Removes the small SiteStamp tag on photos',
                 )),
                 const SizedBox(height: 12),
                 Text(

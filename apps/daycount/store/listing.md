@@ -1,4 +1,4 @@
-# 商店文案 — 倒数日 / DayCount
+# 商店文案 — 倒数日 / Daybird
 
 ## 中文（简体）
 
@@ -36,15 +36,15 @@
 ## English
 
 ### Title (≤30)
-DayCount — Countdown Widget
+Daybird — Countdown Widget
 
 ### Short description (≤80)
 Countdown to birthdays, anniversaries & exams — right on your home screen. Offline.
 
 ### Long description
-DayCount turns every date that matters into a clean countdown (or days-since) and puts it right on your home screen widget.
+Daybird turns every date that matters into a clean countdown (or days-since) and puts it right on your home screen widget.
 
-Why DayCount
+Why Daybird
 · The widget is the point: your nearest day shows on the home screen — tap to open.
 · Automatic: future dates count down, past dates count up, and today shows "It's today 🎉" — no mode to pick.
 · Yearly repeat: birthdays and anniversaries roll forward to the next occurrence automatically, Feb 29 handled correctly.

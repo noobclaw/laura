@@ -51,7 +51,7 @@ private struct SharedData {
     let zh = Locale.preferredLanguages.first?.lowercased().hasPrefix("zh") ?? false
     return SharedData(
       hasEvent: s("dc_has_event") == "true",
-      title: s("dc_title", zh ? "倒数日" : "DayCount"),
+      title: s("dc_title", zh ? "倒数日" : "Daybird"),
       emoji: s("dc_emoji"),
       dateIso: s("dc_date_iso"),
       yearly: s("dc_yearly") == "true",
@@ -198,7 +198,7 @@ struct CountdownWidget: Widget {
     StaticConfiguration(kind: widgetKind, provider: CountdownProvider()) { entry in
       CountdownWidgetEntryView(entry: entry)
     }
-    .configurationDisplayName("倒数日 DayCount")
+    .configurationDisplayName("倒数日 Daybird")
     .description("最近的日子倒计时 · Countdown to your next big day")
     .supportedFamilies([.systemSmall, .systemMedium])
   }

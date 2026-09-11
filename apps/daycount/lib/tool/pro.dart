@@ -43,7 +43,7 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                           color: cs.primary, size: 22),
                     ),
                     const SizedBox(width: 12),
-                    Text(tr(zh: '倒数日 Pro', en: 'DayCount Pro'),
+                    Text(tr(zh: '倒数日 Pro', en: 'Daybird Pro'),
                         style: text.titleLarge),
                   ],
                 ),

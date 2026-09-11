@@ -254,8 +254,8 @@ class _LiftScreenState extends State<LiftScreen> {
           const SizedBox(height: 10),
           Text(
             tr(
-              zh: '免费版结果角落带一个小小的 PhotoLift 标签;Pro 去掉。',
-              en: 'Free results carry a small PhotoLift tag in the corner; Pro removes it.',
+              zh: '免费版结果角落带一个小小的 PixelLift 标签;Pro 去掉。',
+              en: 'Free results carry a small PixelLift tag in the corner; Pro removes it.',
             ),
             textAlign: TextAlign.center,
             style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),

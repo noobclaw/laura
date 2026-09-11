@@ -11,7 +11,7 @@ class UpscaleRequest {
     required this.denoise,
     required this.useGpu,
     required this.tag,
-    this.tagText = 'PhotoLift',
+    this.tagText = 'PixelLift',
   });
 
   final String jobId;

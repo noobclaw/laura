@@ -10,7 +10,7 @@ import 'sensors.dart';
 import 'store.dart';
 import 'tool_module.dart';
 
-/// FieldStamp: an offline GPS field-evidence camera. Everything the shell needs
+/// SiteStamp: an offline GPS field-evidence camera. Everything the shell needs
 /// is behind [ToolModule]; the store and sensor hub are created once and shared.
 class FieldStampTool extends ToolModule {
   FieldStampTool() {
@@ -337,7 +337,7 @@ class _HowItWorksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final body = tr(
       zh: '''
-FieldStamp 把每张照片都变成一份小小的现场证据。
+SiteStamp 把每张照片都变成一份小小的现场证据。
 
 按下快门时,应用会读取设备的 GPS(经纬度、海拔和精度)、磁力计方位和当前时间,连同项目名一起直接烧入照片的像素里。因为水印是在拍摄瞬间合成的(不是事后叠加),照片本身就承载着这份记录。
 
@@ -348,10 +348,10 @@ FieldStamp 把每张照片都变成一份小小的现场证据。
 • 如果方位看起来不对,把手机按"8"字形晃动以校准罗盘。
 • 海拔来自 GPS,可能有波动,仅供参考。
 
-隐私:一切都在本机完成。FieldStamp 不申请网络权限——你的照片和坐标永远不会离开你的手机。
+隐私:一切都在本机完成。SiteStamp 不申请网络权限——你的照片和坐标永远不会离开你的手机。
 ''',
       en: '''
-FieldStamp turns every photo into a small piece of field evidence.
+SiteStamp turns every photo into a small piece of field evidence.
 
 When you tap the shutter, the app reads your device's GPS (latitude, longitude, altitude and accuracy), the magnetometer bearing, and the current time — then burns them, together with the project name, directly into the photo's pixels. Because the stamp is composited at the moment of capture (not added afterward), the image itself carries the record.
 
@@ -362,7 +362,7 @@ Tips for good stamps:
 • Move the phone in a figure-8 to calibrate the compass if the bearing looks off.
 • Altitude comes from GPS and can vary; treat it as approximate.
 
-Privacy: everything happens on this device. FieldStamp requests no network permission — your photos and coordinates never leave your phone.
+Privacy: everything happens on this device. SiteStamp requests no network permission — your photos and coordinates never leave your phone.
 ''',
     );
     return Scaffold(

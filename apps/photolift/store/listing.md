@@ -1,4 +1,4 @@
-# PhotoLift / 离线老照片修复 — 商店文案 / Store Listing
+# PixelLift / 离线老照片修复 — 商店文案 / Store Listing
 
 分类 / Category: iOS Photo & Video (备选 Utilities) / Google Play Photography
 定价 / Pricing: Free with a one-time in-app purchase (Pro $6.99). No subscription, no ads.
@@ -9,17 +9,17 @@
 ## 中文(简体)
 
 **标题(≤30字)**
-离线老照片修复 PhotoLift
+离线老照片修复 PixelLift
 
 **短描述(≤80字)**
 AI 把模糊老照片放大 2x/4x 并降噪,模型内置手机本地运行,照片从不上传。一次买断,无订阅。
 
 **长描述**
-离线老照片修复(PhotoLift)是一款完全在手机上运行的 AI 照片放大与修复工具。它把 Real-ESRGAN 超分辨率模型直接装进了应用里:翻拍的老相片、扫描件、早期手机拍的低分辨率照片,选一张、点一下,通常几分钟内得到 2 倍或 4 倍尺寸、更清晰、噪点更少的新版本——整个过程不需要网络,照片一个字节都不会离开你的手机。
+离线老照片修复(PixelLift)是一款完全在手机上运行的 AI 照片放大与修复工具。它把 Real-ESRGAN 超分辨率模型直接装进了应用里:翻拍的老相片、扫描件、早期手机拍的低分辨率照片,选一张、点一下,通常几分钟内得到 2 倍或 4 倍尺寸、更清晰、噪点更少的新版本——整个过程不需要网络,照片一个字节都不会离开你的手机。
 
-市面上多数「老照片修复」应用要把你的家庭照片上传到服务器,再按周订阅收费。PhotoLift 反其道而行:模型在本地、不申请网络权限、除了应用商店自己的购买流程之外不与任何服务器通信、一次买断永久使用。
+市面上多数「老照片修复」应用要把你的家庭照片上传到服务器,再按周订阅收费。PixelLift 反其道而行:模型在本地、不申请网络权限、除了应用商店自己的购买流程之外不与任何服务器通信、一次买断永久使用。
 
-■ 为什么选 PhotoLift
+■ 为什么选 PixelLift
 • 真离线:应用不申请网络权限,照片从不上传,飞行模式也能用
 • 无订阅:一次买断解锁 Pro,不按周、不按月收费
 • 真 AI:内置 Real-ESRGAN 超分辨率模型,不是简单拉伸
@@ -38,7 +38,7 @@ AI 把模糊老照片放大 2x/4x 并降噪,模型内置手机本地运行,照�
 ■ 适合谁
 想把家里的老相片、毕业照、证件照翻拍件修清楚的人;不愿意把家人照片传到云端的人;以及所有讨厌订阅的人。
 
-免费版每天可修复 3 张(2x,结果角落带一个小小的 PhotoLift 标签);解锁 Pro 后不限张数、支持 4x、不再添加标签。
+免费版每天可修复 3 张(2x,结果角落带一个小小的 PixelLift 标签);解锁 Pro 后不限张数、支持 4x、不再添加标签。
 
 注:本应用做的是放大与降噪,不做人脸重绘、上色或破损修补。
 
@@ -50,17 +50,17 @@ AI 把模糊老照片放大 2x/4x 并降噪,模型内置手机本地运行,照�
 ## English
 
 **Title (≤30 chars)**
-PhotoLift: Offline AI Upscaler
+PixelLift: Offline AI Upscaler
 
 **Short description (≤80 chars)**
 AI upscale & denoise old photos 2x/4x, fully on-device. No upload, no subscription.
 
 **Full description**
-PhotoLift is an AI photo upscaler that runs entirely on your phone. The Real-ESRGAN super-resolution model is bundled inside the app: pick a re-photographed print, a scan, or a low-resolution shot from an early phone, tap once, and usually within a few minutes you get a 2x or 4x version that is sharper and cleaner — with no network involved. Not a single byte of your photo leaves the device.
+PixelLift is an AI photo upscaler that runs entirely on your phone. The Real-ESRGAN super-resolution model is bundled inside the app: pick a re-photographed print, a scan, or a low-resolution shot from an early phone, tap once, and usually within a few minutes you get a 2x or 4x version that is sharper and cleaner — with no network involved. Not a single byte of your photo leaves the device.
 
-Most "photo enhancer" apps upload your family pictures to a server and charge by the week. PhotoLift does the opposite: the model is local, the app requests no network permission and talks to no server other than the App Store's own purchase flow, and Pro is a one-time purchase.
+Most "photo enhancer" apps upload your family pictures to a server and charge by the week. PixelLift does the opposite: the model is local, the app requests no network permission and talks to no server other than the App Store's own purchase flow, and Pro is a one-time purchase.
 
-■ Why PhotoLift
+■ Why PixelLift
 • Truly offline: no network permission, photos are never uploaded, works in airplane mode
 • No subscription: one purchase unlocks Pro for good — no weekly or monthly fees
 • Real AI: a bundled Real-ESRGAN super-resolution model, not a plain resize
@@ -79,9 +79,9 @@ Most "photo enhancer" apps upload your family pictures to a server and charge by
 ■ Who it's for
 Anyone with old family prints, graduation photos or scanned documents to sharpen; anyone who won't upload their family's pictures to the cloud; anyone tired of subscriptions.
 
-The free version restores 3 photos a day at 2x with a small PhotoLift tag in the corner; Pro removes the limit and the tag and adds 4x.
+The free version restores 3 photos a day at 2x with a small PixelLift tag in the corner; Pro removes the limit and the tag and adds 4x.
 
-Note: PhotoLift upscales and denoises. It does not repaint faces, colorize, or repair torn areas.
+Note: PixelLift upscales and denoises. It does not repaint faces, colorize, or repair torn areas.
 
 **Keywords**
 photo upscaler, enhance old photos, ai photo enhancer, unblur, photo denoise, super resolution, upscale image, offline, no subscription, restore photos

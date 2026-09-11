@@ -109,8 +109,8 @@ class _CameraScreenState extends State<CameraScreen>
       if (denied.contains(e.code)) {
         _fail(
           tr(
-            zh: '未授予相机权限。FieldStamp 需要相机才能拍摄取证照片。',
-            en: 'Camera permission not granted. FieldStamp needs the camera '
+            zh: '未授予相机权限。SiteStamp 需要相机才能拍摄取证照片。',
+            en: 'Camera permission not granted. SiteStamp needs the camera '
                 'to take stamped photos.',
           ),
           denied: true,
@@ -218,7 +218,7 @@ class _CameraScreenState extends State<CameraScreen>
         formatTimestamp(r.time),
         store.projectName(store.currentProjectId),
       ],
-      appTag: store.pro ? null : 'FieldStamp',
+      appTag: store.pro ? null : 'SiteStamp',
     );
   }
 
@@ -535,8 +535,8 @@ class _LocationIssue extends StatelessWidget {
         onAction = SensorHub.openLocationSettings;
       case LocationState.deniedForever:
         hint = tr(
-          zh: '请在系统设置里允许 FieldStamp 使用定位。',
-          en: 'Allow FieldStamp to use location in Settings.',
+          zh: '请在系统设置里允许 SiteStamp 使用定位。',
+          en: 'Allow SiteStamp to use location in Settings.',
         );
         action = tr(zh: '去系统设置', en: 'Open Settings');
         onAction = SensorHub.openAppSettings;
