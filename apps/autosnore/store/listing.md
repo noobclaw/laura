@@ -47,7 +47,7 @@ sensitivity lets you catch faint sounds or only clear, loud snoring.
 FREE VS PRO
 Free: record every night and see the full morning report; the last 3 nights are
 kept.
-Pro (one-time $3.99): unlimited history, night-to-night trends, comparison, and
+Pro (one-time $3.99): unlimited history, night-to-night trends, and
 CSV export.
 
 PRIVACY BY DESIGN
@@ -101,7 +101,7 @@ detector, offline, private, no subscription, sleep tracker, snore monitor
 
 免费 vs Pro
 免费:每晚都能记录并查看完整晨间报告,保留最近 3 晚。
-Pro(一次性买断 ¥18 / $3.99):无限历史、跨夜趋势、两晚对比、CSV 导出。
+Pro(一次性买断 ¥18 / $3.99):无限历史、跨夜趋势、CSV 导出。
 
 隐私优先
 无账号、无广告、无网络权限、不保存录音。绝不上传、不追踪、不分享。

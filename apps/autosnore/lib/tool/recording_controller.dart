@@ -88,6 +88,11 @@ class RecordingController extends ChangeNotifier {
   int _stallStartWallMs = 0;
   bool _resuming = false;
 
+  /// Consecutive resume() failures before [_tryResume] gives up on resuming
+  /// and restarts the stream instead. See the comment in [_tryResume].
+  static const int maxResumeFailures = 3;
+  int _resumeFailures = 0;
+
   /// Current loudness mapped to 0..1 for a live meter (−60 dBFS → 0, 0 → 1).
   double get level => ((currentDb + 60) / 60).clamp(0.0, 1.0);
 
@@ -180,13 +185,32 @@ class RecordingController extends ChangeNotifier {
     _resuming = true;
     try {
       final stalledFor = stalled ? _clock.elapsedMilliseconds - _stallStartWallMs : 0;
-      if (await _recorder.isPaused()) {
-        await _recorder.resume();
-      } else if (stalled && stalledFor > forceRestartAfter.inMilliseconds && await _recorder.isRecording()) {
-        // The plugin still says "recording" but nothing has arrived for a
-        // long time: the audio engine underneath it stopped (route change,
-        // ended interruption). Only a fresh stream re-activates the session.
-        debugPrint('recorder stalled ${stalledFor}ms while "recording" — restarting stream');
+      final needRestart = stalled && stalledFor > forceRestartAfter.inMilliseconds;
+      final paused = await _recorder.isPaused();
+      if (paused && _resumeFailures < maxResumeFailures && !needRestart) {
+        // Ordinary interruption end on iOS: the plugin re-activates the
+        // session itself when the system says .shouldResume, and resume()
+        // just restarts the engine. But when the interruption ends WITHOUT
+        // .shouldResume (a call the user took in another app, then hung up)
+        // the session is never re-activated, engine.start() throws every
+        // second, and the old code looped here forever — a whole night of
+        // "recovering…" with nothing recorded. Count the failures and fall
+        // through to a full restart, which does re-activate the session.
+        try {
+          await _recorder.resume();
+          _resumeFailures = 0;
+        } catch (e) {
+          _resumeFailures += 1;
+          debugPrint('resume failed ($_resumeFailures): $e');
+        }
+      } else if (paused || (needRestart && await _recorder.isRecording())) {
+        // Either the plugin still says "recording" but nothing has arrived
+        // for a long time (route change, ended interruption — the audio
+        // engine underneath it stopped), or resume() has failed repeatedly /
+        // the pause has outlived the restart window. Only a fresh stream
+        // re-activates the session.
+        debugPrint('recorder ${paused ? "paused" : "stalled"} ${stalledFor}ms — restarting stream');
+        _resumeFailures = 0;
         await _sub?.cancel();
         try {
           await _recorder.stop();
