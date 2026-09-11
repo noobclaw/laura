@@ -330,9 +330,9 @@ class _CompareScreenState extends State<CompareScreen> {
             child: _sideBySide
                 ? Row(
                     children: [
-                      Expanded(child: _Labelled(label: tr(zh: '原图', en: 'Before'), child: Image.file(File(r.source.path), fit: BoxFit.contain))),
+                      Expanded(child: _Labelled(label: tr(zh: '原图', en: 'Before'), child: Image.file(File(r.source.path), fit: BoxFit.contain, cacheWidth: _compareCacheWidth(context)))),
                       const SizedBox(width: 2),
-                      Expanded(child: _Labelled(label: tr(zh: '处理后', en: 'After'), child: Image.file(File(r.outputPath!), fit: BoxFit.contain))),
+                      Expanded(child: _Labelled(label: tr(zh: '处理后', en: 'After'), child: Image.file(File(r.outputPath!), fit: BoxFit.contain, cacheWidth: _compareCacheWidth(context)))),
                     ],
                   )
                 : LayoutBuilder(
@@ -343,10 +343,10 @@ class _CompareScreenState extends State<CompareScreen> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.file(File(r.outputPath!), fit: BoxFit.contain),
+                          Image.file(File(r.outputPath!), fit: BoxFit.contain, cacheWidth: _compareCacheWidth(context)),
                           ClipRect(
                             clipper: _LeftClipper(_split),
-                            child: Image.file(File(r.source.path), fit: BoxFit.contain),
+                            child: Image.file(File(r.source.path), fit: BoxFit.contain, cacheWidth: _compareCacheWidth(context)),
                           ),
                           Positioned(
                             left: c.maxWidth * _split - 1,
@@ -404,6 +404,14 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 }
+
+/// Decode the two compare images at screen width, not at full resolution.
+/// The compare page holds the original AND the result at once; a pair of 48 MP
+/// iPhone originals decoded raw is ~190 MB each, which is a jetsam kill with
+/// no crash dialog. Every other Image.file in this app already passes
+/// cacheWidth — these four were the only ones that did not.
+int _compareCacheWidth(BuildContext context) =>
+    (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round();
 
 class _LeftClipper extends CustomClipper<Rect> {
   const _LeftClipper(this.frac);

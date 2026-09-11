@@ -309,8 +309,13 @@ MetadataReport inspectMetadata(Uint8List bytes) {
       case 'webp':
         return _inspectWebp(bytes);
     }
-  } catch (_) {
-    // fall through to the empty report
+  } catch (e) {
+    // Do NOT fall through to the empty report. An empty report renders as a
+    // green "No metadata found" — for a privacy tool that is the one wrong
+    // answer we must never give by accident. A parser crash on an odd EXIF
+    // layout must surface as a failure (the screen already has a _failed
+    // channel for exactly this), not as a clean bill of health.
+    throw StateError("metadata parser failed for $format: $e");
   }
   return MetadataReport(
     format: format,
