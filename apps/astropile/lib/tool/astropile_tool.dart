@@ -36,11 +36,14 @@ class AstropileTool extends ToolModule {
                 ? Text(tr(
                     zh: '最多 $kProFrameLimit 张 · 中值叠加 · 记住设置',
                     en: 'Up to $kProFrameLimit frames · median stacking · saved settings'))
-                : Row(
-                    children: [
-                      Text(tr(zh: '一次买断 ', en: 'One-time purchase ')),
-                      const ProPriceText(fallback: kProFallbackPrice),
-                    ],
+                : Text(tr(
+                    zh: '最多 $kProFrameLimit 张 · 中值叠加 · 记住设置 · 一次买断',
+                    en: 'Up to $kProFrameLimit frames · median · saved settings · one-time')),
+            trailing: store.pro
+                ? null
+                : FilledButton.tonal(
+                    onPressed: () => showProSheet(context),
+                    child: const ProPriceText(fallback: kProFallbackPrice),
                   ),
             onTap: store.pro ? null : () => showProSheet(context),
           ),

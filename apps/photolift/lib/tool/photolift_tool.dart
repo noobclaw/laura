@@ -60,13 +60,15 @@ class _ProTile extends StatelessWidget {
                   : tr(zh: '升级 PixelLift Pro', en: 'Upgrade to PixelLift Pro')),
               subtitle: store.pro
                   ? Text(tr(zh: '不限张数 · 4x · 无标签', en: 'Unlimited · 4x · no tag'))
-                  : Row(children: [
-                      Expanded(
-                          child: Text(tr(
-                              zh: '不限张数、4x 放大、去标签 —— 一次买断 ',
-                              en: 'Unlimited, 4x, no tag — one-time '))),
-                      const ProPriceText(fallback: '\$6.99'),
-                    ]),
+                  : Text(tr(
+                      zh: '不限张数、4x 放大、去标签 —— 一次买断',
+                      en: 'Unlimited, 4x, no tag — one-time purchase')),
+              trailing: store.pro
+                  ? null
+                  : FilledButton.tonal(
+                      onPressed: () => showProSheet(context),
+                      child: const ProPriceText(fallback: '\$6.99'),
+                    ),
               onTap: store.pro ? null : () => showProSheet(context),
             ),
             RestorePurchasesTile(pro: store.pro),

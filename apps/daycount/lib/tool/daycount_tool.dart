@@ -87,7 +87,7 @@ class _ProTile extends StatelessWidget {
           subtitle: Text(tr(zh: '无限日子 + 全部主题色', en: 'Unlimited days + all theme colors')),
           // The store's own localized price, so nobody is quoted a currency
           // they will not be charged in.
-          trailing: FilledButton(
+          trailing: FilledButton.tonal(
             onPressed: () => showProSheet(context),
             child: const ProPriceText(fallback: r'$1.99'),
           ),
