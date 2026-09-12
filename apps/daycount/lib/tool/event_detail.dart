@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'accent_ink.dart';
 import 'event_edit.dart';
 import 'hero_card.dart';
 import 'models.dart';
@@ -69,7 +70,10 @@ class _DetailView extends StatelessWidget {
             child: Text(tr(zh: '取消', en: 'Cancel')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
             onPressed: () => Navigator.pop(context, true),
             child: Text(tr(zh: '删除', en: 'Delete')),
           ),
@@ -88,9 +92,8 @@ class _DetailView extends StatelessWidget {
     final s = statusOf(event, now);
     final progress = progressOf(event, now);
     final color = event.color;
-    final onColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? Colors.white
-        : Colors.black87;
+    final ink = onColorFor(color);
+    final onColor = ink.fg;
     final label = s.isToday
         ? tr(zh: '就是今天', en: 'Today!')
         : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
@@ -150,13 +153,19 @@ class _DetailView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // 20px semibold is WCAG "large" text, so it may sit straight
+                // on the accent; the small labels below go on a chip.
                 Text(
                   event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18, color: onColor.withValues(alpha: 0.95)),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: onColor,
+                  ),
                 ),
                 const SizedBox(height: 18),
-                Text(label, style: TextStyle(fontSize: 14, color: onColor.withValues(alpha: 0.9))),
+                _Chip(text: label, fg: onColor, bg: ink.chip),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: 172,
@@ -218,8 +227,7 @@ class _DetailView extends StatelessWidget {
                   ),
                 ),
                 if (!s.isToday)
-                  Text(tr(zh: '天', en: 'days'),
-                      style: TextStyle(fontSize: 16, color: onColor.withValues(alpha: 0.9))),
+                  _Chip(text: tr(zh: '天', en: 'days'), fg: onColor, bg: ink.chip),
               ],
             ),
           ),
@@ -254,6 +262,30 @@ class _DetailView extends StatelessWidget {
   }
 
   static String _two(int n) => n.toString().padLeft(2, '0');
+}
+
+/// Small text on the accent card: sits on the dark band (or a light wash on a
+/// light accent) so it clears WCAG AA where the accent itself would not.
+class _Chip extends StatelessWidget {
+  const _Chip({required this.text, required this.fg, required this.bg});
+  final String text;
+  final Color fg;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: fg),
+      ),
+    );
+  }
 }
 
 class _InfoRow extends StatelessWidget {

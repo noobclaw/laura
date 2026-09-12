@@ -3,12 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'accent_ink.dart';
 import 'flip_digit.dart';
 import 'models.dart';
 
-/// Press feedback for any tappable surface: a `Listener` (so the child's own
-/// InkWell / FAB keeps its tap) that scales the child down while a pointer is
-/// held. Zero duration under reduced motion.
+/// Press feedback for any tappable surface: scales the child down while a
+/// tap is being held. Uses tap gestures rather than raw pointer events so
+/// the child's own InkWell / FAB still wins the tap, and a scroll drag that
+/// happens to start on the card is cancelled by the scrollable instead of
+/// squeezing it. Zero duration under reduced motion.
 class PressScale extends StatefulWidget {
   const PressScale({super.key, required this.child, this.scale = 0.965});
   final Widget child;
@@ -21,13 +24,17 @@ class PressScale extends StatefulWidget {
 class _PressScaleState extends State<PressScale> {
   bool _down = false;
 
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
+  }
+
   @override
   Widget build(BuildContext context) {
     final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    return Listener(
-      onPointerDown: (_) => setState(() => _down = true),
-      onPointerUp: (_) => setState(() => _down = false),
-      onPointerCancel: (_) => setState(() => _down = false),
+    return GestureDetector(
+      onTapDown: (_) => _set(true),
+      onTapUp: (_) => _set(false),
+      onTapCancel: () => _set(false),
       child: AnimatedScale(
         scale: _down ? widget.scale : 1,
         duration: reduce ? Duration.zero : const Duration(milliseconds: 130),
@@ -41,6 +48,21 @@ class _PressScaleState extends State<PressScale> {
 /// Hero tag shared between the list / featured card and the detail page so
 /// the emoji flies between screens.
 String emojiHeroTag(CountdownEvent e) => 'daybird-emoji-${e.id}';
+
+String _two(int n) => n.toString().padLeft(2, '0');
+
+/// "2026-07-18 Sat · yearly" — the date line shared by the cards.
+String eventDateLine(CountdownEvent event, EventStatus s) =>
+    '${s.target.year}-${_two(s.target.month)}-${_two(s.target.day)} '
+    '${weekdayLabel(s.target)}'
+    '${event.yearlyRepeat ? ' · ${tr(zh: '每年', en: 'yearly')}' : ''}';
+
+/// "还有 42 天" / "in 42 days" — the count as one phrase for screen readers.
+String eventCountPhrase(EventStatus s) => s.isToday
+    ? tr(zh: '就是今天', en: 'Today!')
+    : (s.isFuture
+        ? tr(zh: '还有 ${s.absDays} 天', en: 'in ${s.absDays} days')
+        : tr(zh: '已过去 ${s.absDays} 天', en: '${s.absDays} days ago'));
 
 /// The "nearest day" card at the top of the home list — the app's hero.
 /// Event accent as a gradient ground, the emoji big, and the day count as a
@@ -60,219 +82,243 @@ class FeaturedCard extends StatelessWidget {
   final double? progress;
   final VoidCallback onTap;
 
-  static String _two(int n) => n.toString().padLeft(2, '0');
-
   @override
   Widget build(BuildContext context) {
     final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final color = event.color;
     final dark = Color.lerp(color, Colors.black, 0.32)!;
-    final onColor =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? Colors.white
-            : Colors.black87;
+    final ink = onColorFor(color);
+    final onColor = ink.fg;
     final s = status;
     final label = s.isToday
         ? tr(zh: '就是今天', en: 'Today!')
         : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
+    final title =
+        event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title;
+    final dateLine = eventDateLine(event, s);
     final text = Theme.of(context).textTheme;
 
-    return PressScale(
-      child: TweenAnimationBuilder<double>(
-        // Re-keyed per event so a new featured day slides/fades in rather
-        // than the old numbers being overwritten in place.
-        key: ValueKey('featured-${event.id}'),
-        tween: Tween(begin: 0, end: 1),
-        duration: reduce ? Duration.zero : const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-        builder: (context, t, child) => Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, 14 * (1 - t)),
-            child: child,
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.38),
-                blurRadius: 28,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: Material(
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
+    // One sentence for assistive tech instead of a pill, a digit wall and a
+    // date read out as separate fragments.
+    final sentence = tr(
+      zh: '$title，${eventCountPhrase(s)}，$dateLine',
+      en: '$title, ${eventCountPhrase(s)}, $dateLine',
+    );
+
+    return MergeSemantics(
+      child: PressScale(
+        child: TweenAnimationBuilder<double>(
+          // Re-keyed per event so a new featured day slides/fades in rather
+          // than the old numbers being overwritten in place.
+          key: ValueKey('featured-${event.id}'),
+          tween: Tween(begin: 0, end: 1),
+          duration: reduce ? Duration.zero : const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+          builder: (context, t, child) => Opacity(
+            opacity: t,
+            child: Transform.translate(
+              offset: Offset(0, 14 * (1 - t)),
+              child: child,
             ),
-            child: Ink(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [color, dark],
+          ),
+          // The blurred accent shadow lives here, outside the looping
+          // animations (confetti, flip digits), which each sit in their own
+          // RepaintBoundary so the shadow is painted once, not per frame.
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.38),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
                 ),
+              ],
+            ),
+            child: Material(
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
               ),
-              child: InkWell(
-                onTap: onTap,
-                splashColor: onColor.withValues(alpha: 0.12),
-                highlightColor: onColor.withValues(alpha: 0.06),
-                child: Stack(
-                  children: [
-                    // Soft highlight so the gradient has some depth.
-                    Positioned(
-                      right: -60,
-                      top: -70,
-                      child: IgnorePointer(
-                        child: Container(
-                          width: 240,
-                          height: 240,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(colors: [
-                              Colors.white.withValues(alpha: 0.22),
-                              Colors.white.withValues(alpha: 0),
-                            ]),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [color, dark],
+                  ),
+                ),
+                child: InkWell(
+                  onTap: onTap,
+                  splashColor: onColor.withValues(alpha: 0.12),
+                  highlightColor: onColor.withValues(alpha: 0.06),
+                  child: Semantics(
+                    label: sentence,
+                    excludeSemantics: true,
+                    child: Stack(
+                      children: [
+                        // Soft highlight so the gradient has some depth.
+                        Positioned(
+                          right: -60,
+                          top: -70,
+                          child: IgnorePointer(
+                            child: Container(
+                              width: 240,
+                              height: 240,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(colors: [
+                                  Colors.white.withValues(alpha: 0.22),
+                                  Colors.white.withValues(alpha: 0),
+                                ]),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    if (s.isToday)
-                      const Positioned.fill(
-                        child: IgnorePointer(child: ConfettiOverlay()),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                        if (s.isToday)
+                          const Positioned.fill(
+                            child: IgnorePointer(child: ConfettiOverlay()),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: onColor.withValues(alpha: 0.16),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Hero(
+                                      tag: emojiHeroTag(event),
+                                      child: Material(
+                                        type: MaterialType.transparency,
+                                        child: Text(
+                                          event.emoji,
+                                          style: const TextStyle(fontSize: 34),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  _Pill(text: label, fg: onColor, bg: ink.chip),
+                                  if (event.pinned) ...[
+                                    const SizedBox(width: 6),
+                                    _Pill(
+                                      icon: Icons.push_pin,
+                                      text: tr(zh: '置顶', en: 'Pinned'),
+                                      fg: onColor,
+                                      bg: ink.chip,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.titleLarge?.copyWith(
+                                  color: onColor,
+                                  fontSize: 22,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              if (s.isToday)
+                                _TodayBurst(onColor: onColor)
+                              else
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Flexible(
+                                      child: FlipNumber(
+                                        value: s.absDays,
+                                        textColor: onColor,
+                                        tileColor: (onColor == Colors.white
+                                                ? Colors.black
+                                                : Colors.white)
+                                            .withValues(alpha: 0.18),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: Text(
+                                        tr(zh: '天', en: 'days'),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: onColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              const SizedBox(height: 14),
+                              // Small text: on the dark band / chip, never
+                              // straight on a mid-tone accent.
                               Container(
-                                width: 64,
-                                height: 64,
-                                alignment: Alignment.center,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: onColor.withValues(alpha: 0.16),
-                                  borderRadius: BorderRadius.circular(20),
+                                  color: ink.chip,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Hero(
-                                  tag: emojiHeroTag(event),
-                                  child: Material(
-                                    type: MaterialType.transparency,
-                                    child: Text(
-                                      event.emoji,
-                                      style: const TextStyle(fontSize: 34),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.event_outlined,
+                                        size: 16, color: onColor),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        dateLine,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: onColor,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
-                              const Spacer(),
-                              _Pill(text: label, fg: onColor),
-                              if (event.pinned) ...[
-                                const SizedBox(width: 6),
-                                _Pill(
-                                  icon: Icons.push_pin,
-                                  text: tr(zh: '置顶', en: 'Pinned'),
-                                  fg: onColor,
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            event.title.isEmpty
-                                ? tr(zh: '未命名', en: 'Untitled')
-                                : event.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: text.titleLarge?.copyWith(
-                              color: onColor,
-                              fontSize: 22,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          if (s.isToday)
-                            _TodayBurst(onColor: onColor)
-                          else
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Flexible(
-                                  child: FlipNumber(
-                                    value: s.absDays,
-                                    textColor: onColor,
-                                    tileColor: (onColor == Colors.white
-                                            ? Colors.black
-                                            : Colors.white)
-                                        .withValues(alpha: 0.18),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Text(
-                                    tr(zh: '天', en: 'days'),
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: onColor.withValues(alpha: 0.9),
+                              if (progress != null) ...[
+                                const SizedBox(height: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: TweenAnimationBuilder<double>(
+                                    tween: Tween(begin: 0, end: progress),
+                                    duration: reduce
+                                        ? Duration.zero
+                                        : const Duration(milliseconds: 700),
+                                    curve: Curves.easeOutCubic,
+                                    builder: (context, v, _) =>
+                                        LinearProgressIndicator(
+                                      value: v,
+                                      minHeight: 6,
+                                      backgroundColor:
+                                          onColor.withValues(alpha: 0.18),
+                                      valueColor:
+                                          AlwaysStoppedAnimation(onColor),
                                     ),
                                   ),
                                 ),
                               ],
-                            ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Icon(Icons.event_outlined,
-                                  size: 16,
-                                  color: onColor.withValues(alpha: 0.8)),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  '${s.target.year}-${_two(s.target.month)}-${_two(s.target.day)} '
-                                  '${weekdayLabel(s.target)}'
-                                  '${event.yearlyRepeat ? ' · ${tr(zh: '每年', en: 'yearly')}' : ''}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: onColor.withValues(alpha: 0.85),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
-                          if (progress != null) ...[
-                            const SizedBox(height: 12),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: TweenAnimationBuilder<double>(
-                                tween: Tween(begin: 0, end: progress),
-                                duration: reduce
-                                    ? Duration.zero
-                                    : const Duration(milliseconds: 700),
-                                curve: Curves.easeOutCubic,
-                                builder: (context, v, _) =>
-                                    LinearProgressIndicator(
-                                  value: v,
-                                  minHeight: 6,
-                                  backgroundColor:
-                                      onColor.withValues(alpha: 0.18),
-                                  valueColor: AlwaysStoppedAnimation(onColor),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -284,9 +330,15 @@ class FeaturedCard extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({required this.text, required this.fg, this.icon});
+  const _Pill({
+    required this.text,
+    required this.fg,
+    required this.bg,
+    this.icon,
+  });
   final String text;
   final Color fg;
+  final Color bg;
   final IconData? icon;
 
   @override
@@ -294,7 +346,7 @@ class _Pill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: fg.withValues(alpha: 0.16),
+        color: bg,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -318,7 +370,10 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// The 🎉 that replaces the digits on the day itself, popping in.
+/// The 🎉 that replaces the digits on the day itself, popping in. Sized
+/// through the text scaler explicitly (and drawn unscaled) so a large system
+/// font grows the row predictably, then fitted so it can never overflow the
+/// card.
 class _TodayBurst extends StatelessWidget {
   const _TodayBurst({required this.onColor});
   final Color onColor;
@@ -326,29 +381,39 @@ class _TodayBurst extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final scaler = MediaQuery.textScalerOf(context);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.4, end: 1),
       duration: reduce ? Duration.zero : const Duration(milliseconds: 600),
       curve: Curves.elasticOut,
       builder: (context, t, child) =>
           Transform.scale(scale: t, alignment: Alignment.centerLeft, child: child),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          const Text('🎉', style: TextStyle(fontSize: 84, height: 1.05)),
-          const SizedBox(width: 12),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Text(
-              tr(zh: '就是今天', en: 'Today!'),
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: onColor,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '🎉',
+              style: TextStyle(fontSize: scaler.scale(84), height: 1.05),
+              textScaler: TextScaler.noScaling,
+            ),
+            const SizedBox(width: 12),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Text(
+                tr(zh: '就是今天', en: 'Today!'),
+                style: TextStyle(
+                  fontSize: scaler.scale(22),
+                  fontWeight: FontWeight.w800,
+                  color: onColor,
+                ),
+                textScaler: TextScaler.noScaling,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -356,7 +421,8 @@ class _TodayBurst extends StatelessWidget {
 
 /// Confetti and star sparks drifting down the right half of the hero card.
 /// Only mounted on "today" cards. Under reduced motion it paints one still
-/// frame instead of looping.
+/// frame instead of looping. Paints in its own layer so the loop repaints
+/// the particles, not the card (and its blurred shadow) around them.
 class ConfettiOverlay extends StatefulWidget {
   const ConfettiOverlay({super.key});
 
@@ -399,9 +465,11 @@ class _ConfettiOverlayState extends State<ConfettiOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _ConfettiPainter(_particles, _ctrl),
-      willChange: true,
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: _ConfettiPainter(_particles, _ctrl),
+        willChange: true,
+      ),
     );
   }
 }

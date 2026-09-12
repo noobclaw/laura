@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/day_change.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
+import 'accent_ink.dart';
 import 'event_detail.dart';
 import 'event_edit.dart';
 import 'hero_card.dart';
@@ -122,6 +123,11 @@ class _HomeBodyState extends State<_HomeBody> {
   CountdownEvent? _featured;
   final List<CountdownEvent> _rows = [];
 
+  /// Ids whose row badge has already rolled its count in. A row that is
+  /// lifted out and re-inserted (pin, edit, midnight) is a new element, and
+  /// without this its number would count up from zero all over again.
+  final Set<String> _rolled = {};
+
   @override
   void initState() {
     super.initState();
@@ -230,6 +236,7 @@ class _HomeBodyState extends State<_HomeBody> {
   /// One list row with its enter/exit transition: slides up and fades in,
   /// collapses on the way out (the same animation run backwards).
   Widget _row(CountdownEvent e, Animation<double> anim, {required bool hero}) {
+    final rollIn = _rolled.add(e.id);
     final curved = CurvedAnimation(
       parent: anim,
       curve: Curves.easeOutCubic,
@@ -246,6 +253,7 @@ class _HomeBodyState extends State<_HomeBody> {
           child: _EventCard(
             event: e,
             hero: hero,
+            rollIn: rollIn,
             onTap: () => _open(e),
           ),
         ),
@@ -349,6 +357,7 @@ class _EventCard extends StatelessWidget {
     required this.event,
     required this.onTap,
     this.hero = true,
+    this.rollIn = true,
   });
   final CountdownEvent event;
   final VoidCallback onTap;
@@ -357,20 +366,22 @@ class _EventCard extends StatelessWidget {
   /// emoji Hero tag never exists twice on the page.
   final bool hero;
 
+  /// Whether the day badge counts up from zero (first appearance only).
+  final bool rollIn;
+
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final s = statusOf(event, now);
     final progress = progressOf(event, now);
     final color = event.color;
-    final onColor = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? Colors.white
-        : Colors.black87;
+    final ink = onColorFor(color);
     final label = s.isToday
         ? tr(zh: '就是今天', en: 'Today!')
         : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
 
     final emoji = Text(event.emoji, style: const TextStyle(fontSize: 26));
+    final cs = Theme.of(context).colorScheme;
 
     return PressScale(
       child: Card(
@@ -413,9 +424,9 @@ class _EventCard extends StatelessWidget {
                       Row(
                         children: [
                           if (event.pinned)
-                            const Padding(
-                              padding: EdgeInsets.only(right: 4),
-                              child: Icon(Icons.push_pin, size: 15, color: Colors.grey),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Icon(Icons.push_pin, size: 15, color: cs.onSurfaceVariant),
                             ),
                           Expanded(
                             child: Text(
@@ -433,7 +444,7 @@ class _EventCard extends StatelessWidget {
                         '${event.yearlyRepeat ? ' · ${tr(zh: '每年', en: 'yearly')}' : ''}',
                         style: TextStyle(
                           fontSize: 12.5,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                       if (progress != null) ...[
@@ -452,7 +463,7 @@ class _EventCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                _DayBadge(label: label, status: s, bg: color, fg: onColor),
+                _DayBadge(label: label, status: s, ink: ink, rollIn: rollIn),
               ],
             ),
           ),
@@ -464,58 +475,76 @@ class _EventCard extends StatelessWidget {
   static String _two(int n) => n.toString().padLeft(2, '0');
 }
 
+/// The "in 42 days" badge on a list row. Its 10–11px labels are small text,
+/// so the whole badge sits on the accent's small-text surface (the dark band
+/// on a mid-tone accent, the accent itself on a light one). Reads as one
+/// phrase to assistive tech.
 class _DayBadge extends StatelessWidget {
   const _DayBadge({
     required this.label,
     required this.status,
-    required this.bg,
-    required this.fg,
+    required this.ink,
+    this.rollIn = true,
   });
   final String label;
   final EventStatus status;
-  final Color bg;
-  final Color fg;
+  final AccentInk ink;
+
+  /// Count up from zero on first appearance; later builds start on the value.
+  final bool rollIn;
 
   @override
   Widget build(BuildContext context) {
     final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    return Container(
-      constraints: const BoxConstraints(minWidth: 68),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(label, style: TextStyle(fontSize: 11, color: fg.withValues(alpha: 0.9))),
-          const SizedBox(height: 1),
-          if (status.isToday)
-            Text(
-              '🎉',
-              style: TextStyle(fontSize: 30, height: 1.05, color: fg),
-            )
-          else
-            // The count rolls up to its value instead of snapping in.
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: status.absDays.toDouble()),
-              duration: reduce ? Duration.zero : const Duration(milliseconds: 650),
-              curve: Curves.easeOutCubic,
-              builder: (context, v, _) => Text(
-                '${v.round()}',
-                style: TextStyle(
-                  fontSize: 30,
-                  height: 1.05,
-                  fontWeight: FontWeight.w800,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                  color: fg,
+    final fg = ink.fg;
+    final days = status.absDays.toDouble();
+    return MergeSemantics(
+      child: Semantics(
+        label: eventCountPhrase(status),
+        excludeSemantics: true,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 68),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: ink.small,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 11, fontWeight: FontWeight.w500, color: fg)),
+              const SizedBox(height: 1),
+              if (status.isToday)
+                Text(
+                  '🎉',
+                  style: TextStyle(fontSize: 30, height: 1.05, color: fg),
+                )
+              else
+                // The count rolls up to its value instead of snapping in.
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: rollIn ? 0 : days, end: days),
+                  duration:
+                      reduce ? Duration.zero : const Duration(milliseconds: 650),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, v, _) => Text(
+                    '${v.round()}',
+                    style: TextStyle(
+                      fontSize: 30,
+                      height: 1.05,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                      color: fg,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          if (!status.isToday)
-            Text(tr(zh: '天', en: 'days'),
-                style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.9))),
-        ],
+              if (!status.isToday)
+                Text(tr(zh: '天', en: 'days'),
+                    style: TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.w500, color: fg)),
+            ],
+          ),
+        ),
       ),
     );
   }
