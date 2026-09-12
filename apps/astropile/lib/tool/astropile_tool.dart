@@ -41,7 +41,12 @@ class AstropileTool extends ToolModule {
                     maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: store.pro
                 ? null
+                // The app theme forces filled buttons to full width
+                // (Size.fromHeight); inside ListTile.trailing that makes the
+                // tile abort layout, so this one button opts back out.
                 : FilledButton.tonal(
+                    style: FilledButton.styleFrom(
+                        minimumSize: const Size(64, 40)),
                     onPressed: () => showProSheet(context),
                     child: const ProPriceText(fallback: kProFallbackPrice),
                   ),
