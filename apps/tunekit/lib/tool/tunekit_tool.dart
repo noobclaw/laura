@@ -45,9 +45,8 @@ class TuneKitTool extends ToolModule {
                 : tr(zh: '解锁 Pro', en: 'Unlock Pro')),
             subtitle: store.pro
                 ? Text(tr(zh: '全部预设、拍号、字典与记录已开启', en: 'All presets, metres, dictionary and history are on'))
-                : Text(tr(
-                    zh: '乐器预设 · 6/8 与细分 · 完整字典 · 记录不限天 · 一次买断',
-                    en: 'Instrument presets · 6/8 & subdivisions · full dictionary · unlimited history · one-time')),
+                : Text(tr(zh: '一次买断,无订阅', en: 'One-time purchase'),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: store.pro
                 ? null
                 : FilledButton.tonal(

@@ -60,9 +60,8 @@ class _ProTile extends StatelessWidget {
                   : tr(zh: '升级 PixelLift Pro', en: 'Upgrade to PixelLift Pro')),
               subtitle: store.pro
                   ? Text(tr(zh: '不限张数 · 4x · 无标签', en: 'Unlimited · 4x · no tag'))
-                  : Text(tr(
-                      zh: '不限张数、4x 放大、去标签 —— 一次买断',
-                      en: 'Unlimited, 4x, no tag — one-time purchase')),
+                  : Text(tr(zh: '一次买断,无订阅', en: 'One-time purchase'),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
               trailing: store.pro
                   ? null
                   : FilledButton.tonal(

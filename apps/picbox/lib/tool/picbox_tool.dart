@@ -39,9 +39,8 @@ class PicboxTool extends ToolModule {
                 : tr(zh: '解锁 Pro', en: 'Unlock Pro')),
             subtitle: store.pro
                 ? Text(tr(zh: '不限张数 · WebP · 预设 · 记住设置', en: 'Unlimited batch · WebP · presets · saved settings'))
-                : Text(tr(
-                    zh: '不限张数 · WebP · 预设 · 记住设置 · 一次买断',
-                    en: 'Unlimited batch · WebP · presets · saved settings · one-time')),
+                : Text(tr(zh: '一次买断,无订阅', en: 'One-time purchase'),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: store.pro
                 ? null
                 : FilledButton.tonal(

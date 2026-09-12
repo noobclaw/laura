@@ -37,9 +37,8 @@ class AstropileTool extends ToolModule {
                 ? Text(tr(
                     zh: '最多 $kProFrameLimit 张 · 中值叠加 · 记住设置',
                     en: 'Up to $kProFrameLimit frames · median stacking · saved settings'))
-                : Text(tr(
-                    zh: '最多 $kProFrameLimit 张 · 中值叠加 · 记住设置 · 一次买断',
-                    en: 'Up to $kProFrameLimit frames · median · saved settings · one-time')),
+                : Text(tr(zh: '一次买断,无订阅', en: 'One-time purchase'),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: store.pro
                 ? null
                 : FilledButton.tonal(
