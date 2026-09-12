@@ -162,19 +162,33 @@ class Fsrs {
     return s * (1 + growth);
   }
 
-  /// Stability after a lapse (Again) at retrievability [r]. Never exceeds
-  /// the stability the card had before forgetting.
+  /// Stability after a lapse (Again) at retrievability [r].
+  ///
+  /// Capped at the FSRS-5 short-term floor `s / exp(w17·w18)` — the same cap
+  /// fsrs-rs `stability_after_failure` and py-fsrs `_next_forget_stability`
+  /// use — not at the pre-lapse stability. For a mature card the two are
+  /// indistinguishable (the raw value is far smaller than either), but for a
+  /// small-stability card recalled very late the raw post-lapse stability can
+  /// sit between the two, and the reference takes the tighter `s/exp(w17·w18)`.
   double forgetStability(double d, double s, double r) {
     final next = weights[11] *
         math.pow(d, -weights[12]) *
         (math.pow(s + 1, weights[13]) - 1) *
         math.exp(weights[14] * (1 - r));
-    return math.min(next, s);
+    return math.min(next, s / math.exp(weights[17] * weights[18]));
   }
 
   /// Stability after a same-day review (learning / relearning step).
-  double shortTermStability(double s, Rating rating) =>
-      s * math.exp(weights[17] * (_grade(rating) - 3 + weights[18]));
+  ///
+  /// A successful same-day grade (Good/Easy) is clamped so it never shrinks
+  /// stability (`max(sinc, 1)`), matching fsrs-rs `stability_short_term`. At
+  /// the default weights this clamp never bites (Good ≈ 1.41×, Easy ≈ 2.36×),
+  /// but it keeps the formula faithful under custom weights.
+  double shortTermStability(double s, Rating rating) {
+    final grade = _grade(rating);
+    final sinc = math.exp(weights[17] * (grade - 3 + weights[18]));
+    return s * (grade >= 3 ? math.max(sinc, 1.0) : sinc);
+  }
 
   static double _clampD(double d) => d.clamp(1.0, 10.0);
 
