@@ -61,6 +61,7 @@ class IntervalPattern {
     required this.symbol,
     required this.group,
     this.free = false,
+    this.degrees,
   });
 
   /// Stable key used in persistence and tests.
@@ -79,7 +80,19 @@ class IntervalPattern {
   /// Included in the free tier.
   final bool free;
 
+  /// Explicit degree labels, one per entry of [semitones], for the few
+  /// chords whose spelling a context-free lookup cannot know (dim7's
+  /// diminished seventh is `bb7`, not `6`). Null = derive from the
+  /// semitone count, which is right for everything else.
+  final List<String>? degrees;
+
   bool get isChord => group.isChord;
+
+  /// Degree label of every tone, root first (`1`, `b3`, `5`, `b7`, ...).
+  /// Chords label chord tones (9 = ninth), scales label scale degrees.
+  List<String> get degreeLabels =>
+      degrees ??
+      semitones.map(isChord ? degreeLabel : scaleDegreeLabel).toList();
 
   /// Pitch classes (0..11) relative to the root, deduplicated in order.
   List<int> get relativePitchClasses {
@@ -122,7 +135,7 @@ const List<IntervalPattern> kChordTypes = [
   IntervalPattern(id: 'maj7', semitones: [0, 4, 7, 11], nameEn: 'Major 7th', nameZh: '大七和弦', symbol: 'maj7', group: PatternGroup.sevenths),
   IntervalPattern(id: 'm7', semitones: [0, 3, 7, 10], nameEn: 'Minor 7th', nameZh: '小七和弦', symbol: 'm7', group: PatternGroup.sevenths),
   IntervalPattern(id: 'mMaj7', semitones: [0, 3, 7, 11], nameEn: 'Minor–major 7th', nameZh: '小大七和弦', symbol: 'mMaj7', group: PatternGroup.sevenths),
-  IntervalPattern(id: 'dim7', semitones: [0, 3, 6, 9], nameEn: 'Diminished 7th', nameZh: '减七和弦', symbol: 'dim7', group: PatternGroup.sevenths),
+  IntervalPattern(id: 'dim7', semitones: [0, 3, 6, 9], nameEn: 'Diminished 7th', nameZh: '减七和弦', symbol: 'dim7', group: PatternGroup.sevenths, degrees: ['1', 'b3', 'b5', 'bb7']),
   IntervalPattern(id: 'm7b5', semitones: [0, 3, 6, 10], nameEn: 'Half-diminished', nameZh: '半减七和弦', symbol: 'm7b5', group: PatternGroup.sevenths),
   IntervalPattern(id: 'aug7', semitones: [0, 4, 8, 10], nameEn: 'Augmented 7th', nameZh: '增七和弦', symbol: 'aug7', group: PatternGroup.sevenths),
   IntervalPattern(id: '6', semitones: [0, 4, 7, 9], nameEn: 'Major 6th', nameZh: '大六和弦', symbol: '6', group: PatternGroup.sevenths),

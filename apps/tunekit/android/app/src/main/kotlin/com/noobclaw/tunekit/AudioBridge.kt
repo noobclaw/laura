@@ -255,6 +255,9 @@ class AudioBridge(
         @Volatile var subPerBeat = 1
         @Volatile var accents: IntArray = intArrayOf(0)
 
+        /** Output gain while another app has transient-can-duck focus (1 = full). */
+        @Volatile private var duck = 1f
+
         private var track: AudioTrack? = null
         private var thread: Thread? = null
         @Volatile private var running = false
@@ -293,6 +296,7 @@ class AudioBridge(
             requestFocus(attrs)
             track = t
             running = true
+            duck = 1f
             try { t.play() } catch (e: Exception) { Log.e(TAG, "play", e); t.release(); track = null; running = false; return false }
             thread = Thread({ renderLoop(t, sr, isFloat) }, "tunekit-metro").also { it.start() }
             return true
@@ -360,10 +364,16 @@ class AudioBridge(
         }
 
         override fun onAudioFocusChange(change: Int) {
-            // A call or another player taking the output: stop and tell the
-            // UI, rather than ticking silently or fighting for the speaker.
-            if (change == AudioManager.AUDIOFOCUS_LOSS || change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
-                main.post { stop(notify = true) }
+            when (change) {
+                // A call or another player taking the output: stop and tell
+                // the UI, rather than ticking silently or fighting for the
+                // speaker.
+                AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->
+                    main.post { stop(notify = true) }
+                // A notification or navigation prompt: keep the beat going
+                // at a quarter of the volume and come back up afterwards.
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> duck = 0.25f
+                AudioManager.AUDIOFOCUS_GAIN -> duck = 1f
             }
         }
 
@@ -418,7 +428,7 @@ class AudioBridge(
                         s += click(tt, voice.kind)
                         v++
                     }
-                    chunk[i] = s.coerceIn(-1f, 1f)
+                    chunk[i] = (s * duck).coerceIn(-1f, 1f)
                 }
                 val written = if (shorts == null) {
                     t.write(chunk, 0, chunk.size, AudioTrack.WRITE_BLOCKING)

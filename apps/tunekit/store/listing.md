@@ -48,6 +48,8 @@
 · 完整和弦与音阶字典(近 50 种类型 × 12 个根音)
 · 练习记录不限天数,30 天趋势
 
+致谢:和弦与音阶字典按 tonal.js(MIT)逐条校验;练习模式参考了 piano-trainer(MIT)。
+
 ### 关键词
 调音器,节拍器,吉他调音,尤克里里,小提琴,贝斯,和弦,音阶,练琴,练习记录,离线,买断,无广告,音准,拍号
 
@@ -93,6 +95,8 @@ The app has no network permission at all — check it in your system settings. T
 · 6/8 metre, triplet and sixteenth subdivisions
 · The full chord and scale dictionary (about 50 types × 12 roots)
 · Unlimited practice history with 30-day trends
+
+Credits: the chord and scale dictionary is verified against tonal.js (MIT); the practice modes were inspired by piano-trainer (MIT).
 
 ### Keywords
 tuner, metronome, guitar tuner, ukulele, violin, bass, chords, scales, practice log, offline, one-time purchase, no ads, pitch, cents, time signature

@@ -67,6 +67,37 @@ void main() {
       expect(yin.estimate(tone(0, yin.requiredSamples, sr, amp: 0, noise: 0.2)), isNull);
     });
 
+    test('parabolic interpolation (YIN step 5) resolves non-integer periods', () {
+      // 1000 Hz at 44.1 kHz has a period of 44.1 samples. Snapping to the
+      // integer lag 44 would read 1002.3 Hz, +3.9 cents; the interpolated
+      // minimum must land well inside 1 cent.
+      for (final hz in [1000.0, 523.25, 329.63]) {
+        final e = yin.estimate(tone(hz, yin.requiredSamples, sr, harmonics: const [1.0, 0.3]));
+        expect(e, isNotNull, reason: '$hz Hz');
+        expect(centsOff(e!.frequency, hz).abs(), lessThan(1), reason: '$hz Hz');
+      }
+    });
+
+    test('absolute threshold picks the first dip: no sub-harmonic (octave-down) error', () {
+      // Every periodic signal's CMND also dips at 2x the period. The first
+      // dip below the threshold must win, so the estimate is the true
+      // fundamental, never half of it.
+      for (final hz in [110.0, 146.83, 196.0]) {
+        final e = yin.estimate(tone(hz, yin.requiredSamples, sr, harmonics: const [1.0, 0.9, 0.7, 0.5]));
+        expect(e, isNotNull, reason: '$hz Hz');
+        expect(e!.frequency / hz, closeTo(1.0, 0.01), reason: '$hz Hz must not halve');
+        expect(e.confidence, greaterThan(0.85), reason: 'confidence = 1 - CMND(tau)');
+      }
+    });
+
+    test('threshold is in the YIN range (paper 0.1, common 0.1-0.15) and buffers fit', () {
+      expect(yin.threshold, inInclusiveRange(0.1, 0.15));
+      // W >= 2 periods of the lowest guitar string (E2 = 82.4 Hz -> 535 samples).
+      expect(yin.windowSize, greaterThanOrEqualTo(2 * (sr / 82.41).ceil()));
+      // Lag room reaches the configured floor (30 Hz), so bass E1 (41 Hz) fits.
+      expect(yin.requiredSamples, greaterThanOrEqualTo(yin.windowSize + (sr / yin.minHz).ceil()));
+    });
+
     test('too-short input is rejected', () {
       expect(yin.estimate(Float32List(100)), isNull);
     });

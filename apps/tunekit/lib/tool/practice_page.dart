@@ -261,9 +261,7 @@ class PatternDetailPage extends StatelessWidget {
                       index: i,
                       child: _NoteChip(
                         name: pitchClassName((item.root + item.pattern.semitones[i]) % 12, flats: item.useFlats),
-                        degree: item.pattern.isChord
-                            ? degreeLabel(item.pattern.semitones[i])
-                            : scaleDegreeLabel(item.pattern.semitones[i]),
+                        degree: item.pattern.degreeLabels[i],
                         root: i == 0,
                       ),
                     ),

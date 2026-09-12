@@ -20,10 +20,13 @@ abstract final class Branding {
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the shell ships without the INTERNET permission.
   static String get aboutText => tr(
-        zh: '调音器、节拍器与和弦音阶练习,全部在你的手机上完成。麦克风只在调音和练习时用来测音高,声音不保存、不上传;无账号、无广告。',
+        zh: '调音器、节拍器与和弦音阶练习,全部在你的手机上完成。麦克风只在调音和练习时用来测音高,声音不保存、不上传;无账号、无广告。\n\n'
+            '致谢:和弦与音阶字典按 tonal.js(MIT)逐条校验;练习模式的设计参考了 piano-trainer(MIT)。',
         en: 'Tuner, metronome and chord/scale practice, all on your phone. '
             'The microphone is used only to measure pitch while you tune or practise; '
-            'audio is never stored or uploaded. No account, no ads.',
+            'audio is never stored or uploaded. No account, no ads.\n\n'
+            'Credits: the chord and scale dictionary is verified against tonal.js (MIT); '
+            'the practice modes were inspired by piano-trainer (MIT).',
       );
 
   static String get privacyPolicy => tr(

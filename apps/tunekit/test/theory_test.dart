@@ -36,6 +36,10 @@ void main() {
       expect(p('m7').semitones.map(degreeLabel).toList(), ['1', 'b3', '5', 'b7']);
       expect(p('add9').semitones.map(degreeLabel).toList(), ['1', '3', '5', '9']);
       expect(p('7#9').semitones.map(degreeLabel).toList(), ['1', '3', '5', 'b7', '#9']);
+      // dim7's top tone is a diminished seventh, not a sixth (tonal: 7d).
+      expect(p('dim7').degreeLabels, ['1', 'b3', 'b5', 'bb7']);
+      expect(p('6').degreeLabels, ['1', '3', '5', '6']);
+      expect(p('major').degreeLabels, ['1', '2', '3', '4', '5', '6', '7']);
     });
   });
 

@@ -113,43 +113,72 @@ String tempoMarking(int bpm) {
   return 'Prestissimo';
 }
 
-/// Tap-tempo estimator: median of the recent inter-tap intervals, which
-/// shrugs off one mistimed tap better than a mean. Taps more than
-/// [resetAfter] apart start a new measurement.
+/// Tap-tempo estimator, written to the rules of Tack's tempo dialog
+/// (spec only, see REFERENCE.md — no code was taken):
+///
+///  * keep the last [window] (20) inter-tap intervals and use their **mean**;
+///  * a new interval starts a fresh measurement when its implied tempo is
+///    ≥ +50 % or ≤ −50 % of the running tempo, or when the interval itself is
+///    longer than 3× the running mean interval. The offending interval is
+///    kept as the first sample of the new measurement, exactly as in the
+///    original, so after a long pause the estimate reappears on the tap after
+///    next.
+///  * tempo = 60 000 / mean ms, clamped to the app's BPM range.
 class TapTempo {
-  TapTempo({this.window = 6, this.resetAfter = const Duration(seconds: 2)});
+  TapTempo({this.window = 20});
 
+  /// Maximum number of intervals averaged (Tack: MAX_TAPS = 20).
   final int window;
-  final Duration resetAfter;
-  final List<Duration> _intervals = [];
+
+  /// Relative tempo change that restarts the measurement (Tack: 0.5).
+  static const double tempoFactor = 0.5;
+
+  /// An interval this many times the mean restarts it too (Tack: 3).
+  static const int intervalFactor = 3;
+
+  final List<int> _intervalsMs = [];
   DateTime? _last;
 
-  int get tapCount => _intervals.length + (_last == null ? 0 : 1);
+  int get tapCount => _intervalsMs.length + (_last == null ? 0 : 1);
 
-  /// Register a tap at [now]; returns the BPM estimate once two taps exist.
+  /// Mean interval in milliseconds, 0 while there is nothing to average.
+  int get meanIntervalMs => _intervalsMs.isEmpty
+      ? 0
+      : _intervalsMs.reduce((a, b) => a + b) ~/ _intervalsMs.length;
+
+  static int _tempoOf(int intervalMs) =>
+      intervalMs > 0 ? clampBpm(60000 ~/ intervalMs) : 0;
+
+  bool _shouldReset(int intervalMs) {
+    final running = _tempoOf(meanIntervalMs);
+    final incoming = _tempoOf(intervalMs);
+    return incoming >= running * (1 + tempoFactor) ||
+        incoming <= running * (1 - tempoFactor) ||
+        intervalMs > meanIntervalMs * intervalFactor;
+  }
+
+  /// Register a tap at [now]; returns the BPM estimate, or null when there is
+  /// not enough data yet (first tap, or the tap that restarted the count).
   int? tap(DateTime now) {
     final last = _last;
     _last = now;
     if (last == null) return null;
-    final gap = now.difference(last);
-    if (gap > resetAfter) {
-      _intervals.clear();
-      return null;
+    final gap = now.difference(last).inMilliseconds;
+    var enough = true;
+    if (_intervalsMs.isNotEmpty && _shouldReset(gap)) {
+      _intervalsMs.clear();
+      enough = false;
+    } else if (_intervalsMs.length >= window) {
+      _intervalsMs.removeAt(0);
     }
-    _intervals.add(gap);
-    if (_intervals.length > window) _intervals.removeAt(0);
-    final sorted = [..._intervals]..sort();
-    final mid = sorted[sorted.length ~/ 2];
-    final median = sorted.length.isEven
-        ? (sorted[sorted.length ~/ 2 - 1] + mid) ~/ 2
-        : mid;
-    if (median.inMicroseconds == 0) return null;
-    final bpm = (60e6 / median.inMicroseconds).round();
-    return clampBpm(bpm);
+    _intervalsMs.add(gap);
+    if (!enough) return null;
+    final mean = meanIntervalMs;
+    return mean > 0 ? _tempoOf(mean) : null;
   }
 
   void reset() {
-    _intervals.clear();
+    _intervalsMs.clear();
     _last = null;
   }
 }
