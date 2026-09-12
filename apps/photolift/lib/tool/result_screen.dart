@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'compare_slider.dart';
-import 'eta.dart';
 import 'job_runner.dart';
 import 'media.dart';
 import 'models.dart';
@@ -35,6 +35,9 @@ enum _View { compare, zoom }
 class _ResultScreenState extends State<ResultScreen> {
   _View _view = _View.compare;
   bool _busy = false;
+  /// The compare divider sweeps once per visit, not every time the user
+  /// flips between compare and zoom.
+  bool _swept = false;
 
   LiftRecord get r => widget.record;
   File get _out => File(widget.store.outputPath(r));
@@ -156,7 +159,13 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
               const SizedBox(height: 12),
               if (_view == _View.compare)
-                CompareSlider(before: _src, after: _out, aspectRatio: aspect.clamp(0.4, 2.5))
+                CompareSlider(
+                  before: _src,
+                  after: _out,
+                  aspectRatio: aspect.clamp(0.4, 2.5),
+                  autoSweep: !_swept,
+                  onSweepEnd: () => _swept = true,
+                )
               else
                 _ZoomView(file: _out, aspectRatio: aspect.clamp(0.4, 2.5)),
               const SizedBox(height: 8),
@@ -181,18 +190,7 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
               const SizedBox(height: 12),
             ],
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
-                child: Column(
-                  children: [
-                    _Row(tr(zh: '放大', en: 'Upscale'), '${r.scale}x · ${tr(zh: '降噪', en: 'denoise')} ${r.denoise.label}'),
-                    _Row(tr(zh: '尺寸', en: 'Size'), '${r.inWidth} × ${r.inHeight}  →  ${r.outWidth} × ${r.outHeight}'),
-                    _Row(tr(zh: '引擎', en: 'Engine'), '${r.engine.label} · ${formatEta(r.elapsedMs / 1000, zh: isZhLocale)}'),
-                  ],
-                ),
-              ),
-            ),
+            _StatsStrip(record: r, animate: widget.fresh || !_swept),
             if (r.tagged && !widget.store.pro) ...[
               const SizedBox(height: 12),
               _Notice(
@@ -265,28 +263,147 @@ class _ZoomView extends StatelessWidget {
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
-  final String label;
-  final String value;
+/// Time / scale / resolution as three counters that roll up to their values
+/// on arrival (TweenAnimationBuilder), plus the denoise + engine caption.
+/// The resolution counts from the input size to the output size — the
+/// number literally grows.
+class _StatsStrip extends StatelessWidget {
+  const _StatsStrip({required this.record, required this.animate});
+  final LiftRecord record;
+  final bool animate;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-              width: 64,
-              child: Text(label, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant))),
-          Expanded(
-              child: Text(value,
-                  style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
-        ],
+    final r = record;
+    final zh = isZhLocale;
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    final dur = animate && !reduce
+        ? const Duration(milliseconds: 900)
+        : Duration.zero;
+    String fmtSecs(double v) {
+      if (v < 60) return zh ? '${v.toStringAsFixed(1)} 秒' : '${v.toStringAsFixed(1)} s';
+      final m = v ~/ 60;
+      final sec = (v - m * 60).round();
+      return zh ? '$m 分 $sec 秒' : '${m}m ${sec}s';
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _StatTile(
+                    label: tr(zh: '用时', en: 'Time'),
+                    duration: dur,
+                    end: r.elapsedMs / 1000,
+                    format: fmtSecs,
+                  ),
+                ),
+                _vDivider(cs),
+                Expanded(
+                  child: _StatTile(
+                    label: tr(zh: '放大倍数', en: 'Upscale'),
+                    duration: dur,
+                    end: r.scale.toDouble(),
+                    format: (v) => '${v.round()}x',
+                    accent: true,
+                  ),
+                ),
+                _vDivider(cs),
+                Expanded(
+                  flex: 2,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: animate ? 0.0 : 1.0, end: 1.0),
+                    duration: dur,
+                    curve: Curves.easeOutCubic,
+                    builder: (context, t, _) {
+                      final w = (r.inWidth + (r.outWidth - r.inWidth) * t).round();
+                      final h = (r.inHeight + (r.outHeight - r.inHeight) * t).round();
+                      return _StatText(
+                        label: tr(zh: '分辨率', en: 'Resolution'),
+                        value: '$w × $h',
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '${tr(zh: '降噪', en: 'Denoise')} ${r.denoise.label} · '
+              '${r.engine.label} · ${r.inWidth} × ${r.inHeight} → ${r.outWidth} × ${r.outHeight}',
+              style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  static Widget _vDivider(ColorScheme cs) => Container(
+        width: 1,
+        height: 36,
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+        color: cs.outlineVariant.withValues(alpha: 0.6),
+      );
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.label,
+    required this.duration,
+    required this.end,
+    required this.format,
+    this.accent = false,
+  });
+  final String label;
+  final Duration duration;
+  final double end;
+  final String Function(double) format;
+  final bool accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: duration == Duration.zero ? end : 0.0, end: end),
+      duration: duration,
+      curve: Curves.easeOutCubic,
+      builder: (context, v, _) => _StatText(label: label, value: format(v), accent: accent),
+    );
+  }
+}
+
+class _StatText extends StatelessWidget {
+  const _StatText({required this.label, required this.value, this.accent = false});
+  final String label;
+  final String value;
+  final bool accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: text.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: text.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            fontFeatures: const [FontFeature.tabularFigures()],
+            color: accent ? (Theme.of(context).brightness == Brightness.dark ? kLiftGold : cs.primary) : null,
+          ),
+        ),
+      ],
     );
   }
 }

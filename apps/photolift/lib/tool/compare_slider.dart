@@ -15,6 +15,8 @@ class CompareSlider extends StatefulWidget {
     required this.after,
     required this.aspectRatio,
     this.initialFraction = 0.5,
+    this.autoSweep = false,
+    this.onSweepEnd,
   });
 
   final File before;
@@ -22,15 +24,76 @@ class CompareSlider extends StatefulWidget {
   /// width / height of the images.
   final double aspectRatio;
   final double initialFraction;
+  /// On first build, sweep the divider left → right over the whole photo and
+  /// settle at [initialFraction] (1.2 s) — a guided "look what changed"
+  /// before the user touches it. A touch interrupts it. Skipped when the
+  /// platform asks for reduced motion.
+  final bool autoSweep;
+  final VoidCallback? onSweepEnd;
 
   @override
   State<CompareSlider> createState() => _CompareSliderState();
 }
 
-class _CompareSliderState extends State<CompareSlider> {
-  late double _fraction = widget.initialFraction;
+class _CompareSliderState extends State<CompareSlider>
+    with SingleTickerProviderStateMixin {
+  late double _fraction = widget.autoSweep ? 0.0 : widget.initialFraction;
+  late final AnimationController _sweep = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+  late final Animation<double> _sweepPos = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeInOutCubic)),
+      weight: 62,
+    ),
+    TweenSequenceItem(
+      tween: Tween(begin: 1.0, end: widget.initialFraction)
+          .chain(CurveTween(curve: Curves.easeOutCubic)),
+      weight: 38,
+    ),
+  ]).animate(_sweep);
+  bool _sweepScheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sweepPos.addListener(() {
+      if (mounted) setState(() => _fraction = _sweepPos.value);
+    });
+    _sweep.addStatusListener((st) {
+      if (st == AnimationStatus.completed) widget.onSweepEnd?.call();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.autoSweep && !_sweepScheduled) {
+      _sweepScheduled = true;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _fraction = widget.initialFraction;
+        widget.onSweepEnd?.call();
+      } else {
+        // Let the images decode a frame before moving the divider.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _sweep.forward();
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _sweep.dispose();
+    super.dispose();
+  }
 
   void _update(Offset local, double width) {
+    if (_sweep.isAnimating) {
+      _sweep.stop();
+      widget.onSweepEnd?.call();
+    }
     setState(() => _fraction = (local.dx / width).clamp(0.0, 1.0));
   }
 

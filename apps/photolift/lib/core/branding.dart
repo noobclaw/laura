@@ -14,9 +14,10 @@ abstract final class Branding {
 
   static const String version = '1.0.0';
 
-  /// Seed for the Material 3 color scheme: a deep violet — the "sparkle"
-  /// family, distinct from the sepia of the photos it restores.
-  static const Color seedColor = Color(0xFF6C4DFF);
+  /// Seed for the Material 3 color scheme: rose (hue ~335°) — warm against
+  /// the sepia of the photos it restores and on its own hue band among the
+  /// sibling apps. Gold (`kLiftGold` in tool/app_theme.dart) marks "lifted".
+  static const Color seedColor = Color(0xFFE0407A);
 
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the app ships without the INTERNET permission.

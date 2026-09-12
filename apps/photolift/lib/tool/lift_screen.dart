@@ -5,11 +5,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
-import 'app_theme.dart';
 import 'eta.dart';
 import 'job_runner.dart';
 import 'media.dart';
 import 'models.dart';
+import 'pixel_art.dart';
 import 'pro.dart';
 import 'result_screen.dart';
 import 'store.dart';
@@ -36,7 +36,7 @@ class LiftScreen extends StatefulWidget {
 
 enum _Phase { configure, running }
 
-class _LiftScreenState extends State<LiftScreen> {
+class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateMixin {
   int _scale = 2;
   late DenoiseLevel _denoise = widget.store.defaultDenoise;
   _Phase _phase = _Phase.configure;
@@ -45,6 +45,9 @@ class _LiftScreenState extends State<LiftScreen> {
   double _estimateSec = 0;
   Timer? _ticker;
   bool _cancelling = false;
+  /// Drives the light band around the progress ring (one lap per cycle).
+  late final AnimationController _sweep =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 1800));
 
   IntSize get _fit => fitInput(widget.photo.width, widget.photo.height, _scale);
   IntSize get _outSize => IntSize(_fit.width * _scale, _fit.height * _scale);
@@ -54,7 +57,17 @@ class _LiftScreenState extends State<LiftScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    _sweep.dispose();
     super.dispose();
+  }
+
+  void _setPhase(_Phase phase) {
+    _phase = phase;
+    if (phase == _Phase.running) {
+      if (!MediaQuery.disableAnimationsOf(context)) _sweep.repeat();
+    } else {
+      _sweep.stop();
+    }
   }
 
   void _pickScale(int s) {
@@ -77,7 +90,7 @@ class _LiftScreenState extends State<LiftScreen> {
       return;
     }
     setState(() {
-      _phase = _Phase.running;
+      _setPhase(_Phase.running);
       _startedAt = DateTime.now();
       _estimateSec = store.estimateSeconds(_outSize.pixels, _scale);
       _progress = const UpscaleProgress(done: 0, total: 1, stage: 'decode');
@@ -102,13 +115,13 @@ class _LiftScreenState extends State<LiftScreen> {
     } on UpscaleCancelled {
       if (!mounted) return;
       _ticker?.cancel();
-      setState(() => _phase = _Phase.configure);
+      setState(() => _setPhase(_Phase.configure));
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(tr(zh: '已取消', en: 'Cancelled'))));
     } catch (e) {
       if (!mounted) return;
       _ticker?.cancel();
-      setState(() => _phase = _Phase.configure);
+      setState(() => _setPhase(_Phase.configure));
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -152,7 +165,29 @@ class _LiftScreenState extends State<LiftScreen> {
             children: [
               _Preview(photo: widget.photo),
               const SizedBox(height: 16),
-              if (running) _buildProgress(context) else _buildOptions(context),
+              // configure <-> running: cross-fade with a small vertical slide,
+              // not a hard swap.
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 320),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: SlideTransition(
+                    position: Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero)
+                        .animate(anim),
+                    child: child,
+                  ),
+                ),
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.topCenter,
+                  children: [...previous, ?current],
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey(running),
+                  child: running ? _buildProgress(context) : _buildOptions(context),
+                ),
+              ),
             ],
           ),
         ),
@@ -245,10 +280,12 @@ class _LiftScreenState extends State<LiftScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: _start,
-          icon: const Icon(Icons.auto_awesome),
-          label: Text(tr(zh: '开始修复', en: 'Restore')),
+        PressScale(
+          child: FilledButton.icon(
+            onPressed: _start,
+            icon: const Icon(Icons.auto_awesome),
+            label: Text(tr(zh: '开始修复', en: 'Restore')),
+          ),
         ),
         if (!store.pro) ...[
           const SizedBox(height: 10),
@@ -290,28 +327,66 @@ class _LiftScreenState extends State<LiftScreen> {
         padding: const EdgeInsets.fromLTRB(20, 26, 20, 20),
         child: Column(
           children: [
-            SizedBox(
-              width: 168,
-              height: 168,
-              child: CustomPaint(
-                painter: _RingPainter(
-                  fraction: frac,
-                  gradient: heroGradient(cs),
-                  track: cs.surfaceContainerHighest,
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('${(frac * 100).round()}%', style: text.displaySmall),
-                      Text(
-                        _progress.stage == 'encode'
-                            ? tr(zh: '快好了', en: 'almost done')
-                            : tr(zh: '剩余 ${formatEta(remaining, zh: isZhLocale)}',
-                                en: '${formatEta(remaining, zh: isZhLocale)} left'),
-                        style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            // The ring: the fraction is tweened so tile-by-tile jumps glide,
+            // a light band sweeps the filled arc, and the same pixel mosaic
+            // as the home hero resolves inside it in step with progress.
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: frac),
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 650),
+              curve: Curves.easeOutCubic,
+              builder: (context, v, _) => SizedBox(
+                width: 172,
+                height: 172,
+                child: AnimatedBuilder(
+                  animation: _sweep,
+                  builder: (context, _) => CustomPaint(
+                    painter: LiftRingPainter(
+                      fraction: v,
+                      sweep: _sweep.isAnimating ? _sweep.value : -1,
+                      track: cs.surfaceContainerHighest,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(22),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipOval(
+                            child: PixelResolve(
+                                progress: v, grid: 8, gap: 2, radius: 2.5, opacity: 0.85),
+                          ),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  cs.surfaceContainerHigh,
+                                  cs.surfaceContainerHigh.withValues(alpha: 0.92),
+                                  cs.surfaceContainerHigh.withValues(alpha: 0),
+                                ],
+                                stops: const [0.0, 0.55, 1.0],
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('${(v * 100).round()}%', style: text.displaySmall),
+                                Text(
+                                  _progress.stage == 'encode'
+                                      ? tr(zh: '快好了', en: 'almost done')
+                                      : tr(zh: '剩余 ${formatEta(remaining, zh: isZhLocale)}',
+                                          en: '${formatEta(remaining, zh: isZhLocale)} left'),
+                                  style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -405,40 +480,4 @@ class _InfoRow extends StatelessWidget {
       ],
     );
   }
-}
-
-class _RingPainter extends CustomPainter {
-  const _RingPainter({required this.fraction, required this.gradient, required this.track});
-  final double fraction;
-  final Gradient gradient;
-  final Color track;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const stroke = 14.0;
-    final rect = Offset.zero & size;
-    final r = rect.deflate(stroke / 2);
-    final trackPaint = Paint()
-      ..color = track
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(r, 0, math.pi * 2, false, trackPaint);
-    if (fraction <= 0) return;
-    final paint = Paint()
-      ..shader = SweepGradient(
-        startAngle: -math.pi / 2,
-        endAngle: math.pi * 1.5,
-        colors: gradient.colors,
-        transform: const GradientRotation(-math.pi / 2),
-      ).createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(r, -math.pi / 2, math.pi * 2 * fraction, false, paint);
-  }
-
-  @override
-  bool shouldRepaint(_RingPainter old) =>
-      old.fraction != fraction || old.track != track || old.gradient != gradient;
 }
