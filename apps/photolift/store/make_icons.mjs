@@ -151,8 +151,10 @@ async function main() {
   // Store assets.
   await sharp(squareBuf).resize(512, 512).png().toFile(path.join(here, 'icon-512.png'));
   const badge = await sharp(roundedBuf).resize(300, 300).png().toBuffer();
-  await sharp(Buffer.from(featureSvg())).png()
+  // Play rejects feature graphics that carry an alpha channel: flatten to RGB.
+  await sharp(Buffer.from(featureSvg()))
     .composite([{ input: badge, left: 70, top: 100 }])
+    .flatten({ background: WINE }).removeAlpha().png()
     .toFile(path.join(here, 'feature-1024x500.png'));
   await writeFile(path.join(here, 'icon-source.svg'), iconSvg({ rounded: true }));
   // Legibility check sheet: 60 / 120 px next to each other on a light ground.

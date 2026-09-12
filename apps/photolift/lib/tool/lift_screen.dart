@@ -46,8 +46,18 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
   Timer? _ticker;
   bool _cancelling = false;
   /// Drives the light band around the progress ring (one lap per cycle).
-  late final AnimationController _sweep =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1800));
+  /// Built in initState, not lazily: a `late final` initialiser would first
+  /// run from dispose() when the user leaves the configure page without
+  /// starting, and creating a Ticker from a deactivated element asserts.
+  late final AnimationController _sweep;
+
+  @override
+  void initState() {
+    super.initState();
+    // 2.4 s per lap: slow enough that the per-frame ring repaint does not
+    // compete with the CPU-only engine for cores during a multi-minute run.
+    _sweep = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
+  }
 
   IntSize get _fit => fitInput(widget.photo.width, widget.photo.height, _scale);
   IntSize get _outSize => IntSize(_fit.width * _scale, _fit.height * _scale);
@@ -339,53 +349,64 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
               builder: (context, v, _) => SizedBox(
                 width: 172,
                 height: 172,
-                child: AnimatedBuilder(
-                  animation: _sweep,
-                  builder: (context, _) => CustomPaint(
-                    painter: LiftRingPainter(
-                      fraction: v,
-                      sweep: _sweep.isAnimating ? _sweep.value : -1,
-                      track: cs.surfaceContainerHighest,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(22),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ClipOval(
-                            child: PixelResolve(
-                                progress: v, grid: 8, gap: 2, radius: 2.5, opacity: 0.85),
-                          ),
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  cs.surfaceContainerHigh,
-                                  cs.surfaceContainerHigh.withValues(alpha: 0.92),
-                                  cs.surfaceContainerHigh.withValues(alpha: 0),
-                                ],
-                                stops: const [0.0, 0.55, 1.0],
+                // Outer boundary: the sweeping band repaints every frame for
+                // minutes; without it the whole Card (mosaic, texts, button)
+                // would be redrawn at 60 fps alongside it.
+                child: RepaintBoundary(
+                  child: AnimatedBuilder(
+                    animation: _sweep,
+                    // Everything inside the ring only changes with [v] (the
+                    // eased fraction) — passed as `child` so the band's
+                    // ticks neither rebuild nor (inner boundary) repaint it.
+                    child: RepaintBoundary(
+                      child: Padding(
+                        padding: const EdgeInsets.all(22),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ClipOval(
+                              child: PixelResolve(
+                                  progress: v, grid: 8, gap: 2, radius: 2.5, opacity: 0.85),
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    cs.surfaceContainerHigh,
+                                    cs.surfaceContainerHigh.withValues(alpha: 0.92),
+                                    cs.surfaceContainerHigh.withValues(alpha: 0),
+                                  ],
+                                  stops: const [0.0, 0.55, 1.0],
+                                ),
                               ),
                             ),
-                          ),
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('${(v * 100).round()}%', style: text.displaySmall),
-                                Text(
-                                  _progress.stage == 'encode'
-                                      ? tr(zh: '快好了', en: 'almost done')
-                                      : tr(zh: '剩余 ${formatEta(remaining, zh: isZhLocale)}',
-                                          en: '${formatEta(remaining, zh: isZhLocale)} left'),
-                                  style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                                ),
-                              ],
+                            Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('${(v * 100).round()}%', style: text.displaySmall),
+                                  Text(
+                                    _progress.stage == 'encode'
+                                        ? tr(zh: '快好了', en: 'almost done')
+                                        : tr(zh: '剩余 ${formatEta(remaining, zh: isZhLocale)}',
+                                            en: '${formatEta(remaining, zh: isZhLocale)} left'),
+                                    style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                    ),
+                    builder: (context, child) => CustomPaint(
+                      painter: LiftRingPainter(
+                        fraction: v,
+                        sweep: _sweep.isAnimating ? _sweep.value : -1,
+                        track: cs.surfaceContainerHighest,
+                      ),
+                      child: child,
                     ),
                   ),
                 ),

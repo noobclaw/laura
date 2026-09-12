@@ -48,15 +48,29 @@ class _PixelResolveState extends State<PixelResolve>
   void initState() {
     super.initState();
     _loop = AnimationController(vsync: this, duration: _cycle);
-    if (widget.progress == null) _loop.repeat();
+  }
+
+  // Start / stop from didChangeDependencies (and didUpdateWidget), not from
+  // build: the loop must resume when "reduce motion" is switched off again,
+  // and MediaQuery changes only arrive as a dependency change.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncLoop();
   }
 
   @override
   void didUpdateWidget(PixelResolve old) {
     super.didUpdateWidget(old);
-    if (widget.progress == null && !_loop.isAnimating) {
+    _syncLoop();
+  }
+
+  void _syncLoop() {
+    final shouldRun =
+        widget.progress == null && !MediaQuery.disableAnimationsOf(context);
+    if (shouldRun && !_loop.isAnimating) {
       _loop.repeat();
-    } else if (widget.progress != null && _loop.isAnimating) {
+    } else if (!shouldRun && _loop.isAnimating) {
       _loop.stop();
     }
   }
@@ -90,7 +104,6 @@ class _PixelResolveState extends State<PixelResolve>
       );
     }
     if (MediaQuery.disableAnimationsOf(context)) {
-      _loop.stop();
       return CustomPaint(
         painter: PixelResolvePainter(
           resolve: 1,
@@ -164,6 +177,30 @@ class PixelResolvePainter extends CustomPainter {
     return c;
   }
 
+  /// The picture only depends on [grid], so its colours are sampled once per
+  /// grid size and reused by every frame: paint() used to run ~1k
+  /// Color.lerp + trig calls per frame, which the progress ring repainted
+  /// while the CPU-only engine was busy.
+  static final Map<int, _PixelPalette> _palettes = {};
+
+  static _PixelPalette _paletteFor(int n) => _palettes.putIfAbsent(n, () {
+        final coarse = List<Color>.filled(n * n, _rose);
+        final fine = List<Color>.filled(n * n * _sub * _sub, _rose);
+        for (var r = 0; r < n; r++) {
+          for (var c = 0; c < n; c++) {
+            coarse[r * n + c] = _field((c + 0.5) / n, (r + 0.5) / n, fine: false);
+            for (var sr = 0; sr < _sub; sr++) {
+              for (var sc = 0; sc < _sub; sc++) {
+                fine[((r * n + c) * _sub + sr) * _sub + sc] = _field(
+                    (c + (sc + 0.5) / _sub) / n, (r + (sr + 0.5) / _sub) / n,
+                    fine: true);
+              }
+            }
+          }
+        }
+        return _PixelPalette(coarse, fine);
+      });
+
   @override
   void paint(Canvas canvas, Size size) {
     final n = grid;
@@ -178,6 +215,7 @@ class PixelResolvePainter extends CustomPainter {
     const window = 0.22;
     final subCell = (cell - gap * 0.5 * (_sub - 1)) / _sub;
     final subGap = gap * 0.5;
+    final palette = _paletteFor(n);
 
     for (var r = 0; r < n; r++) {
       for (var c = 0; c < n; c++) {
@@ -187,12 +225,11 @@ class PixelResolvePainter extends CustomPainter {
         final x = ox + c * (cell + gap);
         final y = oy + r * (cell + gap);
         final rect = Rect.fromLTWH(x, y, cell, cell);
-        final cx = (c + 0.5) / n;
-        final cy = (r + 0.5) / n;
+        final block = r * n + c;
 
         if (eased < 1) {
-          paint.color = _field(cx, cy, fine: false)
-              .withValues(alpha: (1 - eased) * opacity);
+          paint.color =
+              palette.coarse[block].withValues(alpha: (1 - eased) * opacity);
           canvas.drawRRect(
               RRect.fromRectAndRadius(rect, Radius.circular(radius)), paint);
         }
@@ -204,10 +241,8 @@ class PixelResolvePainter extends CustomPainter {
               final lag = (sr + sc) / (2 * (_sub - 1)) * 0.35;
               final a = ((eased - lag) / (1 - lag)).clamp(0.0, 1.0);
               if (a <= 0) continue;
-              final fx = (c + (sc + 0.5) / _sub) / n;
-              final fy = (r + (sr + 0.5) / _sub) / n;
-              paint.color =
-                  _field(fx, fy, fine: true).withValues(alpha: a * opacity);
+              paint.color = palette.fine[(block * _sub + sr) * _sub + sc]
+                  .withValues(alpha: a * opacity);
               final sx = x + sc * (subCell + subGap);
               final sy = y + sr * (subCell + subGap);
               canvas.drawRRect(
@@ -230,6 +265,14 @@ class PixelResolvePainter extends CustomPainter {
       old.gap != gap ||
       old.radius != radius ||
       old.opacity != opacity;
+}
+
+class _PixelPalette {
+  const _PixelPalette(this.coarse, this.fine);
+  /// One colour per block, row-major.
+  final List<Color> coarse;
+  /// `_sub × _sub` colours per block, row-major within the block.
+  final List<Color> fine;
 }
 
 /// Progress ring with a light band sweeping along the filled arc. The band

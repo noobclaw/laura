@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:photolift/core/l10n.dart';
 import 'package:photolift/main.dart';
+import 'package:photolift/tool/home_screen.dart';
+import 'package:photolift/tool/job_runner.dart';
+import 'package:photolift/tool/lift_screen.dart';
+import 'package:photolift/tool/media.dart';
 import 'package:photolift/tool/pixel_art.dart';
+import 'package:photolift/tool/store.dart';
 
 void main() {
   testWidgets('shell boots and shows the tool home with the hero', (tester) async {
@@ -78,5 +84,68 @@ void main() {
       ));
       expect(find.byType(CustomPaint), findsWidgets);
     }
+  });
+
+  testWidgets('leaving the configure page without starting disposes cleanly',
+      (tester) async {
+    // The progress-ring sweep controller is only ever driven once a job
+    // starts; a lazily created one would be initialised for the first time
+    // from dispose() (deactivated element -> ticker assert).
+    final store = PhotoLiftStore();
+    final runner = LiftJobRunner(store);
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => LiftScreen(
+                photo: const PickedPhoto(path: 'missing.jpg', width: 800, height: 600),
+                store: store,
+                runner: runner,
+              ),
+            )),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LiftScreen), findsOneWidget);
+    // Back without pressing Start.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(LiftScreen), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('home lays out at 360x640 with 1.3x text in English',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final prev = AppLanguage.override.value;
+    AppLanguage.override.value = 'en';
+    addTearDown(() => AppLanguage.override.value = prev);
+
+    final store = PhotoLiftStore()..loaded = true;
+    final runner = LiftJobRunner(store);
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(
+            size: Size(360, 640), textScaler: TextScaler.linear(1.3)),
+        child: Scaffold(body: HomeScreen(store: store, runner: runner)),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    // The quota card sits below the fold at this size, and a RenderFlex only
+    // reports its overflow when painted — scroll it on screen first.
+    await tester.ensureVisible(find.text('Go Pro', skipOffstage: false));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Go Pro'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

@@ -393,14 +393,19 @@ class _StatText extends StatelessWidget {
       children: [
         Text(label, style: text.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
         const SizedBox(height: 2),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: text.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            fontFeatures: const [FontFeature.tabularFigures()],
-            color: accent ? (Theme.of(context).brightness == Brightness.dark ? kLiftGold : cs.primary) : null,
+        // Shrink a long figure ("12m 34s", "4000 × 3000") to fit the
+        // column instead of cutting it off with an ellipsis.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: text.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              fontFeatures: const [FontFeature.tabularFigures()],
+              color: accent ? (Theme.of(context).brightness == Brightness.dark ? kLiftGold : cs.primary) : null,
+            ),
           ),
         ),
       ],

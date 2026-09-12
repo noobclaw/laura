@@ -33,6 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<LiftRecord> _shown = [];
   final GlobalKey<SliverAnimatedGridState> _gridKey = GlobalKey<SliverAnimatedGridState>();
 
+  /// One thumbnail provider per record, plus a listener that keeps its
+  /// decoded image alive while the tile is shown. The result screen's
+  /// full-size before/after images push the small thumbnail out of the LRU
+  /// image cache, and deleteRecord removes the file — so a fresh Image.file
+  /// in the exit builder would reload from a deleted file and flash
+  /// broken_image. The exit tile reuses this provider (still resolved) instead.
+  final Map<String, _Thumb> _thumbs = {};
+
   @override
   void initState() {
     super.initState();
@@ -43,8 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     widget.store.removeListener(_syncHistory);
+    for (final t in _thumbs.values) {
+      t.release();
+    }
+    _thumbs.clear();
     super.dispose();
   }
+
+  ImageProvider _providerFor(LiftRecord r, BuildContext context) => ResizeImage(
+      FileImage(File(widget.store.outputPath(r))),
+      width: (140 * MediaQuery.devicePixelRatioOf(context)).round());
+
+  /// Provider for a shown tile; pins its decoded image until the record goes.
+  ImageProvider _thumbFor(LiftRecord r, BuildContext context) =>
+      _thumbs.putIfAbsent(r.id, () => _Thumb(_providerFor(r, context))).provider;
 
   Duration get _gridDuration => MediaQuery.disableAnimationsOf(context)
       ? Duration.zero
@@ -69,11 +89,23 @@ class _HomeScreenState extends State<HomeScreen> {
       final r = _shown[i];
       if (nextIds.contains(r.id)) continue;
       _shown.removeAt(i);
+      final thumb = _thumbs.remove(r.id);
       grid.removeItem(
         i,
-        (context, anim) => _HistoryTile(record: r, store: widget.store, animation: anim),
+        (context, anim) => _HistoryTile(
+          record: r,
+          store: widget.store,
+          animation: anim,
+          // A tile never built (far off-screen) has nothing pinned; do not
+          // start pinning for a record that is already gone.
+          image: thumb?.provider ?? _providerFor(r, context),
+          exiting: true,
+        ),
         duration: _gridDuration,
       );
+      // Keep the decoded thumbnail until the exit animation is over.
+      Future<void>.delayed(
+          _gridDuration + const Duration(milliseconds: 50), () => thumb?.release());
     }
     final shownIds = {for (final r in _shown) r.id};
     for (var i = 0; i < next.length; i++) {
@@ -173,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   record: _shown[i],
                   store: store,
                   animation: anim,
+                  image: _thumbFor(_shown[i], context),
                 ),
               ),
             ),
@@ -240,7 +273,10 @@ class _HeroCard extends StatelessWidget {
               const SizedBox(
                 width: 108,
                 height: 108,
-                child: ExcludeSemantics(child: PixelResolve(gap: 2.5, radius: 3.5)),
+                // Own layer: the mosaic repaints every frame; the gradient
+                // card, texts and button around it must not.
+                child: ExcludeSemantics(
+                    child: RepaintBoundary(child: PixelResolve(gap: 2.5, radius: 3.5))),
               ),
             ],
           ),
@@ -283,13 +319,22 @@ class _HeroCard extends StatelessWidget {
                               key: ValueKey('idle'), size: 22),
                     ),
                     const SizedBox(width: 10),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      child: Text(
-                        busy
-                            ? tr(zh: '正在打开相册…', en: 'Opening Photos…')
-                            : tr(zh: '选择照片', en: 'Choose a photo'),
-                        key: ValueKey(busy),
+                    // Flexible + scale-down: at large accessibility text
+                    // sizes the label must shrink a little, not overflow
+                    // the pill.
+                    Flexible(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: FittedBox(
+                          key: ValueKey(busy),
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            busy
+                                ? tr(zh: '正在打开相册…', en: 'Opening Photos…')
+                                : tr(zh: '选择照片', en: 'Choose a photo'),
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -374,8 +419,15 @@ class _QuotaCard extends StatelessWidget {
                           ),
                         ),
                       const SizedBox(width: 6),
-                      Text(tr(zh: '免费版 2x · 带角标', en: 'Free: 2x · corner tag'),
-                          style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                      // Flexible: on a 360 px screen with large text the
+                      // English label does not fit beside the bars; wrap
+                      // rather than overflow.
+                      Flexible(
+                        child: Text(tr(zh: '免费版 2x · 带角标', en: 'Free: 2x · corner tag'),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                      ),
                     ],
                   ),
                 ],
@@ -440,29 +492,50 @@ class _EmptyHistory extends StatelessWidget {
   }
 }
 
+/// A history thumbnail provider whose decoded image is pinned in the image
+/// cache (a listener counts as a live reference) until [release].
+class _Thumb {
+  _Thumb(this.provider) {
+    _stream = provider.resolve(ImageConfiguration.empty)..addListener(_listener);
+  }
+
+  final ImageProvider provider;
+  late final ImageStream _stream;
+  final ImageStreamListener _listener =
+      ImageStreamListener((_, _) {}, onError: (_, _) {});
+
+  void release() => _stream.removeListener(_listener);
+}
+
 /// One history cell. [animation] is the AnimatedGrid enter/exit progress: a
 /// new result scales up from 0.6 and fades in; a deleted one shrinks away.
+/// [exiting] tiles belong to a deleted record: should the image be gone
+/// anyway they show a plain placeholder, never the broken-image icon.
 class _HistoryTile extends StatelessWidget {
   const _HistoryTile({
     required this.record,
     required this.store,
     required this.animation,
+    required this.image,
+    this.exiting = false,
   });
 
   final LiftRecord record;
   final PhotoLiftStore store;
   final Animation<double> animation;
+  final ImageProvider image;
+  final bool exiting;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dpr = MediaQuery.devicePixelRatioOf(context);
-    final file = File(store.outputPath(record));
-    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutBack);
     return FadeTransition(
       opacity: animation,
       child: ScaleTransition(
-        scale: Tween<double>(begin: 0.6, end: 1).animate(curved),
+        // drive(): no CurvedAnimation to dispose on every build.
+        scale: animation
+            .drive(CurveTween(curve: Curves.easeOutBack))
+            .drive(Tween<double>(begin: 0.6, end: 1)),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
@@ -474,12 +547,13 @@ class _HistoryTile extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 ColoredBox(color: cs.surfaceContainerHighest),
-                Image.file(
-                  file,
+                Image(
+                  image: image,
                   fit: BoxFit.cover,
-                  cacheWidth: (140 * dpr).round(),
-                  errorBuilder: (_, _, _) =>
-                      Icon(Icons.broken_image_outlined, color: cs.onSurfaceVariant),
+                  gaplessPlayback: true,
+                  errorBuilder: (_, _, _) => exiting
+                      ? const SizedBox.shrink()
+                      : Icon(Icons.broken_image_outlined, color: cs.onSurfaceVariant),
                 ),
                 Positioned(
                   left: 6,
