@@ -114,7 +114,9 @@ class _ResultScreenState extends State<ResultScreen> {
       _rendering = false;
       if (_dirty) {
         _dirty = false;
-        unawaited(_render());
+        // The screen may have been popped while this render was in flight;
+        // a follow-up render would then decode into a disposed state.
+        if (mounted) unawaited(_render());
       }
     }
   }
@@ -351,8 +353,10 @@ class _SummaryStrip extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final failed = outcome.failedFrames;
     final dim = AstroColors.silver.withValues(alpha: 0.75);
+    // Padding sets the height: a fixed 84 px clipped the captions at a large
+    // text scale, and the mode pill has nowhere to go on a narrow phone
+    // unless it can drop to a second row.
     return Container(
-      height: 84,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
@@ -363,38 +367,57 @@ class _SummaryStrip extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
-        fit: StackFit.expand,
         children: [
           // Fully converged: the trails have become the one aligned point.
-          const StarField(seed: 23, density: 0.6, converge: 1),
+          const Positioned.fill(child: StarField(seed: 23, density: 0.6, converge: 1)),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
-            child: Row(
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 16,
+              runSpacing: 10,
               children: [
-                Column(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CountUpText(outcome.usedFrames,
-                        ms: 800, style: text.headlineMedium?.copyWith(color: AstroColors.star)),
-                    Text(tr(zh: '张已叠加', en: 'frames stacked'),
-                        style: text.bodySmall?.copyWith(color: dim)),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CountUpText(outcome.usedFrames,
+                              ms: 800,
+                              style: text.headlineMedium?.copyWith(color: AstroColors.star)),
+                          Text(tr(zh: '张已叠加', en: 'frames stacked'),
+                              softWrap: true,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall?.copyWith(color: dim)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 22),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CountUpText(failed,
+                              ms: 800,
+                              style: text.headlineMedium?.copyWith(
+                                  color: failed == 0 ? AstroColors.star : AstroColors.warn)),
+                          Text(tr(zh: '张被排除', en: 'excluded'),
+                              softWrap: true,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall?.copyWith(color: dim)),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(width: 22),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CountUpText(failed,
-                        ms: 800,
-                        style: text.headlineMedium?.copyWith(
-                            color: failed == 0 ? AstroColors.star : AstroColors.warn)),
-                    Text(tr(zh: '张被排除', en: 'excluded'),
-                        style: text.bodySmall?.copyWith(color: dim)),
-                  ],
-                ),
-                const Spacer(),
                 StatusPill(
                   label: stackModeLabel(outcome.mode),
                   color: AstroColors.aligned,

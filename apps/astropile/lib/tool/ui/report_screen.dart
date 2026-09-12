@@ -64,6 +64,7 @@ class _ReportCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final failed = !report.ok;
+    final status = AstroColors.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -80,18 +81,18 @@ class _ReportCard extends StatelessWidget {
                 if (report.isReference)
                   StatusPill(
                     label: tr(zh: '参考帧', en: 'REFERENCE'),
-                    color: AstroColors.reference,
+                    color: status.reference,
                     icon: Icons.center_focus_strong,
                   )
                 else if (failed)
                   StatusPill(
                     label: tr(zh: '已排除', en: 'EXCLUDED'),
-                    color: AstroColors.bad,
+                    color: status.bad,
                     icon: Icons.cancel_outlined,
                   )
                 else
                   StatusPill(
-                    color: scoreColor(report.score),
+                    color: scoreColor(context, report.score),
                     icon: Icons.check_circle_outline,
                     child: CountUpText(report.score, prefix: tr(zh: '质量 ', en: 'SCORE ')),
                   ),
@@ -124,7 +125,7 @@ class _ReportCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AstroColors.bad.withValues(alpha: 0.12),
+                  color: status.bad.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(

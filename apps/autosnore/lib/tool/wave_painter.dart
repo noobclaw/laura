@@ -138,9 +138,12 @@ class LiveWavePainter extends CustomPainter {
     required this.color,
     required this.accent,
     required this.trackColor,
-  });
+  }) : _snapshot = List<double>.of(samples, growable: false);
 
   final List<double> samples;
+
+  /// Contents of [samples] when this painter was built; see [shouldRepaint].
+  final List<double> _snapshot;
   final double pulse;
   final Color color;
   final Color accent;
@@ -179,7 +182,23 @@ class LiveWavePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant LiveWavePainter old) => true;
+  bool shouldRepaint(covariant LiveWavePainter old) {
+    if (old.pulse != pulse ||
+        old.color != color ||
+        old.accent != accent ||
+        old.trackColor != trackColor ||
+        old._snapshot.length != _snapshot.length) {
+      return true;
+    }
+    // The screen mutates one rolling history list in place, so the previous
+    // painter's [samples] is the *same* object — compare the copies each
+    // painter took at construction instead. A silent room is a flat line
+    // that never needs redrawing.
+    for (int i = 0; i < _snapshot.length; i++) {
+      if (old._snapshot[i] != _snapshot[i]) return true;
+    }
+    return false;
+  }
 }
 
 /// Two concentric rings that expand from a circle and fade — the mic

@@ -213,9 +213,18 @@ class _HomeState extends State<_Home> {
                     else
                       const Icon(Icons.add_photo_alternate_outlined),
                     const SizedBox(width: 10),
-                    Text(_picking
-                        ? tr(zh: '正在读取…', en: 'Reading…')
-                        : tr(zh: '选择照片开始叠加', en: 'Pick photos to stack')),
+                    // Flexible, so a wide label at a large text scale wraps
+                    // inside the button instead of painting past its edge.
+                    Flexible(
+                      child: Text(
+                        _picking
+                            ? tr(zh: '正在读取…', en: 'Reading…')
+                            : tr(zh: '选择照片开始叠加', en: 'Pick photos to stack'),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -294,8 +303,11 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    // A floor, not a fixed height: at a large text scale the English
+    // headline and caption need more than 236 px, and the panel grows with
+    // them instead of painting past its own bottom edge.
     return Container(
-      height: 236,
+      constraints: const BoxConstraints(minHeight: 236),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(
@@ -313,11 +325,11 @@ class _Hero extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
-        fit: StackFit.expand,
+        alignment: Alignment.bottomLeft,
         children: [
           // The sky itself: twinkling stars, a meteor now and then, and the
           // long trails a static camera records — idle, so not converged.
-          const StarField(seed: 7, density: 1.1),
+          const Positioned.fill(child: StarField(seed: 7, density: 1.1)),
           // A breath of horizon glow at the bottom edge so the text sits on
           // something, without a flat overlay.
           Positioned(
@@ -338,22 +350,30 @@ class _Hero extends StatelessWidget {
               ),
             ),
           ),
+          // The eyebrow is pinned to the top corner; the copy below sits on
+          // the bottom edge and pushes the panel taller when it needs to.
+          Positioned(
+            left: 22,
+            top: 20,
+            child: Text(
+              pro ? 'ASTROPILE · PRO' : 'ASTROPILE · OFFLINE',
+              style: text.labelSmall?.copyWith(
+                color: AstroColors.silver.withValues(alpha: 0.7),
+                letterSpacing: 2.2,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+            padding: const EdgeInsets.fromLTRB(22, 68, 22, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  pro ? 'ASTROPILE · PRO' : 'ASTROPILE · OFFLINE',
-                  style: text.labelSmall?.copyWith(
-                    color: AstroColors.silver.withValues(alpha: 0.7),
-                    letterSpacing: 2.2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                Text(
                   tr(zh: '十几张夜空照片\n叠成一张干净的', en: 'A burst of night sky,\nstacked into one clean shot'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: text.headlineSmall?.copyWith(
                     color: AstroColors.star,
                     height: 1.2,

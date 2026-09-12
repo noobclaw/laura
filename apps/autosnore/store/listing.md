@@ -39,8 +39,10 @@ YOUR MORNING REPORT
   scattered ones as ambient noise.
 
 HOW IT WORKS
-Put your phone on the nightstand and keep it charging. AutoSnore keeps the screen
-on and continuously measures how loud the room is. When the sound rises clearly
+Put your phone on the nightstand and keep it charging. On Android the screen
+stays on while it records; on iOS you can lock the phone and recording carries
+on in the background. AutoSnore continuously measures how loud the room is.
+When the sound rises clearly
 above the background for a moment, it logs a snore / noise event. Adjustable
 sensitivity lets you catch faint sounds or only clear, loud snoring.
 
@@ -61,6 +63,11 @@ sleep apnea, please see a doctor.
 ### Keywords
 snore recorder, snoring, snore tracker, sleep audio, sleep recorder, snore
 detector, offline, private, no subscription, sleep tracker, snore monitor
+
+### What's New (1.1.2)
+• New app icon and a breathing waveform on the home screen.
+• Morning report now animates in — score, arc and timeline land together.
+• Fixed the iPad layout and display issues.
 
 ---
 
@@ -95,9 +102,10 @@ detector, offline, private, no subscription, sleep tracker, snore monitor
 • 节律判断——规律出现的响声更可能是持续打鼾,零散的更像偶发环境噪音。
 
 如何使用
-把手机放在床头并接通电源。鼾声记录会保持屏幕常亮、持续测量房间的响度;当声音明显
-高于背景并持续一小段时间,就记为一次「鼾声/响声」。灵敏度可调,既能捕捉轻微响声,
-也能只记录明显的大声打鼾。
+把手机放在床头并接通电源。Android 上记录期间屏幕保持常亮;iOS 上可以直接锁屏,
+记录会在后台继续。鼾声记录持续测量房间的响度;当声音明显高于背景并持续一小段时
+间,就记为一次「鼾声/响声」。灵敏度可调,既能捕捉轻微响声,也能只记录明显的大声
+打鼾。
 
 免费 vs Pro
 免费:每晚都能记录并查看完整晨间报告,保留最近 3 晚。
@@ -112,3 +120,8 @@ Pro(一次性买断 ¥18 / $3.99):无限历史、跨夜趋势、CSV 导出。
 ### 关键词
 打鼾记录, 鼾声, 打呼噜, 睡眠录音, 鼾声监测, 打鼾检测, 睡眠监测, 离线, 隐私,
 无订阅, 呼噜声, 睡眠健康
+
+### 更新说明(1.1.2)
+• 全新应用图标,首页新增呼吸波形。
+• 晨间报告加入动效:评分、圆弧与时间轴一起呈现。
+• 修复 iPad 上的布局与显示问题。

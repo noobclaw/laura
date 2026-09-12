@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ draws a system splash screen before LaunchTheme's
+         windowBackground is visible; give it the same night colour so there
+         is no white flash on cold start. Other attributes inherit from
+         values/styles.xml (and values-night for dark mode). -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/launch_bg</item>
+    </style>
+</resources>

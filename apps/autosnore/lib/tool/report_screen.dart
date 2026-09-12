@@ -222,7 +222,8 @@ class _ScoreCard extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium
-                            ?.copyWith(color: color)),
+                            ?.copyWith(
+                                color: bandTextColor(context, session.band))),
                   ],
                 ),
               ),
@@ -236,10 +237,9 @@ class _ScoreCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelMedium),
                   const SizedBox(height: 2),
                   Text(bandLabel(session.band),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(color: color, fontWeight: FontWeight.bold)),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: bandTextColor(context, session.band),
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(
                     tr(

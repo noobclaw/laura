@@ -178,8 +178,13 @@ class _StartCardState extends State<_StartCard>
           );
 
     return Semantics(
+      // One node for the whole hero: the wave, mic core and sub-line are
+      // decoration around a single button, so a screen reader hears one
+      // thing (with the last-night summary folded into the label).
+      container: true,
+      excludeSemantics: true,
       button: true,
-      label: tr(zh: '开始记录', en: 'Start recording'),
+      label: '${tr(zh: '开始记录', en: 'Start recording')}. $subline',
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 140),
@@ -288,20 +293,23 @@ class _MicCore extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          RepaintBoundary(
-            child: AnimatedBuilder(
-              animation: breath,
-              builder: (context, _) => CustomPaint(
-                size: const Size(150, 150),
-                painter: RipplePainter(
-                  t: breath.value,
-                  color: NightPalette.moon,
-                  innerRadius: 34,
-                  reach: 36,
+          // Ripples are pure decoration: under reduced motion they are not
+          // mounted at all rather than left frozen mid-flight.
+          if (!reduceMotion(context))
+            RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: breath,
+                builder: (context, _) => CustomPaint(
+                  size: const Size(150, 150),
+                  painter: RipplePainter(
+                    t: breath.value,
+                    color: NightPalette.moon,
+                    innerRadius: 34,
+                    reach: 36,
+                  ),
                 ),
               ),
             ),
-          ),
           Container(
             width: 68,
             height: 68,
@@ -432,7 +440,9 @@ class _NightTile extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.18),
           child: Text('${session.score}',
-              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+              style: TextStyle(
+                  color: bandTextColor(context, session.band),
+                  fontWeight: FontWeight.bold)),
         ),
         title: Text(
             '${formatShortDate(session.startMs)} · ${bandLabel(session.band)}'),

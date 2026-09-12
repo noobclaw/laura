@@ -157,14 +157,14 @@ class _RunScreenState extends State<RunScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                       child: Card(
-                        color: AstroColors.bad.withValues(alpha: 0.14),
+                        color: AstroColors.of(context).bad.withValues(alpha: 0.14),
                         margin: EdgeInsets.zero,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.error_outline, color: AstroColors.bad),
+                              Icon(Icons.error_outline, color: AstroColors.of(context).bad),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -393,11 +393,12 @@ class _ReportRow extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final failed = !report.ok;
+    final status = AstroColors.of(context);
     final color = report.isReference
-        ? AstroColors.reference
+        ? status.reference
         : failed
-            ? AstroColors.bad
-            : scoreColor(report.score);
+            ? status.bad
+            : scoreColor(context, report.score);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -435,7 +436,7 @@ class _ReportRow extends StatelessWidget {
                               en: '${report.matchedStars}/${report.starsDetected} stars matched · ${report.rmsPixels.toStringAsFixed(2)} px residual',
                             ),
                   style: text.bodySmall?.copyWith(
-                      color: failed ? AstroColors.bad : cs.onSurfaceVariant),
+                      color: failed ? status.bad : cs.onSurfaceVariant),
                 ),
               ],
             ),

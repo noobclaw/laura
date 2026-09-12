@@ -231,8 +231,8 @@ class _RecordingScreenState extends State<RecordingScreen>
           },
         );
       case _Phase.recording:
-        return _RecordingView(
-          controller: controller,
+        return RecordingView(
+          source: _ControllerSource(controller),
           onStop: _confirmStop,
         );
     }
@@ -287,57 +287,148 @@ class _PermissionPanel extends StatelessWidget {
   }
 }
 
-class _RecordingView extends StatefulWidget {
-  const _RecordingView({required this.controller, required this.onStop});
+/// What the live view reads from the engine. Narrow on purpose: the screen
+/// only needs a few numbers plus change notifications, and a fake can drive
+/// it under test without touching the microphone plugins.
+abstract class LiveRecordingSource implements Listenable {
+  double get level;
+  bool get stalled;
+  int get elapsedMs;
+  int get eventCount;
+  double get currentDb;
+}
 
-  final RecordingController controller;
-  final VoidCallback onStop;
+/// Adapts the real controller to [LiveRecordingSource] without changing the
+/// engine's class declaration.
+class _ControllerSource implements LiveRecordingSource {
+  _ControllerSource(this.c);
+  final RecordingController c;
 
   @override
-  State<_RecordingView> createState() => _RecordingViewState();
+  double get level => c.level;
+  @override
+  bool get stalled => c.stalled;
+  @override
+  int get elapsedMs => c.elapsedMs;
+  @override
+  int get eventCount => c.eventCount;
+  @override
+  double get currentDb => c.currentDb;
+  @override
+  void addListener(VoidCallback listener) => c.addListener(listener);
+  @override
+  void removeListener(VoidCallback listener) => c.removeListener(listener);
+}
+
+@visibleForTesting
+class RecordingView extends StatefulWidget {
+  const RecordingView({super.key, required this.source, required this.onStop});
+
+  final LiveRecordingSource source;
+  final VoidCallback onStop;
+
+  /// Touch-free time before the screen goes night-quiet.
+  static const Duration dimAfter = Duration(seconds: 60);
+
+  @override
+  State<RecordingView> createState() => _RecordingViewState();
 }
 
 /// The live screen: a rolling loudness waveform and a breathing orb whose
 /// glow follows the room. One 4-second breath drives the orb's scale and
 /// the wave's idle sway; the waveform itself is fed by the controller's
 /// real level, sampled ten times a second into a 72-bar history.
-class _RecordingViewState extends State<_RecordingView>
-    with SingleTickerProviderStateMixin {
+///
+/// This page is on for eight hours a night, so it earns its keep by going
+/// quiet: the breath stops whenever the app is not in the foreground or the
+/// platform asks for reduced motion, and after [RecordingView.dimAfter]
+/// without a touch it enters "night quiet" — breath stopped, sampling down to
+/// 2 Hz, content faded to near-black. Any touch brings it back (that first
+/// touch only wakes; it never reaches the stop button).
+class _RecordingViewState extends State<RecordingView>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   static const int _bars = 72;
   static const Duration _sampleEvery = Duration(milliseconds: 100);
+  static const Duration _sampleEveryQuiet = Duration(milliseconds: 500);
 
   late final AnimationController _breath =
       AnimationController(vsync: this, duration: const Duration(seconds: 4));
   final List<double> _history = List<double>.filled(_bars, 0, growable: true);
   Timer? _sampler;
+  Timer? _dimTimer;
   double _smooth = 0;
   bool _motionOn = true;
+  bool _foreground = true;
+  bool _dimmed = false;
 
   @override
   void initState() {
     super.initState();
-    _sampler = Timer.periodic(_sampleEvery, (_) => _sample());
+    WidgetsBinding.instance.addObserver(this);
+    _startSampler();
+    _armDimTimer();
+  }
+
+  void _startSampler() {
+    _sampler?.cancel();
+    _sampler = Timer.periodic(
+      _dimmed ? _sampleEveryQuiet : _sampleEvery,
+      (_) => _sample(),
+    );
+  }
+
+  void _armDimTimer() {
+    _dimTimer?.cancel();
+    _dimTimer = Timer(RecordingView.dimAfter, _enterQuiet);
+  }
+
+  void _enterQuiet() {
+    if (!mounted || _dimmed) return;
+    setState(() => _dimmed = true);
+    _syncBreath();
+    _startSampler();
+  }
+
+  void _wake() {
+    _armDimTimer();
+    if (!_dimmed) return;
+    setState(() => _dimmed = false);
+    _syncBreath();
+    _startSampler();
+  }
+
+  bool get _breathing => _motionOn && _foreground && !_dimmed;
+
+  /// Single owner of the breath's run state so the three reasons to hold
+  /// still (reduced motion, background, night quiet) cannot fight.
+  void _syncBreath() {
+    if (_breathing) {
+      if (!_breath.isAnimating) _breath.repeat();
+    } else if (_breath.isAnimating || _breath.value != 0.25) {
+      _breath
+        ..stop()
+        ..value = 0.25; // hold at a gentle half-inhale
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final on = !reduceMotion(context);
-    if (on != _motionOn || (on && !_breath.isAnimating)) {
-      _motionOn = on;
-      if (on) {
-        _breath.repeat();
-      } else {
-        _breath
-          ..stop()
-          ..value = 0.25;
-      }
-    }
+    _motionOn = !reduceMotion(context);
+    _syncBreath();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // paused / hidden / inactive / detached all mean nobody is looking:
+    // no reason to drive a 60 fps ticker under a locked screen.
+    _foreground = state == AppLifecycleState.resumed;
+    _syncBreath();
   }
 
   void _sample() {
     // Attack fast, release slow — a snore spikes then the bar decays.
-    final double target = widget.controller.level;
+    final double target = widget.source.level;
     _smooth = target > _smooth ? target : _smooth * 0.82 + target * 0.18;
     _history.removeAt(0);
     _history.add(_smooth);
@@ -346,7 +437,9 @@ class _RecordingViewState extends State<_RecordingView>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _sampler?.cancel();
+    _dimTimer?.cancel();
     _breath.dispose();
     super.dispose();
   }
@@ -354,171 +447,227 @@ class _RecordingViewState extends State<_RecordingView>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final controller = widget.controller;
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (context, _) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(28, 20, 28, 28),
-          child: Column(
-            children: [
-              const Spacer(),
-              // Breathing orb — the "we're listening" focal point. Scale
-              // rides the breath; the glow brightens with the room.
-              RepaintBoundary(
-                child: AnimatedBuilder(
+    final source = widget.source;
+    return Listener(
+      // Any touch counts as "someone is looking": re-arm the quiet timer and,
+      // if we were dimmed, wake without letting the tap through.
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _wake(),
+      child: AnimatedOpacity(
+        opacity: _dimmed ? 0.06 : 1.0,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOut,
+        child: IgnorePointer(
+          ignoring: _dimmed,
+          child: ListenableBuilder(
+            listenable: source,
+            builder: (context, _) => LayoutBuilder(
+              builder: (context, constraints) {
+                // Short phones (360×640) at large text: the orb and wave give
+                // up height first, and the column scrolls rather than clips.
+                final double h = constraints.maxHeight;
+                final double orb = (h * 0.26).clamp(112.0, 168.0);
+                final double wave = (h * 0.10).clamp(40.0, 64.0);
+                return SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: h),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(28, 20, 28, 28),
+                        child: _column(context, cs, source, orb, wave),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _column(
+    BuildContext context,
+    ColorScheme cs,
+    LiveRecordingSource source,
+    double orb,
+    double wave,
+  ) {
+    final double k = orb / 168; // everything inside the orb scales with it
+    // The glowing core is built once per rebuild (10 Hz on the sampler),
+    // not once per breath frame: only the Transform.scale rides the ticker.
+    final Widget core = Container(
+      width: 88 * k,
+      height: 88 * k,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.4),
+          colors: [
+            Color.lerp(cs.primary, Colors.white, 0.25)!,
+            cs.primary,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cs.primary.withValues(alpha: 0.22 + 0.5 * _smooth),
+            blurRadius: 36 * k,
+            spreadRadius: 4 * k,
+          ),
+        ],
+      ),
+      child: Icon(
+        source.stalled ? Icons.mic_off_rounded : Icons.nightlight_round,
+        color: cs.onPrimary,
+        size: 40 * k,
+      ),
+    );
+
+    return Column(
+      children: [
+        const Spacer(),
+        // Breathing orb — the "we're listening" focal point. Scale rides
+        // the breath; the glow brightens with the room.
+        RepaintBoundary(
+          child: SizedBox(
+            width: orb,
+            height: orb,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Ripples are pure decoration: with reduced motion they are
+                // not mounted at all rather than frozen mid-flight.
+                if (_motionOn)
+                  AnimatedBuilder(
+                    animation: _breath,
+                    builder: (context, _) => CustomPaint(
+                      size: Size(orb, orb),
+                      painter: RipplePainter(
+                        t: _breath.value,
+                        color: cs.primary,
+                        innerRadius: 44 * k,
+                        reach: 36 * k,
+                      ),
+                    ),
+                  ),
+                AnimatedBuilder(
                   animation: _breath,
                   builder: (context, child) {
                     final double t = _breath.value;
-                    final double swell =
-                        0.5 - 0.5 * math.cos(t * math.pi * 2);
-                    final double glow = 0.22 + 0.5 * _smooth;
-                    return SizedBox(
-                      width: 168,
-                      height: 168,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CustomPaint(
-                            size: const Size(168, 168),
-                            painter: RipplePainter(
-                              t: t,
-                              color: cs.primary,
-                              innerRadius: 44,
-                              reach: 36,
-                            ),
-                          ),
-                          Transform.scale(
-                            scale: 0.94 + 0.08 * swell,
-                            child: Container(
-                              width: 88,
-                              height: 88,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: RadialGradient(
-                                  center: const Alignment(-0.3, -0.4),
-                                  colors: [
-                                    Color.lerp(cs.primary, Colors.white, 0.25)!,
-                                    cs.primary,
-                                  ],
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: cs.primary.withValues(alpha: glow),
-                                    blurRadius: 36,
-                                    spreadRadius: 4,
-                                  ),
-                                ],
-                              ),
-                              child: child,
-                            ),
-                          ),
-                        ],
-                      ),
+                    final double swell = 0.5 - 0.5 * math.cos(t * math.pi * 2);
+                    return Transform.scale(
+                      scale: 0.94 + 0.08 * swell,
+                      child: child,
                     );
                   },
-                  child: Icon(
-                    controller.stalled
-                        ? Icons.mic_off_rounded
-                        : Icons.nightlight_round,
-                    color: cs.onPrimary,
-                    size: 40,
-                  ),
+                  child: core,
                 ),
-              ),
-              const SizedBox(height: 22),
-              Text(
-                formatDuration(controller.elapsedMs),
-                style: Theme.of(context)
-                    .textTheme
-                    .displayMedium
-                    ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w300),
-              ),
-              const SizedBox(height: 6),
-              // The watchdog's verdict, not a decorative label: if the
-              // stream has gone quiet the screen says so instead of
-              // pretending to listen.
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                child: Text(
-                  controller.stalled
-                      ? tr(zh: '麦克风被打断,正在恢复…', en: 'Microphone interrupted, resuming…')
-                      : tr(zh: '正在记录…', en: 'Recording…'),
-                  key: ValueKey(controller.stalled),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: controller.stalled ? cs.error : cs.onSurfaceVariant,
-                        fontWeight: controller.stalled ? FontWeight.w600 : null,
-                      ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Live loudness waveform: the last ~7 seconds, newest right.
-              RepaintBoundary(
-                child: AnimatedBuilder(
-                  animation: _breath,
-                  builder: (context, _) => CustomPaint(
-                    size: const Size(double.infinity, 64),
-                    painter: LiveWavePainter(
-                      samples: _history,
-                      pulse: _breath.value,
-                      color: cs.primary,
-                      accent: NightPalette.moon,
-                      trackColor: cs.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _Live(
-                    value: '${controller.eventCount}',
-                    label: tr(zh: '鼾声', en: 'snores'),
-                  ),
-                  _Live(
-                    value: controller.currentDb <= -120
-                        ? '—'
-                        : controller.currentDb.toStringAsFixed(0),
-                    label: 'dB',
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                Platform.isIOS
-                    ? tr(
-                        zh: '可以锁屏,记录会在后台继续;建议接通电源。',
-                        en: 'You can lock the screen — recording continues in the background. Keep the phone charging.',
-                      )
-                    : tr(
-                        zh: '屏幕保持常亮以持续记录,建议接通电源。',
-                        en: 'Screen stays on to keep recording — keep the phone charging.',
-                      ),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.8)),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: cs.error,
-                    foregroundColor: cs.onError,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                  icon: const Icon(Icons.stop),
-                  label: Text(tr(zh: '停止并生成报告', en: 'Stop & see report')),
-                  onPressed: widget.onStop,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 22),
+        // The clock is the one line that must never wrap: cap its scaling.
+        MediaQuery.withClampedTextScaling(
+          maxScaleFactor: 1.2,
+          child: Text(
+            formatDuration(source.elapsedMs),
+            style: Theme.of(context)
+                .textTheme
+                .displayMedium
+                ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w300),
+          ),
+        ),
+        const SizedBox(height: 6),
+        // The watchdog's verdict, not a decorative label: if the stream has
+        // gone quiet the screen says so instead of pretending to listen —
+        // and a screen reader hears the change without refocusing.
+        Semantics(
+          liveRegion: true,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: Text(
+              source.stalled
+                  ? tr(zh: '麦克风被打断,正在恢复…', en: 'Microphone interrupted, resuming…')
+                  : tr(zh: '正在记录…', en: 'Recording…'),
+              key: ValueKey(source.stalled),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: source.stalled ? cs.error : cs.onSurfaceVariant,
+                    fontWeight: source.stalled ? FontWeight.w600 : null,
+                  ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        // Live loudness waveform: the last ~7 seconds, newest right.
+        RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _breath,
+            builder: (context, _) => CustomPaint(
+              size: Size(double.infinity, wave),
+              painter: LiveWavePainter(
+                samples: _history,
+                pulse: _breath.value,
+                color: cs.primary,
+                accent: NightPalette.moon,
+                trackColor: cs.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _Live(
+              value: '${source.eventCount}',
+              label: tr(zh: '鼾声', en: 'snores'),
+            ),
+            _Live(
+              value: source.currentDb <= -120
+                  ? '—'
+                  : source.currentDb.toStringAsFixed(0),
+              label: 'dB',
+            ),
+          ],
+        ),
+        const Spacer(),
+        Text(
+          Platform.isIOS
+              ? tr(
+                  zh: '可以锁屏,记录会在后台继续;建议接通电源。',
+                  en: 'You can lock the screen — recording continues in the background. Keep the phone charging.',
+                )
+              : tr(
+                  zh: '屏幕保持常亮以持续记录,建议接通电源。',
+                  en: 'Screen stays on to keep recording — keep the phone charging.',
+                ),
+          textAlign: TextAlign.center,
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: cs.onSurfaceVariant.withValues(alpha: 0.8)),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              foregroundColor: cs.onError,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+            ),
+            icon: const Icon(Icons.stop),
+            label: Text(tr(zh: '停止并生成报告', en: 'Stop & see report')),
+            onPressed: widget.onStop,
+          ),
+        ),
+      ],
     );
   }
 }

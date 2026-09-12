@@ -91,6 +91,12 @@ const List<Color> kSkyGradient = [Color(0xFF141C36), Color(0xFF0B1020), Color(0x
 /// Status accents. Semantic (ok/warn/bad), plus the two signature colours the
 /// art direction allows: the warm white of a star and the cyan of a frame
 /// that lined up with the reference.
+///
+/// The static members are the *night-panel* values, tuned for the ink-blue
+/// gradient ([kSkyGradient]) and only legible there. Anything drawn on a
+/// themed surface — cards, list rows, pills, error text — must take its
+/// colours from [AstroColors.of], which hands back a darker set in light
+/// mode: the night values sit below 2:1 against a light card.
 abstract final class AstroColors {
   static const ok = Color(0xFF4ADE80);
   static const warn = Color(0xFFFBBF24);
@@ -107,4 +113,46 @@ abstract final class AstroColors {
 
   /// Neutral silver for text and outlines on the night panels.
   static const silver = Color(0xFFD5DBE7);
+
+  /// The status set for whatever the ambient theme's brightness is. Use this
+  /// for every status colour that lands on a themed surface.
+  static AstroStatusColors of(BuildContext context) =>
+      AstroStatusColors.forBrightness(Theme.of(context).brightness);
+}
+
+/// One brightness's worth of status colours. [night] is the original palette
+/// (and what every night panel keeps); [day] is the same hues pulled down far
+/// enough to pass 4.5:1 as text on a light card.
+final class AstroStatusColors {
+  const AstroStatusColors._({
+    required this.ok,
+    required this.warn,
+    required this.bad,
+    required this.aligned,
+  });
+
+  final Color ok;
+  final Color warn;
+  final Color bad;
+  final Color aligned;
+
+  /// Marks the reference frame — same cyan as [aligned].
+  Color get reference => aligned;
+
+  static const night = AstroStatusColors._(
+    ok: AstroColors.ok,
+    warn: AstroColors.warn,
+    bad: AstroColors.bad,
+    aligned: AstroColors.aligned,
+  );
+
+  static const day = AstroStatusColors._(
+    ok: Color(0xFF15803D),
+    warn: Color(0xFFB45309),
+    bad: Color(0xFFB91C1C),
+    aligned: Color(0xFF0F766E),
+  );
+
+  static AstroStatusColors forBrightness(Brightness brightness) =>
+      brightness == Brightness.dark ? night : day;
 }

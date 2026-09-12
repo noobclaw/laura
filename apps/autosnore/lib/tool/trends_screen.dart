@@ -60,7 +60,7 @@ class TrendsScreen extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: bandColor(s.band))),
+                                color: bandTextColor(context, s.band))),
                       ),
                       title: Text(
                           '${formatShortDate(s.startMs)} · ${bandLabel(s.band)}'),

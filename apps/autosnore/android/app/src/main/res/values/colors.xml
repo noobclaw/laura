@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night surface (tool/app_theme.dart NightPalette.night). Referenced by
+         the launch drawables and the Android 12+ splash background so the
+         first frame never flashes white before the plum UI draws. -->
+    <color name="launch_bg">#14091C</color>
+</resources>

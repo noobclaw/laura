@@ -170,11 +170,12 @@ class FrameThumb extends StatelessWidget {
   }
 }
 
-/// Colour for a per-frame quality score.
-Color scoreColor(int score) {
-  if (score >= 75) return AstroColors.ok;
-  if (score >= 45) return AstroColors.warn;
-  return AstroColors.bad;
+/// Colour for a per-frame quality score, legible on the ambient surface.
+Color scoreColor(BuildContext context, int score) {
+  final c = AstroColors.of(context);
+  if (score >= 75) return c.ok;
+  if (score >= 45) return c.warn;
+  return c.bad;
 }
 
 /// A compact status pill.

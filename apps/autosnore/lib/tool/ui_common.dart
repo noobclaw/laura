@@ -92,6 +92,16 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Band colour as *text* on the current surface. The raw swatches are tuned
+/// for tinted chips and bars; as a glyph on the plum night surface the green
+/// and red fall under 4.5:1, so in dark themes they are lifted toward white.
+Color bandTextColor(BuildContext context, SnoreBand b) {
+  final Color c = bandColor(b);
+  return Theme.of(context).brightness == Brightness.dark
+      ? Color.lerp(c, Colors.white, 0.3)!
+      : c;
+}
+
 Color bandColor(SnoreBand b) {
   switch (b) {
     case SnoreBand.quiet:

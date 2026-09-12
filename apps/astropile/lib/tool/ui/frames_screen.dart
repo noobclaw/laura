@@ -476,45 +476,62 @@ class _Summary extends StatelessWidget {
           colors: kSkyGradient,
         ),
       ),
+      // Both columns flex: at a large text scale the English captions are
+      // wider than half the strip, and a rigid Row would paint past the edge.
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  CountUpText(selected,
-                      ms: 400, style: text.displaySmall?.copyWith(color: AstroColors.star)),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6, left: 4),
-                    child: Text('/$total',
-                        style: text.titleMedium
-                            ?.copyWith(color: Colors.white.withValues(alpha: 0.7))),
-                  ),
-                ],
-              ),
-              Text(tr(zh: '张参与叠加', en: 'frames in the stack'),
-                  style: text.bodySmall
-                      ?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
-            ],
-          ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text('$width×$height',
-                  style: text.titleSmall?.copyWith(color: Colors.white)),
-              const SizedBox(height: 4),
-              Text(
-                tr(
-                  zh: '临时占用约 ${formatBytes(scratchBytes)}',
-                  en: 'about ${formatBytes(scratchBytes)} of scratch space',
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    CountUpText(selected,
+                        ms: 400, style: text.displaySmall?.copyWith(color: AstroColors.star)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6, left: 4),
+                      child: Text('/$total',
+                          style: text.titleMedium
+                              ?.copyWith(color: Colors.white.withValues(alpha: 0.7))),
+                    ),
+                  ],
                 ),
-                style:
-                    text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
-              ),
-            ],
+                Text(tr(zh: '张参与叠加', en: 'frames in the stack'),
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.bodySmall
+                        ?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('$width×$height',
+                    softWrap: true,
+                    maxLines: 2,
+                    textAlign: TextAlign.end,
+                    style: text.titleSmall?.copyWith(color: Colors.white)),
+                const SizedBox(height: 4),
+                Text(
+                  tr(
+                    zh: '临时占用约 ${formatBytes(scratchBytes)}',
+                    en: 'about ${formatBytes(scratchBytes)} of scratch space',
+                  ),
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style:
+                      text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -550,8 +567,9 @@ class _FrameRow extends StatelessWidget {
     // Ticking a frame in or out, or promoting it to reference, moves the
     // card's outline and dims the row — animated, so the eye follows the
     // change instead of hunting for it.
+    final status = AstroColors.of(context);
     final border = isReference
-        ? AstroColors.aligned
+        ? status.aligned
         : included
             ? cs.outlineVariant.withValues(alpha: 0.35)
             : Colors.transparent;
@@ -608,7 +626,7 @@ class _FrameRow extends StatelessWidget {
                                   padding: const EdgeInsets.only(left: 6),
                                   child: StatusPill(
                                     label: tr(zh: '参考帧', en: 'REFERENCE'),
-                                    color: AstroColors.reference,
+                                    color: status.reference,
                                     icon: Icons.center_focus_strong,
                                   ),
                                 )
@@ -630,7 +648,7 @@ class _FrameRow extends StatelessWidget {
                           zh: '画幅 ${frame.width}×${frame.height} 与其余不一致,不能参与叠加',
                           en: '${frame.width}×${frame.height} does not match the rest — cannot be stacked',
                         ),
-                        style: text.bodySmall?.copyWith(color: AstroColors.bad),
+                        style: text.bodySmall?.copyWith(color: status.bad),
                       ),
                     ] else if (precheck == FramePrecheck.exposureOutlier) ...[
                       const SizedBox(height: 5),
@@ -639,7 +657,7 @@ class _FrameRow extends StatelessWidget {
                           zh: '曝光设置与多数帧不同,会拉偏平均值',
                           en: 'Shot with different exposure settings than most frames',
                         ),
-                        style: text.bodySmall?.copyWith(color: AstroColors.warn),
+                        style: text.bodySmall?.copyWith(color: status.warn),
                       ),
                     ],
                   ],
@@ -647,8 +665,10 @@ class _FrameRow extends StatelessWidget {
               ),
               Checkbox(
                 value: included,
-                activeColor: AstroColors.aligned,
-                checkColor: AstroInk.deep,
+                activeColor: status.aligned,
+                checkColor: Theme.of(context).brightness == Brightness.dark
+                    ? AstroInk.deep
+                    : Colors.white,
                 onChanged: broken ? null : (_) => onToggle(),
               ),
             ],
