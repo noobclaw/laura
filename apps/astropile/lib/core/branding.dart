@@ -14,9 +14,10 @@ abstract final class Branding {
 
   static const String version = '1.0.0';
 
-  /// Seed for the Material 3 color scheme: a periwinkle that keeps contrast
-  /// on the near-black surfaces this app uses (see tool/app_theme.dart).
-  static const Color seedColor = Color(0xFF6B7BFF);
+  /// Seed for the Material 3 color scheme: a low-saturation silver grey, so
+  /// the scheme stays neutral and the only colour on screen is the star and
+  /// the alignment cyan (see tool/app_theme.dart).
+  static const Color seedColor = Color(0xFFB4BCCB);
 
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the shell ships without the INTERNET permission.

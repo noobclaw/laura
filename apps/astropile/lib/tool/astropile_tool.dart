@@ -10,6 +10,7 @@ import 'pro.dart';
 import 'store.dart';
 import 'tool_module.dart';
 import 'ui/frames_screen.dart';
+import 'ui/star_field.dart';
 import 'ui/widgets.dart';
 
 /// The stacker: a hero that explains the job in one line, one primary action,
@@ -190,15 +191,35 @@ class _HomeState extends State<_Home> {
         children: [
           _Hero(count: widget.store.stackedCount, pro: widget.store.pro),
           const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: _picking ? null : _pick,
-            icon: _picking
-                ? const SizedBox(
-                    width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.add_photo_alternate_outlined),
-            label: Text(_picking
-                ? tr(zh: '正在读取…', en: 'Reading…')
-                : tr(zh: '选择照片开始叠加', en: 'Pick photos to stack')),
+          PressScale(
+            enabled: !_picking,
+            child: FilledButton(
+              onPressed: _picking ? null : _pick,
+              child: AnimatedSwitcher(
+                duration: animMs(context, 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: SizeTransition(sizeFactor: anim, axis: Axis.horizontal, child: child),
+                ),
+                child: Row(
+                  key: ValueKey(_picking),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_picking)
+                      const SizedBox(
+                          width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    else
+                      const Icon(Icons.add_photo_alternate_outlined),
+                    const SizedBox(width: 10),
+                    Text(_picking
+                        ? tr(zh: '正在读取…', en: 'Reading…')
+                        : tr(zh: '选择照片开始叠加', en: 'Pick photos to stack')),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 10),
           Center(
@@ -274,86 +295,104 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+      height: 236,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: kSkyGradient,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF141A3A).withValues(alpha: 0.45),
-            blurRadius: 22,
+            color: AstroInk.deep.withValues(alpha: 0.5),
+            blurRadius: 24,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      // Clipped, not Clip.none: the decorative sparkle is deliberately hung
-      // past the card's corner, and on a narrow phone an unclipped one paints
-      // a faint smudge onto the page behind it.
       clipBehavior: Clip.antiAlias,
       child: Stack(
+        fit: StackFit.expand,
         children: [
+          // The sky itself: twinkling stars, a meteor now and then, and the
+          // long trails a static camera records — idle, so not converged.
+          const StarField(seed: 7, density: 1.1),
+          // A breath of horizon glow at the bottom edge so the text sits on
+          // something, without a flat overlay.
           Positioned(
-            right: -10,
-            top: -14,
-            child: Icon(Icons.auto_awesome,
-                size: 132, color: Colors.white.withValues(alpha: 0.08)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      pro ? 'PRO' : tr(zh: '离线 · 免费', en: 'OFFLINE · FREE'),
-                      style: text.labelSmall?.copyWith(
-                          color: Colors.white,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                tr(zh: '十几张夜空照片\n叠成一张干净的', en: 'A burst of night sky,\nstacked into one clean shot'),
-                style: text.headlineSmall?.copyWith(color: Colors.white, height: 1.25),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                tr(
-                  zh: '每一帧都告诉你对上了没有、对不上是为什么',
-                  en: 'Every frame tells you whether it lined up — and why it did not',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 120,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    AstroInk.deep.withValues(alpha: 0.72),
+                  ],
                 ),
-                style:
-                    text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.82)),
               ),
-              if (count > 0) ...[
-                const SizedBox(height: 16),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  pro ? 'ASTROPILE · PRO' : 'ASTROPILE · OFFLINE',
+                  style: text.labelSmall?.copyWith(
+                    color: AstroColors.silver.withValues(alpha: 0.7),
+                    letterSpacing: 2.2,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  tr(zh: '十几张夜空照片\n叠成一张干净的', en: 'A burst of night sky,\nstacked into one clean shot'),
+                  style: text.headlineSmall?.copyWith(
+                    color: AstroColors.star,
+                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('$count', style: text.headlineMedium?.copyWith(color: Colors.white)),
-                    const SizedBox(width: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Text(tr(zh: '叠已完成', en: 'stacks made'),
-                          style: text.bodySmall
-                              ?.copyWith(color: Colors.white.withValues(alpha: 0.82))),
+                    Expanded(
+                      child: Text(
+                        tr(
+                          zh: '每一帧都告诉你对上了没有、对不上是为什么',
+                          en: 'Every frame tells you whether it lined up — and why it did not',
+                        ),
+                        style: text.bodySmall?.copyWith(
+                            color: AstroColors.silver.withValues(alpha: 0.78), height: 1.35),
+                      ),
                     ),
+                    if (count > 0) ...[
+                      const SizedBox(width: 14),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          CountUpText(count,
+                              ms: 900,
+                              style: text.headlineMedium?.copyWith(color: AstroColors.aligned)),
+                          Text(tr(zh: '叠已完成', en: 'stacks made'),
+                              style: text.labelSmall?.copyWith(
+                                  color: AstroColors.silver.withValues(alpha: 0.7))),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ],
-            ],
+            ),
           ),
         ],
       ),

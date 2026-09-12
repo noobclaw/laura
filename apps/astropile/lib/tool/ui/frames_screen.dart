@@ -374,8 +374,10 @@ class _FramesScreenState extends State<FramesScreen> {
                           style: text.titleSmall?.copyWith(color: cs.onSurfaceVariant),
                         ),
                       ),
-                      for (final f in _frames)
+                      for (final (i, f) in _frames.indexed)
                         _FrameRow(
+                          key: ValueKey(f.id),
+                          index: i,
                           frame: f,
                           precheck: _precheck(f),
                           included: !_excluded.contains(f.id),
@@ -394,14 +396,45 @@ class _FramesScreenState extends State<FramesScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: FilledButton.icon(
-                    onPressed:
-                        included.length >= kMinStackFramesUi && !_starting ? _start : null,
-                    icon: const Icon(Icons.auto_awesome),
-                    label: Text(tr(
-                      zh: '开始叠加 ${included.length} 张',
-                      en: 'Stack ${included.length} frames',
-                    )),
+                  child: PressScale(
+                    enabled: included.length >= kMinStackFramesUi && !_starting,
+                    child: FilledButton(
+                      onPressed:
+                          included.length >= kMinStackFramesUi && !_starting ? _start : null,
+                      // Idle → starting: the icon gives way to a spinner and
+                      // the label to "starting", cross-faded rather than
+                      // swapped, so the press reads as a state change.
+                      child: AnimatedSwitcher(
+                        duration: animMs(context, 220),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        transitionBuilder: (child, anim) => FadeTransition(
+                          opacity: anim,
+                          child: SizeTransition(
+                              sizeFactor: anim, axis: Axis.horizontal, child: child),
+                        ),
+                        child: Row(
+                          key: ValueKey(_starting),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_starting)
+                              const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2))
+                            else
+                              const Icon(Icons.auto_awesome),
+                            const SizedBox(width: 10),
+                            Text(_starting
+                                ? tr(zh: '正在启动…', en: 'Starting…')
+                                : tr(
+                                    zh: '开始叠加 ${included.length} 张',
+                                    en: 'Stack ${included.length} frames',
+                                  )),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -438,8 +471,8 @@ class _Summary extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: kSkyGradient,
         ),
       ),
@@ -451,8 +484,8 @@ class _Summary extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('$selected',
-                      style: text.displaySmall?.copyWith(color: Colors.white)),
+                  CountUpText(selected,
+                      ms: 400, style: text.displaySmall?.copyWith(color: AstroColors.star)),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 6, left: 4),
                     child: Text('/$total',
@@ -491,6 +524,8 @@ class _Summary extends StatelessWidget {
 
 class _FrameRow extends StatelessWidget {
   const _FrameRow({
+    super.key,
+    required this.index,
     required this.frame,
     required this.precheck,
     required this.included,
@@ -499,6 +534,7 @@ class _FrameRow extends StatelessWidget {
     required this.onMakeReference,
   });
 
+  final int index;
   final SourceFrame frame;
   final FramePrecheck precheck;
   final bool included;
@@ -511,81 +547,112 @@ class _FrameRow extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final broken = precheck == FramePrecheck.sizeMismatch;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
-        child: Row(
-          children: [
-            Semantics(
-              button: true,
-              label: tr(zh: '设为参考帧', en: 'Use as the reference frame'),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: broken ? null : onMakeReference,
-                child: Opacity(
-                  opacity: included ? 1 : 0.4,
-                  child: FrameThumb(path: frame.path),
+    // Ticking a frame in or out, or promoting it to reference, moves the
+    // card's outline and dims the row — animated, so the eye follows the
+    // change instead of hunting for it.
+    final border = isReference
+        ? AstroColors.aligned
+        : included
+            ? cs.outlineVariant.withValues(alpha: 0.35)
+            : Colors.transparent;
+    return RiseIn(
+      index: index,
+      child: AnimatedContainer(
+        duration: animMs(context, 220),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: included ? cs.surfaceContainerHigh : cs.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: border, width: isReference ? 1.6 : 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+          child: Row(
+            children: [
+              Semantics(
+                button: true,
+                label: tr(zh: '设为参考帧', en: 'Use as the reference frame'),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: broken ? null : onMakeReference,
+                  child: AnimatedOpacity(
+                    opacity: included ? 1 : 0.4,
+                    duration: animMs(context, 220),
+                    child: FrameThumb(path: frame.path),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(frame.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: text.bodyMedium),
-                      ),
-                      if (isReference) ...[
-                        const SizedBox(width: 6),
-                        StatusPill(
-                          label: tr(zh: '参考帧', en: 'REFERENCE'),
-                          color: AstroColors.reference,
-                          icon: Icons.center_focus_strong,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(frame.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodyMedium),
+                        ),
+                        AnimatedSwitcher(
+                          duration: animMs(context, 200),
+                          transitionBuilder: (child, anim) => FadeTransition(
+                            opacity: anim,
+                            child: ScaleTransition(scale: anim, child: child),
+                          ),
+                          child: isReference
+                              ? Padding(
+                                  key: const ValueKey('ref'),
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: StatusPill(
+                                    label: tr(zh: '参考帧', en: 'REFERENCE'),
+                                    color: AstroColors.reference,
+                                    icon: Icons.center_focus_strong,
+                                  ),
+                                )
+                              : const SizedBox.shrink(key: ValueKey('none')),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      frame.exposureSummary.isEmpty
+                          ? '${frame.width}×${frame.height} · ${formatBytes(frame.bytes)}'
+                          : '${frame.exposureSummary} · ${formatBytes(frame.bytes)}',
+                      style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    if (broken) ...[
+                      const SizedBox(height: 5),
+                      Text(
+                        tr(
+                          zh: '画幅 ${frame.width}×${frame.height} 与其余不一致,不能参与叠加',
+                          en: '${frame.width}×${frame.height} does not match the rest — cannot be stacked',
+                        ),
+                        style: text.bodySmall?.copyWith(color: AstroColors.bad),
+                      ),
+                    ] else if (precheck == FramePrecheck.exposureOutlier) ...[
+                      const SizedBox(height: 5),
+                      Text(
+                        tr(
+                          zh: '曝光设置与多数帧不同,会拉偏平均值',
+                          en: 'Shot with different exposure settings than most frames',
+                        ),
+                        style: text.bodySmall?.copyWith(color: AstroColors.warn),
+                      ),
                     ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    frame.exposureSummary.isEmpty
-                        ? '${frame.width}×${frame.height} · ${formatBytes(frame.bytes)}'
-                        : '${frame.exposureSummary} · ${formatBytes(frame.bytes)}',
-                    style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                  ),
-                  if (broken) ...[
-                    const SizedBox(height: 5),
-                    Text(
-                      tr(
-                        zh: '画幅 ${frame.width}×${frame.height} 与其余不一致,不能参与叠加',
-                        en: '${frame.width}×${frame.height} does not match the rest — cannot be stacked',
-                      ),
-                      style: text.bodySmall?.copyWith(color: AstroColors.bad),
-                    ),
-                  ] else if (precheck == FramePrecheck.exposureOutlier) ...[
-                    const SizedBox(height: 5),
-                    Text(
-                      tr(
-                        zh: '曝光设置与多数帧不同,会拉偏平均值',
-                        en: 'Shot with different exposure settings than most frames',
-                      ),
-                      style: text.bodySmall?.copyWith(color: AstroColors.warn),
-                    ),
                   ],
-                ],
+                ),
               ),
-            ),
-            Checkbox(
-              value: included,
-              onChanged: broken ? null : (_) => onToggle(),
-            ),
-          ],
+              Checkbox(
+                value: included,
+                activeColor: AstroColors.aligned,
+                checkColor: AstroInk.deep,
+                onChanged: broken ? null : (_) => onToggle(),
+              ),
+            ],
+          ),
         ),
       ),
     );

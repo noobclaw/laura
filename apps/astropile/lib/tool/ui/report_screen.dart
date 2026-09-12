@@ -38,7 +38,8 @@ class ReportScreen extends StatelessWidget {
               style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
             ),
             const SizedBox(height: 16),
-            for (final r in outcome.reports) _ReportCard(report: r),
+            for (final (i, r) in outcome.reports.indexed)
+              RiseIn(index: i, child: _ReportCard(report: r)),
             const SizedBox(height: 8),
             Text(
               tr(
@@ -90,30 +91,33 @@ class _ReportCard extends StatelessWidget {
                   )
                 else
                   StatusPill(
-                    label: tr(zh: '质量 ${report.score}', en: 'SCORE ${report.score}'),
                     color: scoreColor(report.score),
                     icon: Icons.check_circle_outline,
+                    child: CountUpText(report.score, prefix: tr(zh: '质量 ', en: 'SCORE ')),
                   ),
               ],
             ),
             const SizedBox(height: 12),
             if (report.isReference)
               _Metrics(items: [
-                (tr(zh: '检出星点', en: 'Stars found'), '${report.starsDetected}'),
-                (tr(zh: '角色', en: 'Role'), tr(zh: '基准', en: 'Baseline')),
+                _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
+                _Metric(tr(zh: '角色', en: 'Role'), text: tr(zh: '基准', en: 'Baseline')),
               ])
             else if (failed)
               _Metrics(items: [
-                (tr(zh: '检出星点', en: 'Stars found'), '${report.starsDetected}'),
-                (tr(zh: '匹配', en: 'Matched'), '${report.matchedStars}'),
+                _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
+                _Metric(tr(zh: '匹配', en: 'Matched'), value: report.matchedStars),
               ])
             else
               _Metrics(items: [
-                (tr(zh: '检出星点', en: 'Stars found'), '${report.starsDetected}'),
-                (tr(zh: '匹配', en: 'Matched'), '${report.matchedStars}'),
-                (tr(zh: '残差', en: 'Residual'), '${report.rmsPixels.toStringAsFixed(2)} px'),
-                (tr(zh: '位移', en: 'Shift'), '${report.shiftPixels.toStringAsFixed(1)} px'),
-                (tr(zh: '旋转', en: 'Rotation'), '${report.rotationDegrees.toStringAsFixed(2)}°'),
+                _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
+                _Metric(tr(zh: '匹配', en: 'Matched'), value: report.matchedStars),
+                _Metric(tr(zh: '残差', en: 'Residual'),
+                    value: report.rmsPixels, decimals: 2, unit: ' px'),
+                _Metric(tr(zh: '位移', en: 'Shift'),
+                    value: report.shiftPixels, decimals: 1, unit: ' px'),
+                _Metric(tr(zh: '旋转', en: 'Rotation'),
+                    value: report.rotationDegrees, decimals: 2, unit: '°'),
               ]),
             if (failed) ...[
               const SizedBox(height: 12),
@@ -143,9 +147,20 @@ class _ReportCard extends StatelessWidget {
   }
 }
 
+/// One metric: a label, and either a number that rolls into place ([value]
+/// with [decimals] and a [unit]) or a fixed string ([text]).
+class _Metric {
+  const _Metric(this.label, {this.value, this.decimals = 0, this.unit = '', this.text});
+  final String label;
+  final num? value;
+  final int decimals;
+  final String unit;
+  final String? text;
+}
+
 class _Metrics extends StatelessWidget {
   const _Metrics({required this.items});
-  final List<(String, String)> items;
+  final List<_Metric> items;
 
   @override
   Widget build(BuildContext context) {
@@ -155,13 +170,17 @@ class _Metrics extends StatelessWidget {
       spacing: 22,
       runSpacing: 12,
       children: [
-        for (final (label, value) in items)
+        for (final m in items)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(value, style: text.titleMedium),
-              Text(label, style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+              if (m.value != null)
+                CountUpText(m.value!,
+                    decimals: m.decimals, suffix: m.unit, ms: 700, style: text.titleMedium)
+              else
+                Text(m.text ?? '', style: text.titleMedium),
+              Text(m.label, style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
             ],
           ),
       ],

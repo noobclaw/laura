@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -178,13 +179,21 @@ Color scoreColor(int score) {
 
 /// A compact status pill.
 class StatusPill extends StatelessWidget {
-  const StatusPill({super.key, required this.label, required this.color, this.icon});
-  final String label;
+  const StatusPill({super.key, this.label, this.child, required this.color, this.icon})
+      : assert(label != null || child != null);
+  final String? label;
+
+  /// Replaces [label] — for a counting number ([CountUpText]) inside the pill.
+  final Widget? child;
   final Color color;
   final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
+    final style = Theme.of(context)
+        .textTheme
+        .labelSmall
+        ?.copyWith(color: color, fontWeight: FontWeight.w700);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
@@ -198,12 +207,113 @@ class StatusPill extends StatelessWidget {
             Icon(icon, size: 13, color: color),
             const SizedBox(width: 4),
           ],
-          Text(label,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelSmall
-                  ?.copyWith(color: color, fontWeight: FontWeight.w700)),
+          if (child != null)
+            DefaultTextStyle.merge(style: style, child: child!)
+          else
+            Text(label!, style: style),
         ],
+      ),
+    );
+  }
+}
+
+/// Motion helpers. Every animation in the app goes through [animMs] so the
+/// system "reduce motion" switch turns the lot off at once.
+Duration animMs(BuildContext context, int ms) =>
+    MediaQuery.disableAnimationsOf(context) ? Duration.zero : Duration(milliseconds: ms);
+
+/// Press feedback for the primary buttons: the child scales to 0.96 while a
+/// pointer is down (150 ms, standard easing) and springs back on release.
+/// Uses a [Listener], not a gesture, so it never competes with the button's
+/// own tap recogniser.
+class PressScale extends StatefulWidget {
+  const PressScale({super.key, required this.child, this.enabled = true});
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<PressScale> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v && mounted) setState(() => _down = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: widget.enabled ? (_) => _set(true) : null,
+      onPointerUp: (_) => _set(false),
+      onPointerCancel: (_) => _set(false),
+      child: AnimatedScale(
+        scale: _down ? 0.96 : 1,
+        duration: animMs(context, 150),
+        curve: Curves.easeOutCubic,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// A number that rolls from its previous value to the new one instead of
+/// jumping: star counts, scores, percentages. Formats through [format] (an
+/// integer by default) and takes any [Text] styling via [style].
+class CountUpText extends StatelessWidget {
+  const CountUpText(
+    this.value, {
+    super.key,
+    this.style,
+    this.prefix = '',
+    this.suffix = '',
+    this.decimals = 0,
+    this.ms = 600,
+    this.textAlign,
+  });
+  final num value;
+  final TextStyle? style;
+  final String prefix;
+  final String suffix;
+  final int decimals;
+  final int ms;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: value.toDouble()),
+      duration: animMs(context, ms),
+      curve: Curves.easeOutCubic,
+      builder: (context, v, _) => Text(
+        '$prefix${decimals == 0 ? v.round().toString() : v.toStringAsFixed(decimals)}$suffix',
+        style: style,
+        textAlign: textAlign,
+      ),
+    );
+  }
+}
+
+/// Fade + rise entrance for list items, staggered by [index]. Cheap enough
+/// for a whole report page; the stagger is capped so item 30 does not wait
+/// three seconds to show up.
+class RiseIn extends StatelessWidget {
+  const RiseIn({super.key, required this.child, this.index = 0});
+  final Widget child;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final delay = math.min(index, 8) * 45;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: animMs(context, 260 + delay),
+      curve: Interval(delay / (260 + delay), 1, curve: Curves.easeOutCubic),
+      child: child,
+      builder: (context, v, child) => Opacity(
+        opacity: v,
+        child: Transform.translate(offset: Offset(0, (1 - v) * 10), child: child),
       ),
     );
   }

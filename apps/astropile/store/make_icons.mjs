@@ -1,13 +1,18 @@
 // AstroPile launcher icon — rendered procedurally, no image dependencies.
 //
-// PIPELINE.md makes a product-specific icon a hard rule (2026-08-30): the
-// symbol must say what the app does, in the app's own seed colour. Here that
-// is three offset frames (a burst being stacked) with a four-point star
-// coming through them, on the same night-sky gradient the app's hero uses.
+// PIPELINE.md makes a product-specific icon a hard rule (2026-08-30) and
+// "the logo must be good-looking, recognisable at 60 px" (rule 9, 2026-09-11).
+// The symbol: three photo frames stacked with an offset — a burst being
+// aligned and piled — drawn as bold silver outlines (stroke ≥ 1/24 of the
+// canvas so it survives the 60 px shrink), with one big four-point star
+// breaking through the top-right corner in the app's warm star white. Ink
+// blue → black gradient behind, the same sky the in-app hero uses. No fine
+// ticks, no thin lines: nothing that turns to fuzz at launcher size.
 //
 // Usage:  node apps/astropile/store/make_icons.mjs
 // Writes: android mipmaps, iOS AppIcon set, store/icon-1024.png,
-//         store/play-icon-512.png, store/feature-1024x500.png
+//         store/play-icon-512.png, store/feature-1024x500.png,
+//         store/icon-preview-60.png, store/icon-preview-120.png (legibility check)
 
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -69,86 +74,149 @@ function writePng(file, rgba, w, h, { alpha = true } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// The artwork, evaluated per sample in a normalised [-1, 1] square.
+// The artwork, evaluated per sample in a normalised [-1, 1] square. Every
+// shape is a signed-distance field so edges stay crisp at any size; `aa` is
+// the anti-alias width (about one output pixel) passed in by the renderer.
 // ---------------------------------------------------------------------------
 const mix = (a, b, t) => a + (b - a) * t;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const lerpRgb = (a, b, t) => [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)];
 
-const SKY_TOP = [0x1a, 0x21, 0x4a];
-const SKY_MID = [0x33, 0x24, 0x5e];
-const SKY_LOW = [0x0a, 0x0d, 0x28];
-const FRAME = [0x8b, 0x9b, 0xff];
-const STAR = [0xff, 0xff, 0xff];
+// Same ramp as lib/tool/app_theme.dart kSkyGradient / AstroInk / AstroColors.
+const SKY_TOP = [0x14, 0x1c, 0x36];
+const SKY_MID = [0x0b, 0x10, 0x20];
+const SKY_LOW = [0x05, 0x07, 0x0f];
+const FRAME_FILL = [0x0e, 0x14, 0x28]; // AstroInk.low — the "photo" inside each frame
+const SILVER = [0xd5, 0xdb, 0xe7]; // AstroColors.silver
+const SILVER_HI = [0xf2, 0xf4, 0xf8];
+const STAR = [0xff, 0xf4, 0xd6]; // AstroColors.star
 
-/** Rounded-rectangle outline coverage, rotated by `ang`. */
-function frameEdge(x, y, half, radius, stroke, ang) {
+/** Signed distance to a rounded rectangle centred at (cx, cy), rotated by `ang`. */
+function roundedRectSdf(x, y, cx, cy, half, radius, ang) {
   const c = Math.cos(ang);
   const s = Math.sin(ang);
-  const px = x * c + y * s;
-  const py = -x * s + y * c;
-  // Signed distance to a rounded rect.
+  const dx = x - cx;
+  const dy = y - cy;
+  const px = dx * c + dy * s;
+  const py = -dx * s + dy * c;
   const qx = Math.abs(px) - (half - radius);
   const qy = Math.abs(py) - (half - radius);
   const ax = Math.max(qx, 0);
   const ay = Math.max(qy, 0);
-  const d = Math.hypot(ax, ay) + Math.min(Math.max(qx, qy), 0) - radius;
-  // Band around the outline.
-  return clamp01(1 - Math.abs(d) / stroke);
+  return Math.hypot(ax, ay) + Math.min(Math.max(qx, qy), 0) - radius;
 }
 
-/** Four-point star (astroid) plus a soft glow. */
-function sparkle(x, y, size) {
-  const nx = Math.abs(x) / size;
-  const ny = Math.abs(y) / size;
-  const body = clamp01(1 - (Math.pow(nx, 0.42) + Math.pow(ny, 0.42)));
-  const glow = Math.exp(-(x * x + y * y) / (0.22 * size * size)) * 0.55;
-  return clamp01(body * 1.9 + glow);
+/** Signed distance to a simple polygon (array of [x, y]). */
+function polygonSdf(x, y, pts) {
+  let d = Infinity;
+  let sign = 1;
+  const n = pts.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const [ax, ay] = pts[i];
+    const [bx, by] = pts[j];
+    const ex = bx - ax;
+    const ey = by - ay;
+    const wx = x - ax;
+    const wy = y - ay;
+    const t = clamp01((wx * ex + wy * ey) / (ex * ex + ey * ey));
+    const bxp = wx - ex * t;
+    const byp = wy - ey * t;
+    d = Math.min(d, bxp * bxp + byp * byp);
+    // Winding-based inside test.
+    const c1 = y >= ay;
+    const c2 = y < by;
+    const c3 = ex * wy > ey * wx;
+    if ((c1 && c2 && c3) || (!c1 && !c2 && !c3)) sign = -sign;
+  }
+  return sign * Math.sqrt(d);
 }
 
-/** Small background star: a point with a quick falloff, not a pearl. */
+/** A four-point star: tips at `size`, waist at `size * waist`, centred at (cx, cy). */
+function starPoints(cx, cy, size, waist) {
+  const w = size * waist;
+  return [
+    [cx, cy - size],
+    [cx + w, cy - w],
+    [cx + size, cy],
+    [cx + w, cy + w],
+    [cx, cy + size],
+    [cx - w, cy + w],
+    [cx - size, cy],
+    [cx - w, cy - w],
+  ];
+}
+
+const fillCov = (d, aa) => clamp01(0.5 - d / aa);
+const strokeCov = (d, width, aa) => clamp01(0.5 - (Math.abs(d) - width / 2) / aa);
+
+// Three frames, back to front. Offsets are ~14 px on a 256 grid (56 px at
+// 1024, ~3.3 px at 60) — enough that the stack still reads as three sheets
+// after the launcher shrink, not so much that the pile falls apart.
+const FRAMES = [
+  { cx: -0.215, cy: -0.20, ang: -0.17, alpha: 0.42 },
+  { cx: -0.108, cy: -0.10, ang: -0.085, alpha: 0.70 },
+  { cx: 0.0, cy: 0.0, ang: 0, alpha: 1 },
+];
+const FRAME_HALF = 0.43;
+const FRAME_RADIUS = 0.11;
+// 1/24 of the canvas is 0.0833 in [-1, 1] units; go a touch bolder.
+const STROKE = 0.095;
+
+const STAR_C = [0.47, -0.47];
+const STAR_SIZE = 0.38;
+const STAR_PTS = starPoints(STAR_C[0], STAR_C[1], STAR_SIZE, 0.16);
+const STAR_HALO = starPoints(STAR_C[0], STAR_C[1], STAR_SIZE * 1.16, 0.19);
+
+/** Sparse background stars — soft points, deliberately few and small. */
+const DOTS = [
+  [-0.74, -0.70, 0.026],
+  [-0.30, -0.80, 0.018],
+  [0.06, -0.86, 0.022],
+  [0.80, 0.18, 0.024],
+  [0.62, 0.66, 0.020],
+  [-0.78, 0.40, 0.017],
+];
 function dot(x, y, cx, cy, r) {
   const d = Math.hypot(x - cx, y - cy);
   const t = clamp01(1 - d / r);
   return t * t * t;
 }
 
-const DOTS = [
-  [-0.62, -0.58, 0.03],
-  [0.58, -0.66, 0.022],
-  [0.68, 0.52, 0.027],
-  [-0.7, 0.44, 0.02],
-  [-0.2, -0.74, 0.018],
-  [0.3, 0.74, 0.017],
-];
-
 /** Colour of one sample, in the normalised square. */
-function sample(x, y) {
-  // Night-sky gradient along the diagonal, darkening at the corners.
-  const t = clamp01((x + y + 2) / 4);
-  let rgb = t < 0.55 ? lerpRgb(SKY_TOP, SKY_MID, t / 0.55) : lerpRgb(SKY_MID, SKY_LOW, (t - 0.55) / 0.45);
-  const vignette = clamp01(1 - 0.35 * (x * x + y * y));
+function sample(x, y, aa) {
+  // Ink-blue sky, darkening toward the bottom, with a gentle vignette.
+  const t = clamp01((y + 1) / 2);
+  let rgb = t < 0.5 ? lerpRgb(SKY_TOP, SKY_MID, t / 0.5) : lerpRgb(SKY_MID, SKY_LOW, (t - 0.5) / 0.5);
+  const vignette = clamp01(1 - 0.22 * (x * x + y * y));
   rgb = [rgb[0] * vignette, rgb[1] * vignette, rgb[2] * vignette];
 
   for (const [cx, cy, r] of DOTS) {
-    const a = dot(x, y, cx, cy, r) * 0.85;
+    const a = dot(x, y, cx, cy, r) * 0.7;
     if (a > 0) rgb = lerpRgb(rgb, STAR, a);
   }
 
-  // Three frames, back to front: the burst being stacked.
-  const layers = [
-    { half: 0.62, ang: -0.19, alpha: 0.34 },
-    { half: 0.6, ang: -0.095, alpha: 0.6 },
-    { half: 0.58, ang: 0, alpha: 1 },
-  ];
-  for (const l of layers) {
-    const a = frameEdge(x, y, l.half, 0.16, 0.038, l.ang) * l.alpha;
-    if (a > 0) rgb = lerpRgb(rgb, FRAME, a);
+  // The stack: each sheet is a dark card with a bold silver rim; the front
+  // sheet hides the rims behind it, so only the offset edges show.
+  for (const f of FRAMES) {
+    const d = roundedRectSdf(x, y, f.cx, f.cy, FRAME_HALF, FRAME_RADIUS, f.ang);
+    const inside = fillCov(d + STROKE / 2, aa);
+    if (inside > 0) rgb = lerpRgb(rgb, FRAME_FILL, inside * 0.96);
+    const rim = strokeCov(d, STROKE, aa) * f.alpha;
+    if (rim > 0) {
+      // A hint of lighting: brighter along the top-left of each rim.
+      const lit = clamp01(0.5 - (x - f.cx + (y - f.cy)) * 0.35);
+      rgb = lerpRgb(rgb, lerpRgb(SILVER, SILVER_HI, lit), rim);
+    }
   }
 
-  // The star coming through the stack.
-  const s = sparkle(x, y, 0.5);
-  if (s > 0) rgb = lerpRgb(rgb, STAR, s);
+  // The star coming through the top-right corner: a soft glow, a darker
+  // halo so it separates from the silver rim, then the warm-white body.
+  const glow = Math.exp(-((x - STAR_C[0]) ** 2 + (y - STAR_C[1]) ** 2) / (0.16 * STAR_SIZE * STAR_SIZE)) * 0.32;
+  if (glow > 0.003) rgb = lerpRgb(rgb, STAR, glow);
+  const halo = fillCov(polygonSdf(x, y, STAR_HALO), aa * 1.5);
+  if (halo > 0) rgb = lerpRgb(rgb, SKY_LOW, halo * 0.85);
+  const body = fillCov(polygonSdf(x, y, STAR_PTS), aa);
+  if (body > 0) rgb = lerpRgb(rgb, STAR, body);
   return rgb;
 }
 
@@ -156,6 +224,7 @@ function sample(x, y) {
 function render(size, { squircle = false } = {}) {
   const out = Buffer.alloc(size * size * 4);
   const ss = 3;
+  const aa = 2 / size / ss * 1.4; // ~1 sub-sample of anti-aliasing
   for (let py = 0; py < size; py++) {
     for (let px = 0; px < size; px++) {
       let r = 0, g = 0, b = 0, cover = 0;
@@ -170,7 +239,7 @@ function render(size, { squircle = false } = {}) {
             inside = n <= 1 ? 1 : 0;
           }
           if (!inside) continue;
-          const c = sample(x, y);
+          const c = sample(x, y, aa);
           r += c[0];
           g += c[1];
           b += c[2];
@@ -192,20 +261,28 @@ function render(size, { squircle = false } = {}) {
   return out;
 }
 
-/** Feature graphic: the icon on the left, the gradient carrying the rest. */
+/** Feature graphic: the icon on the left, the sky carrying the rest. */
 function renderFeature(w, h) {
   const out = Buffer.alloc(w * h * 4);
-  const icon = h * 0.62;
-  const ix = h * 0.28;
+  const icon = h * 0.66;
+  const ix = h * 0.26;
   const iy = (h - icon) / 2;
+  const aa = 2 / icon * 0.9;
   for (let py = 0; py < h; py++) {
     for (let px = 0; px < w; px++) {
-      const t = clamp01(px / w);
-      let rgb = t < 0.6 ? lerpRgb(SKY_TOP, SKY_MID, t / 0.6) : lerpRgb(SKY_MID, SKY_LOW, (t - 0.6) / 0.4);
+      const t = clamp01(py / h);
+      let rgb = t < 0.5 ? lerpRgb(SKY_TOP, SKY_MID, t / 0.5) : lerpRgb(SKY_MID, SKY_LOW, (t - 0.5) / 0.5);
+      // A few stars scattered across the wide sky.
+      const fx = px / w * 2 - 1;
+      const fy = py / h * 2 - 1;
+      for (const [cx, cy, r] of [[0.35, -0.55, 0.03], [0.62, 0.35, 0.025], [0.82, -0.25, 0.035], [0.5, 0.75, 0.022], [0.95, 0.6, 0.02], [0.2, 0.2, 0.018]]) {
+        const a = dot(fx, fy, cx, cy, r * 0.5) * 0.6;
+        if (a > 0) rgb = lerpRgb(rgb, STAR, a);
+      }
       if (px >= ix && px < ix + icon && py >= iy && py < iy + icon) {
         const x = ((px - ix) / icon) * 2 - 1;
         const y = ((py - iy) / icon) * 2 - 1;
-        if (Math.pow(Math.abs(x), 4) + Math.pow(Math.abs(y), 4) <= 1) rgb = sample(x, y);
+        if (Math.pow(Math.abs(x), 4) + Math.pow(Math.abs(y), 4) <= 1) rgb = sample(x, y, aa);
       }
       const i = (py * w + px) * 4;
       out[i] = Math.round(rgb[0]);
@@ -239,6 +316,7 @@ const ANDROID = [
   ['mipmap-xxxhdpi', 192],
 ];
 
+// Must cover every filename in ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json.
 const IOS = [
   ['Icon-App-20x20@1x.png', 20],
   ['Icon-App-20x20@2x.png', 40],
@@ -266,4 +344,7 @@ for (const [name, size] of IOS) {
 writePng(path.join(HERE, 'icon-1024.png'), flatten(render(1024), 1024), 1024, 1024, { alpha: false });
 writePng(path.join(HERE, 'play-icon-512.png'), flatten(render(512), 512), 512, 512, { alpha: false });
 writePng(path.join(HERE, 'feature-1024x500.png'), renderFeature(1024, 500), 1024, 500, { alpha: false });
+// Legibility check (rule 9): the same art at launcher sizes.
+writePng(path.join(HERE, 'icon-preview-60.png'), flatten(render(60), 60), 60, 60, { alpha: false });
+writePng(path.join(HERE, 'icon-preview-120.png'), flatten(render(120), 120), 120, 120, { alpha: false });
 console.log('icons written');

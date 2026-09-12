@@ -13,6 +13,7 @@ import '../engine/stretch.dart';
 import '../models.dart';
 import '../store.dart';
 import 'report_screen.dart';
+import 'star_field.dart';
 import 'widgets.dart';
 
 /// The finished stack: a live preview, three tone controls, the report, and
@@ -221,18 +222,26 @@ class _ResultScreenState extends State<ResultScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  color: const Color(0xFF06070F),
+                  color: const Color(0xFF05070F),
                   alignment: Alignment.center,
-                  child: _loadError != null
-                      ? Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Text(_loadError!,
-                              textAlign: TextAlign.center,
-                              style: text.bodySmall?.copyWith(color: AstroColors.bad)),
-                        )
-                      : _image == null
-                          ? const CircularProgressIndicator()
-                          : RawImage(image: _image, fit: BoxFit.contain),
+                  // The picture fades up out of the black the first time it
+                  // arrives; slider re-renders swap in place (same key).
+                  child: AnimatedSwitcher(
+                    duration: animMs(context, 350),
+                    child: _loadError != null
+                        ? Padding(
+                            key: const ValueKey('err'),
+                            padding: const EdgeInsets.all(20),
+                            child: Text(_loadError!,
+                                textAlign: TextAlign.center,
+                                style: text.bodySmall?.copyWith(color: AstroColors.bad)),
+                          )
+                        : _image == null
+                            ? const CircularProgressIndicator(
+                                key: ValueKey('wait'), color: AstroColors.aligned)
+                            : RawImage(
+                                key: const ValueKey('img'), image: _image, fit: BoxFit.contain),
+                  ),
                 ),
               ),
             ),
@@ -282,15 +291,18 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _preview == null || _busy ? null : _save,
-              icon: _busy
-                  ? const SizedBox(
-                      width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.photo_library_outlined),
-              label: Text(_busy
-                  ? tr(zh: '正在导出全分辨率…', en: 'Exporting full resolution…')
-                  : tr(zh: '保存到相册', en: 'Save to Photos')),
+            PressScale(
+              enabled: _preview != null && !_busy,
+              child: FilledButton.icon(
+                onPressed: _preview == null || _busy ? null : _save,
+                icon: _busy
+                    ? const SizedBox(
+                        width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.photo_library_outlined),
+                label: Text(_busy
+                    ? tr(zh: '正在导出全分辨率…', en: 'Exporting full resolution…')
+                    : tr(zh: '保存到相册', en: 'Save to Photos')),
+              ),
             ),
             const SizedBox(height: 10),
             OutlinedButton.icon(
@@ -338,45 +350,58 @@ class _SummaryStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final failed = outcome.failedFrames;
+    final dim = AstroColors.silver.withValues(alpha: 0.75);
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+      height: 84,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: kSkyGradient,
         ),
       ),
-      child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('${outcome.usedFrames}',
-                  style: text.headlineMedium?.copyWith(color: Colors.white)),
-              Text(tr(zh: '张已叠加', en: 'frames stacked'),
-                  style: text.bodySmall
-                      ?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
-            ],
-          ),
-          const SizedBox(width: 22),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('$failed',
-                  style: text.headlineMedium?.copyWith(
-                      color: failed == 0 ? Colors.white : AstroColors.warn)),
-              Text(tr(zh: '张被排除', en: 'excluded'),
-                  style: text.bodySmall
-                      ?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
-            ],
-          ),
-          const Spacer(),
-          StatusPill(
-            label: stackModeLabel(outcome.mode),
-            color: AstroColors.reference,
-            icon: Icons.layers_outlined,
+          // Fully converged: the trails have become the one aligned point.
+          const StarField(seed: 23, density: 0.6, converge: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CountUpText(outcome.usedFrames,
+                        ms: 800, style: text.headlineMedium?.copyWith(color: AstroColors.star)),
+                    Text(tr(zh: '张已叠加', en: 'frames stacked'),
+                        style: text.bodySmall?.copyWith(color: dim)),
+                  ],
+                ),
+                const SizedBox(width: 22),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CountUpText(failed,
+                        ms: 800,
+                        style: text.headlineMedium?.copyWith(
+                            color: failed == 0 ? AstroColors.star : AstroColors.warn)),
+                    Text(tr(zh: '张被排除', en: 'excluded'),
+                        style: text.bodySmall?.copyWith(color: dim)),
+                  ],
+                ),
+                const Spacer(),
+                StatusPill(
+                  label: stackModeLabel(outcome.mode),
+                  color: AstroColors.aligned,
+                  icon: Icons.layers_outlined,
+                ),
+              ],
+            ),
           ),
         ],
       ),

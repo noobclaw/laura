@@ -6,6 +6,7 @@ import '../engine/pipeline.dart';
 import '../models.dart';
 import '../store.dart';
 import 'result_screen.dart';
+import 'star_field.dart';
 import 'widgets.dart';
 
 /// Runs the stack and shows it happening.
@@ -35,14 +36,35 @@ class _RunScreenState extends State<RunScreen> {
   final StackRunner _runner = StackRunner();
   bool _handedOff = false;
 
+  /// The verdict list is an [AnimatedList]: rows slide in as the isolate
+  /// hands them back, rather than the whole list re-rendering. [_shown] is
+  /// how many rows the list has been told about.
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  int _shown = 0;
+
   @override
   void initState() {
     super.initState();
+    _runner.addListener(_syncList);
     WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+  }
+
+  void _syncList() {
+    final n = _runner.reports.length;
+    final list = _listKey.currentState;
+    if (list == null) {
+      _shown = n;
+      return;
+    }
+    while (_shown < n) {
+      list.insertItem(_shown, duration: animMs(context, 320));
+      _shown++;
+    }
   }
 
   @override
   void dispose() {
+    _runner.removeListener(_syncList);
     _runner.cancel();
     // The result screen takes ownership of the scratch files; if we never
     // got there, they are ours to delete.
@@ -156,36 +178,68 @@ class _RunScreenState extends State<RunScreen> {
                       ),
                     ),
                   Expanded(
-                    child: _runner.reports.isEmpty
-                        ? Center(
-                            child: Text(
-                              tr(zh: '逐帧结果会在这里出现', en: 'Per-frame results appear here'),
-                              style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    child: Stack(
+                      children: [
+                        AnimatedList(
+                          key: _listKey,
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                          initialItemCount: _shown,
+                          itemBuilder: (context, i, anim) {
+                            if (i >= _runner.reports.length) return const SizedBox.shrink();
+                            final curved =
+                                CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
+                            return SizeTransition(
+                              sizeFactor: curved,
+                              alignment: Alignment.topCenter,
+                              child: FadeTransition(
+                                opacity: curved,
+                                child: _ReportRow(report: _runner.reports[i]),
+                              ),
+                            );
+                          },
+                        ),
+                        IgnorePointer(
+                          child: AnimatedOpacity(
+                            opacity: _runner.reports.isEmpty ? 1 : 0,
+                            duration: animMs(context, 250),
+                            child: Center(
+                              child: Text(
+                                tr(zh: '逐帧结果会在这里出现', en: 'Per-frame results appear here'),
+                                style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                              ),
                             ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                            itemCount: _runner.reports.length,
-                            itemBuilder: (context, i) =>
-                                _ReportRow(report: _runner.reports[i]),
                           ),
+                        ),
+                      ],
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                    child: running
-                        ? OutlinedButton.icon(
-                            onPressed: _runner.isStopping ? null : _runner.cancel,
-                            icon: const Icon(Icons.stop_circle_outlined),
-                            label: Text(_runner.isStopping
-                                ? tr(zh: '正在停止…', en: 'Stopping…')
-                                : tr(zh: '停止', en: 'Stop')),
-                            style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(52)),
-                          )
-                        : FilledButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(tr(zh: '返回', en: 'Back')),
-                          ),
+                    // Stop → Back crossfades when the run settles, instead of
+                    // one button being swapped for another under the thumb.
+                    child: AnimatedSwitcher(
+                      duration: animMs(context, 260),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      child: running
+                          ? OutlinedButton.icon(
+                              key: const ValueKey('stop'),
+                              onPressed: _runner.isStopping ? null : _runner.cancel,
+                              icon: const Icon(Icons.stop_circle_outlined),
+                              label: Text(_runner.isStopping
+                                  ? tr(zh: '正在停止…', en: 'Stopping…')
+                                  : tr(zh: '停止', en: 'Stop')),
+                              style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(52)),
+                            )
+                          : PressScale(
+                              key: const ValueKey('back'),
+                              child: FilledButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text(tr(zh: '返回', en: 'Back')),
+                              ),
+                            ),
+                    ),
                   ),
                 ],
               ),
@@ -214,73 +268,117 @@ class _ProgressHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final settled = !running;
+    final ringColor = phase == RunPhase.failed
+        ? AstroColors.bad
+        : phase == RunPhase.cancelled || stopping
+            ? AstroColors.warn
+            : AstroColors.aligned;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 26),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: kSkyGradient,
         ),
       ),
-      child: Column(
-        children: [
-          SizedBox(
-            width: 128,
-            height: 128,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox.expand(
-                  child: CircularProgressIndicator(
-                    value: running && fraction > 0 ? fraction : (running ? null : fraction),
-                    strokeWidth: 8,
-                    strokeCap: StrokeCap.round,
-                    backgroundColor: Colors.white.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation(
-                      phase == RunPhase.failed
-                          ? AstroColors.bad
-                          : phase == RunPhase.cancelled || stopping
-                              ? AstroColors.warn
-                              : AstroColors.reference,
+      clipBehavior: Clip.antiAlias,
+      // The ring is a TweenAnimationBuilder over the runner's fraction, so a
+      // frame finishing moves the arc rather than teleporting it — and the
+      // same eased value drives the star trails behind it, which pull in to
+      // a single point as the stack lines up.
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: fraction),
+        duration: animMs(context, 420),
+        curve: Curves.easeOutCubic,
+        builder: (context, f, _) => Stack(
+          children: [
+            Positioned.fill(child: StarField(seed: 11, density: 0.9, converge: f)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 26),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: 128,
+                    height: 128,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox.expand(
+                          child: CircularProgressIndicator(
+                            value: running && f <= 0.001 ? null : f,
+                            strokeWidth: 8,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: Colors.white.withValues(alpha: 0.10),
+                            valueColor: AlwaysStoppedAnimation(ringColor),
+                          ),
+                        ),
+                        AnimatedSwitcher(
+                          duration: animMs(context, 300),
+                          switchInCurve: Curves.easeOutBack,
+                          transitionBuilder: (child, anim) =>
+                              ScaleTransition(scale: anim, child: child),
+                          child: settled && phase != RunPhase.done
+                              ? Icon(
+                                  key: ValueKey(phase),
+                                  phase == RunPhase.failed
+                                      ? Icons.error_outline
+                                      : Icons.stop_circle_outlined,
+                                  size: 44,
+                                  color: ringColor,
+                                )
+                              : Column(
+                                  key: const ValueKey('pct'),
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('${(f * 100).round()}',
+                                        style: text.displaySmall
+                                            ?.copyWith(color: AstroColors.star)),
+                                    Text('%',
+                                        style: text.labelSmall?.copyWith(
+                                            color: AstroColors.silver.withValues(alpha: 0.7))),
+                                  ],
+                                ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('${(fraction * 100).round()}',
-                        style: text.displaySmall?.copyWith(color: Colors.white)),
-                    Text('%',
-                        style: text.labelSmall
-                            ?.copyWith(color: Colors.white.withValues(alpha: 0.7))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: text.titleMedium?.copyWith(color: Colors.white),
-            ),
-          ),
-          if (running) ...[
-            const SizedBox(height: 6),
-            Text(
-              tr(
-                zh: '请让本页保持在前台',
-                en: 'Keep this screen in the foreground',
+                  const SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: AnimatedSwitcher(
+                      duration: animMs(context, 220),
+                      child: Text(
+                        label,
+                        key: ValueKey(label),
+                        textAlign: TextAlign.center,
+                        style: text.titleMedium?.copyWith(color: AstroColors.silver),
+                      ),
+                    ),
+                  ),
+                  AnimatedSize(
+                    duration: animMs(context, 220),
+                    curve: Curves.easeOutCubic,
+                    child: running
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              tr(
+                                zh: '请让本页保持在前台',
+                                en: 'Keep this screen in the foreground',
+                              ),
+                              style: text.bodySmall
+                                  ?.copyWith(color: AstroColors.silver.withValues(alpha: 0.6)),
+                            ),
+                          )
+                        : const SizedBox(width: double.infinity),
+                  ),
+                ],
               ),
-              style:
-                  text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.7)),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -343,8 +441,7 @@ class _ReportRow extends StatelessWidget {
             ),
           ),
           if (!report.isReference && !failed)
-            Text('${report.score}',
-                style: text.titleMedium?.copyWith(color: color)),
+            CountUpText(report.score, style: text.titleMedium?.copyWith(color: color)),
         ],
       ),
     );
