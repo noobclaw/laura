@@ -12,3 +12,6 @@ replay_pid*
 *.mdmp
 .kotlin/
 _ref/
+
+# Gradle output under any app
+**/android/build/
