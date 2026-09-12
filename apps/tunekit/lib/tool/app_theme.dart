@@ -28,6 +28,9 @@ const Color kWalnutEbony = Color(0xFF231A16);
 /// Ink on amber (buttons, root dots).
 const Color kOnAmber = Color(0xFF2A1B00);
 
+/// Ink on the in-tune green (solid status pills): 8.7:1 against it.
+const Color kOnGreen = Color(0xFF062B1C);
+
 ThemeData buildTuneTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
   final base = ColorScheme.fromSeed(

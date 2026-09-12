@@ -305,8 +305,29 @@ class _HeroState extends State<_Hero> with TickerProviderStateMixin {
             : inTune
                 ? tr(zh: '准了', en: 'In tune')
                 : (cents! < 0 ? tr(zh: '偏低 ↑', en: 'Flat ↑') : tr(zh: '偏高 ↓', en: 'Sharp ↓'));
+    // Spoken summary of the dial (the ¢ figure itself is excluded below).
+    final String spoken;
+    if (!active || cents == null) {
+      spoken = status;
+    } else if (inTune) {
+      spoken = tr(zh: '$name$octave,准了', en: '$name$octave, in tune');
+    } else {
+      final n = cents.abs().round();
+      spoken = cents < 0
+          ? tr(zh: '$name$octave,偏低 $n 音分', en: '$name$octave, flat by $n cents')
+          : tr(zh: '$name$octave,偏高 $n 音分', en: '$name$octave, sharp by $n cents');
+    }
+    // Status pill: solid accent with its ink colour while a pitch is present
+    // (≥ 4.5:1 either way); a quiet translucent chip when idle/listening.
+    final pillBg = active ? accent : Colors.white.withValues(alpha: 0.14);
+    final pillFg = !active ? Colors.white : (inTune ? kOnGreen : kOnAmber);
+    final motion = motionEnabled(context);
 
-    return Container(
+    return Semantics(
+      label: tr(zh: '调音表盘', en: 'Tuning dial'),
+      value: spoken,
+      liveRegion: true,
+      child: Container(
       decoration: BoxDecoration(
         gradient: heroGradient(Theme.of(context).brightness),
         borderRadius: BorderRadius.circular(28),
@@ -326,17 +347,29 @@ class _HeroState extends State<_Hero> with TickerProviderStateMixin {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
+                // The face (wood, track, ticks) is rasterised once behind a
+                // RepaintBoundary; only the needle layer repaints per frame.
                 Positioned.fill(
                   child: AnimatedBuilder(
                     animation: Listenable.merge([_needle, _halo, _pulse]),
-                    builder: (_, _) => CustomPaint(
-                      painter: TunerGaugePainter(
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: TunerDialFacePainter(
+                          active: active,
+                          scheme: cs.copyWith(onSurface: Colors.white),
+                        ),
+                        size: Size.infinite,
+                      ),
+                    ),
+                    builder: (_, face) => CustomPaint(
+                      foregroundPainter: TunerNeedlePainter(
                         cents: active ? _needle.value : null,
                         active: active,
                         inTune: inTune,
                         glow: _halo.value * (0.55 + 0.45 * _pulse.value),
                         scheme: cs.copyWith(onSurface: Colors.white),
                       ),
+                      child: face,
                     ),
                   ),
                 ),
@@ -361,38 +394,59 @@ class _HeroState extends State<_Hero> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(height: 6),
+          // Three flexible cells so a 360 dp screen at 1.3× text still fits:
+          // the side figures cap at 84 and the pill shrinks to fit its slot.
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 84,
-                child: Text(centsText,
-                    textAlign: TextAlign.right,
-                    style: text.titleLarge?.copyWith(color: accent, fontFeatures: const [FontFeature.tabularFigures()])),
-              ),
-              const SizedBox(width: 16),
-              AnimatedContainer(
-                duration: kMotionMedium,
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: SwapFade(
-                  duration: kMotionShort,
-                  child: Text(
-                    status,
-                    key: ValueKey(status),
-                    style: text.labelLarge?.copyWith(color: active ? accent : Colors.white70),
+              Flexible(
+                child: SizedBox(
+                  width: 84,
+                  child: ExcludeSemantics(
+                    child: Text(centsText,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.clip,
+                        style: text.titleLarge?.copyWith(color: accent, fontFeatures: const [FontFeature.tabularFigures()])),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
-              SizedBox(
-                width: 84,
-                child: Text(hz,
-                    style: text.bodyMedium?.copyWith(color: Colors.white70, fontFeatures: const [FontFeature.tabularFigures()])),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: AnimatedContainer(
+                    duration: motion ? kMotionMedium : Duration.zero,
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: pillBg,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: SwapFade(
+                      duration: kMotionShort,
+                      child: Text(
+                        status,
+                        key: ValueKey(status),
+                        maxLines: 1,
+                        softWrap: false,
+                        style: text.labelLarge?.copyWith(color: pillFg, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Flexible(
+                child: SizedBox(
+                  width: 84,
+                  child: Text(hz,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.clip,
+                      style: text.bodyMedium?.copyWith(color: Colors.white70, fontFeatures: const [FontFeature.tabularFigures()])),
+                ),
               ),
             ],
           ),
@@ -402,7 +456,7 @@ class _HeroState extends State<_Hero> with TickerProviderStateMixin {
             borderRadius: BorderRadius.circular(4),
             child: TweenAnimationBuilder<double>(
               tween: Tween<double>(end: reading.level.clamp(0, 1)),
-              duration: const Duration(milliseconds: 90),
+              duration: motion ? const Duration(milliseconds: 90) : Duration.zero,
               builder: (_, v, _) => LinearProgressIndicator(
                 value: v,
                 minHeight: 4,
@@ -412,6 +466,7 @@ class _HeroState extends State<_Hero> with TickerProviderStateMixin {
             ),
           ),
         ],
+      ),
       ),
     );
   }

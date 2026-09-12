@@ -135,7 +135,7 @@ class _LogPageState extends State<LogPage> {
                     children: [
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(begin: 0, end: store.streak > 0 ? 1 : 0),
-                        duration: kMotionLong,
+                        duration: motionEnabled(context) ? kMotionLong : Duration.zero,
                         curve: Curves.easeOutBack,
                         builder: (_, t, child) => Transform.scale(scale: 0.8 + 0.2 * t, child: child),
                         child: Icon(Icons.local_fire_department,

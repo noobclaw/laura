@@ -286,7 +286,7 @@ class PatternDetailPage extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: AnimatedSize(
-                    duration: kMotionMedium,
+                    duration: motionEnabled(context) ? kMotionMedium : Duration.zero,
                     curve: Curves.easeOutCubic,
                     alignment: Alignment.topCenter,
                     child: SwapFade(
@@ -924,7 +924,7 @@ class _DrillPageState extends State<DrillPage> {
         children: [
           TweenAnimationBuilder<double>(
             tween: Tween<double>(end: _index / DrillPage.rounds),
-            duration: kMotionLong,
+            duration: motionEnabled(context) ? kMotionLong : Duration.zero,
             curve: Curves.easeOutCubic,
             builder: (_, v, _) => LinearProgressIndicator(
               value: v,
@@ -1001,15 +1001,17 @@ class _Option extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final color = state == null ? cs.surfaceContainerHigh : (state! ? kInTuneGreen.withValues(alpha: 0.22) : kOffCoral.withValues(alpha: 0.22));
     // Answer state fades in: tint, border and the verdict icon all animate
-    // rather than snapping, and the wrong pick sinks slightly.
+    // rather than snapping, and the wrong pick sinks slightly. Reduced
+    // motion snaps all three.
+    final d = motionEnabled(context) ? kMotionMedium : Duration.zero;
     return AnimatedOpacity(
       opacity: dim ? 0.5 : 1,
-      duration: kMotionMedium,
+      duration: d,
       child: PressScale(
         pressedScale: 0.97,
         child: AnimatedScale(
           scale: state == false ? 0.98 : 1,
-          duration: kMotionMedium,
+          duration: d,
           curve: Curves.easeOutCubic,
           child: Material(
             color: Colors.transparent,
@@ -1018,7 +1020,7 @@ class _Option extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: onTap,
               child: AnimatedContainer(
-                duration: kMotionMedium,
+                duration: d,
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                 decoration: BoxDecoration(

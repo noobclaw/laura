@@ -5,35 +5,48 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'music/theory.dart';
 
-/// The tuner's hero: a walnut dial — a 150° arc from −50 to +50 cents with
-/// a green ±5 band, an amber needle and a brass pivot. [cents] is the needle's
-/// *displayed* position (the page springs it toward the reading); null = no
-/// signal (needle rests at centre, dimmed). [glow] 0..1 lights an amber halo
-/// around the rim while in tune; the page pulses it.
-class TunerGaugePainter extends CustomPainter {
-  const TunerGaugePainter({
-    required this.cents,
-    required this.active,
-    required this.inTune,
-    required this.scheme,
-    this.glow = 0,
-  });
-
-  final double? cents;
-  final bool active;
-  final bool inTune;
-  final ColorScheme scheme;
-  final double glow;
+/// Shared geometry of the tuner dial: a 150° arc from −50 to +50 cents,
+/// pivot near the bottom edge of the box.
+class _DialGeometry {
+  _DialGeometry(Size size)
+      : r = math.min(size.width / 2, size.height / 1.15) - 8,
+        center = Offset(size.width / 2, size.height * 0.92);
 
   static const double sweepDeg = 150;
+  final double r;
+  final Offset center;
+  double get startAngle => math.pi * (270 - sweepDeg / 2) / 180;
+  double get sweep => math.pi * sweepDeg / 180;
+  Rect get rect => Rect.fromCircle(center: center, radius: r);
+
+  /// Unit vector toward the dial position for [cents] (clamped ±50).
+  Offset dir(double cents) {
+    final a = startAngle + sweep * ((cents.clamp(-50.0, 50.0) + 50) / 100);
+    return Offset(math.cos(a), math.sin(a));
+  }
+}
+
+/// The static part of the tuner's hero: the walnut face, its growth rings,
+/// the track, the green ±5 band and the tick marks. Only depends on the
+/// colour scheme and whether a pitch is present, so wrap it in a
+/// [RepaintBoundary] and it is rasterised once and reused for every needle
+/// frame ([TunerNeedlePainter] draws on top as a foreground painter).
+class TunerDialFacePainter extends CustomPainter {
+  const TunerDialFacePainter({required this.active, required this.scheme});
+
+  final bool active;
+  final ColorScheme scheme;
+
+  static const double sweepDeg = _DialGeometry.sweepDeg;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final r = math.min(size.width / 2, size.height / 1.15) - 8;
-    final center = Offset(size.width / 2, size.height * 0.92);
-    final startAngle = math.pi * (270 - sweepDeg / 2) / 180;
-    final sweep = math.pi * sweepDeg / 180;
-    final rect = Rect.fromCircle(center: center, radius: r);
+    final g = _DialGeometry(size);
+    final r = g.r;
+    final center = g.center;
+    final startAngle = g.startAngle;
+    final sweep = g.sweep;
+    final rect = g.rect;
 
     // Wood face: a radial gradient lit off-centre, then fine concentric
     // rings like the growth lines of a turned walnut disc. Clipped to the
@@ -63,22 +76,6 @@ class TunerGaugePainter extends CustomPainter {
       canvas.drawArc(Rect.fromCircle(center: center, radius: rr), startAngle, sweep, false, ring);
     }
     canvas.restore();
-
-    // Amber halo on the rim when in tune (pulsed by the page).
-    if (glow > 0.01) {
-      final halo = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 12 + 6 * glow
-        ..strokeCap = StrokeCap.round
-        ..color = kBeatAmber.withValues(alpha: 0.18 + 0.32 * glow)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 8 + 8 * glow);
-      canvas.drawArc(Rect.fromCircle(center: center, radius: r + 10), startAngle, sweep, false, halo);
-      final rim = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = kBeatAmber.withValues(alpha: 0.35 + 0.45 * glow);
-      canvas.drawArc(Rect.fromCircle(center: center, radius: r + 9), startAngle, sweep, false, rim);
-    }
 
     // Track.
     final track = Paint()
@@ -133,22 +130,86 @@ class TunerGaugePainter extends CustomPainter {
         tp.paint(canvas, pos - Offset(tp.width / 2, tp.height / 2));
       }
     }
+  }
+
+  @override
+  bool shouldRepaint(TunerDialFacePainter old) => old.active != active || old.scheme != scheme;
+}
+
+/// The moving part of the tuner's hero, painted over [TunerDialFacePainter]:
+/// the amber needle with its brass pivot and the rim halo. [cents] is the
+/// needle's *displayed* position (the page springs it toward the reading);
+/// null = no signal (needle rests at centre, dimmed). [glow] 0..1 lights an
+/// amber halo around the rim while in tune; the page pulses it. This is the
+/// only thing repainted per animation frame, so it uses no mask filters —
+/// both glows are stacked translucent wide strokes instead of a blur.
+class TunerNeedlePainter extends CustomPainter {
+  const TunerNeedlePainter({
+    required this.cents,
+    required this.active,
+    required this.inTune,
+    required this.scheme,
+    this.glow = 0,
+  });
+
+  final double? cents;
+  final bool active;
+  final bool inTune;
+  final ColorScheme scheme;
+  final double glow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final g = _DialGeometry(size);
+    final r = g.r;
+    final center = g.center;
+    final startAngle = g.startAngle;
+    final sweep = g.sweep;
+
+    // Amber halo on the rim when in tune (pulsed by the page): three
+    // concentric translucent strokes, soft enough to read as a glow.
+    if (glow > 0.01) {
+      final haloRect = Rect.fromCircle(center: center, radius: r + 10);
+      for (final (w, a) in [(22.0 + 8 * glow, 0.06), (14.0 + 6 * glow, 0.10), (8.0 + 4 * glow, 0.16)]) {
+        canvas.drawArc(
+          haloRect,
+          startAngle,
+          sweep,
+          false,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = w
+            ..strokeCap = StrokeCap.round
+            ..color = kBeatAmber.withValues(alpha: a * (0.5 + 0.5 * glow)),
+        );
+      }
+      final rim = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = kBeatAmber.withValues(alpha: 0.35 + 0.45 * glow);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: r + 9), startAngle, sweep, false, rim);
+    }
 
     // Needle: amber by default, green once it sits in the band.
-    final c = (cents ?? 0).clamp(-50.0, 50.0);
-    final a = startAngle + sweep * ((c + 50) / 100);
-    final dir = Offset(math.cos(a), math.sin(a));
+    final dir = g.dir(cents ?? 0);
     final tip = center + dir * (r - 6);
     final tail = center - dir * 14;
     final needleColor = !active
         ? scheme.onSurface.withValues(alpha: 0.25)
         : (inTune ? kInTuneGreen : kBeatAmber);
-    final glowPaint = Paint()
-      ..color = needleColor.withValues(alpha: active ? 0.4 : 0)
-      ..strokeWidth = 10
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-    canvas.drawLine(center, tip, glowPaint);
+    if (active) {
+      // Glow: two translucent wide strokes under the body (no MaskFilter).
+      for (final (w, a) in const [(12.0, 0.12), (7.0, 0.22)]) {
+        canvas.drawLine(
+          center,
+          tip,
+          Paint()
+            ..color = needleColor.withValues(alpha: a)
+            ..strokeWidth = w
+            ..strokeCap = StrokeCap.round,
+        );
+      }
+    }
     // Tapered body: a thin polygon rather than a stroke so the tip is sharp.
     final side = Offset(-dir.dy, dir.dx);
     final body = Path()
@@ -175,7 +236,7 @@ class TunerGaugePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(TunerGaugePainter old) =>
+  bool shouldRepaint(TunerNeedlePainter old) =>
       old.cents != cents ||
       old.active != active ||
       old.inTune != inTune ||

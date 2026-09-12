@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tunekit/core/json_file_store.dart';
+import 'package:tunekit/core/l10n.dart';
 import 'package:tunekit/main.dart';
 import 'package:tunekit/tool/app_theme.dart';
 import 'package:tunekit/tool/log_page.dart';
@@ -123,6 +124,51 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     metro.dispose();
     await store.flush();
+  });
+
+  testWidgets('metronome page lays out on a 360x640 phone without overflow', (tester) async {
+    final store = _loadedStore();
+    final metro = MetronomeController(store);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(MaterialApp(
+      theme: buildTuneTheme(Brightness.dark),
+      home: Scaffold(body: MetronomePage(store: store, metro: metro)),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.takeException(), isNull, reason: 'tap | play | metre row must fit 288 dp');
+    expect(find.text('Tap'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    metro.dispose();
+    await store.flush();
+  });
+
+  testWidgets('tuner page lays out on a 360x640 phone at 1.3x text scale (en)', (tester) async {
+    final store = _loadedStore();
+    final mic = MicPitchController(store);
+    final prevLang = AppLanguage.override.value;
+    AppLanguage.override.value = 'en';
+    addTearDown(() => AppLanguage.override.value = prevLang);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(MaterialApp(
+      theme: buildTuneTheme(Brightness.light),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.3)),
+        child: child!,
+      ),
+      home: Scaffold(body: TunerPage(store: store, mic: mic, active: true)),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.takeException(), isNull, reason: 'status row must not overflow at 1.3x');
+    expect(find.text('Idle'), findsOneWidget);
+    expect(find.byType(RepaintBoundary), findsWidgets, reason: 'dial face is cached behind a boundary');
+    await tester.pumpWidget(const SizedBox());
+    mic.dispose();
   });
 
   testWidgets('practice list gates locked types and opens free ones', (tester) async {

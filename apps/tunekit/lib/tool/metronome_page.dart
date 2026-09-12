@@ -189,7 +189,12 @@ class _Hero extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _RoundIcon(icon: Icons.remove, onTap: () => metro.nudge(-1), onLong: () => metro.nudge(-10)),
+                      _RoundIcon(
+                        icon: Icons.remove,
+                        label: tr(zh: '减慢 1 BPM,长按减 10', en: 'Slower by 1 BPM, hold for 10'),
+                        onTap: () => metro.nudge(-1),
+                        onLong: () => metro.nudge(-10),
+                      ),
                       Expanded(
                         child: SliderTheme(
                           data: SliderTheme.of(context).copyWith(
@@ -202,42 +207,62 @@ class _Hero extends StatelessWidget {
                             value: store.bpm.toDouble(),
                             min: kMinBpm.toDouble(),
                             max: kMaxBpm.toDouble(),
+                            label: tr(zh: '速度', en: 'Tempo'),
+                            semanticFormatterCallback: (v) => '${v.round()} BPM',
                             onChanged: (v) => metro.setBpm(v.round()),
                           ),
                         ),
                       ),
-                      _RoundIcon(icon: Icons.add, onTap: () => metro.nudge(1), onLong: () => metro.nudge(10)),
+                      _RoundIcon(
+                        icon: Icons.add,
+                        label: tr(zh: '加快 1 BPM,长按加 10', en: 'Faster by 1 BPM, hold for 10'),
+                        onTap: () => metro.nudge(1),
+                        onLong: () => metro.nudge(10),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
+                  // Tap | play | metre. The side cells flex so the row fits a
+                  // 360 dp screen (288 dp usable here) instead of a fixed 308.
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        width: 96,
-                        height: 48,
-                        child: PressScale(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Colors.white38),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: PressScale(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white38),
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                              onPressed: metro.tap,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(tr(zh: '打拍', en: 'Tap'), maxLines: 1, softWrap: false),
+                              ),
                             ),
-                            onPressed: metro.tap,
-                            child: Text(tr(zh: '打拍', en: 'Tap')),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      const SizedBox(width: 8),
                       _PlayButton(playing: metro.playing, onTap: metro.toggle),
-                      const SizedBox(width: 20),
-                      SizedBox(
-                        width: 96,
-                        height: 48,
-                        child: Center(
-                          child: Text(
-                            '${sig.label} · ${store.subdivision.glyph}',
-                            style: text.titleMedium?.copyWith(color: Colors.white70),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '${sig.label} · ${store.subdivision.glyph}',
+                                maxLines: 1,
+                                softWrap: false,
+                                style: text.titleMedium?.copyWith(color: Colors.white70),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -282,6 +307,11 @@ class _Ripple {
 }
 
 class _BeatRipplesState extends State<_BeatRipples> with TickerProviderStateMixin {
+  /// Rings alive at once. A ring lasts ≤ 0.9 beat, so more than two or
+  /// three means the tab was hidden with tickers muted; cap it so a long
+  /// run cannot pile up controllers.
+  static const int _maxLive = 4;
+
   final List<_Ripple> _live = [];
 
   @override
@@ -291,19 +321,26 @@ class _BeatRipplesState extends State<_BeatRipples> with TickerProviderStateMixi
   }
 
   void _spawn() {
+    // Hidden tab (IndexedStack + TickerMode off): a new controller would
+    // never tick, so its completion could never retire it.
+    if (!TickerMode.valuesOf(context).enabled) return;
+    if (_live.length >= _maxLive) {
+      _live.removeAt(0).controller.dispose();
+    }
     final ms = (widget.intervalMs * 0.9).round().clamp(280, 720);
     final c = AnimationController(vsync: this, duration: Duration(milliseconds: ms));
     final r = _Ripple(c, widget.accent);
     _live.add(r);
-    c.addStatusListener((st) {
-      if (st == AnimationStatus.completed) {
-        _live.remove(r);
-        c.dispose();
-        if (mounted) setState(() {});
-      }
-    });
     c.addListener(() => setState(() {}));
-    c.forward();
+    // Retire on natural completion. The TickerFuture never completes when
+    // the controller is disposed early (cap above / dispose()), so this
+    // cannot double-dispose; and it runs outside the controller's own
+    // status callback, so disposing here is safe.
+    c.forward().whenComplete(() {
+      if (!mounted || !_live.remove(r)) return;
+      c.dispose();
+      setState(() {});
+    });
   }
 
   @override
@@ -370,7 +407,7 @@ class _BeatDot extends StatelessWidget {
     final size = accent ? 26.0 : 18.0;
     return AnimatedContainer(
       key: ValueKey(lit ? serial : -1),
-      duration: Duration(milliseconds: lit ? 30 : 180),
+      duration: motionEnabled(context) ? Duration(milliseconds: lit ? 30 : 180) : Duration.zero,
       width: lit ? size + 8 : size,
       height: lit ? size + 8 : size,
       decoration: BoxDecoration(
@@ -387,26 +424,31 @@ class _BeatDot extends StatelessWidget {
 }
 
 class _RoundIcon extends StatelessWidget {
-  const _RoundIcon({required this.icon, required this.onTap, required this.onLong});
+  const _RoundIcon({required this.icon, required this.label, required this.onTap, required this.onLong});
   final IconData icon;
+  final String label;
   final VoidCallback onTap;
   final VoidCallback onLong;
 
   @override
   Widget build(BuildContext context) {
-    return PressScale(
-      pressedScale: 0.9,
-      child: Material(
-        color: Colors.white.withValues(alpha: 0.12),
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          onLongPress: onLong,
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: Icon(icon, color: Colors.white),
+    return Semantics(
+      button: true,
+      label: label,
+      child: PressScale(
+        pressedScale: 0.9,
+        child: Material(
+          color: Colors.white.withValues(alpha: 0.12),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            onLongPress: onLong,
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: ExcludeSemantics(child: Icon(icon, color: Colors.white)),
+            ),
           ),
         ),
       ),
@@ -431,7 +473,7 @@ class _PlayButton extends StatelessWidget {
       child: PressScale(
         pressedScale: 0.9,
         child: AnimatedContainer(
-          duration: kMotionMedium,
+          duration: motionEnabled(context) ? kMotionMedium : Duration.zero,
           curve: Curves.easeOutCubic,
           width: 76,
           height: 76,

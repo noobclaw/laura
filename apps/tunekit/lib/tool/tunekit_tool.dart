@@ -96,11 +96,16 @@ class _TuneHomeState extends State<_TuneHome> {
         Expanded(
           child: IndexedStack(
             index: index,
+            // IndexedStack keeps hidden pages alive (and ticking); mute their
+            // animations so an off-screen tab costs no frames.
             children: [
-              TunerPage(store: tool.store, mic: tool.mic, active: index == 0),
-              MetronomePage(store: tool.store, metro: tool.metro),
-              PracticePage(store: tool.store, mic: tool.mic),
-              LogPage(store: tool.store),
+              for (final (i, page) in [
+                TunerPage(store: tool.store, mic: tool.mic, active: index == 0),
+                MetronomePage(store: tool.store, metro: tool.metro),
+                PracticePage(store: tool.store, mic: tool.mic),
+                LogPage(store: tool.store),
+              ].indexed)
+                TickerMode(enabled: i == index, child: page),
             ],
           ),
         ),
