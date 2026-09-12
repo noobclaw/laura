@@ -45,7 +45,7 @@ class ReviewPrompt {
               _cooldown;
       final due = next >= _actionsBeforeAsk && !coolingDown;
 
-      await _store.write({
+      _store.write({
         'count': due ? 0 : next,
         'lastAskMs': due ? now.millisecondsSinceEpoch : lastAskMs,
         'v': 1,
