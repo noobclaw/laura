@@ -25,6 +25,10 @@ dependencies:
   permission_handler: ^11.3.1
   # Notes live in a single JSON file in the app sandbox.
   path_provider: ^2.1.6
+  # Native store-rating prompt (core/review_prompt.dart). Fires after the third
+  # completed core action, at most once per 90 days; the OS decides whether to
+  # show anything. No network of our own.
+  in_app_review: ^2.0.9
   # System share sheet for text export (no INTERNET permission).
   share_plus: ^13.2.0
   # Whisper engine (M1, 2026-09-05): whisper.cpp via dart:ffi. MIT, compiles

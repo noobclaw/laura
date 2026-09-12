@@ -25,6 +25,10 @@ dependencies:
   flutter_compass: ^0.8.1
   # Local storage of photos + metadata in the app sandbox.
   path_provider: ^2.1.5
+  # Native store-rating prompt (core/review_prompt.dart). Fires after the third
+  # completed core action, at most once per 90 days; the OS decides whether to
+  # show anything. No network of our own.
+  in_app_review: ^2.0.9
   # Pure-Dart JPEG re-encode after burning the watermark into the pixels.
   image: ^4.3.0
   # Pure-Dart PDF inspection-report generation.

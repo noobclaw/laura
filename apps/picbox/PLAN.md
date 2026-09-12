@@ -108,3 +108,9 @@
 
 ## 状态
 - 2026-09-05:M1 代码完成,`flutter analyze` 0 issue,`flutter test` 42/42;图标/商店文案/appstore.md 齐;**未 commit、未打包、未真机**。→ 🧪待验收(需 push + CI 出包 + 真机)。
+
+## 评价弹窗(G8b-7)
+- **触发事件**:一次批量处理完成进入结果页,且至少 1 张成功(`results.where((r) => r.ok)` ≥ 1);全部失败或空批次不计数(取消但已有成功张数照常计,用户确实拿到了产物)。
+- **位置**:`lib/tool/ui/tool_flow.dart:246` `_run()` 内 `widget.store.addProcessed(okCount)` 之后 `if (okCount > 0) unawaited(ReviewPrompt.noteCoreAction())`,紧接着 push `ResultScreen`。
+- **实现**:`lib/core/review_prompt.dart` 原样自壳拷贝(第 3 次核心操作触发、90 天冷却、状态在 `review.json`);依赖 `in_app_review: ^2.0.9`;iOS 无需权限/Info.plist,仓库仍走 SPM 无 Podfile。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,验证第 3 次触发一次、第 4 次不触发。

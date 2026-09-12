@@ -226,3 +226,9 @@
 **本 app 修了什么**:iOS 语音桥 `ios/Runner/DictationBridge.swift`(SFSpeechRecognizer + requiresOnDeviceRecognition,与 Kotlin 桥同一契约;切段 1.8 s 停顿 / 55 s / stop;离线资产未就绪 102/1101 → 引导去「设置 → 通用 → 键盘 → 启用听写」;耳机插拔重启引擎;同语言回退优先本地区)。Dart 侧放开 `Platform.isAndroid` 短路、iOS 额外申请「语音识别」权限、语言包文案分平台、麦克风用途文案改英文。楔子按方案 A 重写(见上)。
 **仍开**:🔴 **listing 七条卖点仍是旧楔子文案,上架前须按新楔子重写**(复审 R2);🟠 「不丢字」承诺依赖的草稿落盘(Y3)与 120 s 硬停提示(Y2)未做;切段间隙约 0.3–0.7 s 丢音;「原理」页仍写 Android。
 **iOS 验收补充**:见 §7b(八条)。**Swift 桥是本轮第一次编译,任何一条不过都回这里记。**
+
+## 评价弹窗(G8b-7)
+- **触发事件**:一条笔记保存成功 —— 听写结束(`_finishSession`,含被后台/识别器自行结束的场景)且文字非空、`NoteStore.add` 落盘后 `takeSaveError()` 为 null;没听到内容或写盘失败都不计数。
+- **位置**:`lib/tool/home_page.dart:230` `_finishSession()` 内保存成功分支 `unawaited(ReviewPrompt.noteCoreAction())`。
+- **实现**:`lib/core/review_prompt.dart` 原样自壳拷贝(第 3 次核心操作触发、90 天冷却、状态在 `review.json`);依赖 `in_app_review: ^2.0.9`;iOS 无需权限/Info.plist,仓库仍走 SPM 无 Podfile。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,验证第 3 次触发一次、第 4 次不触发。

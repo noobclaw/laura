@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../core/json_file_store.dart';
+import '../core/review_prompt.dart';
 import 'music/metronome_math.dart';
 
 /// One calendar day of practice. Seconds per tool, tuning accuracy samples,
@@ -205,6 +206,7 @@ class TuneKitStore extends ChangeNotifier {
 
   void addSeconds(PracticeTool tool, int sec) {
     final d = today();
+    final minutesBefore = d.totalMinutes;
     switch (tool) {
       case PracticeTool.tuner:
         d.tunerSec += sec;
@@ -213,6 +215,9 @@ class TuneKitStore extends ChangeNotifier {
       case PracticeTool.practice:
         d.practiceSec += sec;
     }
+    // G8b-7: each full minute landing in today's practice log is the core
+    // action (a whole minute on the tuner, metronome or play-and-check).
+    if (d.totalMinutes > minutesBefore) unawaited(ReviewPrompt.noteCoreAction());
     _saveSoon();
     notifyListeners();
   }

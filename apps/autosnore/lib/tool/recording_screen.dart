@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/review_prompt.dart';
 import 'app_theme.dart';
 import 'models.dart';
 import 'recording_controller.dart';
@@ -122,6 +123,8 @@ class _RecordingScreenState extends State<RecordingScreen>
     final s = await controller.stop(endedEarly: endedEarly);
     if (s != null && s.durationMs > 500) {
       widget.store.addSession(s);
+      // G8b-7: a saved night with its morning report is the core action.
+      unawaited(ReviewPrompt.noteCoreAction());
       _pending = s;
     } else {
       widget.store.clearInProgress();

@@ -52,6 +52,10 @@ dependencies:
   wakelock_plus: ^1.2.8
   # Local storage of session metadata in the app sandbox (single JSON file).
   path_provider: ^2.1.5
+  # Native store-rating prompt (core/review_prompt.dart). Fires after the third
+  # completed core action, at most once per 90 days; the OS decides whether to
+  # show anything. No network of our own.
+  in_app_review: ^2.0.9
   # System share sheet for the Pro CSV export (no INTERNET permission).
   share_plus: ^11.0.0
 

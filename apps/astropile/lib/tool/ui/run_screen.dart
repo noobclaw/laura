@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../../core/review_prompt.dart';
 import '../app_theme.dart';
 import '../engine/pipeline.dart';
 import '../models.dart';
@@ -81,6 +84,8 @@ class _RunScreenState extends State<RunScreen> {
     );
     if (!mounted || outcome == null) return;
     widget.store.addStacked();
+    // G8b-7: a finished stack is this app's core action (PLAN.md 评价弹窗).
+    unawaited(ReviewPrompt.noteCoreAction());
     // From here the result screen owns the scratch directory and deletes it.
     _handedOff = true;
     await Navigator.of(context).pushReplacement(MaterialPageRoute(

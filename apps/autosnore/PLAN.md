@@ -131,3 +131,9 @@ BACKLOG 2026-07-27 决策门叙述建议本轮取 **#9 Orbit**,但 Orbit 的**�
 **本 app 修了什么**:R-1 权限宏(改由 CI 环境变量 + plist key 在 SPM 下开启,Podfile 已删);R-2 Android 不申请音频焦点、iOS 打断后自动恢复,失速看门狗 5 s 无音频即尝试恢复并把空洞记入 `interruptedMs`,报告显示「有 N 分钟麦克风没有收到声音」;R-3 停止须确认(单击/返回都弹确认);每分钟检查点写独立小文件,崩溃后下次启动找回并标「提前结束」;睡前简报一次性;iOS `UIBackgroundModes audio` 可锁屏录音、iOS 不再常亮;Pro-before-load 守卫顺序修正。
 **仍开**:🟠 O-4 音频时钟无墙钟校验、O-5 灵敏度在安静卧室失效、O-8 「安静一夜 / 短测试 / 被打断」评分都是 0;N-2 静音抢麦(Android 10+)不可见;**App Review 备注须说明后台音频用途**(整夜采麦);`listenedMs` 未接入指数分母。
 **iOS 验收补充**:① 开始记录后**锁屏**,10 分钟后解锁 → 计时在走、事件在增(后台录音);② 记录中来一个电话 → 挂断后自动恢复,报告出现「被打断 N 分钟」横幅;③ 通知铃声不应让录音停止。
+
+## 评价弹窗(G8b-7)
+- **触发事件**:一夜记录结束并生成晨间报告 —— `_finish()` 里 `controller.stop()` 返回有效 session(时长 > 500 ms)且 `store.addSession(s)` 已落盘之后;太短/无效的记录走 `clearInProgress()` 不计数。
+- **位置**:`lib/tool/recording_screen.dart:127` `_finish()` 内 `widget.store.addSession(s)` 之后 `unawaited(ReviewPrompt.noteCoreAction())`,随后 `_goReport()` 进晨间报告。
+- **实现**:`lib/core/review_prompt.dart` 原样自壳拷贝(第 3 次核心操作触发、90 天冷却、状态在 `review.json`);依赖 `in_app_review: ^2.0.9`;iOS 无需权限/Info.plist,仓库仍走 SPM 无 Podfile。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,验证第 3 次触发一次、第 4 次不触发。

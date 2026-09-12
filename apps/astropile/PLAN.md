@@ -249,3 +249,9 @@ BACKLOG 把它列为可内嵌的特征匹配备选。**M1 不用**：它是需�
   ⚠️ **这一轮的冒烟截屏被模拟器自身的 `Pixel Launcher isn't responding` 弹窗盖住**(是模拟器桌面 ANR,不是本 app —— 冒烟判定的是本 app 进程存活 + 无 FATAL EXCEPTION,两项都过,截屏里本 app 在弹窗后面渲染正常)。**故 G6b 的有效视觉证据取自上一轮截屏**,两轮之间的代码差异只有那一处 clip。
 
 **用语纪律(G7)**:现在只能写「**🧪待验收**」——过了机器冒烟 ≠ 能用。真机核心功能(见上「真机验收清单」12 条)验过才准写「可发布」。
+
+## 评价弹窗(G8b-7)
+- **触发事件**:一次叠加成功进入结果页 —— `StackRunner.run` 返回非 null(失败含 `notEnoughAligned` 与取消都返回 null,不计数)。
+- **位置**:`lib/tool/ui/run_screen.dart:88` `_start()` 内 `widget.store.addStacked()` 之后 `unawaited(ReviewPrompt.noteCoreAction())`,紧接着 `pushReplacement` 到 `ResultScreen`。
+- **实现**:`lib/core/review_prompt.dart` 原样自壳拷贝(第 3 次核心操作触发、90 天冷却、状态在 `review.json`);依赖 `in_app_review: ^2.0.9`;iOS 无需权限/Info.plist,仓库仍走 SPM 无 Podfile。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,验证第 3 次触发一次、第 4 次不触发。

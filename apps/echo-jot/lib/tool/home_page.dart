@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/review_prompt.dart';
 import 'app_theme.dart';
 import 'dictation_controller.dart';
 import 'dictation_engine.dart';
@@ -224,6 +225,9 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
               en: 'The note could not be written to storage ($saveErr). Copy the text, then check free space.',
             ),
           );
+        } else {
+          // G8b-7: a dictated note that reached storage is the core action.
+          unawaited(ReviewPrompt.noteCoreAction());
         }
       } else if (!background && _controller.message == null) {
         _snack(

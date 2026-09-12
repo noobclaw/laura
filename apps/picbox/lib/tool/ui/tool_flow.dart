@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../../core/review_prompt.dart';
 import '../app_theme.dart';
 import '../engine/jobs.dart';
 import '../engine/output.dart';
@@ -239,7 +240,10 @@ class _ToolScaffoldState extends State<ToolScaffold> {
     if (!mounted) return;
     Navigator.of(context).pop(); // progress sheet
     if (results.isEmpty) return;
-    widget.store.addProcessed(results.where((r) => r.ok).length);
+    final okCount = results.where((r) => r.ok).length;
+    widget.store.addProcessed(okCount);
+    // G8b-7: a batch with at least one finished image is the core action.
+    if (okCount > 0) unawaited(ReviewPrompt.noteCoreAction());
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ResultScreen(

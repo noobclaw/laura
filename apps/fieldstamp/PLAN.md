@@ -133,3 +133,9 @@ gps camera, geotag camera, field camera, timestamp camera, survey photo, geotag 
 **本 app 修了什么**:R1 定位状态机(serviceOff/denied/deniedForever/error/陈旧)+ 信息带上对应按钮(去设置 / 打开定位 / 重新申请),iOS 先查定位总开关再查权限(否则被映射成永久拒绝);R2 相机初始化单飞 + 代次守卫,只在 paused 释放、inactive 不动,切后台清掉在飞 future;R3 分享传 `sharePositionOrigin`(iPad 弹窗)+ try/catch;R4 `NSPhotoLibraryAddUsageDescription`;超过 120 s 的定位不再烧进照片;iOS 出片 ultraHigh(4K,与 Android 一致);拍完删掉插件留下的无水印原图;元数据台账原子存盘;iOS 方位读 headingForCameraMode(两端都是磁北)。
 **仍开**(用户已决定「取证」措辞降级):🟠 listing 的「evidence you can trust / law-enforcement」文案未改;O5 完整性机制(模拟定位检测 / 时区 / EXIF)未做;O8 横屏水印带、O10 备份导出、O11 免费导出门死代码。
 **iOS 验收补充**:① iPad 上分享 / PDF / CSV 都能弹出面板;② 分享面板「存储图像」不闪退;③ 关闭系统定位 → 信息带显示「定位服务已关闭 + 打开定位」而不是「权限永久拒绝」。
+
+## 评价弹窗(G8b-7)
+- **触发事件**:一张水印照片保存成功 —— `StampStore.saveCapture()` 返回非 null(拍摄失败 / 写盘失败返回 null 都不计数)。
+- **位置**:`lib/tool/camera_screen.dart:330` 快门流程内 `if (photo != null)` 分支,`onCaptured(photo)` 之后 `unawaited(ReviewPrompt.noteCoreAction())`。
+- **实现**:`lib/core/review_prompt.dart` 原样自壳拷贝(第 3 次核心操作触发、90 天冷却、状态在 `review.json`);依赖 `in_app_review: ^2.0.9`;iOS 无需权限/Info.plist,仓库仍走 SPM 无 Podfile。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,验证第 3 次触发一次、第 4 次不触发。

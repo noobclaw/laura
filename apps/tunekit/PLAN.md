@@ -136,3 +136,9 @@
 - **弹奏检查按音高类匹配**,不判定实际按的是哪根弦(同音异弦 ±12 半音内取最近);扫弦整体不支持,须逐弦。
 - 日语等第三语言未做(壳规则:无 `ja:` 字符串就不提供选项)。
 - 小提琴 / 贝斯只有调音预设,没有指板图(键盘图代替)。
+
+## 评价弹窗(G8b-7)
+- **触发事件**:一次练习记录写入 —— 当天练习日志(调音器 / 节拍器 / 弹奏检查合计)每落满一整分钟计一次核心操作;随机训练答题、调音采样都不单独计数。
+- **位置**:`lib/tool/store.dart:219` `TuneKitStore.addSeconds()` 内,`today().totalMinutes` 跨过整分钟时 `unawaited(ReviewPrompt.noteCoreAction())`,随后 `_saveSoon()` 落盘。
+- **实现**:`lib/core/review_prompt.dart` 原样自壳拷贝(第 3 次核心操作触发、90 天冷却、状态在 `review.json`);依赖 `in_app_review: ^2.0.9`;iOS 无需权限/Info.plist,仓库仍走 SPM 无 Podfile。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,验证第 3 次触发一次、第 4 次不触发。

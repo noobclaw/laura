@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import '../core/branding.dart';
 import '../core/l10n.dart';
+import '../core/review_prompt.dart';
 import 'geo_format.dart';
 import 'models.dart';
 import 'motion.dart';
@@ -323,7 +324,11 @@ class _CameraScreenState extends State<CameraScreen>
         unawaited(File(xfile.path).delete().catchError((_) => File(xfile.path)));
       }
       if (!mounted) return;
-      if (photo != null) onCaptured(photo);
+      if (photo != null) {
+        onCaptured(photo);
+        // G8b-7: a stamped photo that reached storage is the core action.
+        unawaited(ReviewPrompt.noteCoreAction());
+      }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(photo == null
             ? tr(zh: '照片保存失败', en: 'Could not save photo')
