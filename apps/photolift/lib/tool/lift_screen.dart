@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/review_prompt.dart';
 import 'eta.dart';
 import 'job_runner.dart';
 import 'media.dart';
@@ -119,6 +120,9 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
         },
       );
       if (!mounted) return;
+      // Core action for the store-rating prompt (PLAN.md G8b-7): one photo
+      // lifted successfully. Cancels and failures land in the handlers below.
+      unawaited(ReviewPrompt.noteCoreAction());
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (_) => ResultScreen(record: rec, store: store, fresh: true),
       ));

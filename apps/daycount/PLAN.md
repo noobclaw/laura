@@ -150,3 +150,10 @@
 **本 app 修了什么**:R1/R2 小组件改为 Flutter 只写原始数据、Kotlin `CountdownWidgetProvider` 用 `java.time` 现算天数(每年重复含 2/29 钳位),零点 inexact 闹钟 + TIME_SET/TIMEZONE_CHANGED + 30 分钟周期兜底;App 回前台/跨零点重算并推小组件;minSdk 提到 26(`java.time` 所需,复审抓出);存盘原子化 + Pro-before-load 守卫;详情页 5 位数天数自适应缩放;深色卡片可见。
 **仍开**:🔴 **iOS WidgetKit 未做**(用户已拍板要做,排下一轮;架构须与 Android 一样「Provider 端实时算」);🟡 iOS 上「刷新小组件」入口仍显示;`exportJson/importJson` 已备好但无 UI。
 **iOS 验收补充**:本轮首次出 iOS 包,但**小组件在 iOS 不存在** —— 只验列表/详情/编辑/购买四条,不验第 5 条。
+
+## 评价弹窗(G8b-7,2026-09-12)
+
+- **触发事件**:新增或编辑一个日子并保存成功(编辑页 pop 回 `EventDraft` 后写入 store)。「日子到了被打开详情」太稀,不用。
+- **位置**:`lib/tool/daycount_tool.dart:216`(`_addEvent` 里 `store.add(...)` 之后)与 `lib/tool/event_detail.dart:59`(`_edit` 里 `store.update(event)` 之后),均为 `unawaited(ReviewPrompt.noteCoreAction())`。
+- **机制**:`lib/core/review_prompt.dart`(壳拷贝;比壳多一句 `await _store.flush()` 让计数落盘后再返回),第 3 次核心操作调 `in_app_review` 的 `requestReview()`,之后每 90 天最多一次;状态在 `review.json`,不自绘弹窗、不诱导、零网络。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,第 3 次触发一次、第 4 次不触发;`path_provider` 以 `PathProviderPlatform` 子类指向临时目录。

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/review_prompt.dart';
 import 'accent_ink.dart';
 import 'event_edit.dart';
 import 'hero_card.dart';
@@ -52,6 +55,8 @@ class _DetailView extends StatelessWidget {
       event.yearlyRepeat = draft.yearlyRepeat;
       event.note = draft.note;
       store.update(event);
+      // Core action for the store-rating prompt (PLAN.md G8b-7): a day saved.
+      unawaited(ReviewPrompt.noteCoreAction());
     }
   }
 

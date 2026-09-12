@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/day_change.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
+import '../core/review_prompt.dart';
 import 'accent_ink.dart';
 import 'event_detail.dart';
 import 'event_edit.dart';
@@ -209,6 +212,8 @@ class _HomeBodyState extends State<_HomeBody> {
         yearlyRepeat: draft.yearlyRepeat,
         note: draft.note,
       );
+      // Core action for the store-rating prompt (PLAN.md G8b-7): a day saved.
+      unawaited(ReviewPrompt.noteCoreAction());
     }
   }
 

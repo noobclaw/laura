@@ -24,12 +24,18 @@ dependencies:
   # Play Billing / StoreKit for the single `pro_unlock` non-consumable. Billing
   # runs inside the store app's process, so this needs no INTERNET permission.
   in_app_purchase: ^3.2.0
+  # Native store-rating prompt (core/review_prompt.dart): fires after the
+  # third completed core action, at most once per 90 days; the OS decides
+  # whether to show anything. No network of our own.
+  in_app_review: ^2.0.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  # Lets review_prompt_test.dart point the JSON store at a temp directory.
+  path_provider_platform_interface: ^2.1.3
 
 flutter:
   uses-material-design: true

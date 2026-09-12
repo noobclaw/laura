@@ -50,8 +50,8 @@ class ReviewPrompt {
         'lastAskMs': due ? now.millisecondsSinceEpoch : lastAskMs,
         'v': 1,
       });
-      // Wait for the queued write so back-to-back calls read a settled
-      // count instead of racing the store's write queue.
+      // Land the counter before returning so back-to-back calls (and the
+      // unit test) read the updated count rather than racing the queued write.
       await _store.flush();
 
       if (!due) return;

@@ -112,3 +112,10 @@
 - 插画模式(`realesr-animevideov3` / `x4plus-anime`,官方 ncnn 文件直接可用)。
 - 人脸修复:需要商业友好的模型(GFPGAN/CodeFormer 不行);先看 `RestoreFormer`/`GPEN` 许可证。
 - 自适应图标(Android adaptive icon)、结果保留 EXIF 拍摄日期、HEIC 输出。
+
+## 评价弹窗(G8b-7,2026-09-12)
+
+- **触发事件**:一张照片放大成功、进入结果页(job 正常完成;取消 `UpscaleCancelled` 与失败分支都不计)。
+- **位置**:`lib/tool/lift_screen.dart:125` —— `runner.run()` 返回后、`pushReplacement(ResultScreen)` 之前调 `unawaited(ReviewPrompt.noteCoreAction())`。
+- **机制**:`lib/core/review_prompt.dart`(壳拷贝;比壳多一句 `await _store.flush()` 让计数落盘后再返回),第 3 次核心操作调 `in_app_review` 的 `requestReview()`,之后每 90 天最多一次;状态在 `review.json`,不自绘弹窗、不诱导、零网络。
+- **测试**:`test/review_prompt_test.dart` 用 `requestOverride` 注入计数器,第 3 次触发一次、第 4 次不触发;`path_provider` 以 `PathProviderPlatform` 子类指向临时目录。
