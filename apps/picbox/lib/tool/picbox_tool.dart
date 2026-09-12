@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../core/branding.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'app_theme.dart';
@@ -183,13 +182,15 @@ class _Masthead extends StatelessWidget {
             margin: const EdgeInsets.only(top: 4),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: pro ? Branding.seedColor : cs.surfaceContainerHighest,
+              // Scheme primary/onPrimary is the AA pair; raw lime + white
+              // was only ~2.5:1 in light mode.
+              color: pro ? cs.primary : cs.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
               pro ? 'PRO' : tr(zh: '离线 · 免费', en: 'OFFLINE · FREE'),
               style: text.labelSmall?.copyWith(
-                color: pro ? Colors.white : cs.onSurfaceVariant,
+                color: pro ? cs.onPrimary : cs.onSurfaceVariant,
                 letterSpacing: 1,
                 fontWeight: FontWeight.w700,
               ),

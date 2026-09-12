@@ -243,7 +243,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
         mainAxisSpacing: 8,
       ),
       initialItemCount: _shown.length,
-      itemBuilder: (context, i, anim) => _tile(store, _shown[i], anim),
+      // The grid can be asked for an index one past the list for a frame
+      // while a removal is still animating; never index out of range.
+      itemBuilder: (context, i, anim) => i >= _shown.length
+          ? const SizedBox.shrink()
+          : _tile(store, _shown[i], anim),
     );
   }
 
@@ -252,8 +256,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Widget _tile(FieldStampStore store, StampPhoto p, Animation<double> anim,
       {bool ghost = false}) {
     final selected = _selected.contains(p.id);
-    final curved = CurvedAnimation(
-        parent: anim, curve: Motion.enter, reverseCurve: Curves.easeInCubic);
+    // `drive` creates no listener-holding CurvedAnimation to dispose of.
+    final curved = anim.drive(CurveTween(curve: Motion.enter));
     return FadeTransition(
       opacity: curved,
       child: ScaleTransition(
@@ -299,8 +303,22 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 fit: StackFit.expand,
                 children: [
                   ghost
-                      ? _thumb(store, p)
-                      : Hero(tag: 'photo-${p.id}', child: _thumb(store, p)),
+                      ? _thumb(store, p, ghost: true)
+                      : Hero(
+                          tag: 'photo-${p.id}',
+                          // Both the tile left behind and the shuttle in
+                          // flight show the already-decoded 300 px thumbnail
+                          // instead of an empty box while the full-size
+                          // image on the detail page is still decoding.
+                          placeholderBuilder: (_, _, _) => _thumb(store, p),
+                          flightShuttleBuilder: (_, _, _, _, _) => Image(
+                            image: thumbProviderFor(
+                                File(store.photoPath(p.fileName))),
+                            fit: BoxFit.cover,
+                            excludeFromSemantics: true,
+                          ),
+                          child: _thumb(store, p),
+                        ),
                   if (!p.hasFix)
                     const Positioned(
                       left: 4,
@@ -323,7 +341,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               : Icons.radio_button_unchecked,
                           key: ValueKey(selected),
                           color: selected
-                              ? Colors.lightGreenAccent
+                              ? Theme.of(context).colorScheme.primary
                               : Colors.white70,
                           shadows: const [
                             Shadow(color: Colors.black54, blurRadius: 4)
@@ -340,15 +358,27 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
-  Widget _thumb(FieldStampStore store, StampPhoto p) {
+  /// The 300 px grid thumbnail. A [ghost] (a deleted photo animating out)
+  /// skips the existence check: the store removes the file before it
+  /// notifies, so the check would fail and replace the outgoing image with a
+  /// broken-image glyph. The decoded thumbnail is still in the image cache
+  /// under the same key, so `Image` shows it; if the cache was evicted, a
+  /// plain grey cell is the fallback rather than a "broken" icon.
+  Widget _thumb(FieldStampStore store, StampPhoto p, {bool ghost = false}) {
     final file = File(store.photoPath(p.fileName));
     return Container(
       color: Colors.black12,
-      child: file.existsSync()
-          ? Image.file(file, fit: BoxFit.cover,
-              cacheWidth: 300, gaplessPlayback: true, errorBuilder: (_, _, _) {
-              return const Icon(Icons.broken_image_outlined);
-            })
+      child: ghost || file.existsSync()
+          ? Image.file(
+              file,
+              fit: BoxFit.cover,
+              cacheWidth: 300,
+              gaplessPlayback: true,
+              excludeFromSemantics: true,
+              errorBuilder: (_, _, _) => ghost
+                  ? const ColoredBox(color: Colors.black12)
+                  : const Icon(Icons.broken_image_outlined),
+            )
           : const Icon(Icons.broken_image_outlined),
     );
   }
@@ -486,6 +516,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
         '${two(t.hour)}${two(t.minute)}${two(t.second)}.$ext';
   }
 }
+
+/// The provider behind every `Image.file(file, cacheWidth: 300)` thumbnail in
+/// the grid — the same key, so the Hero shuttle and the detail page's first
+/// frame hit the image cache instead of decoding the full photo.
+ImageProvider thumbProviderFor(File file) =>
+    ResizeImage(FileImage(file), width: 300);
 
 /// Counter that rolls to its new value instead of jumping.
 class _RollingCount extends StatelessWidget {
@@ -663,7 +699,21 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             child: Hero(
               tag: widget.heroTag ?? 'detail-${p.id}',
               child: file.existsSync()
-                  ? Image.file(file, fit: BoxFit.contain)
+                  ? Image.file(
+                      file,
+                      fit: BoxFit.contain,
+                      gaplessPlayback: true,
+                      // Until the full-size frame is decoded, show the
+                      // cached grid thumbnail (same aspect, so no jump).
+                      frameBuilder: (_, child, frame, syncLoaded) =>
+                          frame == null && !syncLoaded
+                              ? Image(
+                                  image: thumbProviderFor(file),
+                                  fit: BoxFit.contain,
+                                  excludeFromSemantics: true,
+                                )
+                              : child,
+                    )
                   : const SizedBox(
                       height: 240,
                       child:

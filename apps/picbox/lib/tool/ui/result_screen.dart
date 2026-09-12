@@ -86,7 +86,9 @@ class _ResultScreenState extends State<ResultScreen> {
                 const SizedBox(height: 16),
                 for (final (i, r) in widget.results.indexed) ...[
                   _Enter(
-                    delay: Duration(milliseconds: 60 * (i < 8 ? i : 8)),
+                    // Stagger the first eight rows; the rest (below the
+                    // fold) appear at once rather than queueing timers.
+                    delay: i >= 8 ? Duration.zero : Duration(milliseconds: 60 * i),
                     child: _ResultRow(result: r, meta: widget.meta),
                   ),
                   const SizedBox(height: 10),
@@ -179,6 +181,11 @@ class _Summary extends StatelessWidget {
         meta.kind == ToolKind.resize ||
         meta.kind == ToolKind.convert ||
         meta.kind == ToolKind.metadata;
+    // Deep, opaque accent gradient so the foreground reaches AA on every
+    // tool colour (the old raw lime / amber / orange sat at ~2.5:1 in light).
+    final top = toolDeepColor(meta.color);
+    final bottom = Color.lerp(top, Colors.black, 0.2)!;
+    final fg = onToolColor(top);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
@@ -186,7 +193,7 @@ class _Summary extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [meta.color, meta.color.withValues(alpha: 0.7)],
+          colors: [top, bottom],
         ),
       ),
       child: Column(
@@ -195,7 +202,7 @@ class _Summary extends StatelessWidget {
           Row(
             children: [
               Icon(failed == 0 && !cancelled ? Icons.check_circle_rounded : Icons.info_rounded,
-                  color: Colors.white),
+                  color: fg),
               const SizedBox(width: 8),
               Expanded(
                 // "N done" counts up from 0 (PIPELINE #10 ③).
@@ -211,7 +218,7 @@ class _Summary extends StatelessWidget {
                           : failed == 0
                               ? tr(zh: '完成 $n 张', en: '$n done')
                               : tr(zh: '完成 $n 张,$failed 张失败', en: '$n done, $failed failed'),
-                      style: text.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                      style: text.titleMedium?.copyWith(color: fg, fontWeight: FontWeight.w700),
                     );
                   },
                 ),
@@ -224,10 +231,10 @@ class _Summary extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(formatBytes(before),
-                    style: text.titleLarge?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
+                    style: text.titleLarge?.copyWith(color: fg.withValues(alpha: 0.85))),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Icon(Icons.arrow_forward_rounded, color: Colors.white.withValues(alpha: 0.9), size: 20),
+                  child: Icon(Icons.arrow_forward_rounded, color: fg.withValues(alpha: 0.9), size: 20),
                 ),
                 // The "after" size shrinks from the "before" size, and the
                 // saved-percent pill counts up alongside it.
@@ -236,7 +243,7 @@ class _Summary extends StatelessWidget {
                   duration: dur,
                   curve: Curves.easeOutCubic,
                   builder: (context, v, _) => Text(formatBytes(v.round()),
-                      style: text.headlineSmall?.copyWith(color: Colors.white)),
+                      style: text.headlineSmall?.copyWith(color: fg)),
                 ),
                 const Spacer(),
                 if (pct > 0)
@@ -247,12 +254,13 @@ class _Summary extends StatelessWidget {
                     builder: (context, v, _) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        // Darker pill, not lighter: keeps the figure AA.
+                        color: Colors.black.withValues(alpha: 0.22),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text('−${v.round()}%',
                           style: text.labelLarge?.copyWith(
-                              color: Colors.white,
+                              color: fg,
                               fontWeight: FontWeight.w700,
                               fontFeatures: const [FontFeature.tabularFigures()])),
                     ),
@@ -292,6 +300,9 @@ class _ResultRow extends StatelessWidget {
     final pct = ok && r.outputBytes != null && s.bytes > 0
         ? ((1 - r.outputBytes! / s.bytes) * 100).round()
         : null;
+    // Raw lime is only ~2.1:1 on the light card; the scheme primary is the
+    // AA-tuned tone of the same hue. Dark cards keep the brand lime.
+    final saved = Theme.of(context).brightness == Brightness.dark ? ToolColors.compress : cs.primary;
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -325,7 +336,7 @@ class _ResultRow extends StatelessWidget {
               if (pct != null && pct != 0)
                 Text(pct > 0 ? '−$pct%' : '+${-pct}%',
                     style: text.labelLarge?.copyWith(
-                        color: pct > 0 ? ToolColors.compress : cs.onSurfaceVariant,
+                        color: pct > 0 ? saved : cs.onSurfaceVariant,
                         fontFeatures: const [FontFeature.tabularFigures()]))
               else if (ok)
                 Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),

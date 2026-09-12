@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:echo_jot/main.dart';
@@ -92,6 +93,72 @@ void main() {
     expect(find.text('Buy milk'), findsOneWidget); // card title
     expect(find.text('1:04'), findsOneWidget); // duration chip
     expect(find.byType(EmptyState), findsNothing);
+  });
+
+  testWidgets(
+      'timeline follows the store: add grows it, swipe removes, undo restores, search filters',
+      (tester) async {
+    // Tall viewport so every card is inside the lazy list's build window and
+    // the count assertions below mean what they say.
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final store = storeWith([
+      Note(id: 'a', createdAt: DateTime(2026, 1, 2), text: 'Alpha first. Body a.'),
+      Note(id: 'b', createdAt: DateTime(2026, 1, 1), text: 'Bravo second. Body b.'),
+    ]);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: EchoJotHome(store: store)),
+    ));
+    await tester.pump();
+    expect(find.byType(NoteCard), findsNWidgets(2));
+
+    // Add: the store notifies synchronously; the persist future is real file
+    // I/O and must not be awaited under the fake clock (see the note on top).
+    unawaited(store.add(
+      Note(id: 'c', createdAt: DateTime(2026, 1, 3), text: 'Charlie third. Body c.'),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    expect(find.byType(NoteCard), findsNWidgets(3));
+    expect(find.text('Charlie third'), findsOneWidget);
+
+    // Swipe-to-delete the newest card: Dismissible slides (200ms) then
+    // collapses (300ms) before onDismissed fires, and the list needs one more
+    // frame to drop the row.
+    final newest = store.notes.first;
+    await tester.drag(find.byType(Dismissible).first, const Offset(-600, 0));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+    expect(tester.takeException(), isNull);
+    expect(find.byType(NoteCard), findsNWidgets(2));
+    expect(find.text('Charlie third'), findsNothing);
+    expect(store.notes.length, 2);
+
+    // Undo puts the note back where it was (what the snack bar action does;
+    // the bar itself never shows here because _deleteWithUndo first awaits the
+    // real-file persist, which the fake clock cannot complete).
+    unawaited(store.insertAt(0, newest));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    expect(find.byType(NoteCard), findsNWidgets(3));
+    expect(find.text('Charlie third'), findsOneWidget);
+
+    // Search refilters in place.
+    await tester.enterText(find.byType(TextField), 'bravo');
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(NoteCard), findsOneWidget);
+    expect(find.text('Bravo second'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pump();
+    expect(find.byType(NoteCard), findsNWidgets(3));
   });
 
   testWidgets('search field appears once there are several notes',

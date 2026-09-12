@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../core/branding.dart';
 import '../core/l10n.dart';
 import 'geo_format.dart';
 import 'models.dart';
@@ -22,6 +24,7 @@ class CameraScreen extends StatefulWidget {
     required this.store,
     required this.sensors,
     this.onOpenGallery,
+    this.active = true,
   });
 
   final FieldStampStore store;
@@ -29,6 +32,11 @@ class CameraScreen extends StatefulWidget {
 
   /// Tapping the last-photo thumbnail beside the shutter jumps to the gallery.
   final VoidCallback? onOpenGallery;
+
+  /// False while another tab covers this screen (it stays alive inside an
+  /// `IndexedStack`); continuous animations pause so an invisible viewfinder
+  /// does not keep the GPU busy.
+  final bool active;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -82,6 +90,10 @@ class _CameraScreenState extends State<CameraScreen>
   StampPhoto? _flyPhoto;
   StampPhoto? _lastPhoto;
   bool _reduceMotion = false;
+  bool _paused = false;
+
+  /// The searching breath may only run while someone can see it.
+  bool get _breathAllowed => widget.active && !_paused && !_reduceMotion;
 
   /// Only one initialisation may be in flight. The permission prompt that
   /// `initialize()` itself raises sends the app inactive → resumed while
@@ -104,10 +116,30 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Tracks the system switch both ways: reduced motion freezes the breath
+    // fully lit; turning it back off restarts the breath if still searching.
     _reduceMotion = MediaQuery.disableAnimationsOf(context);
-    if (_reduceMotion) {
+    _syncBreath();
+  }
+
+  @override
+  void didUpdateWidget(CameraScreen old) {
+    super.didUpdateWidget(old);
+    if (old.active != widget.active) _syncBreath();
+  }
+
+  /// Start, stop or settle the searching breath to match visibility and the
+  /// current GPS bucket. Idempotent, so every visibility change just calls it.
+  void _syncBreath() {
+    if (!_breathAllowed) {
       _breath.stop();
-      _breath.value = 1;
+      if (_reduceMotion) _breath.value = 1;
+      return;
+    }
+    if (_lastBucket == 0) {
+      if (!_breath.isAnimating) _breath.repeat(reverse: true);
+    } else if (!_breath.isAnimating && _breath.value != 1) {
+      _breath.animateTo(1, duration: const Duration(milliseconds: 300));
     }
   }
 
@@ -120,11 +152,11 @@ class _CameraScreenState extends State<CameraScreen>
     _lastBucket = bucket;
     if (_reduceMotion) return;
     if (bucket == 0) {
-      _breath.repeat(reverse: true);
+      if (_breathAllowed) _breath.repeat(reverse: true);
     } else {
       _breath.animateTo(1, duration: const Duration(milliseconds: 300));
     }
-    if (!first) _pulse.forward(from: 0);
+    if (!first && widget.active && !_paused) _pulse.forward(from: 0);
   }
 
   /// Keep the gallery entry showing the newest photo of the current project
@@ -230,6 +262,8 @@ class _CameraScreenState extends State<CameraScreen>
     // shade; tearing the camera down for those caused the double-init race.
     // Only a real trip to the background releases the device.
     if (state == AppLifecycleState.paused) {
+      _paused = true;
+      _syncBreath();
       _initGen++; // invalidate any init still in flight
       // ...and forget its future, or `resumed` would await a controller that
       // the generation check is about to throw away and spin forever.
@@ -239,6 +273,8 @@ class _CameraScreenState extends State<CameraScreen>
       c?.dispose();
       if (mounted) setState(() {});
     } else if (state == AppLifecycleState.resumed) {
+      _paused = false;
+      _syncBreath();
       if (_controller == null) _initCamera();
       // The user may have just flipped the switch we asked them to.
       if (!widget.sensors.locationReady) widget.sensors.retryLocation();
@@ -261,8 +297,14 @@ class _CameraScreenState extends State<CameraScreen>
     final c = _controller;
     if (c == null || !c.value.isInitialized || _capturing) return;
     setState(() => _capturing = true);
-    // Iris shuts (120 ms) and stays shut until the stamped file has landed.
-    unawaited(_aperture.forward());
+    unawaited(HapticFeedback.mediumImpact());
+    // Iris shuts (120 ms) and stays shut until the stamped file has landed;
+    // under reduced motion it snaps shut instead.
+    if (_reduceMotion) {
+      _aperture.value = 1;
+    } else {
+      unawaited(_aperture.forward());
+    }
     try {
       final reading = widget.sensors.snapshot();
       final xfile = await c.takePicture();
@@ -281,11 +323,7 @@ class _CameraScreenState extends State<CameraScreen>
         unawaited(File(xfile.path).delete().catchError((_) => File(xfile.path)));
       }
       if (!mounted) return;
-      if (photo != null) {
-        // The new thumbnail lifts off the shutter and lands on the gallery
-        // entry at bottom-right; `_onStore` is muted while it is airborne.
-        setState(() => _flyPhoto = photo);
-      }
+      if (photo != null) onCaptured(photo);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(photo == null
             ? tr(zh: '照片保存失败', en: 'Could not save photo')
@@ -304,9 +342,31 @@ class _CameraScreenState extends State<CameraScreen>
     } finally {
       if (mounted) {
         setState(() => _capturing = false);
-        unawaited(_aperture.reverse());
+        if (_reduceMotion) {
+          _aperture.value = 0;
+        } else {
+          unawaited(_aperture.reverse());
+        }
       }
     }
+  }
+
+  /// Hands a freshly stamped photo to the shutter bar. Normally the thumbnail
+  /// lifts off the shutter and lands on the gallery entry (`_onStore` is muted
+  /// while it is airborne). Under reduced motion it simply appears there: a
+  /// zero-length flight would complete synchronously inside build and call
+  /// `setState` during build.
+  @visibleForTesting
+  void onCaptured(StampPhoto photo) {
+    if (!mounted) return;
+    setState(() {
+      if (_reduceMotion) {
+        _flyPhoto = null;
+        _lastPhoto = photo;
+      } else {
+        _flyPhoto = photo;
+      }
+    });
   }
 
   /// 80 ms full-viewfinder white flash on capture.
@@ -357,12 +417,18 @@ class _CameraScreenState extends State<CameraScreen>
               fit: StackFit.expand,
               children: [
                 _previewLayer(),
-                if (_cameraError == null) _cornerBrackets(),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _liveInfoBand(),
+                // Brackets fill whatever the info band leaves, so their
+                // bottom edge tracks the band's real height (which grows
+                // when the location issue card is showing).
+                Column(
+                  children: [
+                    Expanded(
+                      child: _cameraError == null
+                          ? _cornerBrackets()
+                          : const SizedBox.shrink(),
+                    ),
+                    _liveInfoBand(),
+                  ],
                 ),
                 // Capture flash: 80 ms of white over the whole viewfinder.
                 IgnorePointer(
@@ -385,40 +451,45 @@ class _CameraScreenState extends State<CameraScreen>
   /// orange poor / dim white none); they breathe once on a quality change
   /// and pulse slowly while still searching for a fix.
   Widget _cornerBrackets() {
-    return IgnorePointer(
-      child: ListenableBuilder(
-        listenable: widget.sensors,
-        builder: (context, _) {
-          final r = widget.sensors.snapshot();
-          final bucket = Motion.accuracyBucket(r.accuracy, hasFix: r.hasFix);
-          final color = Motion.accuracyColor(bucket);
-          return AnimatedBuilder(
-            animation: Listenable.merge([_pulseScale, _breathAlpha]),
-            builder: (context, _) => Opacity(
-              opacity: bucket == 0 ? _breathAlpha.value : 1,
-              child: Transform.scale(
-                scale: _pulseScale.value,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 22, 22, 118),
-                  child: Stack(
-                    children: [
-                      for (final a in const [
-                        Alignment.topLeft,
-                        Alignment.topRight,
-                        Alignment.bottomLeft,
-                        Alignment.bottomRight,
-                      ])
-                        Align(
-                          alignment: a,
-                          child: CornerBracket(color: color, alignment: a),
-                        ),
-                    ],
-                  ),
+    // RepaintBoundary keeps the breathing/pulsing brackets on their own
+    // layer so the live preview and info band are not repainted every frame;
+    // the bracket tree itself is built once per colour change and only the
+    // Opacity/Transform wrappers rebuild per tick.
+    return RepaintBoundary(
+      child: IgnorePointer(
+        child: ListenableBuilder(
+          listenable: widget.sensors,
+          builder: (context, _) {
+            final r = widget.sensors.snapshot();
+            final bucket =
+                Motion.accuracyBucket(r.accuracy, hasFix: r.hasFix);
+            final color = Motion.accuracyColor(bucket);
+            return AnimatedBuilder(
+              animation: Listenable.merge([_pulseScale, _breathAlpha]),
+              builder: (context, child) => Opacity(
+                opacity: bucket == 0 ? _breathAlpha.value : 1,
+                child: Transform.scale(scale: _pulseScale.value, child: child),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(22),
+                child: Stack(
+                  children: [
+                    for (final a in const [
+                      Alignment.topLeft,
+                      Alignment.topRight,
+                      Alignment.bottomLeft,
+                      Alignment.bottomRight,
+                    ])
+                      Align(
+                        alignment: a,
+                        child: CornerBracket(color: color, alignment: a),
+                      ),
+                  ],
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -530,16 +601,24 @@ class _CameraScreenState extends State<CameraScreen>
             color: Colors.white70,
             fontSize: 12,
             fontFeatures: [FontFeature.tabularFigures()]);
+        // Green/orange accuracy text sits on a translucent band over a live
+        // image; the shadow keeps it legible on bright scenes.
+        const accShadow = [Shadow(color: Colors.black, blurRadius: 3)];
+        final accLabel = switch (bucket) {
+          2 => tr(zh: 'GPS 精度 良好', en: 'GPS accuracy good'),
+          1 => tr(zh: 'GPS 精度 较差', en: 'GPS accuracy poor'),
+          _ => tr(zh: 'GPS 精度 无', en: 'GPS accuracy none'),
+        };
         return Container(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
           decoration: BoxDecoration(
             border: Border(
                 left: BorderSide(
                     color: r.hasFix
-                        ? const Color(0xFF2E7D32)
+                        ? Branding.seedColor
                         : Motion.safetyOrange,
                     width: 4)),
-            color: Colors.black.withValues(alpha: 0.55),
+            color: Colors.black.withValues(alpha: 0.65),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,15 +627,19 @@ class _CameraScreenState extends State<CameraScreen>
               Row(
                 children: [
                   // Accuracy circle: safety orange, core grows with error.
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(end: accFill),
-                    duration: Motion.of(context, 400),
-                    curve: Motion.standard,
-                    builder: (context, fill, _) => CustomPaint(
-                      size: const Size(18, 18),
-                      painter: AccuracyRingPainter(
-                        fill: fill,
-                        color: r.hasFix ? Motion.safetyOrange : Colors.white38,
+                  Semantics(
+                    label: accLabel,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(end: accFill),
+                      duration: Motion.of(context, 400),
+                      curve: Motion.standard,
+                      builder: (context, fill, _) => CustomPaint(
+                        size: const Size(18, 18),
+                        painter: AccuracyRingPainter(
+                          fill: fill,
+                          color:
+                              r.hasFix ? Motion.safetyOrange : Colors.white38,
+                        ),
                       ),
                     ),
                   ),
@@ -572,8 +655,11 @@ class _CameraScreenState extends State<CameraScreen>
                   if (acc.isNotEmpty)
                     AnimatedDefaultTextStyle(
                       duration: Motion.of(context, 300),
-                      style: subStyle.copyWith(color: accColor),
-                      child: RollingText(text: acc, style: subStyle),
+                      style:
+                          subStyle.copyWith(color: accColor, shadows: accShadow),
+                      child: RollingText(
+                          text: acc,
+                          style: subStyle.copyWith(shadows: accShadow)),
                     ),
                 ],
               ),
@@ -647,7 +733,7 @@ class _CameraScreenState extends State<CameraScreen>
                 child: _galleryEntry(),
               ),
               if (_flyPhoto != null)
-                _FlyingThumb(
+                FlyingThumb(
                   key: ValueKey(_flyPhoto!.id),
                   file: File(widget.store.photoPath(_flyPhoto!.fileName)),
                   from: shutterCenter,
@@ -665,7 +751,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   Widget _shutterButton(bool ready, bool dark) {
     final scheme = Theme.of(context).colorScheme;
-    final disc = ready ? const Color(0xFF2E7D32) : scheme.surfaceContainerHighest;
+    final disc = ready ? Branding.seedColor : scheme.surfaceContainerHighest;
     return AnimatedContainer(
       duration: Motion.of(context, 250),
       width: _shutterSize,
@@ -680,7 +766,7 @@ class _CameraScreenState extends State<CameraScreen>
         boxShadow: ready && !dark
             ? [
                 BoxShadow(
-                    color: const Color(0xFF2E7D32).withValues(alpha: 0.35),
+                    color: Branding.seedColor.withValues(alpha: 0.35),
                     blurRadius: 14,
                     offset: const Offset(0, 4))
               ]
@@ -746,7 +832,10 @@ class _CameraScreenState extends State<CameraScreen>
             clipBehavior: Clip.antiAlias,
             child: file != null && file.existsSync()
                 ? Image.file(file,
-                    fit: BoxFit.cover, cacheWidth: 160, gaplessPlayback: true)
+                    fit: BoxFit.cover,
+                    cacheWidth: 160,
+                    gaplessPlayback: true,
+                    excludeFromSemantics: true)
                 : Icon(Icons.photo_library_outlined,
                     size: 22, color: scheme.onSurfaceVariant),
           ),
@@ -839,8 +928,14 @@ Future<String?> _promptName(BuildContext context) {
 
 /// The freshly stamped thumbnail lifting off the shutter and landing on the
 /// gallery entry: an eased arc from [from] to [to] with a small scale-down.
-class _FlyingThumb extends StatelessWidget {
-  const _FlyingThumb({
+///
+/// A zero [duration] (reduced motion) never animates: `TweenAnimationBuilder`
+/// would complete synchronously inside the first build and fire [onLanded]
+/// (a `setState`) while the parent is still building. Instead the landing
+/// is deferred to the end of the frame.
+@visibleForTesting
+class FlyingThumb extends StatefulWidget {
+  const FlyingThumb({
     super.key,
     required this.file,
     required this.from,
@@ -858,14 +953,55 @@ class _FlyingThumb extends StatelessWidget {
   final VoidCallback onLanded;
 
   @override
+  State<FlyingThumb> createState() => _FlyingThumbState();
+}
+
+class _FlyingThumbState extends State<FlyingThumb> {
+  bool get _instant => widget.duration == Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_instant) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onLanded();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final size = widget.size;
+    final thumb = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: const [
+          BoxShadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 4))
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: widget.file.existsSync()
+          ? Image.file(widget.file,
+              fit: BoxFit.cover, cacheWidth: 160, excludeFromSemantics: true)
+          : const ColoredBox(color: Colors.black26),
+    );
+    if (_instant) {
+      return Positioned(
+        left: widget.to.dx - size / 2,
+        top: widget.to.dy - size / 2,
+        child: IgnorePointer(child: thumb),
+      );
+    }
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: duration,
+      duration: widget.duration,
       curve: Motion.standard,
-      onEnd: onLanded,
+      onEnd: widget.onLanded,
       builder: (context, t, child) {
-        final c = Offset.lerp(from, to, t)!;
+        final c = Offset.lerp(widget.from, widget.to, t)!;
         // A gentle lob: rises 28 px at mid-flight.
         final lift = -28 * (1 - (2 * t - 1) * (2 * t - 1));
         final s = 1.5 - 0.5 * t;
@@ -877,21 +1013,7 @@ class _FlyingThumb extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white, width: 2),
-          boxShadow: const [
-            BoxShadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 4))
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: file.existsSync()
-            ? Image.file(file, fit: BoxFit.cover, cacheWidth: 160)
-            : const ColoredBox(color: Colors.black26),
-      ),
+      child: thumb,
     );
   }
 }
@@ -945,13 +1067,15 @@ class _LocationIssue extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.18),
+        color: Motion.safetyOrange.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.6)),
+        border:
+            Border.all(color: Motion.safetyOrange.withValues(alpha: 0.6)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.location_off_outlined, size: 18, color: Colors.orangeAccent),
+          const Icon(Icons.location_off_outlined,
+              size: 18, color: Motion.safetyOrange),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

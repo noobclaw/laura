@@ -220,19 +220,28 @@ class _MicButtonState extends State<MicButton>
     duration: const Duration(milliseconds: 1500),
   );
   bool _pressed = false;
+  bool _reduceMotion = false;
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.listening) _pulse.repeat();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
+    _syncPulse();
   }
 
   @override
   void didUpdateWidget(covariant MicButton old) {
     super.didUpdateWidget(old);
-    if (widget.listening && !_pulse.isAnimating) {
+    _syncPulse();
+  }
+
+  /// The pulse ring is not drawn under reduced motion, so its ticker must not
+  /// run either — otherwise it burns a frame callback for nothing.
+  void _syncPulse() {
+    final want = widget.listening && !_reduceMotion;
+    if (want && !_pulse.isAnimating) {
       _pulse.repeat();
-    } else if (!widget.listening && _pulse.isAnimating) {
+    } else if (!want && _pulse.isAnimating) {
       _pulse
         ..stop()
         ..reset();

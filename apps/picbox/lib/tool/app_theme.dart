@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
@@ -88,7 +90,43 @@ class ToolColors {
   static const crop = Color(0xFFE6883A); // orange
   static const metadata = Color(0xFF5E7C99); // slate
   static const watermark = Color(0xFFCFA33C); // amber
+
+  /// Charcoal ink used on the lighter accents (lime / orange / amber) where
+  /// white would only reach ~2.5:1.
+  static const ink = Color(0xFF1B1D17);
 }
+
+/// WCAG 2.x contrast ratio between two opaque colours (1..21).
+double contrastRatio(Color a, Color b) {
+  final la = a.computeLuminance();
+  final lb = b.computeLuminance();
+  final hi = math.max(la, lb);
+  final lo = math.min(la, lb);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/// Foreground for text/icons sitting on a tool accent [bg]: whichever of
+/// white and [ToolColors.ink] contrasts more. Use this everywhere a tool
+/// colour is painted as a solid background, instead of hard-coding white.
+Color onToolColor(Color bg) =>
+    contrastRatio(ToolColors.ink, bg) >= contrastRatio(Colors.white, bg) ? ToolColors.ink : Colors.white;
+
+/// A tool accent usable as a solid control background: returns [c] itself
+/// when [onToolColor] already reaches AA (4.5:1) on it, otherwise the
+/// nearest darker tone on which white does. Pair with `onToolColor(result)`.
+Color toolFillColor(Color c) {
+  if (contrastRatio(onToolColor(c), c) >= 4.5) return c;
+  for (var t = 0.1; t < 1.0; t += 0.1) {
+    final d = Color.lerp(c, Colors.black, t)!;
+    if (contrastRatio(Colors.white, d) >= 4.5) return d;
+  }
+  return Colors.black;
+}
+
+/// Deep version of a tool accent for large tinted surfaces (summary card):
+/// white text — and its 85 % dimmed variant — reaches AA on every one of
+/// the six colours at this depth (0.35 left the dimmed amber at 4.2:1).
+Color toolDeepColor(Color c) => Color.lerp(c, Colors.black, 0.4)!;
 
 /// Standard motion durations (PIPELINE #10: 150–300 ms, standard easing).
 abstract final class Motion {

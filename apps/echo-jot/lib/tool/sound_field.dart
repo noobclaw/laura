@@ -156,6 +156,31 @@ class _SoundFieldState extends State<SoundField>
     // CustomPaint layer redraws each frame — the mic button is left alone.
   }
 
+  /// Kept across rebuilds (the home page rebuilds every second while
+  /// recording) so the painter's colour tables and shader cache survive;
+  /// replaced only when the theme or the motion setting changes.
+  _SoundFieldPainter? _painter;
+
+  _SoundFieldPainter _painterFor(EchoJotColors colors) {
+    final p = _painter;
+    final breathe = !_reduceMotion;
+    if (p != null &&
+        p.breathe == breathe &&
+        p.idle == colors.fieldIdle &&
+        p.live == colors.live &&
+        p.glow == colors.fieldGlow) {
+      return p;
+    }
+    return _painter = _SoundFieldPainter(
+      model: _model,
+      clock: _clock,
+      breathe: breathe,
+      idle: colors.fieldIdle,
+      live: colors.live,
+      glow: colors.fieldGlow,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = EchoJotColors.of(context);
@@ -168,14 +193,7 @@ class _SoundFieldState extends State<SoundField>
           RepaintBoundary(
             child: CustomPaint(
               size: Size.square(widget.size),
-              painter: _SoundFieldPainter(
-                model: _model,
-                clock: _clock,
-                breathe: !_reduceMotion,
-                idle: colors.fieldIdle,
-                live: colors.live,
-                glow: colors.fieldGlow,
-              ),
+              painter: _painterFor(colors),
             ),
           ),
           widget.child,
@@ -216,6 +234,31 @@ class _SoundFieldPainter extends CustomPainter {
   final Color live;
   final Color glow;
 
+  // This paints at frame rate for as long as the hero is on screen, so
+  // nothing below allocates per frame in the steady states: paints are fields,
+  // bar colours come from two small lookup tables (idle by breathing phase,
+  // live by energy), and the glow shader is rebuilt only when the ring size
+  // or the quantised cross-fade step changes.
+  static const _steps = 32;
+
+  late final List<Color> _idleTable = List<Color>.generate(
+    _steps + 1,
+    (i) => idle.withValues(alpha: 0.55 + (i / _steps) * 0.25),
+  );
+  late final List<Color> _liveTable = List<Color>.generate(
+    _steps + 1,
+    (i) => Color.lerp(live.withValues(alpha: 0.45), live, i / _steps)!,
+  );
+
+  final Paint _barPaint = Paint()
+    ..strokeCap = StrokeCap.round
+    ..style = PaintingStyle.stroke;
+  final Paint _glowPaint = Paint();
+  double _glowOuter = -1;
+  int _glowStep = -1;
+
+  static int _q(double v) => (v.clamp(0.0, 1.0) * _steps).round();
+
   @override
   void paint(Canvas canvas, Size size) {
     final energies = model.shown;
@@ -232,20 +275,25 @@ class _SoundFieldPainter extends CustomPainter {
     final barW = (2 * math.pi * inner / n) * 0.48;
 
     if (activeMix > 0.01) {
-      final glowPaint = Paint()
-        ..shader = RadialGradient(
+      final step = _q(activeMix);
+      if (step != _glowStep || outer != _glowOuter) {
+        _glowStep = step;
+        _glowOuter = outer;
+        _glowPaint.shader = RadialGradient(
           colors: [
-            glow.withValues(alpha: glow.a * activeMix),
+            glow.withValues(alpha: glow.a * (step / _steps)),
             glow.withValues(alpha: 0),
           ],
         ).createShader(Rect.fromCircle(center: c, radius: outer));
-      canvas.drawCircle(c, outer, glowPaint);
+      }
+      canvas.drawCircle(c, outer, _glowPaint);
     }
 
-    final paint = Paint()
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = barW
-      ..style = PaintingStyle.stroke;
+    final paint = _barPaint..strokeWidth = barW;
+    // Fully idle / fully live (the two steady states) read straight from the
+    // tables; only the ~half-second cross-fade between them lerps.
+    final idleOnly = activeMix <= 0.01;
+    final liveOnly = activeMix >= 0.99;
 
     for (var i = 0; i < n; i++) {
       final angle = -math.pi / 2 + (2 * math.pi * i) / n;
@@ -260,12 +308,13 @@ class _SoundFieldPainter extends CustomPainter {
       final liveLen = 4.0 + e * maxLen;
       final len = idleLen + (liveLen - idleLen) * activeMix;
 
-      final color = Color.lerp(
-        idle.withValues(alpha: 0.55 + wave * 0.25),
-        Color.lerp(live.withValues(alpha: 0.45), live, e)!,
-        activeMix,
-      )!;
-      paint.color = color;
+      final idleColor = _idleTable[_q(wave)];
+      final liveColor = _liveTable[_q(e)];
+      paint.color = idleOnly
+          ? idleColor
+          : liveOnly
+          ? liveColor
+          : Color.lerp(idleColor, liveColor, activeMix)!;
       final dir = Offset(math.cos(angle), math.sin(angle));
       canvas.drawLine(c + dir * inner, c + dir * (inner + len), paint);
     }

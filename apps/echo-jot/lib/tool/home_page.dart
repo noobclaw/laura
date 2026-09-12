@@ -38,7 +38,9 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   /// slides in from the top and an undo grows back into place instead of the
   /// list hard-refreshing.
   final _listKey = GlobalKey<SliverAnimatedListState>();
-  late final List<Note> _shown = _store.search('');
+  // Must be our own growable copy: the store hands out unmodifiable views, and
+  // [_syncList] inserts/removes in place.
+  late final List<Note> _shown = List.of(_store.search(''));
 
   /// Id of the note the user just swiped away: the Dismissible has already
   /// collapsed it, so the list must drop it without a second exit animation.
@@ -524,8 +526,8 @@ class _CapabilityNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final permanentlyDenied = controller.permissionPermanentlyDenied;
-    // secondaryContainer keeps the banner inside the teal palette — the default
-    // tertiary tone lands on lilac and fights the hero.
+    // secondaryContainer keeps the banner inside the violet palette — the
+    // default tertiary tone drifts warm and fights the hero.
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),

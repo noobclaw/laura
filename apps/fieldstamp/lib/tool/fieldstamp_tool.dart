@@ -184,6 +184,7 @@ class _HomeShellState extends State<HomeShell> {
           CameraScreen(
             store: widget.store,
             sensors: widget.sensors,
+            active: _index == 0,
             onOpenGallery: () => setState(() => _index = 1),
           ),
           GalleryScreen(store: widget.store),

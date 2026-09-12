@@ -10,6 +10,9 @@
 **标题(≤30字)**
 SiteStamp 定位水印取证相机
 
+**副标题(≤30字)**
+坐标时间烧入照片,离线取证
+
 **短描述(≤80字)**
 拍照即烧入 GPS 坐标、海拔、方位、时间。全程离线,数据只在你手机里,一次买断。
 
@@ -40,12 +43,21 @@ SiteStamp 是一款纯离线的 GPS 现场取证相机。按下快门的一瞬�
 **关键词**
 取证相机,定位水印相机,GPS相机,工地拍照,巡检,现场取证,时间水印,地理位置,勘测,离线
 
+**更新说明(What's New)**
+全新光圈快门、随 GPS 质量呼吸的取景括角与实时精度环
+新照片飞入相册;照片墙与详情页切换更顺滑
+遵循系统「减弱动态效果」;亮场景下文字对比度更高
+若干修复与细节打磨
+
 ---
 
 ## English
 
 **Title (≤30 chars)**
 SiteStamp: GPS Field Camera
+
+**Subtitle (≤30 chars)**
+GPS stamp burned into photos
 
 **Short description (≤80 chars)**
 Burn GPS, altitude, bearing & time into every photo. Fully offline. Buy once.
@@ -74,5 +86,11 @@ Field engineers and surveyors, insurance adjusters, property and facility mainte
 
 The free version takes fully stamped photos; unlock Pro for multiple projects, PDF/CSV export, DMS coordinates, and to remove the small on-photo tag.
 
-**Keywords**
-gps camera, geotag camera, field camera, timestamp camera, survey photo, geotag photo, gps photo stamp, inspection, location camera, offline
+**Keywords (≤100 chars, comma-separated, no spaces)**
+gps camera,geotag,timestamp camera,field camera,survey,inspection,site photo,evidence,offline,stamp
+
+**What's New**
+New iris shutter, GPS-aware corner brackets and a live accuracy ring in the viewfinder
+New photos fly into the gallery; smoother grid and detail transitions
+Honors Reduce Motion; higher text contrast over bright scenes
+Bug fixes and polish

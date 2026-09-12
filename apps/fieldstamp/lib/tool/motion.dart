@@ -155,11 +155,28 @@ class CornerBracket extends StatelessWidget {
   final double size;
   final double thickness;
 
+  /// A 1 px dark copy sits under the coloured L so it stays visible on a
+  /// bright, washed-out viewfinder (white sky, concrete).
+  static const Color _shadow = Color(0x99000000);
+
   @override
   Widget build(BuildContext context) {
+    return SizedBox(
+      width: size + 1,
+      height: size + 1,
+      child: Stack(
+        children: [
+          Positioned(left: 1, top: 1, child: _l(context, _shadow)),
+          Positioned(left: 0, top: 0, child: _l(context, color)),
+        ],
+      ),
+    );
+  }
+
+  Widget _l(BuildContext context, Color c) {
     final top = alignment.y < 0;
     final left = alignment.x < 0;
-    final side = BorderSide(color: color, width: thickness);
+    final side = BorderSide(color: c, width: thickness);
     return AnimatedContainer(
       duration: Motion.of(context, 300),
       curve: Motion.standard,
@@ -212,7 +229,11 @@ class RollingText extends StatelessWidget {
             child: child,
           ),
         ),
-        child: Text(text, key: ValueKey(text), style: style, maxLines: 1),
+        child: Text(text,
+            key: ValueKey(text),
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis),
       ),
     );
   }

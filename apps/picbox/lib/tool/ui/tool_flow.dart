@@ -261,6 +261,10 @@ class _ToolScaffoldState extends State<ToolScaffold> {
         widget.blocker == null &&
         !_importing &&
         !_running;
+    // Hero button: accent background with an AA foreground — lime / orange /
+    // amber take charcoal ink, the darker accents keep white.
+    final fill = toolFillColor(meta.color);
+    final onFill = onToolColor(fill);
     return Scaffold(
       appBar: AppBar(
         title: Text(meta.title),
@@ -371,7 +375,8 @@ class _ToolScaffoldState extends State<ToolScaffold> {
                   child: FilledButton(
                     onPressed: canRun ? _run : null,
                     style: FilledButton.styleFrom(
-                      backgroundColor: canRun ? meta.color : null,
+                      backgroundColor: canRun ? fill : null,
+                      foregroundColor: canRun ? onFill : null,
                     ),
                     child: AnimatedSwitcher(
                       duration: Motion.of(context, Motion.normal),
@@ -388,10 +393,10 @@ class _ToolScaffoldState extends State<ToolScaffold> {
                               key: const ValueKey('running'),
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const SizedBox(
+                                SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+                                  child: CircularProgressIndicator(strokeWidth: 2.2, color: onFill),
                                 ),
                                 const SizedBox(width: 10),
                                 Text(tr(zh: '处理中…', en: 'Working…')),

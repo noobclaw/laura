@@ -36,12 +36,16 @@ class EchoJotColors extends ThemeExtension<EchoJotColors> {
 
   static const _mint = Color(0xFF5EF2C1);
 
+  // Light mode uses a deeper mint: the neon tone reads on ink surfaces but is
+  // ~1.1:1 against the lavender panel. #1FB98F clears 3:1 for the bars and
+  // button, #0B6E55 clears 4.5:1 for the timer text, and the idle bars sit at
+  // #8F76E6 (≥3:1) instead of a near-invisible pastel.
   static const light = EchoJotColors(
-    live: _mint,
+    live: Color(0xFF1FB98F),
     onLive: Color(0xFF07241B),
-    liveText: Color(0xFF0E8C6C),
-    fieldIdle: Color(0xFFB9A7F5),
-    fieldGlow: Color(0x335EF2C1),
+    liveText: Color(0xFF0B6E55),
+    fieldIdle: Color(0xFF8F76E6),
+    fieldGlow: Color(0x331FB98F),
   );
 
   static const dark = EchoJotColors(
