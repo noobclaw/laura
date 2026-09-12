@@ -128,99 +128,235 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final sig = store.timeSignature;
+    final onBeat = metro.playing && metro.currentBeat >= 0 && metro.currentKind != TickKind.sub;
     return Container(
       decoration: BoxDecoration(
         gradient: heroGradient(Theme.of(context).brightness),
         borderRadius: BorderRadius.circular(28),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      child: Column(
-        children: [
-          // Beat indicator.
-          SizedBox(
-            height: 44,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (var b = 0; b < sig.beats; b++) ...[
-                  _BeatDot(
-                    accent: sig.accents.contains(b),
-                    lit: metro.playing && metro.currentBeat == b,
-                    serial: metro.tickSerial,
-                  ),
-                  if (b < sig.beats - 1) const SizedBox(width: 12),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${store.bpm}',
-            style: text.displayLarge?.copyWith(color: Colors.white, fontSize: 96, height: 1),
-          ),
-          Text(
-            'BPM · ${tempoMarking(store.bpm)}',
-            style: text.labelLarge?.copyWith(color: Colors.white70, letterSpacing: 1),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _RoundIcon(icon: Icons.remove, onTap: () => metro.nudge(-1), onLong: () => metro.nudge(-10)),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: kBeatAmber,
-                    thumbColor: kBeatAmber,
-                    inactiveTrackColor: Colors.white24,
-                    overlayColor: kBeatAmber.withValues(alpha: 0.15),
-                  ),
-                  child: Slider(
-                    value: store.bpm.toDouble(),
-                    min: kMinBpm.toDouble(),
-                    max: kMaxBpm.toDouble(),
-                    onChanged: (v) => metro.setBpm(v.round()),
-                  ),
-                ),
-              ),
-              _RoundIcon(icon: Icons.add, onTap: () => metro.nudge(1), onLong: () => metro.nudge(10)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 96,
-                height: 48,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white38),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  onPressed: metro.tap,
-                  child: Text(tr(zh: '打拍', en: 'Tap')),
-                ),
-              ),
-              const SizedBox(width: 20),
-              _PlayButton(playing: metro.playing, onTap: metro.toggle),
-              const SizedBox(width: 20),
-              SizedBox(
-                width: 96,
-                height: 48,
-                child: Center(
-                  child: Text(
-                    '${sig.label} · ${store.subdivision.glyph}',
-                    style: text.titleMedium?.copyWith(color: Colors.white70),
-                  ),
-                ),
-              ),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: kWalnutEbony.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Stack(
+          children: [
+            // Beat ripples spread from the tempo figure, behind the controls.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: _BeatRipples(
+                  serial: metro.tickSerial,
+                  fire: onBeat,
+                  accent: onBeat && sig.accents.contains(metro.currentBeat),
+                  intervalMs: 60000 ~/ store.bpm,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                children: [
+                  // Beat indicator.
+                  SizedBox(
+                    height: 44,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var b = 0; b < sig.beats; b++) ...[
+                          _BeatDot(
+                            accent: sig.accents.contains(b),
+                            lit: metro.playing && metro.currentBeat == b,
+                            serial: metro.tickSerial,
+                          ),
+                          if (b < sig.beats - 1) const SizedBox(width: 12),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${store.bpm}',
+                    style: text.displayLarge?.copyWith(color: Colors.white, fontSize: 96, height: 1),
+                  ),
+                  Text(
+                    'BPM · ${tempoMarking(store.bpm)}',
+                    style: text.labelLarge?.copyWith(color: Colors.white70, letterSpacing: 1),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _RoundIcon(icon: Icons.remove, onTap: () => metro.nudge(-1), onLong: () => metro.nudge(-10)),
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: kBeatAmber,
+                            thumbColor: kBeatAmber,
+                            inactiveTrackColor: Colors.white24,
+                            overlayColor: kBeatAmber.withValues(alpha: 0.15),
+                          ),
+                          child: Slider(
+                            value: store.bpm.toDouble(),
+                            min: kMinBpm.toDouble(),
+                            max: kMaxBpm.toDouble(),
+                            onChanged: (v) => metro.setBpm(v.round()),
+                          ),
+                        ),
+                      ),
+                      _RoundIcon(icon: Icons.add, onTap: () => metro.nudge(1), onLong: () => metro.nudge(10)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 96,
+                        height: 48,
+                        child: PressScale(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white38),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            onPressed: metro.tap,
+                            child: Text(tr(zh: '打拍', en: 'Tap')),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      _PlayButton(playing: metro.playing, onTap: metro.toggle),
+                      const SizedBox(width: 20),
+                      SizedBox(
+                        width: 96,
+                        height: 48,
+                        child: Center(
+                          child: Text(
+                            '${sig.label} · ${store.subdivision.glyph}',
+                            style: text.titleMedium?.copyWith(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
+}
+
+/// One expanding, fading ring per beat, launched from the centre of the pad
+/// on the same delayed tick the dots use (so it lands with the click). The
+/// accented beat gets a larger, amber ring; subdivisions get none. A ring
+/// lives for most of one beat interval, so at fast tempi they chase each
+/// other outwards. Off under reduced motion.
+class _BeatRipples extends StatefulWidget {
+  const _BeatRipples({
+    required this.serial,
+    required this.fire,
+    required this.accent,
+    required this.intervalMs,
+  });
+
+  final int serial;
+  final bool fire;
+  final bool accent;
+  final int intervalMs;
+
+  @override
+  State<_BeatRipples> createState() => _BeatRipplesState();
+}
+
+class _Ripple {
+  _Ripple(this.controller, this.accent);
+  final AnimationController controller;
+  final bool accent;
+}
+
+class _BeatRipplesState extends State<_BeatRipples> with TickerProviderStateMixin {
+  final List<_Ripple> _live = [];
+
+  @override
+  void didUpdateWidget(_BeatRipples old) {
+    super.didUpdateWidget(old);
+    if (widget.serial != old.serial && widget.fire && motionEnabled(context)) _spawn();
+  }
+
+  void _spawn() {
+    final ms = (widget.intervalMs * 0.9).round().clamp(280, 720);
+    final c = AnimationController(vsync: this, duration: Duration(milliseconds: ms));
+    final r = _Ripple(c, widget.accent);
+    _live.add(r);
+    c.addStatusListener((st) {
+      if (st == AnimationStatus.completed) {
+        _live.remove(r);
+        c.dispose();
+        if (mounted) setState(() {});
+      }
+    });
+    c.addListener(() => setState(() {}));
+    c.forward();
+  }
+
+  @override
+  void dispose() {
+    for (final r in _live) {
+      r.controller.dispose();
+    }
+    _live.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_live.isEmpty) return const SizedBox.expand();
+    return CustomPaint(
+      painter: _RipplePainter([
+        for (final r in _live) (t: r.controller.value, accent: r.accent),
+      ]),
+      size: Size.infinite,
+    );
+  }
+}
+
+class _RipplePainter extends CustomPainter {
+  const _RipplePainter(this.ripples);
+  final List<({double t, bool accent})> ripples;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Centred on the tempo figure (upper-middle of the pad).
+    final center = Offset(size.width / 2, size.height * 0.40);
+    final maxR = size.width * 0.62;
+    for (final r in ripples) {
+      final e = Curves.easeOutCubic.transform(r.t);
+      final radius = 22 + (r.accent ? maxR : maxR * 0.66) * e;
+      final fade = (1 - r.t);
+      final color = r.accent ? kBeatAmber : Colors.white;
+      if (r.accent) {
+        canvas.drawCircle(center, radius, Paint()..color = color.withValues(alpha: 0.10 * fade));
+      }
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = (r.accent ? 6 : 4) * (1 - 0.6 * e) + 1
+          ..color = color.withValues(alpha: (r.accent ? 0.55 : 0.38) * fade),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RipplePainter old) => true;
 }
 
 class _BeatDot extends StatelessWidget {
@@ -258,23 +394,29 @@ class _RoundIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withValues(alpha: 0.12),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        onLongPress: onLong,
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Icon(icon, color: Colors.white),
+    return PressScale(
+      pressedScale: 0.9,
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.12),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          onLongPress: onLong,
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: Icon(icon, color: Colors.white),
+          ),
         ),
       ),
     );
   }
 }
 
+/// Start/stop: sinks under the finger, the colour cross-fades amber↔coral
+/// and the glyph swaps with a scale-fade — the state change is visible even
+/// before the first click sounds.
 class _PlayButton extends StatelessWidget {
   const _PlayButton({required this.playing, required this.onTap});
   final bool playing;
@@ -282,24 +424,39 @@ class _PlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = playing ? kOffCoral : kBeatAmber;
     return Semantics(
       button: true,
       label: playing ? tr(zh: '停止', en: 'Stop') : tr(zh: '开始', en: 'Start'),
-      child: Material(
-        color: playing ? kOffCoral : kBeatAmber,
-        shape: const CircleBorder(),
-        elevation: 6,
-        shadowColor: (playing ? kOffCoral : kBeatAmber).withValues(alpha: 0.5),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: SizedBox(
-            width: 76,
-            height: 76,
-            child: Icon(
-              playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
-              size: 42,
-              color: const Color(0xFF1B1200),
+      child: PressScale(
+        pressedScale: 0.9,
+        child: AnimatedContainer(
+          duration: kMotionMedium,
+          curve: Curves.easeOutCubic,
+          width: 76,
+          height: 76,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+            boxShadow: [
+              BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 18, offset: const Offset(0, 6)),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              child: SwapFade(
+                duration: kMotionShort,
+                child: Icon(
+                  playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                  key: ValueKey(playing),
+                  size: 42,
+                  color: kOnAmber,
+                ),
+              ),
             ),
           ),
         ),

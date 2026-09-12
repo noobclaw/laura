@@ -2,16 +2,31 @@ import 'package:flutter/material.dart';
 
 import '../core/branding.dart';
 
-/// TuneBench's art direction: a dim rehearsal room with one bright meter.
+/// TuneBench's art direction: a walnut workbench with one warm meter.
 ///
-/// Surfaces are a deep indigo-black in the dark theme (the app's home — most
-/// practice happens on a music stand at night) and a cool paper white in
-/// light. Three fixed accents carry meaning everywhere: green = in tune /
-/// correct, amber = the beat / attention, coral = flat-or-sharp / wrong.
+/// The palette is low-saturation warm brown around a 20° hue — the wood of a
+/// guitar back, not a stage light. Surfaces are rice paper in the light theme
+/// and ebony in the dark one (the app's home: a music stand at night). Three
+/// fixed accents carry meaning everywhere: amber = the needle, the beat and
+/// attention; green = in tune / correct; coral = flat-or-sharp / wrong.
 const Color kInTuneGreen = Color(0xFF3DDC97);
 const Color kBeatAmber = Color(0xFFFFB454);
 const Color kOffCoral = Color(0xFFFF6B7A);
-const Color kInkDark = Color(0xFF0B0D1A);
+
+/// Ebony: the dark scaffold. Warm black, never blue-black.
+const Color kInkDark = Color(0xFF14100D);
+
+/// Rice paper: the light scaffold.
+const Color kPaper = Color(0xFFF7F1E8);
+
+/// Walnut tones used by the hero gradients and the gauge face.
+const Color kWalnutLight = Color(0xFF8D6E63);
+const Color kWalnutMid = Color(0xFF5D4037);
+const Color kWalnutDeep = Color(0xFF3E2723);
+const Color kWalnutEbony = Color(0xFF231A16);
+
+/// Ink on amber (buttons, root dots).
+const Color kOnAmber = Color(0xFF2A1B00);
 
 ThemeData buildTuneTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
@@ -21,14 +36,25 @@ ThemeData buildTuneTheme(Brightness brightness) {
   );
 
   final scheme = base.copyWith(
+    primary: isDark ? const Color(0xFFD7B8A9) : kWalnutMid,
+    onPrimary: isDark ? kWalnutDeep : Colors.white,
+    primaryContainer: isDark ? kWalnutMid : const Color(0xFFEBD9CF),
+    onPrimaryContainer: isDark ? const Color(0xFFF6E5DC) : kWalnutDeep,
+    secondary: isDark ? const Color(0xFFC9B3A6) : const Color(0xFF6F5A50),
     tertiary: kBeatAmber,
-    onTertiary: const Color(0xFF3A2600),
-    surface: isDark ? kInkDark : const Color(0xFFF6F7FC),
-    surfaceContainerLowest: isDark ? const Color(0xFF07080F) : Colors.white,
-    surfaceContainerLow: isDark ? const Color(0xFF11142A) : const Color(0xFFEFF1FA),
-    surfaceContainer: isDark ? const Color(0xFF171B36) : const Color(0xFFE8EBF7),
-    surfaceContainerHigh: isDark ? const Color(0xFF1D2242) : const Color(0xFFE0E4F3),
-    surfaceContainerHighest: isDark ? const Color(0xFF252B52) : const Color(0xFFD8DDEF),
+    onTertiary: kOnAmber,
+    tertiaryContainer: isDark ? const Color(0xFF5A3F12) : const Color(0xFFFFE2B8),
+    onTertiaryContainer: isDark ? const Color(0xFFFFE2B8) : const Color(0xFF3A2600),
+    surface: isDark ? kInkDark : kPaper,
+    onSurface: isDark ? const Color(0xFFF1E9E1) : const Color(0xFF2B211C),
+    onSurfaceVariant: isDark ? const Color(0xFFB9ABA2) : const Color(0xFF6B5D55),
+    outline: isDark ? const Color(0xFF8A7B72) : const Color(0xFF8C7C72),
+    outlineVariant: isDark ? const Color(0xFF4A3F39) : const Color(0xFFD6CBC1),
+    surfaceContainerLowest: isDark ? const Color(0xFF0D0A08) : Colors.white,
+    surfaceContainerLow: isDark ? const Color(0xFF1B1613) : const Color(0xFFF1EAE0),
+    surfaceContainer: isDark ? const Color(0xFF221C18) : const Color(0xFFEBE3D8),
+    surfaceContainerHigh: isDark ? const Color(0xFF2A2320) : const Color(0xFFE5DCD0),
+    surfaceContainerHighest: isDark ? const Color(0xFF342C27) : const Color(0xFFDDD3C6),
   );
 
   final theme = ThemeData(
@@ -39,6 +65,18 @@ ThemeData buildTuneTheme(Brightness brightness) {
 
   const tab = <FontFeature>[FontFeature.tabularFigures()];
   return theme.copyWith(
+    // Material 3 forward-fade between pushed pages instead of the hard
+    // slide-up; a zoom on Android tablets / desktop feels closer to native.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+        TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+      },
+    ),
     cardTheme: CardThemeData(
       elevation: 0,
       color: scheme.surfaceContainerHigh,
@@ -53,8 +91,8 @@ ThemeData buildTuneTheme(Brightness brightness) {
       elevation: 0,
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: isDark ? const Color(0xFF11142A) : scheme.surfaceContainerLow,
-      indicatorColor: scheme.primary.withValues(alpha: isDark ? 0.28 : 0.18),
+      backgroundColor: isDark ? const Color(0xFF1B1613) : scheme.surfaceContainerLow,
+      indicatorColor: kBeatAmber.withValues(alpha: isDark ? 0.28 : 0.32),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       labelTextStyle: WidgetStatePropertyAll(
@@ -96,14 +134,25 @@ ThemeData buildTuneTheme(Brightness brightness) {
   );
 }
 
-/// Gradient behind hero surfaces (tuner dial, metronome pad).
+/// Gradient behind hero surfaces (tuner dial, metronome pad): a slab of
+/// walnut, lit from the top-left. Both themes stay dark here so the amber
+/// needle and the green band read the same way day and night.
 LinearGradient heroGradient(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
   return LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: isDark
-        ? const [Color(0xFF1A1E45), Color(0xFF12152E), Color(0xFF0D0F22)]
-        : const [Color(0xFF2E3170), Color(0xFF3B3F8C), Color(0xFF5257B0)],
+        ? const [Color(0xFF4A3129), Color(0xFF2E1F19), kWalnutEbony]
+        : const [Color(0xFF7A5A4C), kWalnutMid, kWalnutDeep],
   );
 }
+
+/// Standard motion for the app: short, standard easing, and off entirely
+/// when the OS asks for reduced motion.
+const Duration kMotionShort = Duration(milliseconds: 180);
+const Duration kMotionMedium = Duration(milliseconds: 260);
+const Duration kMotionLong = Duration(milliseconds: 420);
+
+bool motionEnabled(BuildContext context) =>
+    !(MediaQuery.maybeDisableAnimationsOf(context) ?? false);

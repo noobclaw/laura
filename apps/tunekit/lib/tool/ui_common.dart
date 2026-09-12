@@ -150,7 +150,139 @@ class GuidanceCard extends StatelessWidget {
   }
 }
 
-/// A labelled number in a stat tile.
+/// A number that rolls from its previous value to the new one instead of
+/// jumping (the first build rolls up from zero). Tabular figures keep the
+/// width steady while it counts. Honours the OS reduced-motion setting.
+class AnimatedNumber extends StatelessWidget {
+  const AnimatedNumber(
+    this.value, {
+    super.key,
+    this.decimals = 0,
+    this.style,
+    this.duration = const Duration(milliseconds: 650),
+  });
+
+  final double value;
+  final int decimals;
+  final TextStyle? style;
+  final Duration duration;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = (style ?? const TextStyle()).copyWith(
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    if (!motionEnabled(context)) return Text(value.toStringAsFixed(decimals), style: s);
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: value),
+      duration: duration,
+      curve: Curves.easeOutCubic,
+      builder: (_, v, _) => Text(v.toStringAsFixed(decimals), style: s),
+    );
+  }
+}
+
+/// Fade + rise entrance for the [index]-th item of a list, staggered 40 ms
+/// per item so a freshly built list settles in top to bottom.
+class StaggerIn extends StatelessWidget {
+  const StaggerIn({super.key, required this.index, required this.child});
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!motionEnabled(context)) return child;
+    final delay = (40 * index).clamp(0, 320);
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(index),
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Duration(milliseconds: 260 + delay),
+      curve: Interval(delay / (260 + delay), 1, curve: Curves.easeOutCubic),
+      child: child,
+      builder: (_, t, child) => Opacity(
+        opacity: t,
+        child: Transform.translate(offset: Offset(0, 14 * (1 - t)), child: child),
+      ),
+    );
+  }
+}
+
+/// Press feedback for any tappable child: scales to [pressedScale] while the
+/// pointer is down. Uses raw pointer events so the child's own gesture
+/// handling (buttons, ink) is untouched.
+class PressScale extends StatefulWidget {
+  const PressScale({super.key, required this.child, this.pressedScale = 0.94});
+  final Widget child;
+  final double pressedScale;
+
+  @override
+  State<PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<PressScale> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final on = motionEnabled(context);
+    return Listener(
+      onPointerDown: (_) => _set(true),
+      onPointerUp: (_) => _set(false),
+      onPointerCancel: (_) => _set(false),
+      child: AnimatedScale(
+        scale: on && _down ? widget.pressedScale : 1,
+        duration: kMotionShort,
+        curve: Curves.easeOutCubic,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Standard cross-fade + slight scale for swapping one widget for another
+/// (chord diagram, status pill, icons). Keys on the child's own key.
+class SwapFade extends StatelessWidget {
+  const SwapFade({super.key, required this.child, this.duration = kMotionMedium, this.slide = false});
+  final Widget child;
+  final Duration duration;
+
+  /// Slide up a little as well as fading (for taller content).
+  final bool slide;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!motionEnabled(context)) return child;
+    return AnimatedSwitcher(
+      duration: duration,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, anim) => FadeTransition(
+        opacity: anim,
+        child: slide
+            ? SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(anim),
+                child: child,
+              )
+            : ScaleTransition(
+                scale: Tween<double>(begin: 0.92, end: 1).animate(anim),
+                child: child,
+              ),
+      ),
+      layoutBuilder: (current, previous) => Stack(
+        alignment: Alignment.center,
+        children: [...previous, ?current],
+      ),
+      child: child,
+    );
+  }
+}
+
+/// A labelled number in a stat tile. Give [number] (and optionally
+/// [decimals]) to roll the figure into place; [value] is shown as-is.
 class StatTile extends StatelessWidget {
   const StatTile({
     super.key,
@@ -158,17 +290,22 @@ class StatTile extends StatelessWidget {
     required this.label,
     this.color,
     this.unit,
+    this.number,
+    this.decimals = 0,
   });
 
   final String value;
   final String label;
   final String? unit;
   final Color? color;
+  final double? number;
+  final int decimals;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final numStyle = text.headlineSmall?.copyWith(color: color ?? cs.onSurface);
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
@@ -182,8 +319,10 @@ class StatTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(value,
-                  style: text.headlineSmall?.copyWith(color: color ?? cs.onSurface)),
+              if (number != null)
+                AnimatedNumber(number!, decimals: decimals, style: numStyle)
+              else
+                Text(value, style: numStyle),
               if (unit != null) ...[
                 const SizedBox(width: 3),
                 Text(unit!, style: text.labelMedium?.copyWith(color: cs.onSurfaceVariant)),

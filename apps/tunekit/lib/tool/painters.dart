@@ -5,20 +5,25 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'music/theory.dart';
 
-/// The tuner's hero: a 150° arc from −50 to +50 cents with a green ±5 band
-/// and a needle. Cents null = no signal (needle rests at centre, dimmed).
+/// The tuner's hero: a walnut dial — a 150° arc from −50 to +50 cents with
+/// a green ±5 band, an amber needle and a brass pivot. [cents] is the needle's
+/// *displayed* position (the page springs it toward the reading); null = no
+/// signal (needle rests at centre, dimmed). [glow] 0..1 lights an amber halo
+/// around the rim while in tune; the page pulses it.
 class TunerGaugePainter extends CustomPainter {
   const TunerGaugePainter({
     required this.cents,
     required this.active,
     required this.inTune,
     required this.scheme,
+    this.glow = 0,
   });
 
   final double? cents;
   final bool active;
   final bool inTune;
   final ColorScheme scheme;
+  final double glow;
 
   static const double sweepDeg = 150;
 
@@ -30,13 +35,63 @@ class TunerGaugePainter extends CustomPainter {
     final sweep = math.pi * sweepDeg / 180;
     final rect = Rect.fromCircle(center: center, radius: r);
 
+    // Wood face: a radial gradient lit off-centre, then fine concentric
+    // rings like the growth lines of a turned walnut disc. Clipped to the
+    // dial's wedge so it reads as a face, not a background.
+    final face = Path()
+      ..moveTo(center.dx, center.dy)
+      ..arcTo(Rect.fromCircle(center: center, radius: r + 4), startAngle - 0.06, sweep + 0.12, false)
+      ..close();
+    canvas.save();
+    canvas.clipPath(face);
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-0.25, 0.35),
+          radius: 1.1,
+          colors: const [Color(0xFF6B4B3E), Color(0xFF4A3129), Color(0xFF2A1C17)],
+          stops: const [0, 0.55, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: r + 4)),
+    );
+    final ring = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    for (var rr = r * 0.22; rr < r - 22; rr += 7) {
+      final phase = (rr / 7).floor();
+      ring.color = Colors.white.withValues(alpha: phase % 3 == 0 ? 0.06 : 0.03);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: rr), startAngle, sweep, false, ring);
+    }
+    canvas.restore();
+
+    // Amber halo on the rim when in tune (pulsed by the page).
+    if (glow > 0.01) {
+      final halo = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 12 + 6 * glow
+        ..strokeCap = StrokeCap.round
+        ..color = kBeatAmber.withValues(alpha: 0.18 + 0.32 * glow)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 8 + 8 * glow);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: r + 10), startAngle, sweep, false, halo);
+      final rim = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = kBeatAmber.withValues(alpha: 0.35 + 0.45 * glow);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: r + 9), startAngle, sweep, false, rim);
+    }
+
     // Track.
     final track = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 14
       ..strokeCap = StrokeCap.round
-      ..color = scheme.onSurface.withValues(alpha: 0.10);
+      ..color = Colors.black.withValues(alpha: 0.28);
     canvas.drawArc(rect, startAngle, sweep, false, track);
+    final trackHi = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = Colors.white.withValues(alpha: 0.10);
+    canvas.drawArc(Rect.fromCircle(center: center, radius: r + 7.5), startAngle, sweep, false, trackHi);
 
     // In-tune band (±5 cents).
     final bandSweep = sweep * (10 / 100);
@@ -54,7 +109,7 @@ class TunerGaugePainter extends CustomPainter {
       final inner = r - (major ? 26 : 20);
       final outer = r - 12;
       final p = Paint()
-        ..color = scheme.onSurface.withValues(alpha: major ? 0.55 : 0.28)
+        ..color = scheme.onSurface.withValues(alpha: major ? 0.6 : 0.3)
         ..strokeWidth = major ? 2 : 1.2
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(
@@ -69,7 +124,7 @@ class TunerGaugePainter extends CustomPainter {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: scheme.onSurface.withValues(alpha: 0.6),
+              color: scheme.onSurface.withValues(alpha: 0.65),
             ),
           ),
           textDirection: TextDirection.ltr,
@@ -79,31 +134,53 @@ class TunerGaugePainter extends CustomPainter {
       }
     }
 
-    // Needle.
+    // Needle: amber by default, green once it sits in the band.
     final c = (cents ?? 0).clamp(-50.0, 50.0);
     final a = startAngle + sweep * ((c + 50) / 100);
-    final tip = center + Offset(math.cos(a), math.sin(a)) * (r - 6);
+    final dir = Offset(math.cos(a), math.sin(a));
+    final tip = center + dir * (r - 6);
+    final tail = center - dir * 14;
     final needleColor = !active
         ? scheme.onSurface.withValues(alpha: 0.25)
-        : (inTune ? kInTuneGreen : kOffCoral);
-    final glow = Paint()
-      ..color = needleColor.withValues(alpha: active ? 0.35 : 0)
+        : (inTune ? kInTuneGreen : kBeatAmber);
+    final glowPaint = Paint()
+      ..color = needleColor.withValues(alpha: active ? 0.4 : 0)
       ..strokeWidth = 10
       ..strokeCap = StrokeCap.round
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-    canvas.drawLine(center, tip, glow);
-    final needle = Paint()
-      ..color = needleColor
-      ..strokeWidth = 3.5
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(center, tip, needle);
-    canvas.drawCircle(center, 9, Paint()..color = scheme.surfaceContainerHighest);
-    canvas.drawCircle(center, 5, Paint()..color = needleColor);
+    canvas.drawLine(center, tip, glowPaint);
+    // Tapered body: a thin polygon rather than a stroke so the tip is sharp.
+    final side = Offset(-dir.dy, dir.dx);
+    final body = Path()
+      ..moveTo(tip.dx, tip.dy)
+      ..lineTo(center.dx + side.dx * 3.2, center.dy + side.dy * 3.2)
+      ..lineTo(tail.dx + side.dx * 2.2, tail.dy + side.dy * 2.2)
+      ..lineTo(tail.dx - side.dx * 2.2, tail.dy - side.dy * 2.2)
+      ..lineTo(center.dx - side.dx * 3.2, center.dy - side.dy * 3.2)
+      ..close();
+    canvas.drawPath(body, Paint()..color = needleColor);
+    // Brass pivot.
+    canvas.drawCircle(center, 11, Paint()..color = Colors.black.withValues(alpha: 0.35));
+    canvas.drawCircle(
+      center,
+      9,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-0.4, -0.4),
+          colors: [Color(0xFFFFE0A8), Color(0xFFC98B2E), Color(0xFF7A4E10)],
+          stops: [0, 0.6, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: 9)),
+    );
+    canvas.drawCircle(center, 3, Paint()..color = needleColor);
   }
 
   @override
   bool shouldRepaint(TunerGaugePainter old) =>
-      old.cents != cents || old.active != active || old.inTune != inTune || old.scheme != scheme;
+      old.cents != cents ||
+      old.active != active ||
+      old.inTune != inTune ||
+      old.scheme != scheme ||
+      old.glow != glow;
 }
 
 /// Guitar/ukulele/bass fretboard. Two modes:
@@ -235,7 +312,7 @@ class FretboardPainter extends CustomPainter {
           Paint()..color = isRoot ? kBeatAmber : scheme.primary,
         );
         _label(canvas, pitchClassName(pc, flats: flats), Offset(x, y),
-            isRoot ? const Color(0xFF3A2600) : scheme.onPrimary, dotR > 9 ? 10 : 8,
+            isRoot ? kOnAmber : scheme.onPrimary, dotR > 9 ? 10 : 8,
             bold: true);
       }
     }
@@ -294,9 +371,9 @@ class PianoPainter extends CustomPainter {
     final bw = ww * 0.62;
     final bh = size.height * 0.62;
     final whiteColor = scheme.brightness == Brightness.dark
-        ? const Color(0xFFE9EAF2)
-        : Colors.white;
-    final blackColor = const Color(0xFF1B1D2B);
+        ? const Color(0xFFF0E8DF)
+        : const Color(0xFFFFFCF7);
+    const blackColor = Color(0xFF241C18);
 
     // White keys.
     var wi = 0;
@@ -314,10 +391,10 @@ class PianoPainter extends CustomPainter {
       if (on) {
         _label(canvas, pitchClassName(pitchClassOf(midi), flats: flats),
             Offset(rect.center.dx, size.height - 14),
-            isRoot ? const Color(0xFF3A2600) : scheme.onPrimary);
+            isRoot ? kOnAmber : scheme.onPrimary);
       } else if (i % 12 == 0) {
         _label(canvas, 'C${octaveOf(midi)}', Offset(rect.center.dx, size.height - 14),
-            const Color(0xFF6B6E80));
+            const Color(0xFF7A6A60));
       }
       wi++;
     }
@@ -341,7 +418,7 @@ class PianoPainter extends CustomPainter {
       if (on) {
         _label(canvas, pitchClassName(pitchClassOf(midi), flats: flats),
             Offset(rect.center.dx, bh - 12),
-            isRoot ? const Color(0xFF3A2600) : scheme.onPrimary, size: 9);
+            isRoot ? kOnAmber : scheme.onPrimary, size: 9);
       }
     }
   }
@@ -362,6 +439,8 @@ class PianoPainter extends CustomPainter {
 }
 
 /// Stacked bars (one per day) with a baseline and a light max grid line.
+/// [progress] 0..1 grows the bars up from the baseline left to right (each
+/// bar starts a little after the one before), so the chart "rises" in.
 class StackedBarPainter extends CustomPainter {
   const StackedBarPainter({
     required this.bars,
@@ -369,6 +448,7 @@ class StackedBarPainter extends CustomPainter {
     required this.labels,
     required this.scheme,
     this.highlightIndex,
+    this.progress = 1,
   });
 
   /// bars[day][series] in minutes.
@@ -377,6 +457,16 @@ class StackedBarPainter extends CustomPainter {
   final List<String> labels;
   final ColorScheme scheme;
   final int? highlightIndex;
+  final double progress;
+
+  /// Eased growth of bar [i] at the current [progress]: bars are staggered
+  /// across the first 45% of the run so the last one still gets a full rise.
+  double _grow(int i) {
+    const stagger = 0.45;
+    final start = bars.length <= 1 ? 0.0 : stagger * i / (bars.length - 1);
+    final t = ((progress - start) / (1 - stagger)).clamp(0.0, 1.0);
+    return Curves.easeOutCubic.transform(t);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -425,10 +515,11 @@ class StackedBarPainter extends CustomPainter {
           Paint()..color = scheme.onSurface.withValues(alpha: 0.08),
         );
       }
+      final grow = _grow(i);
       for (var s = 0; s < bars[i].length; s++) {
         final v = bars[i][s];
         if (v <= 0) continue;
-        final hh = v * scale;
+        final hh = v * scale * grow;
         final rect = Rect.fromLTWH(x, y - hh, barW, hh);
         canvas.drawRRect(
           RRect.fromRectAndRadius(rect, const Radius.circular(3)),
@@ -455,20 +546,26 @@ class StackedBarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(StackedBarPainter old) =>
-      old.bars != bars || old.scheme != scheme || old.highlightIndex != highlightIndex;
+      old.bars != bars ||
+      old.scheme != scheme ||
+      old.highlightIndex != highlightIndex ||
+      old.progress != progress;
 }
 
 /// A line of in-tune ratios (0..1) per day; null days leave a gap.
+/// [progress] 0..1 draws the line in from the left.
 class AccuracyLinePainter extends CustomPainter {
   const AccuracyLinePainter({
     required this.values,
     required this.scheme,
     required this.labels,
+    this.progress = 1,
   });
 
   final List<double?> values;
   final ColorScheme scheme;
   final List<String> labels;
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -499,6 +596,10 @@ class AccuracyLinePainter extends CustomPainter {
       Paint()..color = scheme.outlineVariant.withValues(alpha: 0.6),
     );
 
+    // Reveal: everything right of the sweep line is clipped away until the
+    // run completes (labels and grid are drawn above, unclipped).
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width * Curves.easeOutCubic.transform(progress.clamp(0, 1)), size.height));
     Path? path;
     final line = Paint()
       ..color = kInTuneGreen
@@ -521,6 +622,10 @@ class AccuracyLinePainter extends CustomPainter {
         }
         canvas.drawCircle(Offset(x, y), 3.5, Paint()..color = kInTuneGreen);
       }
+    }
+    if (path != null) canvas.drawPath(path, line);
+    canvas.restore();
+    for (var i = 0; i < values.length; i++) {
       if (i < labels.length && labels[i].isNotEmpty) {
         final tp = TextPainter(
           text: TextSpan(
@@ -531,9 +636,9 @@ class AccuracyLinePainter extends CustomPainter {
         tp.paint(canvas, Offset(slot * i + (slot - tp.width) / 2, top + h + 5));
       }
     }
-    if (path != null) canvas.drawPath(path, line);
   }
 
   @override
-  bool shouldRepaint(AccuracyLinePainter old) => old.values != values || old.scheme != scheme;
+  bool shouldRepaint(AccuracyLinePainter old) =>
+      old.values != values || old.scheme != scheme || old.progress != progress;
 }

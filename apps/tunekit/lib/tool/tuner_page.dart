@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import '../core/l10n.dart';
 import 'app_theme.dart';
@@ -187,7 +188,7 @@ class _TunerPageState extends State<TunerPage> {
   }
 }
 
-class _Hero extends StatelessWidget {
+class _Hero extends StatefulWidget {
   const _Hero({
     required this.reading,
     required this.cents,
@@ -205,24 +206,117 @@ class _Hero extends StatelessWidget {
   final bool flats;
 
   @override
+  State<_Hero> createState() => _HeroState();
+}
+
+/// The dial's signature motion: the needle is a physical pointer on a
+/// spring, so each new reading pulls it over with a little overshoot and
+/// settle instead of teleporting. While in tune the rim glows amber and
+/// breathes. Both collapse to instant updates under reduced motion.
+class _HeroState extends State<_Hero> with TickerProviderStateMixin {
+  static const SpringDescription _spring = SpringDescription(mass: 1, stiffness: 170, damping: 13);
+
+  late final AnimationController _needle = AnimationController.unbounded(vsync: this);
+  late final AnimationController _halo = AnimationController(vsync: this, duration: kMotionLong);
+  late final AnimationController _pulse =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+  double _target = 0;
+
+  double get _targetCents =>
+      widget.reading.hasPitch && widget.cents != null ? widget.cents!.clamp(-50.0, 50.0) : 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _target = _targetCents;
+    _needle.value = _target;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncGlow(force: true);
+  }
+
+  @override
+  void didUpdateWidget(_Hero old) {
+    super.didUpdateWidget(old);
+    final t = _targetCents;
+    if (t != _target) {
+      _target = t;
+      if (motionEnabled(context)) {
+        _needle.animateWith(SpringSimulation(_spring, _needle.value, t, _needle.velocity));
+      } else {
+        _needle.value = t;
+      }
+    }
+    if (old.inTune != widget.inTune) _syncGlow();
+  }
+
+  void _syncGlow({bool force = false}) {
+    final on = motionEnabled(context);
+    if (widget.inTune) {
+      if (on) {
+        _halo.forward();
+        if (!_pulse.isAnimating) _pulse.repeat(reverse: true);
+      } else {
+        _halo.value = 1;
+        _pulse.value = 1;
+      }
+    } else {
+      _pulse.stop();
+      if (on && !force) {
+        _halo.reverse();
+      } else {
+        _halo.value = 0;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _needle.dispose();
+    _halo.dispose();
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final reading = widget.reading;
+    final cents = widget.cents;
+    final inTune = widget.inTune;
     final active = reading.hasPitch;
-    final name = targetMidi == null
+    final name = widget.targetMidi == null
         ? '—'
-        : pitchClassName(pitchClassOf(targetMidi!), flats: flats);
-    final octave = targetMidi == null ? '' : octaveOf(targetMidi!).toString();
+        : pitchClassName(pitchClassOf(widget.targetMidi!), flats: widget.flats);
+    final octave = widget.targetMidi == null ? '' : octaveOf(widget.targetMidi!).toString();
     final centsText = active && cents != null
-        ? '${cents! >= 0 ? '+' : '−'}${cents!.abs().toStringAsFixed(0)}¢'
+        ? '${cents >= 0 ? '+' : '−'}${cents.abs().toStringAsFixed(0)}¢'
         : '';
     final hz = reading.frequency == null ? '' : '${reading.frequency!.toStringAsFixed(1)} Hz';
-    final accent = !active ? cs.onSurface.withValues(alpha: 0.5) : (inTune ? kInTuneGreen : kOffCoral);
+    final accent = !active ? Colors.white.withValues(alpha: 0.5) : (inTune ? kInTuneGreen : kBeatAmber);
+    final status = !widget.running
+        ? tr(zh: '未开始', en: 'Idle')
+        : !active
+            ? tr(zh: '等待声音', en: 'Listening')
+            : inTune
+                ? tr(zh: '准了', en: 'In tune')
+                : (cents! < 0 ? tr(zh: '偏低 ↑', en: 'Flat ↑') : tr(zh: '偏高 ↓', en: 'Sharp ↓'));
 
     return Container(
       decoration: BoxDecoration(
         gradient: heroGradient(Theme.of(context).brightness),
         borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: kWalnutEbony.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
       child: Column(
@@ -233,32 +327,34 @@ class _Hero extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               children: [
                 Positioned.fill(
-                  child: CustomPaint(
-                    painter: TunerGaugePainter(
-                      cents: active ? cents : null,
-                      active: active,
-                      inTune: inTune,
-                      scheme: cs.copyWith(onSurface: Colors.white),
+                  child: AnimatedBuilder(
+                    animation: Listenable.merge([_needle, _halo, _pulse]),
+                    builder: (_, _) => CustomPaint(
+                      painter: TunerGaugePainter(
+                        cents: active ? _needle.value : null,
+                        active: active,
+                        inTune: inTune,
+                        glow: _halo.value * (0.55 + 0.45 * _pulse.value),
+                        scheme: cs.copyWith(onSurface: Colors.white),
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
                   bottom: 34,
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(name,
-                              style: text.displayLarge?.copyWith(
-                                  color: active ? Colors.white : Colors.white54, fontSize: 64)),
-                          Text(octave,
-                              style: text.headlineSmall?.copyWith(color: Colors.white70)),
-                        ],
-                      ),
-                    ],
+                  child: SwapFade(
+                    child: Row(
+                      key: ValueKey('$name$octave$active'),
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(name,
+                            style: text.displayLarge?.copyWith(
+                                color: active ? Colors.white : Colors.white54, fontSize: 64)),
+                        Text(octave, style: text.headlineSmall?.copyWith(color: Colors.white70)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -275,21 +371,21 @@ class _Hero extends StatelessWidget {
                     style: text.titleLarge?.copyWith(color: accent, fontFeatures: const [FontFeature.tabularFigures()])),
               ),
               const SizedBox(width: 16),
-              Container(
+              AnimatedContainer(
+                duration: kMotionMedium,
+                curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(
-                  !running
-                      ? tr(zh: '未开始', en: 'Idle')
-                      : !active
-                          ? tr(zh: '等待声音', en: 'Listening')
-                          : inTune
-                              ? tr(zh: '准了', en: 'In tune')
-                              : (cents! < 0 ? tr(zh: '偏低 ↑', en: 'Flat ↑') : tr(zh: '偏高 ↓', en: 'Sharp ↓')),
-                  style: text.labelLarge?.copyWith(color: active ? accent : Colors.white70),
+                child: SwapFade(
+                  duration: kMotionShort,
+                  child: Text(
+                    status,
+                    key: ValueKey(status),
+                    style: text.labelLarge?.copyWith(color: active ? accent : Colors.white70),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -304,11 +400,15 @@ class _Hero extends StatelessWidget {
           // Input level meter.
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: reading.level.clamp(0, 1),
-              minHeight: 4,
-              backgroundColor: Colors.white.withValues(alpha: 0.12),
-              color: reading.level > 0.05 ? kInTuneGreen.withValues(alpha: 0.8) : Colors.white24,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: reading.level.clamp(0, 1)),
+              duration: const Duration(milliseconds: 90),
+              builder: (_, v, _) => LinearProgressIndicator(
+                value: v,
+                minHeight: 4,
+                backgroundColor: Colors.white.withValues(alpha: 0.12),
+                color: v > 0.05 ? kBeatAmber.withValues(alpha: 0.85) : Colors.white24,
+              ),
             ),
           ),
         ],

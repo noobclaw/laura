@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/branding.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
+import 'app_theme.dart';
 import 'engine/output.dart';
 import 'models.dart';
 import 'pro.dart';
@@ -13,11 +14,13 @@ import 'ui/convert_screen.dart';
 import 'ui/crop_screen.dart';
 import 'ui/metadata_screen.dart';
 import 'ui/resize_screen.dart';
+import 'ui/tool_board.dart';
 import 'ui/watermark_screen.dart';
 import 'ui/widgets.dart';
 
-/// The image toolbox: a hero + six-tool grid on the home screen, Pro rows
-/// in Settings. Everything else lives behind the tool screens.
+/// The image toolbox: the six-tile tool board is the home screen's hero and
+/// its navigation; Pro rows live in Settings. Everything else lives behind
+/// the tool screens.
 class PicboxTool extends ToolModule {
   PicboxTool();
 
@@ -103,25 +106,26 @@ class _HomeState extends State<_Home> {
       builder: (context, _) => ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
-          _Hero(count: widget.store.processedCount, pro: widget.store.pro),
-          const SizedBox(height: 20),
+          _Masthead(pro: widget.store.pro),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 10),
-            child: Text(tr(zh: '工具', en: 'Tools'),
-                style: text.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
+            child: Row(
+              children: [
+                Text(tr(zh: '工具', en: 'Tools'),
+                    style: text.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
+                const Spacer(),
+                Text(
+                  tr(zh: '点一格开始', en: 'Tap a tile to start'),
+                  style: text.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
+              ],
+            ),
           ),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.18,
-            children: [
-              for (final k in ToolKind.values) _ToolCard(meta: ToolMeta.of(k), onTap: () => _open(k)),
-            ],
-          ),
-          const SizedBox(height: 20),
+          ToolBoard(onOpen: _open),
+          const SizedBox(height: 16),
+          _Stats(count: widget.store.processedCount),
+          const SizedBox(height: 16),
           Row(
             children: [
               Icon(Icons.lock_outline, size: 16, color: cs.onSurfaceVariant),
@@ -143,77 +147,53 @@ class _HomeState extends State<_Home> {
   }
 }
 
-class _Hero extends StatelessWidget {
-  const _Hero({required this.count, required this.pro});
-  final int count;
+/// Title block above the board: name, one line of promise, the plan badge.
+class _Masthead extends StatelessWidget {
+  const _Masthead({required this.pro});
   final bool pro;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final seed = Branding.seedColor;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [seed, const Color(0xFF145C7A)],
-        ),
-        boxShadow: [BoxShadow(color: seed.withValues(alpha: 0.25), blurRadius: 18, offset: const Offset(0, 8))],
-      ),
-      child: Stack(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            right: -18,
-            top: -22,
-            child: Icon(Icons.layers_rounded, size: 140, color: Colors.white.withValues(alpha: 0.10)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      pro ? 'PRO' : tr(zh: '离线 · 免费', en: 'OFFLINE · FREE'),
-                      style: text.labelSmall?.copyWith(color: Colors.white, letterSpacing: 1, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                tr(zh: '六件图片小工具\n一次批量搞定', en: 'Six image tools,\none batch at a time'),
-                style: text.headlineSmall?.copyWith(color: Colors.white, height: 1.2),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                tr(zh: '压缩 · 缩放 · 转格式 · 裁剪 · 去元数据 · 水印', en: 'Compress · Resize · Convert · Crop · Clean · Watermark'),
-                style: text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.85)),
-              ),
-              if (count > 0) ...[
-                const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('$count', style: text.headlineMedium?.copyWith(color: Colors.white)),
-                    const SizedBox(width: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Text(tr(zh: '张已处理', en: 'pictures processed'),
-                          style: text.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.85))),
-                    ),
-                  ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr(zh: '六件图片小工具\n一次批量搞定', en: 'Six image tools,\none batch at a time'),
+                  style: text.headlineSmall?.copyWith(height: 1.15, letterSpacing: -0.3),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  tr(zh: '压缩 · 缩放 · 转格式 · 裁剪 · 去元数据 · 水印',
+                      en: 'Compress · Resize · Convert · Crop · Clean · Watermark'),
+                  style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
-            ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: pro ? Branding.seedColor : cs.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              pro ? 'PRO' : tr(zh: '离线 · 免费', en: 'OFFLINE · FREE'),
+              style: text.labelSmall?.copyWith(
+                color: pro ? Colors.white : cs.onSurfaceVariant,
+                letterSpacing: 1,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -221,53 +201,53 @@ class _Hero extends StatelessWidget {
   }
 }
 
-class _ToolCard extends StatelessWidget {
-  const _ToolCard({required this.meta, required this.onTap});
-  final ToolMeta meta;
-  final VoidCallback onTap;
+/// "N pictures processed" — the number rolls up rather than jumping.
+class _Stats extends StatelessWidget {
+  const _Stats({required this.count});
+  final int count;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return Material(
-      color: cs.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 14, 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: meta.color.withValues(alpha: 0.14),
-                ),
-                child: Icon(meta.icon, color: meta.color, size: 22),
-              ),
-              const Spacer(),
-              Text(meta.title, style: text.titleMedium),
-              const SizedBox(height: 3),
-              // Reserve two lines so titles line up across the grid whether the
-              // subtitle wraps or not (smoke screenshot showed Watermark sitting
-              // lower than Strip Metadata).
-              SizedBox(
-                height: (text.bodySmall?.fontSize ?? 12) * 1.25 * 2 + 2,
-                child: Text(
-                  meta.subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.25),
-                ),
-              ),
-            ],
+    final lime = ToolColors.compress;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: cs.surfaceContainerLow,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: lime.withValues(alpha: 0.16),
+            ),
+            child: Icon(Icons.auto_awesome_rounded, size: 18, color: lime),
           ),
-        ),
+          const SizedBox(width: 12),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: count.toDouble()),
+            duration: Motion.of(context, Motion.count),
+            curve: Curves.easeOutCubic,
+            builder: (context, v, _) => Text(
+              '${v.round()}',
+              style: text.headlineSmall?.copyWith(color: cs.onSurface),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              count == 0
+                  ? tr(zh: '张已处理 · 从上面挑一件工具开始', en: 'processed · pick a tool above to start')
+                  : tr(zh: '张已处理', en: 'pictures processed'),
+              style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -91,6 +91,13 @@ class _LogPageState extends State<LogPage> {
               decoration: BoxDecoration(
                 gradient: heroGradient(Theme.of(context).brightness),
                 borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: kWalnutEbony.withValues(alpha: 0.35),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
               child: Row(
@@ -105,7 +112,7 @@ class _LogPageState extends State<LogPage> {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text('${today.totalMinutes}',
+                            AnimatedNumber(today.totalMinutes.toDouble(),
                                 style: text.displayLarge?.copyWith(color: Colors.white, fontSize: 64, height: 1.1)),
                             const SizedBox(width: 6),
                             Text(tr(zh: '分钟', en: 'min'),
@@ -126,9 +133,15 @@ class _LogPageState extends State<LogPage> {
                   ),
                   Column(
                     children: [
-                      Icon(Icons.local_fire_department,
-                          color: store.streak > 0 ? kBeatAmber : Colors.white38, size: 36),
-                      Text('${store.streak}',
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: store.streak > 0 ? 1 : 0),
+                        duration: kMotionLong,
+                        curve: Curves.easeOutBack,
+                        builder: (_, t, child) => Transform.scale(scale: 0.8 + 0.2 * t, child: child),
+                        child: Icon(Icons.local_fire_department,
+                            color: store.streak > 0 ? kBeatAmber : Colors.white38, size: 36),
+                      ),
+                      AnimatedNumber(store.streak.toDouble(),
                           style: text.headlineMedium?.copyWith(color: Colors.white)),
                       Text(tr(zh: '天连续', en: 'day streak'),
                           style: text.labelSmall?.copyWith(color: Colors.white70)),
@@ -177,15 +190,19 @@ class _LogPageState extends State<LogPage> {
                     children: [
                       SizedBox(
                         height: 150,
-                        child: CustomPaint(
-                          painter: StackedBarPainter(
-                            bars: bars,
-                            colors: [cs.primary, kBeatAmber, kInTuneGreen],
-                            labels: labels,
-                            scheme: cs,
-                            highlightIndex: bars.length - 1,
+                        child: _ChartRise(
+                          key: ValueKey('bars-$_days'),
+                          builder: (p) => CustomPaint(
+                            painter: StackedBarPainter(
+                              bars: bars,
+                              colors: [cs.primary, kBeatAmber, kInTuneGreen],
+                              labels: labels,
+                              scheme: cs,
+                              highlightIndex: bars.length - 1,
+                              progress: p,
+                            ),
+                            size: Size.infinite,
                           ),
-                          size: Size.infinite,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -209,6 +226,7 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: '${periodSec ~/ 60}',
+                      number: (periodSec ~/ 60).toDouble(),
                       unit: tr(zh: '分钟', en: 'min'),
                       label: tr(zh: '近 $_days 天合计', en: 'Last $_days days'),
                     ),
@@ -217,6 +235,7 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: '${logs.where((l) => (l?.totalSec ?? 0) >= 60).length}',
+                      number: logs.where((l) => (l?.totalSec ?? 0) >= 60).length.toDouble(),
                       unit: '/ $_days',
                       label: tr(zh: '练习天数', en: 'Days practised'),
                     ),
@@ -231,9 +250,13 @@ class _LogPageState extends State<LogPage> {
                     children: [
                       SizedBox(
                         height: 120,
-                        child: CustomPaint(
-                          painter: AccuracyLinePainter(values: accuracy, scheme: cs, labels: labels),
-                          size: Size.infinite,
+                        child: _ChartRise(
+                          key: ValueKey('acc-$_days'),
+                          builder: (p) => CustomPaint(
+                            painter: AccuracyLinePainter(
+                                values: accuracy, scheme: cs, labels: labels, progress: p),
+                            size: Size.infinite,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -251,6 +274,7 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: samples == 0 ? '—' : '${(inTune * 100 / samples).round()}',
+                      number: samples == 0 ? null : (inTune * 100 / samples).roundToDouble(),
                       unit: samples == 0 ? null : '%',
                       label: tr(zh: '在 ±5¢ 内', en: 'Within ±5¢'),
                       color: kInTuneGreen,
@@ -260,6 +284,8 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: samples == 0 ? '—' : (absSum / samples).toStringAsFixed(1),
+                      number: samples == 0 ? null : absSum / samples,
+                      decimals: 1,
                       unit: samples == 0 ? null : '¢',
                       label: tr(zh: '平均偏差', en: 'Mean deviation'),
                     ),
@@ -272,6 +298,7 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: '$checks',
+                      number: checks.toDouble(),
                       label: tr(zh: '弹奏检查通过', en: 'Checks passed'),
                       color: kInTuneGreen,
                     ),
@@ -280,6 +307,7 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: answered == 0 ? '—' : '${(correct * 100 / answered).round()}',
+                      number: answered == 0 ? null : (correct * 100 / answered).roundToDouble(),
                       unit: answered == 0 ? null : '%',
                       label: tr(zh: '训练正确率 ($answered 题)', en: 'Drill accuracy ($answered)'),
                     ),
@@ -288,6 +316,7 @@ class _LogPageState extends State<LogPage> {
                   Expanded(
                     child: StatTile(
                       value: '${store.drillBest}',
+                      number: store.drillBest.toDouble(),
                       label: tr(zh: '训练最佳', en: 'Drill best'),
                       color: kBeatAmber,
                     ),
@@ -305,6 +334,24 @@ class _LogPageState extends State<LogPage> {
           ],
         );
       },
+    );
+  }
+}
+
+/// Runs a chart's reveal (0→1) once when it appears; give it a new key to
+/// replay (the range toggle does). Reduced motion draws it complete.
+class _ChartRise extends StatelessWidget {
+  const _ChartRise({super.key, required this.builder});
+  final Widget Function(double progress) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!motionEnabled(context)) return builder(1);
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.linear,
+      builder: (_, p, _) => builder(p),
     );
   }
 }

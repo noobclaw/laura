@@ -181,7 +181,11 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          CameraScreen(store: widget.store, sensors: widget.sensors),
+          CameraScreen(
+            store: widget.store,
+            sensors: widget.sensors,
+            onOpenGallery: () => setState(() => _index = 1),
+          ),
           GalleryScreen(store: widget.store),
         ],
       ),

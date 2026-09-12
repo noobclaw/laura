@@ -1,12 +1,14 @@
-// TuneBench launcher icon: a tuner gauge with the needle dead centre on the
-// green band, over the app's indigo seed gradient, with three metronome beat
-// dots underneath. Writes Android mipmaps, the iOS AppIcon set, the 512 px
-// Play icon and the 1024×500 feature graphic.
+// TuneBench launcher icon: a walnut disc (warm brown → deep brown gradient)
+// with one bold half-circle dial and a thick amber needle pointing dead
+// centre, a round pivot at its root. No ticks, no beat dots — the three
+// shapes stay legible at 60 px. Writes Android mipmaps, the iOS AppIcon set,
+// the 512 px Play icon and the 1024×500 feature graphic.
 //
 // Usage (sharp lives in the backend workspace on this machine):
 //   node apps/tunekit/store/make_icons.mjs
 import { createRequire } from 'node:module';
 import { mkdir, writeFile } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,41 +18,56 @@ const sharp = require('sharp');
 const here = path.dirname(fileURLToPath(import.meta.url));
 const app = path.resolve(here, '..');
 
+const WALNUT_LIGHT = '#9A7A6A';
+const WALNUT = '#6B4B3E';
+const WALNUT_DEEP = '#2E1C15';
+const AMBER = '#FFB454';
+const AMBER_DEEP = '#E0902E';
+const CREAM = '#F3E6D6';
+
 function iconSvg({ rounded }) {
   const rx = rounded ? 224 : 0;
+  // Dial geometry: centre (512, 640), radius 300. The arc runs 180° from
+  // 9 o'clock to 3 o'clock; the needle stands straight up to the arc.
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6E6EF0"/>
-      <stop offset="0.55" stop-color="#4A4DC0"/>
-      <stop offset="1" stop-color="#23255F"/>
+      <stop offset="0" stop-color="${WALNUT_LIGHT}"/>
+      <stop offset="0.5" stop-color="${WALNUT}"/>
+      <stop offset="1" stop-color="${WALNUT_DEEP}"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.5">
-      <stop offset="0" stop-color="#3DDC97" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#3DDC97" stop-opacity="0"/>
+    <radialGradient id="sheen" cx="0.3" cy="0.2" r="0.8">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="needle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${AMBER}"/>
+      <stop offset="1" stop-color="${AMBER_DEEP}"/>
+    </linearGradient>
+    <radialGradient id="pivot" cx="0.38" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#FFE3B0"/>
+      <stop offset="0.6" stop-color="${AMBER}"/>
+      <stop offset="1" stop-color="${AMBER_DEEP}"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
   </defs>
   <rect width="1024" height="1024" rx="${rx}" fill="url(#bg)"/>
-  <rect width="1024" height="1024" rx="${rx}" fill="url(#glow)"/>
-  <!-- gauge track -->
-  <path d="M 222 660 A 290 290 0 0 1 802 660" stroke="#FFFFFF" stroke-opacity="0.32" stroke-width="46" fill="none" stroke-linecap="round"/>
-  <!-- ticks -->
-  <g stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="12" stroke-linecap="round">
-    <line x1="262" y1="583" x2="300" y2="596"/>
-    <line x1="762" y1="583" x2="724" y2="596"/>
-    <line x1="352" y1="437" x2="379" y2="465"/>
-    <line x1="672" y1="437" x2="645" y2="465"/>
-  </g>
-  <!-- in-tune band -->
-  <path d="M 471 373 A 290 290 0 0 1 553 373" stroke="#3DDC97" stroke-width="46" fill="none" stroke-linecap="round"/>
-  <!-- needle -->
-  <line x1="512" y1="660" x2="512" y2="404" stroke="#3DDC97" stroke-width="30" stroke-linecap="round"/>
-  <circle cx="512" cy="660" r="46" fill="#FFFFFF"/>
-  <circle cx="512" cy="660" r="20" fill="#3DDC97"/>
-  <!-- beat dots -->
-  <circle cx="392" cy="800" r="26" fill="#FFFFFF" fill-opacity="0.45"/>
-  <circle cx="512" cy="800" r="36" fill="#FFB454"/>
-  <circle cx="632" cy="800" r="26" fill="#FFFFFF" fill-opacity="0.45"/>
+  <rect width="1024" height="1024" rx="${rx}" fill="url(#sheen)"/>
+  <!-- dial: one bold half-circle -->
+  <path d="M 212 640 A 300 300 0 0 1 812 640" stroke="#000000" stroke-opacity="0.28" stroke-width="64" fill="none" stroke-linecap="round" transform="translate(0 10)" filter="url(#shadow)"/>
+  <path d="M 212 640 A 300 300 0 0 1 812 640" stroke="${CREAM}" stroke-width="56" fill="none" stroke-linecap="round"/>
+  <!-- needle: glow, then the blade, pointing straight up to the arc -->
+  <line x1="512" y1="640" x2="512" y2="372" stroke="${AMBER}" stroke-opacity="0.55" stroke-width="70" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M 512 330 L 546 640 L 478 640 Z" fill="url(#needle)"/>
+  <!-- pivot -->
+  <circle cx="512" cy="640" r="74" fill="#000000" fill-opacity="0.3" transform="translate(0 6)" filter="url(#shadow)"/>
+  <circle cx="512" cy="640" r="66" fill="url(#pivot)"/>
+  <circle cx="512" cy="640" r="24" fill="${WALNUT_DEEP}"/>
 </svg>`;
 }
 
@@ -58,14 +75,14 @@ function featureSvg() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2A2D6E"/>
-      <stop offset="1" stop-color="#0F1130"/>
+      <stop offset="0" stop-color="#4A3129"/>
+      <stop offset="1" stop-color="#1C120E"/>
     </linearGradient>
   </defs>
   <rect width="1024" height="500" fill="url(#bg)"/>
-  <text x="400" y="215" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="700" fill="#FFFFFF">TuneBench</text>
-  <text x="402" y="280" font-family="Arial, Helvetica, sans-serif" font-size="36" fill="#C9CBEA">Tuner · Metronome · Chords &amp; Scales</text>
-  <text x="402" y="336" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#8E92C8">Offline. One-time purchase. No ads.</text>
+  <text x="400" y="215" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="700" fill="${CREAM}">TuneBench</text>
+  <text x="402" y="280" font-family="Arial, Helvetica, sans-serif" font-size="36" fill="#D9C4B5">Tuner · Metronome · Chords &amp; Scales</text>
+  <text x="402" y="336" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="${AMBER}">Offline. One-time purchase. No ads.</text>
 </svg>`;
 }
 
@@ -95,7 +112,7 @@ async function main() {
     ['Icon-App-1024x1024@1x.png', 1024],
   ];
   for (const [name, size] of ios) {
-    await sharp(squareBuf).resize(size, size).flatten({ background: '#23255F' }).removeAlpha().png().toFile(path.join(iosDir, name));
+    await sharp(squareBuf).resize(size, size).flatten({ background: WALNUT_DEEP }).removeAlpha().png().toFile(path.join(iosDir, name));
   }
 
   // Store assets.
@@ -106,7 +123,11 @@ async function main() {
     .composite([{ input: badge, left: 70, top: 100 }])
     .toFile(path.join(here, 'feature-1024x500.png'));
   await writeFile(path.join(here, 'icon-source.svg'), iconSvg({ rounded: true }));
-  console.log('icons written');
+  // Legibility check: the two sizes G6b looks at, dropped in the temp dir.
+  for (const size of [60, 120]) {
+    await sharp(roundedBuf).resize(size, size).png().toFile(path.join(os.tmpdir(), `tunekit-icon-${size}.png`));
+  }
+  console.log('icons written; previews in', os.tmpdir());
 }
 
 main().catch((e) => {

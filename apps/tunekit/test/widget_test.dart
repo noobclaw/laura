@@ -203,6 +203,9 @@ void main() {
       home: Scaffold(body: LogPage(store: store)),
     ));
     await tester.pump();
+    // Numbers on this page count up through a TweenAnimationBuilder (visual
+    // rubric 10); let the tween finish before reading the final value.
+    await tester.pump(const Duration(seconds: 2));
     expect(find.byType(CustomPaint), findsWidgets);
     expect(find.text('7'), findsWidgets); // today's minutes + 7-day total
     await tester.tap(find.text('30d'));

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../core/l10n.dart';
 import 'geo_format.dart';
 import 'models.dart';
+import 'motion.dart';
 import 'pro.dart';
 import 'sensors.dart';
 import 'store.dart';
@@ -16,17 +17,25 @@ import 'watermark.dart';
 /// current GPS/bearing/time/project, and a shutter that burns those values into
 /// the captured photo's pixels.
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key, required this.store, required this.sensors});
+  const CameraScreen({
+    super.key,
+    required this.store,
+    required this.sensors,
+    this.onOpenGallery,
+  });
 
   final FieldStampStore store;
   final SensorHub sensors;
+
+  /// Tapping the last-photo thumbnail beside the shutter jumps to the gallery.
+  final VoidCallback? onOpenGallery;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
 class _CameraScreenState extends State<CameraScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   CameraController? _controller;
   String? _cameraError;
 
@@ -34,6 +43,45 @@ class _CameraScreenState extends State<CameraScreen>
   /// button instead of a pointless "Retry".
   bool _cameraDenied = false;
   bool _capturing = false;
+
+  // --- signature motion -------------------------------------------------
+  /// Iris blades on the shutter: forward = shut (120 ms), reverse = open
+  /// (200 ms). Held shut for the whole capture so the button reads "busy".
+  late final AnimationController _aperture = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 120),
+    reverseDuration: const Duration(milliseconds: 200),
+  );
+
+  /// One breath of the corner brackets whenever GPS quality changes bucket.
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  );
+  late final Animation<double> _pulseScale = TweenSequence<double>([
+    TweenSequenceItem(tween: Tween(begin: 1, end: 1.10), weight: 40),
+    TweenSequenceItem(tween: Tween(begin: 1.10, end: 1), weight: 60),
+  ]).animate(CurvedAnimation(parent: _pulse, curve: Motion.standard));
+
+  /// Slow continuous breathing while there is no fix at all ("searching").
+  late final AnimationController _breath = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1600),
+  );
+  late final Animation<double> _breathAlpha =
+      Tween<double>(begin: 0.45, end: 1).animate(
+    CurvedAnimation(parent: _breath, curve: Curves.easeInOut),
+  );
+
+  bool _pressed = false;
+  bool _flash = false;
+  int _lastBucket = -1;
+
+  /// The photo currently flying from the shutter to the gallery entry, and
+  /// the one shown there once it lands.
+  StampPhoto? _flyPhoto;
+  StampPhoto? _lastPhoto;
+  bool _reduceMotion = false;
 
   /// Only one initialisation may be in flight. The permission prompt that
   /// `initialize()` itself raises sends the app inactive → resumed while
@@ -47,7 +95,48 @@ class _CameraScreenState extends State<CameraScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.sensors.addListener(_onSensors);
+    widget.store.addListener(_onStore);
+    _onStore();
     _initCamera();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (_reduceMotion) {
+      _breath.stop();
+      _breath.value = 1;
+    }
+  }
+
+  /// Corner brackets breathe once when the GPS quality bucket changes.
+  void _onSensors() {
+    final r = widget.sensors.snapshot();
+    final bucket = Motion.accuracyBucket(r.accuracy, hasFix: r.hasFix);
+    if (bucket == _lastBucket) return;
+    final first = _lastBucket == -1;
+    _lastBucket = bucket;
+    if (_reduceMotion) return;
+    if (bucket == 0) {
+      _breath.repeat(reverse: true);
+    } else {
+      _breath.animateTo(1, duration: const Duration(milliseconds: 300));
+    }
+    if (!first) _pulse.forward(from: 0);
+  }
+
+  /// Keep the gallery entry showing the newest photo of the current project
+  /// (project switches, deletions) — unless one is mid-flight.
+  void _onStore() {
+    if (_flyPhoto != null) return;
+    final list = widget.store.photosForProject(widget.store.currentProjectId);
+    final newest = list.isEmpty ? null : list.first;
+    if (newest?.id != _lastPhoto?.id) {
+      _lastPhoto = newest;
+      if (mounted) setState(() {});
+    }
   }
 
   Future<void> _initCamera() {
@@ -159,6 +248,11 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    widget.sensors.removeListener(_onSensors);
+    widget.store.removeListener(_onStore);
+    _aperture.dispose();
+    _pulse.dispose();
+    _breath.dispose();
     _controller?.dispose();
     super.dispose();
   }
@@ -167,9 +261,12 @@ class _CameraScreenState extends State<CameraScreen>
     final c = _controller;
     if (c == null || !c.value.isInitialized || _capturing) return;
     setState(() => _capturing = true);
+    // Iris shuts (120 ms) and stays shut until the stamped file has landed.
+    unawaited(_aperture.forward());
     try {
       final reading = widget.sensors.snapshot();
       final xfile = await c.takePicture();
+      _fireFlash();
       final bytes = await xfile.readAsBytes();
       final StampPhoto? photo;
       try {
@@ -184,6 +281,11 @@ class _CameraScreenState extends State<CameraScreen>
         unawaited(File(xfile.path).delete().catchError((_) => File(xfile.path)));
       }
       if (!mounted) return;
+      if (photo != null) {
+        // The new thumbnail lifts off the shutter and lands on the gallery
+        // entry at bottom-right; `_onStore` is muted while it is airborne.
+        setState(() => _flyPhoto = photo);
+      }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(photo == null
             ? tr(zh: '照片保存失败', en: 'Could not save photo')
@@ -200,8 +302,29 @@ class _CameraScreenState extends State<CameraScreen>
                     Text(tr(zh: '拍摄失败:$e', en: 'Capture failed: $e'))));
       }
     } finally {
-      if (mounted) setState(() => _capturing = false);
+      if (mounted) {
+        setState(() => _capturing = false);
+        unawaited(_aperture.reverse());
+      }
     }
+  }
+
+  /// 80 ms full-viewfinder white flash on capture.
+  void _fireFlash() {
+    if (!mounted || _reduceMotion) return;
+    setState(() => _flash = true);
+    Future<void>.delayed(const Duration(milliseconds: 80), () {
+      if (mounted) setState(() => _flash = false);
+    });
+  }
+
+  void _landFlight() {
+    if (!mounted) return;
+    setState(() {
+      _lastPhoto = _flyPhoto ?? _lastPhoto;
+      _flyPhoto = null;
+    });
+    _onStore();
   }
 
   // NOTE: watermark text is burned into the photo as evidence — its labels and
@@ -234,11 +357,20 @@ class _CameraScreenState extends State<CameraScreen>
               fit: StackFit.expand,
               children: [
                 _previewLayer(),
+                if (_cameraError == null) _cornerBrackets(),
                 Positioned(
                   left: 0,
                   right: 0,
                   bottom: 0,
                   child: _liveInfoBand(),
+                ),
+                // Capture flash: 80 ms of white over the whole viewfinder.
+                IgnorePointer(
+                  child: AnimatedOpacity(
+                    opacity: _flash ? 1 : 0,
+                    duration: Motion.of(context, 80),
+                    child: const ColoredBox(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -246,6 +378,48 @@ class _CameraScreenState extends State<CameraScreen>
         ),
         _shutterBar(),
       ],
+    );
+  }
+
+  /// Four L-shaped frame corners. Colour follows GPS quality (green good /
+  /// orange poor / dim white none); they breathe once on a quality change
+  /// and pulse slowly while still searching for a fix.
+  Widget _cornerBrackets() {
+    return IgnorePointer(
+      child: ListenableBuilder(
+        listenable: widget.sensors,
+        builder: (context, _) {
+          final r = widget.sensors.snapshot();
+          final bucket = Motion.accuracyBucket(r.accuracy, hasFix: r.hasFix);
+          final color = Motion.accuracyColor(bucket);
+          return AnimatedBuilder(
+            animation: Listenable.merge([_pulseScale, _breathAlpha]),
+            builder: (context, _) => Opacity(
+              opacity: bucket == 0 ? _breathAlpha.value : 1,
+              child: Transform.scale(
+                scale: _pulseScale.value,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 22, 22, 118),
+                  child: Stack(
+                    children: [
+                      for (final a in const [
+                        Alignment.topLeft,
+                        Alignment.topRight,
+                        Alignment.bottomLeft,
+                        Alignment.bottomRight,
+                      ])
+                        Align(
+                          alignment: a,
+                          child: CornerBracket(color: color, alignment: a),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -341,10 +515,30 @@ class _CameraScreenState extends State<CameraScreen>
         final acc = r.accuracy != null
             ? '±${r.accuracy!.toStringAsFixed(0)}m'
             : '';
+        final bucket = Motion.accuracyBucket(r.accuracy, hasFix: r.hasFix);
+        final accColor = Motion.accuracyColor(bucket);
+        // 5 m or better is pin-sharp; 60 m fills the whole ring.
+        final accFill = r.accuracy == null
+            ? 1.0
+            : ((r.accuracy! - 5) / 55).clamp(0.0, 1.0);
+        const coordStyle = TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            fontFeatures: [FontFeature.tabularFigures()]);
+        const subStyle = TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+            fontFeatures: [FontFeature.tabularFigures()]);
         return Container(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
           decoration: BoxDecoration(
-            border: const Border(left: BorderSide(color: Color(0xFF2E7D32), width: 4)),
+            border: Border(
+                left: BorderSide(
+                    color: r.hasFix
+                        ? const Color(0xFF2E7D32)
+                        : Motion.safetyOrange,
+                    width: 4)),
             color: Colors.black.withValues(alpha: 0.55),
           ),
           child: Column(
@@ -353,29 +547,34 @@ class _CameraScreenState extends State<CameraScreen>
             children: [
               Row(
                 children: [
-                  Icon(
-                    r.hasFix ? Icons.gps_fixed : Icons.gps_not_fixed,
-                    size: 16,
-                    color: r.hasFix ? const Color(0xFF69F0AE) : Colors.orangeAccent,
+                  // Accuracy circle: safety orange, core grows with error.
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: accFill),
+                    duration: Motion.of(context, 400),
+                    curve: Motion.standard,
+                    builder: (context, fill, _) => CustomPaint(
+                      size: const Size(18, 18),
+                      painter: AccuracyRingPainter(
+                        fill: fill,
+                        color: r.hasFix ? Motion.safetyOrange : Colors.white38,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      formatLatLon(r.latitude, r.longitude, store.coordFormat,
+                    child: RollingText(
+                      text: formatLatLon(
+                          r.latitude, r.longitude, store.coordFormat,
                           noFix: tr(zh: '尚未定位', en: 'No GPS fix')),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          fontFeatures: [FontFeature.tabularFigures()]),
+                      style: coordStyle,
                     ),
                   ),
                   if (acc.isNotEmpty)
-                    Text(acc,
-                        style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                            fontFeatures: [FontFeature.tabularFigures()])),
+                    AnimatedDefaultTextStyle(
+                      duration: Motion.of(context, 300),
+                      style: subStyle.copyWith(color: accColor),
+                      child: RollingText(text: acc, style: subStyle),
+                    ),
                 ],
               ),
               const SizedBox(height: 2),
@@ -385,10 +584,7 @@ class _CameraScreenState extends State<CameraScreen>
                 '${tr(zh: '海拔', en: 'Alt')} ${formatAltitude(r.altitude, store.altUnit)}   '
                 '${tr(zh: '方位', en: 'Bearing')} ${formatHeading(r.heading)}   '
                 '${formatTimestamp(r.time)}',
-                style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontFeatures: [FontFeature.tabularFigures()]),
+                style: subStyle,
               ),
               if (widget.sensors.locationError != null) ...[
                 const SizedBox(height: 8),
@@ -401,31 +597,158 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
+  static const double _shutterSize = 78;
+  static const double _entrySize = 48;
+  static const double _barHeight = 110;
+
+  /// Shutter bar: the iris shutter in the middle (orange ring, green disc,
+  /// six blades that shut on capture), the last-photo gallery entry at the
+  /// right, and the in-flight thumbnail that connects the two.
   Widget _shutterBar() {
     final ready = _controller?.value.isInitialized ?? false;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final canFire = ready && !_capturing;
     return Container(
-      color: Theme.of(context).colorScheme.surface,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Center(
-        child: GestureDetector(
-          onTap: ready && !_capturing ? _capture : null,
-          child: Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: ready
-                  ? const Color(0xFF2E7D32)
-                  : Theme.of(context).disabledColor,
-              border: Border.all(color: Colors.white, width: 4),
+      color: dark ? Colors.black : Theme.of(context).colorScheme.surface,
+      height: _barHeight,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final w = box.maxWidth;
+          final shutterCenter = Offset(w / 2, _barHeight / 2);
+          final entryCenter = Offset(w - 20 - _entrySize / 2, _barHeight / 2);
+          return Stack(
+            children: [
+              Positioned(
+                left: shutterCenter.dx - _shutterSize / 2,
+                top: shutterCenter.dy - _shutterSize / 2,
+                child: Semantics(
+                  button: true,
+                  enabled: canFire,
+                  label: tr(zh: '拍照', en: 'Take photo'),
+                  child: GestureDetector(
+                    onTapDown: canFire
+                        ? (_) => setState(() => _pressed = true)
+                        : null,
+                    onTapUp: (_) => setState(() => _pressed = false),
+                    onTapCancel: () => setState(() => _pressed = false),
+                    onTap: canFire ? _capture : null,
+                    child: AnimatedScale(
+                      scale: _pressed ? 0.9 : 1,
+                      duration: Motion.of(context, 110),
+                      curve: Motion.standard,
+                      child: _shutterButton(ready, dark),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: entryCenter.dx - _entrySize / 2,
+                top: entryCenter.dy - _entrySize / 2,
+                child: _galleryEntry(),
+              ),
+              if (_flyPhoto != null)
+                _FlyingThumb(
+                  key: ValueKey(_flyPhoto!.id),
+                  file: File(widget.store.photoPath(_flyPhoto!.fileName)),
+                  from: shutterCenter,
+                  to: entryCenter,
+                  size: _entrySize,
+                  duration: Motion.of(context, 520),
+                  onLanded: _landFlight,
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _shutterButton(bool ready, bool dark) {
+    final scheme = Theme.of(context).colorScheme;
+    final disc = ready ? const Color(0xFF2E7D32) : scheme.surfaceContainerHighest;
+    return AnimatedContainer(
+      duration: Motion.of(context, 250),
+      width: _shutterSize,
+      height: _shutterSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: disc,
+        border: Border.all(
+          color: ready ? Motion.safetyOrange : scheme.outlineVariant,
+          width: 3,
+        ),
+        boxShadow: ready && !dark
+            ? [
+                BoxShadow(
+                    color: const Color(0xFF2E7D32).withValues(alpha: 0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4))
+              ]
+            : null,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(9),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedBuilder(
+              animation: _aperture,
+              builder: (context, _) => CustomPaint(
+                painter: AperturePainter(
+                  closure: _aperture.value,
+                  blade: ready ? Colors.white : scheme.outline,
+                  seam: disc,
+                  rotation: _aperture.value * 0.35,
+                ),
+              ),
             ),
-            child: _capturing
-                ? const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 3),
-                  )
-                : const Icon(Icons.camera_alt, color: Colors.white, size: 30),
+            if (_capturing)
+              const Padding(
+                padding: EdgeInsets.all(4),
+                child: CircularProgressIndicator(
+                    color: Motion.safetyOrange, strokeWidth: 2.5),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Bottom-right gallery entry showing the newest photo; empty ring when the
+  /// project has none yet.
+  Widget _galleryEntry() {
+    final p = _lastPhoto;
+    final file = p == null ? null : File(widget.store.photoPath(p.fileName));
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: tr(zh: '打开相册', en: 'Open gallery'),
+      child: GestureDetector(
+        onTap: widget.onOpenGallery,
+        child: AnimatedSwitcher(
+          duration: Motion.of(context, 260),
+          switchInCurve: Motion.enter,
+          transitionBuilder: (child, anim) => FadeTransition(
+            opacity: anim,
+            child: ScaleTransition(
+                scale: Tween<double>(begin: 0.8, end: 1).animate(anim),
+                child: child),
+          ),
+          child: Container(
+            key: ValueKey(p?.id ?? 'none'),
+            width: _entrySize,
+            height: _entrySize,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: scheme.outlineVariant, width: 1.5),
+              color: scheme.surfaceContainerHighest,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: file != null && file.existsSync()
+                ? Image.file(file,
+                    fit: BoxFit.cover, cacheWidth: 160, gaplessPlayback: true)
+                : Icon(Icons.photo_library_outlined,
+                    size: 22, color: scheme.onSurfaceVariant),
           ),
         ),
       ),
@@ -512,6 +835,65 @@ Future<String?> _promptName(BuildContext context) {
       ],
     ),
   );
+}
+
+/// The freshly stamped thumbnail lifting off the shutter and landing on the
+/// gallery entry: an eased arc from [from] to [to] with a small scale-down.
+class _FlyingThumb extends StatelessWidget {
+  const _FlyingThumb({
+    super.key,
+    required this.file,
+    required this.from,
+    required this.to,
+    required this.size,
+    required this.duration,
+    required this.onLanded,
+  });
+
+  final File file;
+  final Offset from;
+  final Offset to;
+  final double size;
+  final Duration duration;
+  final VoidCallback onLanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: duration,
+      curve: Motion.standard,
+      onEnd: onLanded,
+      builder: (context, t, child) {
+        final c = Offset.lerp(from, to, t)!;
+        // A gentle lob: rises 28 px at mid-flight.
+        final lift = -28 * (1 - (2 * t - 1) * (2 * t - 1));
+        final s = 1.5 - 0.5 * t;
+        return Positioned(
+          left: c.dx - size / 2,
+          top: c.dy - size / 2 + lift,
+          child: IgnorePointer(
+            child: Transform.scale(scale: s, child: child),
+          ),
+        );
+      },
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: const [
+            BoxShadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 4))
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: file.existsSync()
+            ? Image.file(file, fit: BoxFit.cover, cacheWidth: 160)
+            : const ColoredBox(color: Colors.black26),
+      ),
+    );
+  }
 }
 
 /// The positioning problem, with the one button that fixes it. Replaces the

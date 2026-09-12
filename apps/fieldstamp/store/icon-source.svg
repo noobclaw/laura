@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3E9A43"/>
+      <stop offset="0.5" stop-color="#2E7D32"/>
+      <stop offset="1" stop-color="#0F3D17"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.38" r="0.55">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pinFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B5E20"/>
+      <stop offset="1" stop-color="#0B2E11"/>
+    </linearGradient>
+    <clipPath id="iris"><circle cx="512" cy="418" r="150"/></clipPath>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="224" fill="url(#glow)"/>
+  <!-- ground shadow under the pin tip -->
+  <ellipse cx="512" cy="856" rx="120" ry="22" fill="#000000" fill-opacity="0.28"/>
+  <!-- pin: thick white outline, deep-green body -->
+  <path d="M 512 838 L 318.6 546.2 A 232 232 0 1 1 705.4 546.2 Z" fill="url(#pinFill)" stroke="#FFFFFF" stroke-width="58" stroke-linejoin="round"/>
+  <!-- aperture: dark lens well, six light blades, orange pupil -->
+  <circle cx="512" cy="418" r="164" fill="#FFFFFF"/>
+  <circle cx="512" cy="418" r="150" fill="#06210A"/>
+  <circle cx="512" cy="418" r="66" fill="#FF8F00"/>
+  <g clip-path="url(#iris)">
+    <path d="M 512.00 266.00 A 152 152 0 0 1 643.64 342.00 L 609.91 411.15 Z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 643.64 342.00 A 152 152 0 0 1 643.64 494.00 L 566.88 499.37 Z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 643.64 494.00 A 152 152 0 0 1 512.00 570.00 L 468.98 506.21 Z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 512.00 570.00 A 152 152 0 0 1 380.36 494.00 L 414.09 424.85 Z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 380.36 494.00 A 152 152 0 0 1 380.36 342.00 L 457.12 336.63 Z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M 380.36 342.00 A 152 152 0 0 1 512.00 266.00 L 555.02 329.79 Z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+  <!-- watermark band: safety-orange rule with a tick pattern -->
+  <rect x="200" y="906" width="624" height="34" rx="17" fill="#FF8F00"/>
+  <g fill="#0F3D17" fill-opacity="0.55">
+    <rect x="236" y="916" width="120" height="14" rx="7"/>
+    <rect x="384" y="916" width="60" height="14" rx="7"/>
+    <rect x="472" y="916" width="180" height="14" rx="7"/>
+    <rect x="680" y="916" width="100" height="14" rx="7"/>
+  </g>
+</svg>

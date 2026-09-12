@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../app_theme.dart';
 import '../engine/output.dart';
 import '../engine/resize_math.dart';
 import '../models.dart';
@@ -83,8 +84,11 @@ class _ResultScreenState extends State<ResultScreen> {
                   cancelled: widget.cancelled,
                 ),
                 const SizedBox(height: 16),
-                for (final r in widget.results) ...[
-                  _ResultRow(result: r, meta: widget.meta),
+                for (final (i, r) in widget.results.indexed) ...[
+                  _Enter(
+                    delay: Duration(milliseconds: 60 * (i < 8 ? i : 8)),
+                    child: _ResultRow(result: r, meta: widget.meta),
+                  ),
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 4),
@@ -105,14 +109,30 @@ class _ResultScreenState extends State<ResultScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: FilledButton.icon(
+                    child: FilledButton(
                       onPressed: _okCount == 0 || _saving ? null : _save,
-                      icon: _saving
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : Icon(_saved ? Icons.check_rounded : Icons.save_alt_rounded),
-                      label: Text(_saved
-                          ? tr(zh: '已保存', en: 'Saved')
-                          : tr(zh: '保存到相册 ($_okCount)', en: 'Save to Photos ($_okCount)')),
+                      child: AnimatedSwitcher(
+                        duration: Motion.of(context, Motion.normal),
+                        switchInCurve: Curves.easeOutCubic,
+                        transitionBuilder: (child, anim) => FadeTransition(
+                          opacity: anim,
+                          child: ScaleTransition(scale: Tween(begin: 0.9, end: 1.0).animate(anim), child: child),
+                        ),
+                        child: Row(
+                          key: ValueKey(_saving ? 'saving' : (_saved ? 'saved' : 'save')),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_saving)
+                              const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            else
+                              Icon(_saved ? Icons.check_rounded : Icons.save_alt_rounded, size: 20),
+                            const SizedBox(width: 8),
+                            Text(_saved
+                                ? tr(zh: '已保存', en: 'Saved')
+                                : tr(zh: '保存到相册 ($_okCount)', en: 'Save to Photos ($_okCount)')),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -154,6 +174,7 @@ class _Summary extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final pct = before == 0 ? 0 : ((1 - after / before) * 100).round();
+    final dur = Motion.of(context, Motion.count);
     final showSize = meta.kind == ToolKind.compress ||
         meta.kind == ToolKind.resize ||
         meta.kind == ToolKind.convert ||
@@ -177,13 +198,22 @@ class _Summary extends StatelessWidget {
                   color: Colors.white),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  cancelled
-                      ? tr(zh: '已停止 · 完成 $ok 张', en: 'Stopped · $ok done')
-                      : failed == 0
-                          ? tr(zh: '完成 $ok 张', en: '$ok done')
-                          : tr(zh: '完成 $ok 张,$failed 张失败', en: '$ok done, $failed failed'),
-                  style: text.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                // "N done" counts up from 0 (PIPELINE #10 ③).
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: ok.toDouble()),
+                  duration: dur,
+                  curve: Curves.easeOutCubic,
+                  builder: (context, v, _) {
+                    final n = v.round();
+                    return Text(
+                      cancelled
+                          ? tr(zh: '已停止 · 完成 $n 张', en: 'Stopped · $n done')
+                          : failed == 0
+                              ? tr(zh: '完成 $n 张', en: '$n done')
+                              : tr(zh: '完成 $n 张,$failed 张失败', en: '$n done, $failed failed'),
+                      style: text.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                    );
+                  },
                 ),
               ),
             ],
@@ -199,18 +229,33 @@ class _Summary extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Icon(Icons.arrow_forward_rounded, color: Colors.white.withValues(alpha: 0.9), size: 20),
                 ),
-                Text(formatBytes(after),
-                    style: text.headlineSmall?.copyWith(color: Colors.white)),
+                // The "after" size shrinks from the "before" size, and the
+                // saved-percent pill counts up alongside it.
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: before.toDouble(), end: after.toDouble()),
+                  duration: dur,
+                  curve: Curves.easeOutCubic,
+                  builder: (context, v, _) => Text(formatBytes(v.round()),
+                      style: text.headlineSmall?.copyWith(color: Colors.white)),
+                ),
                 const Spacer(),
                 if (pct > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(999),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: pct.toDouble()),
+                    duration: dur,
+                    curve: Curves.easeOutCubic,
+                    builder: (context, v, _) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text('−${v.round()}%',
+                          style: text.labelLarge?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontFeatures: const [FontFeature.tabularFigures()])),
                     ),
-                    child: Text('−$pct%',
-                        style: text.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
                   ),
               ],
             ),
@@ -280,7 +325,7 @@ class _ResultRow extends StatelessWidget {
               if (pct != null && pct != 0)
                 Text(pct > 0 ? '−$pct%' : '+${-pct}%',
                     style: text.labelLarge?.copyWith(
-                        color: pct > 0 ? Colors.green.shade700 : cs.onSurfaceVariant,
+                        color: pct > 0 ? ToolColors.compress : cs.onSurfaceVariant,
                         fontFeatures: const [FontFeature.tabularFigures()]))
               else if (ok)
                 Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
@@ -304,6 +349,7 @@ class CompareScreen extends StatefulWidget {
 class _CompareScreenState extends State<CompareScreen> {
   double _split = 0.5;
   bool _sideBySide = false;
+  bool _dragging = false;
 
   @override
   Widget build(BuildContext context) {
@@ -337,6 +383,9 @@ class _CompareScreenState extends State<CompareScreen> {
                   )
                 : LayoutBuilder(
                     builder: (context, c) => GestureDetector(
+                      onHorizontalDragStart: (_) => setState(() => _dragging = true),
+                      onHorizontalDragEnd: (_) => setState(() => _dragging = false),
+                      onHorizontalDragCancel: () => setState(() => _dragging = false),
                       onHorizontalDragUpdate: (d) =>
                           setState(() => _split = (_split + d.delta.dx / c.maxWidth).clamp(0.02, 0.98)),
                       onTapDown: (d) => setState(() => _split = (d.localPosition.dx / c.maxWidth).clamp(0.02, 0.98)),
@@ -348,24 +397,49 @@ class _CompareScreenState extends State<CompareScreen> {
                             clipper: _LeftClipper(_split),
                             child: Image.file(File(r.source.path), fit: BoxFit.contain, cacheWidth: _compareCacheWidth(context)),
                           ),
+                          // Divider: lights up lime while the finger is on it.
                           Positioned(
                             left: c.maxWidth * _split - 1,
                             top: 0,
                             bottom: 0,
-                            child: Container(width: 2, color: Colors.white),
+                            child: AnimatedContainer(
+                              duration: Motion.of(context, Motion.fast),
+                              width: 2,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: ToolColors.compress.withValues(alpha: _dragging ? 0.9 : 0),
+                                    blurRadius: _dragging ? 14 : 0,
+                                    spreadRadius: _dragging ? 2 : 0,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                           Positioned(
                             left: c.maxWidth * _split - 18,
                             top: c.maxHeight / 2 - 18,
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6)],
+                            child: AnimatedScale(
+                              scale: _dragging ? 1.18 : 1,
+                              duration: Motion.of(context, Motion.fast),
+                              curve: Curves.easeOut,
+                              child: AnimatedContainer(
+                                duration: Motion.of(context, Motion.fast),
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: _dragging ? ToolColors.compress : Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6),
+                                    if (_dragging)
+                                      BoxShadow(color: ToolColors.compress.withValues(alpha: 0.6), blurRadius: 18, spreadRadius: 2),
+                                  ],
+                                ),
+                                child: Icon(Icons.unfold_more_rounded,
+                                    color: _dragging ? Colors.white : Colors.black87),
                               ),
-                              child: const Icon(Icons.unfold_more_rounded, color: Colors.black87),
                             ),
                           ),
                           Positioned(left: 12, top: 12, child: _Tag(tr(zh: '原图', en: 'Before'))),
@@ -461,6 +535,53 @@ class _Stat extends StatelessWidget {
             style: style ??
                 text.titleMedium?.copyWith(color: Colors.white70, fontFeatures: const [FontFeature.tabularFigures()])),
       ],
+    );
+  }
+}
+
+/// Slide-and-fade a child in after [delay]; used to stagger the result rows.
+class _Enter extends StatefulWidget {
+  const _Enter({required this.delay, required this.child});
+  final Duration delay;
+  final Widget child;
+
+  @override
+  State<_Enter> createState() => _EnterState();
+}
+
+class _EnterState extends State<_Enter> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: Motion.slow);
+  late final Animation<double> _a = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+  bool _kicked = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_kicked) return;
+    _kicked = true;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _c.value = 1;
+    } else {
+      Future<void>.delayed(widget.delay, () {
+        if (mounted) _c.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _a,
+      child: SlideTransition(
+        position: Tween(begin: const Offset(0, 0.12), end: Offset.zero).animate(_a),
+        child: widget.child,
+      ),
     );
   }
 }

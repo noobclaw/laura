@@ -91,6 +91,13 @@ class _PracticePageState extends State<PracticePage> {
               decoration: BoxDecoration(
                 gradient: heroGradient(Theme.of(context).brightness),
                 borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: kWalnutEbony.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
               child: Row(
@@ -111,13 +118,15 @@ class _PracticePageState extends State<PracticePage> {
                       ],
                     ),
                   ),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(backgroundColor: kBeatAmber, foregroundColor: const Color(0xFF1B1200)),
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => DrillPage(store: store),
-                    )),
-                    icon: const Icon(Icons.bolt),
-                    label: Text(tr(zh: '开始', en: 'Start')),
+                  PressScale(
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(backgroundColor: kBeatAmber, foregroundColor: kOnAmber),
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => DrillPage(store: store),
+                      )),
+                      icon: const Icon(Icons.bolt),
+                      label: Text(tr(zh: '开始', en: 'Start')),
+                    ),
                   ),
                 ],
               ),
@@ -145,24 +154,38 @@ class _PracticePageState extends State<PracticePage> {
               selected: {_chords},
               onSelectionChanged: (s) => setState(() => _chords = s.first),
             ),
-            for (final e in groups.entries) ...[
-              SectionTitle(groupName(e.key)),
-              Card(
-                child: Column(
-                  children: [
-                    for (var i = 0; i < e.value.length; i++) ...[
-                      _PatternTile(
-                        item: RootedPattern(_root, e.value[i]),
-                        locked: !patternAllowed(store, e.value[i]),
-                        onTap: () => _open(e.value[i]),
+            // The whole dictionary slides in as one block when switching
+            // chords↔scales, and its tiles settle top to bottom.
+            SwapFade(
+              slide: true,
+              child: Column(
+                key: ValueKey(_chords),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (gi, e) in groups.entries.indexed) ...[
+                    SectionTitle(groupName(e.key)),
+                    StaggerIn(
+                      index: gi,
+                      child: Card(
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < e.value.length; i++) ...[
+                              _PatternTile(
+                                item: RootedPattern(_root, e.value[i]),
+                                locked: !patternAllowed(store, e.value[i]),
+                                onTap: () => _open(e.value[i]),
+                              ),
+                              if (i < e.value.length - 1)
+                                Divider(indent: 16, endIndent: 16, color: cs.outlineVariant.withValues(alpha: 0.4)),
+                            ],
+                          ],
+                        ),
                       ),
-                      if (i < e.value.length - 1)
-                        Divider(indent: 16, endIndent: 16, color: cs.outlineVariant.withValues(alpha: 0.4)),
-                    ],
+                    ),
                   ],
-                ),
+                ],
               ),
-            ],
+            ),
           ],
         );
       },
@@ -234,12 +257,15 @@ class PatternDetailPage extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   for (var i = 0; i < item.pattern.semitones.length; i++)
-                    _NoteChip(
-                      name: pitchClassName((item.root + item.pattern.semitones[i]) % 12, flats: item.useFlats),
-                      degree: item.pattern.isChord
-                          ? degreeLabel(item.pattern.semitones[i])
-                          : scaleDegreeLabel(item.pattern.semitones[i]),
-                      root: i == 0,
+                    StaggerIn(
+                      index: i,
+                      child: _NoteChip(
+                        name: pitchClassName((item.root + item.pattern.semitones[i]) % 12, flats: item.useFlats),
+                        degree: item.pattern.isChord
+                            ? degreeLabel(item.pattern.semitones[i])
+                            : scaleDegreeLabel(item.pattern.semitones[i]),
+                        root: i == 0,
+                      ),
                     ),
                 ],
               ),
@@ -259,25 +285,33 @@ class PatternDetailPage extends StatelessWidget {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: SizedBox(
-                    height: inst == null ? 150 : 40.0 * (inst.strings.length - 1) + 60,
-                    child: CustomPaint(
-                      painter: inst == null
-                          ? PianoPainter(
-                              highlightMidi: item.midiNotes(baseMidi: 48).toSet(),
-                              root: item.root,
-                              scheme: cs,
-                              flats: item.useFlats,
-                            )
-                          : FretboardPainter(
-                              strings: inst.strings,
-                              scheme: cs,
-                              frets: voicing != null ? 5 : 12,
-                              highlight: pcs,
-                              root: item.root,
-                              voicing: voicing?.frets,
-                              flats: item.useFlats,
-                            ),
+                  child: AnimatedSize(
+                    duration: kMotionMedium,
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: SwapFade(
+                      child: SizedBox(
+                        key: ValueKey(instId),
+                        height: inst == null ? 150 : 40.0 * (inst.strings.length - 1) + 60,
+                        child: CustomPaint(
+                          painter: inst == null
+                              ? PianoPainter(
+                                  highlightMidi: item.midiNotes(baseMidi: 48).toSet(),
+                                  root: item.root,
+                                  scheme: cs,
+                                  flats: item.useFlats,
+                                )
+                              : FretboardPainter(
+                                  strings: inst.strings,
+                                  scheme: cs,
+                                  frets: voicing != null ? 5 : 12,
+                                  highlight: pcs,
+                                  root: item.root,
+                                  voicing: voicing?.frets,
+                                  flats: item.useFlats,
+                                ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -322,15 +356,18 @@ class PatternDetailPage extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 20),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => CheckPage(store: store, mic: mic, item: item, instrument: inst, voicing: voicing),
-                )),
-                icon: const Icon(Icons.mic),
-                label: Text(item.pattern.isChord
-                    ? tr(zh: '弹奏检查:弹这个和弦,我来听', en: 'Play and check: play the chord, I listen')
-                    : tr(zh: '弹奏检查:上行弹一遍音阶', en: 'Play and check: play the scale ascending')),
+              PressScale(
+                pressedScale: 0.97,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => CheckPage(store: store, mic: mic, item: item, instrument: inst, voicing: voicing),
+                  )),
+                  icon: const Icon(Icons.mic),
+                  label: Text(item.pattern.isChord
+                      ? tr(zh: '弹奏检查:弹这个和弦,我来听', en: 'Play and check: play the chord, I listen')
+                      : tr(zh: '弹奏检查:上行弹一遍音阶', en: 'Play and check: play the scale ascending')),
+                ),
               ),
             ],
           ),
@@ -557,6 +594,13 @@ class _CheckPageState extends State<CheckPage> {
                 decoration: BoxDecoration(
                   gradient: heroGradient(Theme.of(context).brightness),
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kWalnutEbony.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                 child: Row(
@@ -576,17 +620,28 @@ class _CheckPageState extends State<CheckPage> {
                             style: text.titleMedium?.copyWith(color: Colors.white),
                           ),
                           const SizedBox(height: 4),
-                          Text('$done / ${_targets.length}',
-                              style: text.bodyMedium?.copyWith(color: Colors.white70)),
+                          Row(
+                            children: [
+                              AnimatedNumber(done.toDouble(),
+                                  duration: kMotionMedium,
+                                  style: text.bodyMedium?.copyWith(color: Colors.white70)),
+                              Text(' / ${_targets.length}',
+                                  style: text.bodyMedium?.copyWith(color: Colors.white70)),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                     Column(
                       children: [
-                        Text(
-                          r.hasPitch ? noteName(r.midi!, flats: item.useFlats) : '—',
-                          style: text.headlineMedium?.copyWith(
-                              color: r.hasPitch ? (r.inTune ? kInTuneGreen : Colors.white) : Colors.white38),
+                        SwapFade(
+                          duration: kMotionShort,
+                          child: Text(
+                            r.hasPitch ? noteName(r.midi!, flats: item.useFlats) : '—',
+                            key: ValueKey(r.hasPitch ? r.midi : -1),
+                            style: text.headlineMedium?.copyWith(
+                                color: r.hasPitch ? (r.inTune ? kInTuneGreen : Colors.white) : Colors.white38),
+                          ),
                         ),
                         Text(
                           r.hasPitch && r.cents != null ? '${r.cents! >= 0 ? '+' : '−'}${r.cents!.abs().round()}¢' : '',
@@ -629,9 +684,12 @@ class _CheckPageState extends State<CheckPage> {
                     for (final t in _targets)
                       ListTile(
                         dense: true,
-                        leading: Icon(
-                          t.done ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: t.done ? (t.cents!.abs() <= PitchTracker.inTuneCents ? kInTuneGreen : kBeatAmber) : cs.onSurfaceVariant,
+                        leading: SwapFade(
+                          child: Icon(
+                            t.done ? Icons.check_circle : Icons.radio_button_unchecked,
+                            key: ValueKey(t.done),
+                            color: t.done ? (t.cents!.abs() <= PitchTracker.inTuneCents ? kInTuneGreen : kBeatAmber) : cs.onSurfaceVariant,
+                          ),
                         ),
                         title: Text(t.label),
                         trailing: Text(
@@ -643,21 +701,27 @@ class _CheckPageState extends State<CheckPage> {
                   ],
                 ),
               ),
-              if (_passed) ...[
-                const SizedBox(height: 16),
-                GuidanceCard(
-                  icon: Icons.emoji_events,
-                  tint: kInTuneGreen,
-                  title: tr(zh: '通过 · 平均偏差 ${meanAbs!.toStringAsFixed(1)}¢', en: 'Passed · mean deviation ${meanAbs.toStringAsFixed(1)}¢'),
-                  body: meanAbs <= PitchTracker.inTuneCents
-                      ? tr(zh: '每个音都在 ±5 音分以内,琴也调得很准。', en: 'Every note within ±5 cents — the instrument is well tuned too.')
-                      : tr(zh: '音都对了,但有几根弦偏了一些,去调音页再校一下。', en: 'The notes are right, but a few were off — a quick visit to the tuner will help.'),
-                  action: FilledButton.tonal(
-                    onPressed: () => setState(_reset),
-                    child: Text(tr(zh: '再来一次', en: 'Again')),
-                  ),
-                ),
-              ],
+              SwapFade(
+                slide: true,
+                child: !_passed
+                    ? const SizedBox.shrink(key: ValueKey('pending'))
+                    : Padding(
+                        key: const ValueKey('passed'),
+                        padding: const EdgeInsets.only(top: 16),
+                        child: GuidanceCard(
+                          icon: Icons.emoji_events,
+                          tint: kInTuneGreen,
+                          title: tr(zh: '通过 · 平均偏差 ${meanAbs!.toStringAsFixed(1)}¢', en: 'Passed · mean deviation ${meanAbs.toStringAsFixed(1)}¢'),
+                          body: meanAbs <= PitchTracker.inTuneCents
+                              ? tr(zh: '每个音都在 ±5 音分以内,琴也调得很准。', en: 'Every note within ±5 cents — the instrument is well tuned too.')
+                              : tr(zh: '音都对了,但有几根弦偏了一些,去调音页再校一下。', en: 'The notes are right, but a few were off — a quick visit to the tuner will help.'),
+                          action: FilledButton.tonal(
+                            onPressed: () => setState(_reset),
+                            child: Text(tr(zh: '再来一次', en: 'Again')),
+                          ),
+                        ),
+                      ),
+              ),
             ],
           );
         },
@@ -848,41 +912,68 @@ class _DrillPageState extends State<DrillPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Center(child: Text('$_score', style: text.titleLarge?.copyWith(color: kBeatAmber))),
+            child: Center(
+              child: AnimatedNumber(_score.toDouble(),
+                  duration: kMotionLong, style: text.titleLarge?.copyWith(color: kBeatAmber)),
+            ),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          LinearProgressIndicator(
-            value: _index / DrillPage.rounds,
-            minHeight: 4,
-            borderRadius: BorderRadius.circular(2),
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: _index / DrillPage.rounds),
+            duration: kMotionLong,
+            curve: Curves.easeOutCubic,
+            builder: (_, v, _) => LinearProgressIndicator(
+              value: v,
+              minHeight: 4,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
           const SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(
-              gradient: heroGradient(Theme.of(context).brightness),
-              borderRadius: BorderRadius.circular(24),
+          SwapFade(
+            slide: true,
+            child: Column(
+              key: ValueKey(_index),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: heroGradient(Theme.of(context).brightness),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kWalnutEbony.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Text(q.prompt,
+                      textAlign: TextAlign.center,
+                      style: text.headlineSmall?.copyWith(color: Colors.white, height: 1.35)),
+                ),
+                const SizedBox(height: 20),
+                for (var i = 0; i < q.options.length; i++) ...[
+                  StaggerIn(
+                    index: i + 1,
+                    child: _Option(
+                      text: q.options[i],
+                      state: _chosen == null
+                          ? null
+                          : (i == q.answer ? true : (i == _chosen ? false : null)),
+                      dim: _chosen != null && i != q.answer && i != _chosen,
+                      onTap: () => _choose(i),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
             ),
-            padding: const EdgeInsets.all(24),
-            child: Text(q.prompt,
-                textAlign: TextAlign.center,
-                style: text.headlineSmall?.copyWith(color: Colors.white, height: 1.35)),
           ),
-          const SizedBox(height: 20),
-          for (var i = 0; i < q.options.length; i++) ...[
-            _Option(
-              text: q.options[i],
-              state: _chosen == null
-                  ? null
-                  : (i == q.answer ? true : (i == _chosen ? false : null)),
-              dim: _chosen != null && i != q.answer && i != _chosen,
-              onTap: () => _choose(i),
-            ),
-            const SizedBox(height: 10),
-          ],
           if (_chosen != null && _chosen != q.answer)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -909,25 +1000,45 @@ class _Option extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final color = state == null ? cs.surfaceContainerHigh : (state! ? kInTuneGreen.withValues(alpha: 0.22) : kOffCoral.withValues(alpha: 0.22));
-    return Opacity(
+    // Answer state fades in: tint, border and the verdict icon all animate
+    // rather than snapping, and the wrong pick sinks slightly.
+    return AnimatedOpacity(
       opacity: dim ? 0.5 : 1,
-      child: Material(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            decoration: BoxDecoration(
+      duration: kMotionMedium,
+      child: PressScale(
+        pressedScale: 0.97,
+        child: AnimatedScale(
+          scale: state == false ? 0.98 : 1,
+          duration: kMotionMedium,
+          curve: Curves.easeOutCubic,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: state == null ? Colors.transparent : (state! ? kInTuneGreen : kOffCoral), width: 1.5),
-            ),
-            child: Row(
-              children: [
-                Expanded(child: Text(text, style: Theme.of(context).textTheme.titleMedium)),
-                if (state != null) Icon(state! ? Icons.check_circle : Icons.cancel, color: state! ? kInTuneGreen : kOffCoral),
-              ],
+              onTap: onTap,
+              child: AnimatedContainer(
+                duration: kMotionMedium,
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: state == null ? Colors.transparent : (state! ? kInTuneGreen : kOffCoral), width: 1.5),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(text, style: Theme.of(context).textTheme.titleMedium)),
+                    SwapFade(
+                      duration: kMotionShort,
+                      child: state == null
+                          ? const SizedBox(key: ValueKey('none'), width: 24, height: 24)
+                          : Icon(state! ? Icons.check_circle : Icons.cancel,
+                              key: ValueKey(state), color: state! ? kInTuneGreen : kOffCoral),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

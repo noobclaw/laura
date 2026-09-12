@@ -7,6 +7,7 @@ import '../core/l10n.dart';
 import 'export.dart';
 import 'geo_format.dart';
 import 'models.dart';
+import 'motion.dart';
 import 'pro.dart';
 import 'store.dart';
 
@@ -26,6 +27,56 @@ class _GalleryScreenState extends State<GalleryScreen> {
   bool _selecting = false;
   bool _busy = false;
 
+  /// What the [AnimatedGrid] currently shows. Kept in step with the store by
+  /// diffing on every notification: new photos animate in at their slot,
+  /// deleted ones animate out. A project switch resets the grid outright.
+  final List<StampPhoto> _shown = [];
+  String? _shownProject;
+  GlobalKey<AnimatedGridState> _gridKey = GlobalKey<AnimatedGridState>();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.store.addListener(_syncGrid);
+    _syncGrid();
+  }
+
+  @override
+  void dispose() {
+    widget.store.removeListener(_syncGrid);
+    super.dispose();
+  }
+
+  void _syncGrid() {
+    final store = widget.store;
+    final target = store.photosForProject(store.currentProjectId);
+    final grid = _gridKey.currentState;
+    if (grid == null || _shownProject != store.currentProjectId) {
+      _shown
+        ..clear()
+        ..addAll(target);
+      _shownProject = store.currentProjectId;
+      _gridKey = GlobalKey<AnimatedGridState>();
+      return;
+    }
+    final targetIds = {for (final p in target) p.id};
+    for (var i = _shown.length - 1; i >= 0; i--) {
+      if (targetIds.contains(_shown[i].id)) continue;
+      final gone = _shown.removeAt(i);
+      grid.removeItem(
+        i,
+        (context, anim) => _tile(store, gone, anim, ghost: true),
+        duration: Motion.of(context, 220),
+      );
+    }
+    final shownIds = {for (final p in _shown) p.id};
+    for (var i = 0; i < target.length; i++) {
+      if (shownIds.contains(target[i].id)) continue;
+      _shown.insert(i, target[i]);
+      grid.insertItem(i, duration: Motion.of(context, 360));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = widget.store;
@@ -40,9 +91,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
           children: [
             _header(store, photos),
             Expanded(
-              child: photos.isEmpty
-                  ? const _EmptyGallery()
-                  : _grid(store, photos),
+              child: AnimatedSwitcher(
+                duration: Motion.of(context, 260),
+                switchInCurve: Motion.enter,
+                child: photos.isEmpty
+                    ? const _EmptyGallery()
+                    : _grid(store),
+              ),
             ),
           ],
         );
@@ -68,10 +123,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         }),
               ),
               Expanded(
-                child: Text(
-                    tr(zh: '已选 ${_selected.length} 项',
-                        en: '${_selected.length} selected'),
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                child: Row(
+                  children: [
+                    _RollingCount(
+                        value: _selected.length,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(width: 4),
+                    Text(tr(zh: '项已选', en: 'selected'),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ),
               ),
               IconButton(
                 tooltip: tr(zh: '分享图片', en: 'Share images'),
@@ -103,20 +164,61 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
       );
     }
+    final cs = Theme.of(context).colorScheme;
+    final withFix = photos.where((p) => p.hasFix).length;
     return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      color: cs.surfaceContainerHighest,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
         child: Row(
           children: [
-            const Icon(Icons.folder_outlined, size: 20),
+            Icon(Icons.folder_outlined, size: 20, color: cs.onSurfaceVariant),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                tr(zh: '${store.projectName(store.currentProjectId)} · ${photos.length} 张照片',
-                    en: '${store.projectName(store.currentProjectId)} · ${photos.length} photos'),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    store.projectName(store.currentProjectId),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  // Two live counters: total photos and how many carry a fix.
+                  Row(
+                    children: [
+                      _RollingCount(
+                        value: photos.length,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(tr(zh: '张照片', en: 'photos'),
+                          style: TextStyle(
+                              color: cs.onSurfaceVariant, fontSize: 12)),
+                      const SizedBox(width: 12),
+                      Icon(Icons.gps_fixed,
+                          size: 13,
+                          color: withFix == photos.length && photos.isNotEmpty
+                              ? cs.primary
+                              : Motion.safetyOrange),
+                      const SizedBox(width: 4),
+                      _RollingCount(
+                        value: withFix,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(tr(zh: '含 GPS', en: 'with GPS'),
+                          style: TextStyle(
+                              color: cs.onSurfaceVariant, fontSize: 12)),
+                    ],
+                  ),
+                ],
               ),
             ),
             if (photos.isNotEmpty)
@@ -131,68 +233,110 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
-  Widget _grid(FieldStampStore store, List<StampPhoto> photos) {
-    return GridView.builder(
+  Widget _grid(FieldStampStore store) {
+    return AnimatedGrid(
+      key: _gridKey,
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
-      itemCount: photos.length,
-      itemBuilder: (context, i) {
-        final p = photos[i];
-        final selected = _selected.contains(p.id);
-        return GestureDetector(
-          onTap: () {
-            if (_selecting) {
-              setState(() {
-                if (selected) {
-                  _selected.remove(p.id);
-                } else {
-                  _selected.add(p.id);
-                }
-              });
-            } else {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => PhotoDetailScreen(store: store, photo: p),
-              ));
-            }
-          },
-          onLongPress: () => setState(() {
-            _selecting = true;
-            _selected.add(p.id);
-          }),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _thumb(store, p),
-                if (!p.hasFix)
-                  const Positioned(
-                    left: 4,
-                    top: 4,
-                    child: Icon(Icons.gps_off,
-                        size: 16, color: Colors.orangeAccent),
-                  ),
-                if (_selecting)
-                  Positioned(
-                    right: 4,
-                    top: 4,
-                    child: Icon(
-                      selected
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color:
-                          selected ? Colors.lightGreenAccent : Colors.white70,
+      initialItemCount: _shown.length,
+      itemBuilder: (context, i, anim) => _tile(store, _shown[i], anim),
+    );
+  }
+
+  /// One grid cell. Enters with a fade + scale-up; when [ghost] it is the
+  /// outgoing copy of a deleted photo, driven by the reverse of [anim].
+  Widget _tile(FieldStampStore store, StampPhoto p, Animation<double> anim,
+      {bool ghost = false}) {
+    final selected = _selected.contains(p.id);
+    final curved = CurvedAnimation(
+        parent: anim, curve: Motion.enter, reverseCurve: Curves.easeInCubic);
+    return FadeTransition(
+      opacity: curved,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 0.82, end: 1).animate(curved),
+        child: GestureDetector(
+          onTap: ghost
+              ? null
+              : () {
+                  if (_selecting) {
+                    setState(() {
+                      if (selected) {
+                        _selected.remove(p.id);
+                      } else {
+                        _selected.add(p.id);
+                      }
+                    });
+                  } else {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => PhotoDetailScreen(
+                          store: store, photo: p, heroTag: 'photo-${p.id}'),
+                    ));
+                  }
+                },
+          onLongPress: ghost
+              ? null
+              : () => setState(() {
+                    _selecting = true;
+                    _selected.add(p.id);
+                  }),
+          child: AnimatedContainer(
+            duration: Motion.of(context, 180),
+            curve: Motion.standard,
+            padding: EdgeInsets.all(selected ? 6 : 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: selected
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Colors.transparent,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(selected ? 8 : 12),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ghost
+                      ? _thumb(store, p)
+                      : Hero(tag: 'photo-${p.id}', child: _thumb(store, p)),
+                  if (!p.hasFix)
+                    const Positioned(
+                      left: 4,
+                      top: 4,
+                      child: Icon(Icons.gps_off,
+                          size: 16, color: Motion.safetyOrange),
                     ),
-                  ),
-              ],
+                  if (_selecting)
+                    Positioned(
+                      right: 4,
+                      top: 4,
+                      child: AnimatedSwitcher(
+                        duration: Motion.of(context, 160),
+                        switchInCurve: Curves.easeOutBack,
+                        transitionBuilder: (child, a) =>
+                            ScaleTransition(scale: a, child: child),
+                        child: Icon(
+                          selected
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          key: ValueKey(selected),
+                          color: selected
+                              ? Colors.lightGreenAccent
+                              : Colors.white70,
+                          shadows: const [
+                            Shadow(color: Colors.black54, blurRadius: 4)
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -343,20 +487,81 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 }
 
+/// Counter that rolls to its new value instead of jumping.
+class _RollingCount extends StatelessWidget {
+  const _RollingCount({required this.value, required this.style});
+
+  final int value;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: value.toDouble()),
+      duration: Motion.of(context, 500),
+      curve: Motion.standard,
+      builder: (context, v, _) => Text(
+        v.round().toString(),
+        style: style.copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()]),
+      ),
+    );
+  }
+}
+
 class _EmptyGallery extends StatelessWidget {
   const _EmptyGallery();
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.photo_library_outlined,
-                size: 72, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
+            // A miniature of the viewfinder: brackets + the iris shutter.
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: Stack(
+                children: [
+                  for (final a in const [
+                    Alignment.topLeft,
+                    Alignment.topRight,
+                    Alignment.bottomLeft,
+                    Alignment.bottomRight,
+                  ])
+                    Align(
+                      alignment: a,
+                      child: CornerBracket(
+                          color: cs.primary, alignment: a, size: 30),
+                    ),
+                  Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: cs.primary,
+                        border: Border.all(
+                            color: Motion.safetyOrange, width: 3),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: CustomPaint(
+                        painter: AperturePainter(
+                          closure: 0.25,
+                          blade: cs.onPrimary,
+                          seam: cs.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
             Text(tr(zh: '还没有照片', en: 'No photos yet'),
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
@@ -377,10 +582,18 @@ class _EmptyGallery extends StatelessWidget {
 
 /// Full-screen view of a single stamped photo plus its metadata.
 class PhotoDetailScreen extends StatefulWidget {
-  const PhotoDetailScreen({super.key, required this.store, required this.photo});
+  const PhotoDetailScreen({
+    super.key,
+    required this.store,
+    required this.photo,
+    this.heroTag,
+  });
 
   final FieldStampStore store;
   final StampPhoto photo;
+
+  /// Matches the Hero on the grid tile that opened this page.
+  final Object? heroTag;
 
   @override
   State<PhotoDetailScreen> createState() => _PhotoDetailScreenState();
@@ -447,11 +660,15 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
         children: [
           Container(
             color: Colors.black,
-            child: file.existsSync()
-                ? Image.file(file, fit: BoxFit.contain)
-                : const SizedBox(
-                    height: 240,
-                    child: Center(child: Icon(Icons.broken_image_outlined))),
+            child: Hero(
+              tag: widget.heroTag ?? 'detail-${p.id}',
+              child: file.existsSync()
+                  ? Image.file(file, fit: BoxFit.contain)
+                  : const SizedBox(
+                      height: 240,
+                      child:
+                          Center(child: Icon(Icons.broken_image_outlined))),
+            ),
           ),
           _metaCard(context, store, p),
           ListTile(

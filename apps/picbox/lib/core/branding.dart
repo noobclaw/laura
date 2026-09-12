@@ -14,9 +14,11 @@ abstract final class Branding {
 
   static const String version = '1.0.0';
 
-  /// Seed for the Material 3 color scheme: a deep teal — "darkroom" tools,
-  /// not a social photo app.
-  static const Color seedColor = Color(0xFF0F8B8D);
+  /// Seed for the Material 3 color scheme: lime (hue ~88°) — a fresh
+  /// "workbench" green that no sibling app uses (echo-jot/remcard own teal,
+  /// fieldstamp owns forest green). Surfaces are cream in light mode and
+  /// charcoal in dark mode (tool/app_theme.dart).
+  static const Color seedColor = Color(0xFF7CB342);
 
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the app ships without the INTERNET permission. The second paragraph is

@@ -20,6 +20,18 @@ ThemeData buildFieldStampTheme(Brightness brightness) {
 
   const tab = <FontFeature>[FontFeature.tabularFigures()];
   return theme.copyWith(
+    // Material 3 fade-forwards on every platform instead of the default hard
+    // cut; photo detail rides a Hero on top of it.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+      },
+    ),
     cardTheme: CardThemeData(
       elevation: 0,
       color: scheme.surfaceContainerHigh,

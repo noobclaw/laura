@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../app_theme.dart';
 import '../engine/jobs.dart';
 import '../engine/output.dart';
 import '../engine/picker.dart';
@@ -11,6 +12,7 @@ import '../models.dart';
 import '../pro.dart';
 import '../store.dart';
 import 'result_screen.dart';
+import 'tool_glyph.dart';
 import 'widgets.dart';
 
 /// Per-run facts handed to every [RunOne] call.
@@ -75,8 +77,11 @@ class ToolScaffold extends StatefulWidget {
 class _ToolScaffoldState extends State<ToolScaffold> {
   final List<SourceImage> _images = [];
   final ImageImporter _importer = ImageImporter();
+  // Drives insert/remove animations of the thumbnail strip (see _ImageStrip).
+  final GlobalKey<AnimatedListState> _stripKey = GlobalKey<AnimatedListState>();
   bool _importing = false;
   bool _running = false;
+  bool _pressed = false;
 
   ToolMeta get meta => ToolMeta.of(widget.kind);
 
@@ -87,10 +92,22 @@ class _ToolScaffoldState extends State<ToolScaffold> {
         ? await _importer.captureFromCamera()
         : await _importer.pickFromLibrary();
     if (!mounted) return;
+    final wasEmpty = _images.isEmpty;
+    final from = _images.length;
     setState(() {
       _importing = false;
       _images.addAll(r.images);
     });
+    // The strip is created with initialItemCount when the first pictures
+    // arrive (the AnimatedSwitcher fades it in); later additions animate in
+    // one by one.
+    if (!wasEmpty && r.images.isNotEmpty) {
+      _stripKey.currentState?.insertAllItems(
+        from,
+        r.images.length,
+        duration: Motion.of(context, Motion.slow),
+      );
+    }
     widget.onImagesChanged?.call(List.unmodifiable(_images));
     if (r.error != null) {
       showNotice(
@@ -121,7 +138,17 @@ class _ToolScaffoldState extends State<ToolScaffold> {
   }
 
   void _remove(SourceImage s) {
-    setState(() => _images.removeWhere((e) => e.id == s.id));
+    final i = _images.indexWhere((e) => e.id == s.id);
+    if (i < 0) return;
+    if (_images.length > 1) {
+      // Collapse the tile; the list itself shrinks in the same frame.
+      _stripKey.currentState?.removeItem(
+        i,
+        (context, anim) => _StripTile.removed(image: s, animation: anim),
+        duration: Motion.of(context, Motion.normal),
+      );
+    }
+    setState(() => _images.removeAt(i));
     widget.onImagesChanged?.call(List.unmodifiable(_images));
   }
 
@@ -255,22 +282,33 @@ class _ToolScaffoldState extends State<ToolScaffold> {
               children: [
                 _Header(meta: meta),
                 const SizedBox(height: 16),
-                if (_images.isEmpty)
-                  _EmptyPicker(
-                    meta: meta,
-                    busy: _importing,
-                    onPick: () => _import(camera: false),
-                    onCamera: () => _import(camera: true),
-                  )
-                else
-                  _ImageStrip(
-                    images: _images,
-                    busy: _importing,
-                    onAdd: () => _import(camera: false),
-                    onCamera: () => _import(camera: true),
-                    onRemove: _remove,
-                    pro: widget.store.pro,
+                AnimatedSwitcher(
+                  duration: Motion.of(context, Motion.normal),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, anim) => FadeTransition(
+                    opacity: anim,
+                    child: SizeTransition(sizeFactor: anim, alignment: Alignment.topCenter, child: child),
                   ),
+                  child: _images.isEmpty
+                      ? _EmptyPicker(
+                          key: const ValueKey('empty'),
+                          meta: meta,
+                          busy: _importing,
+                          onPick: () => _import(camera: false),
+                          onCamera: () => _import(camera: true),
+                        )
+                      : _ImageStrip(
+                          key: const ValueKey('strip'),
+                          listKey: _stripKey,
+                          images: _images,
+                          busy: _importing,
+                          onAdd: () => _import(camera: false),
+                          onCamera: () => _import(camera: true),
+                          onRemove: _remove,
+                          pro: widget.store.pro,
+                        ),
+                ),
                 if (_images.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   Padding(
@@ -320,19 +358,63 @@ class _ToolScaffoldState extends State<ToolScaffold> {
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: FilledButton.icon(
-                onPressed: canRun ? _run : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: canRun ? meta.color : null,
-                ),
-                icon: Icon(meta.icon),
-                label: Text(
-                  _images.isEmpty
-                      ? tr(zh: '先选择图片', en: 'Pick images first')
-                      : tr(
-                          zh: '开始处理 ${_images.length} 张',
-                          en: 'Process ${_images.length}',
+              // Hero button: squashes under the finger, and its face
+              // cross-fades between "pick first" / "process N" / "working".
+              child: Listener(
+                onPointerDown: canRun ? (_) => setState(() => _pressed = true) : null,
+                onPointerUp: (_) => setState(() => _pressed = false),
+                onPointerCancel: (_) => setState(() => _pressed = false),
+                child: AnimatedScale(
+                  scale: _pressed ? 0.965 : 1,
+                  duration: Motion.of(context, Motion.fast),
+                  curve: Curves.easeOut,
+                  child: FilledButton(
+                    onPressed: canRun ? _run : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: canRun ? meta.color : null,
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: Motion.of(context, Motion.normal),
+                      switchInCurve: Curves.easeOutCubic,
+                      transitionBuilder: (child, anim) => FadeTransition(
+                        opacity: anim,
+                        child: SlideTransition(
+                          position: Tween(begin: const Offset(0, 0.35), end: Offset.zero).animate(anim),
+                          child: child,
                         ),
+                      ),
+                      child: _running
+                          ? Row(
+                              key: const ValueKey('running'),
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(tr(zh: '处理中…', en: 'Working…')),
+                              ],
+                            )
+                          : Row(
+                              key: ValueKey(_images.isEmpty ? 'empty' : 'ready'),
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(meta.icon, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _images.isEmpty
+                                      ? tr(zh: '先选择图片', en: 'Pick images first')
+                                      : tr(
+                                          zh: '开始处理 ${_images.length} 张',
+                                          en: 'Process ${_images.length}',
+                                        ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -351,20 +433,23 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [meta.color, meta.color.withValues(alpha: 0.65)],
+        // Same Hero tag as the board tile on the home screen: the glyph
+        // flies from the tile into this header.
+        Hero(
+          tag: toolHeroTag(meta.kind),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: meta.color.withValues(alpha: dark ? 0.22 : 0.14),
             ),
+            alignment: Alignment.center,
+            child: ToolGlyph(kind: meta.kind, color: meta.color, size: 26),
           ),
-          child: Icon(meta.icon, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -380,6 +465,7 @@ class _Header extends StatelessWidget {
 
 class _EmptyPicker extends StatelessWidget {
   const _EmptyPicker({
+    super.key,
     required this.meta,
     required this.busy,
     required this.onPick,
@@ -464,8 +550,13 @@ class _EmptyPicker extends StatelessWidget {
   }
 }
 
+/// Horizontal thumbnail strip as an [AnimatedList]: new pictures scale-fade
+/// in, removed ones collapse. The last item is always the pair of add
+/// tiles, so image indices map 1:1 onto list indices below [images.length].
 class _ImageStrip extends StatelessWidget {
   const _ImageStrip({
+    super.key,
+    required this.listKey,
     required this.images,
     required this.busy,
     required this.onAdd,
@@ -473,6 +564,7 @@ class _ImageStrip extends StatelessWidget {
     required this.onRemove,
     required this.pro,
   });
+  final GlobalKey<AnimatedListState> listKey;
   final List<SourceImage> images;
   final bool busy;
   final VoidCallback onAdd;
@@ -482,35 +574,97 @@ class _ImageStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return SizedBox(
       height: 96,
-      child: ListView(
+      child: AnimatedList(
+        key: listKey,
         scrollDirection: Axis.horizontal,
-        children: [
-          for (final (i, s) in images.indexed)
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Tooltip(
-                    message: '${s.name}\n${describeImage(s)}',
-                    child: ImageThumb(path: s.path, size: 84, radius: 14),
-                  ),
-                  if (!pro && i >= kFreeBatchLimit)
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          color: Colors.black.withValues(alpha: 0.45),
-                        ),
-                        child: const Icon(
-                          Icons.lock_outline,
-                          color: Colors.white,
-                        ),
+        clipBehavior: Clip.none,
+        initialItemCount: images.length + 1,
+        itemBuilder: (context, i, anim) {
+          if (i >= images.length) {
+            return Row(
+              children: [
+                _AddTile(
+                  icon: Icons.add_photo_alternate_outlined,
+                  onTap: busy ? null : onAdd,
+                  busy: busy,
+                ),
+                const SizedBox(width: 8),
+                _AddTile(
+                  icon: Icons.photo_camera_outlined,
+                  onTap: busy ? null : onCamera,
+                  busy: false,
+                ),
+              ],
+            );
+          }
+          final s = images[i];
+          return _StripTile(
+            image: s,
+            animation: anim,
+            locked: !pro && i >= kFreeBatchLimit,
+            onRemove: () => onRemove(s),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _StripTile extends StatelessWidget {
+  const _StripTile({
+    required this.image,
+    required this.animation,
+    required this.locked,
+    required this.onRemove,
+  });
+
+  /// Ghost used while a removed tile collapses: no remove button, no lock.
+  const _StripTile.removed({required this.image, required this.animation})
+      : locked = false,
+        onRemove = null;
+
+  final SourceImage image;
+  final Animation<double> animation;
+  final bool locked;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final s = image;
+    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+    return SizeTransition(
+      sizeFactor: curved,
+      axis: Axis.horizontal,
+      child: FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.8, end: 1.0).animate(curved),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Tooltip(
+                  message: '${s.name}\n${describeImage(s)}',
+                  child: ImageThumb(path: s.path, size: 84, radius: 14),
+                ),
+                if (locked)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        color: Colors.black.withValues(alpha: 0.45),
+                      ),
+                      child: const Icon(
+                        Icons.lock_outline,
+                        color: Colors.white,
                       ),
                     ),
+                  ),
+                if (onRemove != null)
                   Positioned(
                     top: -6,
                     right: -6,
@@ -519,7 +673,7 @@ class _ImageStrip extends StatelessWidget {
                       shape: const CircleBorder(),
                       child: InkWell(
                         customBorder: const CircleBorder(),
-                        onTap: () => onRemove(s),
+                        onTap: onRemove,
                         child: Padding(
                           padding: const EdgeInsets.all(4),
                           child: Icon(
@@ -531,21 +685,10 @@ class _ImageStrip extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
-          _AddTile(
-            icon: Icons.add_photo_alternate_outlined,
-            onTap: busy ? null : onAdd,
-            busy: busy,
           ),
-          const SizedBox(width: 8),
-          _AddTile(
-            icon: Icons.photo_camera_outlined,
-            onTap: busy ? null : onCamera,
-            busy: false,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -630,9 +773,15 @@ class _ProgressSheet extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(value: frac, minHeight: 10),
+                  // The bar glides to each new fraction instead of stepping.
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: frac),
+                    duration: Motion.of(context, Motion.slow),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, v, _) => ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(value: v, minHeight: 10),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(

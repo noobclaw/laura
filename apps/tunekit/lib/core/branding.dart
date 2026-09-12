@@ -15,7 +15,7 @@ abstract final class Branding {
   static const String version = '1.0.0';
 
   /// Seed for the Material 3 color scheme.
-  static const Color seedColor = Color(0xFF5B5BD6);
+  static const Color seedColor = Color(0xFF8D6E63);
 
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the shell ships without the INTERNET permission.
