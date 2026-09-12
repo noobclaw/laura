@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
 import 'event_edit.dart';
+import 'hero_card.dart';
 import 'models.dart';
 import 'store.dart';
 
@@ -93,6 +94,7 @@ class _DetailView extends StatelessWidget {
     final label = s.isToday
         ? tr(zh: '就是今天', en: 'Today!')
         : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -122,12 +124,31 @@ class _DetailView extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
             decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [color, Color.lerp(color, Colors.black, 0.32)!],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.35),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
+                ),
+              ],
             ),
             child: Column(
               children: [
-                Text(event.emoji, style: const TextStyle(fontSize: 44)),
+                // Shared with the home list / hero card: the emoji flies
+                // between the two screens.
+                Hero(
+                  tag: emojiHeroTag(event),
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Text(event.emoji, style: const TextStyle(fontSize: 44)),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title,
@@ -147,12 +168,19 @@ class _DetailView extends StatelessWidget {
                         SizedBox(
                           width: 172,
                           height: 172,
-                          child: CircularProgressIndicator(
-                            value: progress,
-                            strokeWidth: 6,
-                            strokeCap: StrokeCap.round,
-                            backgroundColor: onColor.withValues(alpha: 0.2),
-                            valueColor: AlwaysStoppedAnimation(onColor.withValues(alpha: 0.9)),
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: progress),
+                            duration: reduce
+                                ? Duration.zero
+                                : const Duration(milliseconds: 900),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, v, _) => CircularProgressIndicator(
+                              value: v,
+                              strokeWidth: 6,
+                              strokeCap: StrokeCap.round,
+                              backgroundColor: onColor.withValues(alpha: 0.2),
+                              valueColor: AlwaysStoppedAnimation(onColor.withValues(alpha: 0.9)),
+                            ),
                           ),
                         ),
                       // Shrinks to fit inside the ring: 10,000+ days (a 27-year
@@ -161,16 +189,29 @@ class _DetailView extends StatelessWidget {
                         width: 140,
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text(
-                            s.isToday ? '🎉' : '${s.absDays}',
-                            style: TextStyle(
-                              fontSize: 76,
-                              height: 1.05,
-                              fontWeight: FontWeight.w800,
-                              fontFeatures: const [FontFeature.tabularFigures()],
-                              color: onColor,
-                            ),
-                          ),
+                          child: s.isToday
+                              ? Text(
+                                  '🎉',
+                                  style: TextStyle(fontSize: 76, height: 1.05, color: onColor),
+                                )
+                              // Rolls up to the value instead of snapping in.
+                              : TweenAnimationBuilder<double>(
+                                  tween: Tween(begin: 0, end: s.absDays.toDouble()),
+                                  duration: reduce
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 800),
+                                  curve: Curves.easeOutCubic,
+                                  builder: (context, v, _) => Text(
+                                    '${v.round()}',
+                                    style: TextStyle(
+                                      fontSize: 76,
+                                      height: 1.05,
+                                      fontWeight: FontWeight.w800,
+                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                      color: onColor,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                     ],

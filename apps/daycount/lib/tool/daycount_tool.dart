@@ -5,6 +5,7 @@ import '../core/l10n.dart';
 import '../core/purchase.dart';
 import 'event_detail.dart';
 import 'event_edit.dart';
+import 'hero_card.dart';
 import 'models.dart';
 import 'pro.dart';
 import 'store.dart';
@@ -106,8 +107,83 @@ class _HomeBody extends StatefulWidget {
   State<_HomeBody> createState() => _HomeBodyState();
 }
 
+/// Home: the nearest day as a hero card, then every other day as an
+/// animated list. The list is diffed against the store on every change so
+/// adds slide in from below, deletes collapse, and a newly pinned day is
+/// lifted out of its slot and re-inserted at the top instead of the whole
+/// list hard-refreshing.
 class _HomeBodyState extends State<_HomeBody> {
   EventStore get store => widget.store;
+
+  static const Duration _rowAnim = Duration(milliseconds: 280);
+
+  final GlobalKey<SliverAnimatedListState> _listKey =
+      GlobalKey<SliverAnimatedListState>();
+  CountdownEvent? _featured;
+  final List<CountdownEvent> _rows = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fill();
+    store.addListener(_sync);
+  }
+
+  @override
+  void dispose() {
+    store.removeListener(_sync);
+    super.dispose();
+  }
+
+  bool get _reduceMotion =>
+      MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+
+  /// Non-animated snapshot (first load, or while the list is not mounted).
+  void _fill() {
+    if (!store.loaded) return;
+    final items = sortedEvents(store.events, DateTime.now());
+    _featured = items.firstOrNull;
+    _rows
+      ..clear()
+      ..addAll(items.skip(1));
+  }
+
+  void _sync() {
+    if (!store.loaded) return;
+    final list = _listKey.currentState;
+    if (list == null) {
+      setState(_fill);
+      return;
+    }
+    final items = sortedEvents(store.events, DateTime.now());
+    final featured = items.firstOrNull;
+    final rows = items.skip(1).toList();
+    final d = _reduceMotion ? Duration.zero : _rowAnim;
+
+    // 1. Rows that are gone: remove from the end so indices stay valid.
+    final keep = {for (final e in rows) e.id};
+    for (var i = _rows.length - 1; i >= 0; i--) {
+      if (keep.contains(_rows[i].id)) continue;
+      final gone = _rows.removeAt(i);
+      list.removeItem(i, (_, anim) => _row(gone, anim, hero: false),
+          duration: d);
+    }
+    // 2. Walk the target order; anything out of place is lifted out and
+    //    re-inserted at its new slot (pin/unpin, a date edit, midnight).
+    for (var i = 0; i < rows.length; i++) {
+      final want = rows[i];
+      if (i < _rows.length && _rows[i].id == want.id) continue;
+      final j = _rows.indexWhere((e) => e.id == want.id);
+      if (j >= 0) {
+        final moved = _rows.removeAt(j);
+        list.removeItem(j, (_, anim) => _row(moved, anim, hero: false),
+            duration: d);
+      }
+      _rows.insert(i, want);
+      list.insertItem(i, duration: d);
+    }
+    setState(() => _featured = featured);
+  }
 
   Future<void> _addEvent() async {
     if (store.atLimit) {
@@ -143,31 +219,81 @@ class _HomeBodyState extends State<_HomeBody> {
     );
   }
 
+  void _open(CountdownEvent e) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => EventDetailPage(store: store, eventId: e.id),
+      ),
+    );
+  }
+
+  /// One list row with its enter/exit transition: slides up and fades in,
+  /// collapses on the way out (the same animation run backwards).
+  Widget _row(CountdownEvent e, Animation<double> anim, {required bool hero}) {
+    final curved = CurvedAnimation(
+      parent: anim,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return SizeTransition(
+      sizeFactor: curved,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween(begin: const Offset(0, 0.35), end: Offset.zero)
+              .animate(curved),
+          child: _EventCard(
+            event: e,
+            hero: hero,
+            onTap: () => _open(e),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final featured = _featured;
+    final now = DateTime.now();
     return Scaffold(
-      body: ListenableBuilder(
-        listenable: store,
-        builder: (context, _) {
-          if (!store.loaded) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final items = sortedEvents(store.events, DateTime.now());
-          if (items.isEmpty) return const _EmptyState();
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
-            itemCount: items.length,
-            itemBuilder: (context, i) => _EventCard(
-              event: items[i],
-              store: store,
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _addEvent,
-        icon: const Icon(Icons.add),
-        label: Text(tr(zh: '添加日子', en: 'Add a day')),
+      body: !store.loaded
+          ? const Center(child: CircularProgressIndicator())
+          : featured == null
+              ? const _EmptyState()
+              : CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
+                      sliver: SliverToBoxAdapter(
+                        child: FeaturedCard(
+                          event: featured,
+                          status: statusOf(featured, now),
+                          progress: progressOf(featured, now),
+                          onTap: () => _open(featured),
+                        ),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 104),
+                      sliver: SliverAnimatedList(
+                        key: _listKey,
+                        initialItemCount: _rows.length,
+                        itemBuilder: (context, i, anim) => i < _rows.length
+                            ? _row(_rows[i], anim, hero: true)
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ),
+      floatingActionButton: PressScale(
+        scale: 0.94,
+        child: FloatingActionButton.extended(
+          onPressed: _addEvent,
+          icon: const Icon(Icons.add),
+          label: Text(tr(zh: '添加日子', en: 'Add a day')),
+        ),
       ),
     );
   }
@@ -179,26 +305,39 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.event_available_outlined, size: 72, color: muted),
-            const SizedBox(height: 16),
-            Text(tr(zh: '还没有日子', en: 'No days yet'),
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(
-              tr(
-                zh: '点击右下角「添加日子」，记录生日、纪念日、\n考试倒计时……并放上桌面小组件。',
-                en: 'Tap "Add a day" to track birthdays, anniversaries,\nexam countdowns… and put them on your widget.',
-              ),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: muted),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: reduce ? Duration.zero : const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+          builder: (context, t, child) => Opacity(
+            opacity: t,
+            child: Transform.translate(
+              offset: Offset(0, 16 * (1 - t)),
+              child: child,
             ),
-          ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const BirdMark(size: 112),
+              const SizedBox(height: 22),
+              Text(tr(zh: '还没有日子', en: 'No days yet'),
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text(
+                tr(
+                  zh: '点击右下角「添加日子」，记录生日、纪念日、\n考试倒计时……并放上桌面小组件。',
+                  en: 'Tap "Add a day" to track birthdays, anniversaries,\nexam countdowns… and put them on your widget.',
+                ),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: muted, height: 1.45),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -206,9 +345,17 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _EventCard extends StatelessWidget {
-  const _EventCard({required this.event, required this.store});
+  const _EventCard({
+    required this.event,
+    required this.onTap,
+    this.hero = true,
+  });
   final CountdownEvent event;
-  final EventStore store;
+  final VoidCallback onTap;
+
+  /// False for the snapshot rendered while a row animates out, so the same
+  /// emoji Hero tag never exists twice on the page.
+  final bool hero;
 
   @override
   Widget build(BuildContext context) {
@@ -223,83 +370,91 @@ class _EventCard extends StatelessWidget {
         ? tr(zh: '就是今天', en: 'Today!')
         : (s.isFuture ? tr(zh: '还有', en: 'in') : tr(zh: '已过去', en: 'past'));
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      // Flat tile with a faint wash of the event's own accent — reads as a
-      // premium countdown card rather than a generic list row. A 6% wash is
-      // invisible on a dark surface, so the tint is stronger there.
-      color: color.withValues(
-          alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.06),
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => EventDetailPage(store: store, eventId: event.id),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(event.emoji, style: const TextStyle(fontSize: 26)),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        if (event.pinned)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 4),
-                            child: Icon(Icons.push_pin, size: 15, color: Colors.grey),
+    final emoji = Text(event.emoji, style: const TextStyle(fontSize: 26));
+
+    return PressScale(
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        // Flat tile with a faint wash of the event's own accent — reads as a
+        // premium countdown card rather than a generic list row. A 6% wash is
+        // invisible on a dark surface, so the tint is stronger there.
+        color: color.withValues(
+            alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.07),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: hero
+                      ? Hero(
+                          tag: emojiHeroTag(event),
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: emoji,
                           ),
-                        Expanded(
-                          child: Text(
-                            event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium,
+                        )
+                      : emoji,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          if (event.pinned)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 4),
+                              child: Icon(Icons.push_pin, size: 15, color: Colors.grey),
+                            ),
+                          Expanded(
+                            child: Text(
+                              event.title.isEmpty ? tr(zh: '未命名', en: 'Untitled') : event.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${s.target.year}-${_two(s.target.month)}-${_two(s.target.day)} ${weekdayLabel(s.target)}'
+                        '${event.yearlyRepeat ? ' · ${tr(zh: '每年', en: 'yearly')}' : ''}',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (progress != null) ...[
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 4,
+                            backgroundColor: color.withValues(alpha: 0.15),
+                            valueColor: AlwaysStoppedAnimation(color),
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${s.target.year}-${_two(s.target.month)}-${_two(s.target.day)} ${weekdayLabel(s.target)}'
-                      '${event.yearlyRepeat ? ' · ${tr(zh: '每年', en: 'yearly')}' : ''}',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    if (progress != null) ...[
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 4,
-                          backgroundColor: color.withValues(alpha: 0.15),
-                          valueColor: AlwaysStoppedAnimation(color),
-                        ),
-                      ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              _DayBadge(label: label, status: s, bg: color, fg: onColor),
-            ],
+                const SizedBox(width: 10),
+                _DayBadge(label: label, status: s, bg: color, fg: onColor),
+              ],
+            ),
           ),
         ),
       ),
@@ -323,6 +478,7 @@ class _DayBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     return Container(
       constraints: const BoxConstraints(minWidth: 68),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -334,16 +490,28 @@ class _DayBadge extends StatelessWidget {
         children: [
           Text(label, style: TextStyle(fontSize: 11, color: fg.withValues(alpha: 0.9))),
           const SizedBox(height: 1),
-          Text(
-            status.isToday ? '🎉' : '${status.absDays}',
-            style: TextStyle(
-              fontSize: 30,
-              height: 1.05,
-              fontWeight: FontWeight.w800,
-              fontFeatures: const [FontFeature.tabularFigures()],
-              color: fg,
+          if (status.isToday)
+            Text(
+              '🎉',
+              style: TextStyle(fontSize: 30, height: 1.05, color: fg),
+            )
+          else
+            // The count rolls up to its value instead of snapping in.
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: status.absDays.toDouble()),
+              duration: reduce ? Duration.zero : const Duration(milliseconds: 650),
+              curve: Curves.easeOutCubic,
+              builder: (context, v, _) => Text(
+                '${v.round()}',
+                style: TextStyle(
+                  fontSize: 30,
+                  height: 1.05,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: fg,
+                ),
+              ),
             ),
-          ),
           if (!status.isToday)
             Text(tr(zh: '天', en: 'days'),
                 style: TextStyle(fontSize: 10, color: fg.withValues(alpha: 0.9))),
