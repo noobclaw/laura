@@ -18,6 +18,12 @@ ThemeData buildAppTheme(Brightness brightness) {
 
   const tab = <FontFeature>[FontFeature.tabularFigures()];
   return theme.copyWith(
+    // 2026-09-12 (PIPELINE 视觉标准 10): no hard cuts between pages. Every
+    // app inherits a fade-forward transition; a tool may override per route.
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+    }),
     cardTheme: CardThemeData(
       elevation: 0,
       color: scheme.surfaceContainerHigh,
