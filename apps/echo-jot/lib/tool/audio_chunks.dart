@@ -10,6 +10,7 @@
 // in full by at least one chunk, and the merge assigns every timed segment
 // to exactly one chunk so nothing is dropped or duplicated.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'transcript_text.dart' show isCjkText;
@@ -262,7 +263,7 @@ String mergeChunkTranscripts(List<ChunkTranscript> chunks) {
   if (chunks.length == 1) {
     final only = chunks.first;
     return only.segments == null
-        ? only.text.trim()
+        ? stripSpecialTokens(only.text).trim()
         : joinSegmentTexts(_cleanSegments(only.segments!));
   }
 
@@ -271,7 +272,7 @@ String mergeChunkTranscripts(List<ChunkTranscript> chunks) {
     var out = '';
     for (final c in chunks) {
       final text = c.segments == null
-          ? c.text.trim()
+          ? stripSpecialTokens(c.text).trim()
           : joinSegmentTexts(_cleanSegments(c.segments!));
       out = _joinWithSeamTrim(out, text);
     }
@@ -332,19 +333,299 @@ Duration _halfOverlap(ChunkTranscript a, ChunkTranscript b) {
       microseconds: overlap.inMicroseconds <= 0 ? 0 : overlap.inMicroseconds ~/ 2);
 }
 
-/// Drops whisper's non-speech annotations and empty segments.
-Iterable<TimedSegment> _cleanSegments(Iterable<TimedSegment> segs) =>
-    segs.where((s) => !isNonSpeechArtifact(s.text));
+/// Drops whisper's non-speech annotations and empty segments, after
+/// stripping any special tokens that leaked into the text.
+Iterable<TimedSegment> _cleanSegments(Iterable<TimedSegment> segs) => segs
+    .map((s) => TimedSegment(
+          start: s.start,
+          end: s.end,
+          text: stripSpecialTokens(s.text),
+        ))
+    .where((s) => !isNonSpeechArtifact(s.text));
+
+/// whisper.cpp's textual form of its special tokens (`whisper_token_to_str`
+/// in src/whisper.cpp): `[_BEG_]`, `[_EOT_]`, `[_SOT_]`, `[_TT_123]`,
+/// `[_LANG_zh]`, `[_extra_token_50364]` … and the raw `<|...|>` vocabulary
+/// spellings. With `print_special = false` (whisper.cpp's default, and the
+/// only setting the `whisper_ggml` plugin can produce) they never reach the
+/// segment text; this strip is the belt to that brace, so a plugin change
+/// or an `is_special_tokens` request can never leave `[_TT_450]` in a note.
+final RegExp _specialToken = RegExp(r'\[_[A-Za-z0-9_]*\]|<\|[^|>]*\|>');
+
+/// Removes whisper special tokens from [text]; the surrounding text is
+/// otherwise untouched (spacing is settled later by [joinSegmentTexts]).
+String stripSpecialTokens(String text) =>
+    text.contains('[_') || text.contains('<|')
+        ? text.replaceAll(_specialToken, '')
+        : text;
 
 /// True for segments whisper emits for silence or noise instead of words:
 /// "[BLANK_AUDIO]", "(music)", "♪", "*laughs*", or nothing at all.
 bool isNonSpeechArtifact(String text) {
-  final t = text.trim();
+  final t = stripSpecialTokens(text).trim();
   if (t.isEmpty) return true;
   if (RegExp(r'^[\[\(（【][^\]\)）】]*[\]\)）】]$').hasMatch(t)) return true;
   if (RegExp(r'^\*[^*]*\*$').hasMatch(t)) return true;
   // Only punctuation / music symbols, no letters or ideographs.
   return !RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(t);
+}
+
+// ---------------------------------------------------------------------------
+// Energy VAD — a Dart port of whisper.cpp examples/common.cpp
+// (`high_pass_filter` + `vad_simple`), used to move chunk cut points onto a
+// pause instead of slicing through a word at a fixed 60 s mark.
+//
+// The original is what examples/stream (in its VAD mode) and examples/command
+// use to decide "speech just ended, transcribe now": a 2000 ms buffer whose
+// last 1000 ms carry no more than `vad_thold` (0.6) of the buffer's mean
+// energy, after a one-pole high-pass at `freq_thold` (100 Hz). The numbers
+// below are those defaults; the arithmetic is kept exactly (mean of |x|,
+// single-precision) so the decisions match the original sample for sample.
+// ---------------------------------------------------------------------------
+
+/// `vad_thold` default of examples/stream and examples/command.
+const double defaultVadThold = 0.6;
+
+/// `freq_thold` default (Hz) — high-pass cutoff applied before the energy
+/// comparison.
+const double defaultFreqThold = 100.0;
+
+/// Buffer length the originals feed to `vad_simple` (`audio.get(2000, …)`).
+const int vadBufferMs = 2000;
+
+/// `last_ms` the originals pass (the tail that must have gone quiet).
+const int vadLastMs = 1000;
+
+/// One-pole high-pass filter, in place — `high_pass_filter` from
+/// examples/common.cpp: `rc = 1/(2π·cutoff)`, `dt = 1/sampleRate`,
+/// `alpha = dt/(rc+dt)`, `y[i] = alpha·(y[i-1] + x[i] - x[i-1])`, `y[0] = x[0]`.
+void highPassFilter(Float32List data, double cutoff, double sampleRate) {
+  if (data.isEmpty) return;
+  final rc = 1.0 / (2.0 * math.pi * cutoff);
+  final dt = 1.0 / sampleRate;
+  final alpha = dt / (rc + dt);
+  var y = data[0];
+  for (var i = 1; i < data.length; i++) {
+    y = alpha * (y + data[i] - data[i - 1]);
+    data[i] = y;
+  }
+}
+
+/// `vad_simple` from examples/common.cpp. Returns true when the last
+/// [lastMs] of [pcm] are quiet relative to the whole buffer — i.e. speech
+/// happened earlier in the buffer and has ended — and false otherwise
+/// (still speaking, or not enough contrast: a buffer that is *all* silence
+/// or all speech is false too, exactly as in the original, whose callers
+/// wait for the transition).
+///
+/// Too-short input (`lastMs` covers the whole buffer) is false ("not enough
+/// samples - assume no speech"). [pcm] is not modified; the original filters
+/// its buffer in place, which callers here never rely on.
+bool vadSimple(
+  Float32List pcm, {
+  required int sampleRate,
+  int lastMs = vadLastMs,
+  double vadThold = defaultVadThold,
+  double freqThold = defaultFreqThold,
+}) {
+  final nSamples = pcm.length;
+  final nSamplesLast = (sampleRate * lastMs) ~/ 1000;
+  if (nSamplesLast >= nSamples) return false;
+
+  final data = Float32List.fromList(pcm);
+  if (freqThold > 0.0) {
+    highPassFilter(data, freqThold, sampleRate.toDouble());
+  }
+
+  var energyAll = 0.0;
+  var energyLast = 0.0;
+  for (var i = 0; i < nSamples; i++) {
+    final a = data[i].abs();
+    energyAll += a;
+    if (i >= nSamples - nSamplesLast) energyLast += a;
+  }
+  energyAll /= nSamples;
+  energyLast /= nSamplesLast;
+
+  if (energyLast > vadThold * energyAll) return false;
+  return true;
+}
+
+/// PCM16 little-endian bytes → float samples in [-1, 1), `float(s) / 32768`
+/// exactly as whisper.cpp's WAV readers and the `whisper_ggml` plugin do it.
+/// An odd trailing byte is ignored.
+Float32List pcm16ToFloat(Uint8List bytes) {
+  final n = bytes.length ~/ 2;
+  final bd = ByteData.sublistView(bytes, 0, n * 2);
+  final out = Float32List(n);
+  for (var i = 0; i < n; i++) {
+    out[i] = bd.getInt16(i * 2, Endian.little) / 32768.0;
+  }
+  return out;
+}
+
+/// Finds a pause near [nominalFrame] to cut at. Candidate end points every
+/// [stepMs] within ±[searchMs] of the nominal cut are tested with
+/// [vadSimple] over the [vadBufferMs] of audio that precede them; the
+/// candidate closest to the nominal cut that passes wins, and the cut is
+/// placed in the middle of its quiet tail (`candidate - lastMs/2`). Returns
+/// null when no candidate passes — the caller keeps the nominal cut.
+///
+/// [audio] covers the recording from [audioStartFrame]; it must reach from
+/// `nominal - searchMs - vadBufferMs` to `nominal + searchMs` for the whole
+/// range to be searched (shorter coverage just narrows the search).
+int? findSilentCut({
+  required Float32List audio,
+  required int audioStartFrame,
+  required int nominalFrame,
+  required int sampleRate,
+  int searchMs = 3000,
+  int stepMs = 100,
+  int bufferMs = vadBufferMs,
+  int lastMs = vadLastMs,
+  double vadThold = defaultVadThold,
+  double freqThold = defaultFreqThold,
+}) {
+  final search = (sampleRate * searchMs) ~/ 1000;
+  final step = math.max(1, (sampleRate * stepMs) ~/ 1000);
+  final buffer = (sampleRate * bufferMs) ~/ 1000;
+  final half = (sampleRate * lastMs) ~/ 2000;
+
+  bool quietAt(int candidate) {
+    final start = candidate - buffer - audioStartFrame;
+    final end = candidate - audioStartFrame;
+    if (start < 0 || end > audio.length) return false;
+    return vadSimple(
+      Float32List.sublistView(audio, start, end),
+      sampleRate: sampleRate,
+      lastMs: lastMs,
+      vadThold: vadThold,
+      freqThold: freqThold,
+    );
+  }
+
+  // Walk outward from the nominal cut so the nearest pause wins; the
+  // candidate is the *end* of the quiet tail, the cut sits in its middle.
+  for (var offset = 0; offset <= search; offset += step) {
+    for (final candidate in offset == 0
+        ? [nominalFrame + half]
+        : [nominalFrame + half + offset, nominalFrame + half - offset]) {
+      if (quietAt(candidate)) return candidate - half;
+    }
+  }
+  return null;
+}
+
+/// Moves every seam of [plans] onto a pause found by [findSilentCut]. The
+/// seam of two overlapping chunks is the middle of their overlap (the line
+/// [mergeChunkTranscripts] later assigns segments by); it is re-centred on
+/// the pause and the overlap re-laid around it, so a word can no longer sit
+/// on the line. [read] returns float samples for a frame range (clamped by
+/// the caller to the recording). Plans that fit in one chunk are returned
+/// unchanged.
+Future<List<ChunkPlan>> snapChunksToSilence(
+  List<ChunkPlan> plans, {
+  required int sampleRate,
+  required int totalFrames,
+  required Future<Float32List> Function(int startFrame, int endFrame) read,
+  int overlapSeconds = defaultOverlapSeconds,
+  int searchMs = 3000,
+}) async {
+  if (plans.length < 2) return plans;
+  final overlap = overlapSeconds * sampleRate;
+  final halfOverlap = overlap ~/ 2;
+  final search = (sampleRate * searchMs) ~/ 1000;
+  final buffer = (sampleRate * vadBufferMs) ~/ 1000;
+
+  final starts = plans.map((p) => p.startFrame).toList();
+  final ends = plans.map((p) => p.endFrame).toList();
+  for (var i = 0; i + 1 < plans.length; i++) {
+    final nominal = plans[i + 1].startFrame + halfOverlap;
+    final from = math.max(0, nominal - search - buffer);
+    final to = math.min(totalFrames, nominal + search);
+    if (to - from <= buffer) continue;
+    final audio = await read(from, to);
+    final cut = findSilentCut(
+      audio: audio,
+      audioStartFrame: from,
+      nominalFrame: nominal,
+      sampleRate: sampleRate,
+      searchMs: searchMs,
+    );
+    if (cut == null || cut == nominal) continue;
+    ends[i] = math.min(totalFrames, cut + halfOverlap);
+    starts[i + 1] = math.max(0, cut - halfOverlap);
+  }
+  return [
+    for (var i = 0; i < plans.length; i++)
+      ChunkPlan(index: i, startFrame: starts[i], endFrame: ends[i]),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Context carried from one chunk to the next — the counterpart of
+// examples/stream's `--keep-context`: after each window it collects the
+// tokens of every segment just decoded and hands them to the next call as
+// `prompt_tokens`, so the decoder continues the sentence instead of starting
+// cold. The plugin exposes only `initial_prompt` (text), which whisper.cpp
+// tokenises into the very same `prompt_tokens` slot, so text is passed.
+// ---------------------------------------------------------------------------
+
+/// whisper.cpp keeps at most `n_text_ctx/2` (224) prompt tokens, dropping
+/// from the *front*; the script-steering prompt sits at the front, so the
+/// carried text is capped well under that budget: CJK runs ~1.5 tokens per
+/// character, Latin ~4 characters per token.
+const int maxContextCharsCjk = 100;
+const int maxContextCharsLatin = 400;
+
+/// Text of [previous] to prime the chunk starting at [nextStart] with. Only
+/// segments that end before [nextStart] are used: what lies in the overlap
+/// will be heard again by the next chunk, and a prompt that already contains
+/// those words tempts the decoder to skip them. The tail of that text is
+/// kept, capped by [maxContextCharsCjk] / [maxContextCharsLatin] (whole
+/// segments where possible; a single over-long segment is cut on the left).
+/// Empty when nothing usable precedes the overlap.
+String contextPromptFor(ChunkTranscript previous, Duration nextStart) {
+  final segs = previous.segments;
+  final List<String> texts;
+  if (segs == null) {
+    final t = stripSpecialTokens(previous.text).trim();
+    texts = t.isEmpty ? const [] : [t];
+  } else {
+    texts = [
+      for (final s in _cleanSegments(segs))
+        if (previous.offset + s.end <= nextStart) s.text.trim(),
+    ];
+  }
+  if (texts.isEmpty) return '';
+  final cjk = texts.any(isCjkText);
+  final cap = cjk ? maxContextCharsCjk : maxContextCharsLatin;
+  final kept = <String>[];
+  var length = 0;
+  for (var i = texts.length - 1; i >= 0; i--) {
+    final t = texts[i];
+    if (t.isEmpty) continue;
+    final extra = t.length + (kept.isEmpty || cjk ? 0 : 1);
+    if (length + extra > cap) {
+      if (kept.isEmpty) kept.insert(0, t.substring(t.length - cap));
+      break;
+    }
+    kept.insert(0, t);
+    length += extra;
+  }
+  return cjk ? kept.join() : kept.join(' ');
+}
+
+/// The `initial_prompt` for one chunk: the script-steering [scriptPrompt]
+/// (may be null) followed by the carried [context]; null when both are
+/// empty so the plugin leaves whisper.cpp's `nullptr` default in place.
+String? buildInitialPrompt(String? scriptPrompt, String context) {
+  final s = scriptPrompt?.trim() ?? '';
+  final c = context.trim();
+  if (s.isEmpty && c.isEmpty) return null;
+  if (s.isEmpty) return c;
+  if (c.isEmpty) return s;
+  return isCjkText(s) || isCjkText(c) ? '$s$c' : '$s $c';
 }
 
 /// Joins segment texts the way whisper's own punctuation expects: CJK text

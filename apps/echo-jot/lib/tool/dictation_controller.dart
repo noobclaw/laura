@@ -336,6 +336,9 @@ class DictationController extends ChangeNotifier {
       final result = await _whisperEngine.transcribeWav(
         path,
         languageTag: _language,
+        // The plugin cannot auto-detect (see whisperRequestLanguage); the
+        // app's UI language is the best guess for an unmapped tag.
+        fallbackLanguageTag: AppLanguage.override.value ?? 'en',
         onProgress: (p, c, n) {
           _progress = p;
           _chunk = c;

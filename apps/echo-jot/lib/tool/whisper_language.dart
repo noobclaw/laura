@@ -36,6 +36,23 @@ String whisperLanguageCode(String tag) {
   return whisperLanguageCodes.contains(primary) ? primary : whisperAutoLanguage;
 }
 
+/// The `language` value actually sent to the `whisper_ggml` plugin.
+///
+/// whisper.cpp itself takes `"auto"` (or `""` / `nullptr`) as "detect the
+/// language", but the plugin's native bridge (`whisper_ggml.cpp`,
+/// `transcribe()`) rejects any value `whisper_lang_id()` does not know —
+/// and `"auto"` is not in its table — with `error: unknown language` before
+/// whisper.cpp ever sees it. So a tag that maps to `auto` is resolved to
+/// [fallback] here: the app's own UI language, the best guess for what the
+/// user is about to say. Deliberate deviation from whisper.cpp, forced by
+/// the plugin; drop this once the plugin passes `auto` through.
+String whisperRequestLanguage(String tag, {required String fallback}) {
+  final code = whisperLanguageCode(tag);
+  if (code != whisperAutoLanguage) return code;
+  final fb = whisperLanguageCode(fallback);
+  return fb == whisperAutoLanguage ? 'en' : fb;
+}
+
 /// Whisper writes Chinese in whichever script its decoding drifts toward. An
 /// initial prompt in the wanted script steers it: simplified for zh-CN (and
 /// any bare "zh"), traditional for zh-TW / zh-HK / zh-Hant. Other languages

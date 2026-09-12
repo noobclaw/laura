@@ -153,19 +153,31 @@ class WhisperEngine {
     } catch (_) {}
   }
 
+  /// Whether the text decoded from one chunk primes the next one — the
+  /// counterpart of `examples/stream --keep-context`, see
+  /// [contextPromptFor]. Off, every chunk starts cold (whisper.cpp's own
+  /// `no_context` default) and a sentence cut by a chunk edge loses its
+  /// first words' context.
+  static const bool carryContextBetweenChunks = true;
+
   /// Transcribes [wavPath]. [languageTag] is the app's dictation tag
-  /// ("zh-CN", "auto"); it is mapped to whisper's codes here.
+  /// ("zh-CN", "en-US"); it is mapped to whisper's codes here. A tag whisper
+  /// does not know would mean `auto`, which the plugin rejects, so it falls
+  /// back to [fallbackLanguageTag] (see [whisperRequestLanguage]).
   ///
-  /// Long recordings are cut into overlapping chunks (see audio_chunks.dart);
-  /// [onProgress] reports 0..1 across all chunks and [isCancelled] is polled
-  /// between chunks — a chunk already running finishes (whisper.cpp has no
-  /// cancel), the rest is skipped and the result says `completed: false`.
+  /// Long recordings are cut into overlapping chunks (see audio_chunks.dart)
+  /// whose seams are moved onto pauses by the energy VAD ported from
+  /// whisper.cpp's examples; [onProgress] reports 0..1 across all chunks and
+  /// [isCancelled] is polled between chunks — a chunk already running
+  /// finishes (whisper.cpp has no cancel), the rest is skipped and the
+  /// result says `completed: false`.
   ///
   /// Temporary chunk files live in the system temp directory and are deleted
   /// before this returns, success or failure. The caller owns [wavPath].
   Future<WhisperTranscript> transcribeWav(
     String wavPath, {
     required String languageTag,
+    String fallbackLanguageTag = 'en',
     void Function(double progress, int chunk, int chunkCount)? onProgress,
     bool Function()? isCancelled,
   }) async {
@@ -192,15 +204,32 @@ class WhisperEngine {
     }
 
     final modelPath = await ensureModel();
-    final language = whisperLanguageCode(languageTag);
-    final prompt = whisperInitialPrompt(languageTag);
+    final language =
+        whisperRequestLanguage(languageTag, fallback: fallbackLanguageTag);
+    final scriptPrompt = whisperInitialPrompt(languageTag);
 
     // Only the native layout can be sliced byte-exactly; anything else goes
     // through as one piece and the plugin's converter normalises it.
-    final plans = info.isWhisperNative
+    var plans = info.isWhisperNative
         ? planChunks(totalFrames: info.frameCount, sampleRate: info.sampleRate)
         : [ChunkPlan(index: 0, startFrame: 0, endFrame: info.frameCount)];
     final slice = info.isWhisperNative && plans.length > 1;
+    if (slice) {
+      // Move each seam onto a pause (energy VAD, whisper.cpp examples'
+      // vad_simple) so no word sits on the merge line. Only the few seconds
+      // around each seam are read; the recording is never held in memory.
+      try {
+        plans = await snapChunksToSilence(
+          plans,
+          sampleRate: info.sampleRate,
+          totalFrames: info.frameCount,
+          read: (start, end) => _readFloat(source, info, start, end),
+        );
+      } catch (e) {
+        // A read hiccup only costs the nicer cut points, not the transcript.
+        debugPrint('whisper seam snapping skipped: $e');
+      }
+    }
 
     final tmpRoot = await getTemporaryDirectory();
     final work = Directory(
@@ -218,11 +247,15 @@ class WhisperEngine {
         final chunkPath = slice
             ? await _writeChunk(source, info, plan, work)
             : wavPath;
+        final context = carryContextBetweenChunks && results.isNotEmpty
+            ? contextPromptFor(
+                results.last, _frames(plan.startFrame, info.sampleRate))
+            : '';
         final response = await _transcribeFile(
           chunkPath,
           modelPath: modelPath,
           language: language,
-          prompt: prompt,
+          prompt: buildInitialPrompt(scriptPrompt, context),
           onProgress: onProgress == null
               ? null
               : (pct) => onProgress(
@@ -285,14 +318,35 @@ class WhisperEngine {
     required String Function() partialSoFar,
   }) async {
     try {
+      // Everything not set here is whisper.cpp's `whisper_full_default_params
+      // (WHISPER_SAMPLING_GREEDY)` as examples/cli uses it: greedy best_of 5,
+      // temperature 0.0 with +0.2 fallback steps, entropy_thold 2.4,
+      // logprob_thold -1.0, no_speech_thold 0.6, suppress_blank on,
+      // max_len 0, token_timestamps off, print_special off, translate off.
+      // The plugin exposes none of those, which is fine: they are the values
+      // we would set. See REFERENCE.md for the full ledger.
       return await const Whisper(model: WhisperModel.base).transcribe(
         transcribeRequest: TranscribeRequest(
           audio: path,
           language: language,
           // whisper.cpp's own default; more threads than cores only thrash.
           threads: math.max(1, math.min(4, Platform.numberOfProcessors)),
+          // Timestamped segments are what the chunk merge assigns by.
           isNoTimestamps: false,
+          // Script steering (zh) + the previous chunk's tail; whisper.cpp
+          // tokenises it into `prompt_tokens`, exactly what examples/stream
+          // passes between windows with --keep-context.
           initialPrompt: prompt,
+          // `no_context = false`: within one chunk the 30 s decode windows
+          // condition on what was just decoded (examples/stream
+          // --keep-context; OpenAI's condition_on_previous_text=True).
+          // whisper.cpp's default is `true`; the plugin's is `false`, and it
+          // is set explicitly so a plugin default change cannot flip it.
+          noContext: false,
+          // Deliberate deviation from whisper.cpp's default (false): this is
+          // dictation, and the tail of every recording is the silence after
+          // the user stops talking — exactly what breeds "[BLANK_AUDIO]",
+          // "(music)" and "♪". Costs literal brackets in dictated text.
           suppressNonSpeechTokens: true,
           keepModelLoaded: true,
         ),
@@ -316,6 +370,20 @@ class WhisperEngine {
 
   static Duration _frames(int frames, int sampleRate) =>
       Duration(microseconds: frames * 1000000 ~/ sampleRate);
+
+  /// Reads frames [start, end) of the (16 kHz mono PCM16) recording as float
+  /// samples, the way whisper.cpp's readers scale them.
+  static Future<Float32List> _readFloat(
+      File source, WavInfo info, int start, int end) async {
+    final raf = await source.open();
+    try {
+      await raf.setPosition(info.dataOffset + start * info.bytesPerFrame);
+      final bytes = await raf.read((end - start) * info.bytesPerFrame);
+      return pcm16ToFloat(bytes);
+    } finally {
+      await raf.close();
+    }
+  }
 
   /// Writes one chunk as a standalone 16 kHz mono PCM16 WAV.
   static Future<String> _writeChunk(
