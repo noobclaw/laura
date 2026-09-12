@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'models.dart';
 import 'store.dart';
 import 'ui_common.dart';
@@ -106,7 +107,8 @@ class _TrendChart extends StatelessWidget {
                   // Bars.
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: nights.map((s) {
+                    children: nights.indexed.map((entry) {
+                      final (int i, SleepSession s) = entry;
                       final double frac = (s.score / 100).clamp(0.03, 1.0);
                       final Color c = bandColor(s.band);
                       return Expanded(
@@ -116,7 +118,19 @@ class _TrendChart extends StatelessWidget {
                             alignment: Alignment.bottomCenter,
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 40),
-                              child: Container(
+                              // Each bar grows up from the baseline, 60 ms
+                              // after the one to its left.
+                              child: TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0, end: 1),
+                                duration: reduceMotion(context)
+                                    ? Duration.zero
+                                    : Duration(milliseconds: 500 + 60 * i),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, t, child) => SizedBox(
+                                  height: h * frac * t,
+                                  child: child,
+                                ),
+                                child: Container(
                                 height: h * frac,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -130,6 +144,7 @@ class _TrendChart extends StatelessWidget {
                                   borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(6)),
                                 ),
+                              ),
                               ),
                             ),
                           ),

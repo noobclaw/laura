@@ -14,8 +14,10 @@ abstract final class Branding {
 
   static const String version = '1.1.2';
 
-  /// Seed for the Material 3 color scheme — a calm night indigo.
-  static const Color seedColor = Color(0xFF5661E0);
+  /// Seed for the Material 3 color scheme — plum purple (hue ≈ 290°), the
+  /// app's own colour band; the night surfaces in tool/app_theme.dart are
+  /// tuned to it.
+  static const Color seedColor = Color(0xFF8E24AA);
 
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the app ships without the INTERNET permission.

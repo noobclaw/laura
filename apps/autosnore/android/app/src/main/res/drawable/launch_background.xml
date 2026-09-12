@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@android:color/white" />
+    <!-- Night surface (tool/app_theme.dart NightPalette.night) so the launch
+         frame never flashes white before the plum UI draws. -->
+    <item android:drawable="#14091C" />
 
     <!-- You can insert your own image assets here -->
     <!-- <item>

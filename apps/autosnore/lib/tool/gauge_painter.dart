@@ -10,12 +10,16 @@ class ScoreGaugePainter extends CustomPainter {
     required this.value,
     required this.color,
     required this.trackColor,
+    this.tipColor,
   });
 
   /// 0..100.
   final double value;
   final Color color;
   final Color trackColor;
+
+  /// Optional dot at the arc's leading end — the "needle tip".
+  final Color? tipColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -44,9 +48,20 @@ class ScoreGaugePainter extends CustomPainter {
         colors: [color, Color.lerp(color, Colors.white, 0.4)!],
       ).createShader(arcRect);
     canvas.drawArc(arcRect, start, sweep, false, arc);
+
+    if (tipColor != null) {
+      final double r = arcRect.width / 2;
+      final Offset c = arcRect.center;
+      final double a = start + sweep;
+      final Offset tip = Offset(c.dx + r * math.cos(a), c.dy + r * math.sin(a));
+      canvas.drawCircle(tip, stroke * 0.42, Paint()..color = tipColor!);
+    }
   }
 
   @override
   bool shouldRepaint(covariant ScoreGaugePainter old) =>
-      old.value != value || old.color != color || old.trackColor != trackColor;
+      old.value != value ||
+      old.color != color ||
+      old.trackColor != trackColor ||
+      old.tipColor != tipColor;
 }

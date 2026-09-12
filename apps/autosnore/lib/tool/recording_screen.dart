@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'models.dart';
 import 'recording_controller.dart';
 import 'report_screen.dart';
 import 'store.dart';
 import 'ui_common.dart';
+import 'wave_painter.dart';
 
 enum _Phase { requesting, denied, permanentlyDenied, recording, error }
 
@@ -174,7 +177,16 @@ class _RecordingScreenState extends State<RecordingScreen>
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: SafeArea(child: _body()),
+        body: SafeArea(
+          // Phases (permission -> recording -> error) cross-fade instead of
+          // snapping; each branch is keyed so the switcher sees a change.
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: KeyedSubtree(key: ValueKey(_phase), child: _body()),
+          ),
+        ),
       ),
     );
   }
@@ -275,40 +287,146 @@ class _PermissionPanel extends StatelessWidget {
   }
 }
 
-class _RecordingView extends StatelessWidget {
+class _RecordingView extends StatefulWidget {
   const _RecordingView({required this.controller, required this.onStop});
 
   final RecordingController controller;
   final VoidCallback onStop;
 
   @override
+  State<_RecordingView> createState() => _RecordingViewState();
+}
+
+/// The live screen: a rolling loudness waveform and a breathing orb whose
+/// glow follows the room. One 4-second breath drives the orb's scale and
+/// the wave's idle sway; the waveform itself is fed by the controller's
+/// real level, sampled ten times a second into a 72-bar history.
+class _RecordingViewState extends State<_RecordingView>
+    with SingleTickerProviderStateMixin {
+  static const int _bars = 72;
+  static const Duration _sampleEvery = Duration(milliseconds: 100);
+
+  late final AnimationController _breath =
+      AnimationController(vsync: this, duration: const Duration(seconds: 4));
+  final List<double> _history = List<double>.filled(_bars, 0, growable: true);
+  Timer? _sampler;
+  double _smooth = 0;
+  bool _motionOn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _sampler = Timer.periodic(_sampleEvery, (_) => _sample());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final on = !reduceMotion(context);
+    if (on != _motionOn || (on && !_breath.isAnimating)) {
+      _motionOn = on;
+      if (on) {
+        _breath.repeat();
+      } else {
+        _breath
+          ..stop()
+          ..value = 0.25;
+      }
+    }
+  }
+
+  void _sample() {
+    // Attack fast, release slow — a snore spikes then the bar decays.
+    final double target = widget.controller.level;
+    _smooth = target > _smooth ? target : _smooth * 0.82 + target * 0.18;
+    _history.removeAt(0);
+    _history.add(_smooth);
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _sampler?.cancel();
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final controller = widget.controller;
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
         return Padding(
-          padding: const EdgeInsets.all(28),
+          padding: const EdgeInsets.fromLTRB(28, 20, 28, 28),
           child: Column(
             children: [
               const Spacer(),
-              // Glowing night orb — the "we're listening" focal point.
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cs.primary.withValues(alpha: 0.14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: cs.primary.withValues(alpha: 0.30),
-                      blurRadius: 32,
-                      spreadRadius: 2,
-                    ),
-                  ],
+              // Breathing orb — the "we're listening" focal point. Scale
+              // rides the breath; the glow brightens with the room.
+              RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _breath,
+                  builder: (context, child) {
+                    final double t = _breath.value;
+                    final double swell =
+                        0.5 - 0.5 * math.cos(t * math.pi * 2);
+                    final double glow = 0.22 + 0.5 * _smooth;
+                    return SizedBox(
+                      width: 168,
+                      height: 168,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CustomPaint(
+                            size: const Size(168, 168),
+                            painter: RipplePainter(
+                              t: t,
+                              color: cs.primary,
+                              innerRadius: 44,
+                              reach: 36,
+                            ),
+                          ),
+                          Transform.scale(
+                            scale: 0.94 + 0.08 * swell,
+                            child: Container(
+                              width: 88,
+                              height: 88,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  center: const Alignment(-0.3, -0.4),
+                                  colors: [
+                                    Color.lerp(cs.primary, Colors.white, 0.25)!,
+                                    cs.primary,
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: cs.primary.withValues(alpha: glow),
+                                    blurRadius: 36,
+                                    spreadRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: child,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    controller.stalled
+                        ? Icons.mic_off_rounded
+                        : Icons.nightlight_round,
+                    color: cs.onPrimary,
+                    size: 40,
+                  ),
                 ),
-                child: Icon(Icons.nightlight_round, color: cs.primary, size: 38),
               ),
-              const SizedBox(height: 26),
+              const SizedBox(height: 22),
               Text(
                 formatDuration(controller.elapsedMs),
                 style: Theme.of(context)
@@ -320,30 +438,37 @@ class _RecordingView extends StatelessWidget {
               // The watchdog's verdict, not a decorative label: if the
               // stream has gone quiet the screen says so instead of
               // pretending to listen.
-              Text(
-                controller.stalled
-                    ? tr(zh: '麦克风被打断,正在恢复…', en: 'Microphone interrupted, resuming…')
-                    : tr(zh: '正在记录…', en: 'Recording…'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: controller.stalled ? cs.error : cs.onSurfaceVariant,
-                      fontWeight: controller.stalled ? FontWeight.w600 : null,
-                    ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                child: Text(
+                  controller.stalled
+                      ? tr(zh: '麦克风被打断,正在恢复…', en: 'Microphone interrupted, resuming…')
+                      : tr(zh: '正在记录…', en: 'Recording…'),
+                  key: ValueKey(controller.stalled),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: controller.stalled ? cs.error : cs.onSurfaceVariant,
+                        fontWeight: controller.stalled ? FontWeight.w600 : null,
+                      ),
+                ),
               ),
-              const SizedBox(height: 40),
-              // Live loudness meter.
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  height: 12,
-                  color: cs.surfaceContainerHighest,
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: controller.level,
-                    child: Container(color: cs.primary),
+              const SizedBox(height: 32),
+              // Live loudness waveform: the last ~7 seconds, newest right.
+              RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _breath,
+                  builder: (context, _) => CustomPaint(
+                    size: const Size(double.infinity, 64),
+                    painter: LiveWavePainter(
+                      samples: _history,
+                      pulse: _breath.value,
+                      color: cs.primary,
+                      accent: NightPalette.moon,
+                      trackColor: cs.outlineVariant.withValues(alpha: 0.5),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -387,7 +512,7 @@ class _RecordingView extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.stop),
                   label: Text(tr(zh: '停止并生成报告', en: 'Stop & see report')),
-                  onPressed: onStop,
+                  onPressed: widget.onStop,
                 ),
               ),
             ],

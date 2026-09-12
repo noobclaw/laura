@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'export.dart';
 import 'gauge_painter.dart';
 import 'models.dart';
@@ -52,12 +53,22 @@ class ReportScreen extends StatelessWidget {
                   SizedBox(
                     height: 90,
                     width: double.infinity,
-                    child: CustomPaint(
-                      painter: NightTimelinePainter(
-                        session: session,
-                        barColor: cs.primary,
-                        trackColor: cs.outlineVariant,
-                        labelColor: cs.onSurfaceVariant,
+                    // Bars rise one after another (20 ms stagger per bar);
+                    // the painter maps [progress] to each bar's own rise.
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: 1),
+                      duration: reduceMotion(context)
+                          ? Duration.zero
+                          : NightTimelinePainter.riseDuration,
+                      curve: Curves.linear,
+                      builder: (context, progress, _) => CustomPaint(
+                        painter: NightTimelinePainter(
+                          session: session,
+                          barColor: cs.primary,
+                          trackColor: cs.outlineVariant,
+                          labelColor: NightPalette.moon,
+                          progress: progress,
+                        ),
                       ),
                     ),
                   ),
@@ -185,25 +196,35 @@ class _ScoreCard extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: 92,
-              height: 92,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CustomPaint(
-                    size: const Size.square(92),
-                    painter: ScoreGaugePainter(
-                      value: session.score.toDouble(),
-                      color: color,
-                      trackColor: color.withValues(alpha: 0.16),
+              width: 100,
+              height: 100,
+              // The score sweeps up from 0: the arc, its moon-yellow tip and
+              // the number all ride the same tween, so they land together.
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: session.score.toDouble()),
+                duration: reduceMotion(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 1200),
+                curve: Curves.easeOutCubic,
+                builder: (context, v, _) => Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CustomPaint(
+                      size: const Size.square(100),
+                      painter: ScoreGaugePainter(
+                        value: v,
+                        color: color,
+                        trackColor: color.withValues(alpha: 0.16),
+                        tipColor: NightPalette.moon,
+                      ),
                     ),
-                  ),
-                  Text('${session.score}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(color: color)),
-                ],
+                    Text('${v.round()}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(color: color)),
+                  ],
+                ),
               ),
             ),
             const SizedBox(width: 20),

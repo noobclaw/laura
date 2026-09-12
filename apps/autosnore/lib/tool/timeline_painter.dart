@@ -14,6 +14,7 @@ class NightTimelinePainter extends CustomPainter {
     required this.trackColor,
     required this.labelColor,
     this.buckets = 48,
+    this.progress = 1,
   });
 
   final SleepSession session;
@@ -21,6 +22,24 @@ class NightTimelinePainter extends CustomPainter {
   final Color trackColor;
   final Color labelColor;
   final int buckets;
+
+  /// 0..1 entrance progress. Bar `i` starts rising at `i * staggerMs` and
+  /// takes [barRiseMs]; at 1 every bar is fully up. Pass 1 for a static paint.
+  final double progress;
+
+  static const int staggerMs = 20;
+  static const int barRiseMs = 360;
+
+  /// Total wall time for the whole staggered entrance (48 bars ≈ 1.3 s).
+  static Duration get riseDuration =>
+      Duration(milliseconds: staggerMs * 48 + barRiseMs);
+
+  double _rise(int i) {
+    if (progress >= 1) return 1;
+    final double total = riseDuration.inMilliseconds.toDouble();
+    final double t = progress * total - i * staggerMs;
+    return Curves.easeOutCubic.transform((t / barRiseMs).clamp(0.0, 1.0));
+  }
 
   static const double _minDb = -60, _maxDb = -10;
 
@@ -55,7 +74,7 @@ class NightTimelinePainter extends CustomPainter {
       if (p == null) continue;
       final double norm = ((p - _minDb) / (_maxDb - _minDb)).clamp(0.0, 1.0);
       // Reserve ~14px at the top for the loudest-bar dB label.
-      final double h = (0.12 + norm * 0.88) * (size.height - 14);
+      final double h = (0.12 + norm * 0.88) * (size.height - 14) * _rise(i);
       final double x = i * slot + (slot - barW) / 2;
       // Louder → brighter.
       final Color c = Color.lerp(barColor, Colors.white, norm * 0.45)!;
@@ -70,7 +89,8 @@ class NightTimelinePainter extends CustomPainter {
       }
     }
 
-    if (loudestBucket >= 0) {
+    // The label lands only once its bar is up.
+    if (loudestBucket >= 0 && _rise(loudestBucket) >= 1) {
       final tp = TextPainter(
         text: TextSpan(
           text: '${loudestDb.toStringAsFixed(0)} dB',
@@ -90,5 +110,6 @@ class NightTimelinePainter extends CustomPainter {
       old.session != session ||
       old.barColor != barColor ||
       old.trackColor != trackColor ||
-      old.labelColor != labelColor;
+      old.labelColor != labelColor ||
+      old.progress != progress;
 }

@@ -1,12 +1,16 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'models.dart';
 import 'recording_screen.dart';
 import 'report_screen.dart';
 import 'pro.dart';
 import 'store.dart';
 import 'ui_common.dart';
+import 'wave_painter.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.store});
@@ -45,8 +49,7 @@ class HomeScreen extends StatelessWidget {
               Text(tr(zh: '记录', en: 'Nights'),
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              ...store.visibleSessions
-                  .map((s) => _NightTile(session: s, store: store)),
+              _NightList(sessions: store.visibleSessions, store: store),
               if (store.atFreeLimit)
                 // The history gate itself: tappable, opens the Pro sheet
                 // (a plain caption here was the one free-tier wall that
@@ -95,14 +98,55 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _StartCard extends StatelessWidget {
+/// The hero: a breathing loudness waveform with the mic at its heart.
+///
+/// Signature motion — one 4-second cycle drives everything: the wave swells
+/// and settles, the ripples drift, and two rings leave the mic button and
+/// fade at the same tempo. Pressing scales the whole card down a hair.
+class _StartCard extends StatefulWidget {
   const _StartCard({required this.store});
   final AutoSnoreStore store;
+
+  @override
+  State<_StartCard> createState() => _StartCardState();
+}
+
+class _StartCardState extends State<_StartCard>
+    with SingleTickerProviderStateMixin {
+  static const Duration _cycle = Duration(seconds: 4);
+
+  late final AnimationController _breath =
+      AnimationController(vsync: this, duration: _cycle);
+  bool _pressed = false;
+  bool _motionOn = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final on = !reduceMotion(context);
+    if (on != _motionOn || (on && !_breath.isAnimating)) {
+      _motionOn = on;
+      if (on) {
+        _breath.repeat();
+      } else {
+        _breath
+          ..stop()
+          ..value = 0.25; // hold at a gentle half-inhale
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
 
   /// First night only: the three things that decide whether the recording
   /// survives until morning, said before the user commits — not discovered
   /// at 06:00 from a report that stopped at 00:47.
   Future<void> _startNight(BuildContext context) async {
+    final store = widget.store;
     if (!store.briefingSeen) {
       final go = await showModalBottomSheet<bool>(
         context: context,
@@ -120,77 +164,105 @@ class _StartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: Material(
-        color: Colors.transparent,
-        child: Ink(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF2C2F73), Color(0xFF5661E0)],
-            ),
-          ),
-          child: InkWell(
-            splashColor: Colors.white24,
-            onTap: () => _startNight(context),
-            child: SizedBox(
-              height: 208,
+    final cs = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final SleepSession? last =
+        widget.store.sessions.isEmpty ? null : widget.store.sessions.first;
+    // The sub-line is the card's "state": first night vs. a history. It
+    // cross-fades rather than snapping when the first report lands.
+    final String subline = last == null
+        ? tr(zh: '整夜离线记录鼾声 · 零联网', en: 'Record all night · fully offline')
+        : tr(
+            zh: '上次 ${formatShortDate(last.startMs)} · 评分 ${last.score} · ${bandLabel(last.band)}',
+            en: 'Last ${formatShortDate(last.startMs)} · score ${last.score} · ${bandLabel(last.band)}',
+          );
+
+    return Semantics(
+      button: true,
+      label: tr(zh: '开始记录', en: 'Start recording'),
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 140),
+        curve: Curves.easeOut,
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          onTap: () => _startNight(context),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: Container(
+              height: 248,
               width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    NightPalette.nightHighest,
+                    NightPalette.nightLow,
+                  ],
+                ),
+                border: Border.all(
+                  color: cs.primary.withValues(alpha: 0.18),
+                ),
+                borderRadius: BorderRadius.circular(28),
+              ),
               child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Positioned(
-                    right: -24,
-                    top: -24,
-                    child: Icon(Icons.nightlight_round,
-                        size: 170, color: Colors.white.withValues(alpha: 0.06)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withValues(alpha: 0.30),
-                                blurRadius: 26,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(Icons.mic,
-                              size: 34, color: Colors.white),
+                  // The breathing wave, isolated in its own layer so the
+                  // 60 fps repaint never touches the text above it.
+                  RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: _breath,
+                      builder: (context, _) => CustomPaint(
+                        painter: BreathingWavePainter(
+                          breath: _breath.value,
+                          drift: _breath.value * 2 * math.pi,
+                          color: NightPalette.plumLight,
+                          glowColor: NightPalette.plum,
+                          centerY: 0.36,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          tr(zh: '开始记录', en: 'Start recording'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tr(
-                            zh: '整夜离线记录鼾声 · 零联网',
-                            en: 'Record all night · fully offline',
-                          ),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82)),
-                        ),
-                      ],
+                      ),
                     ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _MicCore(breath: _breath),
+                      const SizedBox(height: 2),
+                      Text(
+                        tr(zh: '开始记录', en: 'Start recording'),
+                        style: text.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 260),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (child, anim) => FadeTransition(
+                          opacity: anim,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.25),
+                              end: Offset.zero,
+                            ).animate(anim),
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          subline,
+                          key: ValueKey(subline),
+                          style: text.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.78),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -198,6 +270,150 @@ class _StartCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The mic button at the centre of the wave: a moon-yellow core (the one
+/// yellow on this screen) with two ripple rings leaving it on the breath.
+class _MicCore extends StatelessWidget {
+  const _MicCore({required this.breath});
+  final Animation<double> breath;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 150,
+      height: 150,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: breath,
+              builder: (context, _) => CustomPaint(
+                size: const Size(150, 150),
+                painter: RipplePainter(
+                  t: breath.value,
+                  color: NightPalette.moon,
+                  innerRadius: 34,
+                  reach: 36,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                center: Alignment(-0.3, -0.4),
+                colors: [Color(0xFFFFE59A), NightPalette.moon],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: NightPalette.moon.withValues(alpha: 0.45),
+                  blurRadius: 28,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.mic_rounded,
+                size: 32, color: NightPalette.nightLowest),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// History list with real enter/exit motion: a new night slides in from the
+/// top, a deleted one collapses away. Diffs the incoming list by id against
+/// what is on screen, so the store can stay a plain sorted list.
+class _NightList extends StatefulWidget {
+  const _NightList({required this.sessions, required this.store});
+  final List<SleepSession> sessions;
+  final AutoSnoreStore store;
+
+  @override
+  State<_NightList> createState() => _NightListState();
+}
+
+class _NightListState extends State<_NightList> {
+  final GlobalKey<AnimatedListState> _key = GlobalKey<AnimatedListState>();
+  late final List<SleepSession> _items =
+      List<SleepSession>.from(widget.sessions);
+
+  @override
+  void didUpdateWidget(covariant _NightList old) {
+    super.didUpdateWidget(old);
+    _sync(widget.sessions);
+  }
+
+  void _sync(List<SleepSession> next) {
+    final animate = !reduceMotion(context);
+    final Duration d = animate
+        ? const Duration(milliseconds: 320)
+        : Duration.zero;
+    // Removals first (walk backwards so indices stay valid).
+    for (int i = _items.length - 1; i >= 0; i--) {
+      final s = _items[i];
+      if (next.any((n) => n.id == s.id)) continue;
+      _items.removeAt(i);
+      _key.currentState?.removeItem(
+        i,
+        (context, anim) => _slide(anim, _NightTile(session: s, store: widget.store)),
+        duration: d,
+      );
+    }
+    // Then insertions, in target order.
+    for (int i = 0; i < next.length; i++) {
+      final n = next[i];
+      final int at = _items.indexWhere((s) => s.id == n.id);
+      if (at == i) {
+        _items[i] = n; // same slot, refreshed data
+        continue;
+      }
+      if (at >= 0) {
+        // Order changed (rare): move without ceremony.
+        _items.removeAt(at);
+        _key.currentState?.removeItem(at, (_, _) => const SizedBox.shrink(),
+            duration: Duration.zero);
+      }
+      _items.insert(i, n);
+      _key.currentState?.insertItem(i, duration: d);
+    }
+  }
+
+  Widget _slide(Animation<double> anim, Widget child) {
+    final curved = CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
+    return SizeTransition(
+      sizeFactor: curved,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -0.35),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedList(
+      key: _key,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      initialItemCount: _items.length,
+      itemBuilder: (context, i, anim) =>
+          _slide(anim, _NightTile(session: _items[i], store: widget.store)),
     );
   }
 }
@@ -211,6 +427,7 @@ class _NightTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = bandColor(session.band);
     return Card(
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.18),
