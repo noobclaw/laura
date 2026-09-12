@@ -63,7 +63,10 @@ void main() {
     ));
     await tester.pump();
     await tester.tap(find.text(DictationEnginePref.label(DictationEngine.system)));
-    await tester.pumpAndSettle();
+    // Not pumpAndSettle: the hero's sound field breathes indefinitely while
+    // idle, so the tree never "settles" — pump past the sheet's open animation.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text(DictationEnginePref.label(DictationEngine.whisper)),
         findsOneWidget);
     expect(find.byType(ListTile), findsNWidgets(2));
@@ -109,7 +112,18 @@ void main() {
     await tester.pump();
 
     expect(find.byType(TextField), findsOneWidget);
-    // The list is lazy: assert it rendered cards, not how many fit the viewport.
+    // Nothing in the body may overflow at 800x600 — the timeline scrolls
+    // under the fixed hero panel instead (an overflow throws and fails here).
+    expect(tester.takeException(), isNull);
+    // The list is lazy and, in the test environment, the "no on-device
+    // recognizer" banner sits above it (the recognizer cannot be probed here),
+    // which at 600px parks the first card just below the fold: scroll the
+    // timeline and assert cards rendered, not how many fit the viewport.
+    await tester.scrollUntilVisible(
+      find.byType(NoteCard),
+      80,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byType(NoteCard), findsWidgets);
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../core/l10n.dart';
+import 'home_page.dart' show noteTitleHeroTag;
 import 'note.dart';
 import 'transcript_text.dart';
 import 'ui_common.dart';
@@ -83,7 +84,19 @@ class _NoteDetailPageState extends State<NoteDetailPage>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(note.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          // Same Hero as the timeline card, so the title flies into the bar.
+          title: Hero(
+            tag: noteTitleHeroTag(note),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Text(
+                note.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+          ),
           actions: [
             IconButton(
               tooltip: tr(zh: '复制', en: 'Copy'),

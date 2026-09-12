@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 import 'dictation_controller.dart';
 import 'dictation_engine.dart';
 import 'dictation_language.dart';
 import 'note.dart';
 import 'note_detail_page.dart';
 import 'paywall.dart';
+import 'sound_field.dart';
 import 'transcript_text.dart';
 import 'ui_common.dart';
 
@@ -30,6 +32,17 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   late final bool _ownsController = widget.controller == null;
   final _searchCtrl = TextEditingController();
   Timer? _ticker;
+
+  /// The timeline is a [SliverAnimatedList]: [_shown] mirrors what it
+  /// currently holds, and [_syncList] diffs the store against it so a new note
+  /// slides in from the top and an undo grows back into place instead of the
+  /// list hard-refreshing.
+  final _listKey = GlobalKey<SliverAnimatedListState>();
+  late final List<Note> _shown = _store.search('');
+
+  /// Id of the note the user just swiped away: the Dismissible has already
+  /// collapsed it, so the list must drop it without a second exit animation.
+  String? _swipedId;
 
   /// True while [_finishSession] is running — keeps the controller's own
   /// state change from triggering a second save of the same session.
@@ -80,8 +93,57 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   }
 
   void _onStoreChanged() {
-    if (mounted) setState(() {});
+    if (mounted) _syncList();
   }
+
+  static const _listMotion = Duration(milliseconds: 320);
+
+  /// Diff the store (filtered by the search box) against what the AnimatedList
+  /// shows, playing exits for removed notes and entrances for new ones.
+  /// [animate] is off for search edits: retyping a query should refilter, not
+  /// choreograph forty cards.
+  void _syncList({bool animate = true}) {
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    final next = _store.search(_searchCtrl.text);
+    final nextIds = {for (final n in next) n.id};
+    final list = _listKey.currentState;
+    for (var i = _shown.length - 1; i >= 0; i--) {
+      final n = _shown[i];
+      if (nextIds.contains(n.id)) continue;
+      _shown.removeAt(i);
+      final swiped = n.id == _swipedId;
+      if (swiped) _swipedId = null;
+      final play = animate && !swiped && !reduce;
+      list?.removeItem(
+        i,
+        (context, anim) => play
+            ? _EnterExit(animation: anim, child: _card(n))
+            : const SizedBox.shrink(),
+        duration: play ? _listMotion : Duration.zero,
+      );
+    }
+    final shownIds = {for (final n in _shown) n.id};
+    for (var i = 0; i < next.length; i++) {
+      final n = next[i];
+      if (shownIds.contains(n.id)) continue;
+      _shown.insert(i, n);
+      list?.insertItem(
+        i,
+        duration: animate && !reduce ? _listMotion : Duration.zero,
+      );
+    }
+    setState(() {});
+  }
+
+  Widget _card(Note note) => NoteCard(
+    note: note,
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NoteDetailPage(note: note, store: _store),
+      ),
+    ),
+    onDelete: () => _deleteWithUndo(note),
+  );
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -143,25 +205,28 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
           : await _controller.stop();
       final trimmed = (text ?? '').trim();
       if (trimmed.isNotEmpty) {
-        await _store.add(Note(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          createdAt: startedAt,
-          durationMs: durationMs,
-          text: trimmed,
-          language: _controller.language,
-        ));
+        await _store.add(
+          Note(
+            id: DateTime.now().microsecondsSinceEpoch.toString(),
+            createdAt: startedAt,
+            durationMs: durationMs,
+            text: trimmed,
+            language: _controller.language,
+          ),
+        );
         final saveErr = _store.takeSaveError();
         if (saveErr != null) {
-          _snack(tr(
-            zh: '笔记没能写入存储($saveErr)。请先复制文字,再检查手机空间。',
-            en: 'The note could not be written to storage ($saveErr). Copy the text, then check free space.',
-          ));
+          _snack(
+            tr(
+              zh: '笔记没能写入存储($saveErr)。请先复制文字,再检查手机空间。',
+              en: 'The note could not be written to storage ($saveErr). Copy the text, then check free space.',
+            ),
+          );
         }
       } else if (!background && _controller.message == null) {
-        _snack(tr(
-          zh: '没听到内容,这条没有保存。',
-          en: 'Nothing was heard — no note saved.',
-        ));
+        _snack(
+          tr(zh: '没听到内容,这条没有保存。', en: 'Nothing was heard — no note saved.'),
+        );
       }
       _showControllerMessage();
     } finally {
@@ -173,7 +238,8 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
   void _showControllerMessage() {
     final msg = _controller.message;
     if (msg == null) return;
-    final denied = _controller.permissionPermanentlyDenied ||
+    final denied =
+        _controller.permissionPermanentlyDenied ||
         _controller.lastErrorNeedsSettings;
     _controller.clearMessage();
     // Anything the user fixes in system settings (permission, dictation
@@ -193,17 +259,20 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(message),
-        action: action,
-        duration: Duration(seconds: action == null ? 4 : 12),
-      ));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: action,
+          duration: Duration(seconds: action == null ? 4 : 12),
+        ),
+      );
   }
 
   /// A note is often the only copy of a thought, and a swipe is easy to trigger
   /// by accident while scrolling — so deletion is always undoable.
   Future<void> _deleteWithUndo(Note note) async {
     final index = _store.indexOf(note);
+    _swipedId = note.id;
     await _store.remove(note);
     if (!mounted) return;
     _snack(
@@ -217,108 +286,178 @@ class _EchoJotHomeState extends State<EchoJotHome> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final notes = _store.search(_searchCtrl.text);
+    final notes = _shown;
     final caps = _controller.capabilities;
     final searching = _searchCtrl.text.isNotEmpty;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
-    return Column(
-      children: [
-        if (_store.loadError != null) const _LoadErrorNotice(),
-        // The banner is about the *system* engine; with Whisper selected the
-        // system's language packs are irrelevant.
-        if (caps != null &&
-            !caps.ready &&
-            !_controller.busy &&
-            _controller.engine == DictationEngine.system)
-          _CapabilityNotice(
-            controller: _controller,
-            onUseWhisper: () async {
-              await DictationEnginePref.set(DictationEngine.whisper);
-              if (!mounted) return;
-              setState(() {});
-              _snack(tr(
-                zh: '已切换到 Whisper 离线引擎:说完停止后开始转写。',
-                en: 'Switched to the Whisper offline engine: transcription '
-                    'starts when you stop.',
-              ));
-            },
-            onRecheck: () async {
-              await _controller.probe();
-              if (!mounted) return;
-              _snack(_controller.capabilities?.ready == true
-                  ? tr(zh: '设备端识别已就绪', en: 'On-device recognition is ready')
-                  : tr(
-                      zh: '仍不可用 — 设备端识别还没就绪',
-                      en: 'Still unavailable — on-device recognition is not ready',
-                    ));
-            },
-          ),
-        if (_store.notes.length > 1 || searching)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: TextField(
-              controller: _searchCtrl,
-              onChanged: (_) => setState(() {}),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: tr(zh: '搜索笔记内容…', en: 'Search notes…'),
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: searching
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchCtrl.clear();
+    // The hero panel is the one fixed-height block; everything above it
+    // (notices, search, stats, the timeline) lives in a single scroll view so
+    // a short body — small phone, landscape, split-screen, a large system
+    // font, or the capability banner on top of it all — scrolls instead of
+    // squeezing the timeline to nothing and overflowing.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bodyHeight = constraints.maxHeight;
+        // The ring scales with the screen (212 on a tall phone, 160 at the
+        // smallest) so the timeline keeps a useful share of the body; the
+        // panel drops to its compact layout only when even that would leave
+        // no room (landscape phones).
+        final fieldSize = bodyHeight.isFinite
+            ? (bodyHeight * 0.30).clamp(
+                SoundField.minSize,
+                SoundField.defaultSize,
+              )
+            : SoundField.defaultSize;
+        final compact = bodyHeight.isFinite && bodyHeight < 480;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  if (_store.loadError != null)
+                    const SliverToBoxAdapter(child: _LoadErrorNotice()),
+                  // The banner is about the *system* engine; with Whisper selected the
+                  // system's language packs are irrelevant.
+                  if (caps != null &&
+                      !caps.ready &&
+                      !_controller.busy &&
+                      _controller.engine == DictationEngine.system)
+                    SliverToBoxAdapter(
+                      child: _CapabilityNotice(
+                        controller: _controller,
+                        onUseWhisper: () async {
+                          await DictationEnginePref.set(
+                            DictationEngine.whisper,
+                          );
+                          if (!mounted) return;
                           setState(() {});
+                          _snack(
+                            tr(
+                              zh: '已切换到 Whisper 离线引擎:说完停止后开始转写。',
+                              en:
+                                  'Switched to the Whisper offline engine: transcription '
+                                  'starts when you stop.',
+                            ),
+                          );
                         },
-                      )
-                    : null,
-              ),
-            ),
-          ),
-        Expanded(
-          child: notes.isEmpty
-              ? EmptyState(
-                  icon: searching ? Icons.search_off : Icons.graphic_eq,
-                  title: searching
-                      ? tr(zh: '没有匹配的笔记', en: 'No matching notes')
-                      : tr(zh: '说出第一条笔记', en: 'Speak your first note'),
-                  body: searching
-                      ? tr(zh: '换个关键词再试试。', en: 'Try another keyword.')
-                      : tr(
-                          zh: '点下面的话筒开始说,说完就是一条可搜索的文字笔记——'
-                              '转写全程在这台手机上完成,不上传、不留录音。\n\n'
-                              '试试说:「提醒我明天上午给房东打电话」',
-                          en: 'Tap the mic and start talking; what you say becomes '
-                              'a searchable note — transcribed on this phone, '
-                              'nothing uploaded, no recording kept.\n\n'
-                              'Try: "remind me to call the landlord tomorrow"',
-                        ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  itemCount: notes.length,
-                  itemBuilder: (context, i) => NoteCard(
-                    note: notes[i],
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            NoteDetailPage(note: notes[i], store: _store),
+                        onRecheck: () async {
+                          await _controller.probe();
+                          if (!mounted) return;
+                          _snack(
+                            _controller.capabilities?.ready == true
+                                ? tr(
+                                    zh: '设备端识别已就绪',
+                                    en: 'On-device recognition is ready',
+                                  )
+                                : tr(
+                                    zh: '仍不可用 — 设备端识别还没就绪',
+                                    en: 'Still unavailable — on-device recognition is not ready',
+                                  ),
+                          );
+                        },
                       ),
                     ),
-                    onDelete: () => _deleteWithUndo(notes[i]),
+                  if (_store.notes.length > 1 || searching)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        child: TextField(
+                          controller: _searchCtrl,
+                          onChanged: (_) => _syncList(animate: false),
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            hintText: tr(zh: '搜索笔记内容…', en: 'Search notes…'),
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: searching
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _searchCtrl.clear();
+                                      _syncList(animate: false);
+                                    },
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (_store.notes.isNotEmpty && !searching)
+                    SliverToBoxAdapter(child: _StatsStrip(notes: _store.notes)),
+                  // The list stays mounted even when empty (so the very first note can
+                  // slide in, and its GlobalKey is never duplicated); the guidance state
+                  // fills whatever is left below it and fades in/out instead of
+                  // replacing the list.
+                  SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    sliver: SliverAnimatedList(
+                      key: _listKey,
+                      initialItemCount: notes.length,
+                      itemBuilder: (context, i, anim) =>
+                          _EnterExit(animation: anim, child: _card(notes[i])),
+                    ),
                   ),
-                ),
-        ),
-        // The engine chip must follow the preference, which changes outside
-        // the controller (settings page, the banner's switch button).
-        ValueListenableBuilder<DictationEngine>(
-          valueListenable: DictationEnginePref.current,
-          builder: (context, _, _) => _DictationPanel(
-            controller: _controller,
-            onToggle: _toggle,
-          ),
-        ),
-      ],
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: AnimatedSwitcher(
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 260),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: notes.isNotEmpty
+                          ? const SizedBox.shrink(key: ValueKey('timeline'))
+                          : EmptyState(
+                              key: ValueKey(
+                                searching ? 'empty-search' : 'empty',
+                              ),
+                              icon: searching
+                                  ? Icons.search_off
+                                  : Icons.graphic_eq,
+                              title: searching
+                                  ? tr(zh: '没有匹配的笔记', en: 'No matching notes')
+                                  : tr(
+                                      zh: '说出第一条笔记',
+                                      en: 'Speak your first note',
+                                    ),
+                              body: searching
+                                  ? tr(
+                                      zh: '换个关键词再试试。',
+                                      en: 'Try another keyword.',
+                                    )
+                                  : tr(
+                                      zh:
+                                          '点下面的话筒开始说,说完就是一条可搜索的文字笔记——'
+                                          '转写全程在这台手机上完成,不上传、不留录音。\n\n'
+                                          '试试说:「提醒我明天上午给房东打电话」',
+                                      en:
+                                          'Tap the mic and start talking; what you say becomes '
+                                          'a searchable note — transcribed on this phone, '
+                                          'nothing uploaded, no recording kept.\n\n'
+                                          'Try: "remind me to call the landlord tomorrow"',
+                                    ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // The engine chip must follow the preference, which changes outside
+            // the controller (settings page, the banner's switch button).
+            ValueListenableBuilder<DictationEngine>(
+              valueListenable: DictationEnginePref.current,
+              builder: (context, _, _) => _DictationPanel(
+                controller: _controller,
+                onToggle: _toggle,
+                fieldSize: fieldSize,
+                compact: compact,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -346,16 +485,18 @@ class _LoadErrorNotice extends StatelessWidget {
           Expanded(
             child: Text(
               tr(
-                zh: '上次的笔记文件读不出来,已原样备份到应用目录(notes.json.corrupt-…),'
+                zh:
+                    '上次的笔记文件读不出来,已原样备份到应用目录(notes.json.corrupt-…),'
                     '这里从空列表开始。新笔记会正常保存。',
-                en: 'The previous notes file could not be read. It was kept as '
+                en:
+                    'The previous notes file could not be read. It was kept as '
                     'notes.json.corrupt-… in the app folder and the list starts '
                     'empty. New notes save normally.',
               ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onErrorContainer,
-                    height: 1.35,
-                  ),
+                color: cs.onErrorContainer,
+                height: 1.35,
+              ),
             ),
           ),
         ],
@@ -397,16 +538,19 @@ class _CapabilityNotice extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.privacy_tip_outlined,
-                  size: 20, color: cs.onSecondaryContainer),
+              Icon(
+                Icons.privacy_tip_outlined,
+                size: 20,
+                color: cs.onSecondaryContainer,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   tr(zh: '需要系统的设备端语音识别', en: 'On-device recognition needed'),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: cs.onSecondaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: cs.onSecondaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -415,9 +559,9 @@ class _CapabilityNotice extends StatelessWidget {
           Text(
             DictationController.noOnDeviceHelp,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSecondaryContainer.withValues(alpha: 0.85),
-                  height: 1.35,
-                ),
+              color: cs.onSecondaryContainer.withValues(alpha: 0.85),
+              height: 1.35,
+            ),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -432,16 +576,20 @@ class _CapabilityNotice extends StatelessWidget {
               TextButton(
                 onPressed: onRecheck,
                 style: TextButton.styleFrom(
-                    foregroundColor: cs.onSecondaryContainer),
+                  foregroundColor: cs.onSecondaryContainer,
+                ),
                 child: Text(tr(zh: '重新检测', en: 'Check again')),
               ),
               TextButton(
                 onPressed: controller.openSystemSettings,
                 style: TextButton.styleFrom(
-                    foregroundColor: cs.onSecondaryContainer),
-                child: Text(permanentlyDenied
-                    ? tr(zh: '去系统设置', en: 'Open settings')
-                    : tr(zh: '打开设置', en: 'Open settings')),
+                  foregroundColor: cs.onSecondaryContainer,
+                ),
+                child: Text(
+                  permanentlyDenied
+                      ? tr(zh: '去系统设置', en: 'Open settings')
+                      : tr(zh: '打开设置', en: 'Open settings'),
+                ),
               ),
             ],
           ),
@@ -453,10 +601,23 @@ class _CapabilityNotice extends StatelessWidget {
 
 /// The hero: a tinted panel that turns into a live transcript while dictating.
 class _DictationPanel extends StatelessWidget {
-  const _DictationPanel({required this.controller, required this.onToggle});
+  const _DictationPanel({
+    required this.controller,
+    required this.onToggle,
+    this.fieldSize = SoundField.defaultSize,
+    this.compact = false,
+  });
 
   final DictationController controller;
   final VoidCallback onToggle;
+
+  /// Side of the sound field; the home page scales it to the body height so
+  /// the timeline keeps room on short screens.
+  final double fieldSize;
+
+  /// Very short bodies (landscape phones): drop the secondary line so the
+  /// panel still fits above the fold.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -467,30 +628,51 @@ class _DictationPanel extends StatelessWidget {
     final engine = controller.engine;
     final whisper = engine == DictationEngine.whisper;
 
+    final colors = EchoJotColors.of(context);
+    final live = listening || finishing;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
     // The panel must read as a container: starting the gradient at cs.surface
     // (== scaffold background) made its 28px radius and top edge invisible.
-    return Container(
+    // Live sessions tint the lower half towards mint so the whole panel, not
+    // just the button, says "listening".
+    return AnimatedContainer(
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
             cs.surfaceContainerLow,
-            listening || transcribing
+            live
                 ? Color.alphaBlend(
-                    cs.primary.withValues(alpha: 0.18),
+                    colors.live.withValues(alpha: 0.10),
+                    cs.surfaceContainerHigh,
+                  )
+                : transcribing
+                ? Color.alphaBlend(
+                    cs.primary.withValues(alpha: 0.12),
                     cs.surfaceContainerHigh,
                   )
                 : cs.surfaceContainerHigh,
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(top: BorderSide(color: cs.outlineVariant)),
+        border: Border(
+          top: BorderSide(
+            color: live
+                ? colors.live.withValues(alpha: 0.6)
+                : cs.outlineVariant,
+          ),
+        ),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -503,6 +685,9 @@ class _DictationPanel extends StatelessWidget {
                 Flexible(
                   child: _LiveTranscript(
                     text: controller.previewText,
+                    // Bumps when a sentence is committed: that is the moment
+                    // the transcript slides up a notch (see _LiveTranscript).
+                    sentenceKey: controller.committedText.length,
                     placeholder: whisper
                         ? tr(
                             zh: '正在录音…停止后开始转写',
@@ -514,35 +699,35 @@ class _DictationPanel extends StatelessWidget {
                           ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                LevelMeter(levels: controller.levels),
                 const SizedBox(height: 12),
                 Text(
                   finishing
                       ? tr(zh: '正在收尾…', en: 'Wrapping up…')
                       : formatElapsed(controller.elapsed),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: cs.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: colors.liveText,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   whisper
                       ? tr(
                           zh: 'Whisper 离线 · 停止后转写 · 录音只在本机,转完即删',
-                          en: 'Whisper offline · transcribes after stop · '
+                          en:
+                              'Whisper offline · transcribes after stop · '
                               'recording stays here, deleted once transcribed',
                         )
                       : tr(
                           zh: '系统识别 · 边说边转文字 · 不保存录音',
-                          en: 'System recognizer · transcribing as you speak · '
+                          en:
+                              'System recognizer · transcribing as you speak · '
                               'no audio kept',
                         ),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
                 const SizedBox(height: 10),
               ] else ...[
@@ -565,22 +750,24 @@ class _DictationPanel extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  whisper
-                      ? tr(
-                          zh: '内置 Whisper 模型 · 声音不出这台手机',
-                          en: 'Bundled Whisper model · your voice stays here',
-                        )
-                      : tr(
-                          zh: '设备端识别 · 声音不出这台手机',
-                          en: 'On-device recognition · your voice stays here',
-                        ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                ),
+                if (!compact) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    whisper
+                        ? tr(
+                            zh: '内置 Whisper 模型 · 声音不出这台手机',
+                            en: 'Bundled Whisper model · your voice stays here',
+                          )
+                        : tr(
+                            zh: '设备端识别 · 声音不出这台手机',
+                            en: 'On-device recognition · your voice stays here',
+                          ),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 // Two chips: which engine, and which language it listens for —
                 // the single most common "it only understands English"
@@ -608,13 +795,20 @@ class _DictationPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
               ],
-              MicButton(
-                listening: listening || finishing || transcribing,
-                icon: transcribing ? Icons.hourglass_top_rounded : null,
-                semanticsLabel: transcribing
-                    ? tr(zh: '提前结束转写', en: 'End transcription early')
-                    : null,
-                onTap: onToggle,
+              // The signature: a ring of spectrum bars that bounce to the mic
+              // while recording and breathe while idle, with the button inside.
+              SoundField(
+                levels: controller.levels,
+                active: live,
+                size: fieldSize,
+                child: MicButton(
+                  listening: live || transcribing,
+                  icon: transcribing ? Icons.hourglass_top_rounded : null,
+                  semanticsLabel: transcribing
+                      ? tr(zh: '提前结束转写', en: 'End transcription early')
+                      : null,
+                  onTap: onToggle,
+                ),
               ),
             ],
           ),
@@ -650,9 +844,9 @@ class _TranscribingStatus extends StatelessWidget {
               ? tr(zh: '正在结束这一段…', en: 'Finishing this part…')
               : tr(zh: '正在转写…', en: 'Transcribing…'),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: cs.primary,
-                fontWeight: FontWeight.w700,
-              ),
+            color: cs.primary,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 12),
         ClipRRect(
@@ -673,9 +867,9 @@ class _TranscribingStatus extends StatelessWidget {
             tr(zh: '只在本机', en: 'on this phone only'),
           ].join(' · '),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 4),
         Text(
@@ -684,9 +878,9 @@ class _TranscribingStatus extends StatelessWidget {
             en: 'Tap the button to end early; what is done so far is kept',
           ),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -696,9 +890,18 @@ class _TranscribingStatus extends StatelessWidget {
 /// The words as they arrive. Auto-scrolls to the newest line and keeps a fixed
 /// height so the button below never jumps around.
 class _LiveTranscript extends StatefulWidget {
-  const _LiveTranscript({required this.text, required this.placeholder});
+  const _LiveTranscript({
+    required this.text,
+    required this.placeholder,
+    required this.sentenceKey,
+  });
 
   final String text;
+
+  /// Changes whenever the recogniser commits a sentence; the box then fades
+  /// and slides the text up from the bottom. Partial-word updates (same key)
+  /// rebuild in place with no motion, so live typing stays calm.
+  final int sentenceKey;
 
   /// Shown while there is no text yet — differs per engine (Whisper has
   /// nothing to show until the recording stops).
@@ -736,26 +939,49 @@ class _LiveTranscriptState extends State<_LiveTranscript> {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 64, maxHeight: 116),
       child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        // The live transcript is the emotional payload — give it a real surface
-        // with an edge, not a barely-there tint.
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: SingleChildScrollView(
-        controller: _scroll,
-        child: Text(
-          empty ? widget.placeholder : widget.text,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          // The live transcript is the emotional payload — give it a real surface
+          // with an edge, not a barely-there tint.
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: cs.outlineVariant),
+        ),
+        child: SingleChildScrollView(
+          controller: _scroll,
+          child: AnimatedSwitcher(
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 260),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeIn,
+            // Old text just fades; the new text rises in from below.
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.18),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
+              ),
+            ),
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topLeft,
+              children: [...previous, ?current],
+            ),
+            child: Text(
+              empty ? widget.placeholder : widget.text,
+              key: ValueKey(empty ? -1 : widget.sentenceKey),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 height: 1.45,
                 color: empty ? cs.onSurfaceVariant : cs.onSurface,
                 fontStyle: empty ? FontStyle.italic : FontStyle.normal,
               ),
+            ),
+          ),
         ),
-      ),
       ),
     );
   }
@@ -807,19 +1033,27 @@ class NoteCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        note.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium,
+                      // Shared with the detail page's app bar: the title flies
+                      // up into place instead of the page just appearing.
+                      child: Hero(
+                        tag: noteTitleHeroTag(note),
+                        child: Material(
+                          type: MaterialType.transparency,
+                          child: Text(
+                            note.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       formatNoteStamp(note.createdAt),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -830,9 +1064,9 @@ class NoteCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.72),
-                          height: 1.35,
-                        ),
+                      color: cs.onSurface.withValues(alpha: 0.72),
+                      height: 1.35,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 12),
@@ -841,7 +1075,8 @@ class NoteCard extends StatelessWidget {
                     InfoChip(
                       icon: Icons.timer_outlined,
                       label: formatElapsed(
-                          Duration(milliseconds: note.durationMs)),
+                        Duration(milliseconds: note.durationMs),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     InfoChip(
@@ -854,6 +1089,114 @@ class NoteCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Hero tag shared by the timeline card and the detail page app bar.
+String noteTitleHeroTag(Note note) => 'note-title-${note.id}';
+
+/// Entrance / exit for a timeline card: grows (or collapses) vertically while
+/// sliding down from the top and fading — the note "lands" in the list.
+class _EnterExit extends StatelessWidget {
+  const _EnterExit({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final eased = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return SizeTransition(
+      sizeFactor: eased,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(
+        opacity: eased,
+        child: SlideTransition(
+          position: Tween(
+            begin: const Offset(0, -0.25),
+            end: Offset.zero,
+          ).animate(eased),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// "12 notes · 842 words": the two totals roll to their new value whenever a
+/// note is added or removed, instead of jumping.
+class _StatsStrip extends StatelessWidget {
+  const _StatsStrip({required this.notes});
+
+  final List<Note> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    var units = 0;
+    var cjkAny = false;
+    for (final n in notes) {
+      final cjk = isCjkText(n.text);
+      cjkAny = cjkAny || cjk;
+      units += countUnits(n.text, cjk: cjk);
+    }
+    final reduce = MediaQuery.disableAnimationsOf(context);
+    final motion = reduce ? Duration.zero : const Duration(milliseconds: 650);
+
+    Widget number(int value) => TweenAnimationBuilder<double>(
+      tween: Tween(end: value.toDouble()),
+      duration: motion,
+      curve: Curves.easeOutCubic,
+      builder: (context, v, _) => Text(
+        v.round().toString(),
+        style: text.titleLarge?.copyWith(
+          color: cs.primary,
+          fontWeight: FontWeight.w700,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+    Widget label(String s) => Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 2),
+      child: Text(
+        s,
+        style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          number(notes.length),
+          label(tr(zh: '条笔记', en: notes.length == 1 ? 'note' : 'notes')),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Container(
+              width: 4,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: cs.outlineVariant,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          number(units),
+          label(
+            cjkAny
+                ? tr(zh: '字', en: 'chars')
+                : tr(zh: '词', en: units == 1 ? 'word' : 'words'),
+          ),
+        ],
       ),
     );
   }

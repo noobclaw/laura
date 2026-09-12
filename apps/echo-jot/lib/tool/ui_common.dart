@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import 'app_theme.dart';
 
 String _two(int n) => n.toString().padLeft(2, '0');
 
@@ -19,7 +20,8 @@ String formatNoteStamp(DateTime when) {
       now.year == when.year && now.month == when.month && now.day == when.day;
   if (sameDay) return '${tr(zh: '今天', en: 'Today')} $t';
   final yesterday = now.subtract(const Duration(days: 1));
-  final isYesterday = yesterday.year == when.year &&
+  final isYesterday =
+      yesterday.year == when.year &&
       yesterday.month == when.month &&
       yesterday.day == when.day;
   if (isYesterday) return '${tr(zh: '昨天', en: 'Yesterday')} $t';
@@ -50,55 +52,53 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    // Centred when there is room, scrollable when there isn't (short screens,
-    // landscape, big system font) — an empty state must never clip.
-    return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          // Slightly above centre: a first-run screen centred in a tall column
-          // reads as a void with a small cluster floating in it.
-          child: Align(
-            alignment: const Alignment(0, -0.25),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          cs.primary.withValues(alpha: 0.22),
-                          cs.primary.withValues(alpha: 0.08),
-                        ],
-                      ),
-                    ),
-                    child: Icon(icon, size: 44, color: cs.primary),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(title,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Text(
-                    body,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.65),
-                          height: 1.45,
-                        ),
-                  ),
-                ],
+    // Sized by its content and centred by the parent: the home page puts this
+    // in a `SliverFillRemaining(hasScrollBody: false)`, which fills the space
+    // left under the timeline and scrolls when the body is too short — so the
+    // state itself must stay a plain box (no LayoutBuilder: slivers ask it
+    // for intrinsic height, which a LayoutBuilder cannot answer).
+    // Slightly above centre: a first-run screen centred in a tall column
+    // reads as a void with a small cluster floating in it.
+    return Align(
+      alignment: const Alignment(0, -0.25),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    cs.primary.withValues(alpha: 0.22),
+                    cs.primary.withValues(alpha: 0.08),
+                  ],
+                ),
+              ),
+              child: Icon(icon, size: 44, color: cs.primary),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.65),
+                height: 1.45,
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -176,9 +176,9 @@ class InfoChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: cs.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -186,8 +186,10 @@ class InfoChip extends StatelessWidget {
   }
 }
 
-/// The app's signature control: a large mic button with a soft pulsing ring
-/// while a session is live.
+/// The app's signature control: a large mic button that scales under the
+/// finger, morphs its glyph between mic / stop / hourglass, and wears a soft
+/// mint pulse ring while a session is live. Mint is the app's one "live"
+/// colour (see EchoJotColors); violet is everything else.
 class MicButton extends StatefulWidget {
   const MicButton({
     super.key,
@@ -217,6 +219,7 @@ class _MicButtonState extends State<MicButton>
     vsync: this,
     duration: const Duration(milliseconds: 1500),
   );
+  bool _pressed = false;
 
   @override
   void initState() {
@@ -242,18 +245,35 @@ class _MicButtonState extends State<MicButton>
     super.dispose();
   }
 
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final colors = EchoJotColors.of(context);
     final light = theme.brightness == Brightness.light;
-    final accent = widget.listening ? cs.error : cs.primary;
-    // The glyph must contrast with the accent in BOTH themes: in dark mode
-    // cs.primary is a light tone, so a hardcoded white mic would vanish.
-    final onAccent = widget.listening ? cs.onError : cs.onPrimary;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    // Idle = violet (start), live = mint (stop / end early): the button is the
+    // same colour as the sound field bouncing around it.
+    final accent = widget.listening ? colors.live : cs.primary;
+    final onAccent = widget.listening ? colors.onLive : cs.onPrimary;
     // Only lighten the gradient when the accent is dark (light theme); in dark
     // mode go slightly the other way so the sheen still reads.
-    final sheen = Color.lerp(accent, light ? Colors.white : Colors.black, 0.16)!;
+    final sheen = Color.lerp(
+      accent,
+      light || widget.listening ? Colors.white : Colors.black,
+      0.16,
+    )!;
+    final glyph =
+        widget.icon ??
+        (widget.listening ? Icons.stop_rounded : Icons.mic_rounded);
+    final motion = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 220);
+
     return SizedBox(
       // 144 so the pulse ring (96 + 42) is never clipped by the Stack.
       width: 144,
@@ -261,7 +281,7 @@ class _MicButtonState extends State<MicButton>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (widget.listening)
+          if (widget.listening && !reduceMotion)
             AnimatedBuilder(
               animation: _pulse,
               builder: (context, _) {
@@ -271,42 +291,66 @@ class _MicButtonState extends State<MicButton>
                   height: 96 + t * 42,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accent.withValues(alpha: (1 - t) * 0.20),
+                    color: accent.withValues(alpha: (1 - t) * 0.22),
                   ),
                 );
               },
             ),
           Semantics(
             button: true,
-            label: widget.semanticsLabel ??
+            label:
+                widget.semanticsLabel ??
                 (widget.listening
                     ? tr(zh: '停止听写', en: 'Stop dictation')
                     : tr(zh: '开始听写', en: 'Start dictation')),
             child: GestureDetector(
               onTap: widget.onTap,
-              child: Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [sheen, accent],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accent.withValues(alpha: light ? 0.32 : 0.45),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+              onTapDown: (_) => _setPressed(true),
+              onTapUp: (_) => _setPressed(false),
+              onTapCancel: () => _setPressed(false),
+              child: AnimatedScale(
+                scale: _pressed ? 0.92 : 1,
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 120),
+                curve: Curves.easeOut,
+                child: AnimatedContainer(
+                  duration: motion,
+                  curve: Curves.easeOutCubic,
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [sheen, accent],
                     ),
-                  ],
-                ),
-                child: Icon(
-                  widget.icon ??
-                      (widget.listening ? Icons.stop_rounded : Icons.mic_rounded),
-                  size: 42,
-                  color: onAccent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: accent.withValues(alpha: light ? 0.34 : 0.45),
+                        blurRadius: _pressed ? 14 : 26,
+                        offset: Offset(0, _pressed ? 4 : 9),
+                      ),
+                    ],
+                  ),
+                  // The glyph morphs (scale + fade) instead of snapping when the
+                  // session starts, stops, or hands over to Whisper.
+                  child: AnimatedSwitcher(
+                    duration: motion,
+                    switchInCurve: Curves.easeOutBack,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (child, anim) => ScaleTransition(
+                      scale: anim,
+                      child: FadeTransition(opacity: anim, child: child),
+                    ),
+                    child: Icon(
+                      glyph,
+                      key: ValueKey(glyph),
+                      size: 42,
+                      color: onAccent,
+                    ),
+                  ),
                 ),
               ),
             ),

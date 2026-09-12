@@ -10,7 +10,7 @@ abstract final class Branding {
   static const String version = '1.2.0';
 
   /// Seed for the Material 3 color scheme.
-  static const Color seedColor = Color(0xFF00696E); // deep teal
+  static const Color seedColor = Color(0xFF7C4DFF); // violet (258°)
 
   static String get aboutText => tr(
         zh: '离线语音笔记。转写在这台手机上完成:用系统内置的「设备端语音识别」(边说边出字),'
