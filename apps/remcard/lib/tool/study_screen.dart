@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/l10n.dart';
+import '../core/review_prompt.dart';
 import 'models.dart';
 import 'store.dart';
 
@@ -77,6 +80,13 @@ class _StudyScreenState extends State<StudyScreen> {
       _index += 1;
       _revealed = false;
     });
+    if (_index >= _queue.length) {
+      // Core action for the store-rating prompt (PLAN.md G8b-7): a review
+      // session finished — every card that was due (and every "Again" repeat)
+      // has been graded. Only reached from a grade, so a deck with nothing
+      // due that opens straight onto the done screen does not count.
+      unawaited(ReviewPrompt.noteCoreAction());
+    }
   }
 
   @override

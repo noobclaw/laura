@@ -39,6 +39,12 @@
 **关键词**
 间隔重复,记忆卡,背单词,离线,SRS,FSRS,复习,闪卡,学习,记忆,无订阅
 
+**更新说明(What's New)1.2.1**
+英文商店名与描述更新
+复习几轮后会礼貌地请你评个分,可直接关掉
+修复 iPad 上界面被拉伸的显示问题
+若干细节打磨
+
 ---
 
 ## English
@@ -74,3 +80,9 @@ The free version includes 2 decks and unlimited cards; unlock Pro for unlimited 
 
 **Keywords**
 spaced repetition, flashcards, SRS, FSRS, offline, study, memorize, vocabulary, review, learning, no subscription
+
+**What's New 1.2.1**
+Updated English store name and description
+After a few review sessions the app may politely ask for a rating — dismiss anytime
+Fixed a stretched layout when running on iPad
+Small polish

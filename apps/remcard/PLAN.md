@@ -165,3 +165,12 @@
 ### 已知限制 / 未做
 - 无个人参数优化(FSRS optimizer 要几百条复习日志 + 训练,单机离线不做);无分钟级学习步(日粒度);无「记忆保持率统计」页。
 - 「重来」当轮再出仍是队尾一次,不做多步 relearning。
+
+## 评价弹窗(G8b-7,2026-09-12,v1.2.1)
+
+> 接入壳的原生商店评价提示(`lib/core/review_prompt.dart`,从 `shell/lib/core/review_prompt.dart` 原样复制,`JsonFileStore` 两边签名一致、零改动;依赖 `in_app_review ^2.0.9`)。规则由壳定:第 **3** 次完成核心动作时请求一次原生弹窗,之后 **90 天**冷却;系统自行决定是否真的显示(Apple 每年每 app 最多 3 次)。计数存 `review.json`,无网络。
+
+- **触发事件**:**一次复习会话完成** —— 会话开始时快照的全部到期卡片(含「重来」回队尾的那几张)都评完分的那一刻。只从评分路径进入,牌组无到期卡直接落到完成页**不计**。
+- **代码位置**:`lib/tool/study_screen.dart:83-89`(`_grade` 末尾,`_index >= _queue.length` 时 `unawaited(ReviewPrompt.noteCoreAction())`)。全 app 只此一处调用。
+- **测试**:`test/review_prompt_test.dart` —— 用 `PathProviderPlatform` 假实现把 `review.json` 指到临时目录,`requestOverride` 计数:第 3 次触发、第 4 次不触发(冷却)。dev 依赖加了 `path_provider_platform_interface`。
+- 同版:`pubspec.yaml` 1.2.0+1 → **1.2.1+1**,`branding.dart` 版本串同步;`store/listing.md` 补 1.2.1 更新说明。
