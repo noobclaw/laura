@@ -24,15 +24,20 @@ abstract final class Branding {
   static String get aboutText => tr(
         zh: '把连拍的夜空照片对齐叠加成一张更干净的照片,并逐帧告诉你对上了没有、对不上是为什么。'
             '全部计算在你的设备上完成,无账号、无广告,照片不出手机。\n\n'
-            '开源致谢:星阵配准算法参考 astroalign(MIT,© 2016 Martin Beroiz)的公开设计思路,'
+            '开源致谢:星阵配准参考 astroalign(MIT,© 2016 Martin Beroiz),'
+            '叠加合成参考 OpenSkyStacker(MIT,© 2017 Benjamin Schubert),'
+            '星点清晰度评估参考 astra_lite(MIT,© 2023 Denis Artyomov)的公开设计思路。'
             '本应用为独立的 Dart 实现,未复制其代码。',
         en: 'Aligns a burst of night-sky photos and stacks them into one '
             'cleaner picture, telling you frame by frame whether it lined up '
             'and why it did not. Everything runs on your device — no account, '
             'no ads, no photo ever leaves the phone.\n\n'
-            'Credits: the asterism-matching approach follows the published '
-            'design of astroalign (MIT, © 2016 Martin Beroiz). This app is an '
-            'independent Dart implementation and copies none of its code.',
+            'Credits: star-field registration follows astroalign (MIT, '
+            '© 2016 Martin Beroiz), frame stacking follows OpenSkyStacker '
+            '(MIT, © 2017 Benjamin Schubert), and the star-sharpness check '
+            'follows the published design of astra_lite (MIT, © 2023 Denis '
+            'Artyomov). This app is an independent Dart implementation and '
+            'copies none of their code.',
       );
 
   static String get privacyPolicy => tr(

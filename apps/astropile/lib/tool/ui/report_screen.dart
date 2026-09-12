@@ -102,12 +102,18 @@ class _ReportCard extends StatelessWidget {
             if (report.isReference)
               _Metrics(items: [
                 _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
+                if (report.fwhmPixels > 0)
+                  _Metric(tr(zh: '星点宽度', en: 'Star FWHM'),
+                      value: report.fwhmPixels, decimals: 1, unit: ' px'),
                 _Metric(tr(zh: '角色', en: 'Role'), text: tr(zh: '基准', en: 'Baseline')),
               ])
             else if (failed)
               _Metrics(items: [
                 _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
                 _Metric(tr(zh: '匹配', en: 'Matched'), value: report.matchedStars),
+                if (report.fwhmPixels > 0)
+                  _Metric(tr(zh: '星点宽度', en: 'Star FWHM'),
+                      value: report.fwhmPixels, decimals: 1, unit: ' px'),
               ])
             else
               _Metrics(items: [
@@ -119,6 +125,12 @@ class _ReportCard extends StatelessWidget {
                     value: report.shiftPixels, decimals: 1, unit: ' px'),
                 _Metric(tr(zh: '旋转', en: 'Rotation'),
                     value: report.rotationDegrees, decimals: 2, unit: '°'),
+                if (report.fwhmPixels > 0)
+                  _Metric(tr(zh: '星点宽度', en: 'Star FWHM'),
+                      value: report.fwhmPixels, decimals: 1, unit: ' px'),
+                if (report.fwhmPixels > 0)
+                  _Metric(tr(zh: '拉长', en: 'Elongation'),
+                      value: report.ovalityPixels, decimals: 1, unit: ' px'),
               ]),
             if (failed) ...[
               const SizedBox(height: 12),

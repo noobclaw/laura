@@ -40,6 +40,9 @@ String alignFailureText(AlignFailure f) => switch (f) {
           en: 'The fit is too loose — the phone moved a lot, or the lens changed'),
       AlignFailure.decodeFailed =>
         tr(zh: '这张照片无法解码', en: 'This photo could not be decoded'),
+      AlignFailure.blurry => tr(
+          zh: '星点比参考帧粗一倍以上(失焦、手抖或有薄云)',
+          en: 'Stars are more than twice as fat as on the reference (defocus, shake or haze)'),
     };
 
 /// One-line hint for what to do about a failure. The wedge is not "we told
@@ -68,6 +71,9 @@ String alignFailureHint(AlignFailure f) => switch (f) {
           en: 'Steady the phone, or untick this frame and stack again.'),
       AlignFailure.decodeFailed =>
         tr(zh: '换一张导出格式正常的照片。', en: 'Try a photo saved in a normal format.'),
+      AlignFailure.blurry => tr(
+          zh: '叠进去只会把成片糊掉;若整组都这样,换这帧作参考帧。',
+          en: 'Stacking it would only smear the result; if the whole burst looks like this, make it the reference.'),
     };
 
 /// Localise a whole-run failure.

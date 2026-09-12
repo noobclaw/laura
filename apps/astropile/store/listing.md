@@ -61,7 +61,7 @@ AstroPile 把这件事装进你的手机,而且**全程离线**:没有网络权�
 本应用不申请网络权限,不含统计与广告 SDK。照片只在本机读取与处理,成片只有在你主动保存或分享时才离开应用。
 
 **开源致谢**
-星阵配准的思路参考了 astroalign(MIT 许可,© 2016 Martin Beroiz)公开的设计。本应用是独立的 Dart 实现,未复制其代码。
+星阵配准参考了 astroalign(MIT,© 2016 Martin Beroiz),叠加合成参考了 OpenSkyStacker(MIT,© 2017 Benjamin Schubert),星点清晰度评估参考了 astra_lite(MIT,© 2023 Denis Artyomov)公开的设计。本应用是独立的 Dart 实现,未复制其代码。
 
 ---
 
@@ -122,7 +122,7 @@ Up to 6 frames per stack, mean stacking, full-resolution export, and **the full 
 The app requests no network permission and contains no analytics or advertising SDK. Photos are read and processed on this device only; the finished picture leaves the app only when you save or share it.
 
 **Credits**
-The asterism-matching approach follows the published design of astroalign (MIT, © 2016 Martin Beroiz). This app is an independent Dart implementation and copies none of its code.
+Star-field registration follows astroalign (MIT, © 2016 Martin Beroiz), frame stacking follows OpenSkyStacker (MIT, © 2017 Benjamin Schubert), and the star-sharpness check follows the published design of astra_lite (MIT, © 2023 Denis Artyomov). This app is an independent Dart implementation and copies none of their code.
 
 ---
 

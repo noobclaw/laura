@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import '../models.dart';
 import 'asterism.dart';
 import 'output.dart';
+import 'quality.dart';
 import 'stack.dart';
 import 'stars.dart';
 import 'stretch.dart';
@@ -192,6 +193,8 @@ class StackRunner extends ChangeNotifier {
       isReference: true,
       starsDetected: prepared.detected,
       matchedStars: prepared.stars.length,
+      fwhmPixels: prepared.shape.fwhm,
+      ovalityPixels: prepared.shape.ovality,
       score: 100,
     ));
     _set(RunPhase.aligning, current: 1);
@@ -215,6 +218,7 @@ class StackRunner extends ChangeNotifier {
               refStars: refStars,
               refWidth: prepared.width,
               refHeight: prepared.height,
+              refFwhm: prepared.shape.fwhm,
             ));
       } on _DiskFull catch (e) {
         return _fail(RunFailure.diskFull, e.detail);
@@ -238,6 +242,8 @@ class StackRunner extends ChangeNotifier {
         rmsPixels: res.rmsPixels,
         shiftPixels: res.transform?.shiftPixels ?? 0,
         rotationDegrees: res.transform?.rotationDegrees ?? 0,
+        fwhmPixels: res.fwhm,
+        ovalityPixels: res.ovality,
         score: res.score,
         failure: res.failure,
       ));
@@ -313,10 +319,14 @@ class StackRunner extends ChangeNotifier {
 // ---------------------------------------------------------------------------
 
 class _PreparedReference {
-  const _PreparedReference(
-      this.width, this.height, this.stars, this.detected, this.overloaded);
+  const _PreparedReference(this.width, this.height, this.stars, this.detected,
+      this.overloaded, this.shape);
   final int width;
   final int height;
+
+  /// Average-star shape of the reference; every other frame's blur gate is
+  /// relative to this.
+  final StarShape shape;
 
   /// The brightest [kMaxControlPoints] of them, used for matching.
   final List<Star> stars;
@@ -337,9 +347,12 @@ class _AlignOutcome {
     required this.matchedStars,
     required this.rmsPixels,
     required this.score,
+    this.fwhm = 0,
+    this.ovality = 0,
   }) : failure = null;
 
-  const _AlignOutcome.failed(this.failure, {this.starsDetected = 0})
+  const _AlignOutcome.failed(this.failure,
+      {this.starsDetected = 0, this.fwhm = 0, this.ovality = 0})
       : transform = null,
         sourceWidth = 0,
         sourceHeight = 0,
@@ -354,6 +367,8 @@ class _AlignOutcome {
   final int matchedStars;
   final double rmsPixels;
   final int score;
+  final double fwhm;
+  final double ovality;
   final AlignFailure? failure;
 }
 
@@ -377,10 +392,13 @@ _PreparedReference _prepareReference(
     String path, int divisor, String outPath, bool orientationBaked) {
   final loaded = _loadRgb(path, divisor, orientationBaked);
   _writeRaw(outPath, loaded.rgb);
-  final field = detectStars(rgbToLuma(loaded.rgb, loaded.width, loaded.height),
-      loaded.width, loaded.height);
-  return _PreparedReference(
-      loaded.width, loaded.height, field.stars, field.blobs, field.overloaded);
+  final luma = rgbToLuma(loaded.rgb, loaded.width, loaded.height);
+  final field = detectStars(luma, loaded.width, loaded.height);
+  final shape = field.overloaded
+      ? StarShape.none
+      : measureStarShape(luma, loaded.width, loaded.height, field.stars, field.background);
+  return _PreparedReference(loaded.width, loaded.height, field.stars,
+      field.blobs, field.overloaded, shape);
 }
 
 _AlignOutcome _alignFrame({
@@ -391,6 +409,7 @@ _AlignOutcome _alignFrame({
   required List<Star> refStars,
   required int refWidth,
   required int refHeight,
+  required double refFwhm,
 }) {
   _Loaded loaded;
   try {
@@ -405,8 +424,8 @@ _AlignOutcome _alignFrame({
   if (loaded.width != refWidth || loaded.height != refHeight) {
     return const _AlignOutcome.failed(AlignFailure.sizeMismatch);
   }
-  final field = detectStars(rgbToLuma(loaded.rgb, loaded.width, loaded.height),
-      loaded.width, loaded.height);
+  final luma = rgbToLuma(loaded.rgb, loaded.width, loaded.height);
+  final field = detectStars(luma, loaded.width, loaded.height);
   if (field.overloaded) {
     return const _AlignOutcome.failed(AlignFailure.tooBright);
   }
@@ -414,11 +433,20 @@ _AlignOutcome _alignFrame({
     return _AlignOutcome.failed(AlignFailure.tooFewStars,
         starsDetected: field.blobs);
   }
+  // Frame quality before geometry (astra_lite: stars quality → offset →
+  // stack, and a frame failing quality never reaches the stacker).
+  final shape =
+      measureStarShape(luma, loaded.width, loaded.height, field.stars, field.background);
+  if (isBlurry(shape.fwhm, refFwhm)) {
+    return _AlignOutcome.failed(AlignFailure.blurry,
+        starsDetected: field.blobs, fwhm: shape.fwhm, ovality: shape.ovality);
+  }
   AlignResult res;
   try {
     res = alignStars(field.stars, refStars);
   } on AlignException catch (e) {
-    return _AlignOutcome.failed(e.failure, starsDetected: field.blobs);
+    return _AlignOutcome.failed(e.failure,
+        starsDetected: field.blobs, fwhm: shape.fwhm, ovality: shape.ovality);
   }
   final warped = warpRgb(loaded.rgb, loaded.width, loaded.height, res.transform);
   _writeRaw(outPath, warped);
@@ -430,6 +458,8 @@ _AlignOutcome _alignFrame({
     matchedStars: res.matchedStars,
     rmsPixels: res.rmsPixels,
     score: res.score,
+    fwhm: shape.fwhm,
+    ovality: shape.ovality,
   );
 }
 

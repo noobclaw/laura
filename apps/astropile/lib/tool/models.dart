@@ -118,6 +118,8 @@ class FrameReport {
     this.rmsPixels = 0,
     this.shiftPixels = 0,
     this.rotationDegrees = 0,
+    this.fwhmPixels = 0,
+    this.ovalityPixels = 0,
     this.score = 0,
     this.failure,
   });
@@ -130,6 +132,13 @@ class FrameReport {
   final double rmsPixels;
   final double shiftPixels;
   final double rotationDegrees;
+
+  /// Width of the frame's average star at half maximum (engine/quality.dart).
+  /// 0 when it could not be measured.
+  final double fwhmPixels;
+
+  /// How far from round the average star is; a trailed frame shows here.
+  final double ovalityPixels;
   final int score;
 
   /// Null on success.

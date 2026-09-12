@@ -33,6 +33,10 @@ enum AlignFailure {
   /// The file could not be decoded.
   decodeFailed,
 
+  /// Stars on this frame are much fatter than on the reference — defocus,
+  /// motion blur or a cloud haze. It would still align, but it would only
+  /// smear the stack. Spec from astra_lite's FrameQuality (fwhm_is_ok).
+  blurry,
 }
 
 /// Pixel residual under which a point pair counts as an inlier.
@@ -189,7 +193,19 @@ double _dist(Star a, Star b) {
 /// the RANSAC shuffle so the same frames always produce the same result —
 /// a stacker that gives a different answer on a re-run is impossible to
 /// reason about when a frame is rejected.
-AlignResult alignStars(List<Star> source, List<Star> target, {int seed = 20260908}) {
+///
+/// [minScale], [maxScale] and [maxRotationDegrees] are the plausibility gate
+/// for consecutive frames of one session (see [kMinScale]). They are
+/// parameters only so the astroalign cross-check test can run the reference
+/// project's 1.5× / 22.5° case through the identical code path.
+AlignResult alignStars(
+  List<Star> source,
+  List<Star> target, {
+  int seed = 20260908,
+  double minScale = kMinScale,
+  double maxScale = kMaxScale,
+  double maxRotationDegrees = kMaxRotationDegrees,
+}) {
   if (source.length < 3 || target.length < 3) {
     throw AlignException(AlignFailure.tooFewStars);
   }
@@ -229,11 +245,21 @@ AlignResult alignStars(List<Star> source, List<Star> target, {int seed = 2026090
   for (final i in idx.take(trials)) {
     final model = _fitFromMatches(source, target, [matches[i]]);
     if (model == null) continue;
-    final inliers = <List<int>>[];
-    for (final m in matches) {
-      if (_triangleError(source, target, m, model) < kPixelTolerance) inliers.add(m);
+    // astroalign `_ransac`: the minimal sample is `maybeinliers`, the
+    // threshold is applied to the *other* candidates (`alsoinliers`), and
+    // `len(alsoinliers) >= min_matches` decides. Counting the sample itself
+    // would let a lone triangle pass with min_matches == 1.
+    final inliers = <List<int>>[matches[i]];
+    var others = 0;
+    for (var j = 0; j < matches.length; j++) {
+      if (j == i) continue;
+      final m = matches[j];
+      if (_triangleError(source, target, m, model) < kPixelTolerance) {
+        inliers.add(m);
+        others++;
+      }
     }
-    if (inliers.length >= minMatches) {
+    if (others >= minMatches) {
       best = _fitFromMatches(source, target, inliers);
       break;
     }
@@ -297,7 +323,7 @@ AlignResult alignStars(List<Star> source, List<Star> target, {int seed = 2026090
   final rms = math.sqrt(sumSq / srcPts.length);
 
   final s = finalModel.scale;
-  if (s < kMinScale || s > kMaxScale || finalModel.rotationDegrees.abs() > kMaxRotationDegrees) {
+  if (s < minScale || s > maxScale || finalModel.rotationDegrees.abs() > maxRotationDegrees) {
     throw AlignException(AlignFailure.noMatch);
   }
   // Three pairs is enough to *solve* a similarity but not enough to trust
