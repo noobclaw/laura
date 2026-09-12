@@ -43,12 +43,18 @@ typedef SizeProbe = FutureOr<int> Function(EncodeParams p);
 /// 1. Try [startQuality] at scale 1. If it already fits and is within
 ///    [tolerance] of the target, stop.
 /// 2. Binary-search quality in `[minQuality, maxQuality]` at scale 1 — a
-///    monotone probe converges in ≤ 7 attempts for a 1..100 range.
-/// 3. If [minQuality] still overshoots, shrink the dimensions: the scale is
-///    estimated from the byte ratio (`sqrt(target/size)`, JPEG size grows
-///    roughly linearly with pixel count) with a safety factor, then the
-///    quality search is repeated at that scale. At most [maxScaleRounds]
-///    shrink rounds; the scale never drops below [minScale].
+///    monotone probe converges in ≤ 7 attempts for a 1..100 range. The
+///    reference walks quality down from 100 one step at a time and stops at
+///    the floor 15; we binary-search the same `[15, …]` band for the highest
+///    quality that fits (identical result on a monotone codec, far fewer
+///    encodes — the deliberate mobile-battery deviation, see REFERENCE.md).
+/// 3. If [minQuality] still overshoots, shrink the dimensions and repeat the
+///    quality search at the smaller scale. The reference shrinks both sides
+///    by a fixed ×0.93 each round (quality pinned at the floor) and loops
+///    unbounded until it fits; we jump straight to the estimated scale
+///    (`sqrt(target/size)`, JPEG size ≈ linear in pixel count) but never by
+///    less than the reference's ×0.93, so we converge in ≤ [maxScaleRounds]
+///    rounds and never drop below [minScale].
 ///
 /// Every attempt costs one encode, so the caller passes a probe that is as
 /// cheap as the platform allows (native codec, no re-decode of the source).
@@ -56,7 +62,7 @@ Future<SizeSearchResult> searchForTargetSize({
   required int targetBytes,
   required SizeProbe probe,
   int startQuality = 85,
-  int minQuality = 20,
+  int minQuality = 15,
   int maxQuality = 95,
   double tolerance = 0.10,
   int maxScaleRounds = 3,
@@ -119,10 +125,14 @@ Future<SizeSearchResult> searchForTargetSize({
     }
     if (done || bestFit != null) break;
 
-    // Even minQuality is too big at this scale: shrink pixels.
+    // Even minQuality is too big at this scale: shrink pixels. The reference
+    // steps both sides by ×0.93 per round; we take the byte-ratio estimate
+    // when it is more aggressive (fewer rounds) and fall back to the same
+    // ×0.93 otherwise, so a round always makes progress like the original.
     if (round == maxScaleRounds) break;
     final ratio = targetBytes / smallestBytes;
-    final next = scale * math.sqrt(ratio) * 0.9;
+    final estimated = scale * math.sqrt(ratio) * 0.9;
+    final next = math.min(estimated, scale * 0.93);
     scale = math.max(minScale, next);
     if (scale >= 0.999) break;
   }

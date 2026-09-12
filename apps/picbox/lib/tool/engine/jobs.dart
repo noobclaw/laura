@@ -151,7 +151,9 @@ Future<({Uint8List bytes, SizeSearchResult search})> nativeCompressToSize(
   Uint8List? last;
   final search = await searchForTargetSize(
     targetBytes: target,
-    minQuality: lossless ? 100 : 20,
+    // Reference (AndroidWeightImageScaler) walks JPEG/WebP quality down to a
+    // hard floor of 15 before it starts shrinking pixels; match that floor.
+    minQuality: lossless ? 100 : 15,
     maxQuality: lossless ? 100 : 95,
     startQuality: lossless ? 100 : 85,
     probe: (p) async {

@@ -22,7 +22,7 @@ void main() {
     // for one fewer encode).
     expect(r.bytes, greaterThanOrEqualTo(2 * 1024 * 1024 * 0.9));
     expect(r.params.scale, 1.0);
-    expect(r.params.quality, inInclusiveRange(20, 95));
+    expect(r.params.quality, inInclusiveRange(15, 95));
     expect(r.attempts, lessThanOrEqualTo(8));
   });
 
@@ -53,8 +53,8 @@ void main() {
     );
     expect(r.hitTarget, isFalse);
     expect(r.bytes, greaterThan(1024));
-    // Still returns the smallest thing it found.
-    expect(r.params.quality, 20);
+    // Still returns the smallest thing it found — at the reference floor 15.
+    expect(r.params.quality, 15);
   });
 
   test('lossless mode (min == max quality) only scales', () async {
