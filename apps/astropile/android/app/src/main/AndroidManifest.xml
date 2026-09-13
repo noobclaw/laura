@@ -11,8 +11,13 @@
          declared. Saving the finished stack (gal plugin) uses MediaStore on
          Android 10+; on Android 9 and below it still needs the legacy write
          permission. -->
+    <!-- maxSdkVersion 29, not the 28 that camera_android_camerax declares:
+         `gal` still needs the legacy write permission on API 29 because this
+         app sets requestLegacyExternalStorage. Without tools:replace the two
+         values collide and the manifest merger fails the build outright. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="29"/>
+        android:maxSdkVersion="29"
+        tools:replace="android:maxSdkVersion"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
 
