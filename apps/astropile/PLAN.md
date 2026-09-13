@@ -363,6 +363,24 @@ iOS 侧平行项：`NSCameraUsageDescription` 已写进 `Info.plist` **并说明
 - **`WorkDirs.clearAll()` 挂在 widget 生命周期上**:切换语言会让 `main.dart` 重建整棵树,于是重跑一次递归删除。今天无害(设置页不可能有任务在跑),但它是一个由 UI 事件触发的无保护全局删除。
 - 关键词字段里带竞品名 `astroshader`(纪律允许),**但苹果确实会因元数据含第三方 app 名拒审 —— 元数据一旦被拒,第一个该删的就是它**。
 
+## M2 的 G6 / G6b 出包与视觉复核(2026-09-13)
+
+- **第一轮 CI [34739478281](https://github.com/noobclaw/laura/actions/runs/34739478281) 挂了**:manifest 合并冲突 —— `camera_android_camerax` 把 `WRITE_EXTERNAL_STORAGE` 声明为 `maxSdkVersion=28`,本 app 是 29,合并器**不挑赢家、直接失败**。29 才是这里要的值(本 app 开了 `requestLegacyExternalStorage`,`gal` 在 API 29 上仍需要它),故加 `tools:replace="android:maxSdkVersion"`。**这类冲突本地跑不出来 —— 本机不出包,只有 CI 会撞。**
+- **最终包 = CI [34739773582](https://github.com/noobclaw/laura/actions/runs/34739773582)**:`build-android` ✅ + `smoke-test` ✅(模拟器装包→启动→30s 验活→logcat 无 FATAL EXCEPTION→截屏)。产物 `apps-astropile-apk` / `apps-astropile-aab`。
+- **G6b 逐条对照 rubric(依据本轮 `apps-astropile-smoke` 首页截屏,已下载亲眼看过)**:
+  - 层级与留白 ✅ hero → 主行动「Pick photos to stack」→ 次行动「Shoot a burst with the camera」→ 张数说明 → 三步 → 离线声明,主次一眼分明;
+  - 配色 ✅ 夜空渐变 hero + 星点,正文区中性;新增的次行动用描边按钮而非第二个实心按钮,没有和主行动打架;
+  - 字阶 ✅ hero 标题 / 副句 / 分步标题 / 分步正文四级;
+  - 形状与质感 ✅ 圆角一致,两个按钮同高;
+  - 空状态 ✅ 首屏是「它做三件事」而不是一行冷字;
+  - hero ✅ 楔子原文当主句;
+  - 一致性 ✅;art direction ✅(墨蓝夜空 + 银白,与其余 11 个 app 不撞)。
+  - **本轮无打回项。** 唯一记下的小瑕疵:「免费版一次可叠 6 张」这句说明现在紧跟在连拍按钮下面,读起来像是在说连拍的上限 —— 实际两者都受它约束,故不改。
+- **⚠️ 冒烟截不到的屏怎么办**:连拍页需要真相机,模拟器和单测都给不出预览。**故本轮补了 `test/capture_screen_test.dart`(5 项)专门渲染这一屏** —— 在测试环境里 `availableCameras()` 既不返回也不抛,正好就是「相机还没打开」那个状态:验证控件可读、「不能设置长曝光」那句在场、原片开关默认开、相机没就绪时不能开拍、四个张数都在且超限的弹解锁页。帧列表 / 报告 / 结果三屏按源码评审 + `frames_screen_test.dart` 的 4 项新用例覆盖。
+  **仍未被任何东西渲染过的**:连拍页在**真机上有预览时**的样子(取景框比例、白闪、计数)—— 只能真机验收,清单第 21–24 条。
+
+**用语纪律(G7)**:仍然只能写「**🧪待验收**」。M2 的四件事没有一件被真机验证过,尤其连拍和暗场平场——它们是本轮唯二依赖真实硬件的功能。
+
 ## 评价弹窗(G8b-7)
 - **触发事件**:一次叠加成功进入结果页 —— `StackRunner.run` 返回非 null(失败含 `notEnoughAligned` 与取消都返回 null,不计数)。
 - **位置**:`lib/tool/ui/run_screen.dart:88` `_start()` 内 `widget.store.addStacked()` 之后 `unawaited(ReviewPrompt.noteCoreAction())`,紧接着 `pushReplacement` 到 `ResultScreen`。
