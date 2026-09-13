@@ -9,6 +9,7 @@ import 'models.dart';
 import 'pro.dart';
 import 'store.dart';
 import 'tool_module.dart';
+import 'ui/capture_screen.dart';
 import 'ui/frames_screen.dart';
 import 'ui/star_field.dart';
 import 'ui/widgets.dart';
@@ -35,8 +36,8 @@ class AstropileTool extends ToolModule {
                 : tr(zh: '解锁 Pro', en: 'Unlock Pro')),
             subtitle: store.pro
                 ? Text(tr(
-                    zh: '最多 $kProFrameLimit 张 · 中值叠加 · 记住设置',
-                    en: 'Up to $kProFrameLimit frames · median stacking · saved settings'))
+                    zh: '最多 $kProFrameLimit 张 · 中值/κ-σ · 暗场平场校准',
+                    en: 'Up to $kProFrameLimit frames · median & kappa-sigma · calibration'))
                 : Text(tr(zh: '一次买断,无订阅', en: 'One-time purchase'),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: store.pro
@@ -233,6 +234,17 @@ class _HomeState extends State<_Home> {
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _picking
+                ? null
+                : () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => CaptureScreen(store: widget.store),
+                    )),
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: Text(tr(zh: '用相机连拍一组', en: 'Shoot a burst with the camera')),
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
           ),
           const SizedBox(height: 10),
           Center(

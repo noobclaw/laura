@@ -48,7 +48,12 @@ class AstroStore extends ChangeNotifier {
         pro = earlyPro || storedPro;
         stackedCount = (j['stackedCount'] as num?)?.toInt() ?? 0;
         if (pro) {
-          mode = j['mode'] == 'median' ? StackMode.median : StackMode.mean;
+          mode = StackMode.values.firstWhere(
+            (m) => m.name == j['mode'],
+            // A file written by an older build, or a hand-edited one: fall
+            // back rather than throw on a name that no longer exists.
+            orElse: () => StackMode.mean,
+          );
           scale = j['scale'] == 'half' ? WorkScale.half : WorkScale.full;
         }
       }
@@ -84,13 +89,18 @@ class AstroStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Median stacking is the Pro half of the split; a free user who somehow
-  /// holds a median setting still gets mean, so the gate cannot be bypassed
-  /// by a stale settings file.
+  /// Median and kappa-sigma are the Pro half of the split; a free user who
+  /// somehow holds one of them still gets mean, so the gate cannot be
+  /// bypassed by a stale settings file. Star trails is free — the free frame
+  /// cap already limits how long an arc it can draw.
   StackSettings get settings => StackSettings(
-        mode: pro ? mode : StackMode.mean,
+        mode: !mode.needsPro || pro ? mode : StackMode.mean,
         scale: scale,
       );
+
+  /// Dark/flat calibration is a Pro feature; the same stale-file reasoning
+  /// applies, so the run asks here rather than trusting the screen.
+  bool get canCalibrate => pro;
 
   void setMode(StackMode m) {
     if (mode == m) return;

@@ -6,6 +6,7 @@ import 'package:image/image.dart' as img;
 
 import '../models.dart';
 import 'asterism.dart';
+import 'calibration.dart';
 import 'output.dart';
 import 'quality.dart';
 import 'stack.dart';
@@ -15,7 +16,20 @@ import 'transform.dart';
 import 'warp.dart';
 
 /// Where a run currently is. Drives the progress screen.
-enum RunPhase { idle, preparing, aligning, stacking, finishing, done, failed, cancelled }
+enum RunPhase {
+  idle,
+  preparing,
+
+  /// Building the master dark and master flat, before any light frame is
+  /// touched. Only entered when the user supplied calibration frames.
+  calibrating,
+  aligning,
+  stacking,
+  finishing,
+  done,
+  failed,
+  cancelled,
+}
 
 /// Whole-run failures — the ones that stop everything, as opposed to a
 /// single frame that could not be aligned.
@@ -26,6 +40,15 @@ enum RunFailure {
   referenceTooBright,
   notEnoughAligned,
   diskFull,
+
+  /// Every dark (or flat) frame failed to decode.
+  calibrationUnreadable,
+
+  /// The calibration frames are a different pixel size than the lights.
+  calibrationMismatch,
+
+  /// The flat frames are so dark that dividing by them is meaningless.
+  calibrationFlatTooDark,
   unknown,
 }
 
@@ -71,12 +94,22 @@ class StackRunner extends ChangeNotifier {
   final List<FrameReport> reports = [];
   StackOutcome? outcome;
 
+  /// Calibration frames that would not decode. They are skipped rather than
+  /// failing the run, but the count reaches the user on the report screen.
+  int skippedCalibrationFrames = 0;
+
   bool _cancelled = false;
   bool _disposed = false;
   Directory? _dir;
 
   bool get isRunning =>
       phase == RunPhase.preparing ||
+      // Calibration is the longest new phase (up to 24 full-resolution
+      // decodes). Leaving it out made Stop a no-op, let the user pop the
+      // screen while the master isolate was still writing into the scratch
+      // directory, and painted the ring as finished. Everything downstream
+      // keys off this one getter.
+      phase == RunPhase.calibrating ||
       phase == RunPhase.aligning ||
       phase == RunPhase.stacking ||
       phase == RunPhase.finishing;
@@ -84,17 +117,26 @@ class StackRunner extends ChangeNotifier {
   /// Progress within the current phase.
   double get fraction => total <= 0 ? 0 : (current / total).clamp(0.0, 1.0);
 
-  /// Progress across the whole run. Aligning owns the first 70 % (it decodes
+  /// Progress across the whole run. Aligning owns the bulk of it (it decodes
   /// every frame), combining the rest — otherwise the ring fills up, resets
-  /// to zero and looks like the run started over.
-  double get overallFraction => switch (phase) {
-        RunPhase.idle || RunPhase.preparing => 0,
-        RunPhase.aligning => fraction * 0.7,
-        RunPhase.stacking => 0.7 + fraction * 0.3,
-        RunPhase.finishing || RunPhase.done => 1,
-        // A stopped or failed run keeps the ring where it got to.
-        RunPhase.failed || RunPhase.cancelled => _lastOverall,
-      };
+  /// to zero and looks like the run started over. Calibration, when there is
+  /// any, takes the first slice: it decodes frames too, and leaving the ring
+  /// at zero through it would read as a hang.
+  double get overallFraction {
+    final cal = _calibrationShare;
+    return switch (phase) {
+      RunPhase.idle || RunPhase.preparing => 0,
+      RunPhase.calibrating => fraction * cal,
+      RunPhase.aligning => cal + fraction * (0.7 - cal),
+      RunPhase.stacking => 0.7 + fraction * 0.3,
+      RunPhase.finishing || RunPhase.done => 1,
+      // A stopped or failed run keeps the ring where it got to.
+      RunPhase.failed || RunPhase.cancelled => _lastOverall,
+    };
+  }
+
+  /// Fraction of the ring the calibration pass owns; zero without one.
+  double _calibrationShare = 0;
 
   double _lastOverall = 0;
 
@@ -149,35 +191,82 @@ class StackRunner extends ChangeNotifier {
     required List<SourceFrame> frames,
     required int referenceIndex,
     required StackSettings settings,
+    List<SourceFrame> darkFrames = const [],
+    List<SourceFrame> flatFrames = const [],
   }) async {
     _cancelled = false;
     failure = null;
     failureDetail = null;
     outcome = null;
     reports.clear();
+    skippedCalibrationFrames = 0;
     final divisor = settings.scale.divisor;
+    final trails = settings.mode.isTrails;
+    final calibrationFrames = darkFrames.length + flatFrames.length;
+    _calibrationShare = calibrationFrames == 0
+        ? 0
+        // Calibration decodes one frame each, the same unit of work aligning
+        // does, so its slice of the ring is simply its share of the decodes.
+        : 0.7 * calibrationFrames / (calibrationFrames + frames.length);
     _set(RunPhase.preparing, current: 0, total: frames.length);
 
     await disposeRun();
     final dir = await WorkDirs.fresh('run');
     _dir = dir;
 
+    // ---- Masters first: the reference frame has to be calibrated too. ----
+    var masters = MasterFrames.none;
+    if (calibrationFrames > 0) {
+      _set(RunPhase.calibrating, current: 0, total: calibrationFrames + 1);
+      try {
+        masters = await _buildMasters(dir, darkFrames, flatFrames, divisor);
+      } on _DiskFull catch (e) {
+        return _fail(RunFailure.diskFull, e.detail);
+      } on CalibrationException catch (e) {
+        return _fail(
+          switch (e.reason) {
+            CalibrationProblem.flatTooDark => RunFailure.calibrationFlatTooDark,
+            CalibrationProblem.sizeMismatch => RunFailure.calibrationMismatch,
+            CalibrationProblem.truncated => RunFailure.calibrationUnreadable,
+          },
+        );
+      } catch (e) {
+        debugPrint('calibration failed: $e');
+        return _fail(RunFailure.calibrationUnreadable, '$e');
+      }
+      if (_cancelled) return _cancel();
+    }
+
     final ref = frames[referenceIndex];
     final refBaked = ref.orientationBaked;
     _PreparedReference prepared;
     try {
-      prepared = await Isolate.run(() =>
-          _prepareReference(ref.path, divisor, '${dir.path}/000.raw', refBaked));
+      prepared = await Isolate.run(() => _prepareReference(
+            ref.path,
+            divisor,
+            '${dir.path}/000.raw',
+            refBaked,
+            masters,
+          ));
     } on _DiskFull catch (e) {
       return _fail(RunFailure.diskFull, e.detail);
     } on _TooLarge {
       return _fail(RunFailure.referenceTooLarge);
+    } on CalibrationException catch (e) {
+      return _fail(e.reason == CalibrationProblem.sizeMismatch
+          ? RunFailure.calibrationMismatch
+          : RunFailure.calibrationUnreadable);
     } catch (e) {
       debugPrint('reference prepare failed: $e');
       return _fail(RunFailure.referenceUnreadable, '$e');
     }
-    if (prepared.overloaded) return _fail(RunFailure.referenceTooBright);
-    if (prepared.stars.length < 3) return _fail(RunFailure.referenceTooFewStars);
+    // Star trails combine without alignment, so a bright or starless
+    // reference is not a reason to stop — a foreground lit by the moon is
+    // exactly the picture the mode exists for.
+    if (!trails) {
+      if (prepared.overloaded) return _fail(RunFailure.referenceTooBright);
+      if (prepared.stars.length < 3) return _fail(RunFailure.referenceTooFewStars);
+    }
 
     final aligned = <AlignedFrame>[
       AlignedFrame(
@@ -196,8 +285,9 @@ class StackRunner extends ChangeNotifier {
       fwhmPixels: prepared.shape.fwhm,
       ovalityPixels: prepared.shape.ovality,
       score: 100,
+      unaligned: trails,
     ));
-    _set(RunPhase.aligning, current: 1);
+    _set(RunPhase.aligning, current: 1, total: frames.length);
 
     final refStars = prepared.stars;
     var index = 0;
@@ -219,9 +309,15 @@ class StackRunner extends ChangeNotifier {
               refWidth: prepared.width,
               refHeight: prepared.height,
               refFwhm: prepared.shape.fwhm,
+              masters: masters,
+              trails: trails,
             ));
       } on _DiskFull catch (e) {
         return _fail(RunFailure.diskFull, e.detail);
+      } on CalibrationException catch (e) {
+        return _fail(e.reason == CalibrationProblem.sizeMismatch
+            ? RunFailure.calibrationMismatch
+            : RunFailure.calibrationUnreadable);
       } catch (e) {
         debugPrint('align failed for ${f.name}: $e');
         res = const _AlignOutcome.failed(AlignFailure.decodeFailed);
@@ -246,6 +342,7 @@ class StackRunner extends ChangeNotifier {
         ovalityPixels: res.ovality,
         score: res.score,
         failure: res.failure,
+        unaligned: trails,
       ));
       _set(RunPhase.aligning, current: reports.length);
     }
@@ -295,10 +392,114 @@ class StackRunner extends ChangeNotifier {
       reports: List.of(reports),
       usedFrames: aligned.length,
       mode: settings.mode,
+      darkFrames: masters.darkFrames,
+      flatFrames: masters.flatFrames,
+      skippedCalibrationFrames: skippedCalibrationFrames,
     );
     outcome = result;
     _set(RunPhase.done, current: 1, total: 1);
     return result;
+  }
+
+  /// Decode every calibration frame, then combine each set into one master.
+  ///
+  /// A frame that will not decode is skipped and counted; a set where *none*
+  /// decoded is an error, because the user asked for calibration and silently
+  /// not doing it would leave them wondering why nothing changed.
+  Future<MasterFrames> _buildMasters(
+    Directory dir,
+    List<SourceFrame> darks,
+    List<SourceFrame> flats,
+    int divisor,
+  ) async {
+    var done = 0;
+    var width = 0;
+    var height = 0;
+
+    Future<List<String>> decodeSet(List<SourceFrame> set, String tag) async {
+      final raws = <String>[];
+      for (var i = 0; i < set.length; i++) {
+        if (_cancelled) return raws;
+        final f = set[i];
+        final outPath = '${dir.path}/$tag-${i.toString().padLeft(3, '0')}.raw';
+        final path = f.path;
+        final baked = f.orientationBaked;
+        try {
+          final size = await Isolate.run(() => _decodeToRaw(path, divisor, baked, outPath));
+          if (width == 0) {
+            width = size.$1;
+            height = size.$2;
+          } else if (size.$1 != width || size.$2 != height) {
+            throw CalibrationException(
+                tag == 'dark' ? CalibrationKind.dark : CalibrationKind.flat,
+                CalibrationProblem.sizeMismatch);
+          }
+          raws.add(outPath);
+        } on _DiskFull {
+          rethrow;
+        } on CalibrationException {
+          rethrow;
+        } catch (e) {
+          // Counted, not just logged: five HEIC darks the codec choked on
+          // would otherwise leave the user with a quietly weaker master and
+          // no way to know. The count is shown on the report screen.
+          debugPrint('calibration frame ${f.name} skipped: $e');
+          skippedCalibrationFrames++;
+        }
+        done++;
+        _set(RunPhase.calibrating, current: done);
+      }
+      // Stopping is not the same as failing: a run cancelled before the
+      // first calibration frame decoded would otherwise be reported to the
+      // user as "none of your dark frames could be read".
+      if (!_cancelled && set.isNotEmpty && raws.isEmpty) {
+        throw CalibrationException(
+            tag == 'dark' ? CalibrationKind.dark : CalibrationKind.flat,
+            CalibrationProblem.truncated);
+      }
+      return raws;
+    }
+
+    final darkRaws = await decodeSet(darks, 'dark');
+    if (_cancelled) return MasterFrames.none;
+    final flatRaws = await decodeSet(flats, 'flat');
+    if (_cancelled) return MasterFrames.none;
+    if (width == 0) return MasterFrames.none;
+
+    final darkPath = darkRaws.isEmpty ? null : '${dir.path}/master-dark.raw';
+    final flatPath = flatRaws.isEmpty ? null : '${dir.path}/master-flat.raw';
+    final w = width;
+    final h = height;
+    // One isolate for both masters: each streams band by band internally, so
+    // memory stays bounded and the pass is short next to the decodes above.
+    final means = await Isolate.run(() {
+      if (darkPath != null) {
+        buildMasterRaw(darkRaws, w, h, darkPath, CalibrationKind.dark);
+      }
+      if (flatPath == null) return const <double>[0, 0, 0];
+      buildMasterRaw(flatRaws, w, h, flatPath, CalibrationKind.flat);
+      return measureFlatMeans(flatPath, w, h);
+    });
+    done++;
+    _set(RunPhase.calibrating, current: done);
+
+    // The decoded per-frame raws are dead weight now — a 16-frame calibration
+    // set is another ~600 MB on top of the lights.
+    for (final p in [...darkRaws, ...flatRaws]) {
+      try {
+        File(p).deleteSync();
+      } catch (_) {}
+    }
+
+    return MasterFrames(
+      width: w,
+      height: h,
+      darkPath: darkPath,
+      flatPath: flatPath,
+      flatMeans: means,
+      darkFrames: darkRaws.length,
+      flatFrames: flatRaws.length,
+    );
   }
 
   StackOutcome? _fail(RunFailure f, [String? detail]) {
@@ -388,9 +589,19 @@ class _TooLarge implements Exception {
   String toString() => 'TooLarge()';
 }
 
-_PreparedReference _prepareReference(
-    String path, int divisor, String outPath, bool orientationBaked) {
+/// Decode one calibration frame to a packed-RGB scratch file and report the
+/// size it came out at. No star work: a dark frame has no stars by design.
+(int, int) _decodeToRaw(
+    String path, int divisor, bool orientationBaked, String outPath) {
   final loaded = _loadRgb(path, divisor, orientationBaked);
+  _writeRaw(outPath, loaded.rgb);
+  return (loaded.width, loaded.height);
+}
+
+_PreparedReference _prepareReference(String path, int divisor, String outPath,
+    bool orientationBaked, MasterFrames masters) {
+  final loaded = _loadRgb(path, divisor, orientationBaked);
+  applyCalibration(loaded.rgb, loaded.width, loaded.height, masters);
   _writeRaw(outPath, loaded.rgb);
   final luma = rgbToLuma(loaded.rgb, loaded.width, loaded.height);
   final field = detectStars(luma, loaded.width, loaded.height);
@@ -410,6 +621,8 @@ _AlignOutcome _alignFrame({
   required int refWidth,
   required int refHeight,
   required double refFwhm,
+  MasterFrames masters = MasterFrames.none,
+  bool trails = false,
 }) {
   _Loaded loaded;
   try {
@@ -424,8 +637,24 @@ _AlignOutcome _alignFrame({
   if (loaded.width != refWidth || loaded.height != refHeight) {
     return const _AlignOutcome.failed(AlignFailure.sizeMismatch);
   }
+  applyCalibration(loaded.rgb, loaded.width, loaded.height, masters);
   final luma = rgbToLuma(loaded.rgb, loaded.width, loaded.height);
   final field = detectStars(luma, loaded.width, loaded.height);
+  if (trails) {
+    // Nothing is aligned, so the frame goes down exactly as shot. The star
+    // count still gets measured and reported — across a trail sequence it is
+    // how cloud creeping in shows up.
+    _writeRaw(outPath, loaded.rgb);
+    return _AlignOutcome(
+      transform: Similarity.identity,
+      sourceWidth: loaded.width,
+      sourceHeight: loaded.height,
+      starsDetected: field.blobs,
+      matchedStars: 0,
+      rmsPixels: 0,
+      score: 100,
+    );
+  }
   if (field.overloaded) {
     return const _AlignOutcome.failed(AlignFailure.tooBright);
   }

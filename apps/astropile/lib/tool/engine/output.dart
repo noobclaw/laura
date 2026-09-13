@@ -136,6 +136,58 @@ Future<SaveOutcome> saveToPhotos(String path) async {
   }
 }
 
+/// Save a whole burst to Photos, asking for access once rather than per file.
+///
+/// Reports the first failure and stops: thirty identical "permission denied"
+/// snackbars help nobody, and once the library refuses one frame it will
+/// refuse the rest. A partial save is still reported as an error, with the
+/// count, so the user knows the burst is only half there.
+Future<SaveOutcome> saveManyToPhotos(List<String> paths) async {
+  if (paths.isEmpty) return const SaveOutcome(saved: true);
+  try {
+    var access = await Gal.hasAccess();
+    if (!access) access = await Gal.requestAccess();
+    if (!access) {
+      return SaveOutcome(
+        saved: false,
+        error: tr(
+          zh: '没有相册写入权限,拍下的原片没有存进相册(叠加不受影响)。可以在系统设置里允许「添加照片」。',
+          en: 'Photos permission was denied, so the frames you shot were not added to your library. Stacking is unaffected. You can allow "Add Photos" in system settings.',
+        ),
+        permanentlyDenied: true,
+      );
+    }
+  } on GalException catch (e) {
+    return SaveOutcome(
+        saved: false,
+        error: _galMessage(e),
+        permanentlyDenied: e.type == GalExceptionType.accessDenied);
+  } catch (e) {
+    return SaveOutcome(
+        saved: false, error: '${tr(zh: '无法访问相册', en: 'Could not access Photos')}: $e');
+  }
+
+  var done = 0;
+  for (final p in paths) {
+    try {
+      await Gal.putImage(p);
+      done++;
+    } on GalException catch (e) {
+      return SaveOutcome(
+        saved: false,
+        error: '${tr(zh: '原片存了 $done/${paths.length} 张就失败了', en: 'Saved $done of ${paths.length} frames, then failed')}: ${_galMessage(e)}',
+        permanentlyDenied: e.type == GalExceptionType.accessDenied,
+      );
+    } catch (e) {
+      return SaveOutcome(
+        saved: false,
+        error: '${tr(zh: '原片存了 $done/${paths.length} 张就失败了', en: 'Saved $done of ${paths.length} frames, then failed')}: $e',
+      );
+    }
+  }
+  return const SaveOutcome(saved: true);
+}
+
 String _galMessage(GalException e) => switch (e.type) {
       GalExceptionType.accessDenied => tr(
           zh: '没有相册写入权限,无法保存。你可以在系统设置里允许「添加照片」,或改用「分享」。',

@@ -1,4 +1,5 @@
 import 'package:astropile/tool/app_theme.dart';
+import 'package:astropile/tool/engine/stack.dart';
 import 'package:astropile/tool/models.dart';
 import 'package:astropile/tool/store.dart';
 import 'package:astropile/tool/ui/frames_screen.dart';
@@ -136,5 +137,62 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.textContaining('different exposure settings'), findsNothing);
+  });
+
+  // ---- M2: the two new modes and the calibration card. ----
+
+  testWidgets('all four combine modes are offered', (tester) async {
+    final store = AstroStore()..loaded = true;
+    await pump(tester, store, [frame('a'), frame('b')]);
+
+    expect(tester.takeException(), isNull);
+    for (final label in ['Mean', 'Median', 'Kappa-sigma', 'Star trails']) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+  });
+
+  testWidgets('star trails is free; kappa-sigma is not', (tester) async {
+    final store = AstroStore()..loaded = true;
+    await pump(tester, store, [frame('a'), frame('b')]);
+
+    // Trails takes effect immediately for a free user...
+    await tester.tap(find.text('Star trails'));
+    await tester.pumpAndSettle();
+    expect(store.settings.mode.isTrails, isTrue);
+    expect(find.textContaining('skips star alignment'), findsOneWidget);
+
+    // ...while kappa-sigma opens the unlock sheet and leaves the mode alone.
+    await tester.tap(find.text('Kappa-sigma'));
+    await tester.pumpAndSettle();
+    expect(store.settings.mode, isNot(StackMode.kappaSigma));
+    expect(find.text('AstroPile Pro'), findsOneWidget);
+  });
+
+  testWidgets('a Pro user gets kappa-sigma without a paywall', (tester) async {
+    final store = AstroStore()
+      ..loaded = true
+      ..pro = true;
+    await pump(tester, store, [frame('a'), frame('b')]);
+
+    await tester.tap(find.text('Kappa-sigma'));
+    await tester.pumpAndSettle();
+    expect(store.settings.mode, StackMode.kappaSigma);
+    expect(find.text('AstroPile Pro'), findsNothing);
+  });
+
+  testWidgets('calibration is offered but gated, and never silently on',
+      (tester) async {
+    final store = AstroStore()..loaded = true;
+    await pump(tester, store, [frame('a'), frame('b')]);
+
+    expect(find.text('Calibration (optional)'), findsOneWidget);
+    expect(find.text('Dark frames'), findsOneWidget);
+    expect(find.text('Flat frames'), findsOneWidget);
+    // The free tier sees the card with a PRO badge; tapping Pick explains
+    // rather than opening a picker that would go nowhere.
+    expect(find.text('PRO'), findsOneWidget);
+    await tester.tap(find.text('Pick').first);
+    await tester.pumpAndSettle();
+    expect(find.text('AstroPile Pro'), findsOneWidget);
   });
 }

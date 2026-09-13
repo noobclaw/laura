@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
 import '../app_theme.dart';
+import '../engine/output.dart';
+import '../engine/picker.dart';
 import '../engine/stack.dart';
 import '../models.dart';
 import '../pro.dart';
@@ -52,6 +54,15 @@ class _FramesScreenState extends State<FramesScreen> {
   bool _starting = false;
   late bool _wasPro = widget.store.pro;
 
+  /// Optional calibration sets (Pro). Kept here rather than in the store: a
+  /// dark frame is only meaningful for the burst it was shot alongside, so
+  /// remembering it across sessions would be a trap.
+  final List<SourceFrame> _darks = [];
+  final List<SourceFrame> _flats = [];
+  final List<String> _calibrationScratch = [];
+  final FrameImporter _calibrationImporter = FrameImporter();
+  bool _pickingCalibration = false;
+
   @override
   void initState() {
     super.initState();
@@ -63,14 +74,93 @@ class _FramesScreenState extends State<FramesScreen> {
   @override
   void dispose() {
     widget.store.removeListener(_onStoreChanged);
-    final scratch = widget.scratchDir;
-    if (scratch != null) {
+    for (final scratch in [widget.scratchDir, ..._calibrationScratch]) {
+      if (scratch == null) continue;
       Directory(scratch).delete(recursive: true).catchError((Object e) {
         debugPrint('import cleanup skipped: $e');
         return Directory(scratch);
       });
     }
     super.dispose();
+  }
+
+  /// One reason line per gated mode — a paywall that says "this is Pro" and
+  /// nothing else does not help anyone decide.
+  String _modeGateReason(StackMode m) => switch (m) {
+        StackMode.median => tr(
+            zh: '中值叠加是 Pro 功能:它会自动丢掉只出现在少数帧里的东西 —— 飞机、卫星拖线、热噪点。',
+            en: 'Median stacking is a Pro feature: it drops anything that appears in only a few frames — aircraft, satellite trails, hot pixels.'),
+        StackMode.kappaSigma => tr(
+            zh: 'κ-σ 剪切是 Pro 功能:它按每个像素自己的统计量剔除异常值,既去掉飞机卫星,又比中值多留住降噪效果。',
+            en: 'Kappa-sigma is a Pro feature: it rejects outliers by each pixel\'s own statistics, removing aircraft and satellites while keeping more of the noise reduction than median does.'),
+        StackMode.mean || StackMode.max => '',
+      };
+
+  /// Pick a dark or flat set. Both go through the same system picker as the
+  /// lights, so neither needs a storage permission.
+  Future<void> _pickCalibration(CalibrationSlot slot) async {
+    if (_pickingCalibration) return;
+    if (!widget.store.canCalibrate) {
+      showProSheet(context,
+          reason: tr(
+            zh: '暗场/平场校准是 Pro 功能:暗场扣掉传感器的热噪与坏点,平场抹平暗角和镜头上的灰尘印。',
+            en: 'Dark and flat calibration is a Pro feature: darks subtract the sensor\'s thermal noise and hot pixels, flats even out vignetting and dust shadows.',
+          ));
+      return;
+    }
+    setState(() => _pickingCalibration = true);
+    try {
+      final result = await _calibrationImporter.pickFromLibrary();
+      if (!mounted) return;
+      if (result.scratchDir != null) _calibrationScratch.add(result.scratchDir!);
+      if (result.error != null) {
+        showNotice(context, result.error!,
+            action: result.permissionDenied
+                ? SnackBarAction(
+                    label: tr(zh: '去设置', en: 'Settings'),
+                    onPressed: openSystemSettings)
+                : null);
+        return;
+      }
+      if (result.frames.isEmpty) return; // cancelled
+      // Wrong-size calibration frames are rejected here, with the numbers in
+      // the message — finding out after a five-minute run would be worse.
+      final good = [
+        for (final f in result.frames)
+          if (f.width == _refWidth && f.height == _refHeight) f
+      ];
+      final wrong = result.frames.length - good.length;
+      if (good.isEmpty) {
+        showNotice(
+            context,
+            tr(
+              zh: '这些校准帧是 ${result.frames.first.width}×${result.frames.first.height},和这组照片的 $_refWidth×$_refHeight 不一致,用不了。',
+              en: 'Those calibration frames are ${result.frames.first.width}×${result.frames.first.height} while this stack is $_refWidth×$_refHeight, so they cannot be used.',
+            ));
+        return;
+      }
+      setState(() {
+        final target = slot == CalibrationSlot.dark ? _darks : _flats;
+        target
+          ..clear()
+          ..addAll(good.take(kMaxCalibrationFrames));
+      });
+      final dropped = good.length - (good.length.clamp(0, kMaxCalibrationFrames));
+      if (wrong > 0 || dropped > 0) {
+        showNotice(
+            context,
+            tr(
+              zh: '已采用 ${(good.length).clamp(0, kMaxCalibrationFrames)} 张,跳过 ${wrong + dropped} 张(画幅不符或超过 $kMaxCalibrationFrames 张上限)。',
+              en: 'Using ${(good.length).clamp(0, kMaxCalibrationFrames)}; skipped ${wrong + dropped} (wrong pixel size, or over the $kMaxCalibrationFrames-frame cap).',
+            ));
+      }
+    } finally {
+      if (mounted) setState(() => _pickingCalibration = false);
+    }
+  }
+
+  void _clearCalibration(CalibrationSlot slot) {
+    setState(() => (slot == CalibrationSlot.dark ? _darks : _flats).clear());
   }
 
   /// Buying Pro from this screen must put the frames the free limit unticked
@@ -187,7 +277,12 @@ class _FramesScreenState extends State<FramesScreen> {
     if (n == 0 || _refWidth == 0) return 0;
     final d = widget.store.scale.divisor;
     final px = (_refWidth ~/ d) * (_refHeight ~/ d);
-    return px * 3 * (n + 1);
+    // Calibration frames are decoded to raw too, though only until their
+    // master is built; while they are on disk this is the real high-water
+    // mark, and understating it is how a run dies at frame 20.
+    final calibration =
+        widget.store.canCalibrate ? _darks.length + _flats.length + 2 : 0;
+    return px * 3 * (n + 1 + calibration);
   }
 
   void _toggle(SourceFrame f) {
@@ -247,12 +342,15 @@ class _FramesScreenState extends State<FramesScreen> {
     }
     setState(() => _starting = true);
     try {
+      final calibrate = widget.store.canCalibrate;
       await Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => RunScreen(
           store: widget.store,
           frames: list,
           referenceIndex: _referenceIndex,
           settings: widget.store.settings,
+          darkFrames: calibrate ? List.of(_darks) : const [],
+          flatFrames: calibrate ? List.of(_flats) : const [],
         ),
       ));
     } finally {
@@ -300,7 +398,7 @@ class _FramesScreenState extends State<FramesScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(stackModeLabel(m)),
-                                        if (m == StackMode.median && !widget.store.pro) ...[
+                                        if (m.needsPro && !widget.store.pro) ...[
                                           const SizedBox(width: 4),
                                           Icon(Icons.lock_outline,
                                               size: 14, color: cs.onSurfaceVariant),
@@ -310,12 +408,8 @@ class _FramesScreenState extends State<FramesScreen> {
                                     selected: widget.store.settings.mode == m,
                                     showCheckmark: false,
                                     onSelected: (_) {
-                                      if (m == StackMode.median && !widget.store.pro) {
-                                        showProSheet(context,
-                                            reason: tr(
-                                              zh: '中值叠加是 Pro 功能:它会自动丢掉只出现在少数帧里的东西 —— 飞机、卫星拖线、热噪点。',
-                                              en: 'Median stacking is a Pro feature: it drops anything that appears in only a few frames — aircraft, satellite trails, hot pixels.',
-                                            ));
+                                      if (m.needsPro && !widget.store.pro) {
+                                        showProSheet(context, reason: _modeGateReason(m));
                                         return;
                                       }
                                       widget.store.setMode(m);
@@ -325,17 +419,19 @@ class _FramesScreenState extends State<FramesScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              widget.store.settings.mode == StackMode.mean
-                                  ? tr(
-                                      zh: '平均:同样张数下降噪最多,但飞机和卫星会留下淡淡的痕迹。',
-                                      en: 'Mean: the most noise reduction for a given number of frames, but aircraft and satellites leave a faint trace.')
-                                  : tr(
-                                      zh: '中值:自动去掉只出现在少数帧里的东西,降噪略少一点。',
-                                      en: 'Median: drops anything that only a few frames saw, at slightly less noise reduction.'),
+                              stackModeBlurb(widget.store.settings.mode),
                               style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      _CalibrationCard(
+                        store: widget.store,
+                        darks: _darks,
+                        flats: _flats,
+                        onPick: _pickCalibration,
+                        onClear: _clearCalibration,
                       ),
                       const SizedBox(height: 12),
                       SectionCard(
@@ -448,6 +544,151 @@ class _FramesScreenState extends State<FramesScreen> {
 
 /// Two frames is the smallest thing worth calling a stack.
 const int kMinStackFramesUi = 2;
+
+/// Calibration frames accepted per set. Past about a dozen the master stops
+/// improving measurably, and every extra one is another full-frame decode
+/// plus its scratch copy before the stack has even started.
+const int kMaxCalibrationFrames = 12;
+
+enum CalibrationSlot { dark, flat }
+
+/// The optional dark/flat pair. Collapsed to two rows when empty, because
+/// most stacks will never use it — but visible, because a user who owns
+/// darks would never think to look for it in a menu.
+class _CalibrationCard extends StatelessWidget {
+  const _CalibrationCard({
+    required this.store,
+    required this.darks,
+    required this.flats,
+    required this.onPick,
+    required this.onClear,
+  });
+
+  final AstroStore store;
+  final List<SourceFrame> darks;
+  final List<SourceFrame> flats;
+  final void Function(CalibrationSlot) onPick;
+  final void Function(CalibrationSlot) onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    return SectionCard(
+      title: tr(zh: '校准帧(可选)', en: 'Calibration (optional)'),
+      trailing: store.pro
+          ? null
+          : StatusPill(
+              label: 'PRO',
+              color: cs.primary,
+              icon: Icons.workspace_premium,
+            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _CalibrationRow(
+            icon: Icons.dark_mode_outlined,
+            title: tr(zh: '暗场', en: 'Dark frames'),
+            hint: tr(
+              zh: '盖上镜头盖、用同样的 ISO 和快门拍几张 —— 扣掉传感器的热噪和坏点。',
+              en: 'A few shots with the lens cap on at the same ISO and shutter — subtracts thermal noise and hot pixels.',
+            ),
+            frames: darks,
+            onPick: () => onPick(CalibrationSlot.dark),
+            onClear: () => onClear(CalibrationSlot.dark),
+          ),
+          const SizedBox(height: 12),
+          _CalibrationRow(
+            icon: Icons.wb_sunny_outlined,
+            title: tr(zh: '平场', en: 'Flat frames'),
+            hint: tr(
+              zh: '对着均匀的亮面(晨昏天空、白墙)不改焦距拍几张 —— 抹平暗角和镜头上的灰尘印。',
+              en: 'A few shots of an evenly lit surface (twilight sky, a white wall) without refocusing — evens out vignetting and dust shadows.',
+            ),
+            frames: flats,
+            onPick: () => onPick(CalibrationSlot.flat),
+            onClear: () => onClear(CalibrationSlot.flat),
+          ),
+          if (darks.isEmpty && flats.isEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              tr(
+                zh: '不选也能叠 —— 校准帧是给「同一台手机、同一晚、噪点特别脏」这种情况准备的。',
+                en: 'Optional: stacks work fine without them. Calibration is for the nights when one phone\'s sensor noise is the thing holding the picture back.',
+              ),
+              style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CalibrationRow extends StatelessWidget {
+  const _CalibrationRow({
+    required this.icon,
+    required this.title,
+    required this.hint,
+    required this.frames,
+    required this.onPick,
+    required this.onClear,
+  });
+
+  final IconData icon;
+  final String title;
+  final String hint;
+  final List<SourceFrame> frames;
+  final VoidCallback onPick;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final chosen = frames.isNotEmpty;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 20, color: chosen ? cs.primary : cs.onSurfaceVariant),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: text.titleSmall),
+              const SizedBox(height: 3),
+              Text(
+                chosen
+                    ? tr(zh: '已选 ${frames.length} 张', en: '${frames.length} selected')
+                    : hint,
+                style: text.bodySmall?.copyWith(
+                    color: chosen ? cs.primary : cs.onSurfaceVariant, height: 1.35),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        // The theme stretches filled buttons to the full width; these two sit
+        // in a row, so they opt back out with an explicit minimum size.
+        chosen
+            ? IconButton(
+                tooltip: tr(zh: '清除', en: 'Clear'),
+                onPressed: onClear,
+                icon: const Icon(Icons.close),
+              )
+            : TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(56, 40)),
+                onPressed: onPick,
+                child: Text(tr(zh: '选择', en: 'Pick')),
+              ),
+      ],
+    );
+  }
+}
 
 class _Summary extends StatelessWidget {
   const _Summary({

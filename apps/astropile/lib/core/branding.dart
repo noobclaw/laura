@@ -12,7 +12,7 @@ abstract final class Branding {
   static const String appNameZh = '星野叠加';
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
-  static const String version = '1.0.0';
+  static const String version = '1.1.0';
 
   /// Seed for the Material 3 color scheme: a low-saturation silver grey, so
   /// the scheme stays neutral and the only colour on screen is the star and
@@ -26,7 +26,9 @@ abstract final class Branding {
             '全部计算在你的设备上完成,无账号、无广告,照片不出手机。\n\n'
             '开源致谢:星阵配准参考 astroalign(MIT,© 2016 Martin Beroiz),'
             '叠加合成参考 OpenSkyStacker(MIT,© 2017 Benjamin Schubert),'
-            '星点清晰度评估参考 astra_lite(MIT,© 2023 Denis Artyomov)的公开设计思路。'
+            '星点清晰度评估参考 astra_lite(MIT,© 2023 Denis Artyomov)的公开设计思路,'
+            'κ-σ 剪切与暗场/平场校准参考 DeepSkyStacker(BSD-3,© 2006-2019 LucCoiffier、'
+            '© 2018-2025 David C. Partridge 等)。'
             '本应用为独立的 Dart 实现,未复制其代码。',
         en: 'Aligns a burst of night-sky photos and stacks them into one '
             'cleaner picture, telling you frame by frame whether it lined up '
@@ -36,8 +38,10 @@ abstract final class Branding {
             '© 2016 Martin Beroiz), frame stacking follows OpenSkyStacker '
             '(MIT, © 2017 Benjamin Schubert), and the star-sharpness check '
             'follows the published design of astra_lite (MIT, © 2023 Denis '
-            'Artyomov). This app is an independent Dart implementation and '
-            'copies none of their code.',
+            'Artyomov); kappa-sigma clipping and dark/flat calibration follow '
+            'DeepSkyStacker (BSD-3, © 2006-2019 LucCoiffier and © 2018-2025 '
+            'David C. Partridge and others). This app is an independent Dart '
+            'implementation and copies none of their code.',
       );
 
   static String get privacyPolicy => tr(

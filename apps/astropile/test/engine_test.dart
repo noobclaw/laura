@@ -323,6 +323,76 @@ void main() {
       expect(medianOf(Uint8List.fromList([5, 1, 3]), 3), 3);
       expect(medianOf(Uint8List.fromList([10, 20, 30, 40]), 4), 25);
     });
+
+    test('max keeps the brightest frame — the star trail mode', () {
+      final frames = [
+        write('a.raw', [10, 10, 10, 200, 200, 200]),
+        write('b.raw', [180, 180, 180, 20, 20, 20]),
+      ];
+      final out = stackBand(frames, 2, 0, 1, StackMode.max);
+      // Each pixel takes whichever frame was brighter there: that is what
+      // draws the arc while the ground stays put.
+      expect(out, [180, 180, 180, 200, 200, 200]);
+    });
+
+    test('kappa-sigma rejects the outlier but keeps mean-like precision', () {
+      const sky = [40, 41, 42, 43, 44, 40, 42];
+      final frames = [
+        for (final (i, v) in sky.indexed) write('$i.raw', List.filled(6, v)),
+        write('sat.raw', List.filled(6, 250)), // a satellite
+      ];
+      final ks = stackBand(frames, 2, 0, 1, StackMode.kappaSigma);
+      final mean = stackBand(frames, 2, 0, 1, StackMode.mean);
+      // The satellite pulls the plain mean far up; after rejection the answer
+      // is the mean of the seven real samples.
+      expect(ks[0], closeTo(sky.reduce((a, b) => a + b) / sky.length, 1));
+      expect(mean[0], greaterThan(60));
+    });
+  });
+
+  group('kappa-sigma clipping', () {
+    int clip(List<int> v) => kappaSigmaClip(Uint8List.fromList(v), v.length);
+
+    test('a clean sample is left alone', () {
+      // Nothing lies outside 2 sigma here, so the first pass rejects nothing
+      // and the result is the plain mean.
+      expect(clip([10, 11, 12, 13, 14]), 12);
+    });
+
+    test('one high outlier is dropped', () {
+      expect(clip([20, 21, 22, 23, 24, 25, 26, 200]), closeTo(23, 1));
+    });
+
+    test('one low outlier is dropped', () {
+      expect(clip([0, 100, 101, 102, 103, 104, 105, 106]), closeTo(103, 1));
+    });
+
+    test('too few frames and the outlier survives — a property, not a bug', () {
+      // With five samples, one of them wild, the wild one is most of the
+      // standard deviation, so 2 sigma is wide enough to keep it. This is why
+      // the mode's own description says it wants about eight frames up, and
+      // why median (which does not care how far out the outlier is) stays on
+      // the menu next to it.
+      expect(clip([20, 21, 22, 23, 200]), closeTo(57, 1));
+    });
+
+    test('two and fewer values fall back to the mean', () {
+      // With two samples every value is exactly one sigma out, so rejection
+      // is meaningless: averaging is the only defensible answer.
+      expect(clip([10, 200]), 105);
+      expect(clip([77]), 77);
+      expect(clip(const []), 0);
+    });
+
+    test('identical values do not divide by a zero sigma', () {
+      expect(clip([64, 64, 64, 64]), 64);
+    });
+
+    test('a sample with no centre still returns a real number', () {
+      // The deliberate deviation from DeepSkyStacker: the original ends up
+      // averaging an empty set here. The result only has to be in range.
+      expect(clip([0, 0, 255, 255]), inInclusiveRange(0, 255));
+    });
   });
 
   group('tone curve', () {

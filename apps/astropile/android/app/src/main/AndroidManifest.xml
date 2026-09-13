@@ -10,13 +10,28 @@
          permission, so no READ_MEDIA_IMAGES / READ_EXTERNAL_STORAGE is
          declared. Saving the finished stack (gal plugin) uses MediaStore on
          Android 10+; on Android 9 and below it still needs the legacy write
-         permission. AstroPile never opens the camera in this version. -->
+         permission. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
-    <uses-permission android:name="android.permission.CAMERA" tools:node="remove"/>
+
+    <!-- In-app burst capture (M2): stills only, written to the app's own
+         scratch folder. The camera plugin also declares RECORD_AUDIO for
+         video recording, which this app never does (`enableAudio: false`);
+         left in, the store page would tell users that an offline stacker
+         wants their microphone. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+    <!-- Both flags, both optional: the camera is one way in, picking photos
+         from the library is the other, and a device without a camera can use
+         the app perfectly well. camera_android_camerax declares
+         `android.hardware.camera.any` with no `android:required`, which
+         defaults to TRUE — without the override below, Play would hide the
+         app from camera-less devices. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.any" android:required="false"
+        tools:replace="android:required"/>
 
     <!-- allowBackup=false: the only thing stored is the Pro flag and a
          counter. Letting them ride along in a cloud backup would contradict

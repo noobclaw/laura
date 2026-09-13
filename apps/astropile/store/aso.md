@@ -1,4 +1,10 @@
-# AstroPile ASO(2026-09-12)
+# AstroPile ASO(2026-09-12 实打;2026-09-13 M2 后复核)
+
+> **2026-09-13(M2)复核**:本轮没有重新实打(改元数据后 7–10 天才有意义,基线 09-12 还没到期),只做了两件事:
+> 1. **`store/listing.md` 补齐三件套** —— 09-12 定的标题/副标题/关键词此前只躺在本文件里,listing.md 还是 M1 的旧标题 `AstroPile: Stack the Night Sky`。**这是 ASO 三件套第一层「能被搜到」的落地缺口,今天补上了**(en-US 与 zh-Hans 都换成本文件的版本)。以后 aso.md 定完必须同步 listing.md,否则实打出来的结论一个字也到不了商店。
+> 2. **`star trails` 的档位重判** —— 09-12 判「放弃」(头部 373,191,`Honkai: Star Rail` 占词)。M2 之后它是**有实现支撑的功能词**,但头部量没变,**主攻仍不成立**:处置维持「只进关键词字段、不进标题副标题」,并加进下方复测基线**只记账**。
+>
+> **M2 新增的功能词**(`kappa sigma` / `dark frame` / `flat frame` / `calibration`)一律**不进三件套**:它们是专业天文用户的词,搜索量极小,而 100 字符的关键词额度更该给 `astro stacker` 那种主攻词的长尾。仅写进长描述。
 
 > 数据:iTunes Search API `country=us`(中文词 `country=cn`)、`entity=software&limit=50`,每词间隔 1.2s,实打于 2026-09-12。
 > 「头部评价量」= **前 10 名里免费 app 的最高 userRatingCount**(50 名里随便一支巨头不代表词被占);档位判据:<5,000 主攻 / 5,000–50,000 次攻 / >50,000 放弃(只进关键词字段)。
@@ -39,8 +45,10 @@
 ## 三件套(en-US)
 
 Title(30/30): AstroPile: Astro Image Stacker
-Subtitle(28/30): Long Exposure & Frame Report
-Keywords(94/100): astrophotography,night,sky,milky,way,star,align,noise,reduction,median,trails,deep,astroshader
+Subtitle(28/30): Astro Stacker & Frame Report
+Keywords(93/100): astrophotography,night,sky,milky,way,long,exposure,align,noise,median,trails,deep,astroshader
+
+> **2026-09-13 改副标题(G8a 抓出)**:原 `Long Exposure & Frame Report` 里的 `long exposure` 是主攻词没错,**但 app 做不到长曝光**,连拍页自己写着「不能设置长曝光,快门由系统决定」。副标题是 Apple 按功能声明读的元数据(2.3.1),把一个 app 明确否认的能力放进去,和 09-04「付费页卖不存在的功能」是同一类拒审风险。处置:副标题换成 `Astro Stacker & Frame Report`(主攻词 `astro stacker` + 楔子),`long exposure` 降进关键词字段 —— **它作为关键词完全合法,只是不能当承诺**。同批把 `reduction` 换成 `exposure`(`noise` 与 `reduction` 苹果会各自参与组合,少一个不亏,腾出的额度给主攻词)。
 
 ## 三件套(zh-Hans)
 
@@ -50,12 +58,13 @@ Keywords(52/100): 星野,银河,星空相机,长曝光,降噪,星轨,深空,对�
 
 ## 复测基线
 
-| 主词(4个) | 2026-09-12 排位 | 备注 |
+| 主词(5个) | 2026-09-12 排位 | 备注 |
 |---|---|---|
 | astro stacker | 未上架 | 主攻(头部 240) |
 | image stacker | 未上架 | 次攻(头部 26,335) |
 | long exposure | 未上架 | 主攻(头部 2,555) |
 | astrophotography | 未上架 | 放弃(头部 494,824) |
+| star trails | 未上架 | 放弃(头部 373,191);**09-13 起只记账** —— M2 有了星轨实现,但头部量没变,不因为「我们做了」就改档 |
 
 > 排位实打方式:同一 API `limit=200`,按 trackId 找位次;「未进前 N」的 N = 该词实际返回条数。改元数据后 7–10 天再测(索引延迟)。
 

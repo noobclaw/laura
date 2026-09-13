@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.1.0+1
 
 environment:
   sdk: ^3.12.2
@@ -47,6 +47,10 @@ dependencies:
   # Native decode for HEIC on import (iOS ImageIO / Android BitmapFactory);
   # the pure-Dart codecs cannot read HEIC.
   flutter_image_compress: ^2.4.0
+  # In-app burst capture (M2): the value is that focus and exposure are locked
+  # for the whole burst, so every frame is shot the same way. Stills only,
+  # `enableAudio: false` — the Android manifest strips RECORD_AUDIO to match.
+  camera: ^0.11.0
   # Save the stacked result to the system Photos library.
   gal: ^2.3.1
   # System share sheet.

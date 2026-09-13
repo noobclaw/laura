@@ -90,11 +90,22 @@ String runFailureText(RunFailure f, String? detail) => switch (f) {
       RunFailure.referenceTooBright => tr(
           zh: '参考帧太亮,分不出星点。请避开路灯和月亮,或换一张更暗的照片作参考帧。',
           en: 'The reference frame is too bright to find stars. Avoid street lights and the moon, or choose a darker frame.'),
+      // Worded for both paths: in star-trail mode nothing is aligned by
+      // design, and the frames that dropped out did so on decode or size.
       RunFailure.notEnoughAligned => tr(
-          zh: '能对齐的照片不足 2 张,没有可叠加的内容。看看下面每一帧的原因。',
-          en: 'Fewer than two frames aligned, so there is nothing to stack. The per-frame reasons are below.'),
+          zh: '能用上的照片不足 2 张,没有可叠加的内容。看看下面每一帧的原因。',
+          en: 'Fewer than two frames could be used, so there is nothing to stack. The per-frame reasons are below.'),
       RunFailure.diskFull => '${tr(zh: '存储空间不足,叠加中断。清理一些空间,或改用半分辨率再试。', en: 'Out of storage — the stack stopped. Free some space, or switch to half resolution.')}'
           '${detail == null || detail.isEmpty ? '' : '\n$detail'}',
+      RunFailure.calibrationUnreadable => tr(
+          zh: '校准帧一张都读不出来,叠加没有开始。请换一组暗场/平场照片,或先把校准关掉再叠。',
+          en: 'None of the calibration frames could be read, so nothing was stacked. Pick another set of dark/flat shots, or turn calibration off.'),
+      RunFailure.calibrationMismatch => tr(
+          zh: '校准帧的画幅和这组照片不一致 —— 暗场和平场必须用同一台相机、同一个画幅比例拍。',
+          en: 'The calibration frames are a different pixel size than this stack. Darks and flats must come from the same camera at the same aspect ratio.'),
+      RunFailure.calibrationFlatTooDark => tr(
+          zh: '平场帧几乎是全黑的,不能拿来做除法。平场要对着均匀的亮面拍(晨昏天空或白墙),不是盖着镜头盖拍。',
+          en: 'The flat frames are almost black, so dividing by them is meaningless. Shoot flats against an evenly lit surface — twilight sky or a white wall — not with the lens cap on.'),
       RunFailure.unknown =>
         '${tr(zh: '叠加失败', en: 'Stacking failed')}${detail == null || detail.isEmpty ? '' : ': $detail'}',
     };
@@ -102,6 +113,24 @@ String runFailureText(RunFailure f, String? detail) => switch (f) {
 String stackModeLabel(StackMode m) => switch (m) {
       StackMode.mean => tr(zh: '平均叠加', en: 'Mean'),
       StackMode.median => tr(zh: '中值叠加', en: 'Median'),
+      StackMode.kappaSigma => tr(zh: 'κ-σ 剪切', en: 'Kappa-sigma'),
+      StackMode.max => tr(zh: '星轨(最大值)', en: 'Star trails'),
+    };
+
+/// The sentence under the mode chips: what this mode does, and what it costs.
+String stackModeBlurb(StackMode m) => switch (m) {
+      StackMode.mean => tr(
+          zh: '平均:同样张数下降噪最多,但飞机和卫星会留下淡淡的痕迹。',
+          en: 'Mean: the most noise reduction for a given number of frames, but aircraft and satellites leave a faint trace.'),
+      StackMode.median => tr(
+          zh: '中值:自动去掉只出现在少数帧里的东西,降噪略少一点。',
+          en: 'Median: drops anything that only a few frames saw, at slightly less noise reduction.'),
+      StackMode.kappaSigma => tr(
+          zh: 'κ-σ 剪切:先算出这一像素的均值与标准差,把偏离超过 ${kKappa.toStringAsFixed(0)}σ 的值扔掉再平均,最多重复 $kKappaIterations 轮。既去掉飞机卫星,又保住大部分平均叠加的降噪 —— 八张以上效果最好。',
+          en: 'Kappa-sigma: takes each pixel\'s mean and standard deviation, throws away anything more than ${kKappa.toStringAsFixed(0)}σ off it and averages the rest, up to $kKappaIterations times. Removes aircraft and satellites while keeping most of mean\'s noise reduction — best from about eight frames up.'),
+      StackMode.max => tr(
+          zh: '星轨:取每个像素最亮的一次,而且不做星点对齐 —— 地景不动,星星拉成弧线。需要固定机位的连拍,张数越多弧线越长。',
+          en: 'Star trails: keeps the brightest value each pixel ever had, and skips star alignment — the ground stays put and the stars draw arcs. Needs a burst from a fixed position; the more frames, the longer the arc.'),
     };
 
 String workScaleLabel(WorkScale s) => switch (s) {

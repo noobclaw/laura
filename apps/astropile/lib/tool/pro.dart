@@ -60,14 +60,22 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                   en: 'Median stacking: aircraft, satellite trails and hot pixels drop out on their own',
                 )),
                 _Perk(tr(
+                  zh: 'κ-σ 剪切叠加:按每个像素自己的统计量剔除异常值,比中值多留住降噪',
+                  en: 'Kappa-sigma stacking: rejects outliers by each pixel\'s own statistics, keeping more noise reduction than median',
+                )),
+                _Perk(tr(
+                  zh: '暗场 / 平场校准:扣掉传感器热噪与坏点,抹平暗角和镜头灰尘印',
+                  en: 'Dark and flat calibration: subtracts sensor noise and hot pixels, evens out vignetting and dust shadows',
+                )),
+                _Perk(tr(
                   zh: '记住你的叠加方式与工作分辨率',
                   en: 'Remembers your stacking mode and working resolution',
                 )),
                 const SizedBox(height: 12),
                 Text(
                   tr(
-                    zh: '一次性买断 —— 没有订阅、没有账号、没有广告,照片依然只在你的手机里处理。逐帧对齐报告在免费版一样完整可用。',
-                    en: 'A one-time purchase — no subscription, no account, no ads, and photos are still processed only on your phone. The per-frame alignment report stays fully available on the free tier.',
+                    zh: '一次性买断 —— 没有订阅、没有账号、没有广告,照片依然只在你的手机里处理。逐帧对齐报告和星轨模式在免费版一样可用。',
+                    en: 'A one-time purchase — no subscription, no account, no ads, and photos are still processed only on your phone. The per-frame alignment report and star trail mode stay available on the free tier.',
                   ),
                   style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.45),
                 ),

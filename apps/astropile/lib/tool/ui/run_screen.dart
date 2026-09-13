@@ -6,6 +6,7 @@ import '../../core/l10n.dart';
 import '../../core/review_prompt.dart';
 import '../app_theme.dart';
 import '../engine/pipeline.dart';
+import '../engine/stack.dart';
 import '../models.dart';
 import '../store.dart';
 import 'result_screen.dart';
@@ -24,12 +25,19 @@ class RunScreen extends StatefulWidget {
     required this.frames,
     required this.referenceIndex,
     required this.settings,
+    this.darkFrames = const [],
+    this.flatFrames = const [],
   });
 
   final AstroStore store;
   final List<SourceFrame> frames;
   final int referenceIndex;
   final StackSettings settings;
+
+  /// Optional calibration sets, already checked against the light frames'
+  /// pixel size on the frames screen.
+  final List<SourceFrame> darkFrames;
+  final List<SourceFrame> flatFrames;
 
   @override
   State<RunScreen> createState() => _RunScreenState();
@@ -81,6 +89,8 @@ class _RunScreenState extends State<RunScreen> {
       frames: widget.frames,
       referenceIndex: widget.referenceIndex,
       settings: widget.settings,
+      darkFrames: widget.darkFrames,
+      flatFrames: widget.flatFrames,
     );
     if (!mounted || outcome == null) return;
     widget.store.addStacked();
@@ -105,11 +115,21 @@ class _RunScreenState extends State<RunScreen> {
     switch (_runner.phase) {
       case RunPhase.preparing:
         return tr(zh: '正在读取参考帧', en: 'Reading the reference frame');
-      case RunPhase.aligning:
+      case RunPhase.calibrating:
         return tr(
-          zh: '正在对齐 ${_runner.current}/${_runner.total} 张',
-          en: 'Aligning ${_runner.current} of ${_runner.total}',
+          zh: '正在合成校准帧 ${_runner.current}/${_runner.total}',
+          en: 'Building the calibration masters ${_runner.current}/${_runner.total}',
         );
+      case RunPhase.aligning:
+        return widget.settings.mode.isTrails
+            ? tr(
+                zh: '正在读取 ${_runner.current}/${_runner.total} 张',
+                en: 'Reading ${_runner.current} of ${_runner.total}',
+              )
+            : tr(
+                zh: '正在对齐 ${_runner.current}/${_runner.total} 张',
+                en: 'Aligning ${_runner.current} of ${_runner.total}',
+              );
       case RunPhase.stacking:
         return tr(
           zh: '正在合成 ${_runner.current}/${_runner.total} 条',
@@ -430,23 +450,27 @@ class _ReportRow extends StatelessWidget {
                     maxLines: 1, overflow: TextOverflow.ellipsis, style: text.bodyMedium),
                 const SizedBox(height: 2),
                 Text(
-                  report.isReference
-                      ? tr(
-                          zh: '参考帧 · 检出 ${report.starsDetected} 颗星',
-                          en: 'Reference · ${report.starsDetected} stars found')
-                      : failed
-                          ? alignFailureText(report.failure!)
-                          : tr(
-                              zh: '匹配 ${report.matchedStars}/${report.starsDetected} 颗 · 残差 ${report.rmsPixels.toStringAsFixed(2)} px',
-                              en: '${report.matchedStars}/${report.starsDetected} stars matched · ${report.rmsPixels.toStringAsFixed(2)} px residual',
-                            ),
+                  failed
+                      ? alignFailureText(report.failure!)
+                      : report.unaligned
+                          ? tr(
+                              zh: '按原样合成(星轨)· 检出 ${report.starsDetected} 颗星',
+                              en: 'Combined as shot (trails) · ${report.starsDetected} stars found')
+                          : report.isReference
+                              ? tr(
+                                  zh: '参考帧 · 检出 ${report.starsDetected} 颗星',
+                                  en: 'Reference · ${report.starsDetected} stars found')
+                              : tr(
+                                  zh: '匹配 ${report.matchedStars}/${report.starsDetected} 颗 · 残差 ${report.rmsPixels.toStringAsFixed(2)} px',
+                                  en: '${report.matchedStars}/${report.starsDetected} stars matched · ${report.rmsPixels.toStringAsFixed(2)} px residual',
+                                ),
                   style: text.bodySmall?.copyWith(
                       color: failed ? status.bad : cs.onSurfaceVariant),
                 ),
               ],
             ),
           ),
-          if (!report.isReference && !failed)
+          if (!report.isReference && !failed && !report.unaligned)
             CountUpText(report.score, style: text.titleMedium?.copyWith(color: color)),
         ],
       ),

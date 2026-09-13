@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'transform.dart';
@@ -13,7 +14,36 @@ enum StackMode {
   /// — aircraft, satellites, hot pixels, a passing cloud edge — at the cost
   /// of roughly a fifth of the noise reduction mean would have given. Pro.
   median,
+
+  /// Mean of the values that survive [kKappa]-sigma rejection, repeated up to
+  /// [kKappaIterations] times. Keeps most of mean's noise reduction while
+  /// still dropping outliers, which median pays a fifth of the signal for.
+  /// Pro. Spec from DeepSkyStacker (BSD-3) — see REFERENCE.md §E.
+  kappaSigma,
+
+  /// Brightest value. Combined *without* star alignment, this is the star
+  /// trail mode: the ground stays put and every star draws its arc.
+  max,
 }
+
+extension StackModeX on StackMode {
+  /// True for the mode that must not align on stars — aligning would cancel
+  /// exactly the motion the picture is made of.
+  bool get isTrails => this == StackMode.max;
+
+  /// The two modes behind the Pro gate. Trails is deliberately free: the
+  /// six-frame free cap already limits how long an arc it can draw.
+  bool get needsPro => this == StackMode.median || this == StackMode.kappaSigma;
+}
+
+/// Rejection width, in standard deviations, for [StackMode.kappaSigma].
+/// DeepSkyStacker's shipped default (`Stacking/Light_Kappa`).
+const double kKappa = 2.0;
+
+/// Maximum rejection passes. DeepSkyStacker's shipped default
+/// (`Stacking/Light_Iteration`); the loop also stops early once a pass
+/// rejects nothing.
+const int kKappaIterations = 5;
 
 /// One aligned frame on disk: packed RGB in the reference frame's grid, plus
 /// the transform that put it there (needed to know which pixels it covered).
@@ -140,22 +170,105 @@ Uint8List stackBand(
       if (count == 0) continue; // stays black: no frame saw this pixel
       for (var ch = 0; ch < 3; ch++) {
         final at = o + ch;
-        if (mode == StackMode.mean) {
-          var sum = 0;
-          for (var k = 0; k < count; k++) {
-            sum += bands[idx[k]][at];
-          }
-          out[at] = sum ~/ count;
-        } else {
-          for (var k = 0; k < count; k++) {
-            vals[k] = bands[idx[k]][at];
-          }
-          out[at] = medianOf(vals, count);
+        switch (mode) {
+          case StackMode.mean:
+            var sum = 0;
+            for (var k = 0; k < count; k++) {
+              sum += bands[idx[k]][at];
+            }
+            out[at] = sum ~/ count;
+          case StackMode.max:
+            var top = 0;
+            for (var k = 0; k < count; k++) {
+              final v = bands[idx[k]][at];
+              if (v > top) top = v;
+            }
+            out[at] = top;
+          case StackMode.median:
+            for (var k = 0; k < count; k++) {
+              vals[k] = bands[idx[k]][at];
+            }
+            out[at] = medianOf(vals, count);
+          case StackMode.kappaSigma:
+            for (var k = 0; k < count; k++) {
+              vals[k] = bands[idx[k]][at];
+            }
+            out[at] = kappaSigmaClip(vals, count);
         }
       }
     }
   }
   return out;
+}
+
+/// Mean of the first [count] entries after kappa-sigma rejection, in place.
+///
+/// Spec (DeepSkyStacker `KappaSigmaClip`, DSSTools.h:606 — BSD-3, read and
+/// re-specified, not copied; REFERENCE.md §E-1):
+/// sort, then up to [iterations] passes over the surviving window: take its
+/// mean `m` and population sigma `s`, keep only `m − κs ≤ v ≤ m + κs`, stop
+/// as soon as a pass rejects nothing. The answer is the mean of what is left.
+///
+/// **Intentional deviation**: the original ends the loop when the window
+/// empties and then averages an empty set (0/0). A pass that would reject
+/// *every* value is discarded here and the previous window kept, so the
+/// result is always a real number. It can only trigger where the values are
+/// so spread that no centre exists — a hot pixel column, say — and returning
+/// NaN there would write 0 and punch a black hole in the picture.
+int kappaSigmaClip(Uint8List v, int count, {
+  double kappa = kKappa,
+  int iterations = kKappaIterations,
+}) {
+  if (count <= 2) {
+    var sum = 0;
+    for (var i = 0; i < count; i++) {
+      sum += v[i];
+    }
+    return count == 0 ? 0 : (sum / count).round();
+  }
+  // The window is sorted, so rejection is two moving ends rather than a
+  // rebuilt list: everything below the low bound is a prefix, everything
+  // above the high bound a suffix.
+  medianOf(v, count); // sorts v[0..count) in place
+  var lo = 0;
+  var hi = count;
+  var mean = 0.0;
+  for (var pass = 0; pass < iterations; pass++) {
+    final n = hi - lo;
+    var sum = 0.0;
+    for (var i = lo; i < hi; i++) {
+      sum += v[i];
+    }
+    mean = sum / n;
+    var sq = 0.0;
+    for (var i = lo; i < hi; i++) {
+      final d = v[i] - mean;
+      sq += d * d;
+    }
+    final sigma = math.sqrt(sq / n);
+    if (sigma <= 0) break; // every survivor is identical
+    final min = mean - kappa * sigma;
+    final max = mean + kappa * sigma;
+    var nlo = lo;
+    var nhi = hi;
+    while (nlo < nhi && v[nlo] < min) {
+      nlo++;
+    }
+    while (nhi > nlo && v[nhi - 1] > max) {
+      nhi--;
+    }
+    if (nhi <= nlo) break; // would reject everything — keep this window
+    if (nlo == lo && nhi == hi) break; // nothing rejected: converged
+    lo = nlo;
+    hi = nhi;
+  }
+  var sum = 0.0;
+  for (var i = lo; i < hi; i++) {
+    sum += v[i];
+  }
+  mean = sum / (hi - lo);
+  final r = mean.round();
+  return r < 0 ? 0 : (r > 255 ? 255 : r);
 }
 
 /// Median of the first [count] entries, in place, by insertion sort.

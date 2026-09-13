@@ -1,5 +1,7 @@
 /* Localized launcher name. The Android side keeps the same pair in
    res/values/strings.xml and res/values-zh/strings.xml. */
 "CFBundleDisplayName" = "星野叠加";
+"NSCameraUsageDescription" = "星野叠加的连拍模式会使用相机：锁定对焦与曝光后连续拍摄多张夜空照片，供后续对齐叠加。照片只留在本机。";
+"NSMicrophoneUsageDescription" = "连拍模式会开启系统相机的采集会话，iOS 会连带初始化其中的音频部分。星野叠加只拍摄静态照片，不录音，也不会把任何内容传出本机。";
 "NSPhotoLibraryUsageDescription" = "星野叠加通过系统照片选择器让你挑选要对齐叠加的夜空照片。照片只在本机读取与处理。";
 "NSPhotoLibraryAddUsageDescription" = "当你点击「保存到相册」时，星野叠加把叠好的成片存入你的相册。";

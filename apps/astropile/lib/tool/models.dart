@@ -122,6 +122,7 @@ class FrameReport {
     this.ovalityPixels = 0,
     this.score = 0,
     this.failure,
+    this.unaligned = false,
   });
 
   final String frameId;
@@ -143,6 +144,11 @@ class FrameReport {
 
   /// Null on success.
   final AlignFailure? failure;
+
+  /// True in star-trail mode, where frames are combined exactly as shot.
+  /// Matched-star and residual figures are meaningless then and the report
+  /// says so rather than printing a row of zeroes.
+  final bool unaligned;
 
   bool get ok => failure == null;
 }
@@ -167,6 +173,9 @@ class StackOutcome {
     required this.reports,
     required this.usedFrames,
     required this.mode,
+    this.darkFrames = 0,
+    this.flatFrames = 0,
+    this.skippedCalibrationFrames = 0,
   });
 
   /// Packed RGB, `width × height × 3`, before the tone curve.
@@ -176,6 +185,15 @@ class StackOutcome {
   final List<FrameReport> reports;
   final int usedFrames;
   final StackMode mode;
+
+  /// Calibration frames that went into the masters, 0 when uncalibrated.
+  final int darkFrames;
+  final int flatFrames;
+
+  /// Calibration frames that would not decode and were left out.
+  final int skippedCalibrationFrames;
+
+  bool get calibrated => darkFrames > 0 || flatFrames > 0;
 
   int get failedFrames => reports.where((r) => !r.ok).length;
 }

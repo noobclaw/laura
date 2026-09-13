@@ -4,6 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>AstroPile uses the camera for its burst mode: it takes several night-sky frames in a row with focus and exposure locked, so they can be aligned and stacked. The photos stay on this device.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Burst mode opens a system camera capture session, and iOS initialises the audio side of that session along with it. AstroPile captures still photographs only — it records no audio, and nothing leaves this device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>AstroPile opens the system photo picker so you can choose the night-sky frames to align and stack. The photos are read and processed on this device only.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

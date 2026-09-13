@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
 import '../app_theme.dart';
+import '../engine/stack.dart';
 import '../models.dart';
 import 'widgets.dart';
 
@@ -19,6 +20,7 @@ class ReportScreen extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final failed = outcome.reports.where((r) => !r.ok).toList();
+    final trails = outcome.mode.isTrails;
     return Scaffold(
       appBar: AppBar(title: Text(tr(zh: '逐帧报告', en: 'Per-frame report'))),
       body: SafeArea(
@@ -26,26 +28,57 @@ class ReportScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             Text(
-              failed.isEmpty
+              trails
                   ? tr(
-                      zh: '全部 ${outcome.reports.length} 张都对上了。',
-                      en: 'All ${outcome.reports.length} frames lined up.',
+                      zh: '星轨模式不做星点对齐,${outcome.reports.length} 张按原样合成。下面的星点数可以看出中途有没有起云。',
+                      en: 'Star trail mode does not align on stars: all ${outcome.reports.length} frames went in exactly as shot. The star counts below are where cloud creeping in shows up.',
                     )
-                  : tr(
-                      zh: '${outcome.reports.length} 张里有 ${failed.length} 张没能对齐,下面写明了原因。',
-                      en: '${failed.length} of ${outcome.reports.length} frames could not be aligned. The reasons are below.',
-                    ),
+                  : failed.isEmpty
+                      ? tr(
+                          zh: '全部 ${outcome.reports.length} 张都对上了。',
+                          en: 'All ${outcome.reports.length} frames lined up.',
+                        )
+                      : tr(
+                          zh: '${outcome.reports.length} 张里有 ${failed.length} 张没能对齐,下面写明了原因。',
+                          en: '${failed.length} of ${outcome.reports.length} frames could not be aligned. The reasons are below.',
+                        ),
               style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
             ),
+            if (outcome.calibrated) ...[
+              const SizedBox(height: 10),
+              Text(
+                tr(
+                  zh: '本次已做校准:暗场 ${outcome.darkFrames} 张、平场 ${outcome.flatFrames} 张,已在对齐前从每一帧里扣除/校正。',
+                  en: 'Calibrated with ${outcome.darkFrames} dark and ${outcome.flatFrames} flat frames, applied to every frame before alignment.',
+                ),
+                style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
+              ),
+            ],
+            if (outcome.skippedCalibrationFrames > 0) ...[
+              const SizedBox(height: 6),
+              Text(
+                tr(
+                  zh: '另有 ${outcome.skippedCalibrationFrames} 张校准帧读不出来,没有参与合成 —— 主帧是用剩下的那些算的。',
+                  en: '${outcome.skippedCalibrationFrames} calibration frame(s) could not be read and were left out — the masters were built from the rest.',
+                ),
+                style: text.bodySmall
+                    ?.copyWith(color: AstroColors.of(context).warn, height: 1.4),
+              ),
+            ],
             const SizedBox(height: 16),
             for (final (i, r) in outcome.reports.indexed)
               RiseIn(index: i, child: _ReportCard(report: r)),
             const SizedBox(height: 8),
             Text(
-              tr(
-                zh: '残差 = 匹配上的星点在对齐之后与参考帧的平均偏差,单位像素。低于 1 px 已经很好。',
-                en: 'Residual = the average distance, in pixels, between matched stars and where the reference frame puts them after alignment. Under 1 px is good.',
-              ),
+              trails
+                  ? tr(
+                      zh: '星轨模式没有残差可报 —— 每一帧都按原样参与合成,取每个像素最亮的一次。',
+                      en: 'There is no residual to report in star trail mode: every frame goes in as shot, and each pixel keeps the brightest value it ever had.',
+                    )
+                  : tr(
+                      zh: '残差 = 匹配上的星点在对齐之后与参考帧的平均偏差,单位像素。低于 1 px 已经很好。',
+                      en: 'Residual = the average distance, in pixels, between matched stars and where the reference frame puts them after alignment. Under 1 px is good.',
+                    ),
               style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
             ),
           ],
@@ -99,7 +132,19 @@ class _ReportCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (report.isReference)
+            if (report.unaligned && !failed)
+              // No transform was fitted, so matched / residual / shift /
+              // rotation would all be a printed zero pretending to be a
+              // measurement.
+              _Metrics(items: [
+                _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
+                if (report.fwhmPixels > 0)
+                  _Metric(tr(zh: '星点宽度', en: 'Star FWHM'),
+                      value: report.fwhmPixels, decimals: 1, unit: ' px'),
+                _Metric(tr(zh: '对齐', en: 'Alignment'),
+                    text: tr(zh: '未对齐', en: 'None')),
+              ])
+            else if (report.isReference)
               _Metrics(items: [
                 _Metric(tr(zh: '检出星点', en: 'Stars found'), value: report.starsDetected),
                 if (report.fwhmPixels > 0)

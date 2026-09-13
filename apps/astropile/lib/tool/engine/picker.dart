@@ -82,6 +82,15 @@ class FrameImporter {
         _ => '${tr(zh: '选择照片失败', en: 'Could not pick photos')}: ${e.message ?? e.code}',
       };
 
+  /// Ingest files this app just wrote itself — the in-app burst.
+  ///
+  /// Same probe and same reporting as the library path, so a capture that
+  /// produced something unreadable is reported rather than silently dropped;
+  /// it just skips the picker and the HEIC rendition step (the burst is
+  /// written as JPEG).
+  static Future<ImportResult> fromPaths(List<String> paths) =>
+      FrameImporter()._ingest([for (final p in paths) XFile(p)]);
+
   Future<ImportResult> _ingest(List<XFile> files) async {
     if (files.isEmpty) return const ImportResult(frames: [], skipped: []);
     final frames = <SourceFrame>[];
