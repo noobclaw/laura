@@ -218,11 +218,51 @@ export const QUERIES = [
   // daily) reached the pool BY ACCIDENT through topic:astronomy on 09-10.
   // An existing open-source *mobile tool app* is the highest-value shape this
   // pipeline can find, and until today nothing was looking for one.
-  { key: 'dart-apps', q: 'language:Dart stars:>800' },     // 550; localsend, AppFlowy, spotube
-  { key: 'kotlin-apps', q: 'language:Kotlin stars:>2000' }, // 469; Trail-Sense class Android tool apps
+  // 09-13: `dart-apps` (language:Dart stars:>800, total 550) and `kotlin-apps`
+  // (language:Kotlin stars:>2000, total 469) are DELETED here, six days ahead of
+  // the 09-19 clause, and replaced by the star-band groups below. Evidence
+  // (report 09-12 头条③): the two of them returned 27 rows and 0 were a
+  // single-purpose local mobile tool — the head of any wide query is the
+  // platform-level project of that topic (Flutter itself 178,906★, the Kotlin
+  // compiler, proxy clients). The decisive proof: `kotlin-apps` was added for
+  // the sole purpose of reaching kylecorry31/Trail-Sense (2,855★ MIT), and with
+  // 469 results sorted by stars and only 15 kept, the 15th sits around 29,000★
+  // — that query could never reach it. See discipline AU.
   { key: 'coreml', q: 'topic:coreml stars:>100' },          // 109; the only query touching Apple's on-device runtime
   { key: 'bioacoustics', q: 'topic:bioacoustics stars:>50' }, // 20, every row on target; AutoSnore/echo-jot audio-classification leg
   { key: 'offline-maps', q: 'topic:offline-maps stars:>100' }, // 13, every row on target; incl. maplibre flutter plugin (Dart)
+  //
+  // 2026-09-13 batch — five NEW directions, required by CLAUDE.md ("连续两天 0
+  // 新候选 → 第三天必须加 5 个新方向"; today is the ninth straight zero) and shaped
+  // by discipline AU (a query's usefulness is inversely related to its
+  // total_count; >200 must be narrowed with a star band or a qualifier).
+  //
+  // ⭐ The first three are the STAR-BAND groups. They are the replacement for
+  // dart-apps / kotlin-apps above, and they are the first queries in this list
+  // that look for *finished single-purpose mobile tool apps* rather than for
+  // libraries or platforms. Pre-verified 09-12, re-verified against the API on
+  // 09-13 before wiring in: 27 head rows across the three contained 6 such apps,
+  // which the 63-query list had never once surfaced.
+  { key: 'kotlin-app-mid', q: 'language:Kotlin topic:android-app stars:300..3000 pushed:>2026-06-01' }, // total 70; ZenConverter, OpenCalc, thumb-key, flashdim, Myne
+  { key: 'swift-app-mid', q: 'language:Swift topic:ios-app stars:300..3000 pushed:>2026-06-01' },       // total 11; foqos, iOS-Open-GPX-Tracker, azooKey, passforios
+  { key: 'dart-app-mid', q: 'language:Dart topic:flutter-app stars:100..800 pushed:>2026-03-01' },      // total 39; ConverterNOW, one_second_diary, Zest, Classipod
+  // Two more capability directions, both probed 09-13 before wiring in. (A third,
+  // `topic:file-converter stars:>100` / total 12, was probed and NOT added: the
+  // existing `file-converter` group already reaches the same head including
+  // Jasonzhu1207/ZenConverter — the only genuinely on-device file converter in
+  // open source. Recorded so the next audit does not re-derive it.)
+  { key: 'android-app-mid', q: 'topic:android-application stars:200..2000 pushed:>2026-05-01' },         // total 91; Audile, Grit, OpenCalc, playtranslate, AndroidMic
+  { key: 'spectrogram', q: 'topic:spectrogram stars:>100' },                                             // total 35; friture GPL-3, audioFlux MIT, FftSharp MIT — AutoSnore/echo-jot/tunekit analysis leg
+  // Probed 09-13 and NOT wired in (recorded so the next audit does not re-derive):
+  //   swiftui-mid  language:Swift topic:swiftui stars:500..4000 pushed:>2026-06-01
+  //                -> total 142, inside the AU ceiling, but the head is
+  //                developer libraries (RevenueCat, ProgressHUD, Factory,
+  //                Snapzy, SwiftUI-Animations). ⚖️ Note this: `total_count` ≤200
+  //                is NECESSARY but NOT SUFFICIENT — `topic:swiftui` names a
+  //                *framework*, and a framework topic returns framework code at
+  //                every star band. The three bands above work because
+  //                `topic:ios-app` / `android-app` / `flutter-app` name a
+  //                *shipped app*, not a technology.
   // Probed 09-11 and NOT wired in (recorded so the next audit does not re-derive):
   //   telescope      topic:telescope stars:>50 -> 55, but the head is entirely
   //                  nvim-telescope plugins. The word belongs to Neovim.
