@@ -11,6 +11,7 @@ import { collectIndieLaunches } from './indie_launches.mjs';
 import { collectAppStore } from './appstore_rss.mjs';
 import { collectGooglePlay } from './google_play.mjs';
 import { collectShowHN } from './hn_showhn.mjs';
+import { collectRedditNiche } from './reddit_niche.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Local date, not UTC: a run before 08:00 CST would otherwise land in the
@@ -32,6 +33,10 @@ const collectors = [
   ['appstore', collectAppStore],
   ['googleplay', collectGooglePlay],
   ['hn_showhn', collectShowHN],
+  // Last on purpose: it hits the same anonymous Reddit bucket as
+  // indie_launches, so it starts with as much distance from those four feeds
+  // as the run allows (discipline AY④, 2026-09-13).
+  ['reddit_niche', collectRedditNiche],
 ];
 
 const summary = { date: today, ok: [], failed: {}, silentZero: {} };
