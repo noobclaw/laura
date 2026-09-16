@@ -86,6 +86,11 @@ export const SUBS = [
   'quilting', 'Firefighting', 'Welding', 'reptiles', 'Blacksmith',
   'Machinists', 'Plumbing', 'Farming', 'Chickens', 'Cheesemaking',
   'Homebrewing', 'Luthier', 'Gunsmithing',
+  // 2026-09-16: the pool/spa dosing candidate (report §三 1) rests entirely on
+  // App Store review quotes — a single source. These three cover the trade and
+  // the owners so the complaint can be cross-checked off-store. Appended, never
+  // reordered, so the rotation slices stay reproducible.
+  'pools', 'swimmingpools', 'poolcleaning',
 ];
 const ROSTER = SUBS;
 
