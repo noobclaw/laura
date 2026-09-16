@@ -165,10 +165,15 @@ class EmptyStateView extends StatelessWidget {
               const SizedBox(height: 20),
               Text(title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(
-                body,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: cs.onSurfaceVariant, height: 1.5),
+              // A measure, not hard line breaks: a fixed `\n` that balances in
+              // one language wraps raggedly in the other.
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 320),
+                child: Text(
+                  body,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: cs.onSurfaceVariant, height: 1.5),
+                ),
               ),
               if (action != null) ...[
                 const SizedBox(height: 22),

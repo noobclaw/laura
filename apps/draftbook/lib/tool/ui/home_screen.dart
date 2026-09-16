@@ -247,9 +247,9 @@ class _HomeScreenState extends State<HomeScreen> {
         body: EmptyStateView(
           title: tr(zh: '开始你的第一本', en: 'Start your first book'),
           body: tr(
-            zh: '一本书拆成章和场景来写 —— 想换顺序就拖一下,\n写过的每一稿都留着,'
+            zh: '一本书拆成章和场景来写 —— 想换顺序就拖一下,写过的每一稿都留着,'
                 '全部只在这台手机上。',
-            en: 'A book, split into chapters and scenes. Drag to reorder,\n'
+            en: 'A book, split into chapters and scenes. Drag to reorder, '
                 'every draft is kept, and all of it stays on this phone.',
           ),
           action: FilledButton.icon(

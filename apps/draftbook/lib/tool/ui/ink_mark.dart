@@ -274,7 +274,7 @@ class _MarkPainter extends CustomPainter {
 
     final line = Paint()
       ..color = ink.withValues(alpha: 0.28)
-      ..strokeWidth = s * 0.035
+      ..strokeWidth = s * 0.038
       ..strokeCap = StrokeCap.round;
     for (var i = 0; i < 4; i++) {
       final y = s * (0.26 + i * 0.14);
@@ -282,20 +282,31 @@ class _MarkPainter extends CustomPainter {
       canvas.drawLine(Offset(s * 0.26, y), Offset(s * right, y), line);
     }
 
-    // The nib, laid across the page from the lower right.
+    // A pen laid across the page, tip down-left on the last line — the same
+    // gesture as the launcher icon (scripts/icons.mjs). Pointing it the other
+    // way reads as a cursor, not a pen, and disagreeing with the icon is worse
+    // than either reading.
     canvas.save();
-    canvas.translate(s * 0.66, s * 0.62);
-    canvas.rotate(-math.pi / 4);
-    final nib = Path()
-      ..moveTo(s * 0.30, 0)
-      ..lineTo(-s * 0.12, -s * 0.085)
-      ..lineTo(-s * 0.02, 0)
-      ..lineTo(-s * 0.12, s * 0.085)
-      ..close();
+    canvas.translate(s * 0.60, s * 0.50);
+    canvas.rotate(math.pi * 0.75);
+    final barrel = Paint()..color = ink;
     canvas
-      ..drawPath(nib, Paint()..color = ink)
-      ..drawCircle(Offset(s * 0.34, 0), s * 0.035,
-          Paint()..color = ink.withValues(alpha: 0.5));
+      ..drawLine(Offset(-s * 0.34, 0), Offset(-s * 0.05, 0),
+          Paint()
+            ..color = ink
+            ..strokeWidth = s * 0.105
+            ..strokeCap = StrokeCap.round)
+      ..drawPath(
+        Path()
+          ..moveTo(s * 0.26, 0)
+          ..lineTo(-s * 0.06, -s * 0.082)
+          ..lineTo(s * 0.03, 0)
+          ..lineTo(-s * 0.06, s * 0.082)
+          ..close(),
+        barrel,
+      )
+      ..drawCircle(Offset(s * 0.30, 0), s * 0.036,
+          Paint()..color = ink.withValues(alpha: 0.65));
     canvas.restore();
   }
 
