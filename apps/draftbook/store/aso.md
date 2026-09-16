@@ -21,8 +21,13 @@
 ## 1. 元数据层
 
 **名称**：`Draftbook: Novel Writing`（24 字符）
-**副标题**：`Chapters, outline & sync`（24 字符）
-**关键词**：`scrivener,manuscript,chapter,outline,novel,writing,author,draft,sync,offline,corkboard,scene,writer,book`
+**副标题**：`Chapters, outline & drafts`（26 字符）
+**关键词**（98 字符）：`scrivener,manuscript,corkboard,scene,writer,author,book,wordcount,longform,storyboard,offline,plot`
+
+> ⚠️ **2026-09-16(M1 落地当轮)修订**：副标题原为 `Chapters, outline & sync`，而 **v1.0 没有同步**（M2 才有）——
+> 卖不存在的功能是 App Store 3.1.1 的直接拒审项，也正是本 app 要回应的那条「felt deceived」差评。
+> 同理，关键词里的 `sync` 一并撤下，等 M2 真的发出去再加回。
+> 另：`novel` / `writing` 已在标题，`chapters` / `outline` / `drafts` 已在副标题，苹果自动合并，关键词字段不再重复。
 
 主词选择依据（2026-09-13 iTunes API 实打）：
 
@@ -35,14 +40,14 @@
 
 ## 2. 转化层
 
-- **首图必须是大纲板拖拽**，不是编辑器 —— 大纲是这个品类唯一不可替代的能力，编辑器人人都有。
-- 截图 1/2/6 的文案要落在三个楔子上：重排整本书、工具条随时在、全部离线可用。
-- 图标：一本摊开的书 + 一条从书页里抽出的卡片（对应「把书拆成场景」），主题色区别于现有 11 个 app（铁律 `feedback_app_icon_product_specific` + `feedback_laura_visual_disciplines_0911` 的「不许长得一样」）。
+- **首图必须是大纲拖拽**，不是编辑器 —— 大纲是这个品类唯一不可替代的能力，编辑器人人都有。
+- 截图 1/2/6 的文案要落在三个楔子上：重排整本书、工具条随时在、没有账号不联网。
+- **图标（2026-09-16 已出）**：墨蓝渐变底 + 米白稿纸 + 一支斜压在稿纸上的笔（笔尖在最后一行，留下一个墨点）。生成器是committed 的 `scripts/icons.mjs`（纯 Node，无依赖，逐尺寸矢量渲染），色相 198° —— 与现有 11 个 app 的色相带各差 ≥20°（铁律 `feedback_app_icon_product_specific` + `feedback_laura_visual_disciplines_0911` 的「不许长得一样」）。
 
 ## 3. 评价层
 
-- Pro 解锁成功后、或「连续写作 7 天」达成时弹一次评价请求（`SKStoreReviewController`），**每版本最多一次**。
-- **不得在丢稿/同步冲突之后弹**。
+- **实现（v1.0）**：壳的 `ReviewPrompt.noteCoreAction()`，在**第 3 次「改动了正文的写作会话」结束时**调一次原生 `requestReview()`，90 天内最多一次（PIPELINE G8b-7）。调用点只有一处：`EditorScreen._closeSession()`。
+- **不得在丢稿/恢复版本之后弹** —— 恢复版本走的是 `HistoryScreen`，不经过 `_closeSession()` 的计数路径。
 
 ## 4. 上线后要实打的可发现性基线（绑上架当天 + 之后每日）
 
