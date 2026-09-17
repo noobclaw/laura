@@ -253,6 +253,16 @@ export const QUERIES = [
   // open source. Recorded so the next audit does not re-derive it.)
   { key: 'android-app-mid', q: 'topic:android-application stars:200..2000 pushed:>2026-05-01' },         // total 91; Audile, Grit, OpenCalc, playtranslate, AndroidMic
   { key: 'spectrogram', q: 'topic:spectrogram stars:>100' },                                             // total 35; friture GPL-3, audioFlux MIT, FftSharp MIT — AutoSnore/echo-jot/tunekit analysis leg
+  // 09-17: the GitHub side produced 0 port candidates for 5 straight days, so
+  // the rule "two zero days -> add 5 new capability directions" fires. The
+  // 09-13 steer moved discovery to vertical profession/hobby circles, so the
+  // five new directions are circles, each probed by hand the same morning
+  // (total and page-1 head checked; head rows on target):
+  { key: 'circuit-simulator', q: 'topic:circuit-simulator stars:>50' }, // total 17; digitaljs BSD-2, circuitjs1 GPL-2, OpenCircuits GPL-3, Xyce GPL-3 — iCircuit/EveryCircuit leg
+  { key: 'woodworking', q: 'topic:woodworking stars:>10' },             // total 14; OpenCutList GPL-3, compas_wood MIT, gdrr-2bp MIT (2D bin packing)
+  { key: 'knitting', q: 'topic:knitting stars:>10' },                   // total 16; knitscape MIT, pyknit GPL-2, knotty GPL-3
+  { key: 'ham-radio', q: 'topic:ham-radio stars:>150' },                // total 33; direwolf GPL-2, Look4Sat GPL-3, pat MIT, Cloudlog MIT
+  { key: 'scuba-diving', q: 'topic:scuba-diving stars:>5' },            // total 8; dive-deco MIT (Rust), submersion (Dart dive log, NOASSERTION)
   // Probed 09-13 and NOT wired in (recorded so the next audit does not re-derive):
   //   swiftui-mid  language:Swift topic:swiftui stars:500..4000 pushed:>2026-06-01
   //                -> total 142, inside the AU ceiling, but the head is
