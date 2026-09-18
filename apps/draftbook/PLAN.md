@@ -269,7 +269,7 @@
 | G6b 视觉二次 check | 下载冒烟截屏亲眼看了。**打回一次**：① app 内的自绘标记里笔尖朝右上，和启动图标里「笔尖压在最后一行」相反，单看像光标不像笔；② 英文空状态里写死的 `\n` 让三行长短不齐。两条都改掉后重出包复看，通过（见上表第二个 run） |
 | 冒烟截不到的屏 | 大纲 / 编辑器 / 版本历史 / 导出 / 统计按源码评审 + widget 测试覆盖（测试会真的打开大纲和编辑器并断言工具条在位） |
 
-**APK 下载**：Actions run `35059979723` → artifacts `apps-draftbook-apk`（另有 `apps-draftbook-aab`、`apps-draftbook-smoke`）。**debug 签名，装机验收用；上架前要换 release keystore。**
+**APK 下载**：Actions run `35289549762`（09-18 第二轮审计修完后的包；上一轮的 35059979723 已作废） → artifacts `apps-draftbook-apk`（另有 `apps-draftbook-aab`、`apps-draftbook-smoke`）。**debug 签名，装机验收用；上架前要换 release keystore。**
 
 ## 8a2. 第二轮审计（2026-09-18，用户要求「审计你的代码」；对上一轮的修法本身做对抗性复审）
 
