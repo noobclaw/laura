@@ -263,6 +263,41 @@ export const QUERIES = [
   { key: 'knitting', q: 'topic:knitting stars:>10' },                   // total 16; knitscape MIT, pyknit GPL-2, knotty GPL-3
   { key: 'ham-radio', q: 'topic:ham-radio stars:>150' },                // total 33; direwolf GPL-2, Look4Sat GPL-3, pat MIT, Cloudlog MIT
   { key: 'scuba-diving', q: 'topic:scuba-diving stars:>5' },            // total 8; dive-deco MIT (Rust), submersion (Dart dive log, NOASSERTION)
+  // 09-18: the 71-group pool returned byte-identical membership two days running
+  // (739 repos, ADDED 0 / REMOVED 0) — re-asking the same 71 questions now yields
+  // nothing. The bottleneck also moved: of six store-side reverse-lookups run off
+  // this pool today, five died on the STORE side (no paid entry / free side owned
+  // by manufacturers / wedge already taken verbatim), not for lack of repos.
+  // So these five are chosen the other way round — each maps to a paid pocket this
+  // project has ALREADY verified on the US paid chart, and asks GitHub for its
+  // reference implementations, instead of asking GitHub first and hoping a paid
+  // face exists:
+  //   surveying + nmea -> MilGPS #7 / Solocator #15 / Land Nav #17 / Site Audit Pro #35
+  //   electrical       -> QuickBend #8 / iBend Pipe #56 / Lineman's XFMR LAB #83
+  //   aviation         -> Prepware Aviation #25 / Prepware Private Pilot #67 / Sporty's E6B #62 / FAR-AIM #91
+  //   cnc              -> the 切点通 pocket (CN ¥38 leader, 332 reviews, stalled 3 years)
+  // All five hand-probed the same morning (total_count and page-1 head checked).
+  { key: 'surveying', q: 'topic:surveying stars:>20' },                 // total 9; GeodePy Apache-2, DynAdjust Apache-2 (least squares), lftools MIT
+  { key: 'electrical', q: 'topic:electrical stars:>50' },               // total 7; ElectricPy MIT (EE formulas), GElectrical GPL-3, VeraGrid MPL-2
+  { key: 'aviation', q: 'topic:aviation stars:>100' },                  // total 30; stratux BSD-3, SoftRF GPL-3, XCSoar GPL-2 (glide computer)
+  { key: 'nmea', q: 'topic:nmea stars:>20' },                           // total 54; GPXSee GPL-3, PyGPSClient BSD-3, lwgps MIT, libnmea MIT
+  { key: 'cnc', q: 'topic:cnc stars:>50' },                             // total 96; cncjs MIT, Universal-G-Code-Sender GPL-3, maker.js Apache-2
+  // Probed 09-18 and NOT wired in (recorded so the next audit does not re-derive):
+  //   hvac        topic:hvac stars:>20       -> total 57, but the entire head is
+  //               ESPHome / Home-Assistant bridges for heat pumps (IRremoteESP8266,
+  //               SwiCago/HeatPump, P1P2MQTT). Zero overlap with the HVAC pocket we
+  //               care about (Manual J load calculation, disciplines BB/BC).
+  //   plumbing    topic:plumbing stars:>3    -> total 6, all homonym pollution
+  //               (tektoncd/plumbing CI config, Elixir pipe helpers, plan9 plumber).
+  //   beekeeping  topic:beekeeping stars:>3  -> total 16 and ON TARGET (hive-pal,
+  //               BEEP AGPL-3), but the store side was rejected the same day
+  //               (report §六 3: wedge taken verbatim by Hive Logger + Apiarist).
+  //   aquarium    topic:aquarium stars:>5    -> total 42, head polluted by a wallpaper
+  //               repo and a terminal aquarium game; reef-pi / borneo sit below it.
+  //   homebrewing topic:homebrewing stars:>3 -> total 19, on target (brewcalc MIT),
+  //               but the store side has no paid entry at all.
+  //   sailing     topic:sailing stars:>10    -> total 38, head is OpenCPN GPL-2, whose
+  //               product form needs licensed chart data (discipline AD).
   // Probed 09-13 and NOT wired in (recorded so the next audit does not re-derive):
   //   swiftui-mid  language:Swift topic:swiftui stars:500..4000 pushed:>2026-06-01
   //                -> total 142, inside the AU ceiling, but the head is
