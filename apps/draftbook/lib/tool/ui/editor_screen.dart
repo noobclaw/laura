@@ -52,7 +52,17 @@ class _EditorScreenState extends State<EditorScreen> {
   AppLifecycleListener? _lifecycle;
   String _sceneId = '';
   String _sessionStartBody = '';
+  int _sessionStartWords = 0;
   bool _dirty = false;
+
+  /// The last text the listener saw. The controller also notifies on caret
+  /// moves and on programmatic assignments; only a real text change may start
+  /// the autosave clock or take a version.
+  String _lastText = '';
+
+  /// Whether this session's opening text has been kept as a version. Once per
+  /// session, not once per autosave — `_dirty` resets after every save.
+  bool _sessionSnapshotted = false;
 
   Project? get _project => widget.store.projectById(widget.projectId);
   SceneRef? get _ref {
@@ -100,6 +110,9 @@ class _EditorScreenState extends State<EditorScreen> {
     if (ref == null) return;
     _sceneId = id;
     _sessionStartBody = ref.scene.body;
+    _sessionStartWords = ref.scene.words;
+    _sessionSnapshotted = false;
+    _lastText = ref.scene.body;
     _controller.value = TextEditingValue(
       text: ref.scene.body,
       selection: TextSelection.collapsed(offset: ref.scene.body.length),
@@ -114,12 +127,18 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   void _onChanged() {
-    if (!_dirty) {
+    // Caret moves and selection changes notify too; they are not edits.
+    if (_controller.text == _lastText) return;
+    _lastText = _controller.text;
+    if (!_sessionSnapshotted) {
       // First change of this session, and `scene.body` is still the text the
       // session started with — keep it. Without this, a scene written in one
       // sitting has no recovery point at all: select-all + one keystroke would
       // overwrite it, and the only version ever taken (on leaving) would be
-      // the damage. `snapshotScene` de-dupes, so this does not grow history.
+      // the damage. Once per session: keying this off `_dirty` (which every
+      // autosave resets) took a version at every typing pause and filled the
+      // 20 slots within minutes.
+      _sessionSnapshotted = true;
       final p = _project;
       final ref = _ref;
       if (p != null && ref != null) widget.store.snapshotScene(p, ref.scene);
@@ -142,6 +161,8 @@ class _EditorScreenState extends State<EditorScreen> {
     final ref = _ref;
     if (p == null || ref == null) return;
     widget.store.updateSceneBody(p, ref.scene, _controller.text);
+    // This path already waited out its own debounce; do not stack the store's.
+    widget.store.saveNow();
     _dirty = false;
   }
 
@@ -308,6 +329,9 @@ class _EditorScreenState extends State<EditorScreen> {
         selection: TextSelection.collapsed(offset: now.scene.body.length),
       );
       _sessionStartBody = now.scene.body;
+      _sessionStartWords = now.scene.words;
+      _sessionSnapshotted = false;
+      _lastText = now.scene.body;
       _dirty = false;
     }
     setState(() {});
@@ -329,7 +353,7 @@ class _EditorScreenState extends State<EditorScreen> {
     final scenes = _allScenes();
     final index = scenes.indexWhere((s) => s.scene.id == ref.scene.id);
     final words = countWords(_controller.text);
-    final session = words - countWords(_sessionStartBody);
+    final session = words - _sessionStartWords;
 
     return Scaffold(
       backgroundColor: cs.surfaceContainerLowest,

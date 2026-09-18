@@ -243,8 +243,14 @@ class _HomeScreenState extends State<HomeScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (store.projects.isEmpty) {
+      // The banner must be reachable here above all: a manuscript that failed
+      // to load looks exactly like an empty shelf.
       return Scaffold(
-        body: EmptyStateView(
+        body: Column(
+          children: [
+            _StorageTroubleBanner(store: store),
+            Expanded(
+              child: EmptyStateView(
           title: tr(zh: '开始你的第一本', en: 'Start your first book'),
           body: tr(
             zh: '一本书拆成章和场景来写 —— 想换顺序就拖一下,写过的每一稿都留着,'
@@ -257,6 +263,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.add),
             label: Text(tr(zh: '新建项目', en: 'New book')),
           ),
+              ),
+            ),
+          ],
         ),
       );
     }

@@ -51,8 +51,11 @@ class DraftbookStore extends ChangeNotifier {
   int dailyGoal = defaultDailyGoal;
 
   /// The manuscript: projects, chapters, scenes and their live text.
-  late final JsonFileStore _file =
-      JsonFileStore('draftbook.json', onTrouble: _onStorageTrouble);
+  late final JsonFileStore _file = JsonFileStore(
+    'draftbook.json',
+    onTrouble: _onStorageTrouble,
+    onWritten: _onStorageWritten,
+  );
 
   /// Version history, keyed by scene id, in its own document.
   ///
@@ -84,6 +87,12 @@ class DraftbookStore extends ChangeNotifier {
     storageTrouble.value = StorageTrouble(kind: kind, detail: detail);
   }
 
+  /// A later write succeeded: a "that save did not go through" banner is now
+  /// stale. Load/corrupt banners stay — nothing later makes them untrue.
+  void _onStorageWritten() {
+    if (storageTrouble.value?.kind == 'save') storageTrouble.value = null;
+  }
+
   /// Pro reported by the store before [load] finished (StoreKit replays
   /// transactions at launch); applied after load so it never saves over a
   /// file we have not read yet.
@@ -109,8 +118,12 @@ class DraftbookStore extends ChangeNotifier {
 
       final raw = await _file.read();
       if (raw != null) {
-        // Older documents (pre-1.0 dev builds) kept the flag here.
-        pro = pro || (raw['pro'] as bool? ?? false);
+        // Older documents (pre-1.0 dev builds) kept the flag here; carry it
+        // over to its own file, or the next manuscript write drops it.
+        if (raw['pro'] == true && proDoc?['pro'] != true) {
+          pro = true;
+          _savePro();
+        }
         dailyGoal = (raw['dailyGoal'] as num?)?.toInt() ?? defaultDailyGoal;
         projects
           ..clear()
@@ -125,29 +138,44 @@ class DraftbookStore extends ChangeNotifier {
           });
         }
       }
-      await _loadHistory();
     } catch (e) {
+      // Valid JSON of the wrong shape (a document from a newer build, say)
+      // throws here with `projects` already cleared or half-filled. That is a
+      // read failure in every way that matters: writing now would replace the
+      // real book with the fragment.
       debugPrint('draftbook load skipped: $e');
-    } finally {
-      loaded = true;
-      if (_proPending) {
-        _proPending = false;
-        pro = true;
-        _savePro();
-        _notify();
-      } else {
-        _notify();
-      }
+      _file.readFailed = true;
+      _onStorageTrouble('load', '$e');
     }
+    var migrateInlineHistory = false;
+    try {
+      final hadHistoryFile = await _loadHistory();
+      // A pre-1.0 document carried history inline; it only survives the next
+      // manuscript write if it reaches the history file first.
+      migrateInlineHistory = !hadHistoryFile && _anyInlineHistory();
+    } catch (e) {
+      debugPrint('draftbook history load skipped: $e');
+      _historyFile.readFailed = true;
+    }
+
+    loaded = true;
+    if (migrateInlineHistory) _saveHistoryIfSafe();
+    if (_proPending) {
+      _proPending = false;
+      pro = true;
+      _savePro();
+    }
+    _notify();
   }
 
   /// Attach saved versions to the scenes they belong to. A scene that still
   /// carries history inside the manuscript (a document written by an earlier
   /// dev build) keeps it; the history file wins where both exist.
-  Future<void> _loadHistory() async {
+  /// Returns whether a history document existed at all.
+  Future<bool> _loadHistory() async {
     final doc = await _historyFile.read();
     final scenes = doc?['scenes'];
-    if (scenes is! Map) return;
+    if (scenes is! Map) return doc != null;
     for (final p in projects) {
       for (final c in p.chapters) {
         for (final s in c.scenes) {
@@ -161,7 +189,11 @@ class DraftbookStore extends ChangeNotifier {
         }
       }
     }
+    return true;
   }
+
+  bool _anyInlineHistory() => projects.any(
+      (p) => p.chapters.any((c) => c.scenes.any((s) => s.history.isNotEmpty)));
 
   /// Tell listeners, but never in the middle of a frame's build/layout phase.
   ///
@@ -215,8 +247,13 @@ class DraftbookStore extends ChangeNotifier {
     });
   }
 
-  void _saveHistory() {
-    if (!canPersist) return;
+  void _saveHistory() => _saveHistoryIfSafe();
+
+  /// Like [canPersist], for the history document: a history file that exists
+  /// but could not be read must not be replaced by the (empty) in-memory
+  /// history the moment one scene takes a version.
+  void _saveHistoryIfSafe() {
+    if (!loaded || _historyFile.readFailed) return;
     _historyFile.write({
       'v': 1,
       'scenes': {
@@ -454,7 +491,7 @@ class DraftbookStore extends ChangeNotifier {
   /// not read as 300 written — but a day's total never goes below zero.
   void updateSceneBody(Project p, Scene s, String body, {bool count = true}) {
     if (s.body == body) return;
-    final before = countWords(s.body);
+    final before = s.words; // cached
     final after = countWords(body);
 
     // A scene written and then wiped inside a single session would otherwise

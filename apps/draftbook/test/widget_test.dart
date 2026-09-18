@@ -1,11 +1,43 @@
+import 'dart:io';
+
 import 'package:draftbook/main.dart';
 import 'package:draftbook/tool/ui/editor_screen.dart';
 import 'package:draftbook/tool/ui/ink_mark.dart';
 import 'package:draftbook/tool/ui/outline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+/// Points every JSON store at a throwaway directory. Without this the editor's
+/// dispose-time save and the review prompt aim at the host's real documents
+/// folder (FakeAsync happens not to deliver the IO today — by accident).
+class _TempDocsPathProvider extends PathProviderPlatform {
+  _TempDocsPathProvider(this.path);
+  final String path;
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async => path;
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
+}
 
 void main() {
+  late Directory tmp;
+
+  setUpAll(() async {
+    tmp = await Directory.systemTemp.createTemp('draftbook_widget_');
+    PathProviderPlatform.instance = _TempDocsPathProvider(tmp.path);
+  });
+
+  tearDownAll(() async {
+    try {
+      await tmp.delete(recursive: true);
+    } on FileSystemException {
+      // A throwaway directory; leaving it behind must not fail the suite.
+    }
+  });
+
   setUp(() {
     // `flutter test` registers the host's Dart-side path_provider, so load()
     // would await real file I/O that FakeAsync never delivers and the home
@@ -100,22 +132,31 @@ void main() {
     final p = tool.store.addProject(title: 'Night Bus');
     final scene = tool.store.firstScene(p)!.scene;
 
+    // The launcher screen listens to the store and calls setState, exactly
+    // like the outline and the shelf do underneath a real editor. Without a
+    // listener there is nothing for a locked-tree notification to break, and
+    // the test passes against the buggy code too.
+    var rebuilds = 0;
     await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (context) => Scaffold(
-          body: Center(
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => EditorScreen(
-                  store: tool.store,
-                  projectId: p.id,
-                  sceneId: scene.id,
-                ),
-              )),
-              child: const Text('open'),
+      home: ListenableBuilder(
+        listenable: tool.store,
+        builder: (context, _) {
+          rebuilds++;
+          return Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => EditorScreen(
+                    store: tool.store,
+                    projectId: p.id,
+                    sceneId: scene.id,
+                  ),
+                )),
+                child: const Text('open'),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     ));
     await tester.tap(find.text('open'));
@@ -132,6 +173,36 @@ void main() {
     expect(scene.body, 'a sentence worth keeping');
     expect(scene.history, isNotEmpty,
         reason: 'the session left a version behind');
+    expect(rebuilds, greaterThan(1),
+        reason: 'the listener really was notified across the pop');
+  });
+
+  testWidgets('a session takes one version at its start, not one per pause',
+      (tester) async {
+    final p = tool.store.addProject(title: 'Night Bus');
+    final scene = tool.store.firstScene(p)!.scene;
+    tool.store.updateSceneBody(p, scene, 'the opening line');
+    expect(scene.history, isEmpty);
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditorScreen(store: tool.store, projectId: p.id, sceneId: scene.id),
+    ));
+    await tester.pump();
+
+    // Three bursts of typing, each followed by a pause longer than the
+    // autosave debounce — the cadence that used to add a version per pause.
+    for (final text in [
+      'the opening line, then',
+      'the opening line, then more',
+      'the opening line, then more still',
+    ]) {
+      await tester.enterText(find.byType(TextField), text);
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    expect(scene.body, 'the opening line, then more still');
+    expect(scene.history.map((h) => h.body).toList(), ['the opening line'],
+        reason: 'only the text the session started with is kept mid-session');
   });
 
   testWidgets('the free tier offers Pro instead of a second book',

@@ -23,7 +23,11 @@ import 'package:path_provider/path_provider.dart';
 /// `write(json)` after every mutation. Stores must refuse to `write` before
 /// their `read` has completed; see `RemcardStore` for the pattern.
 class JsonFileStore {
-  JsonFileStore(this.fileName, {this.onTrouble});
+  JsonFileStore(this.fileName, {this.onTrouble, this.onWritten});
+
+  /// Called after every successful write, so a stale "save failed" notice can
+  /// be withdrawn once saving works again.
+  final void Function()? onWritten;
 
   /// File name inside the app's documents directory, e.g. `remcard.json`.
   final String fileName;
@@ -114,6 +118,7 @@ class JsonFileStore {
       final tmp = File('${f.path}.tmp');
       await tmp.writeAsString(payload, flush: true);
       await tmp.rename(f.path);
+      onWritten?.call();
     } catch (e) {
       debugPrint('$fileName save skipped: $e');
       onTrouble?.call('save', '$e');

@@ -23,8 +23,32 @@ Future<void> main() async {
   runApp(const DraftbookApp());
 }
 
-class DraftbookApp extends StatelessWidget {
+class DraftbookApp extends StatefulWidget {
   const DraftbookApp({super.key});
+
+  @override
+  State<DraftbookApp> createState() => _DraftbookAppState();
+}
+
+class _DraftbookAppState extends State<DraftbookApp> {
+  AppLifecycleListener? _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // The store coalesces writes on a short delay. A rename, a reorder or a
+    // deleted chapter followed by a swipe to the home screen must still reach
+    // the disk — the editor has its own hook, the other screens do not.
+    _lifecycle = AppLifecycleListener(onStateChange: (s) {
+      if (s != AppLifecycleState.resumed) tool.store.saveNow();
+    });
+  }
+
+  @override
+  void dispose() {
+    _lifecycle?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -234,6 +234,43 @@ void main() {
         reason: 'the untouched document must still be on disk');
   });
 
+  test('a history file that cannot be read is never overwritten', () async {
+    final f = File('${tmp.path}/draftbook_history.json');
+    await f.writeAsBytes([0xff, 0xfe, 0xfd, 0x00, 0x41]);
+    final before = await f.readAsBytes();
+
+    final s = DraftbookStore();
+    opened.add(s);
+    await s.load();
+    expect(s.canPersist, isTrue, reason: 'the manuscript itself is fine');
+
+    final p = s.addProject();
+    final scene = s.firstScene(p)!.scene;
+    s.updateSceneBody(p, scene, 'a new version');
+    s.snapshotScene(p, scene);
+    await s.flush();
+    expect(await f.readAsBytes(), before,
+        reason: 'the unreadable history must still be on disk, untouched');
+  });
+
+  test('a manuscript of the wrong shape is a failed read, not an empty book',
+      () async {
+    final f = File('${tmp.path}/draftbook.json');
+    await f.writeAsString('{"projects": {"not": "a list"}}');
+    final before = await f.readAsString();
+
+    final s = DraftbookStore();
+    opened.add(s);
+    await s.load();
+    expect(s.canPersist, isFalse);
+    expect(s.storageTrouble.value?.kind, 'load');
+
+    s.addProject(title: 'Night Bus');
+    s.saveNow();
+    await s.flush();
+    expect(await f.readAsString(), before);
+  });
+
   test('a big cut keeps the text it removed', () async {
     final s = await freshStore();
     final p = s.addProject();
