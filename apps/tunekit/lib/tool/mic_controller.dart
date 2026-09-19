@@ -44,6 +44,7 @@ class MicPitchController extends ChangeNotifier with WidgetsBindingObserver {
   PracticeTool _attributeTo = PracticeTool.tuner;
   bool _wantRunning = false;
   bool _pausedByLifecycle = false;
+  bool _backgrounded = false;
   bool _disposed = false;
 
   /// Listeners interested in every new reading (the check screen); UI that
@@ -93,7 +94,7 @@ class MicPitchController extends ChangeNotifier with WidgetsBindingObserver {
       }
       tracker.a4 = store.a4;
       final rate = await _bridge.micStart();
-      if (!_wantRunning || _disposed) {
+      if (!_wantRunning || _disposed || _backgrounded) {
         // The page went away (tab switch, background) while the OS was
         // opening the microphone: do not leave it capturing.
         await _bridge.micStop();
@@ -101,7 +102,7 @@ class MicPitchController extends ChangeNotifier with WidgetsBindingObserver {
       }
       _worker?.dispose();
       _worker = await PitchWorker.start(rate);
-      if (!_wantRunning || _disposed) {
+      if (!_wantRunning || _disposed || _backgrounded) {
         _worker?.dispose();
         _worker = null;
         await _bridge.micStop();
@@ -198,12 +199,24 @@ class MicPitchController extends ChangeNotifier with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Privacy and battery: never keep the microphone open in the background.
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      // Only "paused" counts as gone: "inactive" also fires for the
+      // permission alert itself, and bailing out then would cancel the very
+      // start the user just approved.
+      if (state == AppLifecycleState.paused) {
+        _backgrounded = true;
+        // A start still in flight would otherwise finish after the app has
+        // left the screen and leave the microphone open in the background —
+        // the one thing the privacy text promises never happens. The guards
+        // in start() see the flag and close it again; this brings it back.
+        if (starting) _pausedByLifecycle = true;
+      }
       if (running) {
         _pausedByLifecycle = true;
         _stopInternal();
       }
       store.flush();
     } else if (state == AppLifecycleState.resumed) {
+      _backgrounded = false;
       refreshPermission();
       if (_pausedByLifecycle && _wantRunning) {
         _pausedByLifecycle = false;

@@ -68,9 +68,18 @@ class _HomeScaffold extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: tr(zh: '设置', en: 'Settings'),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
+            // The tuner tab stays mounted underneath Settings, and with it
+            // the open microphone (the orange dot stays lit on the privacy
+            // policy page that says the mic is off once you leave the tuner).
+            // Close it for as long as Settings covers the tab.
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              await tool.mic.stop();
+              await navigator.push(
+                MaterialPageRoute(builder: (_) => SettingsPage(tool: tool)),
+              );
+              if (tool.tabIndex.value == 0) tool.mic.start();
+            },
           ),
         ],
       ),

@@ -86,6 +86,25 @@ class _ToolScaffoldState extends State<ToolScaffold> {
 
   ToolMeta get meta => ToolMeta.of(widget.kind);
 
+  // The Pro sheet is opened from this screen (locked WebP chip, batch cap),
+  // so the purchase lands while it is on top. Without this the chip keeps its
+  // lock and tapping it again reopens the paywall right after paying for it.
+  @override
+  void initState() {
+    super.initState();
+    widget.store.addListener(_onStoreChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.store.removeListener(_onStoreChanged);
+    super.dispose();
+  }
+
+  void _onStoreChanged() {
+    if (mounted) setState(() {});
+  }
+
   Future<void> _import({required bool camera}) async {
     if (_importing) return;
     setState(() => _importing = true);

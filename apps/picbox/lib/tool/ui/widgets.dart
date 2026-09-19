@@ -166,18 +166,32 @@ class IntField extends StatefulWidget {
 class _IntFieldState extends State<IntField> {
   late final TextEditingController _ctrl =
       TextEditingController(text: widget.value?.toString() ?? '');
+  late final FocusNode _focus = FocusNode()..addListener(_onFocusChanged);
+
+  // The value handed up is clamped on every keystroke, so while the user is
+  // typing the text and the value legitimately differ: "1" on the way to
+  // "1080" is reported as the minimum. Writing the clamped value back into
+  // the field at that point made it impossible to type anything that starts
+  // below the minimum, or to clear the field. The text is only brought back
+  // in line once editing is over.
+  void _onFocusChanged() {
+    if (!_focus.hasFocus) _syncText();
+  }
+
+  void _syncText() {
+    final t = widget.value?.toString() ?? '';
+    if (t != _ctrl.text) _ctrl.text = t;
+  }
 
   @override
   void didUpdateWidget(IntField old) {
     super.didUpdateWidget(old);
-    final t = widget.value?.toString() ?? '';
-    if (t != _ctrl.text && int.tryParse(_ctrl.text) != widget.value) {
-      _ctrl.text = t;
-    }
+    if (!_focus.hasFocus) _syncText();
   }
 
   @override
   void dispose() {
+    _focus.dispose();
     _ctrl.dispose();
     super.dispose();
   }
@@ -186,6 +200,7 @@ class _IntFieldState extends State<IntField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: _ctrl,
+      focusNode: _focus,
       enabled: widget.enabled,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],

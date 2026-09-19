@@ -118,7 +118,13 @@ class _TunerPageState extends State<TunerPage> {
             else if (mic.error != null)
               _ErrorCard(message: mic.error!, onRetry: _allow)
             else
-              _StatusLine(reading: reading, running: mic.running, starting: mic.starting),
+              _StatusLine(
+                reading: reading,
+                cents: cents,
+                inTune: inTune,
+                running: mic.running,
+                starting: mic.starting,
+              ),
             SectionTitle(tr(zh: '乐器', en: 'Instrument')),
             ChoiceRow<Instrument>(
               items: kInstruments,
@@ -617,8 +623,21 @@ class _ErrorCard extends StatelessWidget {
 }
 
 class _StatusLine extends StatelessWidget {
-  const _StatusLine({required this.reading, required this.running, required this.starting});
+  const _StatusLine({
+    required this.reading,
+    required this.cents,
+    required this.inTune,
+    required this.running,
+    required this.starting,
+  });
   final TunerReading reading;
+
+  /// Deviation and verdict as the dial shows them — measured against the
+  /// target string when an instrument preset is on. Reading them off
+  /// [reading] instead compares with the nearest semitone, so a string a
+  /// semitone sharp had the dial say "Sharp" and this line say "in tune".
+  final double? cents;
+  final bool inTune;
   final bool running;
   final bool starting;
 
@@ -635,9 +654,9 @@ class _StatusLine extends StatelessWidget {
     } else if (!reading.hasPitch) {
       msg = tr(zh: '弹一根弦,让它响一会儿。', en: 'Play one string and let it ring.');
     } else {
-      msg = reading.inTune
+      msg = inTune
           ? tr(zh: '保持住,这根弦准了。', en: 'Hold it — this string is in tune.')
-          : (reading.cents! < 0
+          : ((cents ?? 0) < 0
               ? tr(zh: '拧紧一点,音要高一些。', en: 'Tighten slightly — the note needs to go up.')
               : tr(zh: '放松一点,音要低一些。', en: 'Loosen slightly — the note needs to come down.'));
     }

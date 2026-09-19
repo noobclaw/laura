@@ -118,6 +118,22 @@ final class UpscaleBridge: NSObject, FlutterStreamHandler {
 
     busy = true
     cancelRequested = false
+
+    // A job is minutes of CPU on a phone whose default auto-lock is 30 s.
+    // Locked means suspended: inference stops where it is, and if the system
+    // then reclaims the memory the user comes back to the home screen with no
+    // result and no message. So the screen stays awake for the length of the
+    // job, and a background task buys the grace period that covers a brief
+    // switch to another app. Both are undone in the completion block below.
+    UIApplication.shared.isIdleTimerDisabled = true
+    var backgroundTask = UIBackgroundTaskIdentifier.invalid
+    backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "photolift.upscale") {
+      // Out of background time: let go of the task; the job itself resumes
+      // when the app is brought forward again.
+      UIApplication.shared.endBackgroundTask(backgroundTask)
+      backgroundTask = .invalid
+    }
+
     queue.async { [weak self] in
       guard let self = self else { return }
       let outcome: Result<[String: Any], Error> = Result {
@@ -127,6 +143,11 @@ final class UpscaleBridge: NSObject, FlutterStreamHandler {
       }
       DispatchQueue.main.async {
         self.busy = false
+        UIApplication.shared.isIdleTimerDisabled = false
+        if backgroundTask != .invalid {
+          UIApplication.shared.endBackgroundTask(backgroundTask)
+          backgroundTask = .invalid
+        }
         switch outcome {
         case .success(let map):
           result(map)
@@ -235,11 +256,19 @@ final class UpscaleBridge: NSObject, FlutterStreamHandler {
     }
     defer { free(outBuf) }
 
+    // The engine clears its own cancel flag when a run begins, so a Cancel
+    // tapped during decode / model load / allocation would otherwise be wiped
+    // and the whole multi-minute inference would run with the button already
+    // showing "Stopping…". Check once more here, and keep checking per tile.
+    if cancelRequested { throw JobError(code: "cancelled", message: "cancelled") }
+
     let rc = engine.processRGBA(inBuf.assumingMemoryBound(to: UInt8.self), width: Int32(inW), height: Int32(inH),
                                 inStride: Int32(inStride),
                                 output: outBuf.assumingMemoryBound(to: UInt8.self), outStride: Int32(outStride),
                                 scale: Int32(scale), tile: Int32(tile), overlap: Int32(Self.overlap)) { [weak self] done, t in
-      self?.emit(jobId, Int(done), Int(t), "infer")
+      guard let self = self else { return }
+      if self.cancelRequested { self.engine?.cancel() }
+      self.emit(jobId, Int(done), Int(t), "infer")
     }
     if rc == PhotoLiftErrCancelled || cancelRequested {
       throw JobError(code: "cancelled", message: "cancelled")

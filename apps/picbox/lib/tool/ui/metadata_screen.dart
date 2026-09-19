@@ -84,8 +84,8 @@ class _MetadataScreenState extends State<MetadataScreen> {
             title: tr(zh: '这个工具做什么', en: 'What this does'),
             child: Text(
               tr(
-                zh: '照片里通常藏着拍摄地点(GPS)、时间、机型、软件等信息。这里会先列出每张图内嵌了什么,再全部移除。JPEG / PNG / WebP 无损,像素一个字节都不动;HEIC 会先转成 JPEG。',
-                en: 'Pictures usually carry the place (GPS), time, device and software they came from. This lists what each file contains, then removes all of it. Lossless for JPEG / PNG / WebP — not a single pixel is touched; HEIC is converted to JPEG first.',
+                zh: '照片里通常藏着拍摄地点(GPS)、时间、机型、软件等信息。这里会先列出每张图内嵌了什么,再全部移除。元数据是按字节摘掉的,这一步本身不会再压缩画面;HEIC 会先转成 JPEG。',
+                en: 'Pictures usually carry the place (GPS), time, device and software they came from. This lists what each file contains, then removes all of it. Metadata is cut out at the byte level, so this step adds no recompression of its own; HEIC is converted to JPEG first.',
               ),
               style: text.bodyMedium?.copyWith(height: 1.45),
             ),

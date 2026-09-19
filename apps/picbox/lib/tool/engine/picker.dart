@@ -109,7 +109,9 @@ class ImageImporter {
             autoCorrectionAngle: true,
           );
           if (out == null || out.isEmpty) {
-            skipped.add('$name: ${tr(zh: '系统无法解码(HEIC 需要 Android 9 以上)', en: 'the system could not decode it (HEIC needs Android 9+)')}');
+            // The OS-version hint is Android-only: naming another platform in
+            // text an iPhone user can see is an App Review 2.3.10 rejection.
+            skipped.add('$name: ${Platform.isAndroid ? tr(zh: '系统无法解码(HEIC 需要 Android 9 以上)', en: 'the system could not decode it (HEIC needs Android 9+)') : tr(zh: '系统无法解码这个文件', en: 'the system could not decode this file')}');
             continue;
           }
           final stem = name.contains('.') ? name.substring(0, name.lastIndexOf('.')) : name;

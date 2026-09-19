@@ -22,7 +22,7 @@
 • 缩放:按像素、百分比或最长边,默认不把小图拉大;可选保持比例或拉伸
 • 格式转换:JPEG、PNG、WebP 互转,读取 HEIC;透明图转 JPEG 自动填白
 • 裁剪与旋转:自由 / 1:1 / 4:3 / 16:9 / 9:16 等 13 种比例,90° 旋转与翻转;手机竖拍照先摆正再裁
-• 去元数据:先列出每张图里藏的机型、时间、软件、GPS 坐标,再清除(JPEG / PNG / WebP 无损,像素一个字节都不动;HEIC 会先转成 JPEG),发图前保护隐私
+• 去元数据:先列出每张图里藏的机型、时间、软件、GPS 坐标,再清除(元数据按字节摘除,这一步本身不再压缩画面;HEIC 会先转成 JPEG),发图前保护隐私
 • 水印:文字水印,九宫格定位或整图斜向平铺,大小、透明度、颜色、投影可调,所见即所得
 
 ■ 为什么选它
@@ -58,7 +58,7 @@ PicWorks puts the six image tools you actually use into one fully offline app: c
 • Resize: by pixels, percent or longest side; never upscales unless you ask; keep aspect or stretch
 • Convert: JPEG, PNG and WebP in any direction; reads HEIC; transparent images get a white background when going to JPEG
 • Crop & Rotate: free, 1:1, 4:3, 16:9, 9:16 and more (13 presets), 90° rotation and flips; phone photos are put upright before cropping
-• Strip Metadata: see the device, time, software and GPS coordinates hidden in each picture, then remove all of it (lossless for JPEG / PNG / WebP — not a single pixel is re-encoded; HEIC is converted to JPEG first)
+• Strip Metadata: see the device, time, software and GPS coordinates hidden in each picture, then remove all of it (metadata is cut out at the byte level, so this step adds no recompression of its own; HEIC is converted to JPEG first)
 • Watermark: text marks placed on a 3×3 grid or tiled diagonally across the picture; size, opacity, colour and shadow, with a live preview that matches the export
 
 ■ Why PicWorks

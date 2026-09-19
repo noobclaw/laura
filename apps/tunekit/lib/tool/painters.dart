@@ -405,7 +405,7 @@ class FretboardPainter extends CustomPainter {
       old.scheme != scheme;
 }
 
-/// Two octaves of piano keys with the given MIDI notes highlighted.
+/// Two or three octaves of piano keys with the given MIDI notes highlighted.
 class PianoPainter extends CustomPainter {
   const PianoPainter({
     required this.highlightMidi,
@@ -421,6 +421,17 @@ class PianoPainter extends CustomPainter {
   final int? root;
   final int startMidi;
   final int octaves;
+
+  /// Octaves needed to show every note of [midi] from [startMidi] up. Two is
+  /// enough for triads and sevenths; a 9th, 11th or 13th on a high root runs
+  /// past it, and a chord diagram that silently drops its top note is wrong.
+  static int octavesFor(Iterable<int> midi, {int startMidi = 48}) {
+    var top = startMidi;
+    for (final m in midi) {
+      if (m > top) top = m;
+    }
+    return top >= startMidi + 24 ? 3 : 2;
+  }
   final bool flats;
 
   static const _blackOffsets = {1, 3, 6, 8, 10};

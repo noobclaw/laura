@@ -295,6 +295,8 @@ class PatternDetailPage extends StatelessWidget {
                           painter: inst == null
                               ? PianoPainter(
                                   highlightMidi: item.midiNotes(baseMidi: 48).toSet(),
+
+                                  octaves: PianoPainter.octavesFor(item.midiNotes(baseMidi: 48)),
                                   root: item.root,
                                   scheme: cs,
                                   flats: item.useFlats,
@@ -344,6 +346,8 @@ class PatternDetailPage extends StatelessWidget {
                       child: CustomPaint(
                         painter: PianoPainter(
                           highlightMidi: item.midiNotes(baseMidi: 48).toSet(),
+
+                          octaves: PianoPainter.octavesFor(item.midiNotes(baseMidi: 48)),
                           root: item.root,
                           scheme: cs,
                           flats: item.useFlats,

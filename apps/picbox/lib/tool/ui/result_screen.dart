@@ -112,7 +112,9 @@ class _ResultScreenState extends State<ResultScreen> {
                 children: [
                   Expanded(
                     child: FilledButton(
-                      onPressed: _okCount == 0 || _saving ? null : _save,
+                      // Once saved the button stays put as confirmation; leaving
+                      // it live wrote a second copy of every picture to Photos.
+                      onPressed: _okCount == 0 || _saving || _saved ? null : _save,
                       child: AnimatedSwitcher(
                         duration: Motion.of(context, Motion.normal),
                         switchInCurve: Curves.easeOutCubic,

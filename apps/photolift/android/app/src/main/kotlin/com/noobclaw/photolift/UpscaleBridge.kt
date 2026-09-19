@@ -46,6 +46,12 @@ import kotlin.math.sqrt
 class UpscaleBridge(
     private val context: Context,
     messenger: BinaryMessenger,
+    /**
+     * Told on the main thread when a job starts and ends. A job is minutes of
+     * work and a phone that dims and locks half-way leaves the user with a
+     * frozen ring, so the activity keeps the screen on for its duration.
+     */
+    private val onJobActive: (Boolean) -> Unit = {},
 ) : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
 
     private companion object {
@@ -138,12 +144,14 @@ class UpscaleBridge(
             return
         }
         cancelRequested = false
+        onJobActive(true)
         worker.execute {
             val outcome = runCatching {
                 runJob(jobId, inputPath, outputPath, scale, model, useGpu, tag, tagText, maxOutPixels, maxOutLongEdge)
             }
             busy.set(false)
             main.post {
+                onJobActive(false)
                 outcome.fold(
                     onSuccess = { result.success(it) },
                     onFailure = { e ->

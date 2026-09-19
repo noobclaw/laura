@@ -68,8 +68,8 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                   en: 'The full chord and scale dictionary (about 50 types × 12 roots), all with play-and-check and drills',
                 )),
                 _Perk(tr(
-                  zh: '练习记录不限天数,查看 30 天趋势(免费版保留最近 7 天)',
-                  en: 'Unlimited practice history with 30-day trends (free keeps the last 7 days)',
+                  zh: '30 天的练习记录与趋势(免费版保留最近 7 天)',
+                  en: '30 days of practice history and trends (free keeps the last 7 days)',
                 )),
                 const SizedBox(height: 12),
                 Text(

@@ -147,7 +147,12 @@ final class AudioBridge: NSObject {
         result(FlutterError(code: "mic_unavailable", message: "No microphone input", details: nil))
         return
       }
-      input.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
+      // `format: nil` = "whatever the input bus really delivers". The format
+      // read above can be stale right after a category switch (metronome
+      // already playing, or AirPods moving the route to another sample rate),
+      // and a tap installed with a mismatched format raises an NSException
+      // that Swift's do/catch cannot trap — the app just dies.
+      input.installTap(onBus: 0, bufferSize: 2048, format: nil) { [weak self] buffer, _ in
         guard let self = self, let data = buffer.floatChannelData else { return }
         let n = Int(buffer.frameLength)
         if n == 0 { return }
@@ -158,7 +163,10 @@ final class AudioBridge: NSObject {
       try engine.start()
       micEngine = engine
       if metroPlaying { restartMetroEngine() }
-      result(format.sampleRate)
+      // Report the rate the running engine settled on, not the one read
+      // before it started: pitch is computed from this number.
+      let liveRate = input.outputFormat(forBus: 0).sampleRate
+      result(liveRate > 0 ? liveRate : format.sampleRate)
     } catch {
       micActive = false
       micEngine = nil
@@ -264,8 +272,10 @@ final class AudioBridge: NSObject {
       // would surprise the user; they tap start again.
       let hadMic = micActive
       let hadMetro = metroPlaying
-      stopMic()
+      // Metronome first: stopMic() rebuilds the metronome engine when one is
+      // playing, which is exactly what must not happen mid-interruption.
       stopMetro(emit: false)
+      stopMic()
       if hadMic || hadMetro { emit(["type": "interrupted", "what": hadMic && hadMetro ? "all" : (hadMic ? "mic" : "metro")]) }
     }
   }

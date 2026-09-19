@@ -46,7 +46,7 @@
 · 吉他、尤克里里、小提琴、贝斯预设,每根弦一个按钮
 · 节拍器 6/8 拍号,三连音与十六分音符细分
 · 完整和弦与音阶字典(近 50 种类型 × 12 个根音)
-· 练习记录不限天数,30 天趋势
+· 30 天的练习记录与趋势
 
 致谢:和弦与音阶字典按 tonal.js(MIT)逐条校验;练习模式参考了 piano-trainer(MIT)。
 
@@ -94,7 +94,7 @@ The app has no network permission at all — check it in your system settings. T
 · Guitar, ukulele, violin and bass presets with a button per string
 · 6/8 metre, triplet and sixteenth subdivisions
 · The full chord and scale dictionary (about 50 types × 12 roots)
-· Unlimited practice history with 30-day trends
+· 30 days of practice history and trends
 
 Credits: the chord and scale dictionary is verified against tonal.js (MIT); the practice modes were inspired by piano-trainer (MIT).
 

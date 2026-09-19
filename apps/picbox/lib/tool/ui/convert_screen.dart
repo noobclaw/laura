@@ -63,7 +63,12 @@ class _ConvertScreenState extends State<ConvertScreen> {
         outputWidth: p.info.width,
         outputHeight: p.info.height,
         outputFormat: fmt,
-        note: src.shownFormat == fmt ? tr(zh: '格式相同,已重新编码', en: 'Same format, re-encoded') : null,
+        // On iOS the photo picker hands every library photo over as a JPEG,
+        // HEIC originals included, so "same format" cannot be known there and
+        // saying it under a HEIC-to-JPG conversion reads as "nothing happened".
+        note: !Platform.isIOS && src.shownFormat == fmt
+            ? tr(zh: '格式相同,已重新编码', en: 'Same format, re-encoded')
+            : null,
       );
     }
     final out = await runDartJob(DartJobSpec(

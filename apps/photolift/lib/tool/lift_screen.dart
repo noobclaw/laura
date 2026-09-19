@@ -92,6 +92,11 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _start() async {
+    // The Start button stays hit-testable while the options card fades out,
+    // so a double tap used to launch a second run: it bounced off the native
+    // "busy" guard and flipped the screen back to "configure" with the first
+    // job still running underneath.
+    if (_phase == _Phase.running) return;
     final store = widget.store;
     if (!store.canStart(scale: _scale)) {
       showProSheet(context,
@@ -422,6 +427,13 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
             Text(
               tr(zh: '${_scale}x · ${_outSize.width} × ${_outSize.height} · 模型在本机运行',
                   en: '${_scale}x · ${_outSize.width} × ${_outSize.height} · running on this device'),
+              style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              tr(zh: '处理期间请保持 PixelLift 在前台,屏幕不会自动熄灭',
+                  en: 'Keep PixelLift open — the screen stays awake while it works'),
+              textAlign: TextAlign.center,
               style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
