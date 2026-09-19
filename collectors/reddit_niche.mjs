@@ -94,7 +94,29 @@ export const SUBS = [
 ];
 const ROSTER = SUBS;
 
-const PER_RUN = 10;
+// 2026-09-19: 10 -> 5. Frequency only — the query string, the pain regex and
+// the roster order are untouched, so each sub's hit set must stay identical.
+//
+// Why: the daily re-run's marginal output is exactly zero. `sort=top&t=year`
+// returns a year-long ranking that does not move day to day; every same-slice
+// comparison so far (09-14 vs 09-18, 09-14 vs 09-19, ...) came back at 100%
+// URL overlap — five times now. What the run does cost is the entire anonymous
+// Reddit quota: on 09-18 and again on 09-19 the targeted in-sub pain searches
+// that the 09-13 brief calls the PRIMARY discovery channel (r/EngineeringStudents,
+// r/AskElectronics) were 429'd because this collector had already spent the
+// budget re-fetching a list it last saw four days earlier.
+//
+// 10 -> 5 halves both wall clock (~15min -> ~7.5min) and request count, and
+// stretches the roster cycle from ceil(32/10)=4 days to ceil(32/5)=7. A 7-day
+// revisit of a year-ranking loses nothing.
+//
+// NOTE: rotationFor() is `doy % slices`, so slices 4 -> 7 changes which subs
+// land on which day. Cross-day comparisons must match on sub name, never on
+// the slice index.
+//
+// Rollback condition (report 2026-09-19 §六 0): if the targeted searches are
+// still 429 tomorrow, the bottleneck is not this collector — restore PER_RUN.
+const PER_RUN = 5;
 
 export function rotationFor(date = new Date()) {
   const start = Date.UTC(date.getUTCFullYear(), 0, 0);
