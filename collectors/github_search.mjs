@@ -282,6 +282,52 @@ export const QUERIES = [
   { key: 'aviation', q: 'topic:aviation stars:>100' },                  // total 30; stratux BSD-3, SoftRF GPL-3, XCSoar GPL-2 (glide computer)
   { key: 'nmea', q: 'topic:nmea stars:>20' },                           // total 54; GPXSee GPL-3, PyGPSClient BSD-3, lwgps MIT, libnmea MIT
   { key: 'cnc', q: 'topic:cnc stars:>50' },                             // total 96; cncjs MIT, Universal-G-Code-Sender GPL-3, maker.js Apache-2
+  // 09-20: the rule "two consecutive zero-candidate days -> add 5 capability
+  // directions on the third day" fires (09-18 and 09-19 both produced 0). The
+  // pool is nearly frozen again this morning: ADDED 1 / REMOVED 0, and the one
+  // addition (pashpashpash/vault-ai) is an unrelated RAG SaaS. These five keep
+  // the 09-18 direction of travel — the US store side was measured FIRST the
+  // same morning, and only pockets with a real paid face got a query:
+  //   dmx          -> Lighting Designer $24.99/★4.03/145 + ProPresenter Stage $9.99/★2.18/39 (today's only stage-lighting FLAG)
+  //   sheet-metal  -> `pipe fitting calculator`: 7 paid real entities $4.99–$24.99 (QuickBend ★4.82/3,950, Conduit Bender Elite ★4.78/1,712, iBend Pipe ★4.25/101)
+  //   archery      -> ArcherySuccess $14.99/★4.75/291 + Archer's Mark $19.99/★4.27/48
+  //   obd2         -> OBD Fusion $9.99/★4.73/19,444 + DashCommand $9.99/★4.22/2,142
+  //   orienteering -> Land Nav Assistant (US paid #16 -> #36 today) + MilGPS $12.99/★4.83/5,527
+  // All five hand-probed 09-20 (total_count and page-1 head read before wiring).
+  { key: 'dmx', q: 'topic:dmx stars:>30' },                             // total 56; QLC+ Apache-2, OLA, esp_dmx MIT, Companion — stage lighting / ArtNet
+  { key: 'sheet-metal', q: 'topic:sheet-metal stars:>10' },             // total 5 (small but fully on target); JeroenGar/sparrow 358★ MIT (2D irregular nesting), SheetNest MIT
+  { key: 'archery', q: 'topic:archery stars:>3' },                      // total 21; MyTargets GPL-2 (Kotlin), archeryutils MIT, virtualbow. One homonym row: hhyo/Archery = SQL platform
+  { key: 'obd2', q: 'topic:obd2 stars:>30' },                           // total 77; ELMduino MIT, python-udsoncan MIT, ddt4all GPL-3, awesome-canbus CC0
+  { key: 'orienteering', q: 'topic:orienteering stars:>5' },            // total 28; OpenOrienteering/mapper GPL-3, ocad2geojson AGPL-3, sportorg GPL-3
+  // Probed 09-20 and NOT wired in (recorded so the next audit does not re-derive):
+  //   knots       topic:knots stars:>10      -> total 7, and the word belongs to
+  //               MATHEMATICS (knot theory, Seifert surfaces, elastic-rod contact).
+  //               Practical rope knots have no topic. ⚖️ The store pocket is real and
+  //               thick (Knots 3D $5.99/★4.90/12,710, Animated Knots $4.99/336, Knot IQ
+  //               $4.99/249, Knot Guide $2.99/450) but all four are ★>=4.61 = gap 0.
+  //   metrology   topic:metrology stars:>20  -> total 9, all scientific-uncertainty
+  //               libraries (MetroloPy, PyDynamic, EGSnrc). Demand exists on the Reddit
+  //               side (r/Machinists 2026-02-16: a draftsman built his own gage
+  //               calibration tracker because of "shitty, outdated Excel sheets"), but
+  //               the store side has no on-target paid entity — `gage calibration`
+  //               returns AR tape measures, not calibration records.
+  //   spice       topic:spice stars:>20      -> total 78, but the word belongs to the
+  //               SPICE remote-desktop protocol and NASA's SPICE ephemeris toolkit.
+  //               Only PySpice (866★ GPL-3) is circuit SPICE, and SpiceSharp is already
+  //               wired through `circuit-simulator`.
+  //   breadboard  topic:breadboard stars:>10 -> total 30, all physical hardware (Ben
+  //               Eater builds, EEPROM programmers, breakout PCBs).
+  //   sewing      topic:sewing stars:>5      -> total 18, half on target (myogpatterns
+  //               calculators, StitchCounter MIT Swift), but the store side has ONE paid
+  //               entity (Sewing Patterns $5.99/★4.75/252) = below discipline BC.
+  //   model-railroad topic:model-railroad stars:>10 -> total 14, on target but every row
+  //               is DCC hardware control. Store side: the paid hits under `dcc model
+  //               train` are GAMES (Train Kit, Train Conductor).
+  //   climbing    topic:climbing stars:>20   -> total 19, head is OpenBeta (AGPL route
+  //               catalog) = licensed-content form, discipline AD.
+  //   welding     topic:welding stars:>5     -> total 17, all FEA/research code (Abaqus
+  //               subroutines, beamWeldFoam); the welding calculator pocket already
+  //               measured ★>=4.25 on 09-19.
   // Probed 09-18 and NOT wired in (recorded so the next audit does not re-derive):
   //   hvac        topic:hvac stars:>20       -> total 57, but the entire head is
   //               ESPHome / Home-Assistant bridges for heat pumps (IRremoteESP8266,
