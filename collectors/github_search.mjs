@@ -299,6 +299,26 @@ export const QUERIES = [
   { key: 'archery', q: 'topic:archery stars:>3' },                      // total 21; MyTargets GPL-2 (Kotlin), archeryutils MIT, virtualbow. One homonym row: hhyo/Archery = SQL platform
   { key: 'obd2', q: 'topic:obd2 stars:>30' },                           // total 77; ELMduino MIT, python-udsoncan MIT, ddt4all GPL-3, awesome-canbus CC0
   { key: 'orienteering', q: 'topic:orienteering stars:>5' },            // total 28; OpenOrienteering/mapper GPL-3, ocad2geojson AGPL-3, sportorg GPL-3
+  // 09-22: the rule fires again (09-20 and 09-21 both produced 0 new candidates).
+  // Per the 09-21 report the directions come from hobby circles where Reddit shows
+  // people still logging on paper / spreadsheets, store side measured the same morning:
+  //   film-photography / darkroom -> Massive Dev Chart Timer $9.99/★3.75/55 (only paid real entity);
+  //                   r/Darkroom "Best app for the darkroom" (2025-07), print record-keeping in notebooks
+  //   coffee       -> AeroPress Timer $4.99/★3.79/114 (ver 2019), The Great Coffee App $2.99/★4.67/190 (ver 2020);
+  //                   free Beanconqueror GPL-3 ★4.91/139 is the open-source incumbent
+  //   gardening    -> plant-it GPL-3 (Dart!), hortusfox MIT; store side is free-only (Planta / PictureThis)
+  //   sailing      -> OpenCPN GPL-2, XyGrib GPL-3; tide pocket paid-thick but ★>=4.65 (AyeTides $7.99/4,859)
+  { key: 'film-photography', q: 'topic:film-photography stars:>5' },   // total 14; NegPy GPL-3, FreeCCR AGPL-3 (negative inversion)
+  { key: 'darkroom', q: 'topic:darkroom stars:>1' },                   // total 18; negaflow Apache-2 (Swift), NegPy; head partly polluted (blueshift, emacs)
+  { key: 'coffee', q: 'topic:coffee stars:>20' },                      // total 72; artisan AGPL-3, Beanconqueror GPL-3, Cofi GPL-3 (Kotlin brew timer)
+  { key: 'gardening', q: 'topic:gardening stars:>20' },                // total 23; plant-it GPL-3 Dart, hortusfox MIT, OpenFarm MIT (data)
+  { key: 'sailing', q: 'topic:sailing stars:>10' },                    // total 38; OpenCPN GPL-2, marine-api LGPL-3, XyGrib GPL-3
+  // Probed 09-22 and NOT wired in:
+  //   ceramics / glaze -> total 5 / 26, only openglaze (MIT, 4★) on target; store `glaze calculator`
+  //               returns generic calculators, `pottery` returns games = no paid face.
+  //   genealogy   total 35 (gramps GPL-2) but store head is Ancestry 644k / FamilySearch 501k = giant rule (09-13 #2).
+  //   fishing / espresso / tide -> homonym pollution (WoW fishing bots, Kaspresso test framework, Rust `tide`).
+  //   bouldering  total 21, head is route catalogs (theCrag, LocalCrag AGPL) = licensed-content form.
   // Probed 09-20 and NOT wired in (recorded so the next audit does not re-derive):
   //   knots       topic:knots stars:>10      -> total 7, and the word belongs to
   //               MATHEMATICS (knot theory, Seifert surfaces, elastic-rod contact).

@@ -2094,6 +2094,15 @@
 
 ## 观察池(未入队)
 
+### 2026-09-22 增改
+
+1. **🟩 过审 +3**:开发者账号枚举 us/cn/jp 各多出 3 个 app —— `SiteStamp: GPS Field Camera`(cn `FieldStamp 定位水印相机`)、`Daybird — Countdown Widget`(cn `倒数日 DayCount`)、`EchoJot — Offline Voice Notes`(cn `回声笔记 EchoJot`)。在架合计 6 个,**评价合计 0 条**。de/fr 仍 0(DSA 第 3 天)。**建议(须用户裁定)**:主语言改 en-US 覆盖面扩到 6 个;工厂下个版本给 6 个 app 加「完成核心任务后 `requestReview`」+ 设置页评价入口(日报 §四)。
+2. **🟩 周相位平移后首次闭合**:北京 09-22 快照(= 美国周一夜)`Solocator` #61→#30、`Pedi STAT` #71→#51、`MilGPS` #23→#13(3/4 回升)。`切点通` 龙头 #98→#87 同步回升 →「近掉榜」读法作废,改看周环比。**不调分。**
+3. **观察(新,不入队)暗房/胶片计时 `[GH:marcinz606/NegPy GPL-3.0 + habinsong/negaflow Apache-2.0]` — 44 否决**:信号 12 / 付费 8(唯一付费真实体 `Massive Dev Chart Timer` $9.99 ★3.75/55,卖的是显影数据库 = 纪律 AD)/ 开发 14 / 缺口 10。负片扫描一侧被 `Photomyne` 95,787 / `PhotoScan by Google` 90,042 前置排除。重开(绑 10-22):出现第 2 支 ≥20 条的放大机 f-stop 计时/相纸记录付费支,或 `Massive Dev` <★3.5。
+4. **观察(新,不入队)手冲咖啡冲煮记录 `[GH:graphefruit/Beanconqueror GPL-3.0 + rozPierog/Cofi GPL-3.0]` — 46 否决**:信号 14 / 付费 12(4 支 $0.99~$4.99、55~190 条,两支停更 4~6 年)/ 开发 16 / 缺口 4(免费开源 `Beanconqueror` ★4.91 是圈内默认;2026 新进独立开发 app ≥7 支全 0~4 条)。挤满型,不设重开条件。
+5. **否决(商店实扫,不入队)**:园艺/植物养护 `[GH:MDeLuise/plant-it GPL-3.0 Dart]`(付费 0 支 + `PictureThis` 111 万 = 巨头规则)、帆船/潮汐 `[GH:OpenCPN/OpenCPN GPL-2.0]`(海图 = AD;潮汐付费全 ★≥4.65)、釉料计算(付费面 0)、烘豆(外设依赖)、家谱(`Ancestry` 64 万 = 巨头规则)。
+6. **方法**:GitHub QUERIES 81→86(`film-photography` / `darkroom` / `coffee` / `gardening` / `sailing`),池子 860→924。GitHub 侧**连续第 3 天 0 新候选**。新增一步判据(不立纪律):垂直圈子 Reddit 上「I made an app」帖一年内 ≥3 个 → 视为已挤满(胶片、咖啡、奶酪今日均触发)。
+
 ### 2026-09-21 增改
 
 1. **🟩 大陆区生效**:`lookup?id=949878814&country=cn` 由 1 条 → **4 条**(`Orbit` / `记得 Remcard` / `GoldenScout` 均在架)。在审 4 个过审后自动生效。**欧盟仍 0 条**(de/fr 枚举空,DSA 未申报第 2 天)。
