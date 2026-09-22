@@ -23,12 +23,40 @@ import 'package:path_provider/path_provider.dart';
 /// `write(json)` after every mutation. Stores must refuse to `write` before
 /// their `read` has completed; see `RemcardStore` for the pattern.
 class JsonFileStore {
-  JsonFileStore(this.fileName);
+  JsonFileStore(this.fileName, {this.onTrouble, this.onWritten});
+
+  /// Called after every successful write, so a stale "save failed" notice can
+  /// be withdrawn once saving works again.
+  final void Function()? onWritten;
 
   /// File name inside the app's documents directory, e.g. `remcard.json`.
   final String fileName;
 
+  /// Called (with an English tag and the platform's own message) whenever a
+  /// write fails or a document has to be quarantined.
+  ///
+  /// Added in Draftbook and carried into OhmBench, whose wedge is the same
+  /// promise — "nothing you made is ever lost" — so a failed save that only
+  /// reaches `debugPrint` is the one failure it must never have. The app
+  /// turns this into a banner; see `ProjectStore.storageTrouble`.
+  final void Function(String kind, String detail)? onTrouble;
+
   Future<void> _chain = Future<void>.value();
+
+  /// The newest payload waiting to be written. A burst of edits collapses to
+  /// one disk write instead of one per keystroke-debounce.
+  String? _pending;
+
+  /// True when [read] failed for a reason that leaves a real document on disk:
+  /// an IO error, a missing plugin, bytes that are not valid UTF-8, or a
+  /// damaged file that could not even be renamed aside.
+  ///
+  /// It does NOT cover the ordinary damaged-document path, because there the
+  /// file has already been moved to `.corrupt-*` and writing a fresh one is
+  /// correct. The caller must refuse to save while this is true: otherwise one
+  /// transient read failure turns "we could not open your book" into "we
+  /// replaced your book with an empty one" on the next keystroke.
+  bool readFailed = false;
 
   Future<File> _file() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -48,26 +76,37 @@ class JsonFileStore {
       } catch (e) {
         debugPrint('$fileName unreadable, kept aside: $e');
         try {
-          await f.rename(
-              '${f.path}.corrupt-${DateTime.now().millisecondsSinceEpoch}');
+          final kept =
+              '${f.path}.corrupt-${DateTime.now().millisecondsSinceEpoch}';
+          await f.rename(kept);
+          onTrouble?.call('corrupt', kept);
         } catch (_) {
-          // Could not move it; the caller still starts empty and any later
-          // write is atomic, so the damaged bytes are at worst replaced by
-          // a valid document rather than by another torn one.
+          // Could not move it aside, so the damaged bytes are still the only
+          // copy: refuse to write over them.
+          readFailed = true;
+          onTrouble?.call('corrupt', f.path);
         }
         return null;
       }
     } catch (e) {
       debugPrint('$fileName load skipped: $e');
+      readFailed = true;
+      onTrouble?.call('load', '$e');
       return null;
     }
   }
 
   /// Queues an atomic write of [json]. Encoding happens synchronously so the
-  /// snapshot reflects the caller's state at the moment of the call.
+  /// snapshot reflects the caller's state at the moment of the call; queued
+  /// writes coalesce, so a burst only ever puts the newest document on disk.
   void write(Map<String, dynamic> json) {
-    final payload = jsonEncode(json);
-    _chain = _chain.then((_) => _writeAtomically(payload));
+    _pending = jsonEncode(json);
+    _chain = _chain.then((_) async {
+      final payload = _pending;
+      if (payload == null) return; // a later call already wrote this state
+      _pending = null;
+      await _writeAtomically(payload);
+    });
   }
 
   /// Completes when every write queued so far has hit the disk.
@@ -79,8 +118,10 @@ class JsonFileStore {
       final tmp = File('${f.path}.tmp');
       await tmp.writeAsString(payload, flush: true);
       await tmp.rename(f.path);
+      onWritten?.call();
     } catch (e) {
       debugPrint('$fileName save skipped: $e');
+      onTrouble?.call('save', '$e');
     }
   }
 }

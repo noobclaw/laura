@@ -14,11 +14,12 @@ abstract final class Branding {
 
   static const String version = '1.0.0';
 
-  /// Seed for the Material 3 color scheme: hue 198, the cyan of a scope
-  /// trace. Checked against the project's hue table (PIPELINE rule 13) —
-  /// the nearest neighbours are remcard at 174 and orbit at 223, leaving
-  /// 24 and 25 degrees of clearance.
-  static const Color seedColor = Color(0xFF0D78A5);
+  /// Seed for the Material 3 color scheme: hue 52, the warm yellow of the
+  /// moving charge on the bench. The first plan used hue 198 (scope cyan),
+  /// but draftbook already ships at 198 — PIPELINE rule 13 forbids sharing a
+  /// ±20° band, so the chrome took the free yellow band (50–65) and cyan
+  /// stayed on the canvas only, as the colour of positive voltage.
+  static const Color seedColor = Color(0xFFDCC21C);
 
   /// Shown in Settings > About. Keep the no-network promise accurate:
   /// the shell ships without the INTERNET permission.

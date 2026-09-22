@@ -293,6 +293,57 @@ const ART = {
       ];
     },
   },
+  // OhmBench: the bench itself — a dark scope-screen tile on a field of
+  // charge yellow (hue 52°, lib/core/branding.dart), with a resistor drawn in
+  // the canvas's positive-voltage cyan and two charge dots riding its leads.
+  // Reads at 60 px as "a zigzag on a screen".
+  ohmbench: {
+    bg: [
+      [0, [246, 222, 84]],
+      [0.55, [222, 186, 30]],
+      [1, [160, 118, 8]],
+    ],
+    shapes(s) {
+      const screen = roundedRect(s * 0.13, s * 0.25, s * 0.74, s * 0.5, s * 0.1);
+      const cyan = [63, 212, 247];
+      const y = s * 0.5;
+      const w = s * 0.062;
+      // Leads, then a four-peak zigzag between x = 0.36 and 0.64.
+      const pts = [[s * 0.2, y], [s * 0.35, y]];
+      const peaks = 4;
+      for (let i = 0; i < peaks; i++) {
+        const x = s * (0.35 + ((i + 0.5) * 0.3) / peaks);
+        pts.push([x, y + (i % 2 === 0 ? -1 : 1) * s * 0.105]);
+      }
+      pts.push([s * 0.65, y], [s * 0.8, y]);
+      const trace = [];
+      for (let i = 0; i + 1 < pts.length; i++) {
+        trace.push(capsule(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], w));
+      }
+      const glow = [];
+      for (let i = 0; i + 1 < pts.length; i++) {
+        glow.push(capsule(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], w * 2.6));
+      }
+      const dot = (cx, r) => {
+        const d = [];
+        for (let i = 0; i < 28; i++) {
+          const a = (i / 28) * Math.PI * 2;
+          d.push([cx + Math.cos(a) * r, y + Math.sin(a) * r]);
+        }
+        return d;
+      };
+      return [
+        { path: [screen], fill: [60, 40, 0], alpha: 0.28, offset: [0, s * 0.016] },
+        { path: [screen], fill: [11, 19, 27] },
+        // One shape per stroke: overlapping polygons in a single path fill
+        // even-odd and punch holes where the segments meet.
+        ...glow.map((g) => ({ path: [g], fill: cyan, alpha: 0.1 })),
+        ...trace.map((t) => ({ path: [t], fill: cyan })),
+        { path: [dot(s * 0.255, s * 0.052)], fill: [255, 214, 107] },
+        { path: [dot(s * 0.735, s * 0.052)], fill: [255, 214, 107] },
+      ];
+    },
+  },
 };
 
 function render(app, size, { rounded }) {

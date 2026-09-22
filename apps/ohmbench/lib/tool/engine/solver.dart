@@ -16,6 +16,7 @@ class SolverOptions {
     this.maxIterations = 100,
     this.gminSteps = 10,
     this.sourceSteps = 10,
+    this.ladderOnly = false,
   });
 
   /// Conductance shunted across every nonlinear junction so a reverse-biased
@@ -34,11 +35,18 @@ class SolverOptions {
   /// `ITL1` — Newton iterations before a solve is abandoned.
   final int maxIterations;
 
-  /// Decades of gmin stepping to try when plain Newton will not converge.
+  /// Decades of gmin stepping to try when plain Newton will not converge;
+  /// zero skips gmin stepping altogether.
   final int gminSteps;
 
   /// Steps of source ramping to try when gmin stepping also fails.
   final int sourceSteps;
+
+  /// Skips plain Newton and goes straight to the gmin/source ladder. For
+  /// tests and diagnostics only: the ladder is the code path that runs when
+  /// a user's circuit is hard, and it must be exercised on circuits that
+  /// happen to be easy (2026-09-22 audit: it had zero coverage).
+  final bool ladderOnly;
 }
 
 /// Why an answer is what it is — the material the UI turns into one honest
@@ -126,6 +134,12 @@ class TransientResult {
 /// voltages) and between timesteps (reactive history).
 class _DeviceState {
   double junctionVoltage = 0;
+
+  /// Diode current and conductance at [junctionVoltage], from the last load —
+  /// what the device-level convergence test extrapolates from.
+  double junctionCurrent = 0;
+  double junctionConductance = 0;
+
   double previousVoltage = 0;
   double previousCurrent = 0;
 }
@@ -168,6 +182,12 @@ class _LoadContext {
   /// act as voltage sources at their initial voltage, inductors as current
   /// sources at their initial current. SPICE's `uic`.
   bool initialConditions = false;
+
+  /// Set by a load when junction limiting moved any diode away from the
+  /// voltage the last solution implied. A limited iteration is never a
+  /// converged one (SPICE's `CKTnoncon`): the solution it produced answers a
+  /// question the circuit did not ask.
+  bool limited = false;
 }
 
 /// Modified nodal analysis over a [Netlist].
@@ -243,6 +263,7 @@ class CircuitSolver {
 
   void _load(MnaSystem system, _LoadContext ctx, Float64List? solution) {
     system.reset();
+    ctx.limited = false;
 
     if (ctx.shunt > 0) {
       for (final row in _voltageRows) {
@@ -253,17 +274,11 @@ class CircuitSolver {
     for (final device in netlist.devices) {
       switch (device) {
         case Resistor r:
-          if (r.ohms.abs() < 1e-12) {
-            // A zero-ohm resistor is a wire the user drew as a part; treat it
-            // as 1 microhm rather than dividing by zero.
-            system.stampConductance(_anodeIndex(r), _cathodeIndex(r), 1e6);
-          } else {
-            system.stampConductance(
-                _anodeIndex(r), _cathodeIndex(r), 1 / r.ohms);
-          }
+          system.stampConductance(
+              _anodeIndex(r), _cathodeIndex(r), r.conductance);
         case SwitchDevice s:
           system.stampConductance(
-              _anodeIndex(s), _cathodeIndex(s), 1 / s.ohms);
+              _anodeIndex(s), _cathodeIndex(s), s.conductance);
         case CurrentSource c:
           final value = _sourceValue(c.waveform, ctx) * ctx.sourceFactor;
           // Current leaves the anode and enters the cathode.
@@ -283,8 +298,12 @@ class CircuitSolver {
     }
   }
 
-  double _sourceValue(Waveform w, _LoadContext ctx) =>
-      ctx.timeStep == 0 && ctx.time == 0 ? w.dcValue : w.at(ctx.time);
+  /// A source's value at the load's time. The operating point and the
+  /// transient's first sample are both `t = 0`, so a sine with a phase starts
+  /// where its waveform says instead of stepping from its offset on the
+  /// first timestep (2026-09-22, audit P2-11) — ngspice evaluates SIN at
+  /// time zero in DC mode for the same reason.
+  double _sourceValue(Waveform w, _LoadContext ctx) => w.at(ctx.time);
 
   /// `v(anode) - v(cathode) - resistance * i = value`, plus the two KCL
   /// entries that push the branch current out of the anode.
@@ -378,8 +397,9 @@ class CircuitSolver {
       // needing twenty iterations to leave the flat part of the exponential.
       vd = vcrit;
     } else {
-      vd = _valueOf(solution, junction) - _valueOf(solution, cathode);
-      vd = _limitJunction(vd, state.junctionVoltage, vte, vcrit);
+      final raw = _valueOf(solution, junction) - _valueOf(solution, cathode);
+      vd = _limitJunction(raw, state.junctionVoltage, vte, vcrit);
+      if (vd != raw) ctx.limited = true;
     }
     state.junctionVoltage = vd;
 
@@ -400,6 +420,9 @@ class CircuitSolver {
       cd = -isat * evrev + ctx.gmin * vd;
       gd = isat * evrev / vte + ctx.gmin;
     }
+
+    state.junctionCurrent = cd;
+    state.junctionConductance = gd;
 
     final cdeq = cd - gd * vd;
     system.stampConductance(junction, cathode, gd);
@@ -443,8 +466,12 @@ class CircuitSolver {
 
   // --------------------------------------------------------------- analysis
 
+  /// Newton iterations spent by the last analysis, fallbacks included.
+  int _iterationCount = 0;
+
   /// DC operating point: Newton with the SPICE fallback ladder.
   OperatingPoint operatingPoint() {
+    _iterationCount = 0;
     final notes = <SolverNote>{};
     final ctx = _dcContext();
     final attempt = _solveWithFallbacks(ctx, null, notes);
@@ -467,35 +494,82 @@ class CircuitSolver {
       _LoadContext ctx, Float64List? start, Set<SolverNote> notes) {
     if (_size == 0) return Float64List(0);
 
-    var result = _newton(ctx, start);
-    if (result.solution != null) {
-      notes.add(SolverNote.direct);
-      return result.solution;
-    }
+    var base = ctx;
+    var shunted = false;
+    var lastSingular = false;
 
-    if (result.singular) {
-      // A floating island has no path to the reference node. 1 Gohm to
-      // ground costs a picoamp and turns "no answer" into an answer plus a
-      // warning the user can act on.
-      final shunted = _contextWith(ctx, shunt: 1e-9);
-      result = _newton(shunted, start);
+    if (!options.ladderOnly) {
+      var result = _newton(ctx, start);
       if (result.solution != null) {
-        notes
-          ..add(SolverNote.direct)
-          ..add(SolverNote.floatingNodesTiedToGround);
+        notes.add(SolverNote.direct);
         return result.solution;
+      }
+      lastSingular = result.singular;
+
+      if (result.singular) {
+        // A floating island has no path to the reference node. A shunt to
+        // ground turns "no answer" into an answer plus a warning the user can
+        // act on. It must be far below every real conductance in the circuit
+        // or it changes the answer it is only meant to make possible.
+        base = _contextWith(ctx, shunt: _floatingShunt());
+        shunted = true;
+        result = _newton(base, start);
+        if (result.solution != null) {
+          notes
+            ..add(SolverNote.direct)
+            ..add(SolverNote.floatingNodesTiedToGround);
+          return result.solution;
+        }
+        lastSingular = result.singular;
       }
     }
 
     if (netlist.isNonlinear) {
-      final gmin = _gminStepping(ctx, notes);
-      if (gmin != null) return gmin;
-      final source = _sourceStepping(ctx, notes);
-      if (source != null) return source;
+      // The ladders keep the shunt when the plain solve needed one: a circuit
+      // that is both floating and hard to bias would otherwise never solve
+      // (audit P2-10).
+      // `gminSteps: 0` disables the gmin ladder, as ngspice's
+      // `.option gminsteps=0` does.
+      if (options.gminSteps > 0) {
+        final gmin = _gminStepping(base, start, notes);
+        if (gmin.solution != null) {
+          if (shunted) notes.add(SolverNote.floatingNodesTiedToGround);
+          return gmin.solution;
+        }
+      }
+      final source = _sourceStepping(base, notes);
+      if (source.solution != null) {
+        if (shunted) notes.add(SolverNote.floatingNodesTiedToGround);
+        return source.solution;
+      }
+      lastSingular = source.singular;
+    } else if (options.ladderOnly) {
+      final result = _newton(ctx, start);
+      if (result.solution != null) {
+        notes.add(SolverNote.direct);
+        return result.solution;
+      }
+      lastSingular = result.singular;
     }
 
-    notes.add(result.singular ? SolverNote.singular : SolverNote.didNotConverge);
+    notes.add(lastSingular ? SolverNote.singular : SolverNote.didNotConverge);
     return null;
+  }
+
+  /// The floating-island shunt: 1 Gohm, or a millionth of the smallest real
+  /// conductance in the circuit when that is smaller still (a 1e14-ohm
+  /// divider must not be loaded by a 1e9-ohm tie).
+  double _floatingShunt() {
+    var smallest = double.infinity;
+    for (final device in netlist.devices) {
+      final g = switch (device) {
+        Resistor r => r.conductance,
+        SwitchDevice s => s.conductance,
+        _ => double.infinity,
+      };
+      if (g < smallest) smallest = g;
+    }
+    return math.max(math.min(1e-9, smallest * 1e-6), 1e-30);
   }
 
   _LoadContext _contextWith(_LoadContext ctx,
@@ -513,36 +587,41 @@ class CircuitSolver {
   /// Ramps gmin down by decades, each solve seeded with the previous answer.
   /// A junction that cannot find its own bias point can nearly always find
   /// one when a milliohm-scale conductance holds the node still first.
-  Float64List? _gminStepping(_LoadContext ctx, Set<SolverNote> notes) {
+  ///
+  /// [start] seeds the first level: in a transient that is the previous
+  /// timestep, which is a far better guess than the knee voltage.
+  _NewtonResult _gminStepping(
+      _LoadContext ctx, Float64List? start, Set<SolverNote> notes) {
     var gmin = options.gmin <= 0 ? 1e-12 : options.gmin;
     gmin *= math.pow(10, options.gminSteps).toDouble();
-    Float64List? solution;
+    Float64List? solution = start;
     for (var step = 0; step <= options.gminSteps; step++) {
       final stepped = _contextWith(ctx, gmin: gmin);
       final result = _newton(stepped, solution);
-      if (result.solution == null) return null;
+      if (result.solution == null) return result;
       solution = result.solution;
       gmin /= 10;
     }
-    final finalResult = _newton(_contextWith(ctx, gmin: options.gmin), solution);
-    if (finalResult.solution == null) return null;
-    notes.add(SolverNote.gminStepping);
-    return finalResult.solution;
+    final finalResult =
+        _newton(_contextWith(ctx, gmin: options.gmin), solution);
+    if (finalResult.solution != null) notes.add(SolverNote.gminStepping);
+    return finalResult;
   }
 
   /// Brings the independent sources up from zero. Every nonlinear circuit is
   /// solvable at zero volts; each step starts from the last answer.
-  Float64List? _sourceStepping(_LoadContext ctx, Set<SolverNote> notes) {
+  _NewtonResult _sourceStepping(_LoadContext ctx, Set<SolverNote> notes) {
     Float64List? solution;
+    var last = const _NewtonResult(null, singular: false, iterations: 0);
     for (var step = 0; step <= options.sourceSteps; step++) {
       final factor = step / options.sourceSteps;
       final stepped = _contextWith(ctx, sourceFactor: factor);
-      final result = _newton(stepped, solution);
-      if (result.solution == null) return null;
-      solution = result.solution;
+      last = _newton(stepped, solution);
+      if (last.solution == null) return last;
+      solution = last.solution;
     }
     notes.add(SolverNote.sourceStepping);
-    return solution;
+    return last;
   }
 
   _NewtonResult _newton(_LoadContext ctx, Float64List? start) {
@@ -552,6 +631,7 @@ class CircuitSolver {
     final limit = netlist.isNonlinear ? options.maxIterations : 1;
 
     for (var iteration = 1; iteration <= limit; iteration++) {
+      _iterationCount++;
       _load(system, ctx, solution);
       final next = system.solve();
       if (next == null) {
@@ -563,7 +643,16 @@ class CircuitSolver {
       if (!netlist.isNonlinear) {
         return _NewtonResult(solution, singular: false, iterations: iteration);
       }
-      if (previous != null && _converged(previous, next)) {
+      // Never on the first iteration (SpiceSharp's `iterno != 1`): its
+      // `previous` is a seed from another context — the last gmin level, the
+      // last timestep — and agreeing with a seed is not convergence. Without
+      // this guard the step where a diode snaps on could be accepted after a
+      // single linearisation (audit P1-2).
+      if (iteration > 1 &&
+          previous != null &&
+          !ctx.limited &&
+          _converged(previous, next) &&
+          _devicesConverged(next)) {
         return _NewtonResult(solution, singular: false, iterations: iteration);
       }
     }
@@ -588,6 +677,28 @@ class CircuitSolver {
     return true;
   }
 
+  /// The diode's own convergence test (ngspice `DIOconvTest`): the current
+  /// the linearised model predicts at the new junction voltage must agree
+  /// with the current it was linearised at. Node voltages can settle to
+  /// within VNTOL while an exponential's current is still moving by far more
+  /// than RELTOL — and the current is what the meter shows (audit P1-3).
+  bool _devicesConverged(Float64List solution) {
+    for (final device in netlist.devices) {
+      if (device is! Diode) continue;
+      final state = _state[device.id]!;
+      final vd = _valueOf(solution, _junctionIndex(device)) -
+          _valueOf(solution, _cathodeIndex(device));
+      final delta = vd - state.junctionVoltage;
+      final cd = state.junctionCurrent;
+      final predicted = cd + state.junctionConductance * delta;
+      final tolerance =
+          options.relativeTolerance * math.max(predicted.abs(), cd.abs()) +
+              options.absoluteTolerance;
+      if ((predicted - cd).abs() > tolerance) return false;
+    }
+    return true;
+  }
+
   OperatingPoint _toOperatingPoint(
       Float64List? solution, _LoadContext ctx, Set<SolverNote> notes) {
     if (solution == null) {
@@ -595,7 +706,7 @@ class CircuitSolver {
         converged: false,
         nodeVoltages: const {},
         deviceCurrents: const {},
-        iterations: options.maxIterations,
+        iterations: _iterationCount,
         notes: notes,
       );
     }
@@ -603,7 +714,7 @@ class CircuitSolver {
       converged: true,
       nodeVoltages: _nodeVoltages(solution),
       deviceCurrents: _deviceCurrents(solution, ctx),
-      iterations: 0,
+      iterations: _iterationCount,
       notes: notes,
     );
   }
@@ -627,9 +738,9 @@ class CircuitSolver {
       final vb = _valueOf(solution, _cathodeIndex(device));
       switch (device) {
         case Resistor r:
-          out[r.id] = r.ohms.abs() < 1e-12 ? 0 : (va - vb) / r.ohms;
+          out[r.id] = (va - vb) * r.conductance;
         case SwitchDevice s:
-          out[s.id] = (va - vb) / s.ohms;
+          out[s.id] = (va - vb) * s.conductance;
         case CurrentSource c:
           out[c.id] = _sourceValue(c.waveform, ctx) * ctx.sourceFactor;
         case VoltageSource v:

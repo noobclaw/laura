@@ -1,10 +1,18 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Privacy guarantee: OhmBench never uses the network. If any bundled
+         library declares INTERNET, strip it from the merged manifest so the
+         store listing's "cannot phone home" claim stays verifiable. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
+
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

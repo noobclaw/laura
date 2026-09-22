@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import '../core/l10n.dart';
 import '../core/purchase.dart';
 
-/// TEMPLATE — copy into `apps/<app>/lib/tool/pro.dart` and fill in the app
-/// name, the perks and the fallback price.
+/// OhmBench's one paywall.
+///
+/// It sells only what 1.0 ships: more circuits and bigger circuits. The
+/// simulator, the scope, undo and saving are free and stay free — the free
+/// tier is a real tool with a size limit, not a demo. M2 features (AC sweep,
+/// transistors, iPad layout) are deliberately NOT listed: billing for
+/// something the build does not do is an App Store 3.1.1 rejection.
 ///
 /// Rule (2026-09-03): every app sells Pro through this sheet. No free-tier
 /// gate may call `PurchaseService.instance.buyPro()` directly — the user must
@@ -46,7 +51,7 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                           color: cs.primary, size: 22),
                     ),
                     const SizedBox(width: 12),
-                    Text(tr(zh: 'APP_NAME Pro', en: 'APP_NAME Pro'),
+                    Text('OhmBench Pro',
                         style: text.titleLarge),
                   ],
                 ),
@@ -59,9 +64,18 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                 const SizedBox(height: 18),
                 // 3–4 perks, each one concrete thing Pro adds. Name the free
                 // cap in the first one so the sheet answers "why am I here".
-                _Perk(tr(zh: 'PERK_1_ZH', en: 'PERK_1_EN')),
-                _Perk(tr(zh: 'PERK_2_ZH', en: 'PERK_2_EN')),
-                _Perk(tr(zh: 'PERK_3_ZH', en: 'PERK_3_EN')),
+                _Perk(tr(
+                  zh: '不限元件数 —— 免费版每张图 12 个元件,Pro 之后想画多大画多大',
+                  en: 'Unlimited parts — the free version allows 12 per circuit, Pro lifts the cap',
+                )),
+                _Perk(tr(
+                  zh: '不限电路数 —— 免费版保存 1 张,Pro 之后随意新建、复制',
+                  en: 'Unlimited circuits — the free version keeps one, Pro lets you create and duplicate freely',
+                )),
+                _Perk(tr(
+                  zh: '同一个引擎、同一套精度:免费版和 Pro 的仿真结果完全一样',
+                  en: 'The same engine and the same accuracy — free and Pro give identical results',
+                )),
                 const SizedBox(height: 12),
                 Text(
                   tr(
@@ -86,8 +100,8 @@ Future<void> showProSheet(BuildContext context, {String? reason}) {
                     child: ValueListenableBuilder<String?>(
                       valueListenable: PurchaseService.instance.price,
                       builder: (context, price, _) => Text(tr(
-                        zh: '解锁 —— ${price ?? '\$FALLBACK_PRICE'}',
-                        en: 'Unlock — ${price ?? '\$FALLBACK_PRICE'}',
+                        zh: '解锁 —— ${price ?? '\$4.99'}',
+                        en: 'Unlock — ${price ?? '\$4.99'}',
                       )),
                     ),
                   ),

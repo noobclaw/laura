@@ -1,6 +1,6 @@
 # OhmBench — G2 spike 独立审计(2026-09-19,只读 agent)
 
-> **M1 开工前必须先修 P0 + P1。** 本轮因转去提审上架,**一条都还没修**。
+> ✅ **2026-09-22 工厂轮:P0 + 全部 P1 已修,P2-7/8/10/11/12/14/15 已修**;每条都有回归测试(`test/engine/audit_regressions_test.dart`、`test/schematic/audit_regressions_test.dart`)。P2-9(gmin 阶梯单级失败即放弃)、P2-13(每次迭代分配 n²)、P2-16(电容白占支路)留到 M2 实测后再定。
 > 审计确认为正确的部分:全部 MNA 戳记符号、二极管三段加载、`_limitJunction`、电容/电感两种积分的伴随模型、历史传递顺序、同一 `CircuitSolver` 先 `operatingPoint()` 再 `transient()` 的状态复用。
 
 ## P0

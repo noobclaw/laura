@@ -16,9 +16,27 @@ class MnaSystem {
   final Float64List _a;
   final Float64List _b;
 
-  /// Below this the pivot counts as zero and the matrix as singular.
-  /// SpiceSharp's `AbsolutePivotThreshold`.
-  static const double pivotThreshold = 1e-13;
+  /// A pivot smaller than this fraction of the largest magnitude its column
+  /// held *before* elimination counts as zero.
+  ///
+  /// Relative, not absolute (2026-09-22, audit P0-1). The spike compared the
+  /// raw pivot against SpiceSharp's absolute 1e-13, which declared any node
+  /// held only by conductances below 1e-13 S "singular": two 1e14-ohm
+  /// resistors across 10 V then fell through to the floating-node shunt and
+  /// came back as 1e-4 V instead of 5 V, flagged as converged. What makes a
+  /// column singular is cancellation — a pivot that elimination reduced to
+  /// round-off of the entries it started with — so that is what is measured.
+  /// Double round-off is ~1e-16 relative; 1e-12 leaves four decades of margin
+  /// before a genuinely ill-conditioned column is accepted.
+  ///
+  /// This intentionally differs from SpiceSharp's `RelativePivotThreshold`
+  /// (1e-3), which ranks candidate pivots inside a sparse Markowitz search
+  /// rather than deciding singularity; with dense partial pivoting the
+  /// chosen pivot is already the column maximum.
+  static const double relativePivotThreshold = 1e-12;
+
+  /// Exact-zero guard for a column that was empty to begin with.
+  static const double absolutePivotFloor = 1e-300;
 
   void reset() {
     _a.fillRange(0, _a.length, 0);
@@ -57,11 +75,12 @@ class MnaSystem {
     addRhs(nodeB, -amps);
   }
 
-  /// Solves in place and returns the solution, or null when the matrix is
+  /// Solves the system and returns the solution, or null when the matrix is
   /// singular (a short across a source, a fully floating island).
   ///
-  /// Crout LU with partial pivoting; the system is small enough that the
-  /// copy-free in-place factorisation is not worth the extra bookkeeping.
+  /// Gaussian elimination with partial pivoting on a copy of the matrix, so
+  /// the loaded system stays readable for diagnostics. The copy is n^2
+  /// doubles — a few kilobytes at phone scale.
   Float64List? solve() {
     final n = size;
     if (n == 0) return Float64List(0);
@@ -69,6 +88,16 @@ class MnaSystem {
     // is no permutation vector to carry around.
     final a = Float64List.fromList(_a);
     final x = Float64List.fromList(_b);
+
+    // Scale of each column before elimination: the yardstick a pivot is
+    // measured against.
+    final columnScale = Float64List(n);
+    for (var row = 0; row < n; row++) {
+      for (var col = 0; col < n; col++) {
+        final v = a[row * n + col].abs();
+        if (v > columnScale[col]) columnScale[col] = v;
+      }
+    }
 
     for (var col = 0; col < n; col++) {
       // Partial pivoting: largest magnitude in the column at or below the
@@ -84,7 +113,10 @@ class MnaSystem {
           best = row;
         }
       }
-      if (bestValue < pivotThreshold) return null;
+      if (bestValue <= absolutePivotFloor ||
+          bestValue < columnScale[col] * relativePivotThreshold) {
+        return null;
+      }
       if (best != col) {
         for (var k = 0; k < n; k++) {
           final tmp = a[col * n + k];
@@ -108,14 +140,14 @@ class MnaSystem {
       }
     }
 
+    // Every diagonal passed the pivot test above; back substitution only has
+    // to guard against overflow.
     for (var row = n - 1; row >= 0; row--) {
       var sum = x[row];
       for (var k = row + 1; k < n; k++) {
         sum -= a[row * n + k] * x[k];
       }
-      final diagonal = a[row * n + row];
-      if (diagonal.abs() < pivotThreshold) return null;
-      x[row] = sum / diagonal;
+      x[row] = sum / a[row * n + row];
       if (!x[row].isFinite) return null;
     }
     return x;

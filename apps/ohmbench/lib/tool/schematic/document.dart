@@ -131,13 +131,16 @@ class SchematicPart {
     double? value,
     double? secondaryValue,
     bool? closed,
+    bool resetValue = false,
   }) =>
       SchematicPart(
         id: id,
         kind: kind,
         origin: origin ?? this.origin,
         rotation: rotation ?? this.rotation,
-        valueOverride: value ?? valueOverride,
+        // [resetValue] returns the part to its kind's default; a plain null
+        // cannot, because null already means "keep what is there".
+        valueOverride: resetValue ? null : (value ?? valueOverride),
         secondaryValue: secondaryValue ?? this.secondaryValue,
         closed: closed ?? this.closed,
       );
@@ -169,11 +172,32 @@ class SchematicPart {
         ),
         origin: GridPoint((json['x'] as num).toInt(), (json['y'] as num).toInt()),
         rotation: (json['rot'] as num?)?.toInt() ?? 0,
-        valueOverride: (json['value'] as num?)?.toDouble(),
-        secondaryValue: (json['f'] as num?)?.toDouble() ?? 1000,
+        valueOverride: _finiteOrNull(json['value']),
+        secondaryValue: _finiteOrNull(json['f']) ?? 1000,
         closed: json['closed'] as bool? ?? true,
       );
 }
+
+/// A number read from a file, or null when it is missing or not finite.
+/// `jsonEncode` refuses NaN and Infinity, so one that slipped into a value
+/// would make the whole project unsavable; a hand-edited or damaged file
+/// that carries a string there must not crash the load either.
+double? _finiteOrNull(Object? raw) {
+  if (raw is! num) return null;
+  final v = raw.toDouble();
+  return v.isFinite ? v : null;
+}
+
+/// Whether [value] is something [kind] can be built with. Resistance,
+/// capacitance and inductance must be positive; sources may be any finite
+/// number (a negative supply is a real thing).
+bool isValidPartValue(PartKind kind, double value) => switch (kind) {
+      PartKind.resistor ||
+      PartKind.capacitor ||
+      PartKind.inductor =>
+        value.isFinite && value > 0,
+      _ => value.isFinite,
+    };
 
 /// A drawn wire. Wires carry no electrical value; they only merge nodes.
 class SchematicWire {
@@ -226,9 +250,27 @@ class NetlistBuild {
     required this.netlist,
     required this.nodeOfPoint,
     required this.hasGround,
+    this.shortedPartIds = const {},
+    this.invalidPartIds = const {},
   });
 
   final Netlist netlist;
+
+  /// Parts whose two pins landed in the same node — typically a part dropped
+  /// on top of a wire, which joins both pins to it. Legal (SPICE would run
+  /// it), but almost never what the user meant, so the UI names them instead
+  /// of silently simulating a part that does nothing (audit P1-5). The
+  /// T-junction rule itself is unchanged.
+  final Set<String> shortedPartIds;
+
+  /// Parts whose value cannot be simulated (zero or negative resistance,
+  /// capacitance or inductance; a non-positive frequency). They are left out
+  /// of [netlist] and the UI refuses to run until they are fixed, instead of
+  /// the engine quietly clamping them into something else (audit P1-6).
+  final Set<String> invalidPartIds;
+
+  /// True when the drawing can be handed to the solver as it stands.
+  bool get isRunnable => invalidPartIds.isEmpty;
 
   /// Which node each pin/wire point ended up in — what the UI colours by
   /// voltage, and what a probe tap looks up.
@@ -326,7 +368,16 @@ class SchematicDocument {
   /// Requiring the user to hit an endpoint exactly is what makes touch
   /// schematic editors feel like a fight; here the wire's whole length is a
   /// terminal.
-  NetlistBuild buildNetlist() {
+  ///
+  /// [initialVolts] / [initialAmps] seed capacitors and inductors by part id
+  /// for a run that starts from a previous run's state (the live switch
+  /// flip), and [timeOffset] shifts every sine source so that such a run
+  /// continues the waveform instead of restarting it at phase zero.
+  NetlistBuild buildNetlist({
+    Map<String, double> initialVolts = const {},
+    Map<String, double> initialAmps = const {},
+    double timeOffset = 0,
+  }) {
     final union = _UnionFind();
 
     for (final wire in wires) {
@@ -372,18 +423,37 @@ class SchematicDocument {
     };
 
     final devices = <Device>[];
+    final shorted = <String>{};
+    final invalid = <String>{};
     for (final part in parts) {
       if (part.kind == PartKind.ground) continue;
       final pins = part.pins;
       final a = nodeOfPoint[pins.first]!;
       final b = nodeOfPoint[pins.last]!;
+      if (a == b) shorted.add(part.id);
+      if (!isValidPartValue(part.kind, part.value) ||
+          (part.kind == PartKind.sineSource &&
+              !(part.secondaryValue.isFinite && part.secondaryValue > 0))) {
+        invalid.add(part.id);
+        continue;
+      }
       devices.add(switch (part.kind) {
         PartKind.resistor =>
           Resistor(id: part.id, anode: a, cathode: b, ohms: part.value),
-        PartKind.capacitor =>
-          Capacitor(id: part.id, anode: a, cathode: b, farads: part.value),
-        PartKind.inductor =>
-          Inductor(id: part.id, anode: a, cathode: b, henries: part.value),
+        PartKind.capacitor => Capacitor(
+            id: part.id,
+            anode: a,
+            cathode: b,
+            farads: part.value,
+            initialVolts: initialVolts[part.id],
+          ),
+        PartKind.inductor => Inductor(
+            id: part.id,
+            anode: a,
+            cathode: b,
+            henries: part.value,
+            initialAmps: initialAmps[part.id],
+          ),
         PartKind.diode => Diode(id: part.id, anode: a, cathode: b),
         PartKind.dcSource => VoltageSource(
             id: part.id,
@@ -398,6 +468,9 @@ class SchematicDocument {
             waveform: SineWaveform(
               amplitude: part.value,
               frequencyHz: part.secondaryValue,
+              // Whole cycles dropped so the phase stays small and exact.
+              phaseDegrees: 360.0 *
+                  ((part.secondaryValue * timeOffset) % 1.0),
             ),
           ),
         PartKind.currentSource => CurrentSource(
@@ -420,6 +493,8 @@ class SchematicDocument {
       netlist: Netlist(devices),
       nodeOfPoint: nodeOfPoint,
       hasGround: groundRoots.isNotEmpty,
+      shortedPartIds: shorted,
+      invalidPartIds: invalid,
     );
   }
 

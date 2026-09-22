@@ -244,6 +244,15 @@ class DragSession {
   final Set<String> ids;
 
   bool _armed = false;
+
+  /// Finger travel at the moment the drag armed. Subtracted from every later
+  /// position so the part moves from where it sat, not from where it would
+  /// be had it followed the finger through the slop zone — otherwise the
+  /// first frame of a drag jumps a whole cell (two when zoomed out), the
+  /// very "moving them seems impossible" feel this class exists to cure
+  /// (audit P2-12).
+  double _armDx = 0;
+  double _armDy = 0;
   int _appliedDx = 0;
   int _appliedDy = 0;
 
@@ -260,9 +269,14 @@ class DragSession {
       final slop = geometry.dragSlopInGrid;
       if (dx.abs() < slop && dy.abs() < slop) return document;
       _armed = true;
+      // Only the slop itself is forgiven: a fast flick that crosses several
+      // cells in one event still lands under the finger, less at most the
+      // threshold it had to cross.
+      _armDx = dx.clamp(-slop, slop);
+      _armDy = dy.clamp(-slop, slop);
     }
-    final snappedDx = dx.round();
-    final snappedDy = dy.round();
+    final snappedDx = (dx - _armDx).round();
+    final snappedDy = (dy - _armDy).round();
     if (snappedDx == _appliedDx && snappedDy == _appliedDy) return document;
     final moved = document.moveIds(
         ids, snappedDx - _appliedDx, snappedDy - _appliedDy);

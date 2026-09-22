@@ -166,6 +166,18 @@ sealed class Device {
   List<String> get nodes => [anode, cathode];
 }
 
+/// The smallest resistance the engine stamps. A zero-ohm resistor (or a
+/// switch with a zero on-resistance) is a wire the user drew as a part; it
+/// is modelled as one micro-ohm, and — the point of having one constant —
+/// the matrix stamp and the current readout both use it, so two resistors in
+/// series never show two different currents (2026-09-22, audit P1-4).
+const double kMinimumOhms = 1e-6;
+
+/// [ohms] as the engine uses it: magnitude floored at [kMinimumOhms].
+/// Negative values never reach here — the schematic layer rejects them.
+double effectiveOhms(double ohms) =>
+    ohms.abs() < kMinimumOhms ? kMinimumOhms : ohms;
+
 final class Resistor extends Device {
   const Resistor(
       {required super.id,
@@ -174,6 +186,8 @@ final class Resistor extends Device {
       required this.ohms});
 
   final double ohms;
+
+  double get conductance => 1 / effectiveOhms(ohms);
 }
 
 /// An ideal independent voltage source. Contributes one branch-current
@@ -258,6 +272,8 @@ final class SwitchDevice extends Device {
   final double offResistance;
 
   double get ohms => closed ? onResistance : offResistance;
+
+  double get conductance => 1 / effectiveOhms(ohms);
 }
 
 /// A complete circuit.
