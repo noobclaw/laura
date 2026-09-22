@@ -181,6 +181,11 @@
 - 专属图标(`scripts/icons.mjs` 的 `ohmbench` 条目)、iOS 中文显示名(移植 draftbook 的 pbxproj 本地化段)、竖屏锁定、Manifest 剥 INTERNET、`store/listing.md` 中英定稿。
 - 本地截图工具 `screens_test/`(用 flutter test 渲染真字体截图,不进 CI)。
 
+### 1b. 出包(G6)
+- CI run **35688288956**(commit `5aa3e71`):build-android ✅、smoke-test ✅。产物 `apps-ohmbench-apk` / `apps-ohmbench-aab`。
+- smoke 截屏:库页真渲染(hero 整流电路 + 电荷点、电荷黄「新电路」按钮、示例卡);截屏上的「Pixel Launcher isn't responding」是模拟器系统桌面的 ANR,不是本 app。
+- G6b:本地 `screens_test` 真字体截图(库页中英 × 深浅、4 个示例的编辑器静止/运行、空画布)逐屏看过:层级清楚、hero 有动效、深色实验台与示波器质感统一;已据此改过「适配屏幕」给运行键留位、连线模式图标换 `cable`。
+
 ### 2. 真机验收清单(给用户照着点)
 | # | 操作 | 期望 |
 |---|---|---|
