@@ -22,8 +22,8 @@ import 'package:path_provider/path_provider.dart';
 /// Usage: `read()` once at startup (null means "start empty"), then
 /// `write(json)` after every mutation. Stores must refuse to `write` before
 /// their `read` has completed; see `RemcardStore` for the pattern.
-class JsonFileStore {
-  JsonFileStore(this.fileName, {this.onTrouble, this.onWritten});
+class AtomicJsonFile {
+  AtomicJsonFile(this.fileName, {this.onTrouble, this.onWritten});
 
   /// Called after every successful write, so a stale "save failed" notice can
   /// be withdrawn once saving works again.

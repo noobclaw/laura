@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/core/l10n.dart';
+import 'package:ohmbench/bench/words.dart';
 import 'package:ohmbench/tool/examples.dart';
 import 'package:ohmbench/tool/store.dart';
 import 'package:ohmbench/tool/ui/editor_screen.dart';
@@ -93,7 +93,7 @@ void main() {
     for (final b in [Brightness.light, Brightness.dark]) {
       testWidgets('home $lang ${b.name}', (tester) async {
         await sized(tester);
-        AppLanguage.override.value = lang;
+        BenchLanguage.override.value = lang;
         final store = ProjectStore();
         if (b == Brightness.dark) {
           store.create(kExamples[0].title, kExamples[0].build());
@@ -111,7 +111,7 @@ void main() {
   for (final ex in kExamples) {
     testWidgets('editor ${ex.id}', (tester) async {
       await sized(tester);
-      AppLanguage.override.value = 'en';
+      BenchLanguage.override.value = 'en';
       final store = ProjectStore();
       var doc = ex.build();
       // Close the switches so the running shot shows current.
@@ -135,7 +135,7 @@ void main() {
 
   testWidgets('editor empty', (tester) async {
     await sized(tester);
-    AppLanguage.override.value = 'zh';
+    BenchLanguage.override.value = 'zh';
     final store = ProjectStore();
     final project = store.create('新电路', kExamples[0].build().removeIds({}).copyWith(parts: [], wires: []));
     await tester.pumpWidget(

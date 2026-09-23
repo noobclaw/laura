@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'json_file_store.dart';
+import 'atomic_file.dart';
 
 /// Minimal, factory-friendly localization (PIPELINE.md rule: every app ships
 /// multilingual — zh + en mandatory, ja/others per market fit).
@@ -12,11 +12,11 @@ import 'json_file_store.dart';
 ///     Text(tr(zh: '新建', en: 'New'))
 ///
 /// No codegen, no key files, English fallback. The language follows the
-/// system unless the user picks one in Settings ([AppLanguage]).
+/// system unless the user picks one in Settings ([BenchLanguage]).
 /// `required` parameters make the analyzer enforce that zh and en both exist.
 /// Do NOT wrap logs, JSON keys, or file names — user-visible text only.
 String tr({required String zh, required String en, String? ja}) {
-  final code = AppLanguage.effectiveCode;
+  final code = BenchLanguage.effectiveCode;
   if (code == 'zh') return zh;
   if (code == 'ja' && ja != null) return ja;
   return en;
@@ -24,7 +24,7 @@ String tr({required String zh, required String en, String? ja}) {
 
 /// True when the effective language is Chinese — for occasional per-locale
 /// layout/format decisions beyond plain strings.
-bool get isZhLocale => AppLanguage.effectiveCode == 'zh';
+bool get isZhLocale => BenchLanguage.effectiveCode == 'zh';
 
 /// The user's language choice, persisted on device. `null` = follow the
 /// system (the default). Changing it rebuilds the whole app (see main.dart),
@@ -33,8 +33,8 @@ bool get isZhLocale => AppLanguage.effectiveCode == 'zh';
 /// Added 2026-09-02 on the user's request: a Chinese owner testing an
 /// English-system iPhone (and vice versa) needs to flip the language
 /// without changing the phone.
-class AppLanguage {
-  AppLanguage._();
+class BenchLanguage {
+  BenchLanguage._();
 
   /// Choices offered in Settings. Only languages every string of the app
   /// actually has: offering `ja` here while the tool passes no `ja:` strings
@@ -43,7 +43,7 @@ class AppLanguage {
   static const List<String> choices = ['zh', 'en'];
 
   static final ValueNotifier<String?> override = ValueNotifier<String?>(null);
-  static final JsonFileStore _file = JsonFileStore('language.json');
+  static final AtomicJsonFile _file = AtomicJsonFile('ohm_language.json');
   static bool _loaded = false;
 
   /// Read the saved choice. Call once before `runApp`; safe to call again.

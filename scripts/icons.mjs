@@ -293,37 +293,37 @@ const ART = {
       ];
     },
   },
-  // OhmBench: the bench itself — a dark scope-screen tile on a field of
-  // charge yellow (hue 52°, lib/core/branding.dart), with a resistor drawn in
-  // the canvas's positive-voltage cyan and two charge dots riding its leads.
-  // Reads at 60 px as "a zigzag on a screen".
+  // OhmBench (2026-09-23 redesign): not the family "gradient + centred
+  // tile" layout the other apps share, but the bench itself edge to edge —
+  // dark instrument surface, faint grid, and a resistor trace in charge
+  // yellow that runs off both edges, with two cyan charge dots riding it.
+  // After a sibling's 4.3(a) rejection, the icon is one of the places the
+  // app has to look like itself and nothing else.
   ohmbench: {
     bg: [
-      [0, [246, 222, 84]],
-      [0.55, [222, 186, 30]],
-      [1, [160, 118, 8]],
+      [0, [20, 38, 50]],
+      [0.6, [11, 20, 28]],
+      [1, [6, 11, 16]],
     ],
-    shapes(s) {
-      const screen = roundedRect(s * 0.13, s * 0.25, s * 0.74, s * 0.5, s * 0.1);
+    shapes(s, opts = {}) {
+      const yellow = [255, 206, 74];
       const cyan = [63, 212, 247];
-      const y = s * 0.5;
-      const w = s * 0.062;
-      // Leads, then a four-peak zigzag between x = 0.36 and 0.64.
-      const pts = [[s * 0.2, y], [s * 0.35, y]];
+      const y = s * 0.54;
+      const w = s * 0.075;
+      const pts = [[-s * 0.1, y], [s * 0.3, y]];
       const peaks = 4;
       for (let i = 0; i < peaks; i++) {
-        const x = s * (0.35 + ((i + 0.5) * 0.3) / peaks);
-        pts.push([x, y + (i % 2 === 0 ? -1 : 1) * s * 0.105]);
+        const x = s * (0.3 + ((i + 0.5) * 0.4) / peaks);
+        pts.push([x, y + (i % 2 === 0 ? -1 : 1) * s * 0.15]);
       }
-      pts.push([s * 0.65, y], [s * 0.8, y]);
-      const trace = [];
-      for (let i = 0; i + 1 < pts.length; i++) {
-        trace.push(capsule(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], w));
-      }
-      const glow = [];
-      for (let i = 0; i + 1 < pts.length; i++) {
-        glow.push(capsule(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], w * 2.6));
-      }
+      pts.push([s * 0.7, y], [s * 1.1, y]);
+      const seg = (width) => {
+        const out = [];
+        for (let i = 0; i + 1 < pts.length; i++) {
+          out.push(capsule(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], width));
+        }
+        return out;
+      };
       const dot = (cx, r) => {
         const d = [];
         for (let i = 0; i < 28; i++) {
@@ -332,15 +332,30 @@ const ART = {
         }
         return d;
       };
+      const grid = [];
+      if (!opts.markOnly) {
+        for (let gx = 1; gx < 6; gx++) {
+          for (let gy = 1; gy < 6; gy++) {
+            const cx = (s * gx) / 6;
+            const cy = (s * gy) / 6;
+            const r = s * 0.009;
+            const d = [];
+            for (let i = 0; i < 12; i++) {
+              const a = (i / 12) * Math.PI * 2;
+              d.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+            }
+            grid.push(d);
+          }
+        }
+      }
       return [
-        { path: [screen], fill: [60, 40, 0], alpha: 0.28, offset: [0, s * 0.016] },
-        { path: [screen], fill: [11, 19, 27] },
-        // One shape per stroke: overlapping polygons in a single path fill
-        // even-odd and punch holes where the segments meet.
-        ...glow.map((g) => ({ path: [g], fill: cyan, alpha: 0.1 })),
-        ...trace.map((t) => ({ path: [t], fill: cyan })),
-        { path: [dot(s * 0.255, s * 0.052)], fill: [255, 214, 107] },
-        { path: [dot(s * 0.735, s * 0.052)], fill: [255, 214, 107] },
+        ...(grid.length ? [{ path: grid, fill: [120, 160, 180], alpha: 0.35 }] : []),
+        ...seg(w * 2.0).map((p) => ({ path: [p], fill: yellow, alpha: 0.08 })),
+        ...seg(w).map((p) => ({ path: [p], fill: yellow })),
+        { path: [dot(s * 0.16, s * 0.07)], fill: cyan, alpha: 0.25 },
+        { path: [dot(s * 0.16, s * 0.042)], fill: cyan },
+        { path: [dot(s * 0.84, s * 0.07)], fill: cyan, alpha: 0.25 },
+        { path: [dot(s * 0.84, s * 0.042)], fill: cyan },
       ];
     },
   },
@@ -434,6 +449,24 @@ for (const [name, size] of [
     path.join(appDir, 'ios/Runner/Assets.xcassets/AppIcon.appiconset', `${name}.png`),
     render(app, size, { rounded: false }),
   );
+}
+
+if (app === 'ohmbench') {
+  // Launch screen mark: the trace alone on transparent, drawn on the dark
+  // launch background both platforms now use (no white flash).
+  const mark = (size) => {
+    const art = ART[app];
+    const rgba = new Uint8Array(size * size * 4);
+    for (const shape of art.shapes(size, { markOnly: true })) {
+      blend(rgba, size, size, coverage(shape.path, size, size), shape.fill, shape.alpha ?? 1);
+    }
+    return encodePng(size, size, rgba);
+  };
+  console.log('Launch marks:');
+  for (const [name, size] of [['LaunchImage.png', 168], ['LaunchImage@2x.png', 336], ['LaunchImage@3x.png', 504]]) {
+    write(path.join(appDir, 'ios/Runner/Assets.xcassets/LaunchImage.imageset', name), mark(size));
+  }
+  write(path.join(appDir, 'android/app/src/main/res/drawable-nodpi/launch_mark.png'), mark(432));
 }
 
 console.log('Store assets:');

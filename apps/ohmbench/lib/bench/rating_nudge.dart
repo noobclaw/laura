@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:in_app_review/in_app_review.dart';
 
-import 'json_file_store.dart';
+import 'atomic_file.dart';
 
 /// Asks for a store rating at the right moment and never nags.
 ///
@@ -17,10 +17,10 @@ import 'json_file_store.dart';
 ///
 /// State lives in `review.json` next to the app's other JSON stores, so it
 /// survives updates and is wiped with the app. No network, no analytics.
-class ReviewPrompt {
-  ReviewPrompt._();
+class RatingNudge {
+  RatingNudge._();
 
-  static final JsonFileStore _store = JsonFileStore('review.json');
+  static final AtomicJsonFile _store = AtomicJsonFile('ohm_rating.json');
   static const int _actionsBeforeAsk = 3;
   static const Duration _cooldown = Duration(days: 90);
 

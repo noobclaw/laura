@@ -4,14 +4,14 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-import 'l10n.dart';
+import 'words.dart';
 
 /// Every factory app sells exactly one non-consumable: the Pro unlock.
 /// The product must exist in Play Console (and later App Store Connect)
 /// under this id for every app.
 // ⚠️ App Store 的商品 ID 全账号唯一(Play 是按 app 隔离)。每个新 app 必须用
 // '<applicationId>.pro_unlock'(new_app.mjs 会替换);裸 'pro_unlock' 已被 remcard 占用。
-const String kProProductId = 'com.noobclaw.ohmbench.pro_unlock';
+const String kOhmProProductId = 'com.noobclaw.ohmbench.pro_unlock';
 
 /// Thin wrapper around the official in_app_purchase plugin (Play Billing /
 /// StoreKit). Billing runs through the store app's own process, so the app
@@ -22,15 +22,15 @@ const String kProProductId = 'com.noobclaw.ohmbench.pro_unlock';
 /// buy/restore calls simply refuse. The app's ONLY unlock path in release
 /// builds is a store purchase; local placeholder unlocks must not survive
 /// past SOP gate G8.
-class PurchaseService {
-  PurchaseService._();
-  static final PurchaseService instance = PurchaseService._();
+class BenchCheckout {
+  BenchCheckout._();
+  static final BenchCheckout instance = BenchCheckout._();
 
   /// Last user-facing purchase message (error, pending, restored…). UI shows
   /// it via a listener and may clear it after display.
   final ValueNotifier<String?> notice = ValueNotifier<String?>(null);
 
-  /// The store's own localized price for [kProProductId] ("¥28.00", "€4,99"),
+  /// The store's own localized price for [kOhmProProductId] ("¥28.00", "€4,99"),
   /// once known. Null until the store answers; the paywall then falls back to
   /// its written price. Never show a currency the store will not charge.
   final ValueNotifier<String?> price = ValueNotifier<String?>(null);
@@ -73,7 +73,7 @@ class PurchaseService {
       if (_available) await _loadPrice();
     } catch (e) {
       // No billing backend (emulator, tests, sideload) — stay silent.
-      debugPrint('PurchaseService.init skipped: $e');
+      debugPrint('checkout init skipped: $e');
       _available = false;
     }
   }
@@ -95,7 +95,7 @@ class PurchaseService {
         if (delay > 0) await Future<void>.delayed(Duration(seconds: delay));
         try {
           final resp =
-              await InAppPurchase.instance.queryProductDetails({kProProductId});
+              await InAppPurchase.instance.queryProductDetails({kOhmProProductId});
           if (resp.productDetails.isNotEmpty) {
             price.value = resp.productDetails.first.price;
             return;
@@ -134,18 +134,18 @@ class PurchaseService {
       if (p.status == PurchaseStatus.purchased ||
           p.status == PurchaseStatus.restored) {
         if (p.status == PurchaseStatus.restored) _restoreDelivered = true;
-        if (p.productID == kProProductId) {
+        if (p.productID == kOhmProProductId) {
           _onUnlocked?.call();
           notice.value = p.status == PurchaseStatus.restored
-              ? tr(zh: '已恢复 Pro,欢迎回来!', en: 'Pro restored — welcome back!')
-              : tr(zh: 'Pro 已解锁,感谢支持!', en: 'Pro unlocked — thank you!');
+              ? tr(zh: '实验台已恢复 Pro,不限元件', en: 'Bench restored to Pro — no part limit')
+              : tr(zh: '实验台已解锁:元件和电路不再限量', en: 'Bench unlocked: no more part or circuit limits');
         }
       } else if (p.status == PurchaseStatus.error) {
         notice.value = p.error?.message ??
-            tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again');
+            tr(zh: '这次没有买成,钱没有扣,可以再试一次', en: 'That purchase did not go through and nothing was charged. Try again any time.');
       } else if (p.status == PurchaseStatus.pending) {
         notice.value =
-            tr(zh: '等待支付确认…', en: 'Waiting for payment confirmation…');
+            tr(zh: '商店正在确认付款,确认后会自动解锁', en: 'The store is confirming the payment; the bench unlocks by itself when it does');
       }
       if (p.pendingCompletePurchase) {
         try {
@@ -165,11 +165,11 @@ class PurchaseService {
     }
     try {
       final resp =
-          await InAppPurchase.instance.queryProductDetails({kProProductId});
+          await InAppPurchase.instance.queryProductDetails({kOhmProProductId});
       if (resp.productDetails.isEmpty) {
         notice.value = tr(
-          zh: '商品暂不可用,请稍后重试',
-          en: 'Product not available yet, please try again later',
+          zh: '商店暂时没有返回 Pro 的信息,过一会儿再试',
+          en: 'The store has not answered for Pro yet. Try again in a moment.',
         );
         return;
       }
@@ -178,8 +178,9 @@ class PurchaseService {
       );
     } catch (e) {
       debugPrint('buyPro failed: $e');
-      notice.value =
-          tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again');
+      notice.value = tr(
+          zh: '这次没有买成,钱没有扣,可以再试一次',
+          en: 'That purchase did not go through and nothing was charged. Try again any time.');
     }
   }
 
@@ -192,19 +193,22 @@ class PurchaseService {
       return;
     }
     _restoreDelivered = false;
-    notice.value = tr(zh: '正在查找已购记录…', en: 'Looking for past purchases…');
+    notice.value = tr(zh: '正在向商店核对你的 Pro…', en: 'Checking your Pro with the store…');
     try {
       await InAppPurchase.instance.restorePurchases();
     } catch (e) {
       debugPrint('restore failed: $e');
-      notice.value = tr(zh: '恢复购买失败', en: 'Could not restore purchases');
+      notice.value = tr(zh: '商店没有回应恢复请求,稍后再试', en: 'The store did not answer the restore request. Try again later.');
       return;
     }
-    await Future<void>.delayed(const Duration(seconds: 5));
+    // Stores can take a while to replay; saying "nothing found" too early
+    // reads as a lost purchase (audit P2). If the restore lands later, the
+    // stream still unlocks and replaces this line.
+    await Future<void>.delayed(const Duration(seconds: 12));
     if (!_restoreDelivered) {
       notice.value = tr(
-        zh: '这个商店账号下没有找到可恢复的购买',
-        en: 'No previous purchase was found for this store account',
+        zh: '这个商店账号下还没有 OhmBench Pro 的购买记录',
+        en: 'This store account has no OhmBench Pro purchase yet',
       );
     }
   }
@@ -219,26 +223,26 @@ class PurchaseService {
 
 /// Surfaces purchase results (errors, pending, unlocked, restored) as
 /// snackbars. Mount it ONCE, above every route, via
-/// `MaterialApp(builder: (_, child) => PurchaseNotices(child: child))`: the
+/// `MaterialApp(builder: (_, child) => CheckoutNotices(child: child))`: the
 /// snackbar then appears on whichever screen the user is on — the paywall,
 /// a report page, settings — instead of only while settings is open.
 ///
-/// Without it the store's failures are invisible: [PurchaseService] only writes
-/// to [PurchaseService.notice] and something has to read it.
-class PurchaseNotices extends StatefulWidget {
-  const PurchaseNotices({super.key, this.child});
+/// Without it the store's failures are invisible: [BenchCheckout] only writes
+/// to [BenchCheckout.notice] and something has to read it.
+class CheckoutNotices extends StatefulWidget {
+  const CheckoutNotices({super.key, this.child});
 
   final Widget? child;
 
   @override
-  State<PurchaseNotices> createState() => _PurchaseNoticesState();
+  State<CheckoutNotices> createState() => _CheckoutNoticesState();
 }
 
-class _PurchaseNoticesState extends State<PurchaseNotices> {
+class _CheckoutNoticesState extends State<CheckoutNotices> {
   void _show() {
-    final msg = PurchaseService.instance.notice.value;
+    final msg = BenchCheckout.instance.notice.value;
     if (msg == null || !mounted) return;
-    PurchaseService.instance.notice.value = null;
+    BenchCheckout.instance.notice.value = null;
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
     messenger
@@ -249,7 +253,7 @@ class _PurchaseNoticesState extends State<PurchaseNotices> {
   @override
   void initState() {
     super.initState();
-    PurchaseService.instance.notice.addListener(_show);
+    BenchCheckout.instance.notice.addListener(_show);
     // A notice that arrived before this widget existed (StoreKit replays
     // transactions at launch) is still worth showing.
     WidgetsBinding.instance.addPostFrameCallback((_) => _show());
@@ -257,7 +261,7 @@ class _PurchaseNoticesState extends State<PurchaseNotices> {
 
   @override
   void dispose() {
-    PurchaseService.instance.notice.removeListener(_show);
+    BenchCheckout.instance.notice.removeListener(_show);
     super.dispose();
   }
 
@@ -266,32 +270,9 @@ class _PurchaseNoticesState extends State<PurchaseNotices> {
       widget.child ?? const SizedBox.shrink();
 }
 
-/// "Restore purchases" — required by both stores for non-consumables, and the
-/// only way a paying user gets Pro back after a reinstall or a new device.
-/// Hide it once Pro is on by passing [pro].
-class RestorePurchasesTile extends StatelessWidget {
-  const RestorePurchasesTile({super.key, this.pro = false});
-
-  final bool pro;
-
-  @override
-  Widget build(BuildContext context) {
-    if (pro) return const SizedBox.shrink();
-    return ListTile(
-      leading: const Icon(Icons.restore),
-      title: Text(tr(zh: '恢复购买', en: 'Restore purchases')),
-      subtitle: Text(tr(
-        zh: '换机或重装后找回已购的 Pro',
-        en: 'Recover Pro after a reinstall or new device',
-      )),
-      onTap: () => PurchaseService.instance.restore(),
-    );
-  }
-}
-
 /// The store's real localized price for the Pro unlock once known, otherwise
 /// [fallback] (the USD base price written in PLAN.md). Rebuilds when the
-/// store answers, and nudges [PurchaseService.ensurePrice] on every build so
+/// store answers, and nudges [BenchCheckout.ensurePrice] on every build so
 /// a lookup that failed at launch is retried the moment a price is shown.
 ///
 /// The currency is whatever the user's App Store / Play account is billed
@@ -299,17 +280,17 @@ class RestorePurchasesTile extends StatelessWidget {
 /// a "¥" figure into [fallback]: the apps are not sold in mainland China,
 /// so a yuan fallback is wrong for everyone and only shows up while the
 /// store has not answered yet.
-class ProPriceText extends StatelessWidget {
-  const ProPriceText({super.key, required this.fallback, this.style});
+class StorePrice extends StatelessWidget {
+  const StorePrice({super.key, required this.fallback, this.style});
 
   final String fallback;
   final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    PurchaseService.instance.ensurePrice();
+    BenchCheckout.instance.ensurePrice();
     return ValueListenableBuilder<String?>(
-      valueListenable: PurchaseService.instance.price,
+      valueListenable: BenchCheckout.instance.price,
       builder: (context, price, _) => Text(price ?? fallback, style: style),
     );
   }

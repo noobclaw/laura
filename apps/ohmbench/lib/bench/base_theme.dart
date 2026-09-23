@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import 'branding.dart';
+import 'identity.dart';
 
 /// The shell's default premium theme, so every new app starts at the G6b visual
 /// bar instead of bare `ColorScheme.fromSeed` (PIPELINE.md「视觉设计标准」).
-/// Built from [Branding.seedColor] — set that per app and this carries the rest:
+/// Built from [OhmIdentity.seedColor] — set that per app and this carries the rest:
 /// flat filled cards with a generous radius, and tabular figures + weight on the
 /// number styles (a tool's numbers are its emotional payload). Works for both
 /// light and dark via [brightness]. Apps that want a stronger art direction
 /// (gradients, a fixed nocturnal palette) override or extend this.
-ThemeData buildAppTheme(Brightness brightness) {
+ThemeData buildBaseTheme(Brightness brightness) {
   final scheme = ColorScheme.fromSeed(
-    seedColor: Branding.seedColor,
+    seedColor: OhmIdentity.seedColor,
     brightness: brightness,
   );
   final theme = ThemeData(colorScheme: scheme, useMaterial3: true);

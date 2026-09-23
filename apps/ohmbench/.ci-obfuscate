@@ -1,0 +1,1 @@
+Dart obfuscation for CI release builds (see .github/workflows/build-app.yml).

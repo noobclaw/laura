@@ -1,4 +1,4 @@
-import '../../core/l10n.dart';
+import '../../bench/words.dart';
 
 /// One sentence for a storage problem reported by `ProjectStore`.
 String storageTroubleText(String? kind, {required bool blocked}) {

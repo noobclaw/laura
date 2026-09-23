@@ -1,4 +1,4 @@
-import '../core/l10n.dart';
+import '../bench/words.dart';
 import 'schematic/document.dart';
 
 /// Built-in starter circuits. Each one is chosen to show something moving

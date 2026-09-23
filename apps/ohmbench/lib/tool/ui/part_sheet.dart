@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/l10n.dart';
+import '../../bench/words.dart';
 import '../format.dart';
 import '../schematic/document.dart';
 

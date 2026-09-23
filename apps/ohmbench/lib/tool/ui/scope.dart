@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../core/l10n.dart';
+import '../../bench/words.dart';
 import '../format.dart';
 import 'lab_theme.dart';
 
@@ -285,6 +285,14 @@ class ScopePanel extends StatelessWidget {
                     style: label),
                 const Spacer(),
                 Text('t = ${formatSi(cursorTime, 's')}', style: label),
+                if (slowdown < 0.67) ...[
+                  const SizedBox(width: 10),
+                  Text(
+                      tr(
+                          zh: '快放 ${_round(1 / slowdown)}×',
+                          en: '${_round(1 / slowdown)}× fast'),
+                      style: label.copyWith(color: Bench.positive)),
+                ],
                 if (slowdown > 1.5) ...[
                   const SizedBox(width: 10),
                   Text(

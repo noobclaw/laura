@@ -37,19 +37,19 @@ BUILT FOR FINGERS, NOT A MOUSE
 Parts snap to the grid, so a part that looks connected is connected. Drag a part and it moves; a tap that wobbles selects instead of nudging your circuit apart. Pull a wire straight off a pin, or turn on wire mode and draw anywhere. Drop a pin anywhere along a wire and it joins there. Long-press and drag to select a group and move it as one.
 
 A LIVE BENCH
-Press play and the circuit keeps running. Flip a switch and the capacitor charges from the voltage it had a moment ago. Tap a wire to scope its voltage, tap a part to scope its current. Slow circuits play in real time; fast ones are slowed down so you can see them, and the scope tells you by how much.
+Press play and the circuit keeps running. Flip a switch and the capacitor charges from the voltage it had a moment ago. Tap a wire to scope its voltage, tap a part to scope its current. Every run plays back over four seconds — a microsecond ring slowed down, a slow RC sped up — and the scope says by how much.
 
 NOTHING YOU BUILD IS LOST
 Every change is saved as you make it, and again whenever you leave the app. Hundreds of steps of undo and redo, and the undo button tells you what it will take back. Rename, duplicate and delete circuits (with undo).
 
-IT CANNOT PHONE HOME
-OhmBench ships without permission to use the internet. It works in airplane mode, in a basement, in a lab with no signal. No account, no cloud, no ads, no tracking.
+WORKS IN AIRPLANE MODE
+OhmBench makes no network connections. It works on a plane, in a basement, in a lab with no signal.
 
 WHAT YOU CAN BUILD (1.0)
-Resistors, capacitors, inductors, diodes, switches, DC and sine voltage sources, current sources and ground. Four ready-to-run examples: a voltage divider, RC charging, a half-wave rectifier and an LC tank.
+Resistors, capacitors, inductors, diodes, switches, DC and sine voltage sources, current sources and ground. Four ready-to-run examples — a voltage divider, RC charging, a half-wave rectifier and an LC tank — that open as scratch circuits, so trying them never uses up a save.
 
 FREE AND PRO
-The free app is a real app: one saved circuit with up to twelve parts (ground is free), the same engine and the same accuracy, the full scope and full undo. One purchase — no subscription — removes both limits for good.
+The free app is a real app: one saved circuit with up to twelve parts (ground is free), the same engine and the same accuracy, the full scope and full undo. One purchase removes both limits for good.
 
 Circuit engine algorithms ported from SpiceSharp (MIT licence), © 2017 svenboulanger.
 ```
@@ -101,19 +101,19 @@ First release.
 元件吸附栅格,看起来连上了就是真的连上了。拖动元件它就跟着走;手指轻微抖动只会选中,不会把电路挪散。从引脚直接拉出导线,或打开连线模式在任意处画。引脚落在导线的任意一点都算接上。长按拖出方框,可以整组选中一起移动。
 
 一张活的实验台
-按下播放,电路就一直在跑。拨一下开关,电容会从它上一刻的电压继续充电。点导线看它的电压,点元件看它的电流。慢电路按真实时间播放,快电路会被放慢让你看清,示波器会标出放慢了多少倍。
+按下播放,电路就一直在跑。拨一下开关,电容会从它上一刻的电压继续充电。点导线看它的电压,点元件看它的电流。每次运行都在四秒内播完 —— 微秒级的振荡放慢,慢悠悠的 RC 加快 —— 示波器会标出快放或慢放了多少倍。
 
 你画的东西不会丢
 每一次改动都会立刻保存,离开应用时再保存一次。数百步撤销与重做,撤销按钮会告诉你它要撤回什么。电路可以重命名、复制、删除(删除也能撤销)。
 
-它连不上网
-电路台出厂就没有联网权限。飞行模式、地下室、没信号的实验室都照常可用。无账号、无云端、无广告、无追踪。
+飞行模式照样用
+电路台不建立任何网络连接。飞机上、地下室、没信号的实验室都照常可用。
 
 1.0 能画什么
-电阻、电容、电感、二极管、开关、直流与正弦电压源、电流源、接地。自带 4 个能直接运行的示例:分压器、RC 充电、半波整流、LC 振荡。
+电阻、电容、电感、二极管、开关、直流与正弦电压源、电流源、接地。自带 4 个能直接运行的示例:分压器、RC 充电、半波整流、LC 振荡。示例以草稿打开,随便试不占保存名额,喜欢哪个再存下来。
 
 免费版与 Pro
-免费版是真能用的版本:保存 1 张电路图、每张最多 12 个元件(接地不算),同一个引擎、同一套精度,示波器与撤销全都不阉割。一次买断(不是订阅)永久解除这两个上限。
+免费版是真能用的版本:保存 1 张电路图、每张最多 12 个元件(接地不算),同一个引擎、同一套精度,示波器与撤销全都不阉割。一次买断永久解除这两个上限。
 
 电路引擎算法移植自 SpiceSharp(MIT 许可),© 2017 svenboulanger。
 ```

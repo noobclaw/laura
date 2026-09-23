@@ -80,7 +80,11 @@ jobs:
           if [ -f scripts/fetch_ncnn_ios.sh ]; then bash scripts/fetch_ncnn_ios.sh; fi
           flutter pub get
           # Unique ascending build number per CI run; TestFlight rejects reuse.
-          flutter build ios --config-only --release --no-codesign --build-number=${{ github.run_number }}
+          # Opt-in Dart obfuscation (see build-app.yml); --config-only writes
+          # the flags into Generated.xcconfig, which the archive step reads.
+          OBF=""
+          if [ -f .ci-obfuscate ]; then OBF="--obfuscate --split-debug-info=build/symbols"; fi
+          flutter build ios --config-only --release --no-codesign --build-number=${{ github.run_number }} $OBF
 
       - name: Archive (cloud signing via ASC API key)
         env:

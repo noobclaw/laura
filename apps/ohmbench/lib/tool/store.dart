@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../core/json_file_store.dart';
+import '../bench/atomic_file.dart';
 import 'schematic/document.dart';
 
 /// One saved circuit.
@@ -13,7 +13,14 @@ class Project {
     required this.created,
     required this.updated,
     required this.document,
+    this.scratch = false,
   });
+
+  /// An example opened for a look: edited in memory, never written to disk
+  /// and not counted against the free tier until the user saves a copy.
+  /// Opening the built-in examples must not use up a free user's one
+  /// circuit (2026-09-23 audit P1-3).
+  final bool scratch;
 
   final String id;
   String name;
@@ -58,7 +65,7 @@ int countedParts(SchematicDocument doc) =>
 /// damaged project file can never revoke a purchase, and vice versa.
 class ProjectStore extends ChangeNotifier {
   ProjectStore() {
-    _file = JsonFileStore(
+    _file = AtomicJsonFile(
       'ohmbench_projects.json',
       onTrouble: _trouble,
       // Only a failed save is cured by a later successful one. A damaged
@@ -67,7 +74,7 @@ class ProjectStore extends ChangeNotifier {
         if (storageTrouble.value == 'save') storageTrouble.value = null;
       },
     );
-    _proFile = JsonFileStore('ohmbench_pro.json', onTrouble: _trouble);
+    _proFile = AtomicJsonFile('ohmbench_pro.json', onTrouble: _trouble);
   }
 
   /// Free tier: one saved circuit of up to twelve parts. Enough for a
@@ -76,8 +83,8 @@ class ProjectStore extends ChangeNotifier {
   static const int freeProjects = 1;
   static const int freeParts = 12;
 
-  late final JsonFileStore _file;
-  late final JsonFileStore _proFile;
+  late final AtomicJsonFile _file;
+  late final AtomicJsonFile _proFile;
 
   /// A user-facing sentence when saving or loading went wrong, else null.
   /// The home screen and the editor show it as a banner — a save that fails
@@ -94,7 +101,9 @@ class ProjectStore extends ChangeNotifier {
   /// user's circuits. Saving is refused until the app restarts, so a
   /// transient read error can never become "your circuits were replaced by
   /// an empty list".
-  bool get savingBlocked => _file.readFailed;
+  bool get savingBlocked => _file.readFailed || _foreignFile;
+
+  bool _foreignFile = false;
 
   final List<Project> projects = [];
 
@@ -126,11 +135,20 @@ class ProjectStore extends ChangeNotifier {
 
   Future<void> load() async {
     final proDoc = await _proFile.read();
-    pro = proDoc?['pro'] as bool? ?? false;
+    // Type-checked, not cast: a file that is valid JSON but not ours (a
+    // future format, a hand edit) must degrade, never throw out of main().
+    pro = proDoc?['pro'] == true;
     final raw = await _file.read();
     projects.clear();
     _unreadable.clear();
-    for (final entry in (raw?['projects'] as List? ?? const [])) {
+    final list = raw?['projects'];
+    if (raw != null && list is! List) {
+      // Something is there that this version does not understand. Keep it
+      // untouched: treat it as unreadable and refuse to save over it.
+      _foreignFile = true;
+      storageTrouble.value = 'load';
+    }
+    for (final entry in (list is List ? list : const [])) {
       try {
         projects.add(Project.fromJson((entry as Map).cast<String, dynamic>()));
       } catch (e) {
@@ -179,6 +197,19 @@ class ProjectStore extends ChangeNotifier {
   /// Creates a project. Callers check [atProjectLimit] first and send the
   /// user to the Pro sheet; this method does not enforce it, so restoring a
   /// purchase never leaves a half-created project behind.
+  /// An example as an unsaved scratch circuit (see [Project.scratch]).
+  Project scratch(String name, SchematicDocument document) {
+    final now = DateTime.now();
+    return Project(
+      id: _newId(),
+      name: name,
+      created: now,
+      updated: now,
+      document: document,
+      scratch: true,
+    );
+  }
+
   Project create(String name, SchematicDocument document) {
     final now = DateTime.now();
     final project = Project(
@@ -232,6 +263,7 @@ class ProjectStore extends ChangeNotifier {
     project
       ..document = document
       ..updated = DateTime.now();
+    if (project.scratch) return;
     _sort();
     _scheduleSave();
     notifyListeners();
@@ -260,7 +292,7 @@ class ProjectStore extends ChangeNotifier {
   void _write() {
     // Never write before the file was read, or after it failed to read: both
     // would replace the user's saved circuits with whatever is in memory.
-    if (!loaded || _file.readFailed) return;
+    if (!loaded || savingBlocked) return;
     _file.write({
       'version': 1,
       'projects': [for (final p in projects) p.toJson(), ..._unreadable],

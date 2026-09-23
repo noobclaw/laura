@@ -1,5 +1,5 @@
 name: ohmbench
-description: "A new Flutter project."
+description: "OhmBench: an offline, touch-first circuit simulator (MNA solver, live scope)."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -44,9 +44,6 @@ dependencies:
   # needed, the zero-network claim holds.
   in_app_purchase: ^3.2.0
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:

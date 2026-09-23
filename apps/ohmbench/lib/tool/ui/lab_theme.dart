@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/app_theme.dart';
+import '../../bench/base_theme.dart';
 
 /// The bench: OhmBench's canvas is always a dark instrument surface — a
 /// scope screen, not a sheet of paper — whatever the phone's theme. The app
@@ -42,23 +42,74 @@ abstract final class Bench {
   }
 }
 
-/// App theme: the shell's premium defaults on the OhmBench seed, with a
-/// deeper, bluer dark surface so the chrome sits comfortably next to the
-/// bench.
-ThemeData buildOhmTheme(Brightness brightness) {
-  final base = buildAppTheme(brightness);
-  if (brightness == Brightness.light) return base;
+/// The one theme OhmBench ships: the whole app is the bench.
+///
+/// Every other app from this project follows the phone's light/dark setting
+/// on a tonal Material surface. OhmBench deliberately does not — library,
+/// sheets, dialogs and settings all sit on the same dark instrument surface
+/// as the canvas, with charge yellow as the action colour and scope cyan as
+/// the data colour. One look, end to end, that is recognisably this app
+/// (and not the shared template; see the 2026-09-22 4.3(a) rejection of a
+/// sibling app).
+ThemeData buildOhmTheme([Brightness _ = Brightness.dark]) {
+  final base = buildBaseTheme(Brightness.dark);
   final scheme = base.colorScheme.copyWith(
-    surface: const Color(0xFF0C141B),
-    surfaceContainerLowest: const Color(0xFF080E13),
-    surfaceContainerLow: const Color(0xFF101A22),
-    surfaceContainer: const Color(0xFF13202A),
-    surfaceContainerHigh: const Color(0xFF172631),
-    surfaceContainerHighest: const Color(0xFF1C2D39),
+    primary: Bench.charge,
+    onPrimary: const Color(0xFF2B2100),
+    primaryContainer: const Color(0xFF3A3108),
+    onPrimaryContainer: const Color(0xFFFFE9A8),
+    secondary: Bench.positive,
+    onSecondary: const Color(0xFF00202B),
+    secondaryContainer: const Color(0xFF0E3444),
+    onSecondaryContainer: const Color(0xFFBDEFFF),
+    tertiary: Bench.negative,
+    surface: Bench.background,
+    onSurface: Bench.ink,
+    onSurfaceVariant: Bench.inkDim,
+    surfaceContainerLowest: const Color(0xFF070C11),
+    surfaceContainerLow: const Color(0xFF0D161D),
+    surfaceContainer: Bench.panel,
+    surfaceContainerHigh: const Color(0xFF142430),
+    surfaceContainerHighest: const Color(0xFF1B2E3B),
+    outline: const Color(0xFF2E4452),
+    outlineVariant: Bench.panelBorder,
+    error: Bench.error,
   );
   return base.copyWith(
     colorScheme: scheme,
-    scaffoldBackgroundColor: scheme.surface,
-    cardTheme: base.cardTheme.copyWith(color: scheme.surfaceContainerHigh),
+    scaffoldBackgroundColor: Bench.background,
+    canvasColor: Bench.background,
+    appBarTheme: base.appBarTheme.copyWith(
+      backgroundColor: Bench.background,
+      foregroundColor: Bench.ink,
+    ),
+    cardTheme: base.cardTheme.copyWith(
+      color: Bench.panel,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Bench.panelBorder),
+      ),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Color(0xFF0D161D),
+      modalBackgroundColor: Color(0xFF0D161D),
+      surfaceTintColor: Colors.transparent,
+      dragHandleColor: Color(0xFF3A5363),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: Bench.panelBorder),
+      ),
+    ),
+    dialogTheme: const DialogThemeData(
+      backgroundColor: Color(0xFF0F1B24),
+      surfaceTintColor: Colors.transparent,
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Color(0xFF1B2E3B),
+      contentTextStyle: TextStyle(color: Bench.ink),
+      actionTextColor: Bench.charge,
+    ),
+    dividerTheme: const DividerThemeData(color: Bench.panelBorder),
   );
 }

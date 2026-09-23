@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/l10n.dart';
-import '../../core/review_prompt.dart';
+import '../../bench/words.dart';
+import '../../bench/rating_nudge.dart';
 import '../engine/engine.dart';
 import '../format.dart';
 import '../pro.dart';
@@ -38,7 +38,11 @@ class EditorScreen extends StatefulWidget {
 }
 
 class _EditorScreenState extends State<EditorScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  /// The circuit being edited. Starts as the widget's; becomes a saved
+  /// project when a scratch example is saved as a copy.
+  late Project _project = widget.project;
+
   late final EditHistory _history = EditHistory(widget.project.document);
 
   /// What is on screen. Equal to the history's document except during a
@@ -92,12 +96,24 @@ class _EditorScreenState extends State<EditorScreen>
   // dispose() the first time an editor is closed without ever running,
   // which looks up an ancestor from a deactivated element and throws.
   late final Ticker _ticker;
+
+  /// Short-lived "energy" rings where a part just landed or a wire just
+  /// closed — feedback that the edit took, drawn over the canvas.
+  final List<_Burst> _bursts = [];
+  late final AnimationController _fx;
   Duration _lastTick = Duration.zero;
 
   @override
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick);
+    _fx = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 520))
+      ..addListener(() {
+        _bursts.removeWhere(
+            (b) => DateTime.now().difference(b.born).inMilliseconds > 520);
+        setState(() {});
+      });
     widget.store.storageTrouble.addListener(_onStorage);
   }
 
@@ -106,6 +122,7 @@ class _EditorScreenState extends State<EditorScreen>
     widget.store.storageTrouble.removeListener(_onStorage);
     _rerunTimer?.cancel();
     _ticker.dispose();
+    _fx.dispose();
     widget.store.saveNow();
     super.dispose();
   }
@@ -115,6 +132,12 @@ class _EditorScreenState extends State<EditorScreen>
   }
 
   bool get _reduceMotion => MediaQuery.of(context).disableAnimations;
+
+  void _burst(Offset grid, Color color) {
+    if (_reduceMotion) return;
+    _bursts.add(_Burst(grid, color, DateTime.now()));
+    _fx.forward(from: 0);
+  }
 
   SchematicGeometry get _geometry =>
       SchematicGeometry(pixelsPerGrid: _view?.scale ?? 32);
@@ -130,7 +153,7 @@ class _EditorScreenState extends State<EditorScreen>
       if (_running) _flow = null;
       _selection = _selection.where(_exists).toSet();
     });
-    widget.store.updateDocument(widget.project, next);
+    widget.store.updateDocument(_project, next);
     if (_running) _scheduleRerun();
   }
 
@@ -144,8 +167,9 @@ class _EditorScreenState extends State<EditorScreen>
     setState(() {
       _doc = doc;
       _selection = _selection.where(_exists).toSet();
+      if (_running) _flow = null;
     });
-    widget.store.updateDocument(widget.project, doc);
+    widget.store.updateDocument(_project, doc);
     if (_running) _scheduleRerun();
   }
 
@@ -156,8 +180,9 @@ class _EditorScreenState extends State<EditorScreen>
     setState(() {
       _doc = doc;
       _selection = _selection.where(_exists).toSet();
+      if (_running) _flow = null;
     });
-    widget.store.updateDocument(widget.project, doc);
+    widget.store.updateDocument(_project, doc);
     if (_running) _scheduleRerun();
   }
 
@@ -177,6 +202,10 @@ class _EditorScreenState extends State<EditorScreen>
     final (next, part) = _doc.addPart(kind, origin);
     _commit(next, tr(zh: '添加 ${part.id}', en: 'Add ${part.id}'));
     setState(() => _selection = {part.id});
+    final pins = part.pins;
+    _burst(
+        Offset((pins.first.x + pins.last.x) / 2, (pins.first.y + pins.last.y) / 2),
+        Bench.positive);
   }
 
   /// The grid point nearest the middle of the screen where a new part does
@@ -255,7 +284,7 @@ class _EditorScreenState extends State<EditorScreen>
     final next = _doc.replacePart(flipped);
     _history.push(next, tr(zh: '拨动 ${part.id}', en: 'Flip ${part.id}'));
     setState(() => _doc = next);
-    widget.store.updateDocument(widget.project, next);
+    widget.store.updateDocument(_project, next);
     // A flip continues the running simulation from where it is, so a
     // capacitor charges from the voltage it had — that is the whole point
     // of a switch in a live circuit.
@@ -453,6 +482,7 @@ class _EditorScreenState extends State<EditorScreen>
           }
           HapticFeedback.lightImpact();
           _commit(next, tr(zh: '连线', en: 'Wire'));
+          _burst(Offset(b.x.toDouble(), b.y.toDouble()), Bench.charge);
         }
       default:
     }
@@ -579,7 +609,7 @@ class _EditorScreenState extends State<EditorScreen>
     });
     // Only a run the user asked for counts toward the review prompt's
     // "third completed simulation", not the reruns that follow edits.
-    if (await _startRun()) ReviewPrompt.noteCoreAction();
+    if (await _startRun()) RatingNudge.noteCoreAction();
   }
 
   void _stop() {
@@ -796,7 +826,9 @@ class _EditorScreenState extends State<EditorScreen>
           child: Column(
             children: [
               _TopBar(
-                name: widget.project.name,
+                name: _project.name,
+                scratch: _project.scratch,
+                onSaveCopy: _saveCopy,
                 canUndo: _history.canUndo,
                 canRedo: _history.canRedo,
                 undoLabel: _history.undoLabel,
@@ -836,6 +868,14 @@ class _EditorScreenState extends State<EditorScreen>
                     return Stack(
                       children: [
                         Positioned.fill(child: _canvas(run, sample, flagged)),
+                      if (_bursts.isNotEmpty)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: CustomPaint(
+                              painter: _BurstPainter(_bursts, _view!),
+                            ),
+                          ),
+                        ),
                         if (_doc.isEmpty) const _EmptyBench(),
                         Positioned(
                           left: 12,
@@ -996,10 +1036,35 @@ class _EditorScreenState extends State<EditorScreen>
   }
 
   Future<void> _rename() async {
-    final name = await showRenameDialog(context, widget.project.name);
+    if (_project.scratch) return _saveCopy();
+    final name = await showRenameDialog(context, _project.name);
     if (name == null || !mounted) return;
-    widget.store.rename(widget.project, name);
+    widget.store.rename(_project, name);
     setState(() {});
+  }
+
+  /// Turns a scratch example into one of the user's saved circuits.
+  Future<void> _saveCopy() async {
+    if (!_project.scratch) return;
+    if (widget.store.atProjectLimit) {
+      await showProSheet(
+        context,
+        reason: tr(
+          zh: '免费版保存 ${ProjectStore.freeProjects} 张电路图,你已经有了。示例可以随便运行和修改,只是不能再存一份。',
+          en: 'The free version keeps ${ProjectStore.freeProjects} circuit and you already have one. Examples still run and edit freely; they just cannot be saved as another.',
+        ),
+      );
+      return;
+    }
+    final saved = widget.store.create(_project.name, _doc);
+    HapticFeedback.mediumImpact();
+    setState(() => _project = saved);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr(
+          zh: '已存为「${saved.name}」,之后的每一步都会自动保存',
+          en: 'Saved as "${saved.name}". Every step from now on saves itself.')),
+    ));
   }
 
   void _showHelp() {
@@ -1051,6 +1116,8 @@ Future<String?> showRenameDialog(BuildContext context, String current) {
 class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.name,
+    required this.scratch,
+    required this.onSaveCopy,
     required this.canUndo,
     required this.canRedo,
     required this.undoLabel,
@@ -1066,6 +1133,8 @@ class _TopBar extends StatelessWidget {
   });
 
   final String name;
+  final bool scratch;
+  final VoidCallback onSaveCopy;
   final bool canUndo;
   final bool canRedo;
   final String? undoLabel;
@@ -1121,16 +1190,37 @@ class _TopBar extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(
-                        Icons.edit_outlined,
-                        size: 15,
-                        color: Bench.inkDim,
-                      ),
+                      if (scratch)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Bench.charge.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(tr(zh: '示例', en: 'Example'),
+                              style: const TextStyle(
+                                  color: Bench.charge,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700)),
+                        )
+                      else
+                        const Icon(
+                          Icons.edit_outlined,
+                          size: 15,
+                          color: Bench.inkDim,
+                        ),
                     ],
                   ),
                 ),
               ),
             ),
+            if (scratch)
+              IconButton(
+                tooltip: tr(zh: '存为我的电路', en: 'Save as my circuit'),
+                icon: const Icon(Icons.bookmark_add_outlined, color: Bench.charge),
+                onPressed: onSaveCopy,
+              ),
             IconButton(
               tooltip: undoLabel == null
                   ? tr(zh: '撤销', en: 'Undo')
@@ -1929,4 +2019,49 @@ class _HelpSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+class _Burst {
+  _Burst(this.grid, this.color, this.born);
+
+  final Offset grid;
+  final Color color;
+  final DateTime born;
+}
+
+/// Expanding rings and a flash at each fresh edit.
+class _BurstPainter extends CustomPainter {
+  _BurstPainter(this.bursts, this.view);
+
+  final List<_Burst> bursts;
+  final CanvasView view;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final now = DateTime.now();
+    for (final b in bursts) {
+      final t = (now.difference(b.born).inMilliseconds / 520).clamp(0.0, 1.0);
+      final e = Curves.easeOutCubic.transform(t);
+      final c = view.toScreenXY(b.grid.dx, b.grid.dy);
+      final r = view.scale * (0.3 + 1.6 * e);
+      canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5 * (1 - e) + 0.5
+          ..color = b.color.withValues(alpha: 0.85 * (1 - e)),
+      );
+      canvas.drawCircle(
+        c,
+        view.scale * 0.5 * (1 - e),
+        Paint()
+          ..color = b.color.withValues(alpha: 0.35 * (1 - e))
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BurstPainter old) => true;
 }

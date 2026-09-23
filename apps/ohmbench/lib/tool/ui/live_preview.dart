@@ -21,6 +21,7 @@ class LivePreview extends StatefulWidget {
     this.showLabels = false,
     this.margin = 1.6,
     this.maxScale = 40,
+    this.footer,
   });
 
   final SchematicDocument doc;
@@ -29,6 +30,10 @@ class LivePreview extends StatefulWidget {
   final bool showLabels;
   final double margin;
   final double maxScale;
+
+  /// Drawn under the circuit from the same run and cursor, so a strip of
+  /// scope trace can move in step with the charge above it.
+  final Widget Function(SimRun run, int sample)? footer;
 
   @override
   State<LivePreview> createState() => _LivePreviewState();
@@ -127,7 +132,11 @@ class _LivePreviewState extends State<LivePreview>
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final view = CanvasView.fit(widget.doc, constraints.biggest,
+      // With a footer, frame the circuit in the space above it.
+      final area = widget.footer == null
+          ? constraints.biggest
+          : Size(constraints.maxWidth, constraints.maxHeight - 58);
+      final view = CanvasView.fit(widget.doc, area,
           margin: widget.margin, maxScale: widget.maxScale);
       final run = _run;
       final frame = run == null || _flow == null
@@ -139,7 +148,7 @@ class _LivePreviewState extends State<LivePreview>
               flow: _flow!,
               chargeOffsets: _offsets,
             );
-      return CustomPaint(
+      final painter = CustomPaint(
         size: constraints.biggest,
         painter: SchematicPainter(
           doc: widget.doc,
@@ -150,6 +159,12 @@ class _LivePreviewState extends State<LivePreview>
           markOpenPins: false,
         ),
       );
+      final footer = widget.footer;
+      if (footer == null || run == null) return painter;
+      return Stack(children: [
+        Positioned.fill(child: painter),
+        Positioned(left: 0, right: 0, bottom: 0, child: footer(run, _sample)),
+      ]);
     });
   }
 }

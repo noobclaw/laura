@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/l10n.dart';
+import '../../bench/words.dart';
 import '../examples.dart';
 import '../pro.dart';
 import '../schematic/document.dart';
@@ -8,6 +8,8 @@ import '../store.dart';
 import 'editor_screen.dart';
 import 'lab_theme.dart';
 import 'live_preview.dart';
+import 'scope.dart';
+import '../sim/simulation.dart';
 import 'trouble.dart';
 
 /// The library: a live bench up top, your circuits, and starter examples.
@@ -69,11 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
     await _open(project);
   }
 
-  Future<void> _createFromExample(ExampleCircuit example) async {
-    if (!await _roomForAnother()) return;
-    final project = store.create(example.title, example.build());
-    await _open(project);
-  }
+  /// Examples open as scratch circuits: free to run and edit, saved only
+  /// when the user asks for a copy.
+  Future<void> _createFromExample(ExampleCircuit example) =>
+      _open(store.scratch(example.title, example.build()));
 
   Future<void> _duplicate(Project project) async {
     if (!await _roomForAnother()) return;
@@ -226,23 +227,39 @@ class _HeroBench extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(26),
       child: Container(
-        height: 252,
-        decoration: const BoxDecoration(color: Bench.background),
+        height: 318,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: Bench.panelBorder),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Bench.backgroundTop, Bench.background],
+          ),
+        ),
         child: Stack(
           children: [
             Positioned(
               left: 0,
               right: 0,
               top: 0,
-              height: 160,
-              child: LivePreview(doc: doc, live: true, margin: 1.4, maxScale: 30),
+              height: 212,
+              // The rectifier runs, and a strip of scope under it traces the
+              // smoothed output in step with the charge above.
+              child: LivePreview(
+                doc: doc,
+                live: true,
+                margin: 1.3,
+                maxScale: 30,
+                footer: (run, sample) => _HeroScope(doc: doc, run: run, sample: sample),
+              ),
             ),
             // Fade the bench into the caption area.
             const Positioned(
               left: 0,
               right: 0,
-              top: 120,
-              height: 50,
+              top: 200,
+              height: 30,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -303,6 +320,37 @@ class _HeroBench extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A miniature scope under the hero circuit: the capacitor's voltage over the
+/// whole run, with the playback cursor riding it.
+class _HeroScope extends StatelessWidget {
+  const _HeroScope({required this.doc, required this.run, required this.sample});
+
+  final SchematicDocument doc;
+  final SimRun run;
+  final int sample;
+
+  static final Expando<ScopeTrace> _cache = Expando();
+
+  @override
+  Widget build(BuildContext context) {
+    String? node;
+    for (final p in doc.parts) {
+      if (p.kind == PartKind.capacitor) node = run.nodeAt(p.pins.first);
+    }
+    final values = node == null ? null : run.nodeSeries[node];
+    if (values == null || values.isEmpty) return const SizedBox.shrink();
+    final trace = _cache[run] ??=
+        ScopeTrace(values: values, window: run.window, unit: 'V');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: SizedBox(
+        height: 46,
+        child: CustomPaint(painter: ScopePainter(trace: trace, cursor: sample)),
       ),
     );
   }
