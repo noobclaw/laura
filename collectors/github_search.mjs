@@ -313,6 +313,28 @@ export const QUERIES = [
   { key: 'coffee', q: 'topic:coffee stars:>20' },                      // total 72; artisan AGPL-3, Beanconqueror GPL-3, Cofi GPL-3 (Kotlin brew timer)
   { key: 'gardening', q: 'topic:gardening stars:>20' },                // total 23; plant-it GPL-3 Dart, hortusfox MIT, OpenFarm MIT (data)
   { key: 'sailing', q: 'topic:sailing stars:>10' },                    // total 38; OpenCPN GPL-2, marine-api LGPL-3, XyGrib GPL-3
+  // 09-23: GitHub side hit its 4th straight day of 0 new candidates and the 86-group
+  // pool came back 924 -> 924 (1 new repo), so five more craft/hobby circles, each
+  // hand-probed the same morning (total_count + page-1 head) and store-checked:
+  //   timegrapher -> Watch Tuner $7.99/★3.76/80, ClockMaster $49.99/★3.85/52, Timegrapher X
+  //                  $29.99/★4.22/23, Watch Tuner Lite $1.99/★3.21/38; free tickIQ ★4.60/785
+  //   cross-stitch -> X-Stitch App $2.99/★4.55/1,406 (ver 2022), StitchSketch $9.99/★4.09/403;
+  //                  tracker side is Markup R-XP (free+sub ★4.76/2,969)
+  //   embroidery  -> AcuDesign $49.99/★2.04/47 (Janome, ver 2022), DRAWings Snap $29.99/★3.43/47 (ver 2022)
+  //   sourdough   -> BreadMe $2.99/★4.70/40, Bread Boss $5.99/★4.27/33 (ver 2023)
+  //   luthier     -> no on-target paid entity; wired for the tap-tone / fret-math algorithms only
+  { key: 'timegrapher', q: 'timegrapher in:name,description,topics' },  // total 64; vacaboja/tg GPL-2 (C, the reference), qtg GPL-3, mac-timegrapher GPL-2
+  { key: 'cross-stitch', q: 'topic:cross-stitch' },                     // total 42; tiler MIT, DMC-Image-Converter, kxstitch GPL-2, Cstitch GPL-3
+  { key: 'embroidery', q: 'topic:embroidery stars:>10' },               // total 23; inkstitch GPL-3, pyembroidery MIT (file formats), Embroidermodder zlib
+  { key: 'sourdough', q: 'topic:sourdough' },                           // total 45; the-bread-code MIT, sourdoc MPL-2 (Dart)
+  { key: 'luthier', q: 'topic:luthier' },                               // total 13; guitar_tap GPL-3 (tap-tone FFT), fret calculators
+  // Probed 09-23 and NOT wired in (homonyms / hardware / giant rule):
+  //   bonsai (1-bit LLM models), horse (Delphi web framework), candle (Rust ML + K-line charts),
+  //   reloading (hot-reload tooling) -> homonym pollution.
+  //   hydroponics total 30 = ESP/Arduino controllers; store head B-hyve 330k -> giant rule.
+  //   bicycle / cycling -> bike computers + training platforms; store head Strava 374k -> giant rule.
+  //   dog-training 19 / quilting 11 / poultry 56 / pool-chemistry 3 / soap-making 1 /
+  //   leathercraft 3 / taxidermy 5 -> near-empty or off-target (0~1★ rows).
   // Probed 09-22 and NOT wired in:
   //   ceramics / glaze -> total 5 / 26, only openglaze (MIT, 4★) on target; store `glaze calculator`
   //               returns generic calculators, `pottery` returns games = no paid face.
