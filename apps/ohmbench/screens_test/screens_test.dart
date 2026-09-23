@@ -34,6 +34,9 @@ Future<void> _loadFonts() async {
   ]);
   await family('MaterialIcons', ['$_flutter\\materialicons-regular.otf']);
   await family('Deng', [r'C:\Windows\Fonts\Deng.ttf', r'C:\Windows\Fonts\Dengb.ttf']);
+  // Text painted straight onto canvases (part labels) names no family and
+  // falls back to the test default; give that default real glyphs too.
+  await family('FlutterTest', ['$_flutter\\roboto-regular.ttf']);
 }
 
 ThemeData _theme(Brightness b) {
