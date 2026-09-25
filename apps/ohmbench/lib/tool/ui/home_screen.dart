@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 
 import '../../bench/words.dart';
 import '../examples.dart';
+import '../format.dart';
 import '../pro.dart';
 import '../schematic/document.dart';
+import '../sim/simulation.dart';
 import '../store.dart';
+import 'brand.dart';
 import 'editor_screen.dart';
+import 'haptics.dart';
 import 'lab_theme.dart';
 import 'live_preview.dart';
+import 'schematic_painter.dart';
 import 'scope.dart';
-import '../sim/simulation.dart';
+import 'settings_screen.dart';
 import 'trouble.dart';
 
-/// The library: a live bench up top, your circuits, and starter examples.
+/// The first screen is the bench itself: a rectifier running edge to edge,
+/// then your circuits and the examples, with the two actions docked in the
+/// thumb zone. No app bar, no cards (brief PLAN.md §十·五).
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.store});
 
@@ -26,30 +33,52 @@ class _HomeScreenState extends State<HomeScreen> {
   ProjectStore get store => widget.store;
 
   /// Ids fading out before they are removed from the store, so a deleted
-  /// card leaves the list with an animation instead of vanishing.
+  /// row leaves with an animation instead of vanishing.
   final Set<String> _leaving = {};
 
-  late final SchematicDocument _heroDoc =
-      kExamples.firstWhere((e) => e.id == 'rectifier').build();
+  /// Rows on screen at first paint do not animate in; only rows that
+  /// arrive later (a duplicate, an undo) do.
+  late final Set<String> _firstPaint = {for (final p in store.projects) p.id};
 
-  Future<void> _open(Project project) async {
-    await Navigator.of(context).push(PageRouteBuilder<void>(
-      transitionDuration: const Duration(milliseconds: 320),
-      reverseTransitionDuration: const Duration(milliseconds: 240),
-      pageBuilder: (_, _, _) => EditorScreen(store: store, project: project),
-      transitionsBuilder: (_, animation, _, child) {
-        final curved =
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-        return FadeTransition(
-          opacity: curved,
-          child: ScaleTransition(
-            scale: Tween(begin: 0.96, end: 1.0).animate(curved),
-            child: child,
-          ),
-        );
-      },
+  static const String _heroId = 'rectifier';
+
+  /// The hero's loop stops once it has scrolled off screen (第四节).
+  final ScrollController _scroll = ScrollController();
+  bool _heroVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(() {
+      // The hero is ~320 pt plus the status bar; past that it is gone.
+      final visible = _scroll.offset < 360;
+      if (visible != _heroVisible) setState(() => _heroVisible = visible);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  late final ExampleCircuit _heroExample =
+      kExamples.firstWhere((e) => e.id == _heroId);
+  late final SchematicDocument _heroDoc = _heroExample.build();
+
+  Future<void> _open(Project project, {bool autoRun = false}) async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) =>
+          EditorScreen(store: store, project: project, autoRun: autoRun),
     ));
     if (mounted) setState(() {});
+  }
+
+  void _openSettings() {
+    BenchHaptics.select();
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => OhmSettingsScreen(store: store),
+    ));
   }
 
   Future<bool> _roomForAnother() async {
@@ -66,18 +95,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _createBlank() async {
     if (!await _roomForAnother()) return;
+    BenchHaptics.commit();
     final project = store.create(
         tr(zh: '新电路', en: 'New circuit'), const SchematicDocument());
     await _open(project);
   }
 
-  /// Examples open as scratch circuits: free to run and edit, saved only
-  /// when the user asks for a copy.
-  Future<void> _createFromExample(ExampleCircuit example) =>
-      _open(store.scratch(example.title, example.build()));
+  /// Examples open as scratch circuits, already running: free to run and
+  /// edit, saved only when the user asks for a copy.
+  Future<void> _openExample(ExampleCircuit example) {
+    BenchHaptics.select();
+    return _open(store.scratch(example.title, example.build()),
+        autoRun: true);
+  }
 
   Future<void> _duplicate(Project project) async {
     if (!await _roomForAnother()) return;
+    BenchHaptics.commit();
     store.duplicate(project, tr(zh: '副本', en: 'copy'));
   }
 
@@ -86,83 +120,101 @@ class _HomeScreenState extends State<HomeScreen> {
     if (name != null) store.rename(project, name);
   }
 
+  /// Deletes at once and offers Undo — no "are you sure" (F4).
   Future<void> _delete(Project project) async {
+    final messenger = ScaffoldMessenger.of(context);
     final index = store.projects.indexOf(project);
+    BenchHaptics.commit();
     setState(() => _leaving.add(project.id));
-    await Future<void>.delayed(const Duration(milliseconds: 240));
+    await Future<void>.delayed(
+        BenchMotion.of(context, BenchMotion.exit(BenchMotion.medium)));
     if (!mounted) return;
     _leaving.remove(project.id);
     store.delete(project);
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(SnackBar(
-      content: Text(tr(zh: '已删除「${project.name}」', en: 'Deleted "${project.name}"')),
-      action: SnackBarAction(
-        label: tr(zh: '撤销', en: 'Undo'),
-        onPressed: () => store.restore(project, index),
-      ),
-    ));
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(
+        duration: MediaQuery.accessibleNavigationOf(context)
+            ? BenchMotion.undoWindow * 5
+            : BenchMotion.undoWindow,
+        content: Text(tr(
+            zh: '已删除「${project.name}」', en: 'Deleted "${project.name}"')),
+        action: SnackBarAction(
+          label: tr(zh: '撤销', en: 'Undo'),
+          onPressed: () {
+            if (store.restore(project, index) || !mounted) return;
+            // The free slot was taken meanwhile: say why nothing came back.
+            showProSheet(
+              context,
+              reason: tr(
+                zh: '「${project.name}」没能恢复:免费版只保存 ${ProjectStore.freeProjects} 张电路,这个位置已经被新电路占了。解锁 Pro 或删掉新电路后可再建。',
+                en: '"${project.name}" could not come back: the free version keeps ${ProjectStore.freeProjects} circuit and a new one has taken the slot. Unlock Pro, or delete the new one.',
+              ),
+            );
+          },
+        ),
+      ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: Listenable.merge([store, store.storageTrouble]),
-      builder: (context, _) {
-        final cs = Theme.of(context).colorScheme;
-        final text = Theme.of(context).textTheme;
-        return CustomScrollView(
-          slivers: [
-            if (store.storageTrouble.value != null || store.savingBlocked)
+    return Scaffold(
+      backgroundColor: Bench.background,
+      bottomNavigationBar: _Dock(onSettings: _openSettings, onNew: _createBlank),
+      body: ListenableBuilder(
+        listenable: Listenable.merge([store, store.storageTrouble]),
+        builder: (context, _) {
+          final trouble =
+              store.storageTrouble.value != null || store.savingBlocked;
+          return CustomScrollView(
+            controller: _scroll,
+            slivers: [
               SliverToBoxAdapter(
-                  child: _TroubleCard(
-                      text: storageTroubleText(store.storageTrouble.value,
-                          blocked: store.savingBlocked))),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              sliver: SliverToBoxAdapter(
-                child: _HeroBench(doc: _heroDoc, onNew: _createBlank),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 10),
-              sliver: SliverToBoxAdapter(
-                child: Row(
-                  children: [
-                    Text(tr(zh: '我的电路', en: 'Your circuits'),
-                        style: text.titleLarge),
-                    const Spacer(),
-                    if (!store.pro)
-                      _CountChip(
-                        label: '${store.projects.length} / ${ProjectStore.freeProjects}',
-                        tooltip: tr(zh: '免费版可保存的数量', en: 'Circuits the free version keeps'),
-                      ),
-                  ],
+                child: TickerMode(
+                  enabled: _heroVisible,
+                  child: _BenchHero(
+                    doc: _heroDoc,
+                    title: _heroExample.title,
+                    onOpen: () => _openExample(_heroExample),
+                  ),
                 ),
               ),
-            ),
-            if (store.projects.isEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverToBoxAdapter(
-                  child: _EmptyLibrary(onNew: _createBlank),
+              if (trouble)
+                SliverToBoxAdapter(
+                  child: _TroubleBanner(
+                    text: storageTroubleText(store.storageTrouble.value,
+                        blocked: store.savingBlocked),
+                  ),
                 ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList.separated(
+              SliverToBoxAdapter(
+                child: _SectionHeader(
+                  title: tr(zh: '我的电路', en: 'Your circuits'),
+                  trailing: store.pro
+                      ? null
+                      : _CountPill(
+                          used: store.projects.length,
+                          limit: ProjectStore.freeProjects,
+                        ),
+                ),
+              ),
+              if (store.projects.isEmpty)
+                SliverToBoxAdapter(child: _EmptyLibrary(onNew: _createBlank))
+              else
+                SliverList.builder(
                   itemCount: store.projects.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
                     final project = store.projects[i];
                     return _Appear(
                       key: ValueKey(project.id),
+                      animateIn: !_firstPaint.contains(project.id),
                       leaving: _leaving.contains(project.id),
-                      child: _ProjectCard(
+                      child: _ProjectRow(
                         project: project,
+                        first: i == 0,
                         onOpen: () {
-                          if (!_leaving.contains(project.id)) _open(project);
+                          if (_leaving.contains(project.id)) return;
+                          BenchHaptics.select();
+                          _open(project);
                         },
                         onRename: () => _rename(project),
                         onDuplicate: () => _duplicate(project),
@@ -171,150 +223,123 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-              ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 4),
-              sliver: SliverToBoxAdapter(
-                child: Text(tr(zh: '从示例开始', en: 'Start from an example'),
-                    style: text.titleLarge),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-              sliver: SliverToBoxAdapter(
-                child: Text(
-                  tr(
-                    zh: '每一个都能直接运行 —— 打开后按右下角的播放键',
-                    en: 'Every one runs as-is — open it and press play',
+              SliverToBoxAdapter(
+                child: _SectionHeader(
+                  title: tr(zh: '示例', en: 'Examples'),
+                  caption: tr(
+                    zh: '打开就在运行,改哪儿都行',
+                    en: 'Each one opens already running. Change anything.',
                   ),
-                  style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-              sliver: SliverGrid.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 260,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 0.92,
-                ),
-                itemCount: kExamples.length,
-                itemBuilder: (context, i) => _ExampleCard(
-                  example: kExamples[i],
-                  onTap: () => _createFromExample(kExamples[i]),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                    BenchSpace.l, 0, BenchSpace.l, BenchSpace.xl),
+                sliver: SliverToBoxAdapter(
+                  child: _ExampleGrid(
+                    examples: [
+                      for (final e in kExamples)
+                        if (e.id != _heroId) e,
+                      _heroExample,
+                    ],
+                    onOpen: _openExample,
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 }
 
-/// The signature scene: a rectifier actually running on the bench — cyan
-/// swelling and fading with the sine, charge pulsing through the diode.
-class _HeroBench extends StatelessWidget {
-  const _HeroBench({required this.doc, required this.onNew});
+// ------------------------------------------------------------------- hero
+
+/// The signature scene: a rectifier actually running, edge to edge — wires
+/// tinted by their solved voltage, charge moving at the solved current, and
+/// a strip of scope plus a readout tracking the capacitor. Tapping it opens
+/// this very circuit, already running.
+class _BenchHero extends StatelessWidget {
+  const _BenchHero({
+    required this.doc,
+    required this.title,
+    required this.onOpen,
+  });
 
   final SchematicDocument doc;
-  final VoidCallback onNew;
+  final String title;
+  final VoidCallback onOpen;
+
+  static final Expando<ScopeTrace> _traces = Expando();
+
+  /// The capacitor's node: what the readout and the scope strip follow.
+  String? _outNode(SimRun run) {
+    for (final p in doc.parts) {
+      if (p.kind == PartKind.capacitor) return run.nodeAt(p.pins.first);
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(26),
-      child: Container(
-        height: 318,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: Bench.panelBorder),
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Bench.backgroundTop, Bench.background],
-          ),
+    final top = MediaQuery.paddingOf(context).top;
+    return Pressable(
+      onTap: onOpen,
+      label: tr(
+          zh: '打开「$title」并运行', en: 'Open "$title" and run it'),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Bench.panelBorder)),
         ),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              height: 212,
-              // The rectifier runs, and a strip of scope under it traces the
-              // smoothed output in step with the charge above.
-              child: LivePreview(
-                doc: doc,
-                live: true,
-                margin: 1.3,
-                maxScale: 30,
-                footer: (run, sample) => _HeroScope(doc: doc, run: run, sample: sample),
-              ),
-            ),
-            // Fade the bench into the caption area.
-            const Positioned(
-              left: 0,
-              right: 0,
-              top: 200,
-              height: 30,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0x000A1016), Bench.background],
+            SizedBox(
+              height: top + 320,
+              child: ExcludeSemantics(
+                child: ClipRect(
+                  child: LivePreview(
+                  doc: doc,
+                  live: true,
+                  margin: 1.3,
+                  maxScale: 30,
+                  footerHeight: 66,
+                  headerHeight: top + 64,
+                  footer: (run, sample) => _scope(run, sample),
+                  overlay: (run, sample) =>
+                      _TopRow(top: top, readout: _readout(run, sample)),
                   ),
                 ),
               ),
             ),
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: 18,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  BenchSpace.l, BenchSpace.m, BenchSpace.l, BenchSpace.l),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           tr(zh: '画出来,跑起来', en: 'Draw it. Run it.'),
-                          style: const TextStyle(
-                            color: Bench.ink,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: BenchSpace.xs),
                         Text(
                           tr(
-                            zh: 'SPICE 同口径 · 全离线 · 作品丢不了',
-                            en: 'SPICE-grade · fully offline · nothing lost',
+                            zh: '上面这块半波整流正在真算:颜色是电压,亮点是电流。',
+                            en: 'This half-wave rectifier is really being solved: colour is voltage, the dots are current.',
                           ),
-                          style: const TextStyle(
-                              color: Bench.inkDim, fontSize: 13.5, height: 1.3),
+                          style: BenchType.bodyStyle(color: Bench.inkDim),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Bench.charge,
-                      foregroundColor: const Color(0xFF2B2100),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                    ),
-                    onPressed: onNew,
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(tr(zh: '新电路', en: 'New')),
-                  ),
+                  const SizedBox(width: BenchSpace.m),
+                  const _RunHint(),
                 ],
               ),
             ),
@@ -323,116 +348,197 @@ class _HeroBench extends StatelessWidget {
       ),
     );
   }
-}
 
-/// A miniature scope under the hero circuit: the capacitor's voltage over the
-/// whole run, with the playback cursor riding it.
-class _HeroScope extends StatelessWidget {
-  const _HeroScope({required this.doc, required this.run, required this.sample});
-
-  final SchematicDocument doc;
-  final SimRun run;
-  final int sample;
-
-  static final Expando<ScopeTrace> _cache = Expando();
-
-  @override
-  Widget build(BuildContext context) {
-    String? node;
-    for (final p in doc.parts) {
-      if (p.kind == PartKind.capacitor) node = run.nodeAt(p.pins.first);
-    }
+  Widget _scope(SimRun run, int sample) {
+    final node = _outNode(run);
     final values = node == null ? null : run.nodeSeries[node];
     if (values == null || values.isEmpty) return const SizedBox.shrink();
-    final trace = _cache[run] ??=
+    final trace = _traces[run] ??=
         ScopeTrace(values: values, window: run.window, unit: 'V');
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.fromLTRB(
+          BenchSpace.l, 0, BenchSpace.l, BenchSpace.m),
       child: SizedBox(
-        height: 46,
+        height: 50,
         child: CustomPaint(painter: ScopePainter(trace: trace, cursor: sample)),
       ),
     );
   }
+
+  String? _readout(SimRun run, int sample) {
+    final node = _outNode(run);
+    final values = node == null ? null : run.nodeSeries[node];
+    if (values == null || values.isEmpty) return null;
+    return formatSi(values[sample.clamp(0, values.length - 1)], 'V');
+  }
 }
 
-class _CountChip extends StatelessWidget {
-  const _CountChip({required this.label, required this.tooltip});
+/// Wordmark on the left, the live capacitor voltage on the right.
+class _TopRow extends StatelessWidget {
+  const _TopRow({required this.top, required this.readout});
 
-  final String label;
-  final String tooltip;
+  final double top;
+  final String? readout;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: cs.secondaryContainer,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(label,
-            style: TextStyle(
-                color: cs.onSecondaryContainer,
-                fontWeight: FontWeight.w600,
-                fontSize: 12.5,
-                fontFeatures: const [FontFeature.tabularFigures()])),
-      ),
-    );
-  }
-}
-
-/// Fade-and-rise on first appearance; fade-and-shrink while [leaving].
-class _Appear extends StatefulWidget {
-  const _Appear({super.key, required this.child, this.leaving = false});
-
-  final Widget child;
-  final bool leaving;
-
-  @override
-  State<_Appear> createState() => _AppearState();
-}
-
-class _AppearState extends State<_Appear> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 260))
-    ..forward();
-
-  @override
-  void didUpdateWidget(covariant _Appear old) {
-    super.didUpdateWidget(old);
-    if (widget.leaving && !old.leaving) _c.reverse();
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final curved = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
-    return SizeTransition(
-      sizeFactor: curved,
+    // The readout is a hero number: it may cap its growth at 1.5× (F10).
+    final scaler =
+        MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.5);
+    return Align(
       alignment: Alignment.topCenter,
-      child: FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween(begin: const Offset(0, 0.12), end: Offset.zero)
-              .animate(curved),
-          child: widget.child,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+            BenchSpace.l, top + BenchSpace.m, BenchSpace.l, 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const OhmMark(size: 18),
+            const SizedBox(width: BenchSpace.s),
+            const OhmWordmark(size: BenchType.title),
+            const SizedBox(width: BenchSpace.m),
+            if (readout != null)
+              Expanded(
+                child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    readout!,
+                    textAlign: TextAlign.end,
+                    textScaler: scaler,
+                    style: BenchType.monoStyle(BenchType.display,
+                        bold: true, color: Bench.positive),
+                  ),
+                  Text(
+                    tr(zh: '电容电压', en: 'across C'),
+                    textAlign: TextAlign.end,
+                    textScaler: scaler,
+                    style: BenchType.monoStyle(BenchType.label,
+                        color: Bench.inkDim),
+                  ),
+                ],
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _ProjectCard extends StatelessWidget {
-  const _ProjectCard({
+/// "Run it" affordance on the hero: an outlined pill with a drawn play
+/// glyph. The whole hero is the button; this only says so.
+class _RunHint extends StatelessWidget {
+  const _RunHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Container(
+        constraints: const BoxConstraints(minHeight: BenchSpace.row),
+        padding: const EdgeInsets.symmetric(horizontal: BenchSpace.l),
+        decoration: BoxDecoration(
+          borderRadius: BenchRadius.pillAll,
+          border: Border.all(color: Bench.outline),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const BenchGlyph(GlyphKind.play, size: 14, color: Bench.charge),
+            const SizedBox(width: BenchSpace.s),
+            Text(tr(zh: '打开', en: 'Open'),
+                style: BenchType.bodyStyle(weight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --------------------------------------------------------------- sections
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title, this.caption, this.trailing});
+
+  final String title;
+  final String? caption;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          BenchSpace.l, BenchSpace.xl, BenchSpace.l, BenchSpace.s),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(title,
+                      style: Theme.of(context).textTheme.titleLarge),
+                ),
+              ),
+              ?trailing,
+            ],
+          ),
+          if (caption != null) ...[
+            const SizedBox(height: BenchSpace.xs),
+            Text(caption!, style: BenchType.bodyStyle(color: Bench.inkDim)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Free-tier usage as a gauge reading: "1 / 1".
+class _CountPill extends StatelessWidget {
+  const _CountPill({required this.used, required this.limit});
+
+  final int used;
+  final int limit;
+
+  @override
+  Widget build(BuildContext context) {
+    final full = used >= limit;
+    // Never colour alone: the words say "full" too. Over the limit (Pro
+    // lapsed, or created before the cap) reads as a count, not "2 / 1".
+    final text = used > limit
+        ? tr(zh: '$used 张 · 免费上限 $limit', en: '$used · free limit $limit')
+        : full
+            ? tr(zh: '$used / $limit · 已满', en: '$used / $limit · full')
+            : '$used / $limit';
+    return Tooltip(
+      message: tr(zh: '免费版可保存的数量', en: 'Circuits the free version keeps'),
+      child: Semantics(
+        label: tr(
+            zh: '已保存 $used 张,免费版上限 $limit 张',
+            en: '$used of $limit free circuits saved'),
+        excludeSemantics: true,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: BenchSpace.m, vertical: BenchSpace.xs),
+          decoration: BoxDecoration(
+            borderRadius: BenchRadius.pillAll,
+            border: Border.all(color: full ? Bench.warning : Bench.outline),
+          ),
+          child: Text(text,
+              style: BenchType.monoStyle(BenchType.label,
+                  color: full ? Bench.warning : Bench.inkDim)),
+        ),
+      ),
+    );
+  }
+}
+
+/// A saved circuit as one ruled row: its drawing, its name, its size.
+class _ProjectRow extends StatelessWidget {
+  const _ProjectRow({
     required this.project,
+    required this.first,
     required this.onOpen,
     required this.onRename,
     required this.onDuplicate,
@@ -440,6 +546,7 @@ class _ProjectCard extends StatelessWidget {
   });
 
   final Project project;
+  final bool first;
   final VoidCallback onOpen;
   final VoidCallback onRename;
   final VoidCallback onDuplicate;
@@ -447,92 +554,86 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
     final parts = project.partCount;
-    return Card(
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onOpen,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: SizedBox(
-                  width: 108,
-                  height: 72,
-                  child: project.document.isEmpty
-                      ? const ColoredBox(
-                          color: Bench.background,
-                          child: Icon(Icons.grid_4x4_rounded,
-                              color: Bench.gridDot, size: 30),
-                        )
-                      : LivePreview(
-                          doc: project.document,
-                          showGrid: false,
-                          margin: 1.0,
-                          maxScale: 20,
+    final meta =
+        '${tr(zh: '$parts 个元件', en: '$parts ${parts == 1 ? 'part' : 'parts'}')} · ${_ago(project.updated)}';
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          top: first
+              ? const BorderSide(color: Bench.panelBorder)
+              : BorderSide.none,
+          bottom: const BorderSide(color: Bench.panelBorder),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Pressable(
+              onTap: onOpen,
+              label: '${project.name}, $meta',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                    BenchSpace.l, BenchSpace.m, 0, BenchSpace.m),
+                child: ExcludeSemantics(
+                  child: Row(
+                    children: [
+                      _Sheet(
+                        width: 88,
+                        height: 60,
+                        child: project.document.isEmpty
+                            ? const SizedBox.shrink()
+                            : LivePreview(
+                                doc: project.document,
+                                showGrid: false,
+                                margin: 1.0,
+                                maxScale: 20,
+                              ),
+                      ),
+                      const SizedBox(width: BenchSpace.m),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(project.name,
+                                style: Theme.of(context).textTheme.titleMedium),
+                            const SizedBox(height: BenchSpace.xs),
+                            Text(meta,
+                                style: BenchType.bodyStyle(
+                                    color: Bench.inkDim,
+                                    size: BenchType.label)),
+                          ],
                         ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(project.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: text.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${tr(zh: '$parts 个元件', en: '$parts ${parts == 1 ? 'part' : 'parts'}')} · ${_ago(project.updated)}',
-                      style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                tooltip: tr(zh: '更多', en: 'More'),
-                onSelected: (v) => switch (v) {
-                  'rename' => onRename(),
-                  'duplicate' => onDuplicate(),
-                  _ => onDelete(),
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: 'rename',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.edit_outlined),
-                      title: Text(tr(zh: '重命名', en: 'Rename')),
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'duplicate',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.copy_rounded),
-                      title: Text(tr(zh: '复制', en: 'Duplicate')),
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.delete_outline, color: cs.error),
-                      title: Text(tr(zh: '删除', en: 'Delete'),
-                          style: TextStyle(color: cs.error)),
-                    ),
-                  ),
-                ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            tooltip: tr(zh: '更多操作', en: 'More actions'),
+            icon: const Icon(Icons.more_vert_rounded, color: Bench.inkDim),
+            onSelected: (v) => switch (v) {
+              'rename' => onRename(),
+              'duplicate' => onDuplicate(),
+              _ => onDelete(),
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                  value: 'rename', child: Text(tr(zh: '重命名', en: 'Rename'))),
+              PopupMenuItem(
+                  value: 'duplicate',
+                  child: Text(tr(zh: '复制一份', en: 'Duplicate'))),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(tr(zh: '删除', en: 'Delete'),
+                    style: const TextStyle(color: Bench.error)),
               ),
             ],
           ),
-        ),
+          const SizedBox(width: BenchSpace.xs),
+        ],
       ),
     );
   }
@@ -549,153 +650,287 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
+/// A small drawing sheet: the board colour, a hairline edge, radius 4.
+class _Sheet extends StatelessWidget {
+  const _Sheet({required this.child, this.width, required this.height});
+
+  final Widget child;
+  final double? width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Bench.background,
+        borderRadius: BenchRadius.smAll,
+        border: Border.all(color: Bench.panelBorder),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Nothing saved yet: the slot shows a faint ghost of the circuit that could
+/// be here — drawn by the same painter as a real one — and the way to start.
 class _EmptyLibrary extends StatelessWidget {
   const _EmptyLibrary({required this.onNew});
 
   final VoidCallback onNew;
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  cs.primary.withValues(alpha: 0.28),
-                  cs.primary.withValues(alpha: 0.04),
-                ]),
-              ),
-              child: Icon(Icons.electric_bolt_rounded, color: cs.primary),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr(zh: '还没有电路', en: 'No circuits yet'),
-                      style: text.titleMedium),
-                  const SizedBox(height: 4),
-                  Text(
-                    tr(
-                      zh: '开一张空白画布,或者挑下面一个示例改起来。每一步都自动保存。',
-                      en: 'Open a blank bench, or pick an example below to modify. Every step saves itself.',
-                    ),
-                    style: text.bodyMedium
-                        ?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact),
-                    onPressed: onNew,
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(tr(zh: '空白画布', en: 'Blank bench')),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ExampleCard extends StatelessWidget {
-  const _ExampleCard({required this.example, required this.onTap});
-
-  final ExampleCircuit example;
-  final VoidCallback onTap;
+  static final SchematicDocument _ghost =
+      kExamples.firstWhere((e) => e.id == 'divider').build();
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
-    return Card(
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: LivePreview(
-                    doc: _docs[example.id] ??= example.build(),
-                    margin: 1.2,
-                    maxScale: 22,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: BenchSpace.l),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ExcludeSemantics(
+            child: _Sheet(
+              height: 112,
+              child: LayoutBuilder(
+                builder: (context, c) => CustomPaint(
+                  size: c.biggest,
+                  painter: SchematicPainter(
+                    doc: _ghost,
+                    view: CanvasView.fit(_ghost, c.biggest,
+                        margin: 1.4, maxScale: 22),
+                    showLabels: false,
+                    markOpenPins: false,
+                    opacity: 0.22,
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(example.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 3),
-                  Text(example.blurb,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall
-                          ?.copyWith(color: cs.onSurfaceVariant, height: 1.3)),
-                ],
-              ),
+          ),
+          const SizedBox(height: BenchSpace.m),
+          Text(tr(zh: '第一张电路会出现在这里', en: 'Your first circuit lands here'),
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: BenchSpace.xs),
+          Text(
+            tr(
+              zh: '新建一张空白电路,或打开下面任意一个示例改起来。每一步都自动保存,关掉应用也不会丢。',
+              en: 'Start a new circuit, or open any example below and change it. Every step saves itself, even if the app is closed.',
             ),
-          ],
+            style: BenchType.bodyStyle(color: Bench.inkDim),
+          ),
+          const SizedBox(height: BenchSpace.s),
+          OutlinedButton(
+            onPressed: onNew,
+            child: Text(tr(zh: '新电路', en: 'New circuit')),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExampleGrid extends StatelessWidget {
+  const _ExampleGrid({required this.examples, required this.onOpen});
+
+  final List<ExampleCircuit> examples;
+  final ValueChanged<ExampleCircuit> onOpen;
+
+  static final Map<String, SchematicDocument> _docs = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < examples.length; i += 2) {
+      if (i > 0) rows.add(const SizedBox(height: BenchSpace.l));
+      rows.add(Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _tile(examples[i])),
+          const SizedBox(width: BenchSpace.m),
+          Expanded(
+            child: i + 1 < examples.length
+                ? _tile(examples[i + 1])
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ));
+    }
+    return Column(children: rows);
+  }
+
+  Widget _tile(ExampleCircuit e) => Builder(
+        builder: (context) => Pressable(
+          onTap: () => onOpen(e),
+          label: '${e.title}. ${e.blurb}',
+          child: ExcludeSemantics(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Sheet(
+                  height: 96,
+                  child: LivePreview(
+                    doc: _docs[e.id] ??= e.build(),
+                    margin: 1.2,
+                    maxScale: 22,
+                  ),
+                ),
+                const SizedBox(height: BenchSpace.s),
+                Text(e.title,
+                    style: BenchType.bodyStyle(weight: FontWeight.w600)),
+                const SizedBox(height: BenchSpace.xs),
+                Text(e.blurb,
+                    style: BenchType.bodyStyle(
+                        color: Bench.inkDim, size: BenchType.label)),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+// ------------------------------------------------------------------- dock
+
+/// The thumb-zone bar: settings on the left, "New circuit" on the right.
+class _Dock extends StatelessWidget {
+  const _Dock({required this.onSettings, required this.onNew});
+
+  final VoidCallback onSettings;
+  final VoidCallback onNew;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Bench.backgroundTop,
+        border: Border(top: BorderSide(color: Bench.panelBorder)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              BenchSpace.s, BenchSpace.s, BenchSpace.l, BenchSpace.s),
+          child: Row(
+            children: [
+              IconButton(
+                tooltip: tr(zh: '设置', en: 'Settings'),
+                icon: const Icon(Icons.tune_rounded, color: Bench.ink),
+                onPressed: onSettings,
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  heightFactor: 1,
+                  child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: BenchSpace.xl, vertical: BenchSpace.m),
+                  ),
+                  onPressed: onNew,
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(tr(zh: '新电路', en: 'New circuit')),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
-  static final Map<String, SchematicDocument> _docs = {};
 }
 
-class _TroubleCard extends StatelessWidget {
-  const _TroubleCard({required this.text});
+class _TroubleBanner extends StatelessWidget {
+  const _TroubleBanner({required this.text});
 
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cs.errorContainer,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.warning_amber_rounded, color: cs.onErrorContainer),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(color: cs.onErrorContainer, height: 1.4),
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(
+            BenchSpace.l, BenchSpace.l, BenchSpace.l, 0),
+        padding: const EdgeInsets.all(BenchSpace.m),
+        decoration: BoxDecoration(
+          color: Bench.errorContainer,
+          borderRadius: BenchRadius.smAll,
+          border: Border.all(color: Bench.error),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: Bench.onErrorContainer, size: 20),
+            const SizedBox(width: BenchSpace.s),
+            Expanded(
+              child: Text(text,
+                  style: BenchType.bodyStyle(color: Bench.onErrorContainer)),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Size-and-fade in when a row arrives after first paint; out while
+/// [leaving]. Collapses to an instant change under reduce motion.
+class _Appear extends StatefulWidget {
+  const _Appear({
+    super.key,
+    required this.child,
+    this.leaving = false,
+    this.animateIn = true,
+  });
+
+  final Widget child;
+  final bool leaving;
+  final bool animateIn;
+
+  @override
+  State<_Appear> createState() => _AppearState();
+}
+
+class _AppearState extends State<_Appear> with SingleTickerProviderStateMixin {
+  late final AnimationController _c =
+      AnimationController(vsync: this, value: widget.animateIn ? 0 : 1);
+  late final CurvedAnimation _curve =
+      CurvedAnimation(parent: _c, curve: BenchMotion.enter);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_c.value < 1 && !_c.isAnimating && !widget.leaving) {
+      _c.animateTo(1, duration: BenchMotion.of(context, BenchMotion.medium));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _Appear old) {
+    super.didUpdateWidget(old);
+    if (widget.leaving && !old.leaving) {
+      _c.animateBack(0,
+          duration: BenchMotion.of(
+              context, BenchMotion.exit(BenchMotion.medium)));
+    }
+  }
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizeTransition(
+      sizeFactor: _curve,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(opacity: _curve, child: widget.child),
     );
   }
 }

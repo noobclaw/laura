@@ -246,14 +246,16 @@ class ProjectStore extends ChangeNotifier {
   }
 
   /// Puts a deleted project back (the undo on the "deleted" snackbar).
-  void restore(Project project, int index) {
-    if (byId(project.id) != null) return;
+  /// Returns false when the free tier's cap refused it, so the UI can say so.
+  bool restore(Project project, int index) {
+    if (byId(project.id) != null) return true;
     // The free tier's one-circuit cap also holds for undo: a project created
     // while the "deleted" snackbar was still up must not become a second.
-    if (atProjectLimit) return;
+    if (atProjectLimit) return false;
     projects.insert(index.clamp(0, projects.length), project);
     _scheduleSave(immediate: true);
     notifyListeners();
+    return true;
   }
 
   /// Records a new version of a project's drawing. Called on every edit;

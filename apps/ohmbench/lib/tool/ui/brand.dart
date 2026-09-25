@@ -1,35 +1,35 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import 'lab_theme.dart';
 
-/// OhmBench's mark: a resistor trace that draws itself in, then carries a
-/// pulse of charge across it forever. The same drawing as the launcher icon,
-/// so the app bar and the home screen icon read as one thing.
+/// OhmBench's mark: a resistor trace, with a pulse of charge crossing it.
+/// The same drawing as the launcher icon, so the wordmark and the home
+/// screen icon read as one thing.
+///
+/// Static by default. With [animate] it draws itself in and carries a loop
+/// of charge — only where no other ambient scene is on screen (the Pro
+/// sheet), and never under "reduce motion".
 class OhmMark extends StatefulWidget {
-  const OhmMark({super.key, this.size = 30});
+  const OhmMark({super.key, this.size = 30, this.animate = false});
 
   final double size;
+  final bool animate;
 
   @override
   State<OhmMark> createState() => _OhmMarkState();
 }
 
 class _OhmMarkState extends State<OhmMark> with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2600));
-  }
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: BenchMotion.markLoop);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.of(context).disableAnimations) {
+    final loop = widget.animate &&
+        !BenchMotion.reduced(context) &&
+        TickerMode.valuesOf(context).enabled;
+    if (!loop) {
       _c.value = 1;
       _c.stop();
     } else if (!_c.isAnimating) {
@@ -45,13 +45,15 @@ class _OhmMarkState extends State<OhmMark> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _c,
-        builder: (context, _) => CustomPaint(
-          size: Size(widget.size * 1.45, widget.size),
-          painter: _MarkPainter(_c.value,
-              still: MediaQuery.of(context).disableAnimations),
+    final still = !widget.animate || BenchMotion.reduced(context);
+    return ExcludeSemantics(
+      child: RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, _) => CustomPaint(
+            size: Size(widget.size * 1.45, widget.size),
+            painter: _MarkPainter(_c.value, still: still),
+          ),
         ),
       ),
     );
@@ -99,7 +101,8 @@ class _MarkPainter extends CustomPainter {
     }
 
     // 0..0.35 draw in, then hold; the charge pulse loops the whole time.
-    final drawn = still ? 1.0 : Curves.easeOutCubic.transform((t / 0.35).clamp(0, 1));
+    final drawn =
+        still ? 1.0 : BenchMotion.enter.transform((t / 0.35).clamp(0, 1));
     final path = Path()..moveTo(pts.first.dx, pts.first.dy);
     for (var i = 1; i < pts.length; i++) {
       if (lengths[i] <= total * drawn) {
@@ -114,16 +117,6 @@ class _MarkPainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = Bench.positive.withValues(alpha: 0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = stroke * 2.6
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, stroke),
-    );
-    canvas.drawPath(
-      path,
-      Paint()
         ..color = Bench.positive
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke
@@ -135,24 +128,19 @@ class _MarkPainter extends CustomPainter {
       final phase = still ? 0.5 : (t * 1.6) % 1.0;
       final p = at(total * phase);
       final r = size.height * 0.13;
-      canvas.drawCircle(
-          p,
-          r * 2.4,
-          Paint()
-            ..color = Bench.charge.withValues(alpha: 0.4)
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 1.4));
       canvas.drawCircle(p, r, Paint()..color = Bench.charge);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _MarkPainter old) => old.t != t;
+  bool shouldRepaint(covariant _MarkPainter old) =>
+      old.t != t || old.still != still;
 }
 
-/// "OhmBench" set as a wordmark: the weight change marks the join, the way
-/// a part number reads on a component.
+/// "OhmBench" as a wordmark in Martian Mono: the weight change marks the
+/// join, the way a part number reads on a component.
 class OhmWordmark extends StatelessWidget {
-  const OhmWordmark({super.key, this.size = 21});
+  const OhmWordmark({super.key, this.size = BenchType.display});
 
   final double size;
 
@@ -160,106 +148,150 @@ class OhmWordmark extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text.rich(
       TextSpan(children: [
+        TextSpan(text: 'Ohm', style: BenchType.monoStyle(size, bold: true)),
         TextSpan(
-          text: 'Ohm',
-          style: TextStyle(
-            fontSize: size,
-            fontWeight: FontWeight.w800,
-            color: Bench.ink,
-            letterSpacing: -0.4,
-          ),
-        ),
-        TextSpan(
-          text: 'Bench',
-          style: TextStyle(
-            fontSize: size,
-            fontWeight: FontWeight.w400,
-            color: Bench.inkDim,
-            letterSpacing: -0.2,
-          ),
-        ),
+            text: 'Bench',
+            style: BenchType.monoStyle(size, color: Bench.inkDim)),
       ]),
+      // The mark is a logo: it may cap its own growth at 1.5× (F10).
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.5),
     );
   }
 }
 
-/// A slow drift of faint charge across a panel: used behind the paywall and
-/// the settings header so the bench keeps living everywhere, quietly.
-class ChargeField extends StatefulWidget {
-  const ChargeField({super.key, this.count = 14});
+/// Anything pressable on the bench: shrinks to 0.97 the instant a finger
+/// lands (not on release), springs back on the same curve, and carries its
+/// own button semantics. Minimum 44 × 44 (F7).
+class Pressable extends StatefulWidget {
+  const Pressable({
+    super.key,
+    required this.onTap,
+    required this.child,
+    this.label,
+    this.onLongPress,
+    this.minSize = BenchSpace.row,
+  });
 
-  final int count;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final Widget child;
+
+  /// Semantic label; null when [child] already reads well on its own.
+  final String? label;
+  final double minSize;
 
   @override
-  State<ChargeField> createState() => _ChargeFieldState();
+  State<Pressable> createState() => _PressableState();
 }
 
-class _ChargeFieldState extends State<ChargeField>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
+class _PressableState extends State<Pressable> {
+  bool _down = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(vsync: this, duration: const Duration(seconds: 9));
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (MediaQuery.of(context).disableAnimations) {
-      _c.stop();
-    } else if (!_c.isAnimating) {
-      _c.repeat();
-    }
+  Widget build(BuildContext context) {
+    final enabled = widget.onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: widget.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: enabled ? (_) => _set(true) : null,
+        onTapUp: enabled ? (_) => _set(false) : null,
+        onTapCancel: () => _set(false),
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        child: AnimatedScale(
+          scale: _down ? BenchMotion.pressScale : 1,
+          duration: BenchMotion.of(context, BenchMotion.press),
+          curve: BenchMotion.enter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+                minWidth: widget.minSize, minHeight: widget.minSize),
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
   }
+}
+
+/// The bench's own drawn glyphs for its core controls — same stroke and
+/// caps as the canvas, so run/stop/wire read as part of the drawing, not a
+/// borrowed icon set.
+enum GlyphKind { play, stop, wire }
+
+class BenchGlyph extends StatelessWidget {
+  const BenchGlyph(this.kind,
+      {super.key, this.size = 20, this.color = Bench.ink});
+
+  final GlyphKind kind;
+  final double size;
+  final Color color;
 
   @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => RepaintBoundary(
-        child: AnimatedBuilder(
-          animation: _c,
-          builder: (context, _) =>
-              CustomPaint(painter: _FieldPainter(_c.value, widget.count)),
+  Widget build(BuildContext context) => ExcludeSemantics(
+        child: CustomPaint(
+          size: Size.square(size),
+          painter: _GlyphPainter(kind, color),
         ),
       );
 }
 
-class _FieldPainter extends CustomPainter {
-  _FieldPainter(this.t, this.count);
+class _GlyphPainter extends CustomPainter {
+  const _GlyphPainter(this.kind, this.color);
 
-  final double t;
-  final int count;
+  final GlyphKind kind;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Horizontal "traces" at fixed heights, each with one moving charge.
-    final rnd = math.Random(7);
-    final line = Paint()
-      ..color = Bench.gridMajor
-      ..strokeWidth = 1;
-    for (var i = 0; i < count; i++) {
-      final y = size.height * (i + 0.5) / count;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), line);
-      final speed = 0.6 + rnd.nextDouble() * 0.9;
-      final offset = rnd.nextDouble();
-      final x = ((t * speed + offset) % 1.0) * size.width;
-      canvas.drawCircle(
-          Offset(x, y),
-          5,
-          Paint()
-            ..color = Bench.charge.withValues(alpha: 0.18)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
-      canvas.drawCircle(Offset(x, y), 1.6,
-          Paint()..color = Bench.charge.withValues(alpha: 0.55));
+    final w = size.width;
+    final h = size.height;
+    final fill = Paint()..color = color;
+    switch (kind) {
+      case GlyphKind.play:
+        canvas.drawPath(
+          Path()
+            ..moveTo(w * 0.22, h * 0.12)
+            ..lineTo(w * 0.88, h * 0.5)
+            ..lineTo(w * 0.22, h * 0.88)
+            ..close(),
+          fill,
+        );
+      case GlyphKind.stop:
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTRB(w * 0.2, h * 0.2, w * 0.8, h * 0.8),
+            BenchRadius.smRadius,
+          ),
+          fill,
+        );
+      case GlyphKind.wire:
+        // Two pins joined by an L-routed wire: what wire mode draws.
+        final stroke = Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = w * 0.1
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+        canvas.drawPath(
+          Path()
+            ..moveTo(w * 0.18, h * 0.3)
+            ..lineTo(w * 0.62, h * 0.3)
+            ..lineTo(w * 0.62, h * 0.78),
+          stroke,
+        );
+        canvas.drawCircle(Offset(w * 0.18, h * 0.3), w * 0.12, fill);
+        canvas.drawCircle(Offset(w * 0.62, h * 0.78), w * 0.12, fill);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _FieldPainter old) => old.t != t;
+  bool shouldRepaint(covariant _GlyphPainter old) =>
+      old.kind != kind || old.color != color;
 }

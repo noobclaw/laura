@@ -12,9 +12,9 @@
 
 **Name (30)**
 ```
-Circuit Simulator Lab: OhmBench
+Circuit Simulator: OhmBench
 ```
-(30 chars. `OhmBench` has no exact-name match on the US store as of 2026-09-19.)
+(27 chars. ASC counts `Circuit Simulator Lab: OhmBench` as 31 and rejects it, 2026-09-25. `OhmBench` has no exact-name match on the US store as of 2026-09-19.)
 
 **Subtitle (30)**
 ```
@@ -56,7 +56,7 @@ Circuit engine algorithms ported from SpiceSharp (MIT licence), © 2017 svenboul
 
 **Keywords (100, comma-separated, no words already in name/subtitle)** — draft, confirm in G8b
 ```
-spice,electronics,schematic,breadboard,ohm,resistor,capacitor,diode,oscilloscope,physics,icircuit
+spice,electronics,schematic,breadboard,ohm,resistor,capacitor,diode,oscilloscope,physics,lab,ee
 ```
 
 **What's New (1.0.0)**
@@ -64,12 +64,12 @@ spice,electronics,schematic,breadboard,ohm,resistor,capacitor,diode,oscilloscope
 First release.
 ```
 
-**Screenshot captions (EN, 5 × 1284×2778)**
-1. `Draw it. Run it.` — the running rectifier with charge dots and scope (first screen = the ad)
-2. `Every number, SPICE-grade` — divider with probe readout
-3. `Flip a switch mid-run` — RC charging on the scope
-4. `Drag from a pin to wire it` — wire preview from a pin
-5. `Saved at every step` — library with circuits + undo label
+**Screenshot captions (EN, 5 × 1284×2778 / 1389×2778)** — rendered by `screens_test/store_shots_test.dart` (`_shots`), files in `store/screenshots/{appstore,play}/en/`
+1. `Draw it. Run it.` / `Charge flows. The scope traces it.` — half-wave rectifier running: charge dots + scope (first image = the ad)
+2. `Numbers you can trust` / `SPICE-grade solver, on your phone` — voltage divider running, probe readout
+3. `Watch a tank ring` / `Close a switch; see ~500 Hz decay` — LC ringing on the scope
+4. `Flip a switch mid-run` / `The capacitor charges from where it was` — RC charging on the scope
+5. `Nothing you build is lost` / `Every step saves itself. Works offline.` — the home bench with three saved circuits
 
 ---
 
@@ -123,6 +123,13 @@ First release.
 电路,仿真,模拟,电子,原理图,面包板,欧姆,电阻,电容,二极管,示波器,物理
 ```
 
+**截图文案(中文,5 张,与 `store_shots_test.dart` 的 `_shots` 一致,文件在 `store/screenshots/{appstore,play}/zh/`)**
+1. `画出来,跑起来` / `电荷流动,示波器同步描绘` —— 半波整流在跑:电荷点 + 示波器(首图即广告)
+2. `数,算得对` / `SPICE 同口径求解器,就在手机上` —— 分压器运行,探针读数
+3. `看 LC 振荡` / `合上开关,约 500 Hz 衰减振荡` —— LC 振荡波形
+4. `运行中拨开关` / `电容从上一刻的电压继续充` —— RC 充电波形
+5. `作品丢不了` / `每一步自动保存,全离线` —— 首页实验台 + 三张已存电路
+
 **更新说明(1.0.0)**
 ```
 首个版本。
@@ -133,4 +140,4 @@ First release.
 ## 定价
 
 - 免费下载 + Pro 一次性买断 **$4.99 / ¥28**,商品 ID `com.noobclaw.ohmbench.pro_unlock`(非消耗型)。
-- App 内价格一律取商店下发的本地化价(`ProPriceText`),$4.99 只是商店未响应时的兜底。
+- App 内价格一律取商店下发的本地化价(`StorePrice`),$4.99 只是商店未响应时的兜底。

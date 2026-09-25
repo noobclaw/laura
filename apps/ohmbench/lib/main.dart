@@ -1,12 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'bench/identity.dart';
 import 'bench/words.dart';
 import 'bench/checkout.dart';
 import 'tool/ohmbench_tool.dart';
-import 'tool/ui/brand.dart';
+import 'tool/ui/haptics.dart';
 import 'tool/ui/lab_theme.dart';
-import 'tool/ui/settings_screen.dart';
 
 /// The app's single tool object: the circuit store plus the home screen.
 final OhmBenchTool tool = OhmBenchTool();
@@ -19,6 +20,15 @@ Future<void> main() async {
   // The saved language, the Pro flag and the circuits must all be known
   // before the first frame.
   await BenchLanguage.load();
+  await BenchHaptics.load();
+  // The bundled display face ships its licence (SIL OFL 1.1).
+  LicenseRegistry.addLicense(() async* {
+    final text = await rootBundle.loadString('assets/fonts/MartianMono-OFL.txt');
+    yield LicenseEntryWithLineBreaks(const ['Martian Mono'], text);
+    // Junction limiting and the gmin/source stepping ladder are ported from
+    // SpiceSharp (MIT).
+    yield const LicenseEntryWithLineBreaks(['SpiceSharp'], _spiceSharpMit);
+  });
   try {
     await tool.store.load();
   } catch (e) {
@@ -78,41 +88,35 @@ class _OhmBenchAppState extends State<OhmBenchApp> {
         // Purchase results surface as snackbars on whatever screen is open —
         // a paywall that swallows "payment failed" is a support ticket.
         builder: (_, child) => CheckoutNotices(child: child),
-        home: const _HomeScaffold(),
-      ),
-    );
-  }
-}
-
-class _HomeScaffold extends StatelessWidget {
-  const _HomeScaffold();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 20,
-        title: Semantics(
-          label: OhmIdentity.appName,
-          child: const Row(
-            children: [
-              OhmMark(size: 22),
-              SizedBox(width: 10),
-              OhmWordmark(),
-            ],
-          ),
+        // No app bar: the first screen is the bench itself, and settings
+        // live in its bottom dock (kb/UIUX规矩.md 2.2).
+        home: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: Builder(builder: tool.buildHome),
         ),
-        actions: [
-          IconButton(
-            tooltip: tr(zh: '设置', en: 'Settings'),
-            icon: const Icon(Icons.tune_rounded),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => OhmSettingsScreen(store: tool.store))),
-          ),
-          const SizedBox(width: 6),
-        ],
       ),
-      body: SafeArea(child: tool.buildHome(context)),
     );
   }
 }
+
+const String _spiceSharpMit = '''MIT License
+
+Copyright (c) 2017 svenboulanger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''';

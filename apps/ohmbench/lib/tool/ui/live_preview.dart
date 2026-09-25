@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import '../schematic/document.dart';
 import '../sim/flow.dart';
 import '../sim/simulation.dart';
+import 'lab_theme.dart';
 import 'schematic_painter.dart';
 
 /// A circuit drawn on the bench and, when [live], actually running: node
@@ -22,6 +23,9 @@ class LivePreview extends StatefulWidget {
     this.margin = 1.6,
     this.maxScale = 40,
     this.footer,
+    this.footerHeight = 58,
+    this.headerHeight = 0,
+    this.overlay,
   });
 
   final SchematicDocument doc;
@@ -34,6 +38,16 @@ class LivePreview extends StatefulWidget {
   /// Drawn under the circuit from the same run and cursor, so a strip of
   /// scope trace can move in step with the charge above it.
   final Widget Function(SimRun run, int sample)? footer;
+
+  /// Space kept free for [footer] under the framed circuit.
+  final double footerHeight;
+
+  /// Space kept free above the framed circuit (for an [overlay] title row).
+  final double headerHeight;
+
+  /// Laid over the whole preview from the same run and cursor — a live
+  /// readout that ticks with the charge.
+  final Widget Function(SimRun run, int sample)? overlay;
 
   @override
   State<LivePreview> createState() => _LivePreviewState();
@@ -49,8 +63,6 @@ class _LivePreviewState extends State<LivePreview>
   int _sample = 0;
   List<double> _segments = const [];
   final Map<String, double> _offsets = {};
-
-  static const double _playSeconds = 5;
 
   @override
   void initState() {
@@ -83,7 +95,7 @@ class _LivePreviewState extends State<LivePreview>
     super.didChangeDependencies();
     final animate = widget.live &&
         _run != null &&
-        !MediaQuery.of(context).disableAnimations &&
+        !BenchMotion.reduced(context) &&
         TickerMode.valuesOf(context).enabled;
     if (animate && !_ticker.isActive) {
       _last = Duration.zero;
@@ -105,7 +117,7 @@ class _LivePreviewState extends State<LivePreview>
     final span = run.length - 1 - loopFrom;
     final sample = span <= 0
         ? run.length - 1
-        : loopFrom + ((_playback % _playSeconds) / _playSeconds * span).round();
+        : loopFrom + ((_playback % BenchMotion.previewPlaySeconds) / BenchMotion.previewPlaySeconds * span).round();
     if (sample != _sample) {
       _sample = sample;
       _segments = _flow!.currents(widget.doc, (id) => run.partCurrent(id, sample));
@@ -133,11 +145,14 @@ class _LivePreviewState extends State<LivePreview>
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       // With a footer, frame the circuit in the space above it.
-      final area = widget.footer == null
-          ? constraints.biggest
-          : Size(constraints.maxWidth, constraints.maxHeight - 58);
-      final view = CanvasView.fit(widget.doc, area,
+      final reserve = widget.footer == null ? 0.0 : widget.footerHeight;
+      final area = Size(constraints.maxWidth,
+          (constraints.maxHeight - reserve - widget.headerHeight)
+              .clamp(1.0, double.infinity));
+      final fitted = CanvasView.fit(widget.doc, area,
           margin: widget.margin, maxScale: widget.maxScale);
+      final view = fitted.copyWith(
+          offset: fitted.offset + Offset(0, widget.headerHeight));
       final run = _run;
       final frame = run == null || _flow == null
           ? null
@@ -160,10 +175,13 @@ class _LivePreviewState extends State<LivePreview>
         ),
       );
       final footer = widget.footer;
-      if (footer == null || run == null) return painter;
+      final overlay = widget.overlay;
+      if ((footer == null && overlay == null) || run == null) return painter;
       return Stack(children: [
         Positioned.fill(child: painter),
-        Positioned(left: 0, right: 0, bottom: 0, child: footer(run, _sample)),
+        if (footer != null)
+          Positioned(left: 0, right: 0, bottom: 0, child: footer(run, _sample)),
+        if (overlay != null) Positioned.fill(child: overlay(run, _sample)),
       ]);
     });
   }

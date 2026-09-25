@@ -77,14 +77,14 @@ class ScopePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    final r = RRect.fromRectAndRadius(rect, const Radius.circular(14));
+    final r = RRect.fromRectAndRadius(rect, BenchRadius.smRadius);
     canvas.drawRRect(
       r,
       Paint()
         ..shader = const RadialGradient(
           center: Alignment(0, -0.2),
           radius: 1.2,
-          colors: [Color(0xFF0F1F29), Color(0xFF081016)],
+          colors: [Bench.scopeGlass, Bench.scopeGlassEdge],
         ).createShader(rect),
     );
     canvas.save();
@@ -93,7 +93,7 @@ class ScopePainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final grid = Paint()
-      ..color = const Color(0xFF1C3140)
+      ..color = Bench.scopeGrid
       ..strokeWidth = 1;
     for (var c = 1; c < ScopeTrace.columns; c++) {
       final x = w * c / ScopeTrace.columns;
@@ -105,7 +105,7 @@ class ScopePainter extends CustomPainter {
     }
     // Centre graticule with minor ticks, as on a bench scope.
     final axis = Paint()
-      ..color = const Color(0xFF2A4658)
+      ..color = Bench.scopeAxis
       ..strokeWidth = 1;
     canvas.drawLine(Offset(0, h / 2), Offset(w, h / 2), axis);
     canvas.drawLine(Offset(w / 2, 0), Offset(w / 2, h), axis);
@@ -205,68 +205,68 @@ class ScopePanel extends StatelessWidget {
     final value = trace.values.isEmpty
         ? 0.0
         : trace.values[cursor.clamp(0, trace.values.length - 1)];
-    const label = TextStyle(
-        color: Bench.inkDim,
-        fontSize: 11.5,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.3,
-        fontFeatures: [FontFeature.tabularFigures()]);
+    final label = BenchType.monoStyle(BenchType.label, color: Bench.inkDim);
+    final reduce = BenchMotion.reduced(context);
     return Container(
       decoration: const BoxDecoration(
         color: Bench.panel,
         border: Border(top: BorderSide(color: Bench.panelBorder)),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 10, 8, 12),
+      padding: const EdgeInsets.fromLTRB(
+          BenchSpace.l, BenchSpace.xs, BenchSpace.xs, BenchSpace.m),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                    color: Bench.positive, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: label.copyWith(color: Bench.ink, fontSize: 13)),
-              ),
-              TweenAnimationBuilder<double>(
-                tween: Tween(end: value),
-                duration: const Duration(milliseconds: 120),
-                builder: (context, v, _) => Text(
-                  formatSi(v, trace.unit),
-                  style: const TextStyle(
-                    color: Bench.positive,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: [FontFeature.tabularFigures()],
+              const ExcludeSemantics(
+                child: SizedBox(
+                  width: 8,
+                  height: 8,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        color: Bench.positive, shape: BoxShape.circle),
                   ),
                 ),
               ),
+              const SizedBox(width: BenchSpace.s),
+              Expanded(
+                child: Text(title,
+                    style: BenchType.bodyStyle(
+                        weight: FontWeight.w600, height: 1.25)),
+              ),
+              // The reading at the cursor: a measurement, so Martian Mono.
+              Semantics(
+                liveRegion: false,
+                label: '$title ${formatSi(value, trace.unit)}',
+                excludeSemantics: true,
+                child: Text(
+                  formatSi(value, trace.unit),
+                  textScaler: MediaQuery.textScalerOf(context)
+                      .clamp(maxScaleFactor: 1.5),
+                  style: BenchType.monoStyle(BenchType.title,
+                      bold: true, color: Bench.positive),
+                ),
+              ),
               IconButton(
-                visualDensity: VisualDensity.compact,
+                tooltip: tr(zh: '收起示波器', en: 'Hide scope'),
                 color: Bench.inkDim,
                 icon: const Icon(Icons.close_rounded, size: 20),
                 onPressed: onClose,
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: BenchSpace.xs),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: SizedBox(
               height: 120,
               child: TweenAnimationBuilder<double>(
                 key: ValueKey(trace),
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 420),
-                curve: Curves.easeOutCubic,
+                tween: Tween(begin: reduce ? 1 : 0, end: 1),
+                duration: BenchMotion.of(context, BenchMotion.sheet),
+                curve: BenchMotion.enter,
                 builder: (context, reveal, _) => CustomPaint(
                   painter: ScopePainter(
                       trace: trace, cursor: cursor, reveal: reveal),
@@ -277,16 +277,17 @@ class ScopePanel extends StatelessWidget {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: Row(
+            child: Wrap(
+              spacing: BenchSpace.m,
+              runSpacing: BenchSpace.xs,
+              alignment: WrapAlignment.spaceBetween,
               children: [
                 Text(
                     '${formatSi(trace.perDivision, trace.unit)}/div · '
                     '${formatSi(trace.window / ScopeTrace.columns, 's')}/div',
                     style: label),
-                const Spacer(),
                 Text('t = ${formatSi(cursorTime, 's')}', style: label),
                 if (slowdown < 0.67) ...[
-                  const SizedBox(width: 10),
                   Text(
                       tr(
                           zh: '快放 ${_round(1 / slowdown)}×',
@@ -294,19 +295,20 @@ class ScopePanel extends StatelessWidget {
                       style: label.copyWith(color: Bench.positive)),
                 ],
                 if (slowdown > 1.5) ...[
-                  const SizedBox(width: 10),
                   Text(
                       tr(
                           zh: '慢放 ${_round(slowdown)}×',
                           en: '${_round(slowdown)}× slow-mo'),
-                      style: label.copyWith(color: Bench.charge)),
+                      style: label),
                 ],
               ],
             ),
           ),
           if (hint != null) ...[
-            const SizedBox(height: 4),
-            Text(hint!, style: label.copyWith(fontWeight: FontWeight.w500)),
+            const SizedBox(height: BenchSpace.xs),
+            Text(hint!,
+                style: BenchType.bodyStyle(
+                    color: Bench.inkDim, size: BenchType.label)),
           ],
         ],
       ),

@@ -68,9 +68,17 @@ class BenchLanguage {
   static Locale? get locale =>
       override.value == null ? null : Locale(override.value!);
 
-  static String get effectiveCode =>
-      override.value ??
-      PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+  static String get effectiveCode {
+    final chosen = override.value;
+    if (chosen != null) return chosen;
+    // The first of the user's preferred languages this app actually has:
+    // a Japanese-then-Chinese phone gets Chinese, not English.
+    for (final l in PlatformDispatcher.instance.locales) {
+      final code = l.languageCode.toLowerCase();
+      if (choices.contains(code)) return code;
+    }
+    return 'en';
+  }
 
   static String label(String? code) => switch (code) {
         'zh' => '中文',

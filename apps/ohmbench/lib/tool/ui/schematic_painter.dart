@@ -519,21 +519,10 @@ class SchematicPainter extends CustomPainter {
 
   void _labels(Canvas canvas) {
     final size = (s * 0.34).clamp(9.5, 14.0);
-    // Labels are ids and SI values (Latin, µ, Ω). Naming Roboto keeps them
-    // identical on Android and in rendered store screenshots; iOS falls
-    // back to its system face.
-    final idStyle = TextStyle(
-        fontFamily: 'Roboto',
-        fontSize: size * 0.86,
-        color: Bench.inkDim,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.4);
-    final valueStyle = TextStyle(
-        fontFamily: 'Roboto',
-        fontSize: size,
-        color: Bench.ink,
-        fontWeight: FontWeight.w500,
-        fontFeatures: const [FontFeature.tabularFigures()]);
+    // Labels are ids and SI values, lettered like a drawing's annotations
+    // in Martian Mono (bundled); Ω falls back through the chain.
+    final idStyle = BenchType.monoStyle(size * 0.86, color: Bench.inkDim);
+    final valueStyle = BenchType.monoStyle(size, color: Bench.ink);
 
     for (final part in doc.parts) {
       if (part.kind == PartKind.ground) continue;

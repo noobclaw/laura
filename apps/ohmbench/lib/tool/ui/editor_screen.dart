@@ -15,6 +15,8 @@ import '../schematic/editing.dart';
 import '../sim/flow.dart';
 import '../sim/simulation.dart';
 import '../store.dart';
+import 'brand.dart';
+import 'haptics.dart';
 import 'lab_theme.dart';
 import 'part_sheet.dart';
 import 'schematic_painter.dart';
@@ -22,16 +24,25 @@ import 'scope.dart';
 import 'trouble.dart';
 
 /// Real seconds a whole run takes to play back.
-const double kPlaybackSeconds = 4;
+const double kPlaybackSeconds = BenchMotion.editorPlaySeconds;
 
 enum _Gesture { none, pan, drag, wire, pinch }
 
 /// The bench: one circuit, edited and simulated in place.
 class EditorScreen extends StatefulWidget {
-  const EditorScreen({super.key, required this.store, required this.project});
+  const EditorScreen({
+    super.key,
+    required this.store,
+    required this.project,
+    this.autoRun = false,
+  });
 
   final ProjectStore store;
   final Project project;
+
+  /// Start simulating as soon as the bench is on screen — examples open
+  /// running, so the first thing anyone sees is a circuit working (F1).
+  final bool autoRun;
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -107,14 +118,24 @@ class _EditorScreenState extends State<EditorScreen>
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick);
-    _fx = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 520))
+    _fx = AnimationController(vsync: this, duration: BenchMotion.medium)
       ..addListener(() {
         _bursts.removeWhere(
-            (b) => DateTime.now().difference(b.born).inMilliseconds > 520);
+          (b) => DateTime.now().difference(b.born) > BenchMotion.medium,
+        );
         setState(() {});
       });
     widget.store.storageTrouble.addListener(_onStorage);
+    if (widget.autoRun) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _running) return;
+        setState(() {
+          _running = true;
+          _scopeOpen = true;
+        });
+        _startRun();
+      });
+    }
   }
 
   @override
@@ -131,7 +152,7 @@ class _EditorScreenState extends State<EditorScreen>
     if (mounted) setState(() {});
   }
 
-  bool get _reduceMotion => MediaQuery.of(context).disableAnimations;
+  bool get _reduceMotion => BenchMotion.reduced(context);
 
   void _burst(Offset grid, Color color) {
     if (_reduceMotion) return;
@@ -162,8 +183,23 @@ class _EditorScreenState extends State<EditorScreen>
 
   void _undo() {
     if (!_history.canUndo) return;
-    HapticFeedback.selectionClick();
+    BenchHaptics.select();
+    final label = _history.undoLabel;
     final doc = _history.undo();
+    if (label != null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(
+          duration: BenchMotion.undoWindow,
+          content: Text(tr(zh: '已撤销:$label', en: 'Undid: $label')),
+          action: SnackBarAction(
+            label: tr(zh: '重做', en: 'Redo'),
+            onPressed: () {
+              if (mounted) _redo();
+            },
+          ),
+        ));
+    }
     setState(() {
       _doc = doc;
       _selection = _selection.where(_exists).toSet();
@@ -175,7 +211,7 @@ class _EditorScreenState extends State<EditorScreen>
 
   void _redo() {
     if (!_history.canRedo) return;
-    HapticFeedback.selectionClick();
+    BenchHaptics.select();
     final doc = _history.redo();
     setState(() {
       _doc = doc;
@@ -197,15 +233,19 @@ class _EditorScreenState extends State<EditorScreen>
       );
       return;
     }
-    HapticFeedback.lightImpact();
+    BenchHaptics.commit();
     final origin = _freeSpotNearCentre(kind);
     final (next, part) = _doc.addPart(kind, origin);
     _commit(next, tr(zh: '添加 ${part.id}', en: 'Add ${part.id}'));
     setState(() => _selection = {part.id});
     final pins = part.pins;
     _burst(
-        Offset((pins.first.x + pins.last.x) / 2, (pins.first.y + pins.last.y) / 2),
-        Bench.positive);
+      Offset(
+        (pins.first.x + pins.last.x) / 2,
+        (pins.first.y + pins.last.y) / 2,
+      ),
+      Bench.ink,
+    );
   }
 
   /// The grid point nearest the middle of the screen where a new part does
@@ -252,13 +292,35 @@ class _EditorScreenState extends State<EditorScreen>
     _commit(next, tr(zh: '旋转', en: 'Rotate'));
   }
 
+  /// Deletes at once; the snackbar (and the top bar) offer Undo (F4).
   void _deleteSelection() {
     if (_selection.isEmpty) return;
-    HapticFeedback.mediumImpact();
+    BenchHaptics.commit();
     final count = _selection.length;
     final next = _doc.removeIds(_selection);
     setState(() => _selection = {});
     _commit(next, tr(zh: '删除 $count 项', en: 'Delete $count'));
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          duration: MediaQuery.accessibleNavigationOf(context)
+              ? BenchMotion.undoWindow * 5
+              : BenchMotion.undoWindow,
+          content: Text(
+            tr(
+              zh: '已删除 $count 项',
+              en: 'Deleted $count ${count == 1 ? 'item' : 'items'}',
+            ),
+          ),
+          action: SnackBarAction(
+            label: tr(zh: '撤销', en: 'Undo'),
+            onPressed: () {
+              if (mounted) _undo();
+            },
+          ),
+        ),
+      );
   }
 
   Future<void> _editValue(SchematicPart part) async {
@@ -279,7 +341,7 @@ class _EditorScreenState extends State<EditorScreen>
   }
 
   void _flipSwitch(SchematicPart part) {
-    HapticFeedback.mediumImpact();
+    BenchHaptics.select();
     final flipped = part.copyWith(closed: !part.closed);
     final next = _doc.replacePart(flipped);
     _history.push(next, tr(zh: '拨动 ${part.id}', en: 'Flip ${part.id}'));
@@ -310,7 +372,7 @@ class _EditorScreenState extends State<EditorScreen>
           return;
         }
         if (_running) {
-          HapticFeedback.selectionClick();
+          BenchHaptics.select();
           setState(() {
             if (pinIndex != null) {
               _probeNode = _run?.nodeAt(part.pins[pinIndex]);
@@ -325,7 +387,7 @@ class _EditorScreenState extends State<EditorScreen>
         setState(() => _selection = {part.id});
       case WireHit(:final wire):
         if (_running) {
-          HapticFeedback.selectionClick();
+          BenchHaptics.select();
           setState(() {
             _probeNode = _run?.nodeAt(wire.from);
             _probePart = null;
@@ -431,6 +493,7 @@ class _EditorScreenState extends State<EditorScreen>
     }
     switch (_gesture) {
       case _Gesture.pinch:
+        _viewTouched = true;
         final start = _pinchStartView!;
         final scale = (start.scale * d.scale)
             .clamp(CanvasView.minScale, CanvasView.maxScale)
@@ -444,6 +507,7 @@ class _EditorScreenState extends State<EditorScreen>
           ),
         );
       case _Gesture.pan:
+        _viewTouched = true;
         setState(
           () => _view = _view!.copyWith(
             offset: _view!.offset + d.focalPointDelta,
@@ -452,10 +516,8 @@ class _EditorScreenState extends State<EditorScreen>
       case _Gesture.drag:
         final g = _gridOf(d.localFocalPoint);
         final moved = _drag!.update(_doc, g.dx, g.dy);
-        if (!identical(moved, _doc)) {
-          HapticFeedback.selectionClick();
-          setState(() => _doc = moved);
-        }
+        // No haptic per grid step: one gesture, one tick, on the drop.
+        if (!identical(moved, _doc)) setState(() => _doc = moved);
       case _Gesture.wire:
         final g = _gridOf(d.localFocalPoint);
         final end = GridPoint(g.dx.round(), g.dy.round());
@@ -470,6 +532,7 @@ class _EditorScreenState extends State<EditorScreen>
         final (dx, dy) = _drag!.applied;
         if (dx != 0 || dy != 0) {
           final count = _drag!.ids.length;
+          BenchHaptics.commit();
           _commit(_doc, tr(zh: '移动 $count 项', en: 'Move $count'));
         }
       case _Gesture.wire:
@@ -480,7 +543,7 @@ class _EditorScreenState extends State<EditorScreen>
           for (final (from, to) in _route(a, b)) {
             (next, _) = next.addWire(from, to);
           }
-          HapticFeedback.lightImpact();
+          BenchHaptics.commit();
           _commit(next, tr(zh: '连线', en: 'Wire'));
           _burst(Offset(b.x.toDouble(), b.y.toDouble()), Bench.charge);
         }
@@ -506,7 +569,7 @@ class _EditorScreenState extends State<EditorScreen>
   }
 
   void _onLongPressStart(LongPressStartDetails d) {
-    HapticFeedback.mediumImpact();
+    BenchHaptics.select();
     final g = _gridOf(d.localPosition);
     final hit = _geometry.hitTest(_doc, g.dx, g.dy);
     if (hit is! EmptyHit) {
@@ -558,6 +621,7 @@ class _EditorScreenState extends State<EditorScreen>
       if (_gesture == _Gesture.drag && _drag != null) {
         final (dx, dy) = _drag!.applied;
         if (dx != 0 || dy != 0) {
+          BenchHaptics.commit();
           _commit(
             _doc,
             tr(
@@ -582,15 +646,23 @@ class _EditorScreenState extends State<EditorScreen>
     });
   }
 
-  void _fit() => setState(() => _view = _fitView(_canvasSize));
+  void _fit() => setState(() {
+    _viewTouched = false;
+    _view = _fitView(_canvasSize);
+  });
 
-  /// Frames the drawing above the run button and status line, which sit
-  /// over the bottom of the canvas.
+  /// True once the user pans or zooms: from then on the view is theirs and
+  /// is never re-framed behind their back.
+  bool _viewTouched = false;
+
+  /// Frames the drawing clear of the run button (bottom right) and the
+  /// status line, which sit over the bottom of the canvas.
   CanvasView _fitView(Size size) {
-    const reserve = 96.0;
+    const reserveBottom = 96.0;
+    const reserveRight = 80.0;
     final usable = Size(
-      size.width,
-      (size.height - reserve).clamp(1, double.infinity),
+      (size.width - reserveRight).clamp(1, double.infinity),
+      (size.height - reserveBottom).clamp(1, double.infinity),
     );
     return CanvasView.fit(_doc, usable, margin: 1.6, maxScale: 56);
   }
@@ -598,7 +670,7 @@ class _EditorScreenState extends State<EditorScreen>
   // ------------------------------------------------------------- simulation
 
   Future<void> _toggleRun() async {
-    HapticFeedback.mediumImpact();
+    BenchHaptics.run();
     if (_running) {
       _stop();
       return;
@@ -821,7 +893,9 @@ class _EditorScreenState extends State<EditorScreen>
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: Bench.background,
+        // The top bar paints under the status bar itself (one colour band).
         body: SafeArea(
+          top: false,
           bottom: false,
           child: Column(
             children: [
@@ -829,16 +903,8 @@ class _EditorScreenState extends State<EditorScreen>
                 name: _project.name,
                 scratch: _project.scratch,
                 onSaveCopy: _saveCopy,
-                canUndo: _history.canUndo,
-                canRedo: _history.canRedo,
-                undoLabel: _history.undoLabel,
-                redoLabel: _history.redoLabel,
-                wireTool: _wireTool,
                 onBack: () => Navigator.of(context).maybePop(),
                 onRename: _rename,
-                onUndo: _undo,
-                onRedo: _redo,
-                onWireTool: () => setState(() => _wireTool = !_wireTool),
                 onFit: _fit,
                 onHelp: _showHelp,
               ),
@@ -863,24 +929,31 @@ class _EditorScreenState extends State<EditorScreen>
                                 offset: Offset(size.width / 2, size.height / 2),
                               )
                             : _fitView(size);
+                      } else if (!_viewTouched && !_doc.isEmpty) {
+                        // The scope opened or closed: keep the whole
+                        // circuit in view until the user takes the view.
+                        _view = _fitView(size);
                       }
                     }
                     return Stack(
                       children: [
-                        Positioned.fill(child: _canvas(run, sample, flagged)),
-                      if (_bursts.isNotEmpty)
+                        // Clipped: the grid and glows must not bleed over the top bar.
                         Positioned.fill(
-                          child: IgnorePointer(
-                            child: CustomPaint(
-                              painter: _BurstPainter(_bursts, _view!),
+                          child: ClipRect(child: _canvas(run, sample, flagged)),
+                        ),
+                        if (_bursts.isNotEmpty)
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: CustomPaint(
+                                painter: _BurstPainter(_bursts, _view!),
+                              ),
                             ),
                           ),
-                        ),
-                        if (_doc.isEmpty) const _EmptyBench(),
+                        if (_doc.isEmpty) _EmptyBench(view: _view!),
                         Positioned(
-                          left: 12,
+                          left: BenchSpace.m,
                           right: 84,
-                          bottom: 12,
+                          bottom: BenchSpace.m,
                           child: _StatusArea(
                             problem: _problem,
                             notes: _notes,
@@ -897,8 +970,8 @@ class _EditorScreenState extends State<EditorScreen>
                           ),
                         ),
                         Positioned(
-                          right: 16,
-                          bottom: 16,
+                          right: BenchSpace.l,
+                          bottom: BenchSpace.l,
                           child: _RunButton(
                             running: _running,
                             solving: _solving,
@@ -911,8 +984,8 @@ class _EditorScreenState extends State<EditorScreen>
                 ),
               ),
               AnimatedSize(
-                duration: const Duration(milliseconds: 260),
-                curve: Curves.easeOutCubic,
+                duration: BenchMotion.of(context, BenchMotion.medium),
+                curve: BenchMotion.panel,
                 child:
                     _scopeFor(run, sample) ??
                     const SizedBox(width: double.infinity),
@@ -922,6 +995,17 @@ class _EditorScreenState extends State<EditorScreen>
                 atLimit: widget.store.partLimitReached(_doc),
                 count: countedParts(_doc),
                 pro: widget.store.pro,
+                canUndo: _history.canUndo,
+                canRedo: _history.canRedo,
+                undoLabel: _history.undoLabel,
+                redoLabel: _history.redoLabel,
+                wireTool: _wireTool,
+                onUndo: _undo,
+                onRedo: _redo,
+                onWireTool: () {
+                  BenchHaptics.select();
+                  setState(() => _wireTool = !_wireTool);
+                },
               ),
             ],
           ),
@@ -947,34 +1031,40 @@ class _EditorScreenState extends State<EditorScreen>
         _wireStart != null && _wireEnd != null && _wireStart != _wireEnd
         ? _route(_wireStart!, _wireEnd!)
         : const <(GridPoint, GridPoint)>[];
-    return Listener(
-      onPointerDown: _onPointerDown,
-      onPointerUp: _onPointerGone,
-      onPointerCancel: _onPointerGone,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        // Hit-test where the finger went down, not where the drag was
-        // recognised 18 px later — otherwise grabbing a pin would miss it.
-        dragStartBehavior: DragStartBehavior.down,
-        onTapUp: _onTapUp,
-        onScaleStart: _onScaleStart,
-        onScaleUpdate: _onScaleUpdate,
-        onScaleEnd: _onScaleEnd,
-        onLongPressStart: _onLongPressStart,
-        onLongPressMoveUpdate: _onLongPressMove,
-        onLongPressEnd: _onLongPressEnd,
-        child: RepaintBoundary(
-          child: CustomPaint(
-            painter: SchematicPainter(
-              doc: _doc,
-              view: view,
-              selection: _selection,
-              frame: frame,
-              previewWire: preview,
-              marquee: _marquee,
-              probeNode: _probeNode,
-              probePart: _probePart,
-              flaggedIds: flagged,
+    return Semantics(
+      label: tr(
+        zh: '电路画布,${_doc.parts.length} 个元件。拖动移动,从引脚拖出连线,双指缩放',
+        en: 'Circuit canvas, ${_doc.parts.length} parts. Drag to move, drag from a pin to wire, pinch to zoom',
+      ),
+      child: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerUp: _onPointerGone,
+        onPointerCancel: _onPointerGone,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          // Hit-test where the finger went down, not where the drag was
+          // recognised 18 px later — otherwise grabbing a pin would miss it.
+          dragStartBehavior: DragStartBehavior.down,
+          onTapUp: _onTapUp,
+          onScaleStart: _onScaleStart,
+          onScaleUpdate: _onScaleUpdate,
+          onScaleEnd: _onScaleEnd,
+          onLongPressStart: _onLongPressStart,
+          onLongPressMoveUpdate: _onLongPressMove,
+          onLongPressEnd: _onLongPressEnd,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: SchematicPainter(
+                doc: _doc,
+                view: view,
+                selection: _selection,
+                frame: frame,
+                previewWire: preview,
+                marquee: _marquee,
+                probeNode: _probeNode,
+                probePart: _probePart,
+                flaggedIds: flagged,
+              ),
             ),
           ),
         ),
@@ -1057,14 +1147,19 @@ class _EditorScreenState extends State<EditorScreen>
       return;
     }
     final saved = widget.store.create(_project.name, _doc);
-    HapticFeedback.mediumImpact();
+    BenchHaptics.commit();
     setState(() => _project = saved);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(tr(
-          zh: '已存为「${saved.name}」,之后的每一步都会自动保存',
-          en: 'Saved as "${saved.name}". Every step from now on saves itself.')),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          tr(
+            zh: '已存为「${saved.name}」,之后的每一步都会自动保存',
+            en: 'Saved as "${saved.name}". Every step from now on saves itself.',
+          ),
+        ),
+      ),
+    );
   }
 
   void _showHelp() {
@@ -1118,16 +1213,8 @@ class _TopBar extends StatelessWidget {
     required this.name,
     required this.scratch,
     required this.onSaveCopy,
-    required this.canUndo,
-    required this.canRedo,
-    required this.undoLabel,
-    required this.redoLabel,
-    required this.wireTool,
     required this.onBack,
     required this.onRename,
-    required this.onUndo,
-    required this.onRedo,
-    required this.onWireTool,
     required this.onFit,
     required this.onHelp,
   });
@@ -1135,24 +1222,19 @@ class _TopBar extends StatelessWidget {
   final String name;
   final bool scratch;
   final VoidCallback onSaveCopy;
-  final bool canUndo;
-  final bool canRedo;
-  final String? undoLabel;
-  final String? redoLabel;
-  final bool wireTool;
   final VoidCallback onBack;
   final VoidCallback onRename;
-  final VoidCallback onUndo;
-  final VoidCallback onRedo;
-  final VoidCallback onWireTool;
   final VoidCallback onFit;
   final VoidCallback onHelp;
 
   @override
   Widget build(BuildContext context) {
+    // Only navigation and the name live up here; the tools the thumb uses
+    // (undo, redo, wire mode) sit on the part strip at the bottom (F8).
+    final top = MediaQuery.paddingOf(context).top;
     return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      constraints: BoxConstraints(minHeight: 56 + top),
+      padding: EdgeInsets.fromLTRB(BenchSpace.xs, top, BenchSpace.xs, 0),
       decoration: const BoxDecoration(
         color: Bench.backgroundTop,
         border: Border(bottom: BorderSide(color: Bench.panelBorder)),
@@ -1167,50 +1249,60 @@ class _TopBar extends StatelessWidget {
               onPressed: onBack,
             ),
             Expanded(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
+              child: Pressable(
                 onTap: onRename,
+                label: scratch
+                    ? tr(
+                        zh: '$name(示例),存为我的电路',
+                        en: '$name (example), save as my circuit',
+                      )
+                    : tr(zh: '$name,重命名', en: '$name, rename'),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 8,
+                    horizontal: BenchSpace.xs,
+                    vertical: BenchSpace.xs,
                   ),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Bench.ink,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
+                  child: ExcludeSemantics(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            name,
+                            maxLines: 2,
+                            style: BenchType.bodyStyle(
+                              size: BenchType.title,
+                              weight: FontWeight.w600,
+                              height: 1.2,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      if (scratch)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Bench.charge.withValues(alpha: 0.16),
-                            borderRadius: BorderRadius.circular(8),
+                        const SizedBox(width: BenchSpace.s),
+                        if (scratch)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: BenchSpace.s,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BenchRadius.pillAll,
+                              border: Border.all(color: Bench.outline),
+                            ),
+                            child: Text(
+                              tr(zh: '示例', en: 'Example'),
+                              style: BenchType.monoStyle(
+                                BenchType.label,
+                                color: Bench.inkDim,
+                                height: 1.6,
+                              ),
+                            ),
+                          )
+                        else
+                          const Icon(
+                            Icons.edit_outlined,
+                            size: 15,
+                            color: Bench.inkDim,
                           ),
-                          child: Text(tr(zh: '示例', en: 'Example'),
-                              style: const TextStyle(
-                                  color: Bench.charge,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700)),
-                        )
-                      else
-                        const Icon(
-                          Icons.edit_outlined,
-                          size: 15,
-                          color: Bench.inkDim,
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1218,50 +1310,14 @@ class _TopBar extends StatelessWidget {
             if (scratch)
               IconButton(
                 tooltip: tr(zh: '存为我的电路', en: 'Save as my circuit'),
-                icon: const Icon(Icons.bookmark_add_outlined, color: Bench.charge),
+                icon: const Icon(
+                  Icons.bookmark_add_outlined,
+                  color: Bench.charge,
+                ),
                 onPressed: onSaveCopy,
               ),
-            IconButton(
-              tooltip: undoLabel == null
-                  ? tr(zh: '撤销', en: 'Undo')
-                  : tr(zh: '撤销:$undoLabel', en: 'Undo: $undoLabel'),
-              icon: const Icon(Icons.undo_rounded),
-              color: Bench.ink,
-              disabledColor: Bench.inkDim.withValues(alpha: 0.35),
-              onPressed: canUndo ? onUndo : null,
-            ),
-            IconButton(
-              tooltip: redoLabel == null
-                  ? tr(zh: '重做', en: 'Redo')
-                  : tr(zh: '重做:$redoLabel', en: 'Redo: $redoLabel'),
-              icon: const Icon(Icons.redo_rounded),
-              color: Bench.ink,
-              disabledColor: Bench.inkDim.withValues(alpha: 0.35),
-              onPressed: canRedo ? onRedo : null,
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                color: wireTool
-                    ? Bench.selection.withValues(alpha: 0.18)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                tooltip: wireTool
-                    ? tr(
-                        zh: '连线模式:在画布任意处拖动画线',
-                        en: 'Wire mode: drag anywhere to draw',
-                      )
-                    : tr(zh: '连线模式', en: 'Wire mode'),
-                icon: Icon(
-                  Icons.cable_rounded,
-                  color: wireTool ? Bench.selection : Bench.ink,
-                ),
-                onPressed: onWireTool,
-              ),
-            ),
             PopupMenuButton<String>(
+              tooltip: tr(zh: '更多', en: 'More'),
               icon: const Icon(Icons.more_vert_rounded, color: Bench.ink),
               onSelected: (v) => v == 'fit' ? onFit() : onHelp(),
               itemBuilder: (_) => [
@@ -1289,65 +1345,120 @@ class _StorageBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Bench.error.withValues(alpha: 0.16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Text(
-        text,
-        style: const TextStyle(color: Bench.ink, fontSize: 13, height: 1.35),
-      ),
-    );
-  }
-}
-
-class _EmptyBench extends StatelessWidget {
-  const _EmptyBench();
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(40, 0, 40, 60),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.touch_app_outlined,
-                size: 40,
-                color: Bench.positive.withValues(alpha: 0.8),
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: Bench.errorContainer,
+          border: Border(bottom: BorderSide(color: Bench.error)),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: BenchSpace.l,
+          vertical: BenchSpace.s,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 18,
+              color: Bench.onErrorContainer,
+            ),
+            const SizedBox(width: BenchSpace.s),
+            Expanded(
+              child: Text(
+                text,
+                style: BenchType.bodyStyle(color: Bench.onErrorContainer),
               ),
-              const SizedBox(height: 14),
-              Text(
-                tr(zh: '从下方选一个元件开始', en: 'Pick a part below to start'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Bench.ink,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                tr(
-                  zh: '元件会出现在屏幕中央。从引脚拖出去就是连线,别忘了放一个接地。',
-                  en: 'It lands in the middle of the screen. Drag from a pin to wire it, and remember a ground.',
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Bench.inkDim,
-                  fontSize: 14,
-                  height: 1.45,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+/// An empty bench is not blank: a faint ghost of the first part sits where
+/// a real one will land, and the line under it points at the part strip.
+class _EmptyBench extends StatelessWidget {
+  const _EmptyBench({required this.view});
+
+  final CanvasView view;
+
+  static const SchematicDocument _ghost = SchematicDocument(
+    parts: [
+      SchematicPart(
+        id: 'R1',
+        kind: PartKind.resistor,
+        origin: GridPoint(-1, 0),
+      ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ExcludeSemantics(
+              child: CustomPaint(
+                painter: SchematicPainter(
+                  doc: _ghost,
+                  view: view,
+                  showGrid: false,
+                  showLabels: false,
+                  drawBackground: false,
+                  markOpenPins: false,
+                  opacity: 0.35,
+                ),
+              ),
+            ),
+          ),
+          Align(
+            alignment: const Alignment(0, 0.45),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    tr(zh: '从下方选一个元件开始', en: 'Pick a part below to start'),
+                    textAlign: TextAlign.center,
+                    style: BenchType.bodyStyle(
+                      size: BenchType.title,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: BenchSpace.s),
+                  Text(
+                    tr(
+                      zh: '它会落在上面这个位置。从引脚拖出去就是连线,别忘了放一个接地。',
+                      en: 'It lands right where the outline is. Drag from a pin to wire it, and remember a ground.',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: BenchType.bodyStyle(color: Bench.inkDim),
+                  ),
+                  const SizedBox(height: BenchSpace.s),
+                  const ExcludeSemantics(
+                    child: Icon(
+                      Icons.south_rounded,
+                      size: 20,
+                      color: Bench.inkDim,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _Severity { warning, error }
 
 /// Selection actions and the one line of status: what is wrong, or what is
 /// being shown.
@@ -1380,24 +1491,24 @@ class _StatusArea extends StatelessWidget {
   final ValueChanged<SchematicPart> onEdit;
   final ValueChanged<SchematicPart> onFlip;
 
-  (String, Color)? _message() {
+  (String, _Severity)? _message() {
     if (running) {
       switch (problem) {
         case RunProblem.empty:
           return (
             tr(
-              zh: '画布是空的 —— 先放几个元件',
-              en: 'The bench is empty — add some parts',
+              zh: '画布是空的,先放几个元件',
+              en: 'The bench is empty. Add some parts first',
             ),
-            Bench.warning,
+            _Severity.warning,
           );
         case RunProblem.noGround:
           return (
             tr(
-              zh: '缺少接地 —— 放一个 ⏚,电压才有参考点',
-              en: 'No ground — add ⏚ so voltages have a reference',
+              zh: '缺少接地:放一个「接地」,电压才有参考点',
+              en: 'No ground: add a Ground part so voltages have a reference',
             ),
-            Bench.warning,
+            _Severity.warning,
           );
         case RunProblem.invalidValues:
           return (
@@ -1405,7 +1516,7 @@ class _StatusArea extends StatelessWidget {
               zh: '${netlistBuild.invalidPartIds.join('、')} 的数值无法仿真(必须大于 0)',
               en: '${netlistBuild.invalidPartIds.join(', ')}: value must be greater than zero',
             ),
-            Bench.error,
+            _Severity.error,
           );
         case RunProblem.failed:
           if (notes.contains(SolverNote.singular)) {
@@ -1414,15 +1525,15 @@ class _StatusArea extends StatelessWidget {
                 zh: '短路:某个电压源被导线直接短接,或两个电源互相顶牛。没有显示任何数值。',
                 en: 'Short circuit: a source is shorted by a wire, or two sources fight. No numbers shown.',
               ),
-              Bench.error,
+              _Severity.error,
             );
           }
           return (
             tr(
-              zh: '未收敛 —— 这个电路没有可信的解,所以一个数都不显示',
-              en: 'Did not converge — no trustworthy answer, so no numbers are shown',
+              zh: '未收敛:这个电路没有可信的解,所以一个数都不显示',
+              en: 'Did not converge: no trustworthy answer, so no numbers are shown',
             ),
-            Bench.error,
+            _Severity.error,
           );
         case null:
       }
@@ -1432,7 +1543,7 @@ class _StatusArea extends StatelessWidget {
             zh: '在 ${formatSi(run!.window, 's')} 处未收敛,之后的波形不显示',
             en: 'Stopped converging at ${formatSi(run!.window, 's')}; nothing after it is shown',
           ),
-          Bench.error,
+          _Severity.error,
         );
       }
       if (notes.contains(SolverNote.floatingNodesTiedToGround)) {
@@ -1441,7 +1552,7 @@ class _StatusArea extends StatelessWidget {
             zh: '有元件悬空(没接到电路里),它上面的读数没有意义',
             en: 'Something is floating (not connected); its readings mean nothing',
           ),
-          Bench.warning,
+          _Severity.warning,
         );
       }
     }
@@ -1451,7 +1562,7 @@ class _StatusArea extends StatelessWidget {
           zh: '${netlistBuild.shortedPartIds.join('、')} 被短接:两个引脚落在同一根导线上',
           en: '${netlistBuild.shortedPartIds.join(', ')} is shorted: both pins touch the same wire',
         ),
-        Bench.warning,
+        _Severity.warning,
       );
     }
     return null;
@@ -1462,19 +1573,20 @@ class _StatusArea extends StatelessWidget {
     final message = _message();
     final selected = doc.parts.where((p) => selection.contains(p.id)).toList();
     final wires = doc.wires.where((w) => selection.contains(w.id)).length;
+    final fade = BenchMotion.of(context, BenchMotion.small);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
+          duration: fade,
+          reverseDuration: BenchMotion.exit(fade),
+          switchInCurve: BenchMotion.enter,
           transitionBuilder: (child, a) => FadeTransition(
             opacity: a,
-            child: SlideTransition(
-              position: Tween(
-                begin: const Offset(0, 0.25),
-                end: Offset.zero,
-              ).animate(a),
+            child: ScaleTransition(
+              scale: Tween(begin: 0.95, end: 1.0).animate(a),
+              alignment: Alignment.bottomLeft,
               child: child,
             ),
           ),
@@ -1491,47 +1603,61 @@ class _StatusArea extends StatelessWidget {
                 ),
         ),
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
+          duration: fade,
           child: message == null
               ? const SizedBox.shrink()
-              : Container(
+              : _StatusLine(
                   key: ValueKey(message.$1),
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 9,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Bench.panel.withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: message.$2.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 16,
-                        color: message.$2,
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          message.$1,
-                          style: const TextStyle(
-                            color: Bench.ink,
-                            fontSize: 13,
-                            height: 1.3,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  text: message.$1,
+                  severity: message.$2,
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// A problem line. Warning and error differ by glyph shape AND colour, and
+/// the line is announced when it appears.
+class _StatusLine extends StatelessWidget {
+  const _StatusLine({super.key, required this.text, required this.severity});
+
+  final String text;
+  final _Severity severity;
+
+  @override
+  Widget build(BuildContext context) {
+    final error = severity == _Severity.error;
+    final color = error ? Bench.error : Bench.warning;
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        margin: const EdgeInsets.only(top: BenchSpace.s),
+        padding: const EdgeInsets.symmetric(
+          horizontal: BenchSpace.m,
+          vertical: BenchSpace.s,
+        ),
+        decoration: BoxDecoration(
+          color: Bench.panel,
+          borderRadius: BenchRadius.smAll,
+          border: Border.all(color: color),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              error ? Icons.error_outline_rounded : Icons.warning_amber_rounded,
+              size: 18,
+              color: color,
+            ),
+            const SizedBox(width: BenchSpace.s),
+            Flexible(
+              child: Text(text, style: BenchType.bodyStyle(height: 1.35)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1570,35 +1696,22 @@ class _SelectionBar extends StatelessWidget {
       );
     }
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 4, 4, 4),
+      padding: const EdgeInsets.fromLTRB(BenchSpace.m, 0, 0, 0),
       decoration: BoxDecoration(
-        color: Bench.panel.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Bench.selection.withValues(alpha: 0.35)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: Bench.panel,
+        borderRadius: BenchRadius.smAll,
+        border: Border.all(color: Bench.selection),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Flexible(
+          Padding(
+            padding: const EdgeInsets.only(right: BenchSpace.xs),
             child: Text(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Bench.ink,
-                fontWeight: FontWeight.w600,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
+              style: BenchType.monoStyle(BenchType.body, bold: true),
             ),
           ),
-          const SizedBox(width: 4),
           if (single != null && hasEditableValue(single.kind))
             _BarButton(
               icon: Icons.tune_rounded,
@@ -1654,7 +1767,9 @@ class _BarButton extends StatelessWidget {
   );
 }
 
-/// Run / stop. A ring breathes around it while the circuit is live.
+/// Run / stop. The state reads three ways: the drawn glyph (triangle vs
+/// square), the fill (charge yellow vs a raised panel ringed in charge) and
+/// the spoken label. Red stays reserved for errors.
 class _RunButton extends StatefulWidget {
   const _RunButton({
     required this.running,
@@ -1670,111 +1785,55 @@ class _RunButton extends StatefulWidget {
   State<_RunButton> createState() => _RunButtonState();
 }
 
-class _RunButtonState extends State<_RunButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1600),
-  );
+class _RunButtonState extends State<_RunButton> {
   bool _pressed = false;
-
-  @override
-  void didUpdateWidget(covariant _RunButton old) {
-    super.didUpdateWidget(old);
-    _sync();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _sync();
-  }
-
-  void _sync() {
-    final animate = widget.running && !MediaQuery.of(context).disableAnimations;
-    if (animate && !_pulse.isAnimating) _pulse.repeat();
-    if (!animate && _pulse.isAnimating) _pulse.stop();
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final running = widget.running;
+    final press = BenchMotion.of(context, BenchMotion.press);
     return Semantics(
       button: true,
       label: running
           ? tr(zh: '停止仿真', en: 'Stop simulation')
           : tr(zh: '运行仿真', en: 'Run simulation'),
       child: GestureDetector(
+        key: const ValueKey('run-button'),
         onTapDown: (_) => setState(() => _pressed = true),
         onTapCancel: () => setState(() => _pressed = false),
         onTapUp: (_) => setState(() => _pressed = false),
         onTap: widget.onPressed,
         child: AnimatedScale(
-          scale: _pressed ? 0.9 : 1,
-          duration: const Duration(milliseconds: 120),
-          child: SizedBox(
+          scale: _pressed ? BenchMotion.pressScale : 1,
+          duration: press,
+          curve: BenchMotion.enter,
+          child: AnimatedContainer(
             width: 64,
             height: 64,
-            child: AnimatedBuilder(
-              animation: _pulse,
-              builder: (context, child) => CustomPaint(
-                painter: _PulsePainter(running ? _pulse.value : null),
-                child: child,
-              ),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: running
-                        ? const [Color(0xFFFF7A7A), Color(0xFFE0435F)]
-                        : const [Color(0xFFFFE27A), Color(0xFFE0AE1E)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (running ? Bench.error : Bench.charge).withValues(
-                        alpha: 0.45,
+            duration: press,
+            curve: BenchMotion.enter,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: running ? Bench.panelRaised : Bench.charge,
+              border: running
+                  ? Border.all(color: Bench.charge, width: 2)
+                  : null,
+            ),
+            child: Center(
+              child: widget.solving
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: running ? Bench.charge : Bench.onCharge,
                       ),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
+                    )
+                  : BenchGlyph(
+                      running ? GlyphKind.stop : GlyphKind.play,
+                      size: 28,
+                      color: running ? Bench.ink : Bench.onCharge,
                     ),
-                  ],
-                ),
-                child: Center(
-                  child: widget.solving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder: (c, a) =>
-                              ScaleTransition(scale: a, child: c),
-                          child: Icon(
-                            running
-                                ? Icons.stop_rounded
-                                : Icons.play_arrow_rounded,
-                            key: ValueKey(running),
-                            color: running
-                                ? Colors.white
-                                : const Color(0xFF2B2100),
-                            size: 34,
-                          ),
-                        ),
-                ),
-              ),
             ),
           ),
         ),
@@ -1783,45 +1842,36 @@ class _RunButtonState extends State<_RunButton>
   }
 }
 
-class _PulsePainter extends CustomPainter {
-  _PulsePainter(this.t);
-
-  final double? t;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final t = this.t;
-    if (t == null) return;
-    final c = size.center(Offset.zero);
-    for (final phase in const [0.0, 0.5]) {
-      final u = (t + phase) % 1;
-      canvas.drawCircle(
-        c,
-        size.width / 2 + u * 18,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..color = Bench.error.withValues(alpha: (1 - u) * 0.45),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _PulsePainter old) => old.t != t;
-}
-
+/// The bottom strip: the thumb's tools (undo, redo, wire mode) and the
+/// free-tier count on the top row, the parts below.
 class _Palette extends StatelessWidget {
   const _Palette({
     required this.onPick,
     required this.atLimit,
     required this.count,
     required this.pro,
+    required this.canUndo,
+    required this.canRedo,
+    required this.undoLabel,
+    required this.redoLabel,
+    required this.wireTool,
+    required this.onUndo,
+    required this.onRedo,
+    required this.onWireTool,
   });
 
   final ValueChanged<PartKind> onPick;
   final bool atLimit;
   final int count;
   final bool pro;
+  final bool canUndo;
+  final bool canRedo;
+  final String? undoLabel;
+  final String? redoLabel;
+  final bool wireTool;
+  final VoidCallback onUndo;
+  final VoidCallback onRedo;
+  final VoidCallback onWireTool;
 
   static const _order = [
     PartKind.resistor,
@@ -1837,7 +1887,9 @@ class _Palette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    // The strip grows with the caption so large text never clips (F10).
+    final caption = MediaQuery.textScalerOf(context).scale(BenchType.label);
     return Container(
       padding: EdgeInsets.only(bottom: bottom),
       decoration: const BoxDecoration(
@@ -1847,29 +1899,94 @@ class _Palette extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (!pro)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                tr(
-                  zh: '元件 $count / ${ProjectStore.freeParts}',
-                  en: 'Parts $count / ${ProjectStore.freeParts}',
-                ),
-                style: TextStyle(
-                  color: atLimit ? Bench.warning : Bench.inkDim,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              BenchSpace.xs,
+              BenchSpace.xs,
+              BenchSpace.l,
+              0,
             ),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: undoLabel == null
+                      ? tr(zh: '撤销', en: 'Undo')
+                      : tr(zh: '撤销:$undoLabel', en: 'Undo: $undoLabel'),
+                  icon: const Icon(Icons.undo_rounded),
+                  color: Bench.ink,
+                  disabledColor: Bench.neutral,
+                  onPressed: canUndo ? onUndo : null,
+                ),
+                IconButton(
+                  tooltip: redoLabel == null
+                      ? tr(zh: '重做', en: 'Redo')
+                      : tr(zh: '重做:$redoLabel', en: 'Redo: $redoLabel'),
+                  icon: const Icon(Icons.redo_rounded),
+                  color: Bench.ink,
+                  disabledColor: Bench.neutral,
+                  onPressed: canRedo ? onRedo : null,
+                ),
+                const SizedBox(width: BenchSpace.xs),
+                // Wire mode is a latched tool: shown by fill, border, glyph
+                // colour and its spoken state — never by colour alone.
+                Semantics(
+                  toggled: wireTool,
+                  child: AnimatedContainer(
+                    duration: BenchMotion.of(context, BenchMotion.press),
+                    curve: BenchMotion.enter,
+                    decoration: BoxDecoration(
+                      color: wireTool
+                          ? Bench.secondaryFill
+                          : Bench.backgroundClear,
+                      borderRadius: BenchRadius.smAll,
+                      border: Border.all(
+                        color: wireTool ? Bench.selection : Bench.outline,
+                      ),
+                    ),
+                    child: IconButton(
+                      tooltip: wireTool
+                          ? tr(
+                              zh: '连线模式已开:在画布任意处拖动画线',
+                              en: 'Wire mode on: drag anywhere to draw',
+                            )
+                          : tr(zh: '连线模式', en: 'Wire mode'),
+                      icon: BenchGlyph(
+                        GlyphKind.wire,
+                        color: wireTool ? Bench.selection : Bench.ink,
+                      ),
+                      onPressed: onWireTool,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: BenchSpace.s),
+                Expanded(
+                  child: pro
+                      ? const SizedBox.shrink()
+                      : Text(
+                          tr(
+                            zh: '元件 $count / ${ProjectStore.freeParts}',
+                            en: 'Parts $count / ${ProjectStore.freeParts}',
+                          ),
+                          textAlign: TextAlign.end,
+                          style: BenchType.monoStyle(
+                            BenchType.label,
+                            color: atLimit ? Bench.warning : Bench.inkDim,
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
           SizedBox(
-            height: 78,
+            height: 60 + caption * 1.4,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: BenchSpace.m,
+                vertical: BenchSpace.s,
+              ),
               itemCount: _order.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 6),
+              separatorBuilder: (_, _) => const SizedBox(width: BenchSpace.s),
               itemBuilder: (context, i) {
                 final kind = _order[i];
                 return _PaletteItem(kind: kind, onTap: () => onPick(kind));
@@ -1892,37 +2009,43 @@ class _PaletteItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: partKindName(kind),
-      child: Material(
-        color: Bench.panel,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          splashColor: Bench.positive.withValues(alpha: 0.2),
-          onTap: onTap,
-          child: Container(
-            width: 70,
-            padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Bench.panelBorder),
-            ),
+      child: Pressable(
+        onTap: onTap,
+        label: tr(
+          zh: '添加${partKindName(kind)}',
+          en: 'Add ${partKindName(kind)}',
+        ),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 72),
+          padding: const EdgeInsets.fromLTRB(
+            BenchSpace.s,
+            BenchSpace.s,
+            BenchSpace.s,
+            BenchSpace.s,
+          ),
+          decoration: BoxDecoration(
+            color: Bench.panel,
+            borderRadius: BenchRadius.smAll,
+            border: Border.all(color: Bench.panelBorder),
+          ),
+          child: ExcludeSemantics(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
                   width: 44,
                   height: 26,
                   child: CustomPaint(painter: PartGlyphPainter(kind)),
                 ),
-                const Spacer(),
                 Text(
                   partKindShort(kind),
                   maxLines: 1,
-                  overflow: TextOverflow.fade,
                   softWrap: false,
-                  style: const TextStyle(
+                  style: BenchType.bodyStyle(
                     color: Bench.inkDim,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    size: BenchType.label,
+                    weight: FontWeight.w600,
+                    height: 1.2,
                   ),
                 ),
               ],
@@ -1956,7 +2079,7 @@ class _HelpSheet extends StatelessWidget {
         Icons.polyline_rounded,
         tr(
           zh: '从引脚拖出:连线;或打开连线模式在任意处拖',
-          en: 'Drag from a pin: draw a wire — or turn on wire mode',
+          en: 'Drag from a pin: draw a wire, or turn on wire mode',
         ),
       ),
       (
@@ -1982,8 +2105,13 @@ class _HelpSheet extends StatelessWidget {
       ),
     ];
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+          BenchSpace.xl,
+          0,
+          BenchSpace.xl,
+          BenchSpace.l,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1992,25 +2120,18 @@ class _HelpSheet extends StatelessWidget {
               tr(zh: '手势', en: 'Gestures'),
               style: text.titleLarge,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: BenchSpace.m),
             for (final (icon, label) in rows)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 7),
+                padding: const EdgeInsets.symmetric(vertical: BenchSpace.s),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      icon,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.primary,
+                    ExcludeSemantics(
+                      child: Icon(icon, size: 20, color: Bench.inkDim),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: text.bodyMedium?.copyWith(height: 1.4),
-                      ),
-                    ),
+                    const SizedBox(width: BenchSpace.m),
+                    Expanded(child: Text(label, style: BenchType.bodyStyle())),
                   ],
                 ),
               ),
@@ -2029,7 +2150,7 @@ class _Burst {
   final DateTime born;
 }
 
-/// Expanding rings and a flash at each fresh edit.
+/// One expanding ring at each fresh edit: the edit took.
 class _BurstPainter extends CustomPainter {
   _BurstPainter(this.bursts, this.view);
 
@@ -2039,9 +2160,10 @@ class _BurstPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final now = DateTime.now();
+    final span = BenchMotion.medium.inMicroseconds;
     for (final b in bursts) {
-      final t = (now.difference(b.born).inMilliseconds / 520).clamp(0.0, 1.0);
-      final e = Curves.easeOutCubic.transform(t);
+      final t = (now.difference(b.born).inMicroseconds / span).clamp(0.0, 1.0);
+      final e = BenchMotion.enter.transform(t);
       final c = view.toScreenXY(b.grid.dx, b.grid.dy);
       final r = view.scale * (0.3 + 1.6 * e);
       canvas.drawCircle(
@@ -2051,13 +2173,6 @@ class _BurstPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.5 * (1 - e) + 0.5
           ..color = b.color.withValues(alpha: 0.85 * (1 - e)),
-      );
-      canvas.drawCircle(
-        c,
-        view.scale * 0.5 * (1 - e),
-        Paint()
-          ..color = b.color.withValues(alpha: 0.35 * (1 - e))
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
       );
     }
   }

@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'words.dart';
 
@@ -13,6 +15,11 @@ abstract final class OhmIdentity {
   static String get appName => tr(zh: appNameZh, en: appNameEn);
 
   static const String version = '1.0.0';
+
+  /// The store this build is sold through — only the one the user is on.
+  static bool get _isApple => Platform.isIOS || Platform.isMacOS;
+  static String get _store => _isApple ? 'App Store' : 'Google Play';
+  static String get _storeEn => _isApple ? 'the App Store' : 'Google Play';
 
   /// Seed for the Material 3 color scheme: hue 52, the warm yellow of the
   /// moving charge on the bench. The first plan used hue 198 (scope cyan),
@@ -31,7 +38,7 @@ abstract final class OhmIdentity {
 
 求解器、示波器和动画全部在手机上运行,应用不建立任何网络连接,不带统计、广告或崩溃上报 SDK,也不需要账号。
 
-购买 Pro 由 App Store / Google Play 处理,我们拿不到你的支付信息;重装后在设置里「恢复购买」即可找回。
+购买 Pro 由 $_store 处理,我们拿不到你的支付信息;重装后在设置里「恢复购买」即可找回。
 
 有问题请写信:bitcexgroup@gmail.com
 ''',
@@ -42,7 +49,7 @@ The circuits you draw are kept in one file on this device (ohmbench_projects.jso
 
 The solver, the scope and the animation all run on the phone. The app makes no network connections and contains no analytics, advertising or crash-reporting SDKs, and there is no account.
 
-Buying Pro is handled by the App Store / Google Play; we never see your payment details. After a reinstall, "Restore purchase" in settings brings Pro back.
+Buying Pro is handled by $_storeEn; we never see your payment details. After a reinstall, "Restore purchase" in settings brings Pro back.
 
 Questions: bitcexgroup@gmail.com
 ''',
