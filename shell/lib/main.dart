@@ -4,7 +4,7 @@ import 'core/app_theme.dart';
 import 'core/branding.dart';
 import 'core/l10n.dart';
 import 'core/purchase.dart';
-import 'core/settings_page.dart';
+import 'core/shell_nav.dart';
 import 'tool/sample_tool.dart';
 import 'tool/tool_module.dart';
 
@@ -14,6 +14,7 @@ final ToolModule tool = SampleTool();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLanguage.load();
+  ShellNav.tool = tool;
   runApp(const ShellApp());
 }
 
@@ -48,24 +49,13 @@ class ShellApp extends StatelessWidget {
   }
 }
 
+/// No AppBar on purpose: the tool owns the whole first screen, including
+/// where its settings entry goes (see ToolModule.buildHome).
 class _HomeScaffold extends StatelessWidget {
   const _HomeScaffold();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(Branding.appName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),
-          ),
-        ],
-      ),
-      body: SafeArea(child: tool.buildHome(context)),
-    );
+    return Scaffold(body: tool.buildHome(context));
   }
 }

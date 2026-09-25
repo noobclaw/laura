@@ -241,4 +241,6 @@ ohmbench(09-23 商店图 `store/screenshots/appstore/zh/1.png`)是目前唯一�
 | hamen/material-3-skill | 1.4k / MIT | 只借数值 | 色彩角色配对、圆角档位 4/8/12/16/28、M3 动效时长可作参考。iPhone-only 产品不照搬 M3 的组件外观。 |
 | bergside/awesome-design-skills | 2.9k / MIT | 不引入 | 67 套 Web 风格模板,没有移动端内容,最多当看图参考。 |
 
+**已落地(2026-09-25,用户拍板「1、2、3 先改,以后风格按 skill 走」)**:① 已装 `~/.claude/skills/`:impeccable(去掉会下载二进制的启动器,纯文档模式)、emil-design-eng、apple-design、flutter-design-system-structure / flutter-accessibility-as-code / flutter-motion-and-haptics / flutter-ui-states-and-feedback / flutter-i18n-rtl-l10n;② 壳已删默认 AppBar(首屏由 `buildHome` 全权负责,设置入口用 `openSettings(context)`)、iOS 转场恢复 Cupertino 右滑返回;③ PIPELINE 视觉标准 1–8 已改为指向本文 + 风格按 skill 走。④ 老 app 基线拼图与改版队列**未做**,待排。壳的 token 骨架 / Haptics 封装 / screens_test 模板也未做。
+
 **落地顺序**:① 把 impeccable、emil(两个)、Flutter-Skills 子集复制到 `~/.claude/skills/`。② 壳 `shell/` 按本文改:删 `_HomeScaffold` 默认 AppBar;iOS 转场恢复右滑返回;加 token 骨架、Haptics 封装、`screens_test` 模板。③ 把 PIPELINE「视觉设计标准」第 1–8 条改为"见 kb/UIUX规矩.md"。④ 用 5.4 对现有 14 个 app 出基线拼图,Nocturne 撞型的 4 个 app 排进改版队列。第 ②③④ 步需要改 shell 和 PIPELINE,由主会话决定何时做。

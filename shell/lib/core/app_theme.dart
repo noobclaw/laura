@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 import 'branding.dart';
@@ -7,8 +8,12 @@ import 'branding.dart';
 /// Built from [Branding.seedColor] — set that per app and this carries the rest:
 /// flat filled cards with a generous radius, and tabular figures + weight on the
 /// number styles (a tool's numbers are its emotional payload). Works for both
-/// light and dark via [brightness]. Apps that want a stronger art direction
-/// (gradients, a fixed nocturnal palette) override or extend this.
+/// light and dark via [brightness].
+///
+/// This is a floor, not a look: every app replaces it with its own tokens
+/// (hand-authored light/dark colors, a bundled display font, three radii,
+/// motion durations) per the design brief in kb/UIUX规矩.md. Shipping this
+/// theme unchanged is what made the catalog look alike.
 ThemeData buildAppTheme(Brightness brightness) {
   final scheme = ColorScheme.fromSeed(
     seedColor: Branding.seedColor,
@@ -18,11 +23,12 @@ ThemeData buildAppTheme(Brightness brightness) {
 
   const tab = <FontFeature>[FontFeature.tabularFigures()];
   return theme.copyWith(
-    // 2026-09-12 (PIPELINE 视觉标准 10): no hard cuts between pages. Every
-    // app inherits a fade-forward transition; a tool may override per route.
+    // Android fades forward (no hard cuts, PIPELINE 视觉标准 10). iOS keeps
+    // the native Cupertino slide: it is what carries the edge-swipe-back
+    // gesture, and a fade there silently removed it (kb/UIUX规矩.md, 09-25).
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
       TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-      TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     }),
     cardTheme: CardThemeData(
       elevation: 0,

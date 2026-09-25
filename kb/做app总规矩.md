@@ -51,6 +51,7 @@
 
 ## 四、开发铁律（G3）
 - **不许长得一样（防 Apple 4.3(a)）**：TuneBench 09-25 因此被拒。每个 app 都要有：自己的色相（查色相表，和已有的不能在 ±20° 以内）、自己的 hero 形态、至少一处自绘图形、专属图标和启动屏。复制壳之后改名核心层，提审包用混淆（`.ci-obfuscate`）。
+- **风格按 skill 走（09-25）**：界面、交互、动效以 [[UIUX规矩]] 为准；G2 写设计简报前、G3 写界面时、G6b 评审时都要调用已装的 `impeccable`、`emil-design-eng`、`apple-design` 和 `flutter-*` 这 5 个 skill。壳首页不再自带标题栏，首屏必须直接是工具本身。
 - **视觉**：rubric 共 13 条。必须有一个 **signature 炫技动效场景**，logo 缩到 60px 还能认出来，深色和浅色主题都要好看。
 - **多语言**：所有用户能看到的字符串都用 `tr(zh:, en:)`，**必须有完整英文区内容**，英文显示名在美区不能和别人逐字同名。
 - **iOS 平行检查**：`NS*UsageDescription` 说清用途；只做 iPhone（`TARGETED_DEVICE_FAMILY=1`）；用 SPM，不提交 Podfile；plist 里的中文不许用 Windows 工具直接写进去；小心 ITMS-90683。
