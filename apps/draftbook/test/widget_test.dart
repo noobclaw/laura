@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:draftbook/main.dart';
+import 'package:draftbook/tool/app_theme.dart';
 import 'package:draftbook/tool/ui/editor_screen.dart';
-import 'package:draftbook/tool/ui/ink_mark.dart';
+import 'package:draftbook/tool/ui/line_gauge.dart';
 import 'package:draftbook/tool/ui/outline_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,26 +48,37 @@ void main() {
     tool.store.dailyLog.clear();
     tool.store.pro = false;
     tool.store.loaded = true;
+    LineGauge.resetMemory();
   });
 
-  testWidgets('app boots and shows its title bar', (tester) async {
+  testWidgets('app boots straight onto the page: no app bar, settings in reach',
+      (tester) async {
     await tester.pumpWidget(const DraftbookApp());
     await tester.pump();
-    // Under `flutter test` the app boots in the 'en' locale.
-    expect(find.widgetWithText(AppBar, 'Draftbook'), findsOneWidget);
+    // kb/UIUX规矩.md V1: the first screen is the tool, not an AppBar + gear.
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.byTooltip('Settings'), findsOneWidget);
   });
 
-  testWidgets('an empty shelf shows the mark, the pitch and a way in',
+  testWidgets('an empty shelf is a blank page, and one tap starts writing',
       (tester) async {
     await tester.pumpWidget(const DraftbookApp());
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(DraftbookMark), findsOneWidget);
-    expect(find.text('Start your first book'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'New book'), findsOneWidget);
+    expect(find.byType(LineGauge), findsOneWidget);
+    expect(find.text('Untitled'), findsOneWidget, reason: 'the title field, inline');
+    expect(find.widgetWithText(FilledButton, 'Start writing'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Night Bus');
+    await tester.tap(find.widgetWithText(FilledButton, 'Start writing'));
+    await tester.pumpAndSettle();
+    // kb F1: first result in one tap — a book exists and the caret is in it.
+    expect(tool.store.projects, hasLength(1));
+    expect(tool.store.projects.single.title, 'Night Bus');
+    expect(find.byType(EditorScreen), findsOneWidget);
   });
 
-  testWidgets('a book shows the hero, the ink stroke and the shelf',
+  testWidgets('a book shows its page, the line gauge and the way back in',
       (tester) async {
     final p = tool.store.addProject(title: 'Night Bus', targetWords: 1000);
     tool.store.updateSceneBody(
@@ -79,12 +91,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
 
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.byType(AnimatedInkStroke), findsOneWidget);
+    expect(find.text('of 500 words today'), findsOneWidget);
+    expect(find.byType(LineGauge), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Keep writing'), findsOneWidget);
     expect(find.text('Night Bus'), findsWidgets);
+    // The page shows the writer's own last words.
+    expect(find.textContaining('one two three four five', findRichText: true), findsOneWidget);
   });
-
   testWidgets('the shelf opens the outline, and the outline opens the editor',
       (tester) async {
     final p = tool.store.addProject(title: 'Night Bus');
@@ -103,8 +116,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(EditorScreen), findsOneWidget);
     // The always-available formatting bar (PLAN.md 交互铁律 1).
-    expect(find.byIcon(Icons.format_bold), findsOneWidget);
-    expect(find.byIcon(Icons.format_italic), findsOneWidget);
+    expect(find.byTooltip('Bold'), findsOneWidget);
+    expect(find.byTooltip('Italic'), findsOneWidget);
   });
 
   testWidgets('typing in the editor is counted and saved', (tester) async {
@@ -112,6 +125,7 @@ void main() {
     final scene = tool.store.firstScene(p)!.scene;
 
     await tester.pumpWidget(MaterialApp(
+      theme: buildDraftbookTheme(Brightness.light),
       home: EditorScreen(store: tool.store, projectId: p.id, sceneId: scene.id),
     ));
     await tester.pump();
@@ -120,7 +134,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(scene.body, 'one two three');
-    expect(find.text('3 words'), findsOneWidget);
+    expect(find.textContaining('3 words', findRichText: true), findsOneWidget);
     expect(tool.store.todayWords, 3);
   });
 
@@ -138,6 +152,7 @@ void main() {
     // the test passes against the buggy code too.
     var rebuilds = 0;
     await tester.pumpWidget(MaterialApp(
+      theme: buildDraftbookTheme(Brightness.light),
       home: ListenableBuilder(
         listenable: tool.store,
         builder: (context, _) {
@@ -185,6 +200,7 @@ void main() {
     expect(scene.history, isEmpty);
 
     await tester.pumpWidget(MaterialApp(
+      theme: buildDraftbookTheme(Brightness.light),
       home: EditorScreen(store: tool.store, projectId: p.id, sceneId: scene.id),
     ));
     await tester.pump();
@@ -213,7 +229,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.tap(find.widgetWithText(FloatingActionButton, 'New book'));
+    await tester.tap(find.byTooltip('Your books'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New book'));
     await tester.pumpAndSettle();
     expect(find.text('Draftbook Pro'), findsOneWidget);
     // The gate explains itself, and nothing is charged from here.

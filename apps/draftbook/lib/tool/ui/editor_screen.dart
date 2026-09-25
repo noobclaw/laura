@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/l10n.dart';
 import '../../core/review_prompt.dart';
 import '../models.dart';
+import '../app_theme.dart';
+import '../haptics.dart';
 import '../store.dart';
+import 'glyphs.dart';
 import 'history_screen.dart';
 import 'markdown_controller.dart';
 import 'widgets.dart';
@@ -30,11 +32,16 @@ class EditorScreen extends StatefulWidget {
     required this.store,
     required this.projectId,
     required this.sceneId,
+    this.focusOnOpen = false,
   });
 
   final DraftbookStore store;
   final String projectId;
   final String sceneId;
+
+  /// "Keep writing": open with the keyboard up and the caret where the writer
+  /// left it. Opening a scene from the outline is reading first, so it does not.
+  final bool focusOnOpen;
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -77,6 +84,7 @@ class _EditorScreenState extends State<EditorScreen> {
     _sceneId = widget.sceneId;
     _loadScene(_sceneId, focus: true);
     _controller.addListener(_onChanged);
+    widget.store.addListener(_onStore);
     // A phone call, a task switch or a swipe to the home screen must not cost
     // the last few sentences — and the store's own write debounce has to be
     // cut short too, because there may be no next tick.
@@ -93,6 +101,8 @@ class _EditorScreenState extends State<EditorScreen> {
     _debounce?.cancel();
     _barTick?.cancel();
     _lifecycle?.dispose();
+    widget.store.removeListener(_onStore);
+    _noteCaret();
     _saveNow();
     _closeSession(countAction: true);
     widget.store.saveNow();
@@ -113,17 +123,56 @@ class _EditorScreenState extends State<EditorScreen> {
     _sessionStartWords = ref.scene.words;
     _sessionSnapshotted = false;
     _lastText = ref.scene.body;
+    final body = ref.scene.body;
     _controller.value = TextEditingValue(
-      text: ref.scene.body,
-      selection: TextSelection.collapsed(offset: ref.scene.body.length),
+      text: body,
+      selection: TextSelection.collapsed(offset: (ref.scene.caret ?? body.length).clamp(0, body.length)),
     );
     _dirty = false;
     widget.store.noteSceneOpened(p, ref.scene);
-    if (focus && ref.scene.body.isEmpty) {
+    if (focus && (widget.focusOnOpen || body.isEmpty)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _focus.requestFocus();
       });
     }
+  }
+
+  /// Where the caret is now, kept on the scene being left.
+  void _noteCaret() {
+    final ref = _ref;
+    final sel = _controller.selection;
+    if (ref == null || !sel.isValid) return;
+    widget.store.noteCaret(ref.scene, sel.extentOffset);
+  }
+
+  /// Takes a body that changed underneath the editor (a restore, or an Undo of
+  /// one, landed while this screen was open or covered). The session restarts
+  /// from it: that is not writing, so it must not count towards the rating
+  /// prompt or be snapshotted again. `_lastText` is set before the controller
+  /// so the listener does not read the assignment as an edit and spend a
+  /// history slot on it.
+  void _adopt(Scene scene) {
+    final body = scene.body;
+    final at = _controller.selection.isValid ? _controller.selection.extentOffset : body.length;
+    _lastText = body;
+    _controller.value = TextEditingValue(
+      text: body,
+      selection: TextSelection.collapsed(offset: at.clamp(0, body.length)),
+    );
+    _sessionStartBody = body;
+    _sessionStartWords = scene.words;
+    _sessionSnapshotted = false;
+    _dirty = false;
+  }
+
+  /// Store changes made elsewhere — history's Undo bar outlives the history
+  /// screen by up to six seconds — reach the page here. Unsaved typing wins:
+  /// while the editor is dirty the store is about to be overwritten anyway.
+  void _onStore() {
+    if (_dirty || !mounted) return;
+    final ref = _ref;
+    if (ref == null || ref.scene.body == _controller.text) return;
+    setState(() => _adopt(ref.scene));
   }
 
   void _onChanged() {
@@ -187,6 +236,7 @@ class _EditorScreenState extends State<EditorScreen> {
   /// scene being left is closed exactly as if the screen had closed, except
   /// that the writer has not left, so no rating prompt.
   void _goTo(SceneRef target) {
+    _noteCaret();
     _saveNow();
     _closeSession(countAction: false);
     setState(() => _loadScene(target.scene.id));
@@ -239,16 +289,16 @@ class _EditorScreenState extends State<EditorScreen> {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 labelText: tr(zh: '标题', en: 'Title'),
-                hintText: tr(zh: '例如:雨夜的电话', en: 'e.g. The call at midnight'),
+                hintText: tr(zh: '例如：雨夜的电话', en: 'e.g. The call at midnight'),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: DbSpace.x1_5),
             TextField(
               controller: synopsisCtl,
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                labelText: tr(zh: '梗概(只给自己看)', en: 'Synopsis (for your eyes)'),
+                labelText: tr(zh: '梗概（只给自己看）', en: 'Synopsis (for your eyes)'),
                 alignLabelWithHint: true,
               ),
             ),
@@ -271,8 +321,7 @@ class _EditorScreenState extends State<EditorScreen> {
           title: titleCtl.text, synopsis: synopsisCtl.text);
       if (mounted) setState(() {});
     }
-    titleCtl.dispose();
-    synopsisCtl.dispose();
+    disposeNextFrame([titleCtl, synopsisCtl]);
   }
 
   Future<void> _pickStatus() async {
@@ -281,25 +330,34 @@ class _EditorScreenState extends State<EditorScreen> {
     if (p == null || ref == null) return;
     final chosen = await showModalBottomSheet<SceneStatus>(
       context: context,
-      showDragHandle: true,
+      sheetAnimationStyle: DbMotion.sheetStyle(context),
       builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final s in SceneStatus.values)
-              ListTile(
-                leading: StatusDot(status: s, size: 12),
-                title: Text(sceneStatusLabel(s)),
-                trailing: ref.scene.status == s
-                    ? const Icon(Icons.check, size: 18)
-                    : null,
-                onTap: () => Navigator.pop(ctx, s),
-              ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(DbSpace.gutter, 0, DbSpace.gutter, DbSpace.x2),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SheetHeading(title: tr(zh: '这一场景写到哪了', en: 'Where this scene stands')),
+              const SizedBox(height: DbSpace.x1),
+              for (final s in SceneStatus.values)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: StatusMark(status: s, size: 18),
+                  title: Text(sceneStatusLabel(s)),
+                  selected: ref.scene.status == s,
+                  trailing: ref.scene.status == s
+                      ? Icon(Icons.check, size: 20, color: DbColors.of(ctx).accent)
+                      : null,
+                  onTap: () => Navigator.pop(ctx, s),
+                ),
+            ],
+          ),
         ),
       ),
     );
     if (chosen != null) {
+      Haptics.select();
       widget.store.updateScene(p, ref.scene, status: chosen);
       if (mounted) setState(() {});
     }
@@ -323,29 +381,46 @@ class _EditorScreenState extends State<EditorScreen> {
     // A restore rewrote the body while we were away. The session restarts from
     // the restored text: it is not writing, so it must not count towards the
     // rating prompt and must not be snapshotted again as if it were.
-    if (now.scene.body != _controller.text) {
-      _controller.value = TextEditingValue(
-        text: now.scene.body,
-        selection: TextSelection.collapsed(offset: now.scene.body.length),
-      );
-      _sessionStartBody = now.scene.body;
-      _sessionStartWords = now.scene.words;
-      _sessionSnapshotted = false;
-      _lastText = now.scene.body;
-      _dirty = false;
-    }
+    if (now.scene.body != _controller.text) _adopt(now.scene);
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final c = DbColors.of(context);
     final ref = _ref;
     if (ref == null) {
+      // Deleted from another screen while this one was underneath: say what
+      // happened and give the way out, instead of an empty page.
       return Scaffold(
+        backgroundColor: c.paper,
         appBar: AppBar(),
-        body: Center(
-          child: Text(tr(zh: '这个场景已经不在了', en: 'This scene no longer exists')),
+        body: Padding(
+          padding: const EdgeInsets.all(DbSpace.gutter),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tr(zh: '这个场景已经不在了', en: 'This scene no longer exists'),
+                style: DbType.heading.copyWith(color: c.ink),
+              ),
+              const SizedBox(height: DbSpace.x1),
+              Text(
+                tr(
+                  zh: '它在别处被删掉了。它最后保存的正文和版本都随它一起删除；'
+                      '如果刚删，回到大纲还能点「撤销」。',
+                  en: 'It was deleted elsewhere, with its text and versions. If '
+                      'that just happened, Undo is still on the outline.',
+                ),
+                style: DbType.body.copyWith(color: c.inkMuted),
+              ),
+              const SizedBox(height: DbSpace.x3),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: Text(tr(zh: '回到大纲', en: 'Back to the outline')),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -356,56 +431,113 @@ class _EditorScreenState extends State<EditorScreen> {
     final session = words - _sessionStartWords;
 
     return Scaffold(
-      backgroundColor: cs.surfaceContainerLowest,
+      backgroundColor: c.page,
       appBar: AppBar(
-        backgroundColor: cs.surfaceContainerLowest,
+        backgroundColor: c.page,
         titleSpacing: 0,
-        title: InkWell(
-          onTap: _renameScene,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  ref.scene.displayTitle(ref.sceneIndex),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  ref.chapter.displayTitle(ref.chapterIndex),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ],
+        title: Semantics(
+          button: true,
+          hint: tr(zh: '编辑标题与梗概', en: 'Edit title and synopsis'),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _renameScene,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DbSpace.x1, vertical: DbSpace.x0_5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    ref.scene.displayTitle(ref.sceneIndex),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: DbType.rowTitle.copyWith(color: c.ink),
+                  ),
+                  // The chapter, then the live count: the byline of the page
+                  // being set. It lives up here so the bar under the thumb
+                  // has room for 8pt between its keys (kb F7).
+                  Text.rich(
+                    TextSpan(children: [
+                      TextSpan(text: ref.chapter.displayTitle(ref.chapterIndex)),
+                      TextSpan(
+                        text: '  ${wordsLabel(words)}',
+                        style: const TextStyle(fontStyle: FontStyle.normal, fontFeatures: DbType.tabular),
+                      ),
+                      if (session != 0)
+                        TextSpan(
+                          text: session > 0 ? '  +${groupedCount(session)}' : '  ${groupedCount(session)}',
+                          style: TextStyle(
+                            fontStyle: FontStyle.normal,
+                            fontFeatures: DbType.tabular,
+                            color: session > 0 ? c.accent : c.signal,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: DbType.bylineSmall.copyWith(color: c.inkMuted),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: sceneStatusLabel(ref.scene.status),
-            onPressed: _pickStatus,
-            icon: StatusDot(status: ref.scene.status, size: 14),
+          Tooltip(
+            message: sceneStatusLabel(ref.scene.status),
+            child: Semantics(
+              button: true,
+              label: tr(
+                zh: '状态：${sceneStatusLabel(ref.scene.status)}',
+                en: 'Status: ${sceneStatusLabel(ref.scene.status)}',
+              ),
+              excludeSemantics: true,
+              child: PressScale(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _pickStatus,
+                  // Mark and word together: the state never rides on the
+                  // mark's shape alone.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: DbSpace.iconButton),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: DbSpace.x1_5, vertical: DbSpace.x1),
+                        decoration: BoxDecoration(
+                          borderRadius: DbRadius.pillAll,
+                          border: Border.all(color: c.ruleStrong, width: DbRadius.hairline),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ExcludeSemantics(child: StatusMark(status: ref.scene.status, size: 12)),
+                            const SizedBox(width: DbSpace.x1),
+                            Text(sceneStatusLabel(ref.scene.status),
+                                style: DbType.meta.copyWith(color: c.ink)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          IconButton(
+          DbIconButton(
+            glyph: DbGlyph.history,
             tooltip: tr(zh: '版本历史', en: 'Version history'),
             onPressed: _openHistory,
-            icon: const Icon(Icons.history),
           ),
+          const SizedBox(width: DbSpace.x0_5),
         ],
       ),
       body: SafeArea(
         top: false,
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+          padding: const EdgeInsets.fromLTRB(DbSpace.gutter + DbSpace.x0_5, DbSpace.x1, DbSpace.gutter, 0),
           child: TextField(
             controller: _controller,
             focusNode: _focus,
@@ -416,38 +548,28 @@ class _EditorScreenState extends State<EditorScreen> {
             textCapitalization: TextCapitalization.sentences,
             keyboardType: TextInputType.multiline,
             textAlignVertical: TextAlignVertical.top,
-            cursorColor: cs.primary,
-            style: TextStyle(
-              fontSize: 17.5,
-              height: 1.62,
-              color: cs.onSurface,
-            ),
+            cursorColor: c.accent,
+            cursorWidth: 2,
+            style: DbType.manuscript.copyWith(color: c.ink),
             decoration: InputDecoration(
               border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
               isDense: true,
-              contentPadding: const EdgeInsets.only(bottom: 24),
+              contentPadding: const EdgeInsets.only(bottom: DbSpace.x3),
               hintText: tr(
-                zh: '从这里开始写。\n\n加粗用 **两个星号**,斜体用 *一个*,小标题用 # 开头。',
+                zh: '从这里开始写。\n\n加粗用 **两个星号**，斜体用 *一个*，小标题用 # 开头。',
                 en: 'Start writing here.\n\n**Two asterisks** for bold, *one* for '
                     'italic, a leading # for a heading.',
               ),
-              hintStyle: TextStyle(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                height: 1.62,
-              ),
+              hintStyle: DbType.italic(DbType.manuscript).copyWith(color: c.inkMuted),
             ),
           ),
         ),
       ),
       bottomNavigationBar: _EditorBar(
-        words: words,
-        session: session,
-        canPrev: index > 0,
-        canNext: index >= 0 && index < scenes.length - 1,
         onPrev: index > 0 ? () => _goTo(scenes[index - 1]) : null,
-        onNext: index >= 0 && index < scenes.length - 1
-            ? () => _goTo(scenes[index + 1])
-            : null,
+        onNext: index >= 0 && index < scenes.length - 1 ? () => _goTo(scenes[index + 1]) : null,
         onFormat: (kind) {
           switch (kind) {
             case _Fmt.bold:
@@ -461,7 +583,7 @@ class _EditorScreenState extends State<EditorScreen> {
             case _Fmt.sceneBreak:
               _apply(MarkdownEdits.insert(_controller.value, '\n\n* * *\n\n'));
           }
-          HapticFeedback.selectionClick();
+          Haptics.select();
         },
         onDismissKeyboard: () => _focus.unfocus(),
       ),
@@ -472,24 +594,19 @@ class _EditorScreenState extends State<EditorScreen> {
 enum _Fmt { bold, italic, heading, quote, sceneBreak }
 
 /// The bar that is always under the writer's thumb: formatting on the left,
-/// the live count in the middle, scene navigation on the right. It sits in the
-/// scaffold's bottom slot, so the keyboard pushes it up instead of covering it.
+/// scene navigation (or, with the keyboard up, the key that lowers it) on the
+/// right, 8pt between keys (kb F7). The live count is in the app bar. It sits in the
+/// scaffold's bottom slot, so the keyboard pushes it up instead of covering it
+/// (PLAN.md 交互铁律 1). The format keys are type, not icons: B, I, H, a quote
+/// and the typesetter's asterism.
 class _EditorBar extends StatelessWidget {
   const _EditorBar({
-    required this.words,
-    required this.session,
-    required this.canPrev,
-    required this.canNext,
     required this.onPrev,
     required this.onNext,
     required this.onFormat,
     required this.onDismissKeyboard,
   });
 
-  final int words;
-  final int session;
-  final bool canPrev;
-  final bool canNext;
   final VoidCallback? onPrev;
   final VoidCallback? onNext;
   final void Function(_Fmt) onFormat;
@@ -497,116 +614,115 @@ class _EditorBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final c = DbColors.of(context);
     final keyboardUp = MediaQuery.viewInsetsOf(context).bottom > 0;
-    return Material(
-      color: cs.surfaceContainer,
+    final face = DbType.glyph.copyWith(color: c.ink);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.paper,
+        border: Border(top: BorderSide(color: c.rule, width: DbRadius.hairline)),
+      ),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: 52,
-          child: Row(
-            children: [
-              const SizedBox(width: 4),
-              _BarButton(
-                icon: Icons.format_bold,
-                tip: tr(zh: '加粗', en: 'Bold'),
-                onTap: () => onFormat(_Fmt.bold),
-              ),
-              _BarButton(
-                icon: Icons.format_italic,
-                tip: tr(zh: '斜体', en: 'Italic'),
-                onTap: () => onFormat(_Fmt.italic),
-              ),
-              _BarButton(
-                icon: Icons.title,
-                tip: tr(zh: '小标题', en: 'Heading'),
-                onTap: () => onFormat(_Fmt.heading),
-              ),
-              _BarButton(
-                icon: Icons.format_quote,
-                tip: tr(zh: '引用', en: 'Quote'),
-                onTap: () => onFormat(_Fmt.quote),
-              ),
-              _BarButton(
-                icon: Icons.more_horiz,
-                tip: tr(zh: '分隔符', en: 'Scene break'),
-                onTap: () => onFormat(_Fmt.sceneBreak),
-              ),
-              Expanded(
-                child: Center(
-                  child: FittedBox(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          wordsLabel(words),
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(color: cs.onSurfaceVariant),
-                        ),
-                        if (session != 0) ...[
-                          const SizedBox(width: 6),
-                          Text(
-                            session > 0 ? '+${groupedCount(session)}' : groupedCount(session),
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: session > 0 ? cs.primary : cs.error,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                        ],
-                      ],
-                    ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: DbSpace.bar),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: DbSpace.x1),
+            child: Row(
+              children: [
+                ..._spaced([
+                  _Key(
+                    tip: tr(zh: '加粗', en: 'Bold'),
+                    onTap: () => onFormat(_Fmt.bold),
+                    child: Text('B', style: face),
                   ),
-                ),
-              ),
-              if (keyboardUp)
-                _BarButton(
-                  icon: Icons.keyboard_hide_outlined,
-                  tip: tr(zh: '收起键盘', en: 'Hide keyboard'),
-                  onTap: onDismissKeyboard,
-                )
-              else ...[
-                _BarButton(
-                  icon: Icons.chevron_left,
-                  tip: tr(zh: '上一场景', en: 'Previous scene'),
-                  onTap: canPrev ? onPrev : null,
-                ),
-                _BarButton(
-                  icon: Icons.chevron_right,
-                  tip: tr(zh: '下一场景', en: 'Next scene'),
-                  onTap: canNext ? onNext : null,
-                ),
+                  _Key(
+                    tip: tr(zh: '斜体', en: 'Italic'),
+                    onTap: () => onFormat(_Fmt.italic),
+                    child: Text('I', style: face.copyWith(fontStyle: FontStyle.italic, fontWeight: FontWeight.w400)),
+                  ),
+                  _Key(
+                    tip: tr(zh: '小标题', en: 'Heading'),
+                    onTap: () => onFormat(_Fmt.heading),
+                    child: Text('H', style: face),
+                  ),
+                  _Key(
+                    tip: tr(zh: '引用', en: 'Quote'),
+                    onTap: () => onFormat(_Fmt.quote),
+                    child: DbIcon(DbGlyph.quote, size: 18, color: c.ink),
+                  ),
+                  _Key(
+                    tip: tr(zh: '分隔符', en: 'Scene break'),
+                    onTap: () => onFormat(_Fmt.sceneBreak),
+                    child: DbIcon(DbGlyph.asterism, size: 22, color: c.ink),
+                  ),
+                ]),
+                const Spacer(),
+                if (keyboardUp)
+                  _Key(
+                    tip: tr(zh: '收起键盘', en: 'Hide keyboard'),
+                    onTap: onDismissKeyboard,
+                    child: DbIcon(DbGlyph.keyboardDown, size: 22, color: c.ink),
+                  )
+                else
+                  ..._spaced([
+                    _Key(
+                      tip: tr(zh: '上一场景', en: 'Previous scene'),
+                      onTap: onPrev,
+                      child: DbIcon(DbGlyph.prev, size: 22, color: onPrev == null ? c.ruleStrong : c.ink),
+                    ),
+                    _Key(
+                      tip: tr(zh: '下一场景', en: 'Next scene'),
+                      onTap: onNext,
+                      child: DbIcon(DbGlyph.next, size: 22, color: onNext == null ? c.ruleStrong : c.ink),
+                    ),
+                  ]),
               ],
-              const SizedBox(width: 4),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  /// [keys] with 8pt between neighbours.
+  static List<Widget> _spaced(List<Widget> keys) => [
+        for (var i = 0; i < keys.length; i++) ...[
+          if (i > 0) const SizedBox(width: DbSpace.x1),
+          keys[i],
+        ],
+      ];
 }
 
-class _BarButton extends StatelessWidget {
-  const _BarButton({required this.icon, required this.tip, this.onTap});
+/// One key of the editor bar: 44 wide, 48 tall, pressed on touch-down.
+class _Key extends StatelessWidget {
+  const _Key({required this.tip, required this.onTap, required this.child});
 
-  final IconData icon;
   final String tip;
   final VoidCallback? onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return IconButton(
-      tooltip: tip,
-      onPressed: onTap,
-      visualDensity: VisualDensity.compact,
-      icon: Icon(
-        icon,
-        size: 21,
-        color: onTap == null
-            ? cs.onSurfaceVariant.withValues(alpha: 0.35)
-            : cs.onSurface,
+    return Tooltip(
+      message: tip,
+      child: Semantics(
+        button: true,
+        enabled: onTap != null,
+        label: tip,
+        excludeSemantics: true,
+        child: PressScale(
+          enabled: onTap != null,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: SizedBox(
+              width: DbSpace.tap,
+              height: DbSpace.iconButton,
+              child: Center(child: child),
+            ),
+          ),
+        ),
       ),
     );
   }

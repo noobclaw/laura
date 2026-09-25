@@ -1,16 +1,56 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../app_theme.dart';
 import '../models.dart';
-import 'ink_mark.dart';
 
-/// Press feedback on anything tappable that is not a Material button
-/// (PIPELINE 视觉标准 10①). Scales down under the finger, springs back.
+/// The platform's error, said in the reader's language (kb F6/F16): the
+/// common errno values get a plain sentence; anything else keeps the device's
+/// own words so there is still something to search for.
+String plainStorageReason(String detail) {
+  final errno = int.tryParse(RegExp(r'errno\s*=\s*(\d+)').firstMatch(detail)?.group(1) ?? '');
+  final lower = detail.toLowerCase();
+  if (errno == 28 || errno == 69 || errno == 122 || lower.contains('no space left')) {
+    return tr(zh: '手机存储空间不足', en: 'this phone is out of storage');
+  }
+  if (errno == 13 || errno == 1 || lower.contains('permission denied')) {
+    return tr(zh: '没有写入这个文件的权限', en: 'the app was not allowed to write the file');
+  }
+  if (errno == 30 || lower.contains('read-only file system')) {
+    return tr(zh: '存储处于只读状态', en: 'storage is read-only right now');
+  }
+  if (errno == 5) {
+    return tr(zh: '存储读写出错', en: 'the storage reported a read/write error');
+  }
+  return tr(zh: '设备报告「$detail」', en: 'the device reported "$detail"');
+}
+
+/// Disposes a dialog's controllers on the next frame instead of the moment
+/// `showDialog` returns: the dialog is still on screen, animating out, when
+/// its future completes, and its fields must not be left holding disposed
+/// controllers for that frame.
+void disposeNextFrame(List<ChangeNotifier> notifiers) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    for (final n in notifiers) {
+      n.dispose();
+    }
+  });
+}
+
+/// Press feedback for anything tappable (kb 四 按压手感): scales to
+/// [DbMotion.pressScale] the instant the finger lands, springs back on release
+/// along the same curve. No ripple anywhere in the app.
 class PressScale extends StatefulWidget {
-  const PressScale({super.key, required this.child, this.scale = 0.97});
+  const PressScale({
+    super.key,
+    required this.child,
+    this.scale = DbMotion.pressScale,
+    this.enabled = true,
+  });
 
   final Widget child;
   final double scale;
+  final bool enabled;
 
   @override
   State<PressScale> createState() => _PressScaleState();
@@ -19,240 +59,158 @@ class PressScale extends StatefulWidget {
 class _PressScaleState extends State<PressScale> {
   bool _down = false;
 
+  void _set(bool v) {
+    if (!widget.enabled || _down == v) return;
+    setState(() => _down = v);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     return Listener(
-      onPointerDown: (_) => setState(() => _down = true),
-      onPointerUp: (_) => setState(() => _down = false),
-      onPointerCancel: (_) => setState(() => _down = false),
+      onPointerDown: (_) => _set(true),
+      onPointerUp: (_) => _set(false),
+      onPointerCancel: (_) => _set(false),
       child: AnimatedScale(
         scale: _down ? widget.scale : 1,
-        duration: reduce ? Duration.zero : const Duration(milliseconds: 130),
-        curve: Curves.easeOut,
+        duration: DbMotion.of(context, DbMotion.press),
+        curve: DbMotion.enter,
         child: widget.child,
       ),
     );
   }
 }
 
-/// A count that rolls up to its value instead of snapping (视觉标准 10③).
+/// A count that rolls to its value instead of snapping — once, when it first
+/// appears or changes; never on every keystroke.
 class RollingCount extends StatelessWidget {
   const RollingCount({
     super.key,
     required this.value,
     this.style,
-    this.suffix = '',
     this.rollIn = true,
-    this.duration = const Duration(milliseconds: 600),
   });
 
   final int value;
   final TextStyle? style;
-  final String suffix;
-
-  /// Count up from zero the first time this widget is built. Pass false where
-  /// the number changes on every keystroke — a live count must not chase its
-  /// own tail.
   final bool rollIn;
-  final Duration duration;
 
   @override
   Widget build(BuildContext context) {
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(
-        begin: rollIn ? 0 : value.toDouble(),
-        end: value.toDouble(),
-      ),
-      duration: reduce ? Duration.zero : duration,
-      curve: Curves.easeOutCubic,
-      builder: (context, v, _) =>
-          Text('${groupedCount(v.round())}$suffix', style: style),
+      tween: Tween<double>(begin: rollIn ? 0 : value.toDouble(), end: value.toDouble()),
+      duration: DbMotion.of(context, DbMotion.hero),
+      curve: DbMotion.enter,
+      builder: (context, v, _) => Text(groupedCount(v.round()), style: style),
     );
   }
 }
 
-/// A labelled figure — the same shape wherever the app shows a number, so the
-/// stats sheet, the project card and the editor bar read as one system.
-class StatPill extends StatelessWidget {
-  const StatPill({
-    super.key,
-    required this.label,
-    required this.value,
-    this.tone,
-    this.icon,
-  });
-
-  final String label;
-  final String value;
-  final Color? tone;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final color = tone ?? cs.onSurfaceVariant;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 15, color: color),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            value,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: Theme.of(context)
-                .textTheme
-                .labelSmall
-                ?.copyWith(color: color.withValues(alpha: 0.85)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Empty states with a drawn mark, a line of guidance and (optionally) the
-/// action that fills them — never a single cold line of text (视觉标准 5).
-class EmptyStateView extends StatelessWidget {
-  const EmptyStateView({
-    super.key,
-    required this.title,
-    required this.body,
-    this.action,
-    this.markSize = 108,
-  });
-
-  final String title;
-  final String body;
-  final Widget? action;
-  final double markSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: reduce ? Duration.zero : const Duration(milliseconds: 480),
-          curve: Curves.easeOutCubic,
-          builder: (context, t, child) => Opacity(
-            opacity: t,
-            child: Transform.translate(offset: Offset(0, 14 * (1 - t)), child: child),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DraftbookMark(size: markSize),
-              const SizedBox(height: 20),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              // A measure, not hard line breaks: a fixed `\n` that balances in
-              // one language wraps raggedly in the other.
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 320),
-                child: Text(
-                  body,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: cs.onSurfaceVariant, height: 1.5),
-                ),
-              ),
-              if (action != null) ...[
-                const SizedBox(height: 22),
-                action!,
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A thin progress rail used for book and daily targets.
-class ProgressRail extends StatelessWidget {
-  const ProgressRail({
-    super.key,
-    required this.value,
-    this.color,
-    this.height = 6,
-  });
+/// A book or goal target as a printer's rule: a hairline track and a heavier
+/// inked run. Square ends — this app draws rules, not pills.
+class RuleProgress extends StatelessWidget {
+  const RuleProgress({super.key, required this.value, this.semanticLabel});
 
   final double value;
-  final Color? color;
-  final double height;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final c = color ?? cs.primary;
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(height),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
-        duration: reduce ? Duration.zero : const Duration(milliseconds: 700),
-        curve: Curves.easeOutCubic,
-        builder: (context, v, _) => LinearProgressIndicator(
-          value: v,
-          minHeight: height,
-          backgroundColor: c.withValues(alpha: 0.16),
-          valueColor: AlwaysStoppedAnimation(c),
+    final c = DbColors.of(context);
+    final v = value.clamp(0.0, 1.0);
+    return Semantics(
+      label: semanticLabel,
+      value: '${(v * 100).round()}%',
+      child: SizedBox(
+        height: 7,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: v),
+          // Not a hero: the screen's one hero is its figure (kb 四).
+          duration: DbMotion.of(context, DbMotion.medium),
+          curve: DbMotion.enter,
+          builder: (context, t, _) => CustomPaint(
+            painter: _RulePainter(t, c.rule, c.ink),
+          ),
         ),
       ),
     );
   }
 }
 
-/// A coloured dot for [SceneStatus], with its meaning available to assistive
-/// tech rather than carried by colour alone.
-class StatusDot extends StatelessWidget {
-  const StatusDot({super.key, required this.status, this.size = 10});
+class _RulePainter extends CustomPainter {
+  _RulePainter(this.t, this.track, this.ink);
+  final double t;
+  final Color track;
+  final Color ink;
 
-  final SceneStatus status;
-  final double size;
-
-  static Color colorOf(BuildContext context, SceneStatus s) {
-    final cs = Theme.of(context).colorScheme;
-    return switch (s) {
-      SceneStatus.todo => cs.onSurfaceVariant.withValues(alpha: 0.45),
-      SceneStatus.drafting => cs.primary,
-      SceneStatus.done => cs.tertiary,
-    };
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height / 2;
+    canvas.drawLine(Offset(0, y), Offset(size.width, y),
+        Paint()..color = track..strokeWidth = DbRadius.hairline);
+    if (t > 0) {
+      canvas.drawRect(Rect.fromLTWH(0, y - 1.5, size.width * t, 3), Paint()..color = ink);
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: sceneStatusLabel(status),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: colorOf(context, status),
+  bool shouldRepaint(_RulePainter old) => old.t != t || old.ink != ink || old.track != track;
+}
+
+/// A full-width hairline.
+class Hairline extends StatelessWidget {
+  const Hairline({super.key, this.indent = 0});
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsetsDirectional.only(start: indent),
+        child: SizedBox(
+          height: DbRadius.hairline,
+          width: double.infinity,
+          child: ColoredBox(color: DbColors.of(context).rule),
         ),
-      ),
+      );
+}
+
+/// The heading of a bottom sheet: a serif title and, optionally, one line of
+/// context under it.
+class SheetHeading extends StatelessWidget {
+  const SheetHeading({super.key, required this.title, this.subtitle});
+  final String title;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = DbColors.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: DbType.heading.copyWith(color: c.ink)),
+        if (subtitle != null) ...[
+          const SizedBox(height: DbSpace.x0_5),
+          Text(subtitle!, style: DbType.byline.copyWith(color: c.inkMuted)),
+        ],
+      ],
     );
   }
+}
+
+/// Delete now, offer Undo (kb F4). The action is already done when this
+/// shows; Undo puts it back. Stays ≥5 s, and much longer under a screen
+/// reader so it can actually be reached.
+void showUndo(
+  ScaffoldMessengerState messenger, {
+  required String message,
+  required VoidCallback onUndo,
+  bool accessible = false,
+}) {
+  messenger
+    ..clearSnackBars()
+    ..showSnackBar(SnackBar(
+      content: Text(message),
+      duration: accessible ? DbMotion.undoWindowAccessible : DbMotion.undoWindow,
+      action: SnackBarAction(label: tr(zh: '撤销', en: 'Undo'), onPressed: onUndo),
+    ));
 }
 
 /// "3 分钟前 / 2 天前" — relative times, in both languages, without pulling in
@@ -278,4 +236,4 @@ String relativeTime(DateTime t, {DateTime? now}) {
 
 /// Words, phrased for the current language ("12,480 字" / "12,480 words").
 String wordsLabel(int n) =>
-    tr(zh: '${groupedCount(n)} 字', en: '${groupedCount(n)} words');
+    tr(zh: '${groupedCount(n)} 字', en: n == 1 ? '1 word' : '${groupedCount(n)} words');

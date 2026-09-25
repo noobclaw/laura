@@ -50,11 +50,11 @@ class PurchaseService {
 
   String get _unavailableMsg => _isApple
       ? tr(
-          zh: '应用商店不可用(请确认已登录 App Store)',
+          zh: '应用商店不可用（请确认已登录 App Store）',
           en: 'Store unavailable (make sure you are signed in to the App Store)',
         )
       : tr(
-          zh: '应用商店不可用(需要从 Google Play 安装并登录)',
+          zh: '应用商店不可用（需要从 Google Play 安装并登录）',
           en: 'Store unavailable (install via Google Play and sign in)',
         );
 
@@ -137,12 +137,12 @@ class PurchaseService {
         if (p.productID == kProProductId) {
           _onUnlocked?.call();
           notice.value = p.status == PurchaseStatus.restored
-              ? tr(zh: '已恢复 Pro,欢迎回来!', en: 'Pro restored — welcome back!')
-              : tr(zh: 'Pro 已解锁,感谢支持!', en: 'Pro unlocked — thank you!');
+              ? tr(zh: '已恢复 Pro，欢迎回来！', en: 'Pro restored — welcome back!')
+              : tr(zh: 'Pro 已解锁，感谢支持！', en: 'Pro unlocked — thank you!');
         }
       } else if (p.status == PurchaseStatus.error) {
         notice.value = p.error?.message ??
-            tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again');
+            tr(zh: '购买失败，请稍后重试', en: 'Purchase failed, please try again');
       } else if (p.status == PurchaseStatus.pending) {
         notice.value =
             tr(zh: '等待支付确认…', en: 'Waiting for payment confirmation…');
@@ -168,7 +168,7 @@ class PurchaseService {
           await InAppPurchase.instance.queryProductDetails({kProProductId});
       if (resp.productDetails.isEmpty) {
         notice.value = tr(
-          zh: '商品暂不可用,请稍后重试',
+          zh: '商品暂不可用，请稍后重试',
           en: 'Product not available yet, please try again later',
         );
         return;
@@ -179,7 +179,7 @@ class PurchaseService {
     } catch (e) {
       debugPrint('buyPro failed: $e');
       notice.value =
-          tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again');
+          tr(zh: '购买失败，请稍后重试', en: 'Purchase failed, please try again');
     }
   }
 

@@ -16,11 +16,13 @@ abstract final class Branding {
   /// Seed for the Material 3 color scheme — ink blue, hue 198°.
   /// (PIPELINE 视觉标准 13 色相分配表: 190–210° was the open band; the nearest
   /// neighbours are remcard 174° and orbit 223°, both more than 20° away.)
-  static const Color seedColor = Color(0xFF0A6C96);
+  /// Kept in step with the accent in tool/app_theme.dart (the theme itself is
+  /// hand-authored and does not read this).
+  static const Color seedColor = Color(0xFF175F7E);
 
   static String get aboutText => tr(
-        zh: '为长篇写作做的组织工具:一本书拆成章与场景,随手写、随手重排。'
-            '全部在你的手机上完成 —— 无账号、无广告、不联网,稿子不出手机。',
+        zh: '为长篇写作做的组织工具：一本书拆成章与场景，随手写、随手重排。'
+            '全部在你的手机上完成：无账号、无广告、不联网，稿子不出手机。',
         en: 'An organiser for long-form writing: a book split into chapters and '
             'scenes, written and reordered as you go. Everything happens on '
             'your phone — no account, no ads, no network. Your draft never '
@@ -31,16 +33,16 @@ abstract final class Branding {
         zh: '''
 本应用不收集、不存储、不传输任何个人数据。
 
-你的项目、章节、场景正文与版本历史全部保存在本机的应用沙盒里。应用不申请网络权限,不包含任何统计或广告 SDK,也不使用任何第三方服务。
+你的项目、章节、场景正文与版本历史全部保存在本机的应用沙盒里。应用不联网、没有任何网络请求，不包含任何统计或广告 SDK，也不使用任何第三方服务。
 
-只有你主动点击「导出 / 分享」时,稿件才会交给你自己选择的那个应用(邮件、文件、云盘……),去向完全由你决定。
+只有你主动点击「导出 / 分享」时，稿件才会交给你自己选择的那个应用（邮件、文件、云盘……），去向完全由你决定。
 
-卸载应用会一并删除这些数据,所以重要的稿子请定期导出备份。
+卸载应用会一并删除这些数据，所以重要的稿子请定期导出备份。
 ''',
         en: '''
 This app does not collect, store, or transmit any personal data.
 
-Your projects, chapters, scene text and version history are kept in the app's own storage on this device. The app does not request network access, contains no analytics or advertising SDKs, and uses no third-party services.
+Your projects, chapters, scene text and version history are kept in the app's own storage on this device. The app works offline and makes no network requests, contains no analytics or advertising SDKs, and uses no third-party services.
 
 Your manuscript only ever leaves the app when you tap Export / Share yourself, and then only to the app you pick (mail, Files, a cloud drive…).
 

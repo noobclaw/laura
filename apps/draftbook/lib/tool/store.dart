@@ -344,6 +344,16 @@ class DraftbookStore extends ChangeNotifier {
     _save();
   }
 
+  /// Undo for [deleteProject] (kb F4: delete at once, offer Undo). Puts the
+  /// very same book back — chapters, scenes and the version history its
+  /// scenes still carry in memory — at [index], and rewrites both documents.
+  void reinsertProject(Project p, int index) {
+    if (projects.contains(p)) return;
+    projects.insert(index.clamp(0, projects.length), p);
+    _saveHistory();
+    _save();
+  }
+
   void _touch(Project p) {
     p.updatedMs = DateTime.now().millisecondsSinceEpoch;
     _save();
@@ -370,11 +380,28 @@ class DraftbookStore extends ChangeNotifier {
     _touch(p);
   }
 
-  /// Deletes a chapter and everything in it. The caller is responsible for
-  /// confirming first — this is the one destructive action in the app.
+  /// Deletes a chapter and everything in it. The outline offers Undo right
+  /// after (see [reinsertChapter]) instead of a confirmation dialog.
   void deleteChapter(Project p, Chapter c) {
     p.chapters.remove(c);
     if (p.chapters.isEmpty) p.chapters.add(Chapter(id: _newId('chp')));
+    _saveHistory();
+    _touch(p);
+  }
+
+  /// Undo for [deleteChapter]. [placeholder] is the empty chapter
+  /// [deleteChapter] adds when the last one goes; it is removed again if it is
+  /// still untouched, so an undo leaves the book exactly as it was.
+  void reinsertChapter(Project p, Chapter c, int index, {Chapter? placeholder}) {
+    if (p.chapters.contains(c)) return;
+    if (placeholder != null &&
+        placeholder.scenes.isEmpty &&
+        placeholder.title.isEmpty &&
+        p.chapters.length == 1 &&
+        identical(p.chapters.first, placeholder)) {
+      p.chapters.clear();
+    }
+    p.chapters.insert(index.clamp(0, p.chapters.length), c);
     _saveHistory();
     _touch(p);
   }
@@ -406,6 +433,17 @@ class DraftbookStore extends ChangeNotifier {
     // Rewrite the history document so the deleted scene's versions go with it.
     _saveHistory();
     _touch(p);
+  }
+
+  /// Undo for [deleteScene]. Returns false when the chapter it lived in has
+  /// itself been deleted in the meantime.
+  bool reinsertScene(Project p, Chapter c, Scene s, int index, {bool wasLast = false}) {
+    if (!p.chapters.contains(c) || c.scenes.contains(s)) return false;
+    c.scenes.insert(index.clamp(0, c.scenes.length), s);
+    if (wasLast) p.lastSceneId = s.id;
+    _saveHistory();
+    _touch(p);
+    return true;
   }
 
   /// Move a chapter from [from] to [to]. Both are post-removal indices, which
@@ -473,6 +511,13 @@ class DraftbookStore extends ChangeNotifier {
       }
     }
     return null;
+  }
+
+  /// Remembers where the caret was when the writer left [s].
+  void noteCaret(Scene s, int offset) {
+    if (s.caret == offset) return;
+    s.caret = offset;
+    _save();
   }
 
   void noteSceneOpened(Project p, Scene s) {
@@ -605,5 +650,24 @@ class DraftbookStore extends ChangeNotifier {
     s.history.remove(snap);
     _saveHistory();
     _touch(p);
+  }
+
+  /// Undo for [deleteSnapshot]: the version goes back where it was, oldest
+  /// first, still within [Scene.maxHistory].
+  void reinsertSnapshot(Project p, Scene s, SceneSnapshot snap, int index) {
+    if (s.history.contains(snap)) return;
+    s.history.insert(index.clamp(0, s.history.length), snap);
+    while (s.history.length > Scene.maxHistory) {
+      s.history.removeAt(0);
+    }
+    _saveHistory();
+    _touch(p);
+  }
+
+  /// Undo for [restoreSnapshot]: put back the text that was live before the
+  /// restore. Not counted as today's writing, like the restore itself; the
+  /// restored version stays in the history either way.
+  void undoRestore(Project p, Scene s, String previousBody) {
+    updateSceneBody(p, s, previousBody, count: false);
   }
 }

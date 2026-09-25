@@ -347,4 +347,86 @@ void main() {
       isTrue,
     );
   });
+
+  group('undo instead of confirm (kb F4)', () {
+    test('a deleted book comes back whole, history and all, and survives a reload', () async {
+      final s = await freshStore();
+      final p = s.addProject(title: 'Night Bus');
+      final scene = s.firstScene(p)!.scene;
+      s.updateSceneBody(p, scene, 'first draft');
+      s.snapshotScene(p, scene);
+      s.updateSceneBody(p, scene, 'second draft');
+      final index = s.projects.indexOf(p);
+
+      s.deleteProject(p);
+      expect(s.projects, isEmpty);
+      s.reinsertProject(p, index);
+      await s.flush();
+
+      final again = await freshStore();
+      expect(again.projects.single.title, 'Night Bus');
+      final back = again.firstScene(again.projects.single)!.scene;
+      expect(back.body, 'second draft');
+      expect(back.history.map((h) => h.body), ['first draft']);
+    });
+
+    test('undoing the only chapter removes the empty stand-in', () async {
+      final s = await freshStore();
+      final p = s.addProject(title: 'Night Bus');
+      final only = p.chapters.single;
+      s.deleteChapter(p, only);
+      final standIn = p.chapters.single;
+      expect(identical(standIn, only), isFalse);
+
+      s.reinsertChapter(p, only, 0, placeholder: standIn);
+      expect(p.chapters, [only]);
+    });
+
+    test('a deleted scene returns to its place and is still the last one open', () async {
+      final s = await freshStore();
+      final p = s.addProject(title: 'Night Bus');
+      final c = p.chapters.single;
+      final a = c.scenes.single;
+      final b = s.addScene(p, c, title: 'B');
+      s.noteSceneOpened(p, a);
+
+      s.deleteScene(p, c, a);
+      expect(p.lastSceneId, isNull);
+      expect(s.reinsertScene(p, c, a, 0, wasLast: true), isTrue);
+      expect(c.scenes, [a, b]);
+      expect(p.lastSceneId, a.id);
+    });
+
+    test('a restore can be taken back without losing either text', () async {
+      final s = await freshStore();
+      final p = s.addProject(title: 'Night Bus');
+      final scene = s.firstScene(p)!.scene;
+      s.updateSceneBody(p, scene, 'old words');
+      s.snapshotScene(p, scene);
+      final old = scene.history.single;
+      s.updateSceneBody(p, scene, 'new words');
+      final todayBefore = s.todayWords;
+
+      s.restoreSnapshot(p, scene, old);
+      expect(scene.body, 'old words');
+      s.undoRestore(p, scene, 'new words');
+      expect(scene.body, 'new words');
+      expect(scene.history.map((h) => h.body), containsAll(['old words', 'new words']));
+      expect(s.todayWords, todayBefore, reason: 'restoring is not writing');
+    });
+
+    test('a deleted version goes back where it was', () async {
+      final s = await freshStore();
+      final p = s.addProject(title: 'Night Bus');
+      final scene = s.firstScene(p)!.scene;
+      for (final body in ['one', 'two', 'three']) {
+        s.updateSceneBody(p, scene, body);
+        s.snapshotScene(p, scene);
+      }
+      final middle = scene.history[1];
+      s.deleteSnapshot(p, scene, middle);
+      s.reinsertSnapshot(p, scene, middle, 1);
+      expect(scene.history.map((h) => h.body), ['one', 'two', 'three']);
+    });
+  });
 }

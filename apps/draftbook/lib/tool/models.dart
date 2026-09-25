@@ -83,6 +83,10 @@ class Scene {
   final int createdMs;
   int updatedMs;
 
+  /// Where the caret was when the writer last left this scene, so "Keep
+  /// writing" puts it back there. Null: never recorded, go to the end.
+  int? caret;
+
   String _synopsis;
   String _body;
   int? _words;
@@ -139,6 +143,7 @@ class Scene {
         'status': status.name,
         'createdMs': createdMs,
         'updatedMs': updatedMs,
+        if (caret != null) 'caret': caret,
         if (withHistory) 'history': history.map((s) => s.toJson()).toList(),
       };
 
@@ -154,7 +159,7 @@ class Scene {
             .whereType<Map<String, dynamic>>()
             .map(SceneSnapshot.fromJson)
             .toList(),
-      );
+      )..caret = (j['caret'] as num?)?.toInt();
 }
 
 /// A chapter: an ordered bag of scenes.

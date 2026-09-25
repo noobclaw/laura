@@ -240,56 +240,44 @@ function rotate(pts, cx, cy, angle) {
 // ---------------------------------------------------------------------------
 
 const ART = {
-  // Draftbook: a page of manuscript with a nib laid across it. Ink blue
-  // (hue 198°, the seed in lib/core/branding.dart) over cream paper — the same
-  // two-colour language as the in-app DraftbookMark.
+  // Draftbook (2026-09-25 redesign): the app's signature, a typesetter's line
+  // gauge, on galley paper. Near-black ink rule and ticks, the day's run in
+  // proof blue (hue 198°, pencil38 in lib/tool/app_theme.dart), and a
+  // proofreader's insertion caret (‸) where the writing stops. Flat colour,
+  // no gradient, no shadow; strokes sized to survive 60px.
   draftbook: {
     bg: [
-      [0, [18, 132, 170]],
-      [0.55, [10, 108, 150]],
-      [1, [6, 58, 84]],
+      [0, [247, 246, 242]],
+      [1, [247, 246, 242]],
     ],
     shapes(s) {
-      const paper = [250, 246, 236];
-      const ink = [8, 52, 76];
-      const page = roundedRect(s * 0.235, s * 0.155, s * 0.53, s * 0.69, s * 0.055);
-      const lines = [];
-      const widths = [0.62, 0.62, 0.62, 0.40];
-      for (let i = 0; i < widths.length; i++) {
-        const y = s * (0.285 + i * 0.125);
-        lines.push(
-          capsule(s * 0.315, y, s * (0.315 + widths[i] * 0.55), y, s * 0.036),
-        );
+      const ink = [27, 29, 30];
+      const blue = [23, 95, 126];
+      const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+      const left = s * 0.17;
+      const right = s * 0.83;
+      const base = s * 0.53;
+      const rule = s * 0.034;
+      const ticks = [];
+      for (let i = 0; i <= 8; i++) {
+        const x = left + ((right - left) * i) / 8;
+        const major = i % 2 === 0;
+        const w = major ? s * 0.034 : s * 0.026;
+        const top = base - s * (major ? 0.20 : 0.10);
+        ticks.push(rect(x - w / 2, top, x + w / 2, base));
       }
-      // A pen laid across the page, tip down-left on the last line: barrel,
-      // wedge nib, and the dot of ink it has just left behind. Drawn along +x
-      // and rotated 135°, so the tail runs off the top-right corner.
-      const cx = s * 0.66;
-      const cy = s * 0.52;
-      const turn = (pts) => rotate(pts, cx, cy, Math.PI * 0.75);
-      const barrel = turn(
-        capsule(cx - s * 0.44, cy, cx - s * 0.07, cy, s * 0.125),
-      );
-      const nib = turn([
-        [cx + s * 0.30, cy],
-        [cx - s * 0.08, cy - s * 0.095],
-        [cx + s * 0.05, cy],
-        [cx - s * 0.08, cy + s * 0.095],
-      ]);
-      const tip = turn([[cx + s * 0.335, cy]])[0];
-      const dot = [];
-      for (let i = 0; i < 28; i++) {
-        const a = (i / 28) * Math.PI * 2;
-        dot.push([tip[0] + Math.cos(a) * s * 0.040, tip[1] + Math.sin(a) * s * 0.040]);
-      }
+      // The run stops between two ticks, and the caret points up at it.
+      const run = s * 0.54;
+      const caret = [
+        capsule(run, s * 0.625, run - s * 0.085, s * 0.75, s * 0.05),
+        capsule(run, s * 0.625, run + s * 0.085, s * 0.75, s * 0.05),
+      ];
       return [
-        { path: [page], fill: [0, 0, 0], alpha: 0.18, offset: [0, s * 0.012] },
-        { path: [page], fill: paper },
-        { path: lines, fill: ink, alpha: 0.30 },
-        { path: [barrel], fill: [6, 58, 84], alpha: 0.35, offset: [s * 0.012, s * 0.014] },
-        { path: [barrel], fill: ink },
-        { path: [nib], fill: ink },
-        { path: [dot], fill: [18, 132, 170] },
+        { path: ticks, fill: ink },
+        { path: [rect(left - s * 0.017, base - rule / 2, right + s * 0.017, base + rule / 2)], fill: ink },
+        { path: [rect(left - s * 0.017, base - s * 0.03, run, base + s * 0.03)], fill: blue },
+        { path: [caret[0]], fill: blue },
+        { path: [caret[1]], fill: blue },
       ];
     },
   },

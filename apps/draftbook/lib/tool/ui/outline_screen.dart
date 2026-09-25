@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../app_theme.dart';
 import '../export/manuscript.dart';
+import '../haptics.dart';
 import '../models.dart';
 import '../store.dart';
 import 'editor_screen.dart';
 import 'export_sheet.dart';
+import 'glyphs.dart';
 import 'stats_sheet.dart';
 import 'widgets.dart';
 
-/// The outline: the whole book on one screen, chapters and scenes, draggable.
-///
-/// This is the incumbent's corkboard — the one thing a long-form writer cannot
-/// get from a notes app — so it is the screen the app is really about. Both
-/// levels reorder by dragging a handle (never by accident while scrolling),
-/// and a scene moves to another chapter from its own menu.
+/// The outline: the whole book on one screen, set like a table of contents —
+/// serif chapter heads, scenes under them with their status mark and count,
+/// hairlines between. Both levels reorder by dragging a handle (never by
+/// accident while scrolling), and a scene moves to another chapter from its
+/// own menu. Deleting a chapter or a scene happens at once, with Undo.
 class OutlineScreen extends StatefulWidget {
   const OutlineScreen({super.key, required this.store, required this.projectId});
 
@@ -46,17 +48,21 @@ class _OutlineScreenState extends State<OutlineScreen> {
 
   Future<void> _openScene(Project p, Scene s) async {
     await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => EditorScreen(
-        store: widget.store,
-        projectId: p.id,
-        sceneId: s.id,
-      ),
+      builder: (_) => EditorScreen(store: widget.store, projectId: p.id, sceneId: s.id),
     ));
     if (mounted) setState(() {});
   }
 
+  Future<void> _newScene(Project p, Chapter chapter) async {
+    Haptics.commit();
+    final s = widget.store.addScene(p, chapter);
+    if (chapter.collapsed) widget.store.toggleChapterCollapsed(p, chapter);
+    await _openScene(p, s);
+  }
+
   Future<String?> _askText({
     required String title,
+    required String action,
     String initial = '',
     String? hint,
   }) async {
@@ -79,217 +85,243 @@ class _OutlineScreenState extends State<OutlineScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, ctl.text),
-            child: Text(tr(zh: '保存', en: 'Save')),
+            child: Text(action),
           ),
         ],
       ),
     );
-    ctl.dispose();
+    disposeNextFrame([ctl]);
     return out;
   }
 
-  Future<bool> _confirm(String title, String body) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr(zh: '取消', en: 'Cancel')),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-              foregroundColor: Theme.of(ctx).colorScheme.onError,
-            ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr(zh: '删除', en: 'Delete')),
-          ),
-        ],
+  void _deleteChapter(Project p, Chapter c, int ci) {
+    final messenger = ScaffoldMessenger.of(context);
+    final accessible = MediaQuery.accessibleNavigationOf(context);
+    final label = c.displayTitle(ci);
+    final wasOnly = p.chapters.length == 1;
+    widget.store.deleteChapter(p, c);
+    final placeholder = wasOnly ? p.chapters.first : null;
+    showUndo(
+      messenger,
+      accessible: accessible,
+      message: tr(
+        zh: '已删除「$label」和它的 ${c.scenes.length} 个场景',
+        en: c.scenes.length == 1
+            ? 'Deleted "$label" and its scene'
+            : 'Deleted "$label" and its ${c.scenes.length} scenes',
       ),
+      onUndo: () => widget.store.reinsertChapter(p, c, ci, placeholder: placeholder),
     );
-    return ok ?? false;
+  }
+
+  void _deleteScene(Project p, Chapter c, Scene s) {
+    final messenger = ScaffoldMessenger.of(context);
+    final accessible = MediaQuery.accessibleNavigationOf(context);
+    final index = c.scenes.indexOf(s);
+    final wasLast = p.lastSceneId == s.id;
+    final label = s.displayTitle(index);
+    widget.store.deleteScene(p, c, s);
+    showUndo(
+      messenger,
+      accessible: accessible,
+      message: tr(zh: '已删除「$label」', en: 'Deleted "$label"'),
+      onUndo: () => widget.store.reinsertScene(p, c, s, index, wasLast: wasLast),
+    );
   }
 
   Future<void> _moveScene(Project p, Chapter from, Scene s) async {
     final target = await showModalBottomSheet<Chapter>(
       context: context,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
-              child: Text(tr(zh: '移动到哪一章?', en: 'Move to which chapter?'),
-                  style: Theme.of(ctx).textTheme.titleMedium),
+      sheetAnimationStyle: DbMotion.sheetStyle(context),
+      isScrollControlled: true,
+      builder: (ctx) {
+        final c = DbColors.of(ctx);
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.8),
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(DbSpace.gutter, 0, DbSpace.gutter, DbSpace.x2),
+              children: [
+                SheetHeading(title: tr(zh: '移动到哪一章', en: 'Move to which chapter')),
+                const SizedBox(height: DbSpace.x1),
+                for (var i = 0; i < p.chapters.length; i++)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    enabled: !identical(p.chapters[i], from),
+                    title: Text(
+                      p.chapters[i].displayTitle(i),
+                      style: DbType.rowTitle.copyWith(
+                        color: identical(p.chapters[i], from) ? c.inkMuted : c.ink,
+                      ),
+                    ),
+                    subtitle: Text(
+                      identical(p.chapters[i], from)
+                          ? tr(zh: '它现在在这一章', en: 'It is in this chapter now')
+                          : tr(
+                              zh: '${p.chapters[i].scenes.length} 个场景',
+                              en: '${p.chapters[i].scenes.length} scenes',
+                            ),
+                    ),
+                    onTap: () => Navigator.pop(ctx, p.chapters[i]),
+                  ),
+              ],
             ),
-            for (var i = 0; i < p.chapters.length; i++)
-              ListTile(
-                leading: Icon(
-                  identical(p.chapters[i], from)
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
-                  color: identical(p.chapters[i], from)
-                      ? Theme.of(ctx).colorScheme.primary
-                      : null,
-                ),
-                title: Text(p.chapters[i].displayTitle(i)),
-                subtitle: Text(tr(
-                  zh: '${p.chapters[i].scenes.length} 个场景',
-                  en: '${p.chapters[i].scenes.length} scenes',
-                )),
-                onTap: () => Navigator.pop(ctx, p.chapters[i]),
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
     if (target == null) return;
+    Haptics.select();
     widget.store.moveScene(p, from, target, s);
-    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = DbColors.of(context);
     final p = _project;
     if (p == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text(tr(zh: '这个项目已经不在了', en: 'This project is gone'))),
+        body: Padding(
+          padding: const EdgeInsets.all(DbSpace.gutter),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tr(zh: '这本书已经不在了', en: 'This book is gone'),
+                style: DbType.heading.copyWith(color: c.ink),
+              ),
+              const SizedBox(height: DbSpace.x1),
+              Text(
+                tr(
+                  zh: '它刚被删除了。如果是误删，回到首页还能点「撤销」。',
+                  en: 'It was just deleted. If that was a slip, Undo is still on the home page.',
+                ),
+                style: DbType.body.copyWith(color: c.inkMuted),
+              ),
+              const SizedBox(height: DbSpace.x3),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: Text(tr(zh: '回到首页', en: 'Back to the page')),
+              ),
+            ],
+          ),
+        ),
       );
     }
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(p.displayTitle, overflow: TextOverflow.ellipsis),
+        title: Text(p.displayTitle, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
-          IconButton(
+          DbIconButton(
+            glyph: DbGlyph.stats,
             tooltip: tr(zh: '写作统计', en: 'Writing stats'),
-            icon: const Icon(Icons.insights_outlined),
             onPressed: () => showStatsSheet(context, widget.store, p),
           ),
-          IconButton(
+          DbIconButton(
+            glyph: DbGlyph.export,
             tooltip: tr(zh: '导出', en: 'Export'),
-            icon: const Icon(Icons.ios_share),
             onPressed: () => showExportSheet(context, widget.store, p),
           ),
+          const SizedBox(width: DbSpace.x0_5),
         ],
       ),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(child: _BookHeader(project: p, store: widget.store)),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
-            sliver: SliverReorderableList(
-              itemCount: p.chapters.length,
-              onReorderItem: (from, to) {
-                widget.store.reorderChapters(p, from, to);
-                setState(() {});
-              },
-              itemBuilder: (context, ci) {
-                final c = p.chapters[ci];
-                return _ChapterCard(
-                  key: ValueKey(c.id),
-                  index: ci,
-                  project: p,
-                  chapter: c,
-                  store: widget.store,
-                  onOpenScene: (s) => _openScene(p, s),
-                  onRename: () async {
-                    final v = await _askText(
-                      title: tr(zh: '章标题', en: 'Chapter title'),
-                      initial: c.title,
-                      hint: tr(zh: '例如:第一章 出发', en: 'e.g. Chapter One — Departure'),
-                    );
-                    if (v != null) widget.store.renameChapter(p, c, v);
-                  },
-                  onAddScene: () async {
-                    final s = widget.store.addScene(p, c);
-                    if (c.collapsed) widget.store.toggleChapterCollapsed(p, c);
-                    await _openScene(p, s);
-                  },
-                  onDelete: () async {
-                    final ok = await _confirm(
-                      tr(zh: '删除这一章?', en: 'Delete this chapter?'),
-                      tr(
-                        zh: '「${c.displayTitle(ci)}」和它的 ${c.scenes.length} 个场景'
-                            '(共 ${wordsLabel(c.words)})会一起删除,无法撤销。',
-                        en: '"${c.displayTitle(ci)}" and its ${c.scenes.length} scenes '
-                            '(${wordsLabel(c.words)}) will be deleted. This cannot be undone.',
-                      ),
-                    );
-                    if (ok) {
-                      widget.store.deleteChapter(p, c);
-                      if (mounted) setState(() {});
-                    }
-                  },
-                  onSceneMove: (s) => _moveScene(p, c, s),
-                  onSceneDelete: (s) async {
-                    final ok = await _confirm(
-                      tr(zh: '删除这个场景?', en: 'Delete this scene?'),
-                      tr(
-                        zh: '这个场景的正文和它的版本历史会一起删除,无法撤销。',
-                        en: 'The scene, its text and its version history will be '
-                            'deleted. This cannot be undone.',
-                      ),
-                    );
-                    if (ok) {
-                      widget.store.deleteScene(p, c, s);
-                      if (mounted) setState(() {});
-                    }
-                  },
-                );
-              },
-            ),
+          SliverReorderableList(
+            itemCount: p.chapters.length,
+            onReorderItem: (from, to) {
+              Haptics.select();
+              widget.store.reorderChapters(p, from, to);
+            },
+            itemBuilder: (context, ci) {
+              final ch = p.chapters[ci];
+              return _ChapterSection(
+                key: ValueKey(ch.id),
+                index: ci,
+                project: p,
+                chapter: ch,
+                store: widget.store,
+                onOpenScene: (s) => _openScene(p, s),
+                onRename: () async {
+                  final v = await _askText(
+                    title: tr(zh: '章标题', en: 'Chapter title'),
+                    action: tr(zh: '保存章标题', en: 'Save title'),
+                    initial: ch.title,
+                    hint: tr(zh: '例如：第一章 出发', en: 'e.g. Departure'),
+                  );
+                  if (v != null) widget.store.renameChapter(p, ch, v);
+                },
+                onAddScene: () => _newScene(p, ch),
+                onDelete: () => _deleteChapter(p, ch, ci),
+                // The button path for the drag (kb F9), and the accessible one.
+                onStepUp: ci > 0
+                    ? () {
+                        Haptics.select();
+                        widget.store.reorderChapters(p, ci, ci - 1);
+                      }
+                    : null,
+                onStepDown: ci < p.chapters.length - 1
+                    ? () {
+                        Haptics.select();
+                        widget.store.reorderChapters(p, ci, ci + 1);
+                      }
+                    : null,
+                onSceneMove: (s) => _moveScene(p, ch, s),
+                onSceneDelete: (s) => _deleteScene(p, ch, s),
+              );
+            },
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 120),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        widget.store.addChapter(p);
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.playlist_add),
-                      label: Text(tr(zh: '添加一章', en: 'Add a chapter')),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: DbSpace.x6)),
         ],
       ),
-      floatingActionButton: PressScale(
-        scale: 0.94,
-        child: FloatingActionButton.extended(
-          onPressed: () async {
-            final chapter = p.chapters.isEmpty
-                ? widget.store.addChapter(p)
-                : p.chapters.last;
-            final s = widget.store.addScene(p, chapter);
-            if (chapter.collapsed) {
-              widget.store.toggleChapterCollapsed(p, chapter);
-            }
-            await _openScene(p, s);
-          },
-          icon: const Icon(Icons.add),
-          label: Text(tr(zh: '新场景', en: 'New scene')),
-          backgroundColor: cs.primary,
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: c.paper,
+          border: Border(top: BorderSide(color: c.rule, width: DbRadius.hairline)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(DbSpace.gutter, DbSpace.x1, DbSpace.gutter, DbSpace.x1),
+            child: Row(
+              children: [
+                Expanded(
+                  child: PressScale(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Haptics.commit();
+                        widget.store.addChapter(p);
+                      },
+                      child: Text(tr(zh: '加一章', en: 'Add a chapter'), textAlign: TextAlign.center),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: DbSpace.x1),
+                Expanded(
+                  child: PressScale(
+                    child: FilledButton(
+                      onPressed: () => _newScene(
+                        p,
+                        p.chapters.isEmpty ? widget.store.addChapter(p) : p.chapters.last,
+                      ),
+                      child: Text(tr(zh: '新场景', en: 'New scene'), textAlign: TextAlign.center),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-/// Word count against the book's target, plus its structure in one line.
+/// The book in one sentence and one fore-edge, like the copyright page.
 class _BookHeader extends StatelessWidget {
   const _BookHeader({required this.project, required this.store});
 
@@ -298,78 +330,65 @@ class _BookHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final progress = project.progress;
+    final c = DbColors.of(context);
+    final p = project;
+    final progress = p.progress;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 6),
+      padding: const EdgeInsets.fromLTRB(DbSpace.gutter, DbSpace.x2_5, DbSpace.gutter, DbSpace.x2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
+              // The outline is opened many times a day: the total is set,
+              // not rolled up from zero each time (kb 四 高频操作不加动效).
               RollingCount(
-                value: project.words,
-                style: Theme.of(context).textTheme.displaySmall,
+                value: p.words,
+                rollIn: false,
+                style: DbType.figure.copyWith(color: c.ink, fontSize: DbType.title.fontSize),
               ),
-              const SizedBox(width: 6),
-              // Flexible so a large text scale or a six-figure count wraps
-              // instead of overflowing the header.
+              const SizedBox(width: DbSpace.x1),
               Flexible(
-                child: Padding(
-                padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  project.targetWords > 0
+                  p.targetWords > 0
                       ? tr(
-                          zh: '字 / 目标 ${groupedCount(project.targetWords)}',
-                          en: 'words of ${groupedCount(project.targetWords)}',
+                          zh: '字，全书目标 ${groupedCount(p.targetWords)}',
+                          en: 'of ${groupedCount(p.targetWords)} words',
                         )
                       : tr(zh: '字', en: 'words'),
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelLarge
-                      ?.copyWith(color: cs.onSurfaceVariant),
-                ),
+                  style: DbType.byline.copyWith(color: c.inkMuted),
                 ),
               ),
             ],
           ),
           if (progress != null) ...[
-            const SizedBox(height: 10),
-            ProgressRail(value: progress),
+            const SizedBox(height: DbSpace.x1),
+            RuleProgress(
+              value: progress,
+              semanticLabel: tr(zh: '全书进度', en: 'Book progress'),
+            ),
           ],
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              StatPill(
-                icon: Icons.menu_book_outlined,
-                label: tr(zh: '章', en: 'chapters'),
-                value: '${project.chapters.length}',
-              ),
-              StatPill(
-                icon: Icons.article_outlined,
-                label: tr(zh: '场景', en: 'scenes'),
-                value: '${project.sceneCount}',
-              ),
-              StatPill(
-                icon: Icons.local_fire_department_outlined,
-                label: tr(zh: '今日', en: 'today'),
-                value: groupedCount(store.todayWords),
-                tone: cs.primary,
-              ),
-            ],
+          const SizedBox(height: DbSpace.x1_5),
+          ForeEdge(chapterWords: [for (final ch in p.chapters) ch.words], height: 8),
+          const SizedBox(height: DbSpace.x1),
+          Text(
+            tr(
+              zh: '${p.chapters.length} 章，${p.sceneCount} 个场景；今天写了 ${groupedCount(store.todayWords)} 字',
+              en: '${p.chapters.length} chapters, ${p.sceneCount} scenes. '
+                  '${groupedCount(store.todayWords)} words written today.',
+            ),
+            style: DbType.note.copyWith(color: c.inkMuted),
           ),
-          const SizedBox(height: 4),
         ],
       ),
     );
   }
 }
 
-class _ChapterCard extends StatelessWidget {
-  const _ChapterCard({
+class _ChapterSection extends StatelessWidget {
+  const _ChapterSection({
     super.key,
     required this.index,
     required this.project,
@@ -379,6 +398,8 @@ class _ChapterCard extends StatelessWidget {
     required this.onRename,
     required this.onAddScene,
     required this.onDelete,
+    required this.onStepUp,
+    required this.onStepDown,
     required this.onSceneMove,
     required this.onSceneDelete,
   });
@@ -391,63 +412,63 @@ class _ChapterCard extends StatelessWidget {
   final VoidCallback onRename;
   final VoidCallback onAddScene;
   final VoidCallback onDelete;
+  final VoidCallback? onStepUp;
+  final VoidCallback? onStepDown;
   final void Function(Scene) onSceneMove;
   final void Function(Scene) onSceneDelete;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-      child: Card(
-        color: cs.surfaceContainerLow,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InkWell(
-              onTap: () => store.toggleChapterCollapsed(project, chapter),
+    final c = DbColors.of(context);
+    return Material(
+      color: c.paper,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Hairline(),
+          Semantics(
+            button: true,
+            expanded: !chapter.collapsed,
+            hint: chapter.collapsed
+                ? tr(zh: '展开这一章', en: 'Expands the chapter')
+                : tr(zh: '收起这一章', en: 'Collapses the chapter'),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                Haptics.select();
+                store.toggleChapterCollapsed(project, chapter);
+              },
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 4, 10),
+                padding: const EdgeInsets.fromLTRB(DbSpace.gutter, DbSpace.x1, DbSpace.x0_5, DbSpace.x1),
                 child: Row(
                   children: [
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Icon(Icons.drag_indicator,
-                            size: 20, color: cs.onSurfaceVariant),
-                      ),
-                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             chapter.displayTitle(index),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: DbType.heading.copyWith(color: c.ink),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: DbSpace.x0_5),
                           Text(
-                            '${tr(zh: '${chapter.scenes.length} 个场景', en: '${chapter.scenes.length} scenes')} · ${wordsLabel(chapter.words)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(color: cs.onSurfaceVariant),
+                            tr(
+                              zh: '${chapter.scenes.length} 个场景，${wordsLabel(chapter.words)}',
+                              en: '${chapter.scenes.length == 1 ? '1 scene' : '${chapter.scenes.length} scenes'}, ${wordsLabel(chapter.words)}',
+                            ),
+                            style: DbType.meta.copyWith(color: c.inkMuted),
                           ),
                         ],
                       ),
                     ),
                     AnimatedRotation(
                       turns: chapter.collapsed ? -0.25 : 0,
-                      duration:
-                          reduce ? Duration.zero : const Duration(milliseconds: 200),
-                      child: Icon(Icons.expand_more, color: cs.onSurfaceVariant),
+                      duration: DbMotion.of(context, DbMotion.small),
+                      curve: DbMotion.move,
+                      child: DbIcon(DbGlyph.disclosure, size: 20, color: c.inkMuted),
                     ),
                     PopupMenuButton<String>(
-                      tooltip: tr(zh: '章操作', en: 'Chapter actions'),
+                      tooltip: tr(zh: '这一章的操作', en: 'Chapter actions'),
                       onSelected: (v) {
                         switch (v) {
                           case 'rename':
@@ -456,47 +477,55 @@ class _ChapterCard extends StatelessWidget {
                             onAddScene();
                           case 'delete':
                             onDelete();
+                          case 'up':
+                            onStepUp?.call();
+                          case 'down':
+                            onStepDown?.call();
                         }
                       },
                       itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: 'rename',
-                          child: Text(tr(zh: '重命名', en: 'Rename')),
-                        ),
-                        PopupMenuItem(
-                          value: 'scene',
-                          child: Text(tr(zh: '新增场景', en: 'Add a scene')),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(tr(zh: '删除这一章', en: 'Delete chapter')),
-                        ),
+                        if (onStepUp != null)
+                          PopupMenuItem(value: 'up', child: Text(tr(zh: '上移一章', en: 'Move up'))),
+                        if (onStepDown != null)
+                          PopupMenuItem(value: 'down', child: Text(tr(zh: '下移一章', en: 'Move down'))),
+                        PopupMenuItem(value: 'rename', child: Text(tr(zh: '重命名', en: 'Rename'))),
+                        PopupMenuItem(value: 'scene', child: Text(tr(zh: '新增场景', en: 'Add a scene'))),
+                        PopupMenuItem(value: 'delete', child: Text(tr(zh: '删除这一章', en: 'Delete chapter'))),
                       ],
+                    ),
+                    // Same place as a scene's handle: the row's trailing edge.
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Tooltip(
+                        message: tr(zh: '拖动调整章的顺序', en: 'Drag to reorder chapters'),
+                        child: SizedBox.square(
+                          dimension: DbSpace.tap,
+                          child: Center(child: DbIcon(DbGlyph.drag, size: 18, color: c.inkMuted)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-            AnimatedCrossFade(
-              firstCurve: Curves.easeOutCubic,
-              secondCurve: Curves.easeOutCubic,
-              sizeCurve: Curves.easeOutCubic,
-              duration: reduce ? Duration.zero : const Duration(milliseconds: 220),
-              crossFadeState: chapter.collapsed
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              firstChild: _SceneList(
-                project: project,
-                chapter: chapter,
-                store: store,
-                onOpenScene: onOpenScene,
-                onSceneMove: onSceneMove,
-                onSceneDelete: onSceneDelete,
-              ),
-              secondChild: const SizedBox(width: double.infinity),
-            ),
-          ],
-        ),
+          ),
+          AnimatedSize(
+            duration: DbMotion.of(context, DbMotion.medium),
+            curve: DbMotion.enter,
+            alignment: Alignment.topCenter,
+            child: chapter.collapsed
+                ? const SizedBox(width: double.infinity)
+                : _SceneList(
+                    project: project,
+                    chapter: chapter,
+                    store: store,
+                    onOpenScene: onOpenScene,
+                    onAddScene: onAddScene,
+                    onSceneMove: onSceneMove,
+                    onSceneDelete: onSceneDelete,
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -508,6 +537,7 @@ class _SceneList extends StatelessWidget {
     required this.chapter,
     required this.store,
     required this.onOpenScene,
+    required this.onAddScene,
     required this.onSceneMove,
     required this.onSceneDelete,
   });
@@ -516,22 +546,27 @@ class _SceneList extends StatelessWidget {
   final Chapter chapter;
   final DraftbookStore store;
   final void Function(Scene) onOpenScene;
+  final VoidCallback onAddScene;
   final void Function(Scene) onSceneMove;
   final void Function(Scene) onSceneDelete;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final c = DbColors.of(context);
     if (chapter.scenes.isEmpty) {
+      // An empty chapter shows the slot a scene will fill, and the way to
+      // fill it right there (kb F3) — not a sentence pointing elsewhere.
       return Padding(
-        padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-        child: Text(
-          tr(zh: '这一章还空着 —— 从右下角新建一个场景。',
-              en: 'This chapter is empty — start a scene with the button below.'),
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: cs.onSurfaceVariant),
+        padding: const EdgeInsets.fromLTRB(DbSpace.gutter, 0, DbSpace.gutter, DbSpace.x2),
+        child: CustomPaint(
+          painter: _DashedBox(c.ruleStrong),
+          child: SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: onAddScene,
+              child: Text(tr(zh: '在这一章写一个场景', en: 'Write a scene in this chapter')),
+            ),
+          ),
         ),
       );
     }
@@ -539,9 +574,12 @@ class _SceneList extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       buildDefaultDragHandles: false,
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: DbSpace.x1),
       itemCount: chapter.scenes.length,
-      onReorderItem: (from, to) => store.reorderScenes(project, chapter, from, to),
+      onReorderItem: (from, to) {
+        Haptics.select();
+        store.reorderScenes(project, chapter, from, to);
+      },
       itemBuilder: (context, si) {
         final s = chapter.scenes[si];
         return _SceneRow(
@@ -591,101 +629,140 @@ class _SceneRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final c = DbColors.of(context);
     // Cached on the scene: this row is rebuilt on every autosave, and running
     // a regex over the full text of every scene each time is how a long book
     // starts to stutter while you type.
     final summary = scene.summary(strip: stripInlineMarks);
     return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 9, 4, 9),
-          child: Row(
-            children: [
-              StatusDot(status: scene.status),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      scene.displayTitle(index),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyLarge,
+      color: c.paper,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: DbSpace.row),
+        child: Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                button: true,
+                hint: tr(zh: '打开这一场景', en: 'Opens the scene'),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTap,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                        DbSpace.gutter, DbSpace.x1, 0, DbSpace.x1),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: DbSpace.x1_5),
+                          child: StatusMark(status: scene.status),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                scene.displayTitle(index),
+                                style: DbType.excerpt.copyWith(color: c.ink, height: 1.3),
+                              ),
+                              if (summary.isNotEmpty) ...[
+                                const SizedBox(height: DbSpace.x0_5),
+                                Text(
+                                  summary,
+                                  // One line of the scene is a preview, not
+                                  // the label: the title above always wraps.
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: DbType.meta.copyWith(color: c.inkMuted),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: DbSpace.x1),
+                        Text(
+                          groupedCount(scene.words),
+                          style: DbType.numeral.copyWith(color: c.inkMuted, fontSize: DbType.meta.fontSize),
+                        ),
+                      ],
                     ),
-                    if (summary.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        summary,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: cs.onSurfaceVariant),
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                groupedCount(scene.words),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelMedium
-                    ?.copyWith(color: cs.onSurfaceVariant),
-              ),
-              PopupMenuButton<String>(
-                tooltip: tr(zh: '场景操作', en: 'Scene actions'),
-                onSelected: (v) {
-                  switch (v) {
-                    case 'up':
-                      onStepUp();
-                    case 'down':
-                      onStepDown();
-                    case 'move':
-                      onMove();
-                    case 'delete':
-                      onDelete();
-                  }
-                },
-                itemBuilder: (_) => [
-                  if (!isFirst)
-                    PopupMenuItem(
-                      value: 'up',
-                      child: Text(tr(zh: '上移一位', en: 'Move up')),
-                    ),
-                  if (!isLast)
-                    PopupMenuItem(
-                      value: 'down',
-                      child: Text(tr(zh: '下移一位', en: 'Move down')),
-                    ),
-                  PopupMenuItem(
-                    value: 'move',
-                    child: Text(tr(zh: '移动到其它章', en: 'Move to another chapter')),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(tr(zh: '删除场景', en: 'Delete scene')),
-                  ),
-                ],
-              ),
-              ReorderableDragStartListener(
-                index: index,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Icon(Icons.drag_handle,
-                      size: 20, color: cs.onSurfaceVariant),
+            ),
+            PopupMenuButton<String>(
+              tooltip: tr(zh: '这一场景的操作', en: 'Scene actions'),
+              onSelected: (v) {
+                switch (v) {
+                  case 'up':
+                    onStepUp();
+                  case 'down':
+                    onStepDown();
+                  case 'move':
+                    onMove();
+                  case 'delete':
+                    onDelete();
+                }
+              },
+              itemBuilder: (_) => [
+                if (!isFirst)
+                  PopupMenuItem(value: 'up', child: Text(tr(zh: '上移一位', en: 'Move up'))),
+                if (!isLast)
+                  PopupMenuItem(value: 'down', child: Text(tr(zh: '下移一位', en: 'Move down'))),
+                PopupMenuItem(
+                  value: 'move',
+                  child: Text(tr(zh: '移动到其它章', en: 'Move to another chapter')),
+                ),
+                PopupMenuItem(value: 'delete', child: Text(tr(zh: '删除场景', en: 'Delete scene'))),
+              ],
+            ),
+            ReorderableDragStartListener(
+              index: index,
+              child: Tooltip(
+                message: tr(zh: '拖动调整场景顺序', en: 'Drag to reorder scenes'),
+                child: SizedBox(
+                  width: DbSpace.tap,
+                  height: DbSpace.row,
+                  child: Center(child: DbIcon(DbGlyph.drag, size: 18, color: c.inkMuted)),
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: DbSpace.x0_5),
+          ],
         ),
       ),
     );
   }
+}
+
+class _DashedBox extends CustomPainter {
+  _DashedBox(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = color
+      ..strokeWidth = DbRadius.hairline;
+    const dash = 4.0;
+    const gap = 3.0;
+    void hline(double y) {
+      for (var x = 0.0; x < size.width; x += dash + gap) {
+        canvas.drawLine(Offset(x, y), Offset((x + dash).clamp(0, size.width), y), p);
+      }
+    }
+
+    void vline(double x) {
+      for (var y = 0.0; y < size.height; y += dash + gap) {
+        canvas.drawLine(Offset(x, y), Offset(x, (y + dash).clamp(0, size.height)), p);
+      }
+    }
+
+    hline(0.5);
+    hline(size.height - 0.5);
+    vline(0.5);
+    vline(size.width - 0.5);
+  }
+
+  @override
+  bool shouldRepaint(_DashedBox old) => old.color != color;
 }
