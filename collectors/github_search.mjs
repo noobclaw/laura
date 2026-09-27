@@ -328,6 +328,20 @@ export const QUERIES = [
   { key: 'embroidery', q: 'topic:embroidery stars:>10' },               // total 23; inkstitch GPL-3, pyembroidery MIT (file formats), Embroidermodder zlib
   { key: 'sourdough', q: 'topic:sourdough' },                           // total 45; the-bread-code MIT, sourdoc MPL-2 (Dart)
   { key: 'luthier', q: 'topic:luthier' },                               // total 13; guitar_tap GPL-3 (tap-tone FFT), fret calculators
+  // 09-27: rule fires again (09-25 and 09-26 both 0 new candidates). The 09-26 post-mortem:
+  // circles with many "is there an app" posts are ALSO the ones already crowded with 2026
+  // free newcomers. So these five go the other way — domains where the moat is a
+  // professional ALGORITHM a newcomer cannot write in a weekend (the HamPulse/VOACAP shape).
+  // All five hand-probed 09-27 (total_count + page-1 head read before wiring):
+  { key: 'gears', q: 'topic:gears stars:>5' },                          // total 12; mechanism MIT, non-circular-gears MIT, InvoluteGears; 1 homonym (flappybird)
+  { key: 'hydraulics', q: 'topic:hydraulics stars:>5' },                // total 29; EPANET MIT (pipe networks), Hopsan Apache-2, ChannelFlowLib GPL-3 (open channel)
+  { key: 'lens-design', q: 'topic:lens-design stars:>3' },              // total 10; optiland MIT, tracepy MIT, LensSim MIT — ray tracing / optical calc
+  { key: 'structural-engineering', q: 'topic:structural-engineering stars:>30' }, // total 41; Pynite MIT, section-properties MIT, concrete-properties MIT, anaStruct LGPL-3
+  { key: 'naval-architecture', q: 'topic:naval-architecture stars:>5' }, // total 4 (small, on target); navaltoolbox AGPL-3 (hydrostatics/stability), ANYstructure MPL-2
+  // Probed 09-27 and NOT wired in: topic:gear (Go web framework / web3 homonyms), topic:optics
+  // (functional-programming "optics" homonym head), topic:weaving / topic:loom (AOP code weaving,
+  // Project Loom, screen recorders), topic:ship-stability (0), topic:depth-of-field (deblur
+  // research), topic:photovoltaic (Home-Assistant dashboards; pvlib already reachable by name).
   // Probed 09-23 and NOT wired in (homonyms / hardware / giant rule):
   //   bonsai (1-bit LLM models), horse (Delphi web framework), candle (Rust ML + K-line charts),
   //   reloading (hot-reload tooling) -> homonym pollution.
