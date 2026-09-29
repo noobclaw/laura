@@ -338,6 +338,18 @@ export const QUERIES = [
   { key: 'lens-design', q: 'topic:lens-design stars:>3' },              // total 10; optiland MIT, tracepy MIT, LensSim MIT — ray tracing / optical calc
   { key: 'structural-engineering', q: 'topic:structural-engineering stars:>30' }, // total 41; Pynite MIT, section-properties MIT, concrete-properties MIT, anaStruct LGPL-3
   { key: 'naval-architecture', q: 'topic:naval-architecture stars:>5' }, // total 4 (small, on target); navaltoolbox AGPL-3 (hydrostatics/stability), ANYstructure MPL-2
+  // 09-29: 0-candidate streak continues (09-25/26/27 + 09-29; 09-28 run missed) and the pool is
+  // flat (1,051 -> 1,051, +2 new rows). Five more hobby/craft domains with a real algorithm or
+  // file-format core, hand-probed 09-29 (total_count + page-1 head read before wiring):
+  { key: 'celestial-navigation', q: 'topic:celestial-navigation' },     // total 29; alinnman/celestial-navigation MIT (sight reduction), SkyAlmanac GPL-3 (almanac pages)
+  { key: 'rocketry', q: 'topic:rocketry stars:>5' },                    // total 50; openrocket (GPL, Java), RocketPy MIT, openMotor GPL-3 (motor ballistics)
+  { key: 'bookbinding', q: 'topic:bookbinding' },                       // total 26; Booklet BSD-3, bookbinding-imposition MIT, f-impose MPL-2 (PDF signature imposition)
+  { key: 'sewing', q: 'topic:sewing stars:>3' },                        // total 81; respira Apache-2 (Brother SKiTCH), myogpatterns, StitchCounter MIT (Swift)
+  { key: 'beekeeping', q: 'topic:beekeeping' },                         // total 72; BEEP AGPL-3, hive-pal (none); mostly ESP32/IoT hive scales
+  // Probed 09-29 and NOT wired in: topic:sewing-pattern (3), "piano tuning" by name (257, head is
+  // piano-cover ML + MIDI dumps; Entropy-Piano-Tuner is findable directly), topic:homebrewing
+  // (head is a macOS Homebrew tap = homonym), topic:aquarium (wallpapers / terminal toys head),
+  // topic:calligraphy (handwriting-animation web libs, not a calligraphy tool).
   // Probed 09-27 and NOT wired in: topic:gear (Go web framework / web3 homonyms), topic:optics
   // (functional-programming "optics" homonym head), topic:weaving / topic:loom (AOP code weaving,
   // Project Loom, screen recorders), topic:ship-stability (0), topic:depth-of-field (deblur
