@@ -45,6 +45,15 @@ TOOL_INTENT_ZH = ("app", "软件", "计算器", "下载", "免费", "手机版",
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Restored workspaces keep Python dependencies in a local virtual environment.
+# Make the documented direct-script invocation use it without changing the
+# system Python or relying on an interactive shell's activation state.
+VENV = os.path.join(ROOT, ".venv")
+VENV_PYTHON = os.path.join(VENV, "Scripts", "python.exe") if os.name == "nt" \
+    else os.path.join(VENV, "bin", "python")
+if os.path.isfile(VENV_PYTHON) and os.path.abspath(sys.prefix) != os.path.abspath(VENV):
+    os.execv(VENV_PYTHON, [VENV_PYTHON, os.path.abspath(__file__), *sys.argv[1:]])
+
 
 def http_json(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -60,7 +69,11 @@ def trends(words):
         print("[warn] pytrends not installed: pip install pytrends", file=sys.stderr)
         return {}, "pytrends not installed"
     out, err = {}, None
-    p = TrendReq(hl="en-US", tz=0, timeout=(10, 25))
+    try:
+        p = TrendReq(hl="en-US", tz=0, timeout=(10, 25))
+    except Exception as e:
+        # Cookie initialization can fail before the per-batch retry loop.
+        return {}, f"initialization: {type(e).__name__}: {e}"
     for i in range(0, len(words), BATCH):
         kws = [ANCHOR] + [w for w in words[i:i + BATCH] if w != ANCHOR]
         last = None
@@ -79,6 +92,11 @@ def trends(words):
                 break
             except Exception as e:  # 429 is the usual one; the rule says wait >= 60s
                 last = f"{type(e).__name__}: {e}"
+                status = getattr(getattr(e, "response", None), "status_code", None)
+                if status != 429 or attempt == 2:
+                    print(f"[warn] trends batch {kws}: {last}", file=sys.stderr)
+                    err = f"batch {kws[1:]}: {last}"
+                    break
                 print(f"[warn] trends batch {kws}: {last}; retry in 70s", file=sys.stderr)
                 time.sleep(70)
         else:  # every attempt failed: only then is it an error worth recording

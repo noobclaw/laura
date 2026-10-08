@@ -2,6 +2,16 @@
 // Pulls TOP_FREE charts for tool-adjacent categories.
 
 import gplay from 'google-play-scraper';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+
+// got (used by google-play-scraper) does not inherit fetch's proxy handling.
+const proxy = process.env.HTTPS_PROXY || process.env.https_proxy
+  || process.env.HTTP_PROXY || process.env.http_proxy;
+const requestOptions = {
+  timeout: { request: 20000 },
+  retry: { limit: 0 },
+  ...(proxy ? { agent: { https: new HttpsProxyAgent(proxy) } } : {}),
+};
 
 const TARGETS = [
   { key: 'us_tools', country: 'us', category: gplay.category.TOOLS },
@@ -16,6 +26,7 @@ async function fetchList(country, category) {
     num: 50,
     country,
     throttle: 5,
+    requestOptions,
   });
   return items.map((it, i) => ({
     rank: i + 1,

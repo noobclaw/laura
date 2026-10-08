@@ -39,7 +39,7 @@ const strip = (html) => decode(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' 
 // 09-25 probe, 60s later it answered 200.
 async function get(url, tries = 3, backoffMs = 15000) {
   for (let i = 0; i < tries; i++) {
-    const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/atom+xml, application/rss+xml, text/xml, */*' } });
+    const res = await fetch(url, { signal: AbortSignal.timeout(20000), headers: { 'User-Agent': UA, Accept: 'application/atom+xml, application/rss+xml, text/xml, */*' } });
     if (res.status === 429 && i + 1 < tries) { await sleep(backoffMs * (i + 1)); continue; }
     if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
     return res.text();

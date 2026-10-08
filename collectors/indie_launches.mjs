@@ -27,7 +27,7 @@ const strip = (html) => decode(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' 
 // retries are longer and any feed still missing gets a second pass at the end.
 async function get(url, tries = 4) {
   for (let i = 0; i < tries; i++) {
-    const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/rss+xml, application/atom+xml, text/xml, */*' } });
+    const res = await fetch(url, { signal: AbortSignal.timeout(20000), headers: { 'User-Agent': UA, Accept: 'application/rss+xml, application/atom+xml, text/xml, */*' } });
     if (res.status === 429 && i + 1 < tries) { await sleep(15000 * (i + 1)); continue; }
     if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
     return res.text();

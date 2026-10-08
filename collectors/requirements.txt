@@ -1,0 +1,4 @@
+# Python dependencies for google_trends.py; install into the project .venv.
+pytrends==4.9.2
+pandas>=2.2.3,<3
+requests==2.32.5

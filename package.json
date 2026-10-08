@@ -8,6 +8,7 @@
     "collect": "node collectors/run_all.mjs"
   },
   "dependencies": {
-    "google-play-scraper": "^10.0.0"
+    "google-play-scraper": "^10.0.0",
+    "https-proxy-agent": "^7.0.6"
   }
 }
