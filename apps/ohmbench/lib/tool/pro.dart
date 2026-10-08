@@ -38,7 +38,11 @@ class _ProSheet extends StatelessWidget {
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
-            BenchSpace.xl, 0, BenchSpace.xl, BenchSpace.l),
+          BenchSpace.xl,
+          0,
+          BenchSpace.xl,
+          BenchSpace.l,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,16 +52,26 @@ class _ProSheet extends StatelessWidget {
                 const OhmMark(size: 26, animate: true),
                 const SizedBox(width: BenchSpace.m),
                 Expanded(
-                  child: Text.rich(TextSpan(children: [
+                  child: Text.rich(
                     TextSpan(
-                        text: 'OhmBench ',
-                        style: BenchType.monoStyle(BenchType.display,
-                            bold: true)),
-                    TextSpan(
-                        text: 'Pro',
-                        style: BenchType.monoStyle(BenchType.display,
-                            bold: true)),
-                  ])),
+                      children: [
+                        TextSpan(
+                          text: 'OhmBench ',
+                          style: BenchType.monoStyle(
+                            BenchType.display,
+                            bold: true,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Pro',
+                          style: BenchType.monoStyle(
+                            BenchType.display,
+                            bold: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -79,8 +93,9 @@ class _ProSheet extends StatelessWidget {
             ),
             _Spec(
               label: tr(
-                  zh: '求解精度、示波器、撤销、自动保存',
-                  en: 'Solver accuracy, scope, undo, autosave'),
+                zh: '求解精度、示波器、撤销、自动保存',
+                en: 'Solver accuracy, scope, undo, autosave',
+              ),
               free: tr(zh: '完整', en: 'Full'),
               pro: tr(zh: '完整', en: 'Full'),
             ),
@@ -93,34 +108,17 @@ class _ProSheet extends StatelessWidget {
               style: BenchType.bodyStyle(color: Bench.inkDim),
             ),
             const SizedBox(height: BenchSpace.l),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: BenchSpace.l),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                // The result arrives on the purchase stream.
-                BenchCheckout.instance.buyPro();
-              },
-              child: ValueListenableBuilder<String?>(
-                valueListenable: BenchCheckout.instance.price,
-                builder: (context, price, _) => Text(
-                  tr(
-                    zh: '解锁 Pro · ${price ?? '\$4.99'}',
-                    en: 'Unlock Pro · ${price ?? '\$4.99'}',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+            const _PurchaseButton(),
             const SizedBox(height: BenchSpace.xs),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 BenchCheckout.instance.restore();
               },
-              child: Text(tr(zh: '恢复购买', en: 'Restore purchase'),
-                  style: const TextStyle(color: Bench.inkDim)),
+              child: Text(
+                tr(zh: '恢复购买', en: 'Restore purchase'),
+                style: const TextStyle(color: Bench.inkDim),
+              ),
             ),
           ],
         ),
@@ -138,17 +136,23 @@ class _SpecHeader extends StatelessWidget {
           const Spacer(),
           SizedBox(
             width: 76,
-            child: Text(tr(zh: '免费', en: 'Free'),
-                textAlign: TextAlign.center,
-                style:
-                    BenchType.monoStyle(BenchType.label, color: Bench.inkDim)),
+            child: Text(
+              tr(zh: '免费', en: 'Free'),
+              textAlign: TextAlign.center,
+              style: BenchType.monoStyle(BenchType.label, color: Bench.inkDim),
+            ),
           ),
           SizedBox(
             width: 76,
-            child: Text('Pro',
-                textAlign: TextAlign.center,
-                style: BenchType.monoStyle(BenchType.label,
-                    bold: true, color: Bench.charge)),
+            child: Text(
+              'Pro',
+              textAlign: TextAlign.center,
+              style: BenchType.monoStyle(
+                BenchType.label,
+                bold: true,
+                color: Bench.charge,
+              ),
+            ),
           ),
         ],
       ),
@@ -167,7 +171,10 @@ class _Spec extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: tr(zh: '$label:免费版 $free,Pro $pro', en: '$label: free $free, Pro $pro'),
+      label: tr(
+        zh: '$label:免费版 $free,Pro $pro',
+        en: '$label: free $free, Pro $pro',
+      ),
       excludeSemantics: true,
       child: Container(
         constraints: const BoxConstraints(minHeight: BenchSpace.row),
@@ -180,19 +187,83 @@ class _Spec extends StatelessWidget {
             Expanded(child: Text(label, style: BenchType.bodyStyle())),
             SizedBox(
               width: 76,
-              child: Text(free,
-                  textAlign: TextAlign.center,
-                  style: BenchType.monoStyle(BenchType.body,
-                      color: Bench.inkDim)),
+              child: Text(
+                free,
+                textAlign: TextAlign.center,
+                style: BenchType.monoStyle(BenchType.body, color: Bench.inkDim),
+              ),
             ),
             SizedBox(
               width: 76,
-              child: Text(pro,
-                  textAlign: TextAlign.center,
-                  style: BenchType.monoStyle(BenchType.body,
-                      bold: true, color: Bench.charge)),
+              child: Text(
+                pro,
+                textAlign: TextAlign.center,
+                style: BenchType.monoStyle(
+                  BenchType.body,
+                  bold: true,
+                  color: Bench.charge,
+                ),
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PurchaseButton extends StatefulWidget {
+  const _PurchaseButton();
+
+  @override
+  State<_PurchaseButton> createState() => _PurchaseButtonState();
+}
+
+class _PurchaseButtonState extends State<_PurchaseButton> {
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    await BenchCheckout.instance.retryProduct();
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final checkout = BenchCheckout.instance;
+    return ValueListenableBuilder<bool>(
+      valueListenable: checkout.busy,
+      builder: (context, busy, _) => ValueListenableBuilder<String?>(
+        valueListenable: checkout.price,
+        builder: (context, price, _) => FilledButton(
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: BenchSpace.l),
+          ),
+          onPressed: busy || _loading
+              ? null
+              : () async {
+                  if (price == null) {
+                    setState(() => _loading = true);
+                    await _load();
+                  } else {
+                    await checkout.buyPro();
+                  }
+                },
+          child: Text(
+            busy
+                ? tr(zh: '正在确认购买…', en: 'Confirming purchase…')
+                : _loading
+                ? tr(zh: '正在加载价格…', en: 'Loading price…')
+                : price == null
+                ? tr(zh: '重新加载 Pro 价格', en: 'Retry loading Pro price')
+                : tr(zh: '解锁 Pro · $price', en: 'Unlock Pro · $price'),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
