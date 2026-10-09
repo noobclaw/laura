@@ -346,6 +346,16 @@ export const QUERIES = [
   { key: 'bookbinding', q: 'topic:bookbinding' },                       // total 26; Booklet BSD-3, bookbinding-imposition MIT, f-impose MPL-2 (PDF signature imposition)
   { key: 'sewing', q: 'topic:sewing stars:>3' },                        // total 81; respira Apache-2 (Brother SKiTCH), myogpatterns, StitchCounter MIT (Swift)
   { key: 'beekeeping', q: 'topic:beekeeping' },                         // total 72; BEEP AGPL-3, hive-pal (none); mostly ESP32/IoT hive scales
+  // 10-09: the last two completed intel days (09-29 and 10-08) yielded no new
+  // candidates; 10-07 was blocked and the 10-08 recheck is not a second day.
+  // Five newly wired capabilities. Exact phrases avoid the rejected topic
+  // homonyms (code weaving / Homebrew package manager / SOAP web services).
+  // API probes and store checks are recorded in reports/2026-10-09.md.
+  { key: 'weaving-draft', q: '"weaving draft" in:description' },       // probe 32; AdaCAD, tabletweave; shaft/card weaving must stay distinct
+  { key: 'beer-recipe', q: '"beer" "recipe" in:description stars:>5' }, // 20 unarchived; brauhausjs, beer-analytics, BeerXML
+  { key: 'leather-pattern', q: '"leather pattern" in:description' },   // 7; LeatherPatterns, tanlines, ModelToLeatherCAD
+  { key: 'pottery-glaze', q: '"glaze calculator" in:description' },    // 6; openglaze, GlazeHub; no food-safety claims without physical validation
+  { key: 'soap-recipe', q: '"soap recipe" in:description' },          // 24; excludes SOAP service calculators, consumer payment still unverified
   // Probed 09-29 and NOT wired in: topic:sewing-pattern (3), "piano tuning" by name (257, head is
   // piano-cover ML + MIDI dumps; Entropy-Piano-Tuner is findable directly), topic:homebrewing
   // (head is a macOS Homebrew tap = homonym), topic:aquarium (wallpapers / terminal toys head),
@@ -487,16 +497,29 @@ async function search(q, tok) {
   const url = `${API}?q=${encodeURIComponent(q + ' archived:false')}&sort=stars&order=desc&per_page=15`;
   const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'laura-intel', 'X-GitHub-Api-Version': '2022-11-28' };
   if (tok) headers.Authorization = `Bearer ${tok}`;
-  const res = await fetch(url, { headers });
-  if (res.status === 403 || res.status === 429) {
-    const reset = Number(res.headers.get('x-ratelimit-reset') || 0) * 1000;
-    const wait = Math.max(5000, Math.min(65000, reset - Date.now() + 1000));
-    await sleep(wait);
-    return search(q, tok);
+  // Bound both proxy/network failures and rate-limit retries. A transient EOF
+  // should not erase a capability group; persistent limits must still finish.
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let wait = 3000;
+    try {
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout(20000) });
+      if (res.status === 403 || res.status === 429) {
+        const reset = Number(res.headers.get('x-ratelimit-reset') || 0) * 1000;
+        wait = Math.max(5000, Math.min(65000, reset - Date.now() + 1000));
+        lastError = new Error(`github search HTTP ${res.status} for "${q}"`);
+      } else {
+        if (!res.ok) throw new Error(`github search HTTP ${res.status} for "${q}"`);
+        const body = await res.json();
+        if (!Array.isArray(body.items)) throw new Error('github search: response has no items array');
+        return body.items;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt < 2) await sleep(wait);
   }
-  if (!res.ok) throw new Error(`github search HTTP ${res.status} for "${q}"`);
-  const body = await res.json();
-  return body.items || [];
+  throw lastError;
 }
 
 export async function collectGithubSearch() {

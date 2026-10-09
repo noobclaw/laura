@@ -63,4 +63,6 @@ for (const [name, fn] of collectors) {
 
 await writeFile(path.join(outDir, 'summary.json'), JSON.stringify(summary, null, 2), 'utf8');
 console.log(`\nDone. ${summary.ok.length}/${collectors.length} sources ok → ${outDir}`);
-if (summary.ok.length === 0) process.exit(1);
+// This is a CLI entry point. Third-party collectors can retain proxy sockets
+// after their category deadlines; exit only after every output has been flushed.
+process.exit(summary.ok.length === 0 ? 1 : 0);
