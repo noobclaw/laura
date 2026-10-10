@@ -176,8 +176,10 @@ def main():
     print(f"| 词 | 区 | 热度(锚 {ANCHOR}=100) | 工具意图联想 | 头部评价数(iTunes {a.country}) | 热度/竞争 |")
     print("|---|---|---|---|---|---|")
     for r in rows:
+        intent_label = '缺测（请求失败）' if r['errors'].get('suggest') \
+            else (' / '.join(r['toolIntent']) or '无 → 扣分')
         print(f"| {r['word']} | {r['country']} | {r['vsAnchor'] if r['vsAnchor'] is not None else '—'} | "
-              f"{' / '.join(r['toolIntent']) or '无 → 扣分'} | {r['topReviews']} | "
+              f"{intent_label} | {r['topReviews']} | "
               f"{r['heatPerCompetition'] if r['heatPerCompetition'] is not None else '—'} |")
     if trends_err:
         print(f"\n[trends] {trends_err}", file=sys.stderr)

@@ -445,6 +445,14 @@ export const QUERIES = [
   //                  Only liblouis is real braille — and the store side killed
   //                  the direction the same day (主词 45 hits / 2 paid, one of
   //                  them ★0.00 / 0 ratings).
+  // 10-10: 10-08 and 10-09 both produced zero new candidates. Expand by
+  // five concrete hobby capabilities; avoid telescope's Neovim homonym,
+  // genomics "stained glass", and generic mosaic UI/image-processing noise.
+  { key: 'stained-glass-pattern', q: '"stained glass" pattern in:description' },
+  { key: 'mosaic-crochet', q: 'mosaic crochet in:description' },
+  { key: 'fly-tying', q: '"fly tying" in:name,description,topics' },
+  { key: 'railroad-timetable', q: '"model railroad" timetable in:description' },
+  { key: 'telescope-collimation', q: 'telescope collimation in:description' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
