@@ -453,6 +453,14 @@ export const QUERIES = [
   { key: 'fly-tying', q: '"fly tying" in:name,description,topics' },
   { key: 'railroad-timetable', q: '"model railroad" timetable in:description' },
   { key: 'telescope-collimation', q: 'telescope collimation in:description' },
+  // 10-11: 10-09 and 10-10 again produced zero new candidates. Broaden
+  // into five specific maker capabilities; keep the initial 111-group
+  // snapshot separate so expanded scope cannot masquerade as daily growth.
+  { key: 'tatting-pattern', q: 'tatting in:name,description,topics' },
+  { key: 'lapidary-faceting', q: 'lapidary in:description' },
+  { key: 'aquarium-fertilizer', q: 'aquarium fertilizer in:description' },
+  { key: 'kite-design', q: '"kite design" in:description' },
+  { key: 'miniature-paint', q: '"hobby paint" in:description' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
