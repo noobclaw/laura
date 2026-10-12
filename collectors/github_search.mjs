@@ -461,6 +461,15 @@ export const QUERIES = [
   { key: 'aquarium-fertilizer', q: 'aquarium fertilizer in:description' },
   { key: 'kite-design', q: '"kite design" in:description' },
   { key: 'miniature-paint', q: '"hobby paint" in:description' },
+  // 10-12: 10-10 and 10-11 both yielded zero new candidates. Probe five
+  // new craft workflows; use chainmaille to avoid email/game homonyms and
+  // exclude the same bulk Notion-template author from lace/kiln queries.
+  // Preserve the initial 116-group sample for like-for-like daily comparison.
+  { key: 'chainmail-design', q: 'chainmaille in:name,description,topics -user:ncreighton' },
+  { key: 'bobbin-lace', q: '"bobbin lace" in:description -user:ncreighton' },
+  { key: 'machine-knitting', q: '"knitting machine" in:description' },
+  { key: 'kiln-schedule', q: '"kiln" "schedule" in:description -user:ncreighton' },
+  { key: 'sewing-projector', q: '"sewing" "projector" in:description' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
