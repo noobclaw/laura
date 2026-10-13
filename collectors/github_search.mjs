@@ -470,6 +470,14 @@ export const QUERIES = [
   { key: 'machine-knitting', q: '"knitting machine" in:description' },
   { key: 'kiln-schedule', q: '"kiln" "schedule" in:description -user:ncreighton' },
   { key: 'sewing-projector', q: '"sewing" "projector" in:description' },
+  // 10-13: 10-11 and 10-12 yielded zero new candidates. Add five
+  // concrete workflows, preserving the original 121-group daily sample.
+  // Require a star to bound bead noise; "care" avoids bonsai ML/tree codes.
+  { key: 'bead-pattern', q: '"bead" "pattern" in:description stars:>0 -user:ncreighton' },
+  { key: 'origami-crease', q: '"origami" "crease" in:description' },
+  { key: 'bonsai-tracker', q: '"bonsai" "care" in:description -user:ncreighton' },
+  { key: 'dog-agility', q: '"dog agility" in:name,description,topics' },
+  { key: 'pottery-shrinkage', q: '"pottery" "shrinkage" in:description' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
