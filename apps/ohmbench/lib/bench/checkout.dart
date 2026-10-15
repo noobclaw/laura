@@ -13,6 +13,35 @@ import 'words.dart';
 // '<applicationId>.pro_unlock'(new_app.mjs 会替换);裸 'pro_unlock' 已被 remcard 占用。
 const String kOhmProProductId = 'com.noobclaw.ohmbench.pro_unlock';
 
+/// Store boundary so product availability and purchase recovery can be tested.
+abstract class CheckoutStore {
+  Stream<List<PurchaseDetails>> get purchaseStream;
+  Future<bool> isAvailable();
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> ids);
+  Future<bool> buyNonConsumable({required PurchaseParam purchaseParam});
+  Future<void> restorePurchases();
+  Future<void> completePurchase(PurchaseDetails purchase);
+}
+
+class _PluginStore implements CheckoutStore {
+  @override
+  Stream<List<PurchaseDetails>> get purchaseStream =>
+      InAppPurchase.instance.purchaseStream;
+  @override
+  Future<bool> isAvailable() => InAppPurchase.instance.isAvailable();
+  @override
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) =>
+      InAppPurchase.instance.queryProductDetails(ids);
+  @override
+  Future<bool> buyNonConsumable({required PurchaseParam purchaseParam}) =>
+      InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+  @override
+  Future<void> restorePurchases() => InAppPurchase.instance.restorePurchases();
+  @override
+  Future<void> completePurchase(PurchaseDetails purchase) =>
+      InAppPurchase.instance.completePurchase(purchase);
+}
+
 /// Thin wrapper around the official in_app_purchase plugin (Play Billing /
 /// StoreKit). Billing runs through the store app's own process, so the app
 /// keeps working without the INTERNET permission.
@@ -23,7 +52,19 @@ const String kOhmProProductId = 'com.noobclaw.ohmbench.pro_unlock';
 /// builds is a store purchase; local placeholder unlocks must not survive
 /// past SOP gate G8.
 class BenchCheckout {
-  BenchCheckout._();
+  BenchCheckout._() : _store = _PluginStore();
+
+  @visibleForTesting
+  BenchCheckout.testing(
+    this._store, {
+    this.retryDelay = const Duration(seconds: 2),
+  });
+
+  final CheckoutStore _store;
+  Duration retryDelay = const Duration(seconds: 2);
+  final ValueNotifier<bool> busy = ValueNotifier(false);
+  ProductDetails? _product;
+  Future<void>? _productLoad;
   static final BenchCheckout instance = BenchCheckout._();
 
   /// Last user-facing purchase message (error, pending, restored…). UI shows
@@ -65,11 +106,16 @@ class BenchCheckout {
     if (_inited) return;
     _inited = true;
     try {
-      _sub = InAppPurchase.instance.purchaseStream.listen(
+      _sub = _store.purchaseStream.listen(
         _handlePurchases,
-        onError: (Object e) => debugPrint('purchase stream error: $e'),
+        onError: (Object e) {
+          busy.value = false;
+          debugPrint('purchase stream error: $e');
+        },
       );
-      _available = await InAppPurchase.instance.isAvailable();
+      _available = await _store.isAvailable().timeout(
+        const Duration(seconds: 8),
+      );
       if (_available) await _loadPrice();
     } catch (e) {
       // No billing backend (emulator, tests, sideload) — stay silent.
@@ -86,29 +132,48 @@ class BenchCheckout {
   /// seconds after launch and Play answers late on a cold start, so one
   /// failed lookup must not leave the price empty for the whole session:
   /// retry with a short backoff, and let the UI ask again via [ensurePrice].
-  Future<void> _loadPrice() async {
-    if (_priceLoading) return;
+  Future<void> _loadPrice() {
+    return _productLoad ??= _queryProduct().whenComplete(
+      () => _productLoad = null,
+    );
+  }
+
+  Future<void> _queryProduct() async {
     _priceLoading = true;
     _lastPriceAttempt = DateTime.now();
     try {
-      for (final delay in const [0, 2, 5, 10]) {
-        if (delay > 0) await Future<void>.delayed(Duration(seconds: delay));
+      for (var attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) await Future<void>.delayed(retryDelay);
         try {
-          final resp =
-              await InAppPurchase.instance.queryProductDetails({kOhmProProductId});
-          if (resp.productDetails.isNotEmpty) {
-            price.value = resp.productDetails.first.price;
-            return;
+          _available = await _store.isAvailable().timeout(
+            const Duration(seconds: 8),
+          );
+          if (!_available) continue;
+          final response = await _store
+              .queryProductDetails({kOhmProProductId})
+              .timeout(const Duration(seconds: 12));
+          debugPrint(
+            'OhmBench product query: error=${response.error}, '
+            'missing=${response.notFoundIDs}',
+          );
+          for (final product in response.productDetails) {
+            if (product.id == kOhmProProductId) {
+              _product = product;
+              price.value = product.price;
+              return;
+            }
           }
-          debugPrint('price lookup: product not found (${resp.notFoundIDs})');
         } catch (e) {
-          debugPrint('price lookup failed: $e');
+          debugPrint('OhmBench product query failed: $e');
         }
       }
     } finally {
       _priceLoading = false;
     }
   }
+
+  Future<void> retryProduct() =>
+      _product != null ? Future<void>.value() : _loadPrice();
 
   /// Called by every widget that displays the price. A no-op once the store
   /// has answered; otherwise re-checks store availability and looks the price
@@ -122,7 +187,11 @@ class BenchCheckout {
       return;
     }
     try {
-      if (!_available) _available = await InAppPurchase.instance.isAvailable();
+      if (!_available) {
+        _available = await _store.isAvailable().timeout(
+          const Duration(seconds: 8),
+        );
+      }
       if (_available) await _loadPrice();
     } catch (e) {
       debugPrint('ensurePrice failed: $e');
@@ -131,25 +200,39 @@ class BenchCheckout {
 
   Future<void> _handlePurchases(List<PurchaseDetails> purchases) async {
     for (final p in purchases) {
+      if (p.productID != kOhmProProductId) continue;
+      busy.value = p.status == PurchaseStatus.pending;
       if (p.status == PurchaseStatus.purchased ||
           p.status == PurchaseStatus.restored) {
         if (p.status == PurchaseStatus.restored) _restoreDelivered = true;
         if (p.productID == kOhmProProductId) {
           _onUnlocked?.call();
           notice.value = p.status == PurchaseStatus.restored
-              ? tr(zh: '实验台已恢复 Pro,不限元件', en: 'Bench restored to Pro — no part limit')
-              : tr(zh: '实验台已解锁:元件和电路不再限量', en: 'Bench unlocked: no more part or circuit limits');
+              ? tr(
+                  zh: '实验台已恢复 Pro,不限元件',
+                  en: 'Bench restored to Pro — no part limit',
+                )
+              : tr(
+                  zh: '实验台已解锁:元件和电路不再限量',
+                  en: 'Bench unlocked: no more part or circuit limits',
+                );
         }
       } else if (p.status == PurchaseStatus.error) {
-        notice.value = p.error?.message ??
-            tr(zh: '这次没有买成,钱没有扣,可以再试一次', en: 'That purchase did not go through and nothing was charged. Try again any time.');
-      } else if (p.status == PurchaseStatus.pending) {
         notice.value =
-            tr(zh: '商店正在确认付款,确认后会自动解锁', en: 'The store is confirming the payment; the bench unlocks by itself when it does');
+            p.error?.message ??
+            tr(
+              zh: '这次没有买成,钱没有扣,可以再试一次',
+              en: 'That purchase did not go through and nothing was charged. Try again any time.',
+            );
+      } else if (p.status == PurchaseStatus.pending) {
+        notice.value = tr(
+          zh: '商店正在确认付款,确认后会自动解锁',
+          en: 'The store is confirming the payment; the bench unlocks by itself when it does',
+        );
       }
       if (p.pendingCompletePurchase) {
         try {
-          await InAppPurchase.instance.completePurchase(p);
+          await _store.completePurchase(p);
         } catch (e) {
           debugPrint('completePurchase failed: $e');
         }
@@ -159,28 +242,44 @@ class BenchCheckout {
 
   /// Launch the store's purchase sheet for the Pro unlock.
   Future<void> buyPro() async {
-    if (!_available) {
-      notice.value = _unavailableMsg;
-      return;
-    }
+    if (busy.value) return;
+    busy.value = true;
+    var launched = false;
     try {
-      final resp =
-          await InAppPurchase.instance.queryProductDetails({kOhmProProductId});
-      if (resp.productDetails.isEmpty) {
+      // Recheck on every user attempt: a cold-start failure is not permanent.
+      _available = await _store.isAvailable().timeout(
+        const Duration(seconds: 8),
+      );
+      if (!_available) {
+        notice.value = _unavailableMsg;
+        return;
+      }
+      if (_product == null) await _loadPrice();
+      final product = _product;
+      if (product == null) {
         notice.value = tr(
-          zh: '商店暂时没有返回 Pro 的信息,过一会儿再试',
-          en: 'The store has not answered for Pro yet. Try again in a moment.',
+          zh: '暂时无法加载 Pro,请检查网络后重试。',
+          en: 'Unable to load Pro. Check your connection and try again.',
         );
         return;
       }
-      await InAppPurchase.instance.buyNonConsumable(
-        purchaseParam: PurchaseParam(productDetails: resp.productDetails.first),
+      launched = await _store.buyNonConsumable(
+        purchaseParam: PurchaseParam(productDetails: product),
       );
+      if (!launched) {
+        notice.value = tr(
+          zh: '无法打开购买窗口,请重试。',
+          en: 'Unable to open the purchase sheet. Please try again.',
+        );
+      }
     } catch (e) {
-      debugPrint('buyPro failed: $e');
+      debugPrint('OhmBench buyPro failed: $e');
       notice.value = tr(
-          zh: '这次没有买成,钱没有扣,可以再试一次',
-          en: 'That purchase did not go through and nothing was charged. Try again any time.');
+        zh: '购买未完成,请稍后重试。',
+        en: 'Purchase could not be completed. Please try again.',
+      );
+    } finally {
+      if (!launched) busy.value = false;
     }
   }
 
@@ -188,17 +287,31 @@ class BenchCheckout {
   /// purchase stream as [PurchaseStatus.restored]; if nothing has arrived a
   /// few seconds later, say so — silence reads as a broken button.
   Future<void> restore() async {
+    try {
+      _available = await _store.isAvailable().timeout(
+        const Duration(seconds: 8),
+      );
+    } catch (e) {
+      _available = false;
+      debugPrint('restore availability failed: $e');
+    }
     if (!_available) {
       notice.value = _unavailableMsg;
       return;
     }
     _restoreDelivered = false;
-    notice.value = tr(zh: '正在向商店核对你的 Pro…', en: 'Checking your Pro with the store…');
+    notice.value = tr(
+      zh: '正在向商店核对你的 Pro…',
+      en: 'Checking your Pro with the store…',
+    );
     try {
-      await InAppPurchase.instance.restorePurchases();
+      await _store.restorePurchases();
     } catch (e) {
       debugPrint('restore failed: $e');
-      notice.value = tr(zh: '商店没有回应恢复请求,稍后再试', en: 'The store did not answer the restore request. Try again later.');
+      notice.value = tr(
+        zh: '商店没有回应恢复请求,稍后再试',
+        en: 'The store did not answer the restore request. Try again later.',
+      );
       return;
     }
     // Stores can take a while to replay; saying "nothing found" too early
@@ -218,6 +331,7 @@ class BenchCheckout {
     _sub?.cancel();
     _sub = null;
     _inited = false;
+    busy.value = false;
   }
 }
 
@@ -266,8 +380,7 @@ class _CheckoutNoticesState extends State<CheckoutNotices> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      widget.child ?? const SizedBox.shrink();
+  Widget build(BuildContext context) => widget.child ?? const SizedBox.shrink();
 }
 
 /// The store's real localized price for the Pro unlock once known, otherwise

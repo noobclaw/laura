@@ -247,7 +247,7 @@ class _ProModule extends StatelessWidget {
                       size: BenchType.title, weight: FontWeight.w700)),
               FilledButton(
                 onPressed: () => showProSheet(context),
-                child: const StorePrice(fallback: r'$4.99'),
+                child: const StorePrice(fallback: 'Pro'),
               ),
             ],
           ),
