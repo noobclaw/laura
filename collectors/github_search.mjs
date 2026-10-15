@@ -478,6 +478,14 @@ export const QUERIES = [
   { key: 'bonsai-tracker', q: '"bonsai" "care" in:description -user:ncreighton' },
   { key: 'dog-agility', q: '"dog agility" in:name,description,topics' },
   { key: 'pottery-shrinkage', q: '"pottery" "shrinkage" in:description' },
+  // 10-15: the last two completed reports (10-12/10-13) found no new
+  // candidates; 10-14 was interrupted and is not a completed zero day.
+  // Probe concrete craft outputs, excluding bulk templates and code homonyms.
+  { key: 'string-art', q: '"string art" in:description stars:>1' },
+  { key: 'macrame-pattern', q: 'macrame pattern in:description -user:ncreighton' },
+  { key: 'marquetry-design', q: 'marquetry nesting in:description' },
+  { key: 'kumihimo-pattern', q: 'kumihimo braid in:description -user:ncreighton' },
+  { key: 'quilling-design', q: '"paper quilling" in:description -user:ncreighton' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
