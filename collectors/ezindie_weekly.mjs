@@ -26,26 +26,25 @@ async function get(url) {
   return res.text();
 }
 
-/// Issue pages list products as "1、Name：tagline" headings followed by the
-/// write-up; the last one is usually a founder story. Split on those headings.
-function parseIssue(lines) {
-  const products = [];
-  let cur = null;
-  for (const line of lines) {
-    const m = line.match(/^(\d)[、.．]\s*(.{2,80})$/);
-    if (m && Number(m[1]) >= 1 && Number(m[1]) <= 9 && (!cur || Number(m[1]) === products.length + 1)) {
-      if (cur) products.push(cur);
-      cur = { title: m[2].trim(), body: [] };
-    } else if (cur && cur.body.join('').length < 1500) {
-      cur.body.push(line);
-    }
-  }
-  if (cur) products.push(cur);
-  return products.map((p) => ({
-    title: p.title,
-    summary: p.body.join(' ').slice(0, 600),
-    revenueHint: (p.title + ' ' + p.body.join(' ')).match(/(每月|月入|年收入|月收入|MRR|ARR)[^。,,]{0,30}/)?.[0] || null,
-  }));
+// Read article h2 headings, not flattened text: the contents list repeats
+// titles, numbered steps inside an article can look like new products, and
+// newer issues have ten articles rather than nine.
+function parseIssue(html) {
+  const headings = [...html.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi)];
+  return headings.flatMap((heading, i) => {
+    const title = textOf(heading[1]).join(' ').match(/^\d{1,2}[、.．]\s*(.+)$/)?.[1];
+    if (!title) return [];
+    const start = heading.index + heading[0].length;
+    let body = html.slice(start, headings[i + 1]?.index ?? html.length);
+    // The final article is followed by the site's promotional/footer headings.
+    if (i === headings.length - 1) body = body.split(/<h[1-6]\b/i)[0];
+    const text = textOf(body).join(' ').slice(0, 1500);
+    return [{
+      title: title.trim(),
+      summary: text.slice(0, 600),
+      revenueHint: (title + ' ' + text).match(/(每月|月入|年收入|月收入|MRR|ARR)[^。,,]{0,30}/)?.[0] || null,
+    }];
+  });
 }
 
 export async function collectEzindie() {
@@ -58,7 +57,9 @@ export async function collectEzindie() {
   for (const it of items.slice(0, ISSUES_TO_READ)) {
     try {
       const html = await get(it.url);
-      issues.push({ ...it, products: parseIssue(textOf(html)) });
+      const products = parseIssue(html);
+      if (!products.length) throw new Error('ezindie: no numbered article headings');
+      issues.push({ ...it, products });
     } catch (e) {
       issues.push({ ...it, error: String(e?.message || e) });
     }

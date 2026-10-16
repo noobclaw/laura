@@ -486,6 +486,14 @@ export const QUERIES = [
   { key: 'marquetry-design', q: 'marquetry nesting in:description' },
   { key: 'kumihimo-pattern', q: 'kumihimo braid in:description -user:ncreighton' },
   { key: 'quilling-design', q: '"paper quilling" in:description -user:ncreighton' },
+  // 10-16: two completed zero-candidate runs (10-13/10-15). Probe each
+  // capability first; exact phrases and exclusions remove photo frames,
+  // smoking/mocking typos, Tufts coursework, and bulk template repositories.
+  { key: 'picture-frame-mat', q: '"mat board" in:description -user:jchoi207 -user:KrisYarno' },
+  { key: 'warp-calculator', q: 'warp requirements weaving in:description' },
+  { key: 'smocking-grid', q: 'smocking in:description -user:Nesplee -user:andrefernandez-rgb -user:jooyox64 -user:darasimirichard1-design -user:fajlerabbi-2002' },
+  { key: 'rug-tufting-pattern', q: '"rug tufting" in:description language:CSS' },
+  { key: 'screen-print-separation', q: 'screen printing color separation in:description' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
