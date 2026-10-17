@@ -494,6 +494,14 @@ export const QUERIES = [
   { key: 'smocking-grid', q: 'smocking in:description -user:Nesplee -user:andrefernandez-rgb -user:jooyox64 -user:darasimirichard1-design -user:fajlerabbi-2002' },
   { key: 'rug-tufting-pattern', q: '"rug tufting" in:description language:CSS' },
   { key: 'screen-print-separation', q: 'screen printing color separation in:description' },
+  // 10-17: completed 10-15/10-16 runs found no new candidates. Probe
+  // concrete craft operations; exclude the Minecraft Quilt homonym,
+  // cross-craft template farms and contact-pressure/freight homonyms.
+  { key: 'quilt-cutting', q: 'quilting cutting in:description -user:ncreighton -repo:Patbox/NotEnoughSUS' },
+  { key: 'handspinning-log', q: 'handspinning in:description -user:ncreighton' },
+  { key: 'tablet-weaving', q: '"tablet weaving" in:description -user:ncreighton' },
+  { key: 'scrollsaw-pattern', q: 'scroll saw pattern in:description -user:ncreighton' },
+  { key: 'fret-layout', q: 'fret calculator in:description -user:ncreighton -repo:drsammcmaster/Contact-Pressure-Fretting-calculator -repo:BernardoArouka/freight-calculator-c' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
