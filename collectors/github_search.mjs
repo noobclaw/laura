@@ -502,6 +502,14 @@ export const QUERIES = [
   { key: 'tablet-weaving', q: '"tablet weaving" in:description -user:ncreighton' },
   { key: 'scrollsaw-pattern', q: 'scroll saw pattern in:description -user:ncreighton' },
   { key: 'fret-layout', q: 'fret calculator in:description -user:ncreighton -repo:drsammcmaster/Contact-Pressure-Fretting-calculator -repo:BernardoArouka/freight-calculator-c' },
+  // 10-18: completed 10-16/10-17 runs yielded no new candidates.
+  // Probe craft outputs first; name+description recovers libraries with blank
+  // descriptions. C# bounds grading to garment geometry, not school/LLM grades.
+  { key: 'book-folding', q: '"book folding" pattern in:description -user:ncreighton' },
+  { key: 'sashiko-pattern', q: 'sashiko pattern in:name,description -user:ncreighton' },
+  { key: 'kumiko-design', q: 'kumiko generator in:name,description -user:ncreighton' },
+  { key: 'sewing-grading', q: '"pattern grading" in:description language:C#' },
+  { key: 'papercraft-unfold', q: 'papercraft unfolding in:description -user:ncreighton -repo:LZS31415/HandControlledOrigami' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
