@@ -510,6 +510,15 @@ export const QUERIES = [
   { key: 'kumiko-design', q: 'kumiko generator in:name,description -user:ncreighton' },
   { key: 'sewing-grading', q: '"pattern grading" in:description language:C#' },
   { key: 'papercraft-unfold', q: 'papercraft unfolding in:description -user:ncreighton -repo:LZS31415/HandControlledOrigami' },
+  // 10-19: completed 10-17/10-18 runs yielded zero new candidates.
+  // Move from craft patterns to concrete fabrication/layout operations.
+  // Probe first: remove tube marketing/robotics and Spring Boot homonyms;
+  // API results remain reference implementations, not consumer demand.
+  { key: 'pipe-notching', q: 'tube notching in:description stars:>0 -repo:nepacheco/Continuum-Image-Analyzer -user:chinone369' },
+  { key: 'stair-stringer', q: '"stair" "calculator" in:description -user:ncreighton -user:kingboss568' },
+  { key: 'roof-rafter', q: '"rafter" "calculator" in:description -user:ncreighton -user:alliswell99' },
+  { key: 'belt-pulley', q: '"belt" "pulley" calculator in:description -user:ncreighton' },
+  { key: 'compression-spring', q: '"compression spring" in:description -user:ncreighton -repo:alexTrifonov/file-compression-spr-xml' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
