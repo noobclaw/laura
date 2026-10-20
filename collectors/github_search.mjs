@@ -519,6 +519,15 @@ export const QUERIES = [
   { key: 'roof-rafter', q: '"rafter" "calculator" in:description -user:ncreighton -user:alliswell99' },
   { key: 'belt-pulley', q: '"belt" "pulley" calculator in:description -user:ncreighton' },
   { key: 'compression-spring', q: '"compression spring" in:description -user:ncreighton -repo:alexTrifonov/file-compression-spr-xml' },
+  // 10-20: completed 10-18/10-19 runs yielded no new candidates.
+  // Exact bowl phrase excludes medical segmentation; joint excludes the
+  // Dovetail SaaS homonym. Spoke and compound-miter remain geometry, while
+  // coil queries require inductance to avoid motor-controller-only results.
+  { key: 'segmented-turning', q: '"segmented bowl" in:name,description -user:ncreighton' },
+  { key: 'dovetail-layout', q: '"dovetail" "joint" in:description -user:ncreighton' },
+  { key: 'wheel-spoke', q: '"spoke length" in:description -user:ncreighton' },
+  { key: 'compound-miter', q: '"compound" "miter" in:description -user:ncreighton' },
+  { key: 'aircoil-inductance', q: '"coil" "inductance" calculator in:description -user:ncreighton' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
