@@ -528,6 +528,14 @@ export const QUERIES = [
   { key: 'wheel-spoke', q: '"spoke length" in:description -user:ncreighton' },
   { key: 'compound-miter', q: '"compound" "miter" in:description -user:ncreighton' },
   { key: 'aircoil-inductance', q: '"coil" "inductance" calculator in:description -user:ncreighton' },
+  // 10-21: completed 10-19/10-20 runs yielded no new candidates.
+  // Probe duct sizing, backlash, sundial templates, speaker boxes and cams.
+  // Results include add-ins, research and hardware; none imply mobile demand.
+  { key: 'duct-sizing', q: '"duct" "sizing" in:description -user:ncreighton' },
+  { key: 'gear-backlash', q: '"gear" "backlash" calculator in:description -user:ncreighton' },
+  { key: 'sundial-layout', q: 'sundial generator in:description -user:ncreighton' },
+  { key: 'speaker-enclosure', q: '"speaker" "enclosure" calculator in:description -user:ncreighton' },
+  { key: 'cam-profile', q: '"cam profile" in:description -user:ncreighton' },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
