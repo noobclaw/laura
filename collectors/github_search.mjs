@@ -536,6 +536,14 @@ export const QUERIES = [
   { key: 'sundial-layout', q: 'sundial generator in:description -user:ncreighton' },
   { key: 'speaker-enclosure', q: '"speaker" "enclosure" calculator in:description -user:ncreighton' },
   { key: 'cam-profile', q: '"cam profile" in:description -user:ncreighton' },
+  // 10-22: completed 10-20/10-21 runs yielded no new candidates.
+  // Narrow matching networks and bellows optics; readme binding needs quilting
+  // to avoid biochemical binding. Reference hits do not establish mobile demand.
+  { key: "impedance-matching", q: "\"impedance matching\" calculator in:description -user:ncreighton" },
+  { key: "telescope-mirror", q: "telescope mirror grinding in:description -user:ncreighton" },
+  { key: "bellows-factor", q: "bellows factor in:name,description -user:ncreighton" },
+  { key: "bias-binding", q: "\"bias binding\" quilting in:readme -user:ncreighton" },
+  { key: "transformer-winding", q: "\"transformer winding\" in:description -user:ncreighton" },
 ];
 
 // Permissive licences let us ship the code inside a paid closed app with
