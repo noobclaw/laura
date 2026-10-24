@@ -17,6 +17,15 @@ const API = 'https://api.github.com/search/repositories';
 // Each query is one product capability. Keep them concrete: a repo that
 // answers "how do I do X locally" is a port candidate; frameworks are not.
 export const QUERIES = [
+  // 2026-10-24: complete the five directions prepared by the unfinished
+  // 10-23 run after two completed zero-candidate days (10-21/22). Readme
+  // hits include hardware, games and unrelated uses, never demand evidence.
+  { key: 'wood-movement', q: '"wood movement" in:readme -user:ncreighton' },
+  { key: 'pipe-offset', q: '"pipe offset" calculator in:readme -user:ncreighton' },
+  { key: 'thread-milling', q: '"thread milling" in:description -user:ncreighton' },
+  { key: 'quilt-border', q: '"quilt border" in:readme -user:ncreighton' },
+  { key: 'eyepiece-fov', q: 'eyepiece "field of view" in:readme -user:ncreighton' },
+
   // Documents / text
   // 09-10: was 'ocr offline in:description,topics stars:>1500' — 3 repos for the
   // whole tracking period, because the free word `offline` ANDed inside
