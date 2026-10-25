@@ -17,6 +17,15 @@ const API = 'https://api.github.com/search/repositories';
 // Each query is one product capability. Keep them concrete: a repo that
 // answers "how do I do X locally" is a port candidate; frameworks are not.
 export const QUERIES = [
+  // 2026-10-25: completed zero-candidate days 10-22/24 trigger five new
+  // capabilities. Exact phrases keep thread-wire hardware homonyms out;
+  // source availability alone is neither mobile demand nor validation.
+  { key: 'drill-point', q: '"drill point" calculator in:readme' },
+  { key: 'thread-wire', q: '"three wire" "pitch diameter" in:readme' },
+  { key: 'lathe-change-gears', q: '"lathe change gears" in:readme' },
+  { key: 'quilt-binding', q: '"quilt binding" calculator in:readme' },
+  { key: 'sewing-elastic', q: '"elastic" "stretch ratio" sewing in:readme' },
+
   // 2026-10-24: complete the five directions prepared by the unfinished
   // 10-23 run after two completed zero-candidate days (10-21/22). Readme
   // hits include hardware, games and unrelated uses, never demand evidence.
