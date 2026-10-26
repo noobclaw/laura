@@ -17,6 +17,14 @@ const API = 'https://api.github.com/search/repositories';
 // Each query is one product capability. Keep them concrete: a repo that
 // answers "how do I do X locally" is a port candidate; frameworks are not.
 export const QUERIES = [
+  // 2026-10-26: completed zero-candidate days 10-24/25 trigger five
+  // capabilities. Probe exact workflows; source hits do not prove demand.
+  { key: "string-tension", q: "\"string tension\" calculator in:description -user:ncreighton" },
+  { key: "brew-water", q: "\"brewing water\" calculator in:description -user:ncreighton" },
+  { key: "saddle-compensation", q: "\"saddle compensation\" in:readme -user:ncreighton" },
+  { key: "mash-infusion", q: "\"mash\" \"infusion\" calculator in:description -user:ncreighton" },
+  { key: "hydrometer-correction", q: "\"hydrometer correction\" brewing in:readme -user:ncreighton" },
+
   // 2026-10-25: completed zero-candidate days 10-22/24 trigger five new
   // capabilities. Exact phrases keep thread-wire hardware homonyms out;
   // source availability alone is neither mobile demand nor validation.
