@@ -167,9 +167,14 @@ let AC=null;
 function tone(f,d,type="sine",vol=.12,when=0){if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+when,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
 const SCALE=[523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.5];
-const sfx={place:i=>{tone(SCALE[i%8],.5,"triangle",.16);tone(SCALE[i%8]*2,.35,"sine",.06,.02)},mark:()=>tone(1400,.05,"sine",.04),lift:()=>tone(330,.14,"sine",.08),
- bad:()=>{tone(160,.22,"sawtooth",.05);tone(120,.25,"sine",.1)},tap:()=>tone(700,.06,"triangle",.06),
- win:()=>{[0,2,4,5,7].forEach((s,i)=>{tone(SCALE[s],.7,"triangle",.14,i*.1);tone(SCALE[s]*2,.5,"sine",.05,i*.1+.03)})}};
+// recorded clips (see assets/ASSETS.md); the synth above is the fallback when a clip is missing
+const EXT=(()=>{try{return new Audio().canPlayType("audio/ogg; codecs=vorbis")?"ogg":"mp3"}catch(e){return"mp3"}})();
+const CLIP={};for(const n of["place","mark","tap","bad","lift","hint","rise","win"]){try{const a=new Audio("assets/sfx/"+n+"."+EXT);a.preload="auto";a.addEventListener("canplaythrough",()=>{CLIP[n]=a},{once:true})}catch(e){}}
+function clip(n,vol=1,rate=1){if(!S.sound)return true;const src=CLIP[n];if(!src)return false;try{const a=src.cloneNode();a.volume=vol;a.preservesPitch=false;a.playbackRate=rate;const pr=a.play();pr&&pr.catch(()=>{});return true}catch(e){return false}}
+const sfx={place:i=>{if(!clip("place",.9,SCALE[i%8]/SCALE[0]))tone(SCALE[i%8],.5,"triangle",.16);tone(SCALE[i%8]*2,.35,"sine",.05,.02)},
+ mark:()=>{clip("mark",.6)||tone(1400,.05,"sine",.04)},lift:()=>{clip("lift",.7)||tone(330,.14,"sine",.08)},bad:()=>{clip("bad",.8)||tone(140,.24,"sine",.1)},
+ tap:()=>{clip("tap",.6)||tone(700,.06,"triangle",.06)},hint:()=>{clip("hint",.7)||tone(990,.2,"sine",.08)},rise:i=>{clip("rise",.3,1+i*.07)||tone(SCALE[i%8]*2,.4,"sine",.05)},
+ win:()=>{if(!clip("win",.9))[0,2,4,5,7].forEach((n,i)=>tone(SCALE[n],.7,"triangle",.14,i*.1))}};
 const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 // ---------- rules ----------
 function conflicts(){const n=S.p.n,g=S.p.g,bad=new Set(),L=[];S.cells.forEach((v,k)=>{if(v===2)L.push(k)});
@@ -217,7 +222,7 @@ function layout(){DPR=Math.min(window.devicePixelRatio||1,3);VW=innerWidth;VH=in
  cv.style.width=cv.style.height=BW+"px";cv.width=cv.height=Math.round(BW*DPR);for(const c of[sky,fx]){c.width=Math.round(VW*DPR);c.height=Math.round(VH*DPR)}}
 const geo=()=>{const P=BW*.035,cs=(BW-2*P)/S.p.n;return{P,cs}};
 function drawSky(t,dt){skx.setTransform(DPR,0,0,DPR,0,0);skx.clearRect(0,0,VW,VH);
- for(const s of stars){skx.globalAlpha=calm?.6:.35+.45*Math.sin(t/1000*s.s+s.p)**2;skx.fillStyle="#fff";skx.beginPath();skx.arc(s.x*VW,s.y*VH,s.r,0,7);skx.fill()}
+ for(const s of stars){skx.globalAlpha=calm?.6:.35+.45*Math.sin(t/1000*s.s+s.p)**2;const im=s.r>1.35&&TEX.star_07;if(im){const z=s.r*11;skx.drawImage(im,s.x*VW-z/2,s.y*VH-z/2,z,z)}else{skx.fillStyle="#fff";skx.beginPath();skx.arc(s.x*VW,s.y*VH,s.r,0,7);skx.fill()}}
  skx.globalAlpha=1;skx.globalCompositeOperation="lighter";
  for(const b of bokeh){if(!calm){b.y-=b.v*dt;if(b.y<-.1){b.y=1.1;b.x=Math.random()}}glow(skx,(b.x+Math.sin(t/3000+b.p)*.02)*VW,b.y*VH,b.r*2.2,b.a)}
  skx.globalCompositeOperation="source-over"}
@@ -247,16 +252,23 @@ function drawBoard(t){if(!S.p)return;const n=S.p.n,g=S.p.g,{P,cs}=geo(),gap=cs*.
    c.fillStyle="rgba(0,0,0,.22)";c.beginPath();c.ellipse(r.cx+dx,r.cy+cs*.36,cs*.2*sc,cs*.05*sc,0,0,7);c.fill();
    lantern(c,r.cx+dx,r.cy-cs*.03+(calm?0:Math.sin(t/700+k)*cs*.012),cs*.78*sc,{bad:isBad})}})}
 // ---------- particles and released lanterns ----------
-const sparks=[],floaters=[];
-function burst(x,y,n,col,sp=160){if(calm)return;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=sp*(.3+Math.random()*.7);sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,age:0,life:.5+Math.random()*.5,r:1.5+Math.random()*2.5,col})}}
+// particle textures: Kenney Particle Pack, CC0 (see assets/ASSETS.md); plain dots are drawn if an image is missing
+const TEX={},tintC={};for(const n of["star_06","star_07","star_09","circle_02","circle_05","magic_05","symbol_02"]){const im=new Image();im.onload=()=>{TEX[n]=im};im.src="assets/fx/"+n+".png"}
+function tex(n,rgb){const im=TEX[n];if(!im)return null;const key=n+rgb;if(!tintC[key]){const c=document.createElement("canvas");c.width=c.height=128;const x=c.getContext("2d");x.drawImage(im,0,0);x.globalCompositeOperation="source-in";x.fillStyle=`rgb(${rgb})`;x.fillRect(0,0,128,128);tintC[key]=c}return tintC[key]}
+const sparks=[],floaters=[],rings=[];const SPARK_TEX=["star_06","star_07","magic_05","circle_05"];
+function burst(x,y,n,col,sp=160){if(calm)return;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=sp*(.3+Math.random()*.7);sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:220,age:0,life:.5+Math.random()*.6,r:1.5+Math.random()*2.5,size:12+Math.random()*22,rot:Math.random()*6.28,spin:(Math.random()-.5)*6,tex:SPARK_TEX[i%4],col})}}
 function cellPage(k){const b=cv.getBoundingClientRect(),{P,cs}=geo();return{x:b.left+P+(k%S.p.n+.5)*cs,y:b.top+P+(Math.floor(k/S.p.n)+.5)*cs,cs}}
 function drawFx(t,dt){fxx.setTransform(DPR,0,0,DPR,0,0);fxx.clearRect(0,0,VW,VH);
- for(let i=floaters.length-1;i>=0;i--){const f=floaters[i];if(t<f.born)continue;if(!f.live){f.live=true;S.gone.add(f.k);burst(f.x,f.y,14,"255,210,120");tone(SCALE[f.i%8]*2,.4,"sine",.05)}
+ for(let i=floaters.length-1;i>=0;i--){const f=floaters[i];if(t<f.born)continue;if(!f.live){f.live=true;S.gone.add(f.k);burst(f.x,f.y,14,"255,210,120");sfx.rise(f.i);rings.push({x:f.x,y:f.y,age:0,life:.5,r0:f.h*.4,r1:f.h*1.6,rgb:"255,220,140"});sparks.push({x:f.x,y:f.y,vx:0,vy:0,g:0,age:0,life:.35,size:f.h*2.4,rot:0,spin:1,tex:"star_09",col:"255,235,180"})}
   f.y-=f.v*dt;f.v+=30*dt;const x=f.x+Math.sin((t-f.born)/600+f.i)*14;fxx.globalCompositeOperation="lighter";glow(fxx,x,f.y,f.h*1.5,.45);fxx.globalCompositeOperation="source-over";lantern(fxx,x,f.y,f.h);
-  if(Math.random()<.3)sparks.push({x,y:f.y+f.h*.5,vx:(Math.random()-.5)*30,vy:30,age:0,life:.6,r:1.5,col:"255,200,110"});if(f.y<-f.h)floaters.splice(i,1)}
+  if(Math.random()<.35)sparks.push({x,y:f.y+f.h*.5,vx:(Math.random()-.5)*30,vy:30,g:60,age:0,life:.7,r:1.5,size:8+Math.random()*10,rot:0,spin:3,tex:"star_06",col:"255,200,110"});if(f.y<-f.h)floaters.splice(i,1)}
  fxx.globalCompositeOperation="lighter";
- for(let i=sparks.length-1;i>=0;i--){const s=sparks[i];s.age+=dt;if(s.age>s.life){sparks.splice(i,1);continue}s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=220*dt;s.vx*=.985;
-  fxx.fillStyle=`rgba(${s.col},${1-s.age/s.life})`;fxx.beginPath();fxx.arc(s.x,s.y,s.r,0,7);fxx.fill()}
+ for(let i=rings.length-1;i>=0;i--){const r=rings[i];r.age+=dt;if(r.age>r.life){rings.splice(i,1);continue}const u=r.age/r.life,rad=r.r0+(r.r1-r.r0)*(1-(1-u)*(1-u)),im=tex("circle_02",r.rgb);if(!im)continue;fxx.globalAlpha=1-u;fxx.drawImage(im,r.x-rad,r.y-rad,rad*2,rad*2)}
+ for(let i=sparks.length-1;i>=0;i--){const s=sparks[i];s.age+=dt;if(s.age<0)continue;if(s.age>s.life){sparks.splice(i,1);continue}s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=(s.g??220)*dt;s.vx*=.985;
+  const al=1-s.age/s.life,im=s.tex&&tex(s.tex,s.col);
+  if(im){s.rot+=s.spin*dt;fxx.globalAlpha=al;fxx.save();fxx.translate(s.x,s.y);fxx.rotate(s.rot);fxx.drawImage(im,-s.size/2,-s.size/2,s.size,s.size);fxx.restore()}
+  else{fxx.globalAlpha=1;fxx.fillStyle=`rgba(${s.col},${al})`;fxx.beginPath();fxx.arc(s.x,s.y,s.r,0,7);fxx.fill()}}
+ fxx.globalAlpha=1;
  fxx.globalCompositeOperation="source-over"}
 let last=performance.now();
 function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;drawSky(t,dt);if(S.screen==="home")drawHero(t);else drawBoard(t);drawFx(t,dt);requestAnimationFrame(frame)}
@@ -274,7 +286,7 @@ function show(s){S.screen=s;document.body.dataset.screen=s;text()}
 // ---------- actions ----------
 function setCell(k,v,rec=true){if(S.done||S.cells[k]===v)return;const was=S.cells[k];if(rec)S.undo.push([k,was]);S.cells[k]=v;S.at[k]=performance.now();S.hintCell=-1;
  const p=cellPage(k);
- if(v===2){const{bad,count}=conflicts();if(bad.size){for(const b of bad)S.shake[b]=performance.now();sfx.bad();buzz([20,40,20])}else{sfx.place(count-1);buzz(12);burst(p.x,p.y,12,"255,215,130")}
+ if(v===2){const{bad,count}=conflicts();if(bad.size){for(const b of bad)S.shake[b]=performance.now();sfx.bad();buzz([20,40,20])}else{sfx.place(count-1);buzz(12);burst(p.x,p.y,14,"255,215,130");rings.push({x:p.x,y:p.y,age:0,life:.45,r0:p.cs*.3,r1:p.cs*1.5,rgb:"255,225,150"})}
   if(S.auto){const n=S.p.n;for(let j=0;j<n*n;j++)if(S.cells[j]===0&&j!==k&&blockedBy(j)){S.undo.push([j,0,1]);S.cells[j]=1;S.at[j]=performance.now()+40}}}
  else if(was===2){sfx.lift();burst(p.x,p.y,6,"200,200,255",90)}else sfx.mark();
  pips();check()}
@@ -288,7 +300,7 @@ function check(){const n=S.p.n,{bad,count}=conflicts();if(count!==n||bad.size)re
  [...$("stars").children].forEach((s,i)=>s.classList.toggle("got",i<got));$("winInfo").textContent=info;
  // release every lantern into the sky, then show the result sheet
  const now=performance.now();let i=0;S.cells.forEach((v,k)=>{if(v!==2)return;const p=cellPage(k);floaters.push({k,i,x:p.x,y:p.y,h:p.cs*.78,v:70+Math.random()*40,born:now+350+i*130,live:false});i++});
- setTimeout(()=>sfx.win(),350);buzz([30,60,30,60,60]);pips();setTimeout(()=>$("win").classList.add("on"),calm?300:350+n*130+700)}
+ setTimeout(()=>sfx.win(),350);if(!calm)for(let j=0;j<34;j++)sparks.push({x:Math.random()*VW,y:-20,vx:(Math.random()-.5)*40,vy:120+Math.random()*160,g:40,age:-(.6+n*.13+Math.random()*1.2),life:2.6,size:14+Math.random()*18,rot:Math.random()*6,spin:(Math.random()-.5)*5,tex:"symbol_02",col:j%3?"255,207,107":"255,255,255"});buzz([30,60,30,60,60]);pips();setTimeout(()=>$("win").classList.add("on"),calm?300:350+n*130+700)}
 function start(){clearInterval(S.tick);$("win").classList.remove("on");floaters.length=0;S.p=null;show("game");say(tr("gen"));
  setTimeout(()=>{const n=S.mode==="daily"?7:sizeFor(S.level),seed=S.mode==="daily"?todayKey():S.level*7919+n;
   S.p=makePuzzle(n,seed);S.cells=new Array(n*n).fill(0);S.undo=[];S.at=[];S.shake=[];S.gone=new Set();S.hints=3;S.used=0;S.done=false;S.hintCell=-1;S.t0=Date.now();
@@ -303,7 +315,7 @@ cv.addEventListener("pointerup",()=>{if(drag&&!drag.moved)setCell(drag.k,(S.cell
 cv.addEventListener("pointercancel",()=>{drag=null});
 $("undo").onclick=()=>{if(S.done)return;sfx.tap();let u=S.undo.pop();while(u){S.cells[u[0]]=u[1];S.at[u[0]]=performance.now();if(!u[2])break;u=S.undo.pop()}S.hintCell=-1;pips()};
 $("reset").onclick=()=>{if(S.done)return;sfx.tap();S.cells.fill(0);S.undo=[];S.hintCell=-1;pips()};
-$("hint").onclick=()=>{if(S.done)return;if(S.hints<=0){say(tr("noHints"));return}const h=findHint();if(!h)return;sfx.tap();S.hints--;S.used++;if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;say(tr(h.why));text()};
+$("hint").onclick=()=>{if(S.done)return;if(S.hints<=0){say(tr("noHints"));return}const h=findHint();if(!h)return;sfx.hint();S.hints--;S.used++;if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;say(tr(h.why));text()};
 $("next").onclick=()=>{S.level=load("level",S.level+1);start()};
 $("homeBtn").onclick=$("back").onclick=()=>{sfx.tap();clearInterval(S.tick);$("win").classList.remove("on");floaters.length=0;S.level=load("level",S.level);show("home")};
 $("play").onclick=()=>{sfx.tap();S.mode="levels";S.level=load("level",1);start()};
