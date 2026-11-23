@@ -95,7 +95,7 @@ h1{margin:-8px 0 0;font-size:clamp(56px,18vw,84px);line-height:1;font-weight:800
 @media(prefers-reduced-motion:reduce){.pop,#flash.go,#board.shake,#pips i.on,#win.on #next{animation:none}.pop{display:none}#win,.btn,.tool span.b{transition:none}#win.on .stars svg{animation-duration:.01s}}
 
 /* ---- 3D build additions ---- */
-body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,10,40,.78) 0,rgba(8,10,40,0) 24%,rgba(8,10,40,0) 60%,rgba(8,10,40,.88) 100%)}
+body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,10,40,.9) 0,rgba(8,10,40,.6) 11%,rgba(8,10,40,0) 22%,rgba(8,10,40,0) 70%,rgba(8,10,40,.45) 100%)}
 #gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;touch-action:none}
 .screen{z-index:2;pointer-events:none}
 .screen>*{pointer-events:auto}
@@ -104,7 +104,8 @@ body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;bac
 #home .gap{flex:1;pointer-events:none}
 h1{margin:6px 0 0}
 #t-rules,#msg{text-shadow:0 2px 6px rgba(5,8,30,.9)}
-#msg{color:#e6e2ff}
+#msg{color:#f1eeff;background:rgba(12,14,52,.72);border:1.5px solid rgba(255,255,255,.18);border-radius:16px;padding:8px 14px;min-height:0;backdrop-filter:blur(3px)}#msg:empty{visibility:hidden}
+.meter{background:rgba(12,14,52,.72);border:1.5px solid rgba(255,255,255,.18);border-radius:14px;padding:4px 12px;width:auto!important;min-width:min(78%,300px)}
 #loadbar{width:min(74%,300px);height:16px;border-radius:9px;background:rgba(8,10,40,.6);border:1.5px solid rgba(255,255,255,.25);overflow:hidden;direction:ltr}
 #loadbar b{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#7fe0a0,#ffd166 55%,#ff5d6c);background-size:300px 100%;transition:width .25s}
 #loadbar.hot{animation:hot .6s ease-in-out infinite}
@@ -117,6 +118,20 @@ h1{margin:6px 0 0}
 #fail .btn{min-height:60px}
 #gl.shake{animation:shake .32s}
 @media(prefers-reduced-motion:reduce){#loadbar.hot,#gl.shake{animation:none}#fail{transition:none}}
+
+/* portrait only: on wide windows everything sits in a centred phone-shaped column */
+.screen{--col:min(100vw,62vh)}
+.screen>*{max-width:var(--col)}
+#win,#fail{left:calc(50% - min(100vw,62vh)/2);right:auto;width:min(100vw,62vh)}
+#game{gap:6px}
+.meter{order:0}
+#msg{position:absolute;inset-inline:0;margin-inline:auto;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 104px);width:fit-content;max-width:min(92vw,56vh);z-index:3;pointer-events:none}
+.tools{margin-top:auto}
+#rotate{display:none;position:fixed;inset:0;z-index:20;background:#0b1030;color:var(--ink);place-items:center;text-align:center;font-size:22px;font-weight:800;padding:24px}
+#rotate svg{width:72px;height:72px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto 12px;animation:tip 1.6s ease-in-out infinite}
+@keyframes tip{0%,30%{transform:rotate(90deg)}70%,100%{transform:rotate(0)}}
+@media (orientation:landscape) and (max-height:520px){#rotate{display:grid}}
+@media(prefers-reduced-motion:reduce){#rotate svg{animation:none}}
 </style>
 </head>
 <body data-screen="home">
@@ -143,10 +158,9 @@ h1{margin:6px 0 0}
     <div id="time">0:00</div>
   </div>
   <div id="pips" aria-hidden="true"></div>
-  <div class="stage"></div>
-  <div class="meter"><span id="t-load"></span><div id="loadbar"><b></b></div></div>
+  <div class="meter" id="meter"><span id="t-load"></span><div id="loadbar"><b></b></div></div>
   <p id="msg" role="status" aria-live="polite"></p>
-  <div class="tools">
+  <div class="tools" id="tools">
     <button class="tool" id="undo"><span class="b"><svg viewBox="0 0 24 24"><path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 0 12"/></svg></span><span id="t-undo"></span></button>
     <button class="tool gold" id="hint"><span class="b"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.500h6c0-1 .2-1.700 1-2.500A6 6 0 0 0 12 3z"/></svg><b id="hintN"></b></span><span id="t-hint"></span></button>
     <button class="tool" id="reset"><span class="b"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.600-5.900"/><path d="M20 4v5h-5"/></svg></span><span id="t-reset"></span></button>
@@ -168,6 +182,7 @@ h1{margin:6px 0 0}
   <p id="failInfo"></p>
   <button class="btn" id="retry"></button>
 </div>
+<div id="rotate"><div><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg><span id="t-rotate"></span></div></div>
 <div id="flash"></div>
 <canvas id="fx"></canvas>
 <script src="vendor/three.min.js"></script>
