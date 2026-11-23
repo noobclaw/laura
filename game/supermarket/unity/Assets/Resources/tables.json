@@ -1,0 +1,115 @@
+{
+ "version": "0.1",
+ "params": {
+  "levelGrowth": 1.07,
+  "levelCostFrac": 0.08,
+  "milestones": [
+   10,
+   25,
+   50,
+   100,
+   150,
+   200,
+   300,
+   400,
+   500
+  ],
+  "payback0": 45,
+  "paybackGrowth": 1.55,
+  "offlineRate": 0.5,
+  "offlineCapSec": 7200,
+  "starCost0": 50000,
+  "starCostGrowth": 60,
+  "starMult": 1.6,
+  "starMax": 16,
+  "startCash": 0
+ },
+ "targetUnlockSec": [
+  0,
+  180,
+  900,
+  3600,
+  7920.000000000001,
+  17424.000000000004,
+  38332.80000000001,
+  84332.16000000003,
+  185530.7520000001,
+  408167.65440000023,
+  897968.8396800006,
+  1975531.4472960015
+ ],
+ "departments": [
+  {
+   "id": "produce",
+   "unlockCost": 0,
+   "baseIncomePerSec": 1,
+   "levelCost0": 0.96
+  },
+  {
+   "id": "bakery",
+   "unlockCost": 123000,
+   "baseIncomePerSec": 1763,
+   "levelCost0": 9840
+  },
+  {
+   "id": "butcher",
+   "unlockCost": 1860000000,
+   "baseIncomePerSec": 17200000,
+   "levelCost0": 148800000
+  },
+  {
+   "id": "seafood",
+   "unlockCost": 325000000000000,
+   "baseIncomePerSec": 1939000000000,
+   "levelCost0": 26000000000000
+  },
+  {
+   "id": "dates_spices",
+   "unlockCost": 41900000000000000000,
+   "baseIncomePerSec": 161300000000000000,
+   "levelCost0": 3352000000000000000
+  },
+  {
+   "id": "coffee_tea",
+   "unlockCost": 5.22e+25,
+   "baseIncomePerSec": 1.297e+23,
+   "levelCost0": 4.176e+24
+  },
+  {
+   "id": "fashion",
+   "unlockCost": 6.980000000000001e+32,
+   "baseIncomePerSec": 1.119e+30,
+   "levelCost0": 5.584e+31
+  },
+  {
+   "id": "fragrance",
+   "unlockCost": 9.8e+39,
+   "baseIncomePerSec": 1.013e+37,
+   "levelCost0": 7.84e+38
+  },
+  {
+   "id": "appliances",
+   "unlockCost": 3.0999999999999996e+47,
+   "baseIncomePerSec": 2.068e+44,
+   "levelCost0": 2.48e+46
+  },
+  {
+   "id": "electronics",
+   "unlockCost": 1.53e+55,
+   "baseIncomePerSec": 6.584e+51,
+   "levelCost0": 1.224e+54
+  },
+  {
+   "id": "jewellery",
+   "unlockCost": 9.52e+62,
+   "baseIncomePerSec": 2.643e+59,
+   "levelCost0": 7.616e+61
+  },
+  {
+   "id": "car_showroom",
+   "unlockCost": 8.67e+70,
+   "baseIncomePerSec": 1.553e+67,
+   "levelCost0": 6.936e+69
+  }
+ ]
+}
