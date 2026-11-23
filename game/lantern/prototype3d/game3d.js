@@ -341,14 +341,15 @@ $("blast").onclick=()=>{if(S.done||!S.p||S.screen!=="game")return;if(S.inv.blast
 // Purchases run in the native app (StoreKit through the Flutter frame). The page only asks and is told the result.
 // Products are consumables: the items are added here, on the device, when the app reports a finished purchase.
 const PRODUCTS={"com.noobclaw.lantern.hints10":{key:"buyHints",info:"buyHintsInfo",give:()=>{S.inv.hints+=10}},"com.noobclaw.lantern.blasts5":{key:"buyBlasts",info:"buyBlastsInfo",give:()=>{S.inv.blasts+=5}}};
-const native=window.LanternNative&&typeof window.LanternNative.postMessage==="function"?window.LanternNative:null,prices={};let shopMsg="";
+const native=window.LanternNative&&typeof window.LanternNative.postMessage==="function"?window.LanternNative:null,prices=load("iap.prices",{});let shopMsg="";
 const toNative=o=>{try{native.postMessage(JSON.stringify(o))}catch(e){}};
 function shopText(){const el=$("shopList");if(!el)return;el.innerHTML=Object.entries(PRODUCTS).map(([id,p])=>`<div class="item"><div><b>${tr(p.key)}</b><small>${tr(p.info)}</small><small class="own">${fmtN("owned",id.endsWith("hints10")?S.inv.hints:S.inv.blasts)}</small></div><button class="btn" data-id="${id}">${prices[id]||"…"}</button></div>`).join("");$("shopMsg").textContent=shopMsg||(native?"":tr("noStore"))}
 function openShop(){sfx.tap();shopMsg="";shopText();$("shop").classList.add("on");if(native)toNative({type:"products",ids:Object.keys(PRODUCTS)})}
 window.lanternStore={
-  onProducts(list){for(const p of list||[])prices[p.id]=p.price;shopText()},
+  onProducts(list){for(const p of list||[])prices[p.id]=p.price;save("iap.prices",prices);shopText()},
   onResult(r){const p=PRODUCTS[r&&r.id];if(r&&r.status==="ok"&&p){const seen=load("iap.done",[]);if(r.tx&&seen.includes(r.tx))return;p.give();saveInv();if(r.tx){seen.push(r.tx);save("iap.done",seen.slice(-50))}shopMsg=tr("bought");sfx.win();text()}else if(r&&r.status==="fail"){shopMsg=tr("buyFail");shopText()}else{shopMsg="";shopText()}}};
 $("shopList").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;if(!native){shopMsg=tr("noStore");shopText();return}sfx.tap();shopMsg=tr("buying");shopText();toNative({type:"buy",id:b.dataset.id})};
+if(native)setTimeout(()=>toNative({type:"products",ids:Object.keys(PRODUCTS)}),1500); // ask for prices at launch so the shop never opens on a placeholder
 $("shopClose").onclick=()=>{sfx.tap();$("shop").classList.remove("on")};$("shopChip").onclick=openShop;
 if(native)toNative({type:"ready"});
 $("next").onclick=()=>{S.level=load("level",S.level+1);start()};
