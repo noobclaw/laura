@@ -74,6 +74,10 @@ public static class CiBuild
         PlayerSettings.iOS.buildNumber = Arg("-buildNumber", "1");
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
         PlayerSettings.iOS.targetOSVersionString = "15.0";
+        // One 1024 px source; Unity scales it to every slot, including the App Store one.
+        var icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Icon/icon.png");
+        if (icon == null) throw new Exception("Assets/Icon/icon.png missing");
+        PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
         AssetDatabase.SaveAssets();
 
         var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
