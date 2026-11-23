@@ -4,7 +4,7 @@
 const sysLang=(()=>{const l=(navigator.language||"en").toLowerCase();const c=l.split("-")[0];return l.startsWith("zh")?"zh-Hant":LANGS.some(x=>x[0]===c)?c:"en"})();
 const fmtN=(k,n)=>tr(k).replace("{n}",n);
 const S={lang:LANGS.some(x=>x[0]===load("lang",sysLang))?load("lang",sysLang):"en",inv:{hints:load("inv.hints",0),blasts:load("inv.blasts",1)},screen:"home",mode:"levels",level:load("level",1),p:null,cells:[],undo:[],hints:3,used:0,t0:0,tick:0,done:false,failed:false,
-  run:0,auto:load("auto",true),sound:load("sound",true),hintCell:-1,at:[],shake:[],combo:0,introT:0,maxCount:0,rockClock:0,rockEvery:7,demo:true};
+  run:0,auto:load("auto",true),sound:load("sound",true),music:load("music",true),hintCell:-1,at:[],shake:[],combo:0,introT:0,maxCount:0,rockClock:0,rockEvery:7,demo:true};
 const MAXR=14,TOP=0.5;
 const rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
@@ -254,7 +254,7 @@ function update(t,dt){const game=S.screen==="game";
     else if(u.sq>0){u.sq=Math.max(0,u.sq-dt*5);m.scale.y=u.by*(1-.25*Math.sin(u.sq*Math.PI))}});
   for(let i=flying.length-1;i>=0;i--){const m=flying[i],u=m.userData;u.age+=dt;u.vy-=14*dt;m.position.x+=u.vx*dt;m.position.y+=u.vy*dt;m.position.z+=u.vz*dt;m.rotation.x+=u.sx*dt;m.rotation.z+=u.sz*dt;m.scale.multiplyScalar(1-dt*.9);if(u.age>1.5){scene.remove(m);flying.splice(i,1)}}
   // keeper body language
-  const Lr=rocks.length/MAXR;K.dipV+=(-K.dip*60-K.dipV*9)*dt;K.dip+=K.dipV*dt;K.hopV-=11*dt;K.hop=Math.max(0,K.hop+K.hopV*dt);if(K.hop===0&&K.hopV<0)K.hopV=K.cheer>0?rnd(2.6,3.6):0;if(K.cheer>0)K.cheer-=dt;
+  const Lr=rocks.length/MAXR;Music.set(S.screen==="game"&&!S.done?Lr:0);K.dipV+=(-K.dip*60-K.dipV*9)*dt;K.dip+=K.dipV*dt;K.hopV-=11*dt;K.hop=Math.max(0,K.hop+K.hopV*dt);if(K.hop===0&&K.hopV<0)K.hopV=K.cheer>0?rnd(2.6,3.6):0;if(K.cheer>0)K.cheer-=dt;
   const sq=S.failed?.42:clamp(1-.26*Lr+K.dip*.5,.5,1.12),strain=clamp((Lr-.45)*2,0,1);
   KP.body.scale.set(1+(1-sq)*.45,sq,1+(1-sq)*.45);KP.body.position.set(calm?0:Math.sin(t/23)*.014*strain,.33+K.hop,0);
   KP.plank.position.set(0,.33+K.hop+1.6*sq,-.34);KP.plank.rotation.z=calm?0:Math.sin(t/31)*.02*strain+(K.cheer>0?Math.sin(t/90)*.08:0);
@@ -280,7 +280,7 @@ function text(){document.documentElement.lang=S.lang;document.documentElement.di
   $("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("failInfo").textContent=tr("failInfo");$("langName").textContent=LANGS.find(l=>l[0]===S.lang)[1];for(const b of $("langList").children)b.setAttribute("aria-pressed",b.dataset.lang===S.lang);
   $("playSub").textContent=fmtN("levelN",load("level",1));const st=load("streak",0),done=load("dailyLast",0)===todayKey();
   $("dailySub").textContent=(done?tr("doneToday"):tr("newToday"))+(st>0?" · "+tr("streak")+" "+st:"");
-  $("snd").setAttribute("aria-pressed",S.sound);$("auto").setAttribute("aria-pressed",S.auto);$("hintN").textContent=S.hints+S.inv.hints;
+  $("snd").setAttribute("aria-pressed",S.sound||S.music);$("t-snd2").textContent=tr("snd");$("sndClose").textContent=tr("close");for(const[id,k,v]of[["sfxT","sfx",S.sound],["musT","mus",S.music]]){$(id).textContent=tr(k)+" · "+tr(v?"on":"off");$(id).setAttribute("aria-pressed",v)}$("auto").setAttribute("aria-pressed",S.auto);$("hintN").textContent=S.hints+S.inv.hints;
   $("lvl").textContent=S.mode==="daily"?tr("daily"):fmtN("levelN",S.level);$("blastN").textContent=S.inv.blasts;shopText();fit()}
 function pips(){if(!S.p)return;const n=S.p.n,{bad,count}=conflicts(),el=$("pips");if(el.children.length!==n)el.innerHTML="<i></i>".repeat(n);[...el.children].forEach((e,i)=>e.className=i<count?(bad.size?"bad":"on"):"");$("undo").disabled=!S.undo.length||S.done}
 const say=m=>{$("msg").textContent=m};
@@ -359,8 +359,12 @@ $("daily").onclick=()=>{sfx.tap();S.mode="daily";start()};
 $("lang").onclick=()=>{sfx.tap();$("langSheet").classList.add("on")};
 $("langSheet").onclick=e=>{const b=e.target.closest("button[data-lang]");if(b){S.lang=b.dataset.lang;save("lang",S.lang);text();if(S.screen==="game"&&$("msg").textContent)say(tr("how"))}$("langSheet").classList.remove("on")};
 $("langList").innerHTML=LANGS.map(([c,n])=>`<button class="btn alt" data-lang="${c}" lang="${c}">${n}</button>`).join("");
-$("snd").onclick=()=>{S.sound=!S.sound;save("sound",S.sound);text();sfx.tap()};
+Music.enable(S.music);Music.start();
+$("snd").onclick=()=>{sfx.tap();$("sndSheet").classList.add("on")};
+$("sfxT").onclick=()=>{S.sound=!S.sound;save("sound",S.sound);text();sfx.tap()};
+$("musT").onclick=()=>{S.music=!S.music;save("music",S.music);Music.enable(S.music);text();sfx.tap()};
+$("sndSheet").onclick=e=>{if(e.target===$("sndSheet")||e.target===$("sndClose"))$("sndSheet").classList.remove("on")};
 $("auto").onclick=()=>{S.auto=!S.auto;save("auto",S.auto);text();sfx.tap()};
 addEventListener("resize",layout);
-window.__lanternApi={start,setCell,show,dropRock,cellPage,info:()=>({buffers:Object.keys(BUF).length,audio:AC?AC.state:"none",geo:R.info.memory.geometries,tex:R.info.memory.textures,programs:R.info.programs.length,rocks:rocks.length,lights:LIGHTS.length})};
+window.__lanternApi={start,setCell,show,dropRock,cellPage,info:()=>({music:Music.state(),buffers:Object.keys(BUF).length,audio:AC?AC.state:"none",geo:R.info.memory.geometries,tex:R.info.memory.textures,programs:R.info.programs.length,rocks:rocks.length,lights:LIGHTS.length})};
 layout();demo();text();requestAnimationFrame(frame);

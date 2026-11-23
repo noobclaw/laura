@@ -5,7 +5,7 @@
 set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"; src="$here/../../game/lantern/prototype3d"; dst="$here/assets/game"
 rm -rf "$dst"; mkdir -p "$dst/vendor" "$dst/assets/fx"
-cp "$src/core.js" "$src/solver.js" "$src/i18n.js" "$src/game3d.js" "$dst/"
+cp "$src/core.js" "$src/music.js" "$src/solver.js" "$src/i18n.js" "$src/game3d.js" "$dst/"
 cp "$src/vendor/three.min.js" "$src/vendor/THREE-LICENSE.txt" "$dst/vendor/"
 cp "$src"/assets/fx/*.png "$dst/assets/fx/"
 cp "$src/assets/sfx.js" "$dst/assets/"   # sounds travel as base64 inside this script

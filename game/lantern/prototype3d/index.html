@@ -149,6 +149,13 @@ h1{margin:6px 0 0}
 .badge,#hintN{position:absolute;top:-6px;inset-inline-end:-6px;min-width:26px;height:26px;padding:0 5px;border-radius:13px;display:grid;place-items:center;background:#fff;color:#4a2408;font-size:15px;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .tools{gap:16px}
 h1{font-size:clamp(34px,11.5vw,66px);line-height:1.05;text-wrap:balance;padding-inline:8px}
+.pick{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:rgba(5,8,30,.72)}
+.pick.on{display:grid}
+.pick .card{width:min(86vw,320px);padding:20px;border-radius:26px;background:linear-gradient(#3b379a,#211b5c);box-shadow:0 20px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:14px;text-align:center}
+.pick .list{display:flex;flex-direction:column;gap:12px}
+.pick .btn{width:100%;min-height:58px;font-size:22px}
+.pick .list .btn[aria-pressed=true]{color:#4a2408;background:linear-gradient(#ffe38f,#ffb53d);box-shadow:0 6px 0 var(--gold-d),0 16px 26px rgba(0,0,0,.4)}
+.pick .list .btn[aria-pressed=false]{opacity:.7}
 #langSheet .card{max-height:86vh;overflow:auto}
 #langList .btn{min-height:50px;font-size:20px}
 #langSheet{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:rgba(5,8,30,.72)}
@@ -212,12 +219,14 @@ h1{font-size:clamp(34px,11.5vw,66px);line-height:1.05;text-wrap:balance;padding-
 </div>
 <div id="rotate"><div><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg><span id="t-rotate"></span></div></div>
 <div id="shop" role="dialog" aria-labelledby="t-shop"><div class="card"><b id="t-shop"></b><div id="shopList"></div><p id="shopMsg" role="status" aria-live="polite"></p><button class="btn alt" id="shopClose"><span id="t-close"></span></button></div></div>
+<div id="sndSheet" class="pick" role="dialog" aria-labelledby="t-snd2"><div class="card"><b id="t-snd2"></b><div class="list"><button class="btn alt" id="sfxT"></button><button class="btn alt" id="musT"></button></div><button class="btn alt" id="sndClose"></button></div></div>
 <div id="langSheet" role="dialog" aria-labelledby="t-lang"><div class="card"><b id="t-lang"></b><div id="langList"></div></div></div>
 <div id="flash"></div>
 <canvas id="fx"></canvas>
 <script src="vendor/three.min.js"></script>
 <script src="assets/sfx.js"></script>
 <script src="core.js"></script>
+<script src="music.js"></script>
 <script src="solver.js"></script>
 <script src="i18n.js"></script>
 <script src="game3d.js"></script>
