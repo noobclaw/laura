@@ -11,7 +11,12 @@ const T={
   how:"اضغط مرة لتعليم الخانة فارغة، ومرتين لإضاءة فانوس. اسحب لتعليم عدة خانات.",win:"تم الحل!",next:"اللغز التالي",best:"الأفضل",time:"الوقت",dailyDone:"عُد غداً للغز يومي جديد.",streak:"السلسلة",newToday:"جديد اليوم",doneToday:"تم حله اليوم",
   hRow:"هذه الخانة في صف فيه فانوس، فتبقى فارغة.",hCol:"هذه الخانة في عمود فيه فانوس، فتبقى فارغة.",hReg:"هذه الخانة بلون فيه فانوس، فتبقى فارغة.",hAdj:"هذه الخانة تلامس فانوساً، فتبقى فارغة.",
   hOnlyRow:"بقيت خانة واحدة متاحة في هذا الصف. الفانوس هنا.",hOnlyCol:"بقيت خانة واحدة متاحة في هذا العمود. الفانوس هنا.",hOnlyReg:"بقيت خانة واحدة متاحة بهذا اللون. الفانوس هنا.",
-  praise:["جميل!","رائع!","مذهل!","خرافي!","لا يُوقَف!"],win3:"مثالي!",win2:"أحسنت!",hBad:"هذا الفانوس يخالف القواعد. أزِله.",hWrong:"هذا الفانوس في مكان خاطئ. أزِله.",hGive:"لا توجد خطوة بسيطة. في هذه الخانة فانوس.",noHints:"لا تلميحات متبقية لهذا اللغز.",gen:"جارٍ إنشاء اللغز…"}};
+  praise:["جميل!","رائع!","مذهل!","خرافي!","لا يُوقَف!"],win3:"مثالي!",win2:"أحسنت!",hBad:"هذا الفانوس يخالف القواعد. أزِله.",hWrong:"هذا الفانوس في مكان خاطئ. أزِله.",hGive:"لا توجد خطوة بسيطة. في هذه الخانة فانوس.",noHints:"لا تلميحات متبقية لهذا اللغز.",gen:"جارٍ إنشاء اللغز…"},
+ "zh-Hant":{title:"燈籠花園",rules:"每一行、每一列、每個顏色區各點亮一盞燈籠。燈籠之間不能相鄰。",play:"開始",daily:"每日挑戰",level:"第",undo:"撤銷",hint:"提示",reset:"重來",auto:"自動標記",snd:"音效",home:"首頁",
+  how:"單擊格子標記為空，雙擊點亮燈籠。拖動可連續標記。",win:"過關！",next:"下一關",best:"最佳",time:"用時",dailyDone:"明天再來挑戰新的一題。",streak:"連續",newToday:"今日新題",doneToday:"今日已完成",
+  hRow:"這一格和某盞燈籠在同一行，所以是空的。",hCol:"這一格和某盞燈籠在同一列，所以是空的。",hReg:"這一格和某盞燈籠在同一個顏色區，所以是空的。",hAdj:"這一格緊挨著一盞燈籠，所以是空的。",
+  hOnlyRow:"這一行只剩這一格能放，燈籠就在這裡。",hOnlyCol:"這一列只剩這一格能放，燈籠就在這裡。",hOnlyReg:"這個顏色區只剩這一格能放，燈籠就在這裡。",
+  praise:["不錯！","很棒！","太強了！","驚人！","勢不可擋！"],win3:"完美！",win2:"做得好！",hBad:"這盞燈籠違反了規則，請移除。",hWrong:"這盞燈籠放錯位置了，請移除。",hGive:"找不到簡單的下一步。這一格有燈籠。",noHints:"這一關的提示用完了。",gen:"正在出題…"}};
 // ---------- storage (optional; the game works without it) ----------
 const mem={};
 const load=(k,d)=>{try{const v=localStorage.getItem("lantern."+k);return v==null?(k in mem?mem[k]:d):JSON.parse(v)}catch(e){return k in mem?mem[k]:d}};
@@ -26,18 +31,23 @@ function countSolutions(n,g,limit){let cnt=0;const cu=new Array(n).fill(false),r
 function makePuzzle(n,seed){const r=rng(seed);for(let t=0;t<20000;t++){const p=perm(n,r);for(let k=0;k<20;k++){const g=grow(n,p,r);if(countSolutions(n,g,2)===1)return{n,g,sol:p}}}return null}
 const $=id=>document.getElementById(id), tr=k=>T[S.lang][k];
 const dayKey=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(), todayKey=()=>dayKey(new Date());
-const sizeFor=l=>5+Math.min(3,Math.floor((l-1)/5));
 const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
 const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
 // ---------- sound: synthesized, no audio files ----------
 let AC=null;
-function tone(f,d,type="sine",vol=.12,when=0){if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+when,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+function tone(f,d,type="sine",vol=.12,when=0){if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state!=="running")AC.resume();const t=AC.currentTime+when,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
 const SCALE=[523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.5];
 // recorded clips (see assets/ASSETS.md); the synth above is the fallback when a clip is missing
-const EXT=(()=>{try{return new Audio().canPlayType("audio/ogg; codecs=vorbis")?"ogg":"mp3"}catch(e){return"mp3"}})();
-const CLIP={};for(const n of["place","mark","tap","bad","lift","hint","rise","win"]){try{const a=new Audio("assets/sfx/"+n+"."+EXT);a.preload="auto";a.addEventListener("canplaythrough",()=>{CLIP[n]=a},{once:true})}catch(e){}}
-function clip(n,vol=1,rate=1){if(!S.sound)return true;const src=CLIP[n];if(!src)return false;try{const a=src.cloneNode();a.volume=vol;a.preservesPitch=false;a.playbackRate=rate;const pr=a.play();pr&&pr.catch(()=>{});return true}catch(e){return false}}
+// Clips are embedded as base64 (assets/sfx.js) and played through Web Audio. Nothing is fetched or preloaded,
+// because a local page in an iOS WebView cannot do either. The audio context is created and resumed inside the
+// first touch, which iOS requires before any sound may play.
+const BUF={};let unlocked=false;
+function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state!=="running")AC.resume();
+  if(unlocked)return;unlocked=true;const src=window.SFX_B64||{};for(const n in src){const bin=atob(src[n]),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    AC.decodeAudioData(u.buffer,b=>{BUF[n]=b},()=>{})}}catch(e){}}
+for(const ev of["touchstart","touchend","pointerup","click","keydown"])addEventListener(ev,unlock,{capture:true,passive:true});
+function clip(n,vol=1,rate=1){if(!S.sound)return true;const b=BUF[n];if(!b||!AC||AC.state!=="running")return false;try{const src=AC.createBufferSource(),g=AC.createGain();src.buffer=b;src.playbackRate.value=rate;g.gain.value=vol;src.connect(g).connect(AC.destination);src.start();return true}catch(e){return false}}
 const sfx={place:i=>{if(!clip("place",.9,SCALE[i%8]/SCALE[0]))tone(SCALE[i%8],.5,"triangle",.16);tone(SCALE[i%8]*2,.35,"sine",.05,.02)},
  mark:()=>{clip("mark",.6)||tone(1400,.05,"sine",.04)},lift:()=>{clip("lift",.7)||tone(330,.14,"sine",.08)},bad:()=>{clip("bad",.8)||tone(140,.24,"sine",.1)},
  tap:()=>{clip("tap",.6)||tone(700,.06,"triangle",.06)},hint:()=>{clip("hint",.7)||tone(990,.2,"sine",.08)},rise:i=>{clip("rise",.3,1+i*.07)||tone(SCALE[i%8]*2,.4,"sine",.05)},
@@ -50,15 +60,6 @@ function conflicts(){const n=S.p.n,g=S.p.g,bad=new Set(),L=[];S.cells.forEach((v
  return{bad,count:L.length}}
 function blockedBy(k){const n=S.p.n,g=S.p.g,y=Math.floor(k/n),x=k%n;for(let j=0;j<n*n;j++){if(S.cells[j]!==2||j===k)continue;const jy=Math.floor(j/n),jx=j%n;
   if(jy===y)return"hRow";if(jx===x)return"hCol";if(g[j]===g[k])return"hReg";if(Math.abs(jy-y)<2&&Math.abs(jx-x)<2)return"hAdj"}return null}
-function findHint(){const n=S.p.n,g=S.p.g,{bad}=conflicts();
- for(const k of bad)return{k,why:"hBad"};
- for(let k=0;k<n*n;k++)if(S.cells[k]===2&&S.p.sol[Math.floor(k/n)]!==k%n)return{k,why:"hWrong"};
- for(let k=0;k<n*n;k++)if(S.cells[k]===0){const why=blockedBy(k);if(why)return{k,why}}
- const free=k=>S.cells[k]!==1&&!blockedBy(k), has=ks=>ks.some(k=>S.cells[k]===2);
- const groups=[];for(let i=0;i<n;i++){groups.push({ks:[...Array(n).keys()].map(x=>i*n+x),why:"hOnlyRow"});groups.push({ks:[...Array(n).keys()].map(y=>y*n+i),why:"hOnlyCol"});groups.push({ks:[...Array(n*n).keys()].filter(k=>g[k]===i),why:"hOnlyReg"})}
- for(const gr of groups){if(has(gr.ks))continue;const f=gr.ks.filter(free);if(f.length===1)return{k:f[0],why:gr.why}}
- for(let y=0;y<n;y++){const k=y*n+S.p.sol[y];if(S.cells[k]!==2)return{k,why:"hGive"}}
- return null}
 function glow(c,x,y,r,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(255,205,120,${a})`);g.addColorStop(.45,`rgba(255,160,70,${a*.38})`);g.addColorStop(1,"rgba(255,140,60,0)");c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill()}
 const back=t=>{const u=t-1;return 1+2.7*u*u*u+1.7*u*u};
 const TEX={},tintC={};for(const n of["star_06","star_07","star_09","circle_02","circle_05","magic_05","symbol_02"]){const im=new Image();im.onload=()=>{TEX[n]=im};im.src="assets/fx/"+n+".png"}

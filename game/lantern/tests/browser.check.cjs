@@ -8,9 +8,11 @@ const b=await chromium.launch({executablePath:process.env.CHROME||'/usr/bin/goog
 const p=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
 const errs=[];p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});p.on('pageerror',e=>errs.push('PE '+e.message));
 const E=(f,a)=>p.evaluate(f,a),api=s=>E(`window.__lanternApi.${s}`),st=()=>E(()=>({n:__lantern.p.n,sol:__lantern.p.sol,g:__lantern.p.g.join(),done:__lantern.done,failed:__lantern.failed,cells:__lantern.cells.join('')}));
-await p.goto(url);await p.waitForTimeout(1500);
+await p.addInitScript(()=>{try{localStorage.clear()}catch(e){}});await p.goto(url);await p.waitForTimeout(1500);
 await p.click('#play');await p.waitForTimeout(1500);
 let s=await st();
+// 0. sound: after the first tap the audio context runs and all eight clips are decoded from the embedded data
+await p.waitForTimeout(600);{const i=await api('info()');ok(i.audio==='running'&&i.buffers===8,`audio unlocked on first tap (${i.audio}, ${i.buffers} clips decoded)`)}
 // 1. placing lanterns must not compile new shader programs (fixed light pool)
 const prog0=(await api('info()')).programs;
 await api(`setCell(${s.sol[0]},2)`);await p.waitForTimeout(500);await api(`setCell(${s.n+s.sol[1]},2)`);await p.waitForTimeout(700);
@@ -36,8 +38,15 @@ await p.click('#back');await p.click('#play');await p.waitForTimeout(4500);ok(!(
 const round=async()=>{await p.click('#back');await p.waitForTimeout(500);await p.click('#play');await p.waitForTimeout(2200);return api('info()')};
 const m0=await round();let m1;for(let i=0;i<6;i++)m1=await round();
 ok(m1.geo===m0.geo&&m1.tex===m0.tex,`GPU resources stable over 6 restarts (geometries ${m0.geo} -> ${m1.geo}, textures ${m0.tex} -> ${m1.tex})`);
+// 6b. restart button resets board, rocks and clock; language list offers three languages
+await api(`setCell(3,1)`);for(let i=0;i<3;i++)await api('dropRock()');await p.waitForTimeout(1200);await p.click('#reset');await p.waitForTimeout(1200);s=await st();ok(/^0+$/.test(s.cells)&&(await api('info()')).rocks<=1,'restart clears the board and the rocks');
+await p.click('#back');await p.click('#lang');ok(await E(()=>document.querySelectorAll('#langList button').length===8),'language list shows eight languages');await p.click('#langList button[data-lang="zh-Hant"]');ok(await E(()=>document.getElementById('t-play').textContent==='開始'&&document.documentElement.lang==='zh-Hant'),'Traditional Chinese applies');await p.screenshot({path:path.join(out,'check_zh.png')});
+// 6c. shop and items: a fake native bridge reports prices and a finished purchase; items are added once per transaction
+await p.click('#shopChip');ok(await E(()=>document.getElementById('shop').classList.contains('on')&&document.querySelectorAll('#shopList .item').length===2),'shop lists two item packs');
+{const before=await E(()=>__lantern.inv.hints);await E(()=>{window.lanternStore.onProducts([{id:'com.noobclaw.lantern.hints10',price:'$0.99'}]);window.lanternStore.onResult({id:'com.noobclaw.lantern.hints10',status:'ok',tx:'t1'});window.lanternStore.onResult({id:'com.noobclaw.lantern.hints10',status:'ok',tx:'t1'})});const after=await E(()=>__lantern.inv.hints);ok(after===before+10,`a finished purchase adds 10 hints once, repeat of the same transaction is ignored (${before} -> ${after})`);ok(await E(()=>document.querySelector('#shopList button').textContent==='$0.99'),'price from the store is shown');}
+await p.screenshot({path:path.join(out,'check_shop.png')});await p.click('#shopClose');
 // 7. Arabic: right-to-left document, board itself not mirrored, no horizontal overflow
-await p.click('#back');await p.click('#lang');await p.click('#play');await p.waitForTimeout(1500);
+await p.click('#lang');await p.click('#langList button[data-lang="ar"]');await p.click('#play');await p.waitForTimeout(1500);
 ok(await E(()=>document.documentElement.dir==='rtl'),'Arabic sets dir=rtl');ok(!(await E(()=>document.documentElement.scrollWidth>innerWidth)),'no horizontal overflow in Arabic');
 s=await st();const c0=await api('cellPage(0)'),c1=await api('cellPage(1)');ok(c1.x>c0.x,'board columns keep left-to-right order in Arabic');
 await p.screenshot({path:path.join(out,'check_ar.png')});

@@ -1,12 +1,9 @@
 // Lantern 3D — real 3D scene built entirely in code (three.js, MIT). No model or image files for the scene.
 // Rules, generator, sound and text come from core.js.
 "use strict";
-Object.assign(T.en,{fail:"Too heavy!",failInfo:"The rocks piled up faster than the lanterns. Same puzzle, fresh start.",retry:"Try again",load:"Rocks",
-  how:"Tap a tile once to mark it empty, twice to light a lantern. Each new lantern blasts rocks off the keeper.",rotate:"Turn your phone upright to play"});
-Object.assign(T.ar,{fail:"ثقيل جداً!",failInfo:"تراكمت الصخور أسرع من الفوانيس. اللغز نفسه، بداية جديدة.",retry:"حاول مجدداً",load:"الصخور",
-  how:"اضغط الخانة مرة لتعليمها فارغة، ومرتين لإضاءة فانوس. كل فانوس جديد يفجّر صخوراً عن الحارس.",rotate:"أدِر هاتفك عمودياً للعب"});
-
-const S={lang:load("lang","en"),screen:"home",mode:"levels",level:load("level",1),p:null,cells:[],undo:[],hints:3,used:0,t0:0,tick:0,done:false,failed:false,
+const sysLang=(()=>{const l=(navigator.language||"en").toLowerCase();const c=l.split("-")[0];return l.startsWith("zh")?"zh-Hant":LANGS.some(x=>x[0]===c)?c:"en"})();
+const fmtN=(k,n)=>tr(k).replace("{n}",n);
+const S={lang:LANGS.some(x=>x[0]===load("lang",sysLang))?load("lang",sysLang):"en",inv:{hints:load("inv.hints",0),blasts:load("inv.blasts",1)},screen:"home",mode:"levels",level:load("level",1),p:null,cells:[],undo:[],hints:3,used:0,t0:0,tick:0,done:false,failed:false,
   run:0,auto:load("auto",true),sound:load("sound",true),hintCell:-1,at:[],shake:[],combo:0,introT:0,maxCount:0,rockClock:0,rockEvery:7,demo:true};
 const MAXR=14,TOP=0.5;
 const rnd=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -35,11 +32,11 @@ function drawFx(t,dt){fxx.setTransform(DPR,0,0,DPR,0,0);fxx.clearRect(0,0,VW,VH)
 
 // ---------- renderer, camera, lights ----------
 const R=new THREE.WebGLRenderer({canvas:gl,antialias:true,alpha:true,powerPreference:"high-performance"});
-R.shadowMap.enabled=true;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.setClearColor(0,0);
+R.shadowMap.enabled=true;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.3;R.setClearColor(0,0);
 const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(30,1,.1,140);
-scene.add(new THREE.HemisphereLight(0x8a9eff,0x1e1840,.8));
-const moon=new THREE.DirectionalLight(0xb9caff,1.15);moon.position.set(-8,14,7);moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);
+scene.add(new THREE.HemisphereLight(0xa4b4ff,0x2a2452,1.35));
+const moon=new THREE.DirectionalLight(0xcdd8ff,1.75);moon.position.set(-8,14,7);moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);
 Object.assign(moon.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:1,far:40});moon.shadow.bias=-.0004;moon.shadow.normalBias=.03;scene.add(moon);
 const warm=new THREE.DirectionalLight(0xffb98a,.22);warm.position.set(5,5,10);scene.add(warm);
 
@@ -123,13 +120,13 @@ const farL=Array.from({length:16},()=>{const s=glowSprite(rnd(.9,1.8),.85,0xffc8
 const LG={body:(()=>{const p=[];for(let i=0;i<=14;i++){const u=i/14;p.push(new THREE.Vector2(.1+.25*Math.pow(Math.sin(Math.PI*u),.75),-.3+.6*u))}return new THREE.LatheGeometry(p,24)})(),
   rib:new THREE.TorusGeometry(.345,.012,6,36),cap:new THREE.CylinderGeometry(.13,.15,.08,18),ring:new THREE.TorusGeometry(.145,.016,6,20),
   handle:new THREE.TorusGeometry(.075,.013,6,14,Math.PI),cord:new THREE.CylinderGeometry(.008,.008,.16,5),bead:new THREE.SphereGeometry(.035,10,8),tassel:new THREE.ConeGeometry(.035,.13,8)};
-const LM={good:M(0xff4a1e,{emissive:0xff5210,emissiveIntensity:1.25,roughness:.55}),bad:M(0x7d82a6,{emissive:0x20244a,emissiveIntensity:.6,roughness:.7}),
+const LM={good:M(0xff4a1e,{emissive:0xff5a14,emissiveIntensity:1.75,roughness:.55}),bad:M(0x7d82a6,{emissive:0x20244a,emissiveIntensity:.6,roughness:.7}),
   rib:M(0x9c1f18,{roughness:.6}),ribBad:M(0x3d4066),wood:M(0x4a2414,{roughness:.6}),gold:M(0xf4c860,{roughness:.3,metalness:.7,emissive:0x5a3a08}),red:M(0xe2473a,{emissive:0x6a1208})};
 function makeLantern(withLight=true){const g=new THREE.Group(),body=mesh(LG.body,LM.good);g.add(body);const ribs=[];
   for(let i=0;i<3;i++){const r=mesh(LG.rib,LM.rib);r.scale.set(1.01,.87,1);r.rotation.y=i*Math.PI/3;g.add(r);ribs.push(r)}
   for(const s of[1,-1]){g.add(mesh(LG.cap,LM.wood,0,s*.31,0));const rg=mesh(LG.ring,LM.gold,0,s*.31,0);rg.rotation.x=Math.PI/2;g.add(rg)}
   g.add(mesh(LG.handle,LM.gold,0,.35,0));g.add(mesh(LG.cord,LM.gold,0,-.43,0));g.add(mesh(LG.bead,LM.red,0,-.52,0));const ts=mesh(LG.tassel,LM.red,0,-.61,0);ts.rotation.x=Math.PI;g.add(ts);
-  const gs=glowSprite(2.3,.5);g.add(gs);g.userData={body,ribs,gs,li:0,lit:withLight,isBad:false};return g}
+  const gs=glowSprite(2.6,.62);g.add(gs);g.userData={body,ribs,gs,li:0,lit:withLight,isBad:false};return g}
 const LIGHTS=Array.from({length:8},()=>{const l=new THREE.PointLight(0xffa850,0,4.6,1.6);scene.add(l);return l});
 function setBad(l,b){const u=l.userData;if(u.isBad===b)return;u.isBad=b;u.body.material=b?LM.bad:LM.good;for(const r of u.ribs)r.material=b?LM.ribBad:LM.rib}
 
@@ -137,12 +134,12 @@ function setBad(l,b){const u=l.userData;if(u.isBad===b)return;u.isBad=b;u.body.m
 const PALC=[[0x35b3a8,0x1f7a73],[0xa56bd6,0x6f3f9c],[0xec6f8e,0xab4562],[0x5f86ea,0x3a57ad],[0x86bf5c,0x557f38],[0xe3bd6a,0xa5843c],[0x52bdea,0x2f83ad],[0x98a2cc,0x5f6896]];
 const tileGeo=(()=>{const h=.4,r=.13,s=new THREE.Shape();s.moveTo(-h+r,-h);s.lineTo(h-r,-h);s.quadraticCurveTo(h,-h,h,-h+r);s.lineTo(h,h-r);s.quadraticCurveTo(h,h,h-r,h);s.lineTo(-h+r,h);s.quadraticCurveTo(-h,h,-h,h-r);s.lineTo(-h,-h+r);s.quadraticCurveTo(-h,-h,-h+r,-h);
   const g=new THREE.ExtrudeGeometry(s,{depth:.14,bevelEnabled:true,bevelThickness:.05,bevelSize:.05,bevelSegments:4,curveSegments:6});g.rotateX(-Math.PI/2);g.translate(0,.05,0);return g})();
-const tileMat=PALC.map(([a])=>[M(a,{roughness:.38,metalness:.05,map:tileTex}),M(new THREE.Color(a).lerp(new THREE.Color(0xffffff),.16),{roughness:.38,metalness:.05,map:tileTex})]);
+const tileMat=PALC.map(([a])=>[0,.07].map(k=>{const c=new THREE.Color(a).lerp(new THREE.Color(0xffffff),k);return M(c,{roughness:.38,metalness:.05,map:tileTex,emissive:c,emissiveMap:tileTex,emissiveIntensity:.34})}));
 const plateMat=PALC.map(([,b])=>M(b,{roughness:.8}));
-const markGeo=new THREE.BoxGeometry(.34,.035,.075),markMat=new THREE.MeshBasicMaterial({color:0x0c1034,transparent:true,opacity:.5});
+const markGeo=new THREE.BoxGeometry(.42,.035,.1),markMat=new THREE.MeshBasicMaterial({color:0x0c1034,transparent:true,opacity:.88}),markRimGeo=new THREE.BoxGeometry(.47,.03,.15),markRimMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.55});
 const board=new THREE.Group();scene.add(board);let cellsO=[];
-for(const g of[tileGeo,markGeo,...Object.values(LG)])g.userData.shared=true;
-for(const m of[markMat,...Object.values(LM),...tileMat.flat(),...plateMat])m.userData.shared=true;
+for(const g of[tileGeo,markGeo,markRimGeo,...Object.values(LG)])g.userData.shared=true;
+for(const m of[markMat,markRimMat,...Object.values(LM),...tileMat.flat(),...plateMat])m.userData.shared=true;
 function dispose(obj){obj.traverse(o=>{if(o.geometry&&!o.geometry.userData.shared)o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];for(const m of ms)if(!m.userData.shared)m.dispose()})}
 function drop(parent,obj){parent.remove(obj);dispose(obj)}
 const hintRing=mesh(new THREE.TorusGeometry(.4,.04,8,36),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true}),0,0,0,false);hintRing.rotation.x=Math.PI/2;hintRing.visible=false;scene.add(hintRing);
@@ -171,7 +168,7 @@ function buildBoard(){while(board.children.length)drop(board,board.children[0]);
 function sync(k){const o=cellsO[k],v=S.cells[k];
   if(v!==1&&o.mark){drop(board,o.mark);o.mark=null}
   if(v!==2&&o.lan&&!o.rise){drop(board,o.lan);o.lan=null}
-  if(v===1&&!o.mark){const m=new THREE.Group();for(const a of[1,-1]){const b=new THREE.Mesh(markGeo,markMat);b.rotation.y=a*Math.PI/4;m.add(b)}m.position.set(o.x,TOP+.02,o.z);board.add(m);o.mark=m}
+  if(v===1&&!o.mark){const m=new THREE.Group();for(const a of[1,-1]){const r=new THREE.Mesh(markRimGeo,markRimMat);r.rotation.y=a*Math.PI/4;m.add(r)}for(const a of[1,-1]){const b=new THREE.Mesh(markGeo,markMat);b.rotation.y=a*Math.PI/4;b.position.y=.006;m.add(b)}m.position.set(o.x,TOP+.02,o.z);board.add(m);o.mark=m}
   if(v===2&&!o.lan){o.lan=makeLantern();o.lan.position.set(o.x,TOP+.55,o.z);board.add(o.lan)}}
 const syncAll=()=>{for(let k=0;k<cellsO.length;k++)sync(k)};
 
@@ -246,7 +243,7 @@ function update(t,dt){const game=S.screen==="game";
         setBad(L,isBad&&!o.rise);
         if(o.rise){const r=(t-o.rise)/1000;if(r>0){L.position.y=top+.55+r*r*.28+r*.85;L.position.x=o.x+Math.sin(r*1.7+k)*.35*Math.min(1,r);L.rotation.z=Math.sin(r*2+k)*.12;U.li=Math.max(0,6-r*.8);U.gs.material.opacity=Math.max(0,.6-r*.04);if(L.position.y>26){drop(board,L);o.lan=null;o.rise=0}}}
         else{L.scale.setScalar(sc);L.position.set(o.x+(!calm&&sh<400?Math.sin(sh/22)*.09*(1-sh/400):0),top+.55+(calm?0:(1-u)*(1-u)*1.4+Math.sin(t/700+k)*.035),o.z);L.rotation.y=t/2600+k;L.rotation.z=calm?0:Math.sin(t/900+k)*.05;
-          U.li=isBad?0:(3.4+(calm?0:.35*Math.sin(t/190+k)))*u;U.gs.material.opacity=isBad?.05:.5+(calm?0:.06*Math.sin(t/190+k))}}});
+          U.li=isBad?0:(4.4+(calm?0:.35*Math.sin(t/190+k)))*u;U.gs.material.opacity=isBad?.05:.62+(calm?0:.06*Math.sin(t/190+k))}}});
     let li=0;for(const o of cellsO)if(o.lan&&li<8){const l=LIGHTS[li++];l.position.copy(o.lan.position);l.intensity=o.lan.userData.li}for(;li<8;li++)LIGHTS[li].intensity=0;
     const hk=S.hintCell;hintRing.visible=hk>=0&&game;if(hintRing.visible){const o=cellsO[hk];hintRing.position.set(o.x,TOP+.12+.05*Math.sin(t/200),o.z);hintRing.scale.setScalar(1+.08*Math.sin(t/160));hintRing.material.opacity=.75+.25*Math.sin(t/160)}}
   // rocks
@@ -279,18 +276,18 @@ function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;drawSky(t);update(
 
 // ---------- UI ----------
 function text(){document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";
-  for(const k of["title","rules","play","daily","undo","hint","reset","auto","snd","load","fail","rotate"])$("t-"+k).textContent=tr(k);
-  $("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("failInfo").textContent=tr("failInfo");$("lang").textContent=S.lang==="en"?"العربية":"English";
-  $("playSub").textContent=tr("level")+" "+load("level",1);const st=load("streak",0),done=load("dailyLast",0)===todayKey();
+  for(const k of["title","rules","play","daily","undo","hint","reset","auto","snd","load","fail","rotate","lang","blast","shop","shop2","close"])$("t-"+k).textContent=tr(k==="shop2"?"shop":k);
+  $("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("failInfo").textContent=tr("failInfo");$("langName").textContent=LANGS.find(l=>l[0]===S.lang)[1];for(const b of $("langList").children)b.setAttribute("aria-pressed",b.dataset.lang===S.lang);
+  $("playSub").textContent=fmtN("levelN",load("level",1));const st=load("streak",0),done=load("dailyLast",0)===todayKey();
   $("dailySub").textContent=(done?tr("doneToday"):tr("newToday"))+(st>0?" · "+tr("streak")+" "+st:"");
-  $("snd").setAttribute("aria-pressed",S.sound);$("auto").setAttribute("aria-pressed",S.auto);$("hintN").textContent=S.hints;
-  $("lvl").textContent=S.mode==="daily"?tr("daily"):tr("level")+" "+S.level;fit()}
+  $("snd").setAttribute("aria-pressed",S.sound);$("auto").setAttribute("aria-pressed",S.auto);$("hintN").textContent=S.hints+S.inv.hints;
+  $("lvl").textContent=S.mode==="daily"?tr("daily"):fmtN("levelN",S.level);$("blastN").textContent=S.inv.blasts;shopText();fit()}
 function pips(){if(!S.p)return;const n=S.p.n,{bad,count}=conflicts(),el=$("pips");if(el.children.length!==n)el.innerHTML="<i></i>".repeat(n);[...el.children].forEach((e,i)=>e.className=i<count?(bad.size?"bad":"on"):"");$("undo").disabled=!S.undo.length||S.done}
 const say=m=>{$("msg").textContent=m};
 function show(s){S.screen=s;document.body.dataset.screen=s;text()}
 function clearRocks(){for(const m of rocks)KP.rocks.remove(m);for(const m of flying)scene.remove(m);rocks=[];flying=[];meter()}
 function setPuzzle(p,cells){S.p=p;S.cells=cells;S.undo=[];S.at=[];S.shake=[];S.hintCell=-1;S.combo=0;S.maxCount=0;S.done=false;S.failed=false;S.rockClock=0;K.cheer=0;waves.length=0;S.introT=performance.now()+80;buildBoard();syncAll();fit()}
-function demo(){const p=makePuzzle(5,77);const c=new Array(25).fill(0);p.sol.forEach((x,y)=>c[y*5+x]=2);S.demo=true;clearRocks();setPuzzle(p,c);for(let i=0;i<4;i++){dropRock();rocks[i].position.y=rocks[i].userData.ty;rocks[i].userData.landed=true}S.at=c.map(()=>-1e6)}
+function demo(){const p=gradedPuzzle(5,77,1,5);const c=new Array(25).fill(0);p.sol.forEach((x,y)=>c[y*5+x]=2);S.demo=true;clearRocks();setPuzzle(p,c);for(let i=0;i<4;i++){dropRock();rocks[i].position.y=rocks[i].userData.ty;rocks[i].userData.landed=true}S.at=c.map(()=>-1e6)}
 
 // ---------- actions ----------
 function setCell(k,v,rec=true){if(S.done||S.cells[k]===v)return;const was=S.cells[k],now=performance.now();if(rec)S.undo.push([k,was]);S.cells[k]=v;S.at[k]=now;S.hintCell=-1;sync(k);
@@ -323,8 +320,8 @@ function check(){const n=S.p.n,{bad,count}=conflicts();if(count!==n||bad.size)re
 function fail(){S.done=true;S.failed=true;clearInterval(S.tick);trauma=1;sfx.bad();buzz([60,40,120]);meter();
   const run=S.run;setTimeout(()=>{if(S.run===run&&S.failed)$("fail").classList.add("on")},calm?200:900)}
 function start(same=false){S.run++;clearInterval(S.tick);$("win").classList.remove("on");$("fail").classList.remove("on");show("game");say(tr("gen"));S.demo=false;
-  const run=S.run;setTimeout(()=>{if(S.run!==run)return;const n=S.mode==="daily"?7:sizeFor(S.level),seed=S.mode==="daily"?todayKey():S.level*7919+n;clearRocks();
-    setPuzzle(same&&S.p?S.p:makePuzzle(n,seed),new Array(n*n).fill(0));S.hints=3;S.used=0;S.t0=Date.now();S.rockEvery=S.mode==="daily"?6:Math.max(4.2,8.5-S.level*.22);S.rockClock=S.rockEvery-4;
+  const run=S.run;setTimeout(()=>{if(S.run!==run)return;const p=same&&S.p?S.p:S.mode==="daily"?dailyPuzzle(todayKey()):levelPuzzle(S.level),n=p.n;clearRocks();
+    setPuzzle(p,new Array(n*n).fill(0));S.hints=3;S.used=0;S.t0=Date.now();S.rockEvery=S.mode==="daily"?7:Math.max(5,9-S.level*.06);S.rockClock=S.rockEvery-4;
     S.tick=setInterval(()=>{$("time").textContent=fmt(Math.round((Date.now()-S.t0)/1000))},500);$("time").textContent="0:00";text();pips();meter();say(tr("how"));window.__lantern=S},30)}
 
 // ---------- input ----------
@@ -334,16 +331,36 @@ gl.addEventListener("pointermove",e=>{if(!drag)return;const k=cellAt(e);if(k<0)r
 gl.addEventListener("pointerup",()=>{if(drag&&!drag.moved)setCell(drag.k,(S.cells[drag.k]+1)%3);drag=null});
 gl.addEventListener("pointercancel",()=>{drag=null});
 $("undo").onclick=()=>{if(S.done)return;sfx.tap();S.combo=0;let u=S.undo.pop();while(u){S.cells[u[0]]=u[1];S.at[u[0]]=performance.now();sync(u[0]);if(!u[2])break;u=S.undo.pop()}S.hintCell=-1;pips()};
-$("reset").onclick=()=>{if(S.done)return;sfx.tap();S.combo=0;S.cells.fill(0);S.undo=[];S.hintCell=-1;syncAll();pips()};
-$("hint").onclick=()=>{if(S.done)return;if(S.hints<=0){say(tr("noHints"));return}const h=findHint();if(!h)return;sfx.hint();S.hints--;S.used++;if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;say(tr(h.why));text()};
+$("reset").onclick=()=>{if(S.done&&!S.failed)return;sfx.tap();start(true)};
+const saveInv=()=>{save("inv.hints",S.inv.hints);save("inv.blasts",S.inv.blasts)};
+$("hint").onclick=()=>{if(S.done)return;if(S.hints<=0&&S.inv.hints<=0){say(tr("noHints"));openShop();return}const h=findHint();if(!h)return;sfx.hint();if(S.hints>0)S.hints--;else{S.inv.hints--;saveInv()}S.used++;if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;say(tr(h.why));text()};
+// rock blast: a paid item that clears every rock at once
+$("blast").onclick=()=>{if(S.done||!S.p||S.screen!=="game")return;if(S.inv.blasts<=0){openShop();return}if(!rocks.length){sfx.tap();return}S.inv.blasts--;saveInv();trauma=Math.min(1,trauma+.5);blast(rocks.length);K.hopV=3.4;const b=$("blast").getBoundingClientRect();burst(b.left+b.width/2,b.top+20,18,"255,160,120",200);text()};
+
+// ---------- shop ----------
+// Purchases run in the native app (StoreKit through the Flutter frame). The page only asks and is told the result.
+// Products are consumables: the items are added here, on the device, when the app reports a finished purchase.
+const PRODUCTS={"com.noobclaw.lantern.hints10":{key:"buyHints",info:"buyHintsInfo",give:()=>{S.inv.hints+=10}},"com.noobclaw.lantern.blasts5":{key:"buyBlasts",info:"buyBlastsInfo",give:()=>{S.inv.blasts+=5}}};
+const native=window.LanternNative&&typeof window.LanternNative.postMessage==="function"?window.LanternNative:null,prices={};let shopMsg="";
+const toNative=o=>{try{native.postMessage(JSON.stringify(o))}catch(e){}};
+function shopText(){const el=$("shopList");if(!el)return;el.innerHTML=Object.entries(PRODUCTS).map(([id,p])=>`<div class="item"><div><b>${tr(p.key)}</b><small>${tr(p.info)}</small><small class="own">${fmtN("owned",id.endsWith("hints10")?S.inv.hints:S.inv.blasts)}</small></div><button class="btn" data-id="${id}">${prices[id]||"…"}</button></div>`).join("");$("shopMsg").textContent=shopMsg||(native?"":tr("noStore"))}
+function openShop(){sfx.tap();shopMsg="";shopText();$("shop").classList.add("on");if(native)toNative({type:"products",ids:Object.keys(PRODUCTS)})}
+window.lanternStore={
+  onProducts(list){for(const p of list||[])prices[p.id]=p.price;shopText()},
+  onResult(r){const p=PRODUCTS[r&&r.id];if(r&&r.status==="ok"&&p){const seen=load("iap.done",[]);if(r.tx&&seen.includes(r.tx))return;p.give();saveInv();if(r.tx){seen.push(r.tx);save("iap.done",seen.slice(-50))}shopMsg=tr("bought");sfx.win();text()}else if(r&&r.status==="fail"){shopMsg=tr("buyFail");shopText()}else{shopMsg="";shopText()}}};
+$("shopList").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;if(!native){shopMsg=tr("noStore");shopText();return}sfx.tap();shopMsg=tr("buying");shopText();toNative({type:"buy",id:b.dataset.id})};
+$("shopClose").onclick=()=>{sfx.tap();$("shop").classList.remove("on")};$("shopChip").onclick=openShop;
+if(native)toNative({type:"ready"});
 $("next").onclick=()=>{S.level=load("level",S.level+1);start()};
 $("retry").onclick=()=>{sfx.tap();start(true)};
 $("homeBtn").onclick=$("back").onclick=()=>{S.run++;sfx.tap();clearInterval(S.tick);$("win").classList.remove("on");$("fail").classList.remove("on");S.level=load("level",S.level);S.screen="home";demo();show("home")};
 $("play").onclick=()=>{sfx.tap();S.mode="levels";S.level=load("level",1);start()};
 $("daily").onclick=()=>{sfx.tap();S.mode="daily";start()};
-$("lang").onclick=()=>{S.lang=S.lang==="en"?"ar":"en";save("lang",S.lang);text()};
+$("lang").onclick=()=>{sfx.tap();$("langSheet").classList.add("on")};
+$("langSheet").onclick=e=>{const b=e.target.closest("button[data-lang]");if(b){S.lang=b.dataset.lang;save("lang",S.lang);text();if(S.screen==="game"&&$("msg").textContent)say(tr("how"))}$("langSheet").classList.remove("on")};
+$("langList").innerHTML=LANGS.map(([c,n])=>`<button class="btn alt" data-lang="${c}" lang="${c}">${n}</button>`).join("");
 $("snd").onclick=()=>{S.sound=!S.sound;save("sound",S.sound);text();sfx.tap()};
 $("auto").onclick=()=>{S.auto=!S.auto;save("auto",S.auto);text();sfx.tap()};
 addEventListener("resize",layout);
-window.__lanternApi={start,setCell,show,dropRock,cellPage,info:()=>({geo:R.info.memory.geometries,tex:R.info.memory.textures,programs:R.info.programs.length,rocks:rocks.length,lights:LIGHTS.length})};
+window.__lanternApi={start,setCell,show,dropRock,cellPage,info:()=>({buffers:Object.keys(BUF).length,audio:AC?AC.state:"none",geo:R.info.memory.geometries,tex:R.info.memory.textures,programs:R.info.programs.length,rocks:rocks.length,lights:LIGHTS.length})};
 layout();demo();text();requestAnimationFrame(frame);

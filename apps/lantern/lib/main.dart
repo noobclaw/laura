@@ -1,11 +1,18 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 /// Lantern ships its game as local web files (assets/game, synced from
 /// game/lantern/prototype3d by tools/sync_game.sh). This app is only the
 /// native frame around it: portrait lock, full screen, a loading state and a
-/// visible error if the page cannot be opened.
+/// visible error if the page cannot be opened, and the store bridge: the page
+/// asks for prices or a purchase through the `LanternNative` channel and is told
+/// the outcome through `window.lanternStore`. Items are consumables and are
+/// added by the page itself when it hears a purchase finished.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -42,6 +49,10 @@ class _GamePageState extends State<GamePage> {
   bool _ready = false;
   String? _error;
 
+  StreamSubscription<List<PurchaseDetails>>? _purchases;
+  final Map<String, ProductDetails> _products = {};
+  final List<String> _waiting = []; // calls into the page made before it finished loading
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +63,10 @@ class _GamePageState extends State<GamePage> {
         NavigationDelegate(
           onPageFinished: (_) {
             if (mounted) setState(() => _ready = true);
+            for (final call in _waiting) {
+              _run(call);
+            }
+            _waiting.clear();
           },
           onWebResourceError: (error) {
             // Sub-resource failures (a missing sound, say) must not replace the game.
@@ -64,7 +79,105 @@ class _GamePageState extends State<GamePage> {
               : NavigationDecision.prevent,
         ),
       )
+      ..addJavaScriptChannel('LanternNative', onMessageReceived: _onMessage)
       ..loadFlutterAsset('assets/game/index.html');
+    _purchases = InAppPurchase.instance.purchaseStream.listen(
+      _onPurchases,
+      onError: (Object _) {},
+    );
+  }
+
+  @override
+  void dispose() {
+    _purchases?.cancel();
+    super.dispose();
+  }
+
+  void _run(String call) {
+    _controller.runJavaScript(call).catchError((Object _) {});
+  }
+
+  void _toPage(String call) {
+    if (_ready) {
+      _run(call);
+    } else {
+      _waiting.add(call);
+    }
+  }
+
+  void _result(String id, String status, [String? tx]) {
+    _toPage('window.lanternStore&&window.lanternStore.onResult(${jsonEncode({'id': id, 'status': status, 'tx': tx})})');
+  }
+
+  Future<void> _onMessage(JavaScriptMessage message) async {
+    Map<String, dynamic> msg;
+    try {
+      msg = jsonDecode(message.message) as Map<String, dynamic>;
+    } catch (_) {
+      return;
+    }
+    final type = msg['type'];
+    if (type == 'products') {
+      final ids = ((msg['ids'] as List?) ?? const []).map((e) => '$e').toSet();
+      await _loadProducts(ids);
+    } else if (type == 'buy') {
+      await _buy('${msg['id']}');
+    }
+  }
+
+  Future<void> _loadProducts(Set<String> ids) async {
+    var found = <ProductDetails>[];
+    try {
+      if (await InAppPurchase.instance.isAvailable()) {
+        final response = await InAppPurchase.instance.queryProductDetails(ids);
+        found = response.productDetails;
+        for (final d in found) {
+          _products[d.id] = d;
+        }
+      }
+    } catch (_) {
+      // Reported to the page as "no products"; the shop then shows no prices.
+    }
+    final list = [
+      for (final d in found) {'id': d.id, 'price': d.price},
+    ];
+    _toPage('window.lanternStore&&window.lanternStore.onProducts(${jsonEncode(list)})');
+  }
+
+  Future<void> _buy(String id) async {
+    try {
+      if (_products[id] == null) await _loadProducts({id});
+      final details = _products[id];
+      if (details == null) {
+        _result(id, 'fail');
+        return;
+      }
+      final started = await InAppPurchase.instance.buyConsumable(
+        purchaseParam: PurchaseParam(productDetails: details),
+      );
+      if (!started) _result(id, 'fail');
+    } catch (_) {
+      _result(id, 'fail');
+    }
+  }
+
+  Future<void> _onPurchases(List<PurchaseDetails> updates) async {
+    for (final p in updates) {
+      if (p.status == PurchaseStatus.purchased) {
+        _result(p.productID, 'ok', p.purchaseID);
+      } else if (p.status == PurchaseStatus.error) {
+        _result(p.productID, 'fail');
+      } else if (p.status == PurchaseStatus.canceled) {
+        _result(p.productID, 'cancel');
+      }
+      if (p.pendingCompletePurchase) {
+        try {
+          await InAppPurchase.instance.completePurchase(p);
+        } catch (_) {
+          // The store retries unfinished transactions on the next launch.
+        }
+      }
+    }
   }
 
   @override

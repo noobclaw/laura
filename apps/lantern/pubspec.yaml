@@ -2,7 +2,7 @@ name: lantern
 description: "Lantern: a lantern logic puzzle. The game itself is the web build in assets/game, shown in a full-screen WebView."
 publish_to: 'none'
 
-version: 0.1.0+1
+version: 0.2.0+1
 
 environment:
   sdk: ^3.12.2
@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   # The whole game runs as local files inside this view. No network access is used.
   webview_flutter: ^4.10.0
+  # StoreKit / Play Billing for the two consumable item packs. Goes through the store's own process.
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -24,5 +26,5 @@ flutter:
   assets:
     - assets/game/
     - assets/game/vendor/
+    - assets/game/assets/
     - assets/game/assets/fx/
-    - assets/game/assets/sfx/
