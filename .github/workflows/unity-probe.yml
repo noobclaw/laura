@@ -70,6 +70,7 @@ jobs:
 
       - name: Compile for device, unsigned
         run: |
+          set -o pipefail
           LATEST=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
           sudo xcode-select -s "$LATEST/Contents/Developer"
           xcodebuild -version
