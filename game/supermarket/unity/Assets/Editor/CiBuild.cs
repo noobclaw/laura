@@ -56,17 +56,64 @@ public static class CiBuild
         }
     }
 
+    static RenderTexture shotRt;
     static void Snap(Souq.Game g, string name)
     {
-        var rt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32);
-        g.cam.targetTexture = rt; Canvas.ForceUpdateCanvases(); g.cam.Render();
-        RenderTexture.active = rt;
-        var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
-        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); tex.Apply();
-        RenderTexture.active = null; g.cam.targetTexture = null;
+        // the camera keeps this target for the whole session, so screen positions are worked out for the right size
+        g.Tick(0.001f); Canvas.ForceUpdateCanvases(); g.cam.Render();
+        RenderTexture.active = shotRt;
+        var tex = new Texture2D(shotRt.width, shotRt.height, TextureFormat.RGB24, false);
+        tex.ReadPixels(new Rect(0, 0, shotRt.width, shotRt.height), 0, 0); tex.Apply();
+        RenderTexture.active = null;
         Directory.CreateDirectory("../../../shots");
         File.WriteAllBytes("../../../shots/" + name + ".png", tex.EncodeToPNG());
         Debug.Log("CiBuild: wrote shot " + name);
+    }
+
+    // Runs the rule core alone for four simulated hours with a simple buying habit. Checks it never breaks and prints the pace.
+    static void SimAudit()
+    {
+        double clock = 1e9; var s = Souq.Core.Save.Fresh(); var sim = new Souq.Core.Sim(s, () => clock);
+        double paid = 0, lastPaid = 0, t = 0; int nd = Souq.Core.T.ND; sim.OnPaid += (c, b) => paid += b;
+        var sb = new System.Text.StringBuilder(); int bad = 0, fullTicks = 0, ticks = 0;
+        for (int step = 0; step < 4 * 3600 * 4; step++)
+        {
+            sim.Tick(0.25); clock += 0.25; t += 0.25; ticks++; if (sim.MarketFull()) fullTicks++;
+            if (sim.truckHere) sim.CollectTruck();
+            if (step % 4 == 0)
+            {
+                bool again = true; int guard = 0;
+                while (again && guard++ < 300)
+                {
+                    again = false;
+                    if (sim.TaskDone) { sim.TaskClaim(); again = true; continue; }
+                    int next = -1; for (int d = 0; d < nd; d++) if (!s.dOpen[d]) { next = d; break; }
+                    if (next >= 0 && sim.BuildDept(next)) { sb.Append(" build" + next + "@" + (t / 60).ToString("0.0") + "m"); again = true; continue; }
+                    if (sim.StarUp()) { sb.Append(" star" + s.star + "@" + (t / 60).ToString("0.0") + "m"); again = true; continue; }
+                    if (sim.MarketFull() && sim.CashHire()) { again = true; continue; }
+                    if (s.coin >= sim.ParkCost() * 3 && sim.ParkUp()) { again = true; continue; }
+                    int best = -1; for (int d = 0; d < nd; d++) if (s.dOpen[d] && s.dLevel[d] < Souq.Core.T.MaxLevel && (best < 0 || sim.LevelCost(d) < sim.LevelCost(best))) best = d;
+                    if (best >= 0 && sim.LevelCost(best) <= s.coin * 0.5 && sim.LevelUp(best)) { again = true; continue; }
+                    for (int d = 0; d < nd && !again; d++) if (s.dOpen[d] && sim.HireCost(d) <= s.coin * 0.3 && sim.Hire(d)) again = true;
+                    for (int d = 0; d < nd && !again; d++) if (s.dOpen[d] && sim.ProdCost(d) <= s.coin * 0.1 && sim.ProdUp(d)) again = true;
+                    for (int c = 0; c < Souq.Core.T.NC && !again; c++) if (s.cLevel[c] > 0 && sim.CashUpCost(c) <= s.coin * 0.05 && sim.CashUp(c)) again = true;
+                    if (!again && sim.AdLevelCost() <= s.coin * 0.05 && sim.AdLevelUp()) again = true;
+                }
+            }
+            // invariants
+            if (double.IsNaN(s.coin) || s.coin < 0) bad++;
+            for (int d = 0; d < nd; d++) for (int k = 0; k < Souq.Core.T.MaxStaff; k++) if (sim.dq[d][k].Count > Souq.Core.T.MaxQueue) bad++;
+            foreach (var c in sim.custs) { int inq = 0; for (int d = 0; d < nd; d++) for (int k = 0; k < Souq.Core.T.MaxStaff; k++) if (sim.dq[d][k].Contains(c)) inq++; for (int q = 0; q < Souq.Core.T.NC; q++) if (sim.cq[q].Contains(c)) inq++; if (inq > 1) bad++; }
+            if (step % (600 * 4) == 0 && step > 0)
+            {
+                int open = 0; string lv = ""; for (int d = 0; d < nd; d++) if (s.dOpen[d]) { open++; lv += s.dLevel[d] + "/" + s.dStaff[d] + " "; }
+                Debug.Log("AUDIT t=" + (t / 60).ToString("0") + "m coin=" + Souq.Loc.Num(s.coin) + " shown/min=" + Souq.Loc.Num(sim.EarnPerMin) + " real/min=" + Souq.Loc.Num((paid - lastPaid) / 10) + " shoppers=" + sim.custs.Count + " park=" + s.parkLevel + " cash=" + sim.CashOpen + " ad=" + s.adLevel + " star=" + s.star + " task=" + s.task + " gems=" + s.gem + " lv/staff: " + lv);
+                lastPaid = paid;
+            }
+        }
+        Debug.Log("AUDIT events:" + sb);
+        Debug.Log("AUDIT done: invariantBreaks=" + bad + " checkoutsFullShare=" + (100.0 * fullTicks / ticks).ToString("0.0") + "% offline8h=" + Souq.Loc.Num(sim.IdleIncome(8 * 3600)));
+        if (bad > 0) throw new Exception("SimAudit: " + bad + " invariant breaks");
     }
 
     // Plays a mid-game save for a while in the editor and saves pictures of it: the only way to see the game without a device.
@@ -80,8 +127,11 @@ public static class CiBuild
         s.cLevel[0] = 12; s.cLevel[1] = 8; s.cLevel[2] = 5; s.cLevel[3] = 2; s.cLevel[4] = 1;
         s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false;
         var g = new Souq.Game(); g.editor = true; g.Start(s, false);
+        shotRt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
+        Canvas.ForceUpdateCanvases(); g.cam.Render();        // first frame warms up lighting
+        g.sim.truckHere = true; g.sim.vipHere = true; g.sim.vipReward = 4.2e9; g.sim.busOffer = true;
         for (int i = 0; i < 1500; i++) g.Tick(0.05f);
-        g.focus = new Vector3(0, 0, 8); g.zoom = 20f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
+        g.focus = new Vector3(0, 0, 9); g.zoom = 19f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
         g.focus = new Vector3(0, 0, 14); g.zoom = 11f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "2_close");
         g.focus = new Vector3(0, 0, -6); g.zoom = 16f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "3_parking");
         g.focus = new Vector3(0, 0, 8); g.zoom = 20f; g.PlaceCamera();
@@ -112,6 +162,7 @@ public static class CiBuild
         if (emis.HasProperty("_EmissionColor")) emis.SetColor("_EmissionColor", Color.white);
         AssetDatabase.CreateAsset(emis, "Assets/Resources/BaseEmis.mat");
         AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
+        SimAudit();
         try { GameShots(); } catch (Exception e) { Debug.LogWarning("CiBuild: GameShots failed: " + e); }
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);

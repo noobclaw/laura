@@ -22,7 +22,7 @@ namespace Souq
             {"checkouts", new[]{"Checkouts","الكاشير"}}, {"checkout", new[]{"Checkout","كاشير"}}, {"open", new[]{"OPEN","فتح"}},
             {"parking", new[]{"Parking","المواقف"}}, {"spaces", new[]{"Spaces","الأماكن"}}, {"marketing", new[]{"Marketing","التسويق"}},
             {"carsmin", new[]{"Cars per minute","سيارات في الدقيقة"}}, {"expand", new[]{"EXPAND","توسيع"}}, {"promote", new[]{"PROMOTE","ترويج"}},
-            {"boosts", new[]{"Managers & Research","المدراء والأبحاث"}}, {"tasks", new[]{"Tasks","المهام"}}, {"claim", new[]{"CLAIM","استلام"}},
+            {"boosts", new[]{"Managers & Research","المدراء والأبحاث"}}, {"boostsNav", new[]{"Boosts","التطوير"}}, {"gradeNav", new[]{"Grade","الدرجة"}}, {"tasks", new[]{"Tasks","المهام"}}, {"claim", new[]{"CLAIM","استلام"}},
             {"shop", new[]{"Shop","المتجر"}}, {"store", new[]{"Store","المتجر"}}, {"stats", new[]{"Stats","الإحصاءات"}}, {"settings", new[]{"Settings","الإعدادات"}},
             {"grade", new[]{"Store grade","درجة المتجر"}}, {"newstore", new[]{"Move to a bigger store","انتقل إلى متجر أكبر"}}, {"profit", new[]{"Profit","الربح"}},
             {"move", new[]{"MOVE","انتقال"}}, {"income", new[]{"Income","الدخل"}}, {"welcome", new[]{"Welcome back!","أهلاً بعودتك!"}},

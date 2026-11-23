@@ -50,8 +50,8 @@ namespace Souq
             gemTxt = U.Txt(gem.transform, "0", 48, Color.white, TextAnchor.MiddleLeft); U.Place(gemTxt.rectTransform, 0, 0, 1, 1, 110, 0, -78, 0);
             var plus = U.Button(gem.transform, "+", U.Green, 50, () => OpenShop(), "plus"); U.Pin(plus.rt, 1, 0.5f, -12, 4, 70, 70);
             var gear = U.Button(hud, "", new Color(0.30f, 0.34f, 0.50f), 40, () => OpenSettings(), "gear"); U.Pin(gear.rt, 1, 1, -28, top - 6, 150, 106);
-            var gs = U.Img(gear.bg.transform, Spr.Star, Color.white, "star", false); U.Pin(gs.rectTransform, 0, 0.5f, 12, 0, 60, 60);
-            gradeTxt = U.Txt(gear.bg.transform, "0", 44, Color.white); U.Place(gradeTxt.rectTransform, 0, 0, 1, 1, 70, 0, -10, 0);
+            for (int i = 0; i < 3; i++) { var ln = U.Img(gear.bg.transform, Spr.Round, Color.white, "line"); U.Pin(ln.rectTransform, 0.5f, 0.5f, 0, (i - 1) * 24, 76, 12); ln.rectTransform.pivot = new Vector2(0.5f, 0.5f); }
+            gradeTxt = U.Txt(gear.bg.transform, "", 10, Color.clear); U.Pin(gradeTxt.rectTransform, 0, 0, 0, 0, 2, 2);
             // task strip
             var ts = U.Img(hud, Spr.Round, new Color(1, 1, 1, 0.95f), "task", true, true); taskStrip = U.Pin(ts.rectTransform, 0.5f, 1, 0, top - 136, 1024, 110);
             taskBar = U.Img(ts.transform, Spr.Round, new Color(0.80f, 0.93f, 0.82f), "bar"); U.Place(taskBar.rectTransform, 0, 0, 0, 1, 6, 6, 6, -6);
@@ -81,7 +81,7 @@ namespace Souq
         void BuildNav()
         {
             var bar = U.Img(hud, Spr.Round, U.Navy, "nav", true, true); U.Place(bar.rectTransform, 0, 0, 1, 0, 20, 44, -20, 250);
-            string[] keys = { "checkouts", "parking", "boosts", "grade", "shop" }; Color[] cols = { U.Green, U.Blue, U.Purple, U.Gold, U.Red };
+            string[] keys = { "checkouts", "parking", "boostsNav", "gradeNav", "shop" }; Color[] cols = { U.Green, U.Blue, U.Purple, U.Gold, U.Red };
             Sprite[] ic = { Spr.Coin, null, Spr.Person, Spr.Star, Spr.Gem }; Action[] act = { () => OpenCheckouts(), () => OpenParking(), () => OpenBoosts(), () => OpenGrade(), () => OpenShop() };
             for (int i = 0; i < 5; i++)
             {
@@ -241,6 +241,7 @@ namespace Souq
         /// Coins burst from a point in the store and fly to the coin counter.
         public void CoinsFromWorld(Vector3 world, double amount, bool big)
         {
+            if (!big && Busy) return;
             var at = ToCanvas(world); if (at.x < -100 || at.x > root.rect.width + 100 || at.y < -100 || at.y > root.rect.height + 100) return;
             Float("+" + Loc.Num(amount), at + new Vector2(0, 30), big ? U.Gold : new Color(1f, 0.95f, 0.75f), big ? 52 : 34);
             if (big) FlyIcons(Spr.Coin, at, coinPill, 5);
@@ -418,16 +419,16 @@ namespace Souq
         public void OpenShop()
         {
             var body = OpenSheet(Loc.G("shop"), U.Red, 1700); var list = g.store.Products; int warps = Store.WarpHours.Length;
-            var content = Scroll(body, (list.Count + warps) * 162 + 120);
+            var content = Scroll(body, list.Count * 180 + warps * 162 + 140);
             var note = U.Txt(content, Loc.G("test"), 28, U.Red); U.Place(note.rectTransform, 0, 1, 1, 1, 0, -90, 0, -4);
-            var rows = new List<Row>(); float y = -96;
+            var rows = new List<Row>(); float y = -120;
             foreach (var p in list)
             {
                 var pp = p; Row r = null; r = AddRow(content, y, 150, Loc.G(pp.key), pp.gems > 0 ? U.Green : U.Red, () => g.store.Buy(pp, ok => { if (ok) { Bought(r.btn.rt, true); Flash(U.Gold); if (pp.gems > 0) FlyIcons(Spr.Gem, CanvasPosOf(r.btn.rt), gemPill, 10); } }), Spr.Gem);
                 r.btn.bg.transform.Find("ci").gameObject.SetActive(false); U.Place(r.cost.rectTransform, 0, 0, 1, 0.5f, 10, 4, -10, 4); r.cost.alignment = TextAnchor.MiddleCenter;
                 if (pp.gems > 0) { var gi = U.Img(r.rt, Spr.Gem, Color.white, "gem", false); U.Pin(gi.rectTransform, Loc.Ar ? 1 : 0, 0.5f, Loc.Ar ? -340 : 20, 0, 84, 84); U.Place(r.title.rectTransform, 0, 0.5f, 1, 1, Loc.Ar ? 24 : 120, 0, Loc.Ar ? -440 : -330, -6); U.Place(r.sub.rectTransform, 0, 0, 1, 0.5f, Loc.Ar ? 24 : 120, 8, Loc.Ar ? -440 : -330, 0); r.title.text = Loc.Num(pp.gems) + " " + Loc.G("gems"); }
-                if (pp.tag != null) { var tg = U.Img(r.rt, Spr.Round, U.Gold, "tag"); U.Pin(tg.rectTransform, 0, 1, 12, 14, 250, 44); var tt = U.Txt(tg.transform, Loc.G(pp.tag), 24, U.Ink); U.Fill(tt.rectTransform); }
-                rows.Add(r); y -= 162;
+                if (pp.tag != null) { var tg = U.Img(r.rt, Spr.Round, U.Gold, "tag"); U.Pin(tg.rectTransform, 0, 1, 12, 26, 250, 44); var tt = U.Txt(tg.transform, Loc.G(pp.tag), 24, U.Ink); U.Fill(tt.rectTransform); }
+                rows.Add(r); y -= 180;
             }
             var warpRows = new Row[warps];
             for (int i = 0; i < warps; i++)
@@ -493,7 +494,7 @@ namespace Souq
         }
         public void OfflinePopup(double reward, double away, bool capped)
         {
-            RectTransform card; var body = OpenPopup(Loc.G("welcome"), new Color(0.95f, 0.65f, 0.10f), capped && !s.offlinePro ? 980 : 800, out card);
+            RectTransform card; var body = OpenPopup(Loc.G("welcome"), new Color(0.95f, 0.65f, 0.10f), capped && !s.offlinePro ? 1120 : 800, out card);
             var d = U.Txt(body, Loc.G("away") + "\n" + Loc.Time(away), 36, U.Ink); U.Place(d.rectTransform, 0, 1, 1, 1, 0, -150, 0, 0);
             var ic = U.Img(body, Spr.Coin, Color.white, "coin", false); U.Pin(ic.rectTransform, 0.5f, 1, -250, -170, 110, 110);
             var amt = U.Txt(body, Loc.Num(reward), 88, new Color(0.95f, 0.62f, 0.05f), TextAnchor.MiddleLeft); U.Pin(amt.rectTransform, 0.5f, 1, -120, -160, 540, 130); amt.rectTransform.pivot = new Vector2(0, 1);

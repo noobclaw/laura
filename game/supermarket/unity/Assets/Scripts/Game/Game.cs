@@ -97,6 +97,7 @@ namespace Souq
 
     public class Game
     {
+        public const float Pitch = 46f;
         public const string SaveKey = "save.v2";
         public Sim sim; public World world; public Ui ui; public Camera cam; public AudioKit audio; public Store store;
         public bool editor, overlay; public double pendingOffline; float saveT, stuckCd, paidFx; public Vector3 focus = new Vector3(0, 0, 9); public float zoom = 19f;
@@ -139,9 +140,9 @@ namespace Souq
             try
             {
                 var vol = new GameObject("PostFx").AddComponent<Volume>(); vol.isGlobal = true; var prof = ScriptableObject.CreateInstance<VolumeProfile>(); vol.sharedProfile = prof;
-                var bloom = prof.Add<Bloom>(true); bloom.intensity.value = 0.85f; bloom.threshold.value = 1.05f; bloom.scatter.value = 0.62f;
+                var bloom = prof.Add<Bloom>(true); bloom.intensity.value = 1.25f; bloom.threshold.value = 0.9f; bloom.scatter.value = 0.68f;
                 var tm = prof.Add<Tonemapping>(true); tm.mode.value = TonemappingMode.Neutral;
-                var ca = prof.Add<ColorAdjustments>(true); ca.saturation.value = 16f; ca.contrast.value = 10f; ca.postExposure.value = 0.15f;
+                var ca = prof.Add<ColorAdjustments>(true); ca.saturation.value = 10f; ca.contrast.value = 8f; ca.postExposure.value = 0f;
                 var vg = prof.Add<Vignette>(true); vg.intensity.value = 0.2f; vg.smoothness.value = 0.5f;
                 var data = cam.GetUniversalAdditionalCameraData(); data.renderPostProcessing = true; data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
             }
@@ -151,7 +152,7 @@ namespace Souq
         public void PlaceCamera()
         {
             focus.x = Mathf.Clamp(focus.x, -5f, 5f); focus.z = Mathf.Clamp(focus.z, -10f - sim.s.parkLevel * 2.2f, World.StoreDepth - 6f); zoom = Mathf.Clamp(zoom, 8f, 26f);
-            cam.transform.rotation = Quaternion.Euler(52, 0, 0); cam.transform.position = focus - cam.transform.forward * 90f; cam.orthographicSize = zoom;
+            cam.transform.rotation = Quaternion.Euler(Pitch, 0, 0); cam.transform.position = focus - cam.transform.forward * 90f; cam.orthographicSize = zoom;
         }
 
         public void Tick(float dt)
@@ -223,7 +224,7 @@ namespace Souq
         }
         public void Pan(Vector2 pixels)
         {
-            float unit = 2 * zoom / Screen.height; focus.x -= pixels.x * unit; focus.z -= pixels.y * unit / Mathf.Sin(52 * Mathf.Deg2Rad); PlaceCamera();
+            float unit = 2 * zoom / Screen.height; focus.x -= pixels.x * unit; focus.z -= pixels.y * unit / Mathf.Sin(Pitch * Mathf.Deg2Rad); PlaceCamera();
         }
         public void Zoom(float factor) { zoom /= factor; PlaceCamera(); }
     }

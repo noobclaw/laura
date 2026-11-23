@@ -30,7 +30,7 @@ namespace Souq
         {
             var m = new Material(Lit); SetColor(m, c); if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", smooth); return m;
         }
-        public static Material Glow(Color c, float power = 2.5f)
+        public static Material Glow(Color c, float power = 1.7f)
         {
             var m = new Material(Emis); SetColor(m, c);
             m.EnableKeyword("_EMISSION"); if (m.HasProperty("_EmissionColor")) m.SetColor("_EmissionColor", c * power);
@@ -122,11 +122,11 @@ namespace Souq
             Kit.Init();
             root = new GameObject("World").transform;
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.52f, 0.50f, 0.78f); RenderSettings.ambientEquatorColor = new Color(0.60f, 0.47f, 0.52f); RenderSettings.ambientGroundColor = new Color(0.28f, 0.22f, 0.30f);
+            RenderSettings.ambientSkyColor = new Color(0.66f, 0.72f, 0.92f); RenderSettings.ambientEquatorColor = new Color(0.62f, 0.62f, 0.66f); RenderSettings.ambientGroundColor = new Color(0.40f, 0.37f, 0.36f);
             RenderSettings.fog = false;
             sun = new GameObject("Sun").AddComponent<Light>(); sun.transform.SetParent(root, false);
-            sun.type = LightType.Directional; sun.color = new Color(1f, 0.83f, 0.66f); sun.intensity = 1.35f; sun.shadows = LightShadows.Soft; sun.shadowStrength = 0.55f;
-            sun.transform.rotation = Quaternion.Euler(47, 35, 0);
+            sun.type = LightType.Directional; sun.color = new Color(1f, 0.95f, 0.86f); sun.intensity = 1.15f; sun.shadows = LightShadows.Soft; sun.shadowStrength = 0.55f;
+            sun.transform.rotation = Quaternion.Euler(50, 28, 0);
 
             float depth = StoreDepth;
             // ground: asphalt lot, pavement, shop floor in a two-tone checker
@@ -134,12 +134,12 @@ namespace Souq
             Kit.Box(root, new Vector3(0, -0.14f, -3.4f), new Vector3(120, 0.3f, 4.6f), Kit.Mat(new Color(0.16f, 0.17f, 0.24f), 0.3f), "road");
             for (int i = -14; i <= 14; i++) Kit.Box(root, new Vector3(i * 3.6f, 0.02f, -3.4f), new Vector3(1.6f, 0.02f, 0.14f), Kit.Mat(new Color(0.95f, 0.85f, 0.45f)), "dash");
             Kit.Box(root, new Vector3(0, -0.1f, -0.65f), new Vector3(HalfW * 2 + 5, 0.3f, 1.3f), Kit.Mat(new Color(0.74f, 0.72f, 0.78f)), "pavement");
-            var tileA = Kit.Mat(new Color(0.96f, 0.93f, 0.86f), 0.55f); var tileB = Kit.Mat(new Color(0.90f, 0.86f, 0.80f), 0.55f);
+            var tileA = Kit.Mat(new Color(0.97f, 0.95f, 0.90f), 0.45f); var tileB = Kit.Mat(new Color(0.91f, 0.89f, 0.85f), 0.45f);
             for (int ix = 0; ix < 6; ix++) for (int iz = 0; iz < Mathf.CeilToInt(depth / 3f); iz++)
                 Kit.Box(root, new Vector3(-HalfW + 1.5f + ix * 3f, -0.05f, 1.5f + iz * 3f), new Vector3(3f, 0.1f, 3f), (ix + iz) % 2 == 0 ? tileA : tileB, "tile");
             // walls: low enough to see over from the camera side
             var wall = Kit.Mat(new Color(0.98f, 0.96f, 0.92f)); var trim = Kit.Mat(new Color(0.16f, 0.36f, 0.62f));
-            neonA = Kit.Glow(new Color(1f, 0.78f, 0.25f), 3.2f); neonB = Kit.Glow(new Color(0.25f, 0.85f, 1f), 3.2f);
+            neonA = Kit.Glow(new Color(1f, 0.72f, 0.20f), 1.8f); neonB = Kit.Glow(new Color(0.20f, 0.80f, 1f), 1.8f);
             Kit.Box(root, new Vector3(-HalfW - 0.25f, 1.6f, depth / 2), new Vector3(0.5f, 3.2f, depth), wall, "wallL");
             Kit.Box(root, new Vector3(HalfW + 0.25f, 1.6f, depth / 2), new Vector3(0.5f, 3.2f, depth), wall, "wallR");
             Kit.Box(root, new Vector3(0, 2.4f, depth + 0.25f), new Vector3(HalfW * 2 + 1, 4.8f, 0.5f), wall, "wallBack");
@@ -183,7 +183,7 @@ namespace Souq
         {
             var p = CashPos(c); var g = new GameObject("cash" + c); g.transform.SetParent(root, false);
             Kit.Spawn("r_kitchencounter_straight_A", g.transform, p, 90, 1.7f);
-            cashScreen[c] = Kit.Box(g.transform, p + new Vector3(0, 1.25f, -0.35f), new Vector3(0.55f, 0.4f, 0.08f), Kit.Glow(new Color(0.3f, 1f, 0.6f), 2.2f), "screen").GetComponent<Renderer>();
+            cashScreen[c] = Kit.Box(g.transform, p + new Vector3(0, 1.25f, -0.35f), new Vector3(0.55f, 0.4f, 0.08f), Kit.Glow(new Color(0.3f, 1f, 0.6f), 1.6f), "screen").GetComponent<Renderer>();
             Kit.Box(g.transform, p + new Vector3(0, 0.95f, -0.35f), new Vector3(0.12f, 0.3f, 0.08f), Kit.Mat(new Color(0.2f, 0.2f, 0.25f)), "stand");
             cashStaff[c] = MakePerson(g.transform, 3, new Color(0.15f, 0.55f, 0.75f), true); cashStaff[c].transform.position = p + new Vector3(-0.75f, 0, 0.1f); cashStaff[c].transform.rotation = Quaternion.Euler(0, 90, 0);
             cashDesk[c] = g;
@@ -195,7 +195,7 @@ namespace Souq
             var col = DeptColor[d];
             v.pad = Kit.Box(g.transform, v.center + new Vector3(0, 0.02f, 0.4f), new Vector3(8.2f, 0.05f, 7.6f), Kit.Mat(Color.Lerp(col, Color.white, 0.55f), 0.4f), "pad").GetComponent<Renderer>();
             Kit.Box(g.transform, v.center + new Vector3(0, 0.03f, 0.4f), new Vector3(7.6f, 0.06f, 7.0f), Kit.Mat(Color.Lerp(col, Color.white, 0.80f), 0.5f), "padIn");
-            v.signMat = Kit.Glow(col, 2.6f);
+            v.signMat = Kit.Glow(col, 1.6f);
             v.sign = Kit.Box(g.transform, v.center + new Vector3(0, 3.0f, 4.1f), new Vector3(6.4f, 0.9f, 0.25f), v.signMat, "sign").GetComponent<Renderer>();
             Kit.Box(g.transform, v.center + new Vector3(-3.0f, 1.5f, 4.1f), new Vector3(0.22f, 3.0f, 0.22f), Kit.Mat(new Color(0.25f, 0.27f, 0.35f)), "pole");
             Kit.Box(g.transform, v.center + new Vector3(3.0f, 1.5f, 4.1f), new Vector3(0.22f, 3.0f, 0.22f), Kit.Mat(new Color(0.25f, 0.27f, 0.35f)), "pole");
@@ -232,7 +232,7 @@ namespace Souq
             v.builtOpen = open; v.builtTier = tier;
             var col = DeptColor[v.d];
             Kit.SetColor(v.pad.sharedMaterial, open ? Color.Lerp(col, Color.white, 0.55f) : new Color(0.55f, 0.56f, 0.62f));
-            v.signMat.SetColor("_EmissionColor", open ? col * 2.6f : new Color(0.05f, 0.05f, 0.07f)); Kit.SetColor(v.signMat, open ? col : new Color(0.3f, 0.3f, 0.35f));
+            v.signMat.SetColor("_EmissionColor", open ? col * 1.6f : new Color(0.05f, 0.05f, 0.07f)); Kit.SetColor(v.signMat, open ? col : new Color(0.3f, 0.3f, 0.35f));
             if (!open)
             {
                 Kit.Spawn("p_Pallet_Large", v.props, v.center + new Vector3(-1.2f, 0, 1.2f), 15, 2.2f);
@@ -278,7 +278,7 @@ namespace Souq
         {
             var a = new Actor(); a.go = MakePerson(root, c.look, Cloth[(c.look / 5) % Cloth.Length], false); a.body = a.go.transform.GetChild(0); a.phase = (c.look % 100) * 0.1f;
             a.bag = Kit.Box(a.body, Vector3.zero, new Vector3(0.3f, 0.34f, 0.2f), Kit.Mat(DeptColor[c.look % T.ND], 0.3f), "bag"); a.bag.transform.localPosition = new Vector3(0.36f, 0.45f, 0.05f); a.bag.SetActive(false);
-            a.gift = Kit.Shape(PrimitiveType.Cube, a.go.transform, new Vector3(0, 1.9f, 0), Vector3.one * 0.42f, Kit.Glow(new Color(1f, 0.35f, 0.6f), 2.5f)); a.gift.SetActive(false);
+            a.gift = Kit.Shape(PrimitiveType.Cube, a.go.transform, new Vector3(0, 1.9f, 0), Vector3.one * 0.42f, Kit.Glow(new Color(1f, 0.35f, 0.6f), 1.8f)); a.gift.SetActive(false);
             a.gift.AddComponent<SphereCollider>().radius = 1.6f;
             if (c.slot >= 0)
             {
@@ -340,8 +340,8 @@ namespace Souq
             time += dt; SyncStatic();
             // neon breathing; brighter and warmer while an ad campaign doubles profit
             float pulse = 0.75f + 0.25f * Mathf.Sin(time * 2.2f); bool ad = sim.AdActive;
-            neonA.SetColor("_EmissionColor", (ad ? new Color(1f, 0.55f, 0.15f) : new Color(1f, 0.78f, 0.25f)) * (2.4f + (ad ? 2.2f : 0.9f) * pulse));
-            neonB.SetColor("_EmissionColor", new Color(0.25f, 0.85f, 1f) * (2.2f + 1.0f * Mathf.Sin(time * 1.7f + 1f)));
+            neonA.SetColor("_EmissionColor", (ad ? new Color(1f, 0.50f, 0.12f) : new Color(1f, 0.72f, 0.20f)) * (1.4f + (ad ? 1.3f : 0.5f) * pulse));
+            neonB.SetColor("_EmissionColor", new Color(0.20f, 0.80f, 1f) * (1.5f + 0.5f * Mathf.Sin(time * 1.7f + 1f)));
             for (int d = 0; d < T.ND; d++)
             {
                 var v = depts[d];
@@ -358,7 +358,7 @@ namespace Souq
             {
                 if (sim.s.cLevel[c] <= 0) continue; bool paying = sim.cq[c].Count > 0 && sim.cq[c][0].st == CS.Paying;
                 cashStaff[c].transform.GetChild(0).localRotation = Quaternion.Euler(0, paying ? 20f * Mathf.Sin(time * 10f + c) : 0, 0);
-                cashScreen[c].sharedMaterial.SetColor("_EmissionColor", (paying ? new Color(0.3f, 1f, 0.6f) : new Color(0.2f, 0.5f, 0.9f)) * (paying ? 2.0f + Mathf.Sin(time * 14f) : 1.2f));
+                cashScreen[c].sharedMaterial.SetColor("_EmissionColor", (paying ? new Color(0.3f, 1f, 0.6f) : new Color(0.2f, 0.5f, 0.9f)) * (paying ? 1.5f + 0.5f * Mathf.Sin(time * 14f) : 1.1f));
             }
 
             foreach (var c in sim.custs)
@@ -400,7 +400,7 @@ namespace Souq
 
         void AddMarker(GameObject g, Color c)
         {
-            var m = Kit.Shape(PrimitiveType.Sphere, g.transform, Vector3.zero, Vector3.one, Kit.Glow(c, 3f)); m.name = "marker";
+            var m = Kit.Shape(PrimitiveType.Sphere, g.transform, Vector3.zero, Vector3.one, Kit.Glow(c, 1.9f)); m.name = "marker";
             m.transform.position = Kit.BoundsOf(g).center + Vector3.up * 2.2f; m.transform.localScale = Vector3.one * (0.7f / g.transform.lossyScale.x);
             var col = g.AddComponent<BoxCollider>(); var b = Kit.BoundsOf(g); col.center = g.transform.InverseTransformPoint(b.center); var sz = b.size / g.transform.lossyScale.x; col.size = new Vector3(sz.x * 1.3f, sz.y * 2.5f, sz.z * 1.3f);
         }
