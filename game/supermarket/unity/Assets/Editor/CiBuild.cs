@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public static class CiBuild
 {
@@ -36,6 +37,12 @@ public static class CiBuild
             var create = assetType.GetMethod("Create", new[] { Type.GetType("UnityEngine.Rendering.Universal.ScriptableRendererData, " + asm, true) });
             var asset = (RenderPipelineAsset)create.Invoke(null, new object[] { data });
             AssetDatabase.CreateAsset(asset, "Assets/Settings/URP.asset");
+            foreach (var kv in new (string, object)[] { ("shadowDistance", 150f), ("msaaSampleCount", 4), ("supportsHDR", true), ("shadowCascadeCount", 2), ("mainLightShadowmapResolution", 4096), ("supportsSoftShadows", true) })
+            {
+                try { var pi = assetType.GetProperty(kv.Item1, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance); if (pi != null && pi.GetSetMethod(true) != null) pi.SetValue(asset, kv.Item2); else Debug.Log("CiBuild: no setter for " + kv.Item1); }
+                catch (Exception e) { Debug.Log("CiBuild: could not set " + kv.Item1 + ": " + e.Message); }
+            }
+            EditorUtility.SetDirty(asset);
             GraphicsSettings.defaultRenderPipeline = asset;
             QualitySettings.renderPipeline = asset;
             AssetDatabase.SaveAssets();
@@ -49,27 +56,42 @@ public static class CiBuild
         }
     }
 
-    // Renders the current editor scene through a camera to a PNG, so there is something to look at without a device.
-    public static void Shot(string name, Vector3 pos, Vector3 euler, float fov)
+    static void Snap(Souq.Game g, string name)
     {
-        try
-        {
-            Debug.Log("CiBuild.Shot device: " + SystemInfo.graphicsDeviceType + " / " + SystemInfo.graphicsDeviceName);
-            var go = new GameObject("ShotCam"); var cam = go.AddComponent<Camera>();
-            cam.transform.position = pos; cam.transform.rotation = Quaternion.Euler(euler); cam.fieldOfView = fov;
-            cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.05f, 0.07f, 0.13f);
-            var rt = new RenderTexture(540, 1170, 24, RenderTextureFormat.ARGB32);
-            cam.targetTexture = rt; cam.Render();
-            RenderTexture.active = rt;
-            var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
-            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); tex.Apply();
-            RenderTexture.active = null; cam.targetTexture = null;
-            Directory.CreateDirectory("../../../shots");
-            File.WriteAllBytes("../../../shots/" + name + ".png", tex.EncodeToPNG());
-            UnityEngine.Object.DestroyImmediate(go);
-            Debug.Log("CiBuild.Shot wrote " + name);
-        }
-        catch (Exception e) { Debug.LogWarning("CiBuild.Shot failed: " + e); }
+        var rt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32); rt.antiAliasing = 4;
+        g.cam.targetTexture = rt; Canvas.ForceUpdateCanvases(); g.cam.Render();
+        RenderTexture.active = rt;
+        var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); tex.Apply();
+        RenderTexture.active = null; g.cam.targetTexture = null;
+        Directory.CreateDirectory("../../../shots");
+        File.WriteAllBytes("../../../shots/" + name + ".png", tex.EncodeToPNG());
+        Debug.Log("CiBuild: wrote shot " + name);
+    }
+
+    // Plays a mid-game save for a while in the editor and saves pictures of it: the only way to see the game without a device.
+    static void GameShots()
+    {
+        Debug.Log("CiBuild: shots on " + SystemInfo.graphicsDeviceType + " / " + SystemInfo.graphicsDeviceName);
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var s = Souq.Core.Save.Fresh();
+        int[] lv = { 130, 62, 27, 9, 1 }; int[] st = { 5, 4, 3, 2, 1 };
+        for (int d = 0; d < 5; d++) { s.dOpen[d] = true; s.dLevel[d] = lv[d]; s.dStaff[d] = st[d]; s.dSpeed[d] = 3; }
+        s.cLevel[0] = 12; s.cLevel[1] = 8; s.cLevel[2] = 5; s.cLevel[3] = 2; s.cLevel[4] = 1;
+        s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false;
+        var g = new Souq.Game(); g.editor = true; g.Start(s, false);
+        for (int i = 0; i < 1500; i++) g.Tick(0.05f);
+        g.focus = new Vector3(0, 0, 8); g.zoom = 20f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
+        g.focus = new Vector3(0, 0, 14); g.zoom = 11f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "2_close");
+        g.focus = new Vector3(0, 0, -6); g.zoom = 16f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "3_parking");
+        g.focus = new Vector3(0, 0, 8); g.zoom = 20f; g.PlaceCamera();
+        g.ui.OpenDept(1); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "4_department");
+        g.ui.CloseSheet(); g.ui.Banner("x2", Souq.World.DeptColor[0]); g.ui.Confetti(new Vector2(540, 1300), 60); g.ui.FlyIcons(Souq.Spr.Coin, new Vector2(540, 900), g.ui.hud, 12);
+        for (int i = 0; i < 12; i++) g.Tick(0.03f); Snap(g, "5_effects");
+        for (int i = 0; i < 60; i++) g.Tick(0.03f);
+        g.ui.OpenShop(); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "6_shop");
+        g.ui.CloseSheet(); g.ui.OfflinePopup(3.2e13, 30000, true); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "7_offline");
+        g.ui.ClosePopup(); g.SetLang(true); g.ui.OpenDept(0); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "8_arabic");
     }
 
     public static void IOS()
@@ -86,18 +108,14 @@ public static class CiBuild
         var shader = (urp ? Shader.Find("Universal Render Pipeline/Lit") : null) ?? Shader.Find("Standard");
         Debug.Log("CiBuild: base shader = " + (shader ? shader.name : "none"));
         AssetDatabase.CreateAsset(new Material(shader), "Assets/Resources/BaseLit.mat");
+        var emis = new Material(shader); emis.EnableKeyword("_EMISSION"); emis.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        if (emis.HasProperty("_EmissionColor")) emis.SetColor("_EmissionColor", Color.white);
+        AssetDatabase.CreateAsset(emis, "Assets/Resources/BaseEmis.mat");
+        AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
+        try { GameShots(); } catch (Exception e) { Debug.LogWarning("CiBuild: GameShots failed: " + e); }
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Main.unity");
-
-        // render probe: a lit cube
-        {
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.GetComponent<Renderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/BaseLit.mat");
-            var l = new GameObject("L").AddComponent<Light>(); l.type = LightType.Directional; l.transform.rotation = Quaternion.Euler(50, -30, 0);
-            Shot("probe", new Vector3(0, 2, -4), new Vector3(25, 0, 0), 40);
-            UnityEngine.Object.DestroyImmediate(cube); UnityEngine.Object.DestroyImmediate(l.gameObject);
-        }
 
         PlayerSettings.companyName = "noobclaw";
         PlayerSettings.productName = "Souq Tycoon";
