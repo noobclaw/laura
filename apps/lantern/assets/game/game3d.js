@@ -333,7 +333,9 @@ gl.addEventListener("pointerup",()=>{if(drag&&!drag.moved)setCell(drag.k,(S.cell
 gl.addEventListener("pointercancel",()=>{drag=null});
 $("undo").onclick=()=>{if(S.done)return;sfx.tap();S.combo=0;let u=S.undo.pop();while(u){S.cells[u[0]]=u[1];S.at[u[0]]=performance.now();sync(u[0]);if(!u[2])break;u=S.undo.pop()}S.hintCell=-1;pips()};
 $("reset").onclick=()=>{if(S.done&&!S.failed)return;sfx.tap();start(true)};
-const saveInv=()=>{save("inv.hints",S.inv.hints);save("inv.blasts",S.inv.blasts)};
+// Bought items are kept twice: in the page's own storage and, through the app, in native storage. The web
+// view's storage can be cleared by the system; the native copy is what brings paid items back in that case.
+const saveInv=()=>{save("inv.hints",S.inv.hints);save("inv.blasts",S.inv.blasts);if(typeof toNative==="function"&&native)toNative({type:"save",state:{hints:S.inv.hints,blasts:S.inv.blasts,done:load("iap.done",[])}})};
 $("hint").onclick=()=>{if(S.done)return;if(S.hints<=0&&S.inv.hints<=0){say(tr("noHints"));openShop();return}const h=findHint();if(!h)return;sfx.hint();if(S.hints>0)S.hints--;else{S.inv.hints--;saveInv()}S.used++;if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;say(tr(h.why));text()};
 // rock blast: a paid item that clears every rock at once
 $("blast").onclick=()=>{if(S.done||!S.p||S.screen!=="game")return;if(S.inv.blasts<=0){openShop();return}if(!rocks.length){sfx.tap();return}S.inv.blasts--;saveInv();trauma=Math.min(1,trauma+.5);blast(rocks.length);K.hopV=3.4;const b=$("blast").getBoundingClientRect();burst(b.left+b.width/2,b.top+20,18,"255,160,120",200);text()};
@@ -347,7 +349,7 @@ const PRODUCTS={[ID+"hints10"]:{key:"buyHints",info:"buyHintsInfo",h:10,b:0},[ID
   [ID+"bundle_s"]:{key:"packS",h:40,b:10},[RESCUE]:{key:"packM",h:80,b:25},[ID+"bundle_l"]:{key:"packL",h:200,b:70}};
 for(const p of Object.values(PRODUCTS))p.give=()=>{S.inv.hints+=p.h;S.inv.blasts+=p.b};
 const fill=(k,o)=>tr(k).replace(/\{(\w)\}/g,(m,c)=>o[c]);
-const native=window.LanternNative&&typeof window.LanternNative.postMessage==="function"?window.LanternNative:null,prices=load("iap.prices",{});let shopMsg="";
+const native=window.LanternNative&&typeof window.LanternNative.postMessage==="function"?window.LanternNative:null,prices=load("iap.prices",{});let shopMsg="",busy=0; // busy: time a purchase was started; taps on buy are ignored while one is open
 const toNative=o=>{try{native.postMessage(JSON.stringify(o))}catch(e){}};
 function shopText(){const el=$("shopList");if(!el)return;$("inv").textContent=fill("invLine",{h:S.inv.hints,b:S.inv.blasts});
   el.innerHTML=Object.entries(PRODUCTS).map(([id,p])=>`<div class="item${p.info?"":" pack"}"><div><b>${tr(p.key)}</b><small>${p.info?tr(p.info):fill("packInfo",p)}</small></div><button class="btn" data-id="${id}">${prices[id]||"…"}</button></div>`).join("");
@@ -357,12 +359,27 @@ function failText(){const has=S.inv.blasts>0,p=PRODUCTS[RESCUE];$("revive").text
   $("failInfo").textContent=has?tr("failInfo"):fill("reviveInfo",p)}
 function revive(){if(!S.failed||S.inv.blasts<=0)return;S.inv.blasts--;saveInv();S.failed=false;S.done=false;S.rockClock=0;S.t0+=Date.now()-(S.failAt||Date.now());
   $("fail").classList.remove("on");blast(rocks.length);K.hopV=3.4;K.cheer=1.5;clearInterval(S.tick);S.tick=setInterval(()=>{$("time").textContent=fmt(Math.round((Date.now()-S.t0)/1000))},500);sfx.hint();text();meter()}
-$("revive").onclick=()=>{if(!S.failed)return;if(S.inv.blasts>0){revive();return}if(!native){openShop();return}sfx.tap();$("revive").textContent=tr("buying");toNative({type:"buy",id:RESCUE})};
+$("revive").onclick=()=>{if(!S.failed)return;if(S.inv.blasts>0){revive();return}if(!native){openShop();return}buy(RESCUE);$("revive").textContent=tr("buying")};
 function openShop(){sfx.tap();shopMsg="";shopText();$("shop").classList.add("on");if(native)toNative({type:"products",ids:Object.keys(PRODUCTS)})}
 window.lanternStore={
   onProducts(list){for(const p of list||[])prices[p.id]=p.price;save("iap.prices",prices);shopText()},
-  onResult(r){const p=PRODUCTS[r&&r.id];if(r&&r.status==="ok"&&p){const seen=load("iap.done",[]);if(r.tx&&seen.includes(r.tx))return;p.give();saveInv();if(r.tx){seen.push(r.tx);save("iap.done",seen.slice(-50))}shopMsg=tr("bought");sfx.win();text();if(S.failed&&r.id===RESCUE)revive()}else if(r&&r.status==="fail"){shopMsg=tr("buyFail");shopText()}else{shopMsg="";shopText()}}};
-$("shopList").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;if(!native){shopMsg=tr("noStore");shopText();return}sfx.tap();shopMsg=tr("buying");shopText();toNative({type:"buy",id:b.dataset.id})};
+  // The app reports every transaction here and closes it with the store only after the page answers "ack".
+  // So a purchase that was paid but not yet added (app killed, page not loaded) is delivered again on the next launch.
+  onResult(r){if(!r)return;busy=0;const p=PRODUCTS[r.id];
+    if(r.status==="ok"){if(!p||!r.tx){shopMsg=tr("buyFail");shopText();return} // unknown item or no transaction id: leave it open with the store
+      const seen=load("iap.done",[]);
+      if(!seen.includes(r.tx)){p.give();seen.push(r.tx);save("iap.done",seen.slice(-200));saveInv();shopMsg=tr("bought");sfx.win();text();if(S.failed&&r.id===RESCUE)revive()}
+      else{shopMsg="";shopText()}
+      toNative({type:"ack",tx:r.tx})}
+    else if(r.status==="fail"){shopMsg=tr("buyFail");shopText()}
+    else if(r.status==="pending"){shopMsg=tr("buyPending");shopText()}
+    else{shopMsg="";shopText()}},
+  // Native copy of the inventory, sent once at launch. It wins over the page's copy when it exists.
+  onRestore(st){if(st&&typeof st.hints==="number"&&typeof st.blasts==="number"){S.inv.hints=Math.max(0,st.hints|0);S.inv.blasts=Math.max(0,st.blasts|0);save("inv.hints",S.inv.hints);save("inv.blasts",S.inv.blasts);
+      if(Array.isArray(st.done))save("iap.done",[...new Set([...load("iap.done",[]),...st.done])].slice(-200));text()}
+    else saveInv()}};
+const buy=id=>{if(Date.now()-busy<90000)return;busy=Date.now();sfx.tap();shopMsg=tr("buying");shopText();toNative({type:"buy",id})};
+$("shopList").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;if(!native){shopMsg=tr("noStore");shopText();return}buy(b.dataset.id)};
 if(native)setTimeout(()=>toNative({type:"products",ids:Object.keys(PRODUCTS)}),1500); // ask for prices at launch so the shop never opens on a placeholder
 $("shopClose").onclick=()=>{sfx.tap();$("shop").classList.remove("on")};$("shopChip").onclick=openShop;
 if(native)toNative({type:"ready"});
