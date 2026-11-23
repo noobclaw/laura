@@ -5,16 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '../../bench/words.dart';
-import '../../bench/rating_nudge.dart';
-import '../engine/engine.dart';
-import '../format.dart';
-import '../pro.dart';
-import '../schematic/document.dart';
-import '../schematic/editing.dart';
-import '../sim/flow.dart';
-import '../sim/simulation.dart';
-import '../store.dart';
+import '../i18n/txt.dart';
+import '../circuit/engine/engine.dart';
+import '../workshop/format.dart';
+import '../workshop/pro.dart';
+import '../circuit/schematic/document.dart';
+import '../circuit/schematic/editing.dart';
+import '../circuit/sim/flow.dart';
+import '../circuit/sim/simulation.dart';
+import '../workshop/store.dart';
 import 'brand.dart';
 import 'haptics.dart';
 import 'lab_theme.dart';
@@ -191,9 +190,9 @@ class _EditorScreenState extends State<EditorScreen>
         ..clearSnackBars()
         ..showSnackBar(SnackBar(
           duration: BenchMotion.undoWindow,
-          content: Text(tr(zh: '已撤销:$label', en: 'Undid: $label')),
+          content: Text(Txt.undid(label)),
           action: SnackBarAction(
-            label: tr(zh: '重做', en: 'Redo'),
+            label: Txt.redo,
             onPressed: () {
               if (mounted) _redo();
             },
@@ -226,17 +225,14 @@ class _EditorScreenState extends State<EditorScreen>
     if (kind != PartKind.ground && widget.store.partLimitReached(_doc)) {
       await showProSheet(
         context,
-        reason: tr(
-          zh: '免费版每张电路图最多 ${ProjectStore.freeParts} 个元件(接地不算)。',
-          en: 'The free version allows ${ProjectStore.freeParts} parts per circuit (ground is free).',
-        ),
+        reason: Txt.freeVersionAllowsParts(ProjectStore.freeParts),
       );
       return;
     }
     BenchHaptics.commit();
     final origin = _freeSpotNearCentre(kind);
     final (next, part) = _doc.addPart(kind, origin);
-    _commit(next, tr(zh: '添加 ${part.id}', en: 'Add ${part.id}'));
+    _commit(next, Txt.add(part.id));
     setState(() => _selection = {part.id});
     final pins = part.pins;
     _burst(
@@ -289,7 +285,7 @@ class _EditorScreenState extends State<EditorScreen>
     for (final p in parts) {
       next = next.replacePart(p.rotated());
     }
-    _commit(next, tr(zh: '旋转', en: 'Rotate'));
+    _commit(next, Txt.rotate);
   }
 
   /// Deletes at once; the snackbar (and the top bar) offer Undo (F4).
@@ -299,7 +295,7 @@ class _EditorScreenState extends State<EditorScreen>
     final count = _selection.length;
     final next = _doc.removeIds(_selection);
     setState(() => _selection = {});
-    _commit(next, tr(zh: '删除 $count 项', en: 'Delete $count'));
+    _commit(next, Txt.delete(count));
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
@@ -308,13 +304,10 @@ class _EditorScreenState extends State<EditorScreen>
               ? BenchMotion.undoWindow * 5
               : BenchMotion.undoWindow,
           content: Text(
-            tr(
-              zh: '已删除 $count 项',
-              en: 'Deleted $count ${count == 1 ? 'item' : 'items'}',
-            ),
+            Txt.deleted(count, count == 1 ? 'item' : 'items'),
           ),
           action: SnackBarAction(
-            label: tr(zh: '撤销', en: 'Undo'),
+            label: Txt.undo,
             onPressed: () {
               if (mounted) _undo();
             },
@@ -336,7 +329,7 @@ class _EditorScreenState extends State<EditorScreen>
           resetValue: updated.valueOverride == null,
         ),
       ),
-      tr(zh: '修改 ${part.id}', en: 'Edit ${part.id}'),
+      Txt.edit(part.id),
     );
   }
 
@@ -344,7 +337,7 @@ class _EditorScreenState extends State<EditorScreen>
     BenchHaptics.select();
     final flipped = part.copyWith(closed: !part.closed);
     final next = _doc.replacePart(flipped);
-    _history.push(next, tr(zh: '拨动 ${part.id}', en: 'Flip ${part.id}'));
+    _history.push(next, Txt.flip(part.id));
     setState(() => _doc = next);
     widget.store.updateDocument(_project, next);
     // A flip continues the running simulation from where it is, so a
@@ -533,7 +526,7 @@ class _EditorScreenState extends State<EditorScreen>
         if (dx != 0 || dy != 0) {
           final count = _drag!.ids.length;
           BenchHaptics.commit();
-          _commit(_doc, tr(zh: '移动 $count 项', en: 'Move $count'));
+          _commit(_doc, Txt.move(count));
         }
       case _Gesture.wire:
         final a = _wireStart!;
@@ -544,7 +537,7 @@ class _EditorScreenState extends State<EditorScreen>
             (next, _) = next.addWire(from, to);
           }
           BenchHaptics.commit();
-          _commit(next, tr(zh: '连线', en: 'Wire'));
+          _commit(next, Txt.wire);
           _burst(Offset(b.x.toDouble(), b.y.toDouble()), Bench.charge);
         }
       default:
@@ -624,10 +617,7 @@ class _EditorScreenState extends State<EditorScreen>
           BenchHaptics.commit();
           _commit(
             _doc,
-            tr(
-              zh: '移动 ${_drag!.ids.length} 项',
-              en: 'Move ${_drag!.ids.length}',
-            ),
+            Txt.move2(_drag!.ids.length),
           );
         }
       }
@@ -681,7 +671,7 @@ class _EditorScreenState extends State<EditorScreen>
     });
     // Only a run the user asked for counts toward the review prompt's
     // "third completed simulation", not the reruns that follow edits.
-    if (await _startRun()) RatingNudge.noteCoreAction();
+    await _startRun();
   }
 
   void _stop() {
@@ -1032,10 +1022,7 @@ class _EditorScreenState extends State<EditorScreen>
         ? _route(_wireStart!, _wireEnd!)
         : const <(GridPoint, GridPoint)>[];
     return Semantics(
-      label: tr(
-        zh: '电路画布,${_doc.parts.length} 个元件。拖动移动,从引脚拖出连线,双指缩放',
-        en: 'Circuit canvas, ${_doc.parts.length} parts. Drag to move, drag from a pin to wire, pinch to zoom',
-      ),
+      label: Txt.circuitCanvasPartsDrag(_doc.parts.length),
       child: Listener(
         onPointerDown: _onPointerDown,
         onPointerUp: _onPointerGone,
@@ -1078,13 +1065,13 @@ class _EditorScreenState extends State<EditorScreen>
     final List<double> values;
     final String unit;
     if (_probePart != null && run.partSeries.containsKey(_probePart)) {
-      title = tr(zh: '$_probePart 的电流', en: 'Current through $_probePart');
+      title = Txt.currentThrough(_probePart);
       values = run.partSeries[_probePart]!;
       unit = 'A';
     } else if (_probeNode != null) {
       title = _probeNode == kGroundNode
-          ? tr(zh: '接地(参考点,恒为 0 V)', en: 'Ground (the reference, always 0 V)')
-          : tr(zh: '节点电压(对地)', en: 'Node voltage (to ground)');
+          ? Txt.groundReferenceAlways0
+          : Txt.nodeVoltageGround;
       values = run.nodeSeries[_probeNode] ?? _zeros(run.length);
       unit = 'V';
     } else {
@@ -1098,10 +1085,7 @@ class _EditorScreenState extends State<EditorScreen>
       cursor: sample,
       cursorTime: run.timeOffset + (run.times.isEmpty ? 0 : run.times[sample]),
       slowdown: slowdown,
-      hint: tr(
-        zh: '点导线看电压,点元件看电流',
-        en: 'Tap a wire for its voltage, a part for its current',
-      ),
+      hint: Txt.tapWireItsVoltage,
       onClose: () => setState(() => _scopeOpen = false),
     );
   }
@@ -1139,10 +1123,7 @@ class _EditorScreenState extends State<EditorScreen>
     if (widget.store.atProjectLimit) {
       await showProSheet(
         context,
-        reason: tr(
-          zh: '免费版保存 ${ProjectStore.freeProjects} 张电路图,你已经有了。示例可以随便运行和修改,只是不能再存一份。',
-          en: 'The free version keeps ${ProjectStore.freeProjects} circuit and you already have one. Examples still run and edit freely; they just cannot be saved as another.',
-        ),
+        reason: Txt.freeVersionKeepsCircuit(ProjectStore.freeProjects),
       );
       return;
     }
@@ -1153,10 +1134,7 @@ class _EditorScreenState extends State<EditorScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          tr(
-            zh: '已存为「${saved.name}」,之后的每一步都会自动保存',
-            en: 'Saved as "${saved.name}". Every step from now on saves itself.',
-          ),
+          Txt.savedEveryStepFrom(saved.name),
         ),
       ),
     );
@@ -1177,14 +1155,14 @@ Future<String?> showRenameDialog(BuildContext context, String current) {
   return showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(tr(zh: '重命名', en: 'Rename')),
+      title: Text(Txt.rename),
       content: TextField(
         controller: controller,
         autofocus: true,
         maxLength: 60,
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(
-          hintText: tr(zh: '电路名称', en: 'Circuit name'),
+          hintText: Txt.circuitName,
         ),
         onSubmitted: (v) =>
             Navigator.of(ctx).pop(v.trim().isEmpty ? null : v.trim()),
@@ -1192,14 +1170,14 @@ Future<String?> showRenameDialog(BuildContext context, String current) {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
-          child: Text(tr(zh: '取消', en: 'Cancel')),
+          child: Text(Txt.cancel),
         ),
         FilledButton(
           onPressed: () {
             final v = controller.text.trim();
             Navigator.of(ctx).pop(v.isEmpty ? null : v);
           },
-          child: Text(tr(zh: '保存', en: 'Save')),
+          child: Text(Txt.save),
         ),
       ],
     ),
@@ -1244,7 +1222,7 @@ class _TopBar extends StatelessWidget {
         child: Row(
           children: [
             IconButton(
-              tooltip: tr(zh: '返回', en: 'Back'),
+              tooltip: Txt.back,
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: onBack,
             ),
@@ -1252,11 +1230,8 @@ class _TopBar extends StatelessWidget {
               child: Pressable(
                 onTap: onRename,
                 label: scratch
-                    ? tr(
-                        zh: '$name(示例),存为我的电路',
-                        en: '$name (example), save as my circuit',
-                      )
-                    : tr(zh: '$name,重命名', en: '$name, rename'),
+                    ? Txt.exampleSaveMyCircuit(name)
+                    : Txt.rename2(name),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: BenchSpace.xs,
@@ -1287,7 +1262,7 @@ class _TopBar extends StatelessWidget {
                               border: Border.all(color: Bench.outline),
                             ),
                             child: Text(
-                              tr(zh: '示例', en: 'Example'),
+                              Txt.example,
                               style: BenchType.monoStyle(
                                 BenchType.label,
                                 color: Bench.inkDim,
@@ -1309,7 +1284,7 @@ class _TopBar extends StatelessWidget {
             ),
             if (scratch)
               IconButton(
-                tooltip: tr(zh: '存为我的电路', en: 'Save as my circuit'),
+                tooltip: Txt.saveMyCircuit,
                 icon: const Icon(
                   Icons.bookmark_add_outlined,
                   color: Bench.charge,
@@ -1317,17 +1292,17 @@ class _TopBar extends StatelessWidget {
                 onPressed: onSaveCopy,
               ),
             PopupMenuButton<String>(
-              tooltip: tr(zh: '更多', en: 'More'),
+              tooltip: Txt.more,
               icon: const Icon(Icons.more_vert_rounded, color: Bench.ink),
               onSelected: (v) => v == 'fit' ? onFit() : onHelp(),
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'fit',
-                  child: Text(tr(zh: '适配屏幕', en: 'Fit to screen')),
+                  child: Text(Txt.fitScreen),
                 ),
                 PopupMenuItem(
                   value: 'help',
-                  child: Text(tr(zh: '手势说明', en: 'Gestures')),
+                  child: Text(Txt.gestures),
                 ),
               ],
             ),
@@ -1424,7 +1399,7 @@ class _EmptyBench extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    tr(zh: '从下方选一个元件开始', en: 'Pick a part below to start'),
+                    Txt.pickPartBelowStart,
                     textAlign: TextAlign.center,
                     style: BenchType.bodyStyle(
                       size: BenchType.title,
@@ -1433,10 +1408,7 @@ class _EmptyBench extends StatelessWidget {
                   ),
                   const SizedBox(height: BenchSpace.s),
                   Text(
-                    tr(
-                      zh: '它会落在上面这个位置。从引脚拖出去就是连线,别忘了放一个接地。',
-                      en: 'It lands right where the outline is. Drag from a pin to wire it, and remember a ground.',
-                    ),
+                    Txt.landsRightWhereOutline,
                     textAlign: TextAlign.center,
                     style: BenchType.bodyStyle(color: Bench.inkDim),
                   ),
@@ -1496,72 +1468,48 @@ class _StatusArea extends StatelessWidget {
       switch (problem) {
         case RunProblem.empty:
           return (
-            tr(
-              zh: '画布是空的,先放几个元件',
-              en: 'The bench is empty. Add some parts first',
-            ),
+            Txt.benchEmptyAddSome,
             _Severity.warning,
           );
         case RunProblem.noGround:
           return (
-            tr(
-              zh: '缺少接地:放一个「接地」,电压才有参考点',
-              en: 'No ground: add a Ground part so voltages have a reference',
-            ),
+            Txt.noGroundAddGround,
             _Severity.warning,
           );
         case RunProblem.invalidValues:
           return (
-            tr(
-              zh: '${netlistBuild.invalidPartIds.join('、')} 的数值无法仿真(必须大于 0)',
-              en: '${netlistBuild.invalidPartIds.join(', ')}: value must be greater than zero',
-            ),
+            Txt.valueMustGreaterThan(netlistBuild.invalidPartIds.join(', '), netlistBuild.invalidPartIds.join('、')),
             _Severity.error,
           );
         case RunProblem.failed:
           if (notes.contains(SolverNote.singular)) {
             return (
-              tr(
-                zh: '短路:某个电压源被导线直接短接,或两个电源互相顶牛。没有显示任何数值。',
-                en: 'Short circuit: a source is shorted by a wire, or two sources fight. No numbers shown.',
-              ),
+              Txt.shortCircuitSourceShorted,
               _Severity.error,
             );
           }
           return (
-            tr(
-              zh: '未收敛:这个电路没有可信的解,所以一个数都不显示',
-              en: 'Did not converge: no trustworthy answer, so no numbers are shown',
-            ),
+            Txt.didNotConvergeNo,
             _Severity.error,
           );
         case null:
       }
       if (run != null && !run!.completed) {
         return (
-          tr(
-            zh: '在 ${formatSi(run!.window, 's')} 处未收敛,之后的波形不显示',
-            en: 'Stopped converging at ${formatSi(run!.window, 's')}; nothing after it is shown',
-          ),
+          Txt.stoppedConvergingNothingAfter(formatSi(run!.window, 's')),
           _Severity.error,
         );
       }
       if (notes.contains(SolverNote.floatingNodesTiedToGround)) {
         return (
-          tr(
-            zh: '有元件悬空(没接到电路里),它上面的读数没有意义',
-            en: 'Something is floating (not connected); its readings mean nothing',
-          ),
+          Txt.somethingFloatingNotConnected,
           _Severity.warning,
         );
       }
     }
     if (netlistBuild.shortedPartIds.isNotEmpty) {
       return (
-        tr(
-          zh: '${netlistBuild.shortedPartIds.join('、')} 被短接:两个引脚落在同一根导线上',
-          en: '${netlistBuild.shortedPartIds.join(', ')} is shorted: both pins touch the same wire',
-        ),
+        Txt.shortedBothPinsTouch(netlistBuild.shortedPartIds.join(', '), netlistBuild.shortedPartIds.join('、')),
         _Severity.warning,
       );
     }
@@ -1688,12 +1636,9 @@ class _SelectionBar extends StatelessWidget {
       final value = partValueLabel(single);
       label = value.isEmpty ? single.id : '${single.id} · $value';
     } else if (parts.isEmpty && wireCount == 1) {
-      label = tr(zh: '导线', en: 'Wire');
+      label = Txt.wire2;
     } else {
-      label = tr(
-        zh: '已选 ${parts.length + wireCount} 项',
-        en: '${parts.length + wireCount} selected',
-      );
+      label = Txt.selected(parts.length + wireCount);
     }
     return Container(
       padding: const EdgeInsets.fromLTRB(BenchSpace.m, 0, 0, 0),
@@ -1715,7 +1660,7 @@ class _SelectionBar extends StatelessWidget {
           if (single != null && hasEditableValue(single.kind))
             _BarButton(
               icon: Icons.tune_rounded,
-              tooltip: tr(zh: '改数值', en: 'Edit value'),
+              tooltip: Txt.editValue,
               onTap: () => onEdit(single),
             ),
           if (single != null && single.kind == PartKind.toggleSwitch)
@@ -1724,19 +1669,19 @@ class _SelectionBar extends StatelessWidget {
                   ? Icons.toggle_on_rounded
                   : Icons.toggle_off_rounded,
               tooltip: single.closed
-                  ? tr(zh: '断开', en: 'Open')
-                  : tr(zh: '闭合', en: 'Close'),
+                  ? Txt.open
+                  : Txt.close,
               onTap: () => onFlip(single),
             ),
           if (parts.isNotEmpty)
             _BarButton(
               icon: Icons.rotate_90_degrees_cw_outlined,
-              tooltip: tr(zh: '旋转', en: 'Rotate'),
+              tooltip: Txt.rotate,
               onTap: onRotate,
             ),
           _BarButton(
             icon: Icons.delete_outline_rounded,
-            tooltip: tr(zh: '删除', en: 'Delete'),
+            tooltip: Txt.delete2,
             color: Bench.error,
             onTap: onDelete,
           ),
@@ -1795,8 +1740,8 @@ class _RunButtonState extends State<_RunButton> {
     return Semantics(
       button: true,
       label: running
-          ? tr(zh: '停止仿真', en: 'Stop simulation')
-          : tr(zh: '运行仿真', en: 'Run simulation'),
+          ? Txt.stopSimulation
+          : Txt.runSimulation,
       child: GestureDetector(
         key: const ValueKey('run-button'),
         onTapDown: (_) => setState(() => _pressed = true),
@@ -1910,8 +1855,8 @@ class _Palette extends StatelessWidget {
               children: [
                 IconButton(
                   tooltip: undoLabel == null
-                      ? tr(zh: '撤销', en: 'Undo')
-                      : tr(zh: '撤销:$undoLabel', en: 'Undo: $undoLabel'),
+                      ? Txt.undo
+                      : Txt.undo2(undoLabel),
                   icon: const Icon(Icons.undo_rounded),
                   color: Bench.ink,
                   disabledColor: Bench.neutral,
@@ -1919,8 +1864,8 @@ class _Palette extends StatelessWidget {
                 ),
                 IconButton(
                   tooltip: redoLabel == null
-                      ? tr(zh: '重做', en: 'Redo')
-                      : tr(zh: '重做:$redoLabel', en: 'Redo: $redoLabel'),
+                      ? Txt.redo
+                      : Txt.redo2(redoLabel),
                   icon: const Icon(Icons.redo_rounded),
                   color: Bench.ink,
                   disabledColor: Bench.neutral,
@@ -1945,11 +1890,8 @@ class _Palette extends StatelessWidget {
                     ),
                     child: IconButton(
                       tooltip: wireTool
-                          ? tr(
-                              zh: '连线模式已开:在画布任意处拖动画线',
-                              en: 'Wire mode on: drag anywhere to draw',
-                            )
-                          : tr(zh: '连线模式', en: 'Wire mode'),
+                          ? Txt.wireModeDragAnywhere
+                          : Txt.wireMode,
                       icon: BenchGlyph(
                         GlyphKind.wire,
                         color: wireTool ? Bench.selection : Bench.ink,
@@ -1963,10 +1905,7 @@ class _Palette extends StatelessWidget {
                   child: pro
                       ? const SizedBox.shrink()
                       : Text(
-                          tr(
-                            zh: '元件 $count / ${ProjectStore.freeParts}',
-                            en: 'Parts $count / ${ProjectStore.freeParts}',
-                          ),
+                          Txt.parts(count, ProjectStore.freeParts),
                           textAlign: TextAlign.end,
                           style: BenchType.monoStyle(
                             BenchType.label,
@@ -2011,10 +1950,7 @@ class _PaletteItem extends StatelessWidget {
       message: partKindName(kind),
       child: Pressable(
         onTap: onTap,
-        label: tr(
-          zh: '添加${partKindName(kind)}',
-          en: 'Add ${partKindName(kind)}',
-        ),
+        label: Txt.add2(partKindName(kind)),
         child: Container(
           constraints: const BoxConstraints(minWidth: 72),
           padding: const EdgeInsets.fromLTRB(
@@ -2066,42 +2002,27 @@ class _HelpSheet extends StatelessWidget {
     final rows = <(IconData, String)>[
       (
         Icons.add_circle_outline,
-        tr(zh: '点下方元件:放到屏幕中央', en: 'Tap a part below: it lands mid-screen'),
+        Txt.tapPartBelowLands,
       ),
       (
         Icons.open_with_rounded,
-        tr(
-          zh: '拖元件或导线:移动(贴合栅格)',
-          en: 'Drag a part or wire: move it (snaps to grid)',
-        ),
+        Txt.dragPartWireMove,
       ),
       (
         Icons.polyline_rounded,
-        tr(
-          zh: '从引脚拖出:连线;或打开连线模式在任意处拖',
-          en: 'Drag from a pin: draw a wire, or turn on wire mode',
-        ),
+        Txt.dragFromPinDraw,
       ),
       (
         Icons.crop_free_rounded,
-        tr(
-          zh: '在空白处长按再拖:框选多个',
-          en: 'Long-press empty space and drag: box-select',
-        ),
+        Txt.longPressEmptySpace,
       ),
       (
         Icons.pinch_rounded,
-        tr(
-          zh: '双指:缩放与平移;单指拖空白:平移',
-          en: 'Two fingers: zoom and pan; one finger on empty space: pan',
-        ),
+        Txt.twoFingersZoomPan,
       ),
       (
         Icons.play_circle_outline,
-        tr(
-          zh: '运行中点导线看电压,点元件看电流,点开关拨动',
-          en: 'While running: tap a wire for voltage, a part for current, a switch to flip it',
-        ),
+        Txt.whileRunningTapWire,
       ),
     ];
     return SafeArea(
@@ -2117,7 +2038,7 @@ class _HelpSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              tr(zh: '手势', en: 'Gestures'),
+              Txt.gestures2,
               style: text.titleLarge,
             ),
             const SizedBox(height: BenchSpace.m),

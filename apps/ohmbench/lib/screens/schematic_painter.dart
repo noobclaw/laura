@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../format.dart';
-import '../schematic/document.dart';
-import '../sim/flow.dart';
-import '../sim/simulation.dart';
+import '../workshop/format.dart';
+import '../circuit/schematic/document.dart';
+import '../circuit/sim/flow.dart';
+import '../circuit/sim/simulation.dart';
 import 'lab_theme.dart';
 
 /// Where the drawing sits on screen: `screen = grid * scale + offset`.

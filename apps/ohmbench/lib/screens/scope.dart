@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../bench/words.dart';
-import '../format.dart';
+import '../i18n/txt.dart';
+import '../workshop/format.dart';
 import 'lab_theme.dart';
 
 /// "Nice" step for an axis: 1, 2 or 5 times a power of ten, at least [raw].
@@ -250,7 +250,7 @@ class ScopePanel extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: tr(zh: '收起示波器', en: 'Hide scope'),
+                tooltip: Txt.hideScope,
                 color: Bench.inkDim,
                 icon: const Icon(Icons.close_rounded, size: 20),
                 onPressed: onClose,
@@ -289,16 +289,12 @@ class ScopePanel extends StatelessWidget {
                 Text('t = ${formatSi(cursorTime, 's')}', style: label),
                 if (slowdown < 0.67) ...[
                   Text(
-                      tr(
-                          zh: '快放 ${_round(1 / slowdown)}×',
-                          en: '${_round(1 / slowdown)}× fast'),
+                      Txt.fast(_round(1 / slowdown)),
                       style: label.copyWith(color: Bench.positive)),
                 ],
                 if (slowdown > 1.5) ...[
                   Text(
-                      tr(
-                          zh: '慢放 ${_round(slowdown)}×',
-                          en: '${_round(slowdown)}× slow-mo'),
+                      Txt.slowMo(_round(slowdown)),
                       style: label),
                 ],
               ],

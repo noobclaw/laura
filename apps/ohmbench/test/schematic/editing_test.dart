@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/tool/schematic/document.dart';
-import 'package:ohmbench/tool/schematic/editing.dart';
+import 'package:ohmbench/circuit/schematic/document.dart';
+import 'package:ohmbench/circuit/schematic/editing.dart';
 
 /// The six touch operations the App Store reviewers named, checked at the
 /// model level so the widget layer only has to wire them up (see PLAN.md,

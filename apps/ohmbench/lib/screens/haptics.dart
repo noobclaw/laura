@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../../bench/atomic_file.dart';
+import '../platform/disk_slot.dart';
 
 /// The only place in the app that calls [HapticFeedback] (F14). Call sites
 /// name an event, never an intensity; one event fires once, on the frame the
@@ -15,7 +15,7 @@ abstract final class BenchHaptics {
   /// The in-app master switch (Settings). Persisted on device.
   static final ValueNotifier<bool> enabled = ValueNotifier<bool>(true);
 
-  static final AtomicJsonFile _file = AtomicJsonFile('ohm_prefs.json');
+  static final DiskSlot _file = DiskSlot('feel.json');
   static bool _loaded = false;
 
   /// Read the saved switch. Call once before `runApp`; safe to call again.
@@ -23,7 +23,7 @@ abstract final class BenchHaptics {
     if (_loaded) return;
     _loaded = true;
     try {
-      final raw = await _file.read();
+      final raw = await _file.load();
       if (raw?['haptics'] == false) enabled.value = false;
     } catch (e) {
       debugPrint('prefs load skipped: $e');
@@ -32,7 +32,7 @@ abstract final class BenchHaptics {
 
   static void setEnabled(bool on) {
     enabled.value = on;
-    _file.write({'haptics': on});
+    _file.put({'haptics': on});
   }
 
   static void run() => _fire(HapticFeedback.mediumImpact);

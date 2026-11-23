@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../bench/identity.dart';
-import '../../bench/words.dart';
-import '../../bench/checkout.dart';
-import '../pro.dart';
-import '../store.dart';
+import '../app/app_info.dart';
+import '../app/unlock_ui.dart';
+import '../i18n/lang.dart';
+import '../i18n/txt.dart';
+import '../platform/unlock_service.dart';
+import '../workshop/pro.dart';
+import '../workshop/store.dart';
 import 'brand.dart';
 import 'haptics.dart';
 import 'lab_theme.dart';
@@ -19,7 +21,7 @@ class OhmSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr(zh: '实验台设置', en: 'Bench settings'))),
+      appBar: AppBar(title: Text(Txt.benchSettings)),
       body: ListenableBuilder(
         listenable: store,
         builder: (context, _) => ListView(
@@ -30,11 +32,11 @@ class OhmSettingsScreen extends StatelessWidget {
             const SizedBox(height: BenchSpace.l),
             _ProModule(store: store),
             const SizedBox(height: BenchSpace.xl),
-            _SectionLabel(tr(zh: '这台设备', en: 'This device')),
+            _SectionLabel(Txt.device),
             _Panel(children: [
               _Row(
                 icon: Icons.memory_rounded,
-                title: tr(zh: '保存的电路', en: 'Saved circuits'),
+                title: Txt.savedCircuits,
                 trailing: Text(
                   '${store.projects.length}',
                   style: BenchType.monoStyle(BenchType.body, bold: true),
@@ -42,20 +44,18 @@ class OhmSettingsScreen extends StatelessWidget {
               ),
               _Row(
                 icon: Icons.wifi_off_rounded,
-                title: tr(zh: '网络权限', en: 'Network permission'),
-                trailing: Text(tr(zh: '无', en: 'None'),
+                title: Txt.networkPermission,
+                trailing: Text(Txt.none,
                     style: const TextStyle(color: Bench.inkDim)),
               ),
               ValueListenableBuilder<bool>(
                 valueListenable: BenchHaptics.enabled,
                 builder: (context, on, _) => _Row(
                   icon: Icons.vibration_rounded,
-                  title: tr(zh: '触感反馈', en: 'Haptics'),
-                  subtitle: tr(
-                      zh: '运行、放置元件、连线时轻震一下',
-                      en: 'A light tap when you run, place a part or wire'),
+                  title: Txt.haptics,
+                  subtitle: Txt.lightTapWhenRun,
                   trailing: Semantics(
-                    label: tr(zh: '触感反馈', en: 'Haptics'),
+                    label: Txt.haptics,
                     child: Switch.adaptive(
                       value: on,
                       onChanged: (v) {
@@ -67,29 +67,29 @@ class OhmSettingsScreen extends StatelessWidget {
                 ),
               ),
               ValueListenableBuilder<String?>(
-                valueListenable: BenchLanguage.override,
+                valueListenable: Lang.picked,
                 builder: (context, code, _) => _Row(
                   icon: Icons.translate_rounded,
-                  title: tr(zh: '语言', en: 'Language'),
-                  trailing: Text(BenchLanguage.label(code),
+                  title: Txt.language,
+                  trailing: Text(code == null ? Txt.followSystem : Lang.nativeName(code),
                       style: const TextStyle(color: Bench.inkDim)),
                   onTap: () => _pickLanguage(context, code),
                 ),
               ),
             ]),
             const SizedBox(height: BenchSpace.xl),
-            _SectionLabel(tr(zh: '说明', en: 'Small print')),
+            _SectionLabel(Txt.smallPrint),
             _Panel(children: [
               _Row(
                 icon: Icons.privacy_tip_outlined,
-                title: tr(zh: '隐私政策', en: 'Privacy policy'),
-                onTap: () => _open(context, tr(zh: '隐私政策', en: 'Privacy policy'),
-                    OhmIdentity.privacyPolicy),
+                title: Txt.privacyPolicy,
+                onTap: () => _open(context, Txt.privacyPolicy,
+                    AppInfo.privacyPolicy),
               ),
               _Row(
                 icon: Icons.functions_rounded,
-                title: tr(zh: '引擎与致谢', en: 'Engine & credits'),
-                onTap: () => _open(context, tr(zh: '引擎与致谢', en: 'Engine & credits'),
+                title: Txt.engineCredits,
+                onTap: () => _open(context, Txt.engineCredits,
                     _credits(),
                     licences: true),
               ),
@@ -100,16 +100,7 @@ class OhmSettingsScreen extends StatelessWidget {
     );
   }
 
-  static String _credits() => tr(
-        zh: '求解器:改进节点法(MNA)+ 牛顿迭代 + 梯形积分,收敛容差沿用 SPICE 默认值(RELTOL 1e-3、VNTOL 1µV、ABSTOL 1pA)。\n\n'
-            '结点限压、gmin 阶梯与源阶梯算法移植自 SpiceSharp(MIT 许可),© 2017 svenboulanger。\n\n'
-            '触屏交互的抓取半径与拖动阈值参考了开源桌面电路仿真器的交互参数(仅参考行为,未使用其代码)。\n\n'
-            '${OhmIdentity.appName} ${OhmIdentity.version}',
-        en: 'Solver: modified nodal analysis with Newton iteration and trapezoidal integration, using SPICE default tolerances (RELTOL 1e-3, VNTOL 1 µV, ABSTOL 1 pA).\n\n'
-            'Junction limiting and the gmin/source stepping ladder are ported from SpiceSharp (MIT licence), © 2017 svenboulanger.\n\n'
-            'Touch grab radius and drag threshold follow the interaction parameters of an open-source desktop circuit simulator (behaviour only; none of its code is used).\n\n'
-            '${OhmIdentity.appName} ${OhmIdentity.version}',
-      );
+  static String _credits() => Txt.solverModifiedNodalAnalysis(AppInfo.name, AppInfo.version);
 
   void _open(BuildContext context, String title, String body,
       {bool licences = false}) {
@@ -128,11 +119,11 @@ class OhmSettingsScreen extends StatelessWidget {
                 _Panel(children: [
                   _Row(
                     icon: Icons.description_outlined,
-                    title: tr(zh: '开源许可', en: 'Open-source licences'),
+                    title: Txt.openSourceLicences,
                     onTap: () => showLicensePage(
                       context: ctx,
-                      applicationName: OhmIdentity.appName,
-                      applicationVersion: OhmIdentity.version,
+                      applicationName: AppInfo.name,
+                      applicationVersion: AppInfo.version,
                     ),
                   ),
                 ]),
@@ -153,13 +144,13 @@ class OhmSettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (final c in <String?>[null, ...BenchLanguage.choices])
+            for (final c in <String?>[null, ...Lang.supported])
               ListTile(
                 leading: Icon(
                   c == current ? Icons.radio_button_checked : Icons.radio_button_off,
                   color: c == current ? Bench.charge : Bench.inkDim,
                 ),
-                title: Text(BenchLanguage.label(c)),
+                title: Text(c == null ? Txt.followSystem : Lang.nativeName(c)),
                 onTap: () => Navigator.pop(ctx, c ?? system),
               ),
             const SizedBox(height: 8),
@@ -168,7 +159,7 @@ class OhmSettingsScreen extends StatelessWidget {
       ),
     );
     if (chosen == null) return;
-    await BenchLanguage.set(chosen == system ? null : chosen);
+    Lang.pick(chosen == system ? null : chosen);
   }
 }
 
@@ -178,7 +169,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '${OhmIdentity.appName} ${OhmIdentity.version}',
+      label: '${AppInfo.name} ${AppInfo.version}',
       excludeSemantics: true,
       child: Row(
         children: [
@@ -191,9 +182,7 @@ class _Header extends StatelessWidget {
                 const OhmWordmark(),
                 const SizedBox(height: BenchSpace.xs),
                 Text(
-                  tr(
-                      zh: '离线电路仿真 · 版本 ${OhmIdentity.version}',
-                      en: 'Offline circuit simulator · v${OhmIdentity.version}'),
+                  Txt.offlineCircuitSimulatorV(AppInfo.version),
                   style: BenchType.monoStyle(BenchType.label,
                       color: Bench.inkDim),
                 ),
@@ -218,10 +207,8 @@ class _ProModule extends StatelessWidget {
         _Row(
           icon: Icons.bolt_rounded,
           iconColor: Bench.charge,
-          title: tr(zh: 'Pro 已解锁', en: 'Pro unlocked'),
-          subtitle: tr(
-              zh: '不限元件、不限电路,谢谢支持',
-              en: 'Unlimited parts and circuits. Thank you.'),
+          title: Txt.proUnlocked,
+          subtitle: Txt.unlimitedPartsCircuitsThank,
         ),
       ]);
     }
@@ -242,28 +229,25 @@ class _ProModule extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             alignment: WrapAlignment.spaceBetween,
             children: [
-              Text(tr(zh: '解锁 Pro(一次买断)', en: 'Unlock Pro (one-time)'),
+              Text(Txt.unlockProOneTime,
                   style: BenchType.bodyStyle(
                       size: BenchType.title, weight: FontWeight.w700)),
               FilledButton(
                 onPressed: () => showProSheet(context),
-                child: const StorePrice(fallback: r'$4.99'),
+                child: const PriceTag(fallback: r'$4.99'),
               ),
             ],
           ),
           const SizedBox(height: BenchSpace.s),
           Text(
-            tr(
-              zh: '免费版:1 张电路、每张 12 个元件。Pro 解除两个上限,引擎和精度完全相同。',
-              en: 'Free: one circuit, twelve parts each. Pro lifts both limits; the engine and accuracy are the same.',
-            ),
+            Txt.freeOneCircuitTwelve,
             style: BenchType.bodyStyle(color: Bench.inkDim),
           ),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () => BenchCheckout.instance.restore(),
-              child: Text(tr(zh: '恢复购买', en: 'Restore purchase')),
+              onPressed: () => UnlockService.shared.restorePurchases(),
+              child: Text(Txt.restorePurchase),
             ),
           ),
         ],

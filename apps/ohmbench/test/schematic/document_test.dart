@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/tool/engine/engine.dart';
-import 'package:ohmbench/tool/schematic/document.dart';
+import 'package:ohmbench/circuit/engine/engine.dart';
+import 'package:ohmbench/circuit/schematic/document.dart';
 
 /// Connectivity and persistence: the bridge between what the user draws and
 /// what the solver runs, plus "my work is still there after the app was

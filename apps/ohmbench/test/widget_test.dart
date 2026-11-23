@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/main.dart';
-import 'package:ohmbench/tool/examples.dart';
-import 'package:ohmbench/tool/store.dart';
-import 'package:ohmbench/tool/ui/brand.dart';
-import 'package:ohmbench/tool/ui/editor_screen.dart';
+import 'package:ohmbench/app/bench_app.dart';
+import 'package:ohmbench/workshop/ohmbench_tool.dart';
+import 'package:ohmbench/workshop/examples.dart';
+import 'package:ohmbench/workshop/store.dart';
+import 'package:ohmbench/screens/brand.dart';
+import 'package:ohmbench/screens/editor_screen.dart';
 
 void main() {
   testWidgets('the library boots with its live bench and examples',
       (tester) async {
-    await tester.pumpWidget(const OhmBenchApp());
+    await tester.pumpWidget(
+        BenchApp(workbench: Workbench.bare(OhmBenchTool())));
     await tester.pump(const Duration(milliseconds: 300));
 
     // The first screen is the bench: no app bar, the wordmark sits on it.

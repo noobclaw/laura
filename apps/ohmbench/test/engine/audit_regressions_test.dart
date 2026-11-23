@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/tool/engine/engine.dart';
+import 'package:ohmbench/circuit/engine/engine.dart';
 
 /// Regressions for the 2026-09-19 G2 audit (apps/ohmbench/AUDIT-G2.md).
 /// Every test here failed, or passed for the wrong reason, on the spike.

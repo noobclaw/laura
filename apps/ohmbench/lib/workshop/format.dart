@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'schematic/document.dart';
+import '../circuit/schematic/document.dart';
 
 /// SI-prefixed numbers, the way an electronics person writes them.
 ///

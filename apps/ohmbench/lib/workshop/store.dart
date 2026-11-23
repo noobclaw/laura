@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../bench/atomic_file.dart';
-import 'schematic/document.dart';
+import '../platform/disk_slot.dart';
+import '../circuit/schematic/document.dart';
 
 /// One saved circuit.
 class Project {
@@ -65,16 +65,16 @@ int countedParts(SchematicDocument doc) =>
 /// damaged project file can never revoke a purchase, and vice versa.
 class ProjectStore extends ChangeNotifier {
   ProjectStore() {
-    _file = AtomicJsonFile(
-      'ohmbench_projects.json',
-      onTrouble: _trouble,
+    _file = DiskSlot(
+      'circuits.json',
+      onProblem: _trouble,
       // Only a failed save is cured by a later successful one. A damaged
       // file set aside, or entries that could not be read, stay reported.
-      onWritten: () {
+      onSaved: () {
         if (storageTrouble.value == 'save') storageTrouble.value = null;
       },
     );
-    _proFile = AtomicJsonFile('ohmbench_pro.json', onTrouble: _trouble);
+    _proFile = DiskSlot('unlock.json', onProblem: _trouble);
   }
 
   /// Free tier: one saved circuit of up to twelve parts. Enough for a
@@ -83,8 +83,8 @@ class ProjectStore extends ChangeNotifier {
   static const int freeProjects = 1;
   static const int freeParts = 12;
 
-  late final AtomicJsonFile _file;
-  late final AtomicJsonFile _proFile;
+  late final DiskSlot _file;
+  late final DiskSlot _proFile;
 
   /// A user-facing sentence when saving or loading went wrong, else null.
   /// The home screen and the editor show it as a banner — a save that fails
@@ -92,16 +92,19 @@ class ProjectStore extends ChangeNotifier {
   final ValueNotifier<String?> storageTrouble = ValueNotifier<String?>(null);
 
   /// Set in [_trouble]; turned into words by the UI, which owns `tr()`.
-  void _trouble(String kind, String detail) {
-    debugPrint('storage $kind: $detail');
-    storageTrouble.value = kind;
+  void _trouble(DiskProblem problem, String detail) {
+    storageTrouble.value = switch (problem) {
+      DiskProblem.unreadable => 'corrupt',
+      DiskProblem.cannotLoad => 'load',
+      DiskProblem.cannotSave => 'save',
+    };
   }
 
   /// True when the projects file could not be read but may still hold the
   /// user's circuits. Saving is refused until the app restarts, so a
   /// transient read error can never become "your circuits were replaced by
   /// an empty list".
-  bool get savingBlocked => _file.readFailed || _foreignFile;
+  bool get savingBlocked => _file.frozen || _foreignFile;
 
   bool _foreignFile = false;
 
@@ -134,11 +137,11 @@ class ProjectStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
-    final proDoc = await _proFile.read();
+    final proDoc = await _proFile.load();
     // Type-checked, not cast: a file that is valid JSON but not ours (a
     // future format, a hand edit) must degrade, never throw out of main().
     pro = proDoc?['pro'] == true;
-    final raw = await _file.read();
+    final raw = await _file.load();
     projects.clear();
     _unreadable.clear();
     final list = raw?['projects'];
@@ -180,7 +183,7 @@ class ProjectStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _savePro() => _proFile.write({'pro': pro});
+  void _savePro() => _proFile.put({'pro': pro});
 
   String _newId() => 'p${DateTime.now().microsecondsSinceEpoch}';
 
@@ -288,14 +291,14 @@ class ProjectStore extends ChangeNotifier {
       _saveTimer!.cancel();
       _write();
     }
-    await _file.flush();
+    await _file.settle();
   }
 
   void _write() {
     // Never write before the file was read, or after it failed to read: both
     // would replace the user's saved circuits with whatever is in memory.
     if (!loaded || savingBlocked) return;
-    _file.write({
+    _file.put({
       'version': 1,
       'projects': [for (final p in projects) p.toJson(), ..._unreadable],
     });

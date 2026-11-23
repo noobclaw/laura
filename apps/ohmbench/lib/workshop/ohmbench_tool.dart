@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'store.dart';
-import 'ui/home_screen.dart';
+import '../screens/home_screen.dart';
 
 /// OhmBench — an offline circuit simulator you can actually edit on a phone.
 ///

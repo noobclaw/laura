@@ -3,13 +3,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/bench/words.dart';
-import 'package:ohmbench/tool/examples.dart';
-import 'package:ohmbench/tool/store.dart';
-import 'package:ohmbench/tool/ui/editor_screen.dart';
-import 'package:ohmbench/tool/ui/home_screen.dart';
-import 'package:ohmbench/tool/ui/lab_theme.dart';
-import 'package:ohmbench/tool/ui/settings_screen.dart';
+import 'package:ohmbench/i18n/lang.dart';
+import 'package:ohmbench/workshop/examples.dart';
+import 'package:ohmbench/workshop/store.dart';
+import 'package:ohmbench/screens/editor_screen.dart';
+import 'package:ohmbench/screens/home_screen.dart';
+import 'package:ohmbench/screens/lab_theme.dart';
+import 'package:ohmbench/screens/settings_screen.dart';
 
 double _contrast(Color a, Color b) {
   final la = a.computeLuminance();
@@ -95,8 +95,8 @@ void main() {
   });
 
   group('home screen accessibility', () {
-    setUp(() => BenchLanguage.override.value = 'en');
-    tearDown(() => BenchLanguage.override.value = null);
+    setUp(() => Lang.picked.value = 'en');
+    tearDown(() => Lang.picked.value = null);
 
     testWidgets('lays out at text scale 2.0 without overflow (F10, V7)',
         (tester) async {
@@ -130,8 +130,8 @@ void main() {
   });
 
   group('editor and settings accessibility', () {
-    setUp(() => BenchLanguage.override.value = 'en');
-    tearDown(() => BenchLanguage.override.value = null);
+    setUp(() => Lang.picked.value = 'en');
+    tearDown(() => Lang.picked.value = null);
 
     Future<void> phone(WidgetTester tester) async {
       tester.view.physicalSize = const Size(1170, 2532);

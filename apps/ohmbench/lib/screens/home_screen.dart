@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../bench/words.dart';
-import '../examples.dart';
-import '../format.dart';
-import '../pro.dart';
-import '../schematic/document.dart';
-import '../sim/simulation.dart';
-import '../store.dart';
+import '../i18n/txt.dart';
+import '../workshop/examples.dart';
+import '../workshop/format.dart';
+import '../workshop/pro.dart';
+import '../circuit/schematic/document.dart';
+import '../circuit/sim/simulation.dart';
+import '../workshop/store.dart';
 import 'brand.dart';
 import 'editor_screen.dart';
 import 'haptics.dart';
@@ -85,10 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!store.atProjectLimit) return true;
     await showProSheet(
       context,
-      reason: tr(
-        zh: '免费版保存 ${ProjectStore.freeProjects} 张电路图。解锁 Pro 可以不限数量地新建和复制。',
-        en: 'The free version keeps ${ProjectStore.freeProjects} circuit. Pro lets you create and duplicate as many as you like.',
-      ),
+      reason: Txt.freeVersionKeepsCircuit2(ProjectStore.freeProjects),
     );
     return false;
   }
@@ -97,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!await _roomForAnother()) return;
     BenchHaptics.commit();
     final project = store.create(
-        tr(zh: '新电路', en: 'New circuit'), const SchematicDocument());
+        Txt.newCircuit, const SchematicDocument());
     await _open(project);
   }
 
@@ -112,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _duplicate(Project project) async {
     if (!await _roomForAnother()) return;
     BenchHaptics.commit();
-    store.duplicate(project, tr(zh: '副本', en: 'copy'));
+    store.duplicate(project, Txt.copy);
   }
 
   Future<void> _rename(Project project) async {
@@ -137,19 +134,15 @@ class _HomeScreenState extends State<HomeScreen> {
         duration: MediaQuery.accessibleNavigationOf(context)
             ? BenchMotion.undoWindow * 5
             : BenchMotion.undoWindow,
-        content: Text(tr(
-            zh: '已删除「${project.name}」', en: 'Deleted "${project.name}"')),
+        content: Text(Txt.deleted2(project.name)),
         action: SnackBarAction(
-          label: tr(zh: '撤销', en: 'Undo'),
+          label: Txt.undo,
           onPressed: () {
             if (store.restore(project, index) || !mounted) return;
             // The free slot was taken meanwhile: say why nothing came back.
             showProSheet(
               context,
-              reason: tr(
-                zh: '「${project.name}」没能恢复:免费版只保存 ${ProjectStore.freeProjects} 张电路,这个位置已经被新电路占了。解锁 Pro 或删掉新电路后可再建。',
-                en: '"${project.name}" could not come back: the free version keeps ${ProjectStore.freeProjects} circuit and a new one has taken the slot. Unlock Pro, or delete the new one.',
-              ),
+              reason: Txt.couldNotComeBack(project.name, ProjectStore.freeProjects),
             );
           },
         ),
@@ -188,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               SliverToBoxAdapter(
                 child: _SectionHeader(
-                  title: tr(zh: '我的电路', en: 'Your circuits'),
+                  title: Txt.circuits,
                   trailing: store.pro
                       ? null
                       : _CountPill(
@@ -225,11 +218,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               SliverToBoxAdapter(
                 child: _SectionHeader(
-                  title: tr(zh: '示例', en: 'Examples'),
-                  caption: tr(
-                    zh: '打开就在运行,改哪儿都行',
-                    en: 'Each one opens already running. Change anything.',
-                  ),
+                  title: Txt.examples,
+                  caption: Txt.eachOneOpensAlready,
                 ),
               ),
               SliverPadding(
@@ -286,8 +276,7 @@ class _BenchHero extends StatelessWidget {
     final top = MediaQuery.paddingOf(context).top;
     return Pressable(
       onTap: onOpen,
-      label: tr(
-          zh: '打开「$title」并运行', en: 'Open "$title" and run it'),
+      label: Txt.openRun(title),
       child: DecoratedBox(
         decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: Bench.panelBorder)),
@@ -324,15 +313,12 @@ class _BenchHero extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          tr(zh: '画出来,跑起来', en: 'Draw it. Run it.'),
+                          Txt.drawRun,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: BenchSpace.xs),
                         Text(
-                          tr(
-                            zh: '上面这块半波整流正在真算:颜色是电压,亮点是电流。',
-                            en: 'This half-wave rectifier is really being solved: colour is voltage, the dots are current.',
-                          ),
+                          Txt.halfWaveRectifierReally,
                           style: BenchType.bodyStyle(color: Bench.inkDim),
                         ),
                       ],
@@ -410,7 +396,7 @@ class _TopRow extends StatelessWidget {
                         bold: true, color: Bench.positive),
                   ),
                   Text(
-                    tr(zh: '电容电压', en: 'across C'),
+                    Txt.acrossC,
                     textAlign: TextAlign.end,
                     textScaler: scaler,
                     style: BenchType.monoStyle(BenchType.label,
@@ -446,7 +432,7 @@ class _RunHint extends StatelessWidget {
           children: [
             const BenchGlyph(GlyphKind.play, size: 14, color: Bench.charge),
             const SizedBox(width: BenchSpace.s),
-            Text(tr(zh: '打开', en: 'Open'),
+            Text(Txt.open2,
                 style: BenchType.bodyStyle(weight: FontWeight.w600)),
           ],
         ),
@@ -507,16 +493,14 @@ class _CountPill extends StatelessWidget {
     // Never colour alone: the words say "full" too. Over the limit (Pro
     // lapsed, or created before the cap) reads as a count, not "2 / 1".
     final text = used > limit
-        ? tr(zh: '$used 张 · 免费上限 $limit', en: '$used · free limit $limit')
+        ? Txt.freeLimit(used, limit)
         : full
-            ? tr(zh: '$used / $limit · 已满', en: '$used / $limit · full')
+            ? Txt.full2(used, limit)
             : '$used / $limit';
     return Tooltip(
-      message: tr(zh: '免费版可保存的数量', en: 'Circuits the free version keeps'),
+      message: Txt.circuitsFreeVersionKeeps,
       child: Semantics(
-        label: tr(
-            zh: '已保存 $used 张,免费版上限 $limit 张',
-            en: '$used of $limit free circuits saved'),
+        label: Txt.freeCircuitsSaved(used, limit),
         excludeSemantics: true,
         child: Container(
           padding: const EdgeInsets.symmetric(
@@ -556,7 +540,7 @@ class _ProjectRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final parts = project.partCount;
     final meta =
-        '${tr(zh: '$parts 个元件', en: '$parts ${parts == 1 ? 'part' : 'parts'}')} · ${_ago(project.updated)}';
+        '${Txt.partCount(parts, parts == 1 ? 'part' : 'parts')} · ${_ago(project.updated)}';
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
@@ -612,7 +596,7 @@ class _ProjectRow extends StatelessWidget {
             ),
           ),
           PopupMenuButton<String>(
-            tooltip: tr(zh: '更多操作', en: 'More actions'),
+            tooltip: Txt.moreActions,
             icon: const Icon(Icons.more_vert_rounded, color: Bench.inkDim),
             onSelected: (v) => switch (v) {
               'rename' => onRename(),
@@ -621,13 +605,13 @@ class _ProjectRow extends StatelessWidget {
             },
             itemBuilder: (_) => [
               PopupMenuItem(
-                  value: 'rename', child: Text(tr(zh: '重命名', en: 'Rename'))),
+                  value: 'rename', child: Text(Txt.rename)),
               PopupMenuItem(
                   value: 'duplicate',
-                  child: Text(tr(zh: '复制一份', en: 'Duplicate'))),
+                  child: Text(Txt.duplicate)),
               PopupMenuItem(
                 value: 'delete',
-                child: Text(tr(zh: '删除', en: 'Delete'),
+                child: Text(Txt.delete2,
                     style: const TextStyle(color: Bench.error)),
               ),
             ],
@@ -640,12 +624,12 @@ class _ProjectRow extends StatelessWidget {
 
   static String _ago(DateTime t) {
     final d = DateTime.now().difference(t);
-    if (d.inMinutes < 1) return tr(zh: '刚刚', en: 'just now');
+    if (d.inMinutes < 1) return Txt.justNow;
     if (d.inHours < 1) {
-      return tr(zh: '${d.inMinutes} 分钟前', en: '${d.inMinutes} min ago');
+      return Txt.minAgo(d.inMinutes);
     }
-    if (d.inDays < 1) return tr(zh: '${d.inHours} 小时前', en: '${d.inHours} h ago');
-    if (d.inDays < 30) return tr(zh: '${d.inDays} 天前', en: '${d.inDays} d ago');
+    if (d.inDays < 1) return Txt.hAgo(d.inHours);
+    if (d.inDays < 30) return Txt.dAgo(d.inDays);
     return '${t.year}-${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')}';
   }
 }
@@ -710,20 +694,17 @@ class _EmptyLibrary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: BenchSpace.m),
-          Text(tr(zh: '第一张电路会出现在这里', en: 'Your first circuit lands here'),
+          Text(Txt.firstCircuitLandsHere,
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: BenchSpace.xs),
           Text(
-            tr(
-              zh: '新建一张空白电路,或打开下面任意一个示例改起来。每一步都自动保存,关掉应用也不会丢。',
-              en: 'Start a new circuit, or open any example below and change it. Every step saves itself, even if the app is closed.',
-            ),
+            Txt.startNewCircuitOpen,
             style: BenchType.bodyStyle(color: Bench.inkDim),
           ),
           const SizedBox(height: BenchSpace.s),
           OutlinedButton(
             onPressed: onNew,
-            child: Text(tr(zh: '新电路', en: 'New circuit')),
+            child: Text(Txt.newCircuit),
           ),
         ],
       ),
@@ -814,7 +795,7 @@ class _Dock extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                tooltip: tr(zh: '设置', en: 'Settings'),
+                tooltip: Txt.settings,
                 icon: const Icon(Icons.tune_rounded, color: Bench.ink),
                 onPressed: onSettings,
               ),
@@ -829,7 +810,7 @@ class _Dock extends StatelessWidget {
                   ),
                   onPressed: onNew,
                   icon: const Icon(Icons.add_rounded),
-                  label: Text(tr(zh: '新电路', en: 'New circuit')),
+                  label: Text(Txt.newCircuit),
                   ),
                 ),
               ),

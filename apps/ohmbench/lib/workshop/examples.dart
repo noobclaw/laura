@@ -1,5 +1,5 @@
-import '../bench/words.dart';
-import 'schematic/document.dart';
+import '../i18n/lang.dart';
+import '../circuit/schematic/document.dart';
 
 /// Built-in starter circuits. Each one is chosen to show something moving
 /// the moment the user taps Run: a steady flow, a capacitor charging, a
@@ -21,8 +21,8 @@ class ExampleCircuit {
   final String blurbEn;
   final SchematicDocument Function() build;
 
-  String get title => tr(zh: titleZh, en: titleEn);
-  String get blurb => tr(zh: blurbZh, en: blurbEn);
+  String get title => bilingual(en: titleEn, zh: titleZh);
+  String get blurb => bilingual(en: blurbEn, zh: blurbZh);
 }
 
 /// Small builder so the layouts below read as a drawing, not as JSON.

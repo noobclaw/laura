@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../schematic/document.dart';
-import '../sim/flow.dart';
-import '../sim/simulation.dart';
+import '../circuit/schematic/document.dart';
+import '../circuit/sim/flow.dart';
+import '../circuit/sim/simulation.dart';
 import 'lab_theme.dart';
 import 'schematic_painter.dart';
 

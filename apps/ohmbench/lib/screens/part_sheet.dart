@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 
-import '../../bench/words.dart';
-import '../format.dart';
-import '../schematic/document.dart';
+import '../i18n/txt.dart';
+import '../workshop/format.dart';
+import '../circuit/schematic/document.dart';
 
 /// Localised name of a part kind.
 String partKindName(PartKind kind) => switch (kind) {
-      PartKind.resistor => tr(zh: '电阻', en: 'Resistor'),
-      PartKind.capacitor => tr(zh: '电容', en: 'Capacitor'),
-      PartKind.inductor => tr(zh: '电感', en: 'Inductor'),
-      PartKind.diode => tr(zh: '二极管', en: 'Diode'),
-      PartKind.dcSource => tr(zh: '直流电压源', en: 'DC voltage'),
-      PartKind.sineSource => tr(zh: '正弦电压源', en: 'AC (sine) voltage'),
-      PartKind.currentSource => tr(zh: '电流源', en: 'Current source'),
-      PartKind.toggleSwitch => tr(zh: '开关', en: 'Switch'),
-      PartKind.ground => tr(zh: '接地', en: 'Ground'),
+      PartKind.resistor => Txt.resistor,
+      PartKind.capacitor => Txt.capacitor,
+      PartKind.inductor => Txt.inductor,
+      PartKind.diode => Txt.diode,
+      PartKind.dcSource => Txt.dcVoltage,
+      PartKind.sineSource => Txt.acSineVoltage,
+      PartKind.currentSource => Txt.currentSource,
+      PartKind.toggleSwitch => Txt.switchPart,
+      PartKind.ground => Txt.ground,
     };
 
 /// Short palette caption.
 String partKindShort(PartKind kind) => switch (kind) {
-      PartKind.resistor => tr(zh: '电阻', en: 'Resistor'),
-      PartKind.capacitor => tr(zh: '电容', en: 'Capacitor'),
-      PartKind.inductor => tr(zh: '电感', en: 'Inductor'),
-      PartKind.diode => tr(zh: '二极管', en: 'Diode'),
-      PartKind.dcSource => tr(zh: '直流源', en: 'DC'),
-      PartKind.sineSource => tr(zh: '交流源', en: 'AC'),
-      PartKind.currentSource => tr(zh: '电流源', en: 'Current'),
-      PartKind.toggleSwitch => tr(zh: '开关', en: 'Switch'),
-      PartKind.ground => tr(zh: '接地', en: 'Ground'),
+      PartKind.resistor => Txt.resistor,
+      PartKind.capacitor => Txt.capacitor,
+      PartKind.inductor => Txt.inductor,
+      PartKind.diode => Txt.diode,
+      PartKind.dcSource => Txt.dc,
+      PartKind.sineSource => Txt.ac,
+      PartKind.currentSource => Txt.current,
+      PartKind.toggleSwitch => Txt.switchPart,
+      PartKind.ground => Txt.ground,
     };
 
 bool hasEditableValue(PartKind kind) => switch (kind) {
@@ -101,21 +101,21 @@ class _PartValueSheetState extends State<_PartValueSheet> {
   String? get _valueError {
     final v = _parsedValue;
     if (v == null) {
-      return tr(zh: '看不懂这个数,试试 4.7k、10u、2.2M', en: 'Not a number — try 4.7k, 10u, 2.2M');
+      return Txt.notNumberTry4;
     }
     if (!isValidPartValue(widget.part.kind, v)) {
-      return tr(zh: '必须大于 0', en: 'Must be greater than zero');
+      return Txt.mustGreaterThanZero;
     }
-    if (v.abs() > 1e12) return tr(zh: '太大了', en: 'Too large');
+    if (v.abs() > 1e12) return Txt.tooLarge;
     return null;
   }
 
   String? get _frequencyError {
     if (widget.part.kind != PartKind.sineSource) return null;
     final f = _parsedFrequency;
-    if (f == null) return tr(zh: '看不懂这个数', en: 'Not a number');
-    if (f <= 0) return tr(zh: '必须大于 0', en: 'Must be greater than zero');
-    if (f > 1e7) return tr(zh: '最高 10 MHz', en: 'At most 10 MHz');
+    if (f == null) return Txt.notNumber;
+    if (f <= 0) return Txt.mustGreaterThanZero;
+    if (f > 1e7) return Txt.most10Mhz;
     return null;
   }
 
@@ -154,13 +154,11 @@ class _PartValueSheetState extends State<_PartValueSheet> {
               style: text.headlineSmall,
               decoration: InputDecoration(
                 labelText: isSine
-                    ? tr(zh: '幅值', en: 'Amplitude')
-                    : tr(zh: '数值', en: 'Value'),
+                    ? Txt.amplitude
+                    : Txt.value,
                 suffixText: unit,
                 errorText: _value.text.isEmpty ? null : _valueError,
-                helperText: tr(
-                    zh: '支持 k M m u n p 前缀,如 4.7k 或 4k7',
-                    en: 'Prefixes k M m u n p work — 4.7k or 4k7'),
+                helperText: Txt.prefixesKMM,
                 border: const OutlineInputBorder(),
               ),
               onChanged: (_) => setState(() {}),
@@ -180,7 +178,7 @@ class _PartValueSheetState extends State<_PartValueSheet> {
                     const TextInputType.numberWithOptions(decimal: true),
                 style: text.headlineSmall,
                 decoration: InputDecoration(
-                  labelText: tr(zh: '频率', en: 'Frequency'),
+                  labelText: Txt.frequency,
                   suffixText: 'Hz',
                   errorText: _frequency.text.isEmpty ? null : _frequencyError,
                   border: const OutlineInputBorder(),
@@ -200,17 +198,14 @@ class _PartValueSheetState extends State<_PartValueSheet> {
             FilledButton(
               onPressed:
                   _valueError == null && _frequencyError == null ? _save : null,
-              child: Text(tr(zh: '完成', en: 'Done')),
+              child: Text(Txt.done),
             ),
             if (p.valueOverride != null)
               TextButton(
                 onPressed: () => Navigator.of(context)
                     .pop(p.copyWith(resetValue: true)),
                 child: Text(
-                  tr(
-                    zh: '恢复默认(${formatSi(p.kind.defaultValue, unit)})',
-                    en: 'Reset to default (${formatSi(p.kind.defaultValue, unit)})',
-                  ),
+                  Txt.resetDefault(formatSi(p.kind.defaultValue, unit)),
                   style: TextStyle(color: cs.onSurfaceVariant),
                 ),
               ),

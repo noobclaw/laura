@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/tool/engine/engine.dart';
+import 'package:ohmbench/circuit/engine/engine.dart';
 
 /// Transient analysis against closed-form answers.
 ///

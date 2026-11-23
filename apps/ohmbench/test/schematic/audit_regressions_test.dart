@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/tool/schematic/document.dart';
-import 'package:ohmbench/tool/schematic/editing.dart';
+import 'package:ohmbench/circuit/schematic/document.dart';
+import 'package:ohmbench/circuit/schematic/editing.dart';
 
 /// Schematic-side regressions for the 2026-09-19 G2 audit.
 void main() {
