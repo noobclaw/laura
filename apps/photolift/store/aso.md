@@ -66,3 +66,11 @@ Keywords(59/100): 照片修复,图片变清晰,高清修复,超分辨率,画质�
 3. 副标题 `Restore Old Photos, Offline`:`restore old photos`(2 支付费,前 3 名是 16/3/71 条的小 app)+ 楔子 `offline`。`enhancer` 退到关键词(Remini 的词)。
 4. 关键词放竞品 `remini`/`pixelup` + `unblur`(7,535 条的同名 app 在前 1)+ `upload`(与副标题 `offline` 呼应「no upload」长尾)。
 5. 中区:唯一主攻词 `照片增强`(头部 1,090)进标题末段;`老照片修复` 头部 5.6 万刚过线,但 PLAN 定的中文显示名就是「离线老照片修复」,保留在标题(它同时覆盖 `照片修复`)。`图片变清晰`/`高清修复` 前 10 有 Wink(179 万)放弃。
+
+## 2026-11-22 · v1.1 ASO update (applied in App Store Connect)
+
+- en-US subtitle: `Restore Old Photos, Offline` → `Fix Blurry & Old Photos to HD`
+- en-US keywords: removed `remini`, `pixelup` (competitor names, Guideline 2.3.7 risk), `upload`, and words already in name/subtitle (`upscale`, `enhance`, `hd`). Now: `enhancer,unblur,sharpen,denoise,restore,quality,clear,resolution,pixelated,scan,vintage,picture,4k`
+- New store localizations: zh-Hans, zh-Hant, ja, es-MX, pt-BR, de-DE, fr-FR (full name/subtitle/keywords/description/what's new in `appstore-1.1-localizations.json`). Non-zh/en listings state that the app UI is English/Chinese.
+- Why: analytics (to 11-21) showed 4.07K impressions → 559 product page views → 347 first-time downloads; page→download ≈62% is strong, App Store Search brings ~1 page view/day. The bottleneck is discoverability, not the page.
+- Verify 2–3 weeks after release: Analytics → Sources, App Store Search page views (baseline ≈1/day).

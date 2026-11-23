@@ -1,0 +1,57 @@
+{
+ "en-US": {
+  "name": "PixelLift: AI Photo Upscaler",
+  "subtitle": "Fix Blurry & Old Photos to HD",
+  "keywords": "enhancer,unblur,sharpen,denoise,restore,quality,clear,resolution,pixelated,scan,vintage,picture,4k",
+  "whatsNew": "• Better App Store listing in more languages\n• Small improvements and fixes"
+ },
+ "zh-Hans": {
+  "name": "PixelLift: 老照片修复 高清放大",
+  "subtitle": "模糊照片变清晰，离线AI画质增强",
+  "keywords": "照片修复,画质增强,图片放大,无损放大,超分辨率,去噪,清晰度,修图,扫描件,旧照片,高清修复,像素,人像,证件照,图片变清晰",
+  "description": "PixelLift 是一款完全在手机上运行的 AI 照片放大工具。App 内置 Real-ESRGAN 超分辨率模型：选一张翻拍的老照片、扫描件或早年手机拍的低清照片，点一下，几分钟后就能得到更清晰、更干净的 2 倍或 4 倍版本——全程不联网，照片一个字节都不会离开你的设备。\n\n大多数“画质增强”App 会把你的家庭照片上传到服务器，还按周收费。PixelLift 正好相反：模型在本地运行，App 不建立任何网络连接（除 App Store 自身的购买流程外），Pro 版一次买断。\n\n■ 为什么选 PixelLift\n• 真正离线：不联网、不上传，飞行模式下也能用\n• 不订阅：一次购买永久解锁 Pro，没有周费月费\n• 真 AI：内置 Real-ESRGAN 超分辨率模型，不是简单拉伸\n• 简单好用：选图 → 选倍数 → 开始；拖动对比修复前后；支持深色模式\n• 隐私优先：无需账号，无广告，不收集数据\n\n■ 核心功能\n• 2 倍 / 4 倍 AI 放大，最高输出 2400 万像素\n• 三档去噪（关 / 轻 / 强），适合扫描件、翻拍照片和老手机照片\n• 显示进度和预计时间，可随时取消\n• 前后对比滑杆和放大查看\n• 一键保存到相册或分享\n• 本地保存修复记录\n• 界面可切换中文 / 英文\n\n■ 适合谁\n家里有老照片、毕业照或扫描文件想变清晰的人；不愿把家人照片传到云端的人；受够了订阅制的人。\n\n免费版每天可修复 3 张 2 倍照片，角落带有小小的 PixelLift 标记；Pro 版去除次数限制和标记，并解锁 4 倍放大。\n\n注意：PixelLift 用于放大和去噪，不会重绘人脸、不能给黑白照片上色，也不能修补破损区域。",
+  "whatsNew": "• App Store 页面新增多语言\n• 细节优化与问题修复"
+ },
+ "zh-Hant": {
+  "name": "PixelLift: 老照片修復 高清放大",
+  "subtitle": "模糊照片變清晰，離線AI畫質增強",
+  "keywords": "照片修復,畫質增強,圖片放大,無損放大,超解析度,去噪,清晰度,修圖,掃描,舊照片,高清修復,像素,人像,證件照,圖片變清晰",
+  "description": "PixelLift 是一款完全在手機上執行的 AI 照片放大工具。App 內建 Real-ESRGAN 超解析度模型：選一張翻拍的老照片、掃描檔或早年手機拍的低畫質照片，點一下，幾分鐘後就能得到更清晰、更乾淨的 2 倍或 4 倍版本——全程不連網，照片一個位元組都不會離開你的裝置。\n\n大多數「畫質增強」App 會把你的家庭照片上傳到伺服器，還按週收費。PixelLift 正好相反：模型在本機執行，App 不建立任何網路連線（除 App Store 自身的購買流程外），Pro 版一次買斷。\n\n■ 為什麼選 PixelLift\n• 真正離線：不連網、不上傳，飛航模式下也能用\n• 不訂閱：一次購買永久解鎖 Pro，沒有週費月費\n• 真 AI：內建 Real-ESRGAN 超解析度模型，不是單純拉大\n• 簡單好用：選圖 → 選倍數 → 開始；拖動比較修復前後；支援深色模式\n• 隱私優先：免帳號、無廣告、不收集資料\n\n■ 核心功能\n• 2 倍 / 4 倍 AI 放大，最高輸出 2400 萬像素\n• 三段去噪（關 / 輕 / 強），適合掃描檔、翻拍照片和舊手機照片\n• 顯示進度和預估時間，可隨時取消\n• 前後對比滑桿和放大檢視\n• 一鍵儲存到相簿或分享\n• 本機保存修復紀錄\n• 介面可切換中文 / 英文\n\n■ 適合誰\n家裡有老照片、畢業照或掃描檔想變清晰的人；不想把家人照片傳到雲端的人；受夠訂閱制的人。\n\n免費版每天可修復 3 張 2 倍照片，角落帶有小小的 PixelLift 標記；Pro 版移除次數限制和標記，並解鎖 4 倍放大。\n\n注意：PixelLift 用於放大和去噪，不會重繪人臉、不能替黑白照片上色，也無法修補破損區域。",
+  "whatsNew": "• App Store 頁面新增多語言\n• 細節優化與問題修正"
+ },
+ "ja": {
+  "name": "PixelLift: AI写真高画質化",
+  "subtitle": "古い写真・ぼやけた画像を鮮明に",
+  "keywords": "画質,高画質,補正,修復,復元,ノイズ除去,拡大,アップスケール,解像度,鮮明,スキャン,昔の写真,画像,オフライン",
+  "description": "PixelLift は、すべてiPhone上で動作するAI写真アップスケーラーです。Real-ESRGAN 超解像モデルをアプリに内蔵。プリントを撮影し直した写真、スキャン画像、昔のケータイで撮った低解像度の写真を選んでタップするだけで、数分後にはより鮮明でクリーンな2倍・4倍の画像が得られます。ネット接続は一切不要。写真データが端末の外に出ることはありません。\n\n多くの「画質向上」アプリは家族の写真をサーバーにアップロードし、週額課金をします。PixelLift はその逆。モデルは端末内で動作し、App Store の購入処理以外の通信は行いません。Pro は買い切りです。\n\n■ PixelLift の特長\n• 完全オフライン：通信なし、アップロードなし、機内モードでも使える\n• サブスクなし：一度の購入で Pro がずっと使える\n• 本物のAI：単なる引き伸ばしではなく Real-ESRGAN 超解像モデル\n• シンプル：選ぶ → 倍率を選ぶ → 開始。スライダーでビフォー・アフターを比較。ダークモード対応\n• プライバシー重視：アカウント不要、広告なし、データ収集なし\n\n■ 主な機能\n• 2倍 / 4倍のAIアップスケール（最大2400万画素）\n• 3段階のノイズ除去（オフ / 弱 / 強）\n• 進捗と残り時間の表示、いつでもキャンセル可能\n• ビフォー・アフタースライダーとズーム表示\n• ワンタップで写真に保存・共有\n• 復元履歴を端末に保存\n\n無料版は1日3枚まで2倍で復元でき、右下に小さな PixelLift ロゴが入ります。Pro では回数制限とロゴがなくなり、4倍に対応します。\n\n※ PixelLift は拡大とノイズ除去を行うアプリです。顔の描き直し、白黒写真のカラー化、破れた部分の修復はできません。アプリの表示言語は英語と中国語です。",
+  "whatsNew": "• App Store の掲載情報を多言語に対応\n• 細かな改善と不具合の修正"
+ },
+ "es-MX": {
+  "name": "PixelLift: Mejorar Fotos IA",
+  "subtitle": "Restaura fotos viejas en HD",
+  "keywords": "calidad,nitidez,enfocar,borrosa,antigua,ampliar,resolucion,ruido,escaner,imagen,pixel,reparar,4k",
+  "description": "PixelLift es un ampliador de fotos con IA que funciona por completo en tu teléfono. El modelo de superresolución Real-ESRGAN viene incluido en la app: elige una foto impresa vuelta a fotografiar, un escaneo o una foto de baja resolución de un celular antiguo, toca una vez y en unos minutos obtienes una versión 2x o 4x más nítida y limpia, sin conexión a internet. Tu foto nunca sale del dispositivo.\n\nLa mayoría de las apps para \"mejorar fotos\" suben tus fotos familiares a un servidor y cobran por semana. PixelLift hace lo contrario: el modelo es local, la app no se conecta a ningún servidor salvo el propio proceso de compra del App Store, y Pro es un pago único.\n\n■ Por qué PixelLift\n• Totalmente sin conexión: no sube fotos y funciona en modo avión\n• Sin suscripción: una sola compra desbloquea Pro para siempre\n• IA real: modelo de superresolución Real-ESRGAN, no un simple cambio de tamaño\n• Fácil y rápido: elige → escala → listo; desliza para comparar antes/después; modo oscuro\n• Privacidad primero: sin cuenta, sin anuncios, sin recopilación de datos\n\n■ Funciones principales\n• Ampliación con IA 2x / 4x, hasta 24 MP\n• Tres niveles de reducción de ruido (apagado / suave / fuerte)\n• Progreso con tiempo estimado; cancela cuando quieras\n• Control deslizante antes/después y vista con zoom\n• Guarda en Fotos o comparte con un toque\n• Historial local de fotos restauradas\n\nLa versión gratuita restaura 3 fotos al día en 2x con una pequeña marca PixelLift en la esquina; Pro elimina el límite y la marca y añade 4x.\n\nNota: PixelLift amplía y reduce el ruido. No redibuja rostros, no colorea fotos ni repara zonas rotas. La interfaz de la app está en inglés y chino.",
+  "whatsNew": "• Ficha del App Store en más idiomas\n• Pequeñas mejoras y correcciones"
+ },
+ "pt-BR": {
+  "name": "PixelLift: Melhorar Fotos IA",
+  "subtitle": "Restaure fotos antigas em HD",
+  "keywords": "qualidade,nitidez,desfocada,borrada,velha,ampliar,resolucao,ruido,scanner,imagem,pixel,reparar",
+  "description": "PixelLift é um ampliador de fotos com IA que funciona inteiramente no seu celular. O modelo de super-resolução Real-ESRGAN vem dentro do app: escolha uma foto impressa refotografada, um scan ou uma foto de baixa resolução de um celular antigo, toque uma vez e, em poucos minutos, você terá uma versão 2x ou 4x mais nítida e limpa, sem internet. Nenhum byte da sua foto sai do aparelho.\n\nA maioria dos apps para \"melhorar fotos\" envia suas fotos de família para um servidor e cobra por semana. O PixelLift faz o contrário: o modelo é local, o app não se conecta a nenhum servidor além do próprio fluxo de compra da App Store, e o Pro é uma compra única.\n\n■ Por que PixelLift\n• Totalmente offline: sem upload, funciona no modo avião\n• Sem assinatura: uma compra desbloqueia o Pro para sempre\n• IA de verdade: modelo de super-resolução Real-ESRGAN, não um simples redimensionamento\n• Simples e rápido: escolha → escala → pronto; arraste para comparar antes/depois; modo escuro\n• Privacidade em primeiro lugar: sem conta, sem anúncios, sem coleta de dados\n\n■ Recursos principais\n• Ampliação com IA 2x / 4x, até 24 MP\n• Três níveis de redução de ruído (desligado / leve / forte)\n• Progresso com tempo estimado; cancele quando quiser\n• Controle antes/depois e visualização com zoom\n• Salve em Fotos ou compartilhe com um toque\n• Histórico local das fotos restauradas\n\nA versão gratuita restaura 3 fotos por dia em 2x, com uma pequena marca PixelLift no canto; o Pro remove o limite e a marca e adiciona 4x.\n\nObservação: o PixelLift amplia e reduz ruído. Ele não redesenha rostos, não colore fotos nem repara áreas rasgadas. A interface do app está em inglês e chinês.",
+  "whatsNew": "• Página da App Store em mais idiomas\n• Pequenas melhorias e correções"
+ },
+ "de-DE": {
+  "name": "PixelLift: Fotos verbessern",
+  "subtitle": "Alte & unscharfe Bilder in HD",
+  "keywords": "ki,qualität,schärfen,hochskalieren,vergrößern,auflösung,entrauschen,restaurieren,scan,4k,klar",
+  "description": "PixelLift ist ein KI-Foto-Upscaler, der vollständig auf deinem iPhone läuft. Das Real-ESRGAN-Superresolution-Modell ist in der App enthalten: Wähle einen abfotografierten Abzug, einen Scan oder ein niedrig aufgelöstes Foto von einem alten Handy, tippe einmal, und nach wenigen Minuten erhältst du eine schärfere, sauberere 2x- oder 4x-Version – ganz ohne Internet. Kein Byte deines Fotos verlässt das Gerät.\n\nDie meisten „Foto verbessern“-Apps laden deine Familienfotos auf einen Server hoch und rechnen wöchentlich ab. PixelLift macht es umgekehrt: Das Modell läuft lokal, die App baut außer dem Kaufvorgang des App Store keine Verbindungen auf, und Pro ist ein Einmalkauf.\n\n■ Warum PixelLift\n• Wirklich offline: kein Upload, funktioniert im Flugmodus\n• Kein Abo: Ein Kauf schaltet Pro dauerhaft frei\n• Echte KI: Real-ESRGAN-Superresolution statt einfachem Vergrößern\n• Einfach: auswählen → Faktor wählen → los; Vorher/Nachher per Schieberegler; Dark Mode\n• Datenschutz zuerst: kein Konto, keine Werbung, keine Datenerfassung\n\n■ Funktionen\n• KI-Hochskalierung 2x / 4x, bis zu 24 MP\n• Drei Entrauschungsstufen (aus / leicht / stark)\n• Fortschritt mit Zeitschätzung; jederzeit abbrechen\n• Vorher/Nachher-Regler und Zoomansicht\n• Mit einem Tipp in Fotos sichern oder teilen\n• Lokaler Verlauf restaurierter Fotos\n\nDie Gratisversion restauriert 3 Fotos pro Tag in 2x mit einem kleinen PixelLift-Zeichen in der Ecke; Pro entfernt Limit und Zeichen und bietet 4x.\n\nHinweis: PixelLift vergrößert und entrauscht. Es malt keine Gesichter nach, koloriert keine Fotos und repariert keine eingerissenen Stellen. Die App-Oberfläche ist auf Englisch und Chinesisch.",
+  "whatsNew": "• App-Store-Seite in weiteren Sprachen\n• Kleine Verbesserungen und Fehlerbehebungen"
+ },
+ "fr-FR": {
+  "name": "PixelLift: Améliorer Photo IA",
+  "subtitle": "Photos floues et anciennes HD",
+  "keywords": "qualité,netteté,agrandir,résolution,débruiter,restaurer,vieille,scan,image,pixel,4k,retouche",
+  "description": "PixelLift est un agrandisseur de photos par IA qui fonctionne entièrement sur votre iPhone. Le modèle de super-résolution Real-ESRGAN est intégré à l'app : choisissez un tirage rephotographié, un scan ou une photo basse résolution d'un ancien téléphone, touchez une fois et, quelques minutes plus tard, vous obtenez une version 2x ou 4x plus nette et plus propre, sans connexion. Aucun octet de votre photo ne quitte l'appareil.\n\nLa plupart des apps « amélioration photo » envoient vos photos de famille sur un serveur et facturent à la semaine. PixelLift fait l'inverse : le modèle est local, l'app ne se connecte à aucun serveur hormis le processus d'achat de l'App Store, et Pro est un achat unique.\n\n■ Pourquoi PixelLift\n• Vraiment hors ligne : aucun envoi, fonctionne en mode avion\n• Sans abonnement : un seul achat débloque Pro pour toujours\n• Vraie IA : modèle de super-résolution Real-ESRGAN, pas un simple redimensionnement\n• Simple : choisir → échelle → c'est parti ; curseur avant/après ; mode sombre\n• Confidentialité d'abord : sans compte, sans pub, sans collecte de données\n\n■ Fonctions\n• Agrandissement IA 2x / 4x, jusqu'à 24 MP\n• Trois niveaux de réduction du bruit (désactivé / léger / fort)\n• Progression avec temps estimé ; annulation à tout moment\n• Curseur avant/après et vue zoom\n• Enregistrer dans Photos ou partager en un geste\n• Historique local des photos restaurées\n\nLa version gratuite restaure 3 photos par jour en 2x avec une petite marque PixelLift dans le coin ; Pro supprime la limite et la marque et ajoute le 4x.\n\nRemarque : PixelLift agrandit et réduit le bruit. Il ne redessine pas les visages, ne colorise pas et ne répare pas les zones déchirées. L'interface de l'app est en anglais et en chinois.",
+  "whatsNew": "• Fiche App Store dans plus de langues\n• Petites améliorations et corrections"
+ }
+}
