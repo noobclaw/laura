@@ -80,7 +80,19 @@ h1{margin:-8px 0 0;font-size:clamp(56px,18vw,84px);line-height:1;font-weight:800
 #win .row{display:flex;gap:12px;width:min(100%,360px)}
 #win .btn{min-height:60px}
 #homeBtn{width:auto;flex:0 0 auto;padding:0 20px}
-@media(prefers-reduced-motion:reduce){#win,.btn,.tool span.b{transition:none}#win.on .stars svg{animation-duration:.01s}}
+.pop{position:fixed;z-index:7;pointer-events:none;white-space:nowrap;font-weight:800;font-size:34px;line-height:1;color:#fff;text-shadow:0 3px 0 #b8501c,0 0 20px rgba(255,190,90,.95);animation:pop 1.05s cubic-bezier(.2,1.4,.4,1) forwards}
+.pop.big{font-size:60px;color:#ffe9b0;text-shadow:0 5px 0 #a8551c,0 0 40px rgba(255,180,80,.95);animation-duration:1.7s}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-10deg)}16%{opacity:1;transform:translate(-50%,-75%) scale(1.3) rotate(4deg)}32%{transform:translate(-50%,-85%) scale(1) rotate(0)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-170%) scale(.92)}}
+#flash{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 45%,rgba(255,240,200,.9),rgba(255,200,120,.25) 60%,transparent 80%)}
+#flash.go{animation:flash .7s ease-out}
+@keyframes flash{0%{opacity:.9}100%{opacity:0}}
+#board.shake{animation:shake .32s}
+@keyframes shake{20%{transform:translateX(-7px) rotate(-.6deg)}40%{transform:translateX(6px) rotate(.5deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+#pips i.on{animation:pip .35s cubic-bezier(.2,1.8,.4,1)}
+@keyframes pip{0%{transform:scale(.4)}100%{transform:scale(1.15)}}
+#win.on #next{animation:beat 1.1s ease-in-out 1.4s infinite}
+@keyframes beat{50%{transform:scale(1.05);box-shadow:0 6px 0 var(--gold-d),0 0 34px rgba(255,200,100,.85)}}
+@media(prefers-reduced-motion:reduce){.pop,#flash.go,#board.shake,#pips i.on,#win.on #next{animation:none}.pop{display:none}#win,.btn,.tool span.b{transition:none}#win.on .stars svg{animation-duration:.01s}}
 </style>
 </head>
 <body data-screen="home">
@@ -125,6 +137,7 @@ h1{margin:-8px 0 0;font-size:clamp(56px,18vw,84px);line-height:1;font-weight:800
   <p id="winInfo"></p>
   <div class="row"><button class="btn alt" id="homeBtn"></button><button class="btn" id="next"></button></div>
 </div>
+<div id="flash"></div>
 <canvas id="fx"></canvas>
 
 <script>
@@ -135,12 +148,12 @@ const T={
   how:"Tap once to mark a tile empty, twice to light a lantern. Drag to mark several.",win:"Solved!",next:"Next puzzle",best:"Best",time:"Time",dailyDone:"Come back tomorrow for a new daily puzzle.",streak:"Streak",newToday:"New today",doneToday:"Solved today",
   hRow:"This tile shares a row with a lantern, so it stays empty.",hCol:"This tile shares a column with a lantern, so it stays empty.",hReg:"This tile shares a colour with a lantern, so it stays empty.",hAdj:"This tile touches a lantern, so it stays empty.",
   hOnlyRow:"Only one free tile is left in this row. The lantern goes here.",hOnlyCol:"Only one free tile is left in this column. The lantern goes here.",hOnlyReg:"Only one free tile is left in this colour. The lantern goes here.",
-  hBad:"This lantern breaks a rule. Remove it.",hWrong:"This lantern is in the wrong place. Remove it.",hGive:"No simple step found. This tile holds a lantern.",noHints:"No hints left for this puzzle.",gen:"Building puzzle…"},
+  praise:["Nice!","Great!","Brilliant!","Amazing!","Unstoppable!"],win3:"Perfect!",win2:"Great job!",hBad:"This lantern breaks a rule. Remove it.",hWrong:"This lantern is in the wrong place. Remove it.",hGive:"No simple step found. This tile holds a lantern.",noHints:"No hints left for this puzzle.",gen:"Building puzzle…"},
  ar:{title:"فانوس",rules:"أضئ فانوساً واحداً في كل صف وكل عمود وكل لون. الفوانيس لا تتلامس أبداً.",play:"العب",daily:"لغز اليوم",level:"المرحلة",undo:"تراجع",hint:"تلميح",reset:"إعادة",auto:"تعليم تلقائي",snd:"الصوت",home:"الرئيسية",
   how:"اضغط مرة لتعليم الخانة فارغة، ومرتين لإضاءة فانوس. اسحب لتعليم عدة خانات.",win:"تم الحل!",next:"اللغز التالي",best:"الأفضل",time:"الوقت",dailyDone:"عُد غداً للغز يومي جديد.",streak:"السلسلة",newToday:"جديد اليوم",doneToday:"تم حله اليوم",
   hRow:"هذه الخانة في صف فيه فانوس، فتبقى فارغة.",hCol:"هذه الخانة في عمود فيه فانوس، فتبقى فارغة.",hReg:"هذه الخانة بلون فيه فانوس، فتبقى فارغة.",hAdj:"هذه الخانة تلامس فانوساً، فتبقى فارغة.",
   hOnlyRow:"بقيت خانة واحدة متاحة في هذا الصف. الفانوس هنا.",hOnlyCol:"بقيت خانة واحدة متاحة في هذا العمود. الفانوس هنا.",hOnlyReg:"بقيت خانة واحدة متاحة بهذا اللون. الفانوس هنا.",
-  hBad:"هذا الفانوس يخالف القواعد. أزِله.",hWrong:"هذا الفانوس في مكان خاطئ. أزِله.",hGive:"لا توجد خطوة بسيطة. في هذه الخانة فانوس.",noHints:"لا تلميحات متبقية لهذا اللغز.",gen:"جارٍ إنشاء اللغز…"}};
+  praise:["جميل!","رائع!","مذهل!","خرافي!","لا يُوقَف!"],win3:"مثالي!",win2:"أحسنت!",hBad:"هذا الفانوس يخالف القواعد. أزِله.",hWrong:"هذا الفانوس في مكان خاطئ. أزِله.",hGive:"لا توجد خطوة بسيطة. في هذه الخانة فانوس.",noHints:"لا تلميحات متبقية لهذا اللغز.",gen:"جارٍ إنشاء اللغز…"}};
 // ---------- storage (optional; the game works without it) ----------
 const mem={};
 const load=(k,d)=>{try{const v=localStorage.getItem("lantern."+k);return v==null?(k in mem?mem[k]:d):JSON.parse(v)}catch(e){return k in mem?mem[k]:d}};
@@ -156,7 +169,7 @@ function makePuzzle(n,seed){const r=rng(seed);for(let t=0;t<20000;t++){const p=p
 // ---------- state ----------
 // tile colours: [top face, side face]
 const PAL=[["#35b3a8","#1f7a73"],["#a56bd6","#6f3f9c"],["#ec6f8e","#ab4562"],["#5f86ea","#3a57ad"],["#86bf5c","#557f38"],["#e3bd6a","#a5843c"],["#52bdea","#2f83ad"],["#98a2cc","#5f6896"]];
-const S={lang:load("lang","en"),screen:"home",mode:"levels",level:load("level",1),p:null,cells:[],undo:[],hints:3,used:0,t0:0,tick:0,done:false,auto:load("auto",true),sound:load("sound",true),hintCell:-1,at:[],shake:[],gone:new Set()};
+const S={lang:load("lang","en"),screen:"home",mode:"levels",level:load("level",1),p:null,cells:[],undo:[],hints:3,used:0,t0:0,tick:0,done:false,auto:load("auto",true),sound:load("sound",true),hintCell:-1,at:[],shake:[],gone:new Set(),combo:0,introT:0};
 const $=id=>document.getElementById(id), tr=k=>T[S.lang][k];
 const dayKey=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(), todayKey=()=>dayKey(new Date());
 const sizeFor=l=>5+Math.min(3,Math.floor((l-1)/5));
@@ -228,29 +241,38 @@ function drawSky(t,dt){skx.setTransform(DPR,0,0,DPR,0,0);skx.clearRect(0,0,VW,VH
  skx.globalCompositeOperation="source-over"}
 function drawHero(t){hx.setTransform(2,0,0,2,0,0);hx.clearRect(0,0,200,220);const y=112+(calm?0:Math.sin(t/900)*6);hx.globalCompositeOperation="lighter";glow(hx,100,y,100,.5+(calm?0:.06*Math.sin(t/230)));hx.globalCompositeOperation="source-over";lantern(hx,100,y,150)}
 const back=t=>{const u=t-1;return 1+2.7*u*u*u+1.7*u*u};
+// waves make tiles hop outward from a point; beams sweep the row and column of a new lantern
+const waves=[],beams=[];
+function hop(x,y,t){let h=0;for(const w of waves){const d=Math.hypot(x-w.x,y-w.y);if(d>w.max)continue;const u=(t-w.t0)/1000*w.sp-d;if(u>0&&u<1)h+=w.amp*Math.sin(u*Math.PI)*(1-d/(w.max+2))}return h}
 function drawBoard(t){if(!S.p)return;const n=S.p.n,g=S.p.g,{P,cs}=geo(),gap=cs*.035,dep=cs*.07,{bad}=conflicts(),c=bx;
+ while(waves.length&&t-waves[0].t0>4000)waves.shift();while(beams.length&&t-beams[0].t0>600)beams.shift();
  c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,BW,BW);
  c.beginPath();c.roundRect(0,0,BW,BW,BW*.06);c.fillStyle="rgba(10,12,44,.72)";c.fill();c.lineWidth=1.5;c.strokeStyle="rgba(255,255,255,.14)";c.stroke();
- const R=k=>{const x=k%n,y=Math.floor(k/n),L=x===0||g[k-1]!==g[k],Rr=x===n-1||g[k+1]!==g[k],Tp=y===0||g[k-n]!==g[k],B=y===n-1||g[k+n]!==g[k],r=cs*.2;
-  return{x:P+x*cs+(L?gap:0),y:P+y*cs+(Tp?gap:0),w:cs-(L?gap:0)-(Rr?gap:0),h:cs-(Tp?gap:0)-(B?gap+dep:0),rad:[Tp&&L?r:0,Tp&&Rr?r:0,B&&Rr?r:0,B&&L?r:0],Rr,B,cx:P+(x+.5)*cs,cy:P+(y+.5)*cs-dep*.4}};
- const rs=Array.from({length:n*n},(_,k)=>R(k));
- rs.forEach((r,k)=>{if(!r.B)return;c.fillStyle=PAL[g[k]%8][1];c.beginPath();c.roundRect(r.x,r.y+dep,r.w,r.h,r.rad);c.fill()});
- rs.forEach((r,k)=>{c.fillStyle=PAL[g[k]%8][0];c.beginPath();c.roundRect(r.x,r.y,r.w,r.h+(r.B?0:.5),r.rad);c.fill();
+ const rs=Array.from({length:n*n},(_,k)=>{const x=k%n,y=Math.floor(k/n),L=x===0||g[k-1]!==g[k],Rr=x===n-1||g[k+1]!==g[k],Tp=y===0||g[k-n]!==g[k],B=y===n-1||g[k+n]!==g[k],r=cs*.2,
+   a=calm?1:Math.max(0,Math.min(1,(t-S.introT-(x+y)*45)/380)),hv=calm?0:hop(x,y,t)*cs*.17;
+  return{x:P+x*cs+(L?gap:0),y:P+y*cs+(Tp?gap:0),w:cs-(L?gap:0)-(Rr?gap:0),h:cs-(Tp?gap:0)-(B?gap+dep:0),rad:[Tp&&L?r:0,Tp&&Rr?r:0,B&&Rr?r:0,B&&L?r:0],Rr,B,mx:P+(x+.5)*cs,my:P+(y+.5)*cs,cx:P+(x+.5)*cs,cy:P+(y+.5)*cs-dep*.4-hv,a,e:a<1?Math.max(.01,back(a)):1,hv}});
+ const each=fn=>rs.forEach((r,k)=>{if(r.a<=0)return;if(r.a<1){c.save();c.globalAlpha=r.a;c.translate(r.mx,r.my);c.scale(r.e,r.e);c.translate(-r.mx,-r.my);fn(r,k);c.restore()}else fn(r,k)});
+ each((r,k)=>{if(!r.B&&r.hv<.5)return;c.fillStyle=PAL[g[k]%8][1];c.beginPath();c.roundRect(r.x,r.y+dep-r.hv,r.w,r.h+r.hv,r.rad);c.fill()});
+ each((r,k)=>{const y=r.y-r.hv;c.fillStyle=PAL[g[k]%8][0];c.beginPath();c.roundRect(r.x,y,r.w,r.h+(r.B?0:.5),r.rad);c.fill();
   if(((k%n)+Math.floor(k/n))%2){c.fillStyle="rgba(255,255,255,.07)";c.fill()}
+  if(r.hv>.5){c.fillStyle=`rgba(255,255,255,${Math.min(.45,r.hv/cs*2.4)})`;c.fill()}
   c.strokeStyle="rgba(255,255,255,.2)";c.lineWidth=1;
-  if(!r.Rr){c.beginPath();c.moveTo(r.x+r.w,r.y+cs*.12);c.lineTo(r.x+r.w,r.y+r.h-cs*.12);c.stroke()}
-  if(!r.B){c.beginPath();c.moveTo(r.x+cs*.12,r.y+r.h);c.lineTo(r.x+r.w-cs*.12,r.y+r.h);c.stroke()}});
- // lantern light spills over the eight tiles a lantern blocks
+  if(!r.Rr){c.beginPath();c.moveTo(r.x+r.w,y+cs*.12);c.lineTo(r.x+r.w,y+r.h-cs*.12);c.stroke()}
+  if(!r.B){c.beginPath();c.moveTo(r.x+cs*.12,y+r.h);c.lineTo(r.x+r.w-cs*.12,y+r.h);c.stroke()}});
+ // light: beams along the row and column, then the glow each lantern throws on the eight tiles it blocks
  c.save();c.beginPath();c.roundRect(0,0,BW,BW,BW*.06);c.clip();c.globalCompositeOperation="lighter";
+ for(const b of beams){const u=(t-b.t0)/520;if(u<0||u>=1)continue;const ext=(1-(1-u)*(1-u))*n*cs,al=(1-u)*.42,cx=P+(b.x+.5)*cs,cy=P+(b.y+.5)*cs;c.fillStyle=`rgba(255,226,150,${al})`;
+  c.beginPath();c.roundRect(Math.max(P,cx-ext),cy-cs*.36,Math.min(P+n*cs,cx+ext)-Math.max(P,cx-ext),cs*.72,cs*.3);c.fill();
+  c.beginPath();c.roundRect(cx-cs*.36,Math.max(P,cy-ext),cs*.72,Math.min(P+n*cs,cy+ext)-Math.max(P,cy-ext),cs*.3);c.fill()}
  S.cells.forEach((v,k)=>{if(v===2&&!bad.has(k)&&!S.gone.has(k)){const a=Math.max(0,Math.min(1,(t-(S.at[k]||0))/300));glow(c,rs[k].cx,rs[k].cy,cs*1.55,(.5+(calm?0:.05*Math.sin(t/210+k)))*a)}});
  c.restore();
- S.cells.forEach((v,k)=>{const r=rs[k];
-  if(v===1){const a=Math.max(0,Math.min(1,(t-(S.at[k]||0))/140)),s=cs*.11;c.strokeStyle=`rgba(12,16,52,${.42*a})`;c.lineWidth=cs*.055;c.lineCap="round";c.beginPath();c.moveTo(r.cx-s,r.cy-s);c.lineTo(r.cx+s,r.cy+s);c.moveTo(r.cx+s,r.cy-s);c.lineTo(r.cx-s,r.cy+s);c.stroke()}
-  if(k===S.hintCell){c.save();c.strokeStyle=`rgba(255,255,255,${.75+.25*Math.sin(t/160)})`;c.lineWidth=cs*.06;c.setLineDash([cs*.16,cs*.12]);c.lineDashOffset=calm?0:-t/40;c.beginPath();c.roundRect(P+(k%n)*cs+cs*.1,P+Math.floor(k/n)*cs+cs*.08,cs*.8,cs*.8,cs*.18);c.stroke();c.restore()}
-  if(v===2&&!S.gone.has(k)){const age=t-(S.at[k]||0),sc=calm?1:Math.max(.05,back(Math.max(0,Math.min(1,age/300)))),sh=t-(S.shake[k]||-1e9),dx=!calm&&sh<400?Math.sin(sh/22)*cs*.07*(1-sh/400):0,isBad=bad.has(k);
-   if(isBad){c.strokeStyle=`rgba(255,93,108,${.7+.3*Math.sin(t/140)})`;c.lineWidth=cs*.07;c.beginPath();c.roundRect(P+(k%n)*cs+cs*.08,P+Math.floor(k/n)*cs+cs*.06,cs*.84,cs*.84,cs*.2);c.stroke()}
+ S.cells.forEach((v,k)=>{const r=rs[k];if(r.a<1)return;
+  if(v===1){const a=Math.max(0,Math.min(1,(t-(S.at[k]||0))/160)),s=cs*.11*(calm?1:Math.max(.2,back(a)));c.strokeStyle=`rgba(12,16,52,${.42*a})`;c.lineWidth=cs*.055;c.lineCap="round";c.beginPath();c.moveTo(r.cx-s,r.cy-s);c.lineTo(r.cx+s,r.cy+s);c.moveTo(r.cx+s,r.cy-s);c.lineTo(r.cx-s,r.cy+s);c.stroke()}
+  if(k===S.hintCell){c.save();c.strokeStyle=`rgba(255,255,255,${.75+.25*Math.sin(t/160)})`;c.lineWidth=cs*.06;c.setLineDash([cs*.16,cs*.12]);c.lineDashOffset=calm?0:-t/40;c.beginPath();c.roundRect(r.mx-cs*.4,r.my-cs*.42-r.hv,cs*.8,cs*.8,cs*.18);c.stroke();c.restore()}
+  if(v===2&&!S.gone.has(k)){const age=t-(S.at[k]||0),u=Math.max(0,Math.min(1,age/340)),sc=calm?1:Math.max(.05,back(u)),drop=calm?0:(1-u)*(1-u)*cs*.5,sh=t-(S.shake[k]||-1e9),dx=!calm&&sh<400?Math.sin(sh/22)*cs*.07*(1-sh/400):0,isBad=bad.has(k);
+   if(isBad){c.strokeStyle=`rgba(255,93,108,${.7+.3*Math.sin(t/140)})`;c.lineWidth=cs*.07;c.beginPath();c.roundRect(r.mx-cs*.42,r.my-cs*.44,cs*.84,cs*.84,cs*.2);c.stroke()}
    c.fillStyle="rgba(0,0,0,.22)";c.beginPath();c.ellipse(r.cx+dx,r.cy+cs*.36,cs*.2*sc,cs*.05*sc,0,0,7);c.fill();
-   lantern(c,r.cx+dx,r.cy-cs*.03+(calm?0:Math.sin(t/700+k)*cs*.012),cs*.78*sc,{bad:isBad})}})}
+   lantern(c,r.cx+dx,r.cy-cs*.03-drop+(calm?0:Math.sin(t/700+k)*cs*.012),cs*.78*sc,{bad:isBad})}})}
 // ---------- particles and released lanterns ----------
 // particle textures: Kenney Particle Pack, CC0 (see assets/ASSETS.md); plain dots are drawn if an image is missing
 const TEX={},tintC={};for(const n of["star_06","star_07","star_09","circle_02","circle_05","magic_05","symbol_02"]){const im=new Image();im.onload=()=>{TEX[n]=im};im.src="assets/fx/"+n+".png"}
@@ -270,6 +292,12 @@ function drawFx(t,dt){fxx.setTransform(DPR,0,0,DPR,0,0);fxx.clearRect(0,0,VW,VH)
   else{fxx.globalAlpha=1;fxx.fillStyle=`rgba(${s.col},${al})`;fxx.beginPath();fxx.arc(s.x,s.y,s.r,0,7);fxx.fill()}}
  fxx.globalAlpha=1;
  fxx.globalCompositeOperation="source-over"}
+function praise(x,y,txt,big){if(calm)return;const d=document.createElement("div");d.className="pop"+(big?" big":"");d.textContent=txt;d.style.left=Math.max(90,Math.min(VW-90,x))+"px";d.style.top=Math.max(80,y)+"px";document.body.appendChild(d);d.addEventListener("animationend",()=>d.remove())}
+const FW=["255,207,107","255,120,160","120,220,255","170,255,150","210,160,255"];
+function firework(x,y,rgb){if(calm)return;rings.push({x,y,age:0,life:.7,r0:10,r1:130,rgb});sparks.push({x,y,vx:0,vy:0,g:0,age:0,life:.3,size:220,rot:0,spin:2,tex:"star_09",col:"255,245,220"});
+ for(let i=0;i<54;i++){const a=i/54*6.283+Math.random()*.2,v=120+Math.random()*190;sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:130,age:0,life:.9+Math.random()*.8,size:10+Math.random()*20,rot:Math.random()*6,spin:(Math.random()-.5)*8,tex:SPARK_TEX[i%3],col:i%5?rgb:"255,255,255"})}
+ clip("place",.45,.45+Math.random()*.3)||tone(180+Math.random()*80,.3,"sine",.08);buzz(15)}
+function flash(){const f=$("flash");f.classList.remove("go");void f.offsetWidth;f.classList.add("go")}
 let last=performance.now();
 function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;drawSky(t,dt);if(S.screen==="home")drawHero(t);else drawBoard(t);drawFx(t,dt);requestAnimationFrame(frame)}
 // ---------- UI text ----------
@@ -286,9 +314,14 @@ function show(s){S.screen=s;document.body.dataset.screen=s;text()}
 // ---------- actions ----------
 function setCell(k,v,rec=true){if(S.done||S.cells[k]===v)return;const was=S.cells[k];if(rec)S.undo.push([k,was]);S.cells[k]=v;S.at[k]=performance.now();S.hintCell=-1;
  const p=cellPage(k);
- if(v===2){const{bad,count}=conflicts();if(bad.size){for(const b of bad)S.shake[b]=performance.now();sfx.bad();buzz([20,40,20])}else{sfx.place(count-1);buzz(12);burst(p.x,p.y,14,"255,215,130");rings.push({x:p.x,y:p.y,age:0,life:.45,r0:p.cs*.3,r1:p.cs*1.5,rgb:"255,225,150"})}
-  if(S.auto){const n=S.p.n;for(let j=0;j<n*n;j++)if(S.cells[j]===0&&j!==k&&blockedBy(j)){S.undo.push([j,0,1]);S.cells[j]=1;S.at[j]=performance.now()+40}}}
- else if(was===2){sfx.lift();burst(p.x,p.y,6,"200,200,255",90)}else sfx.mark();
+ if(v===2){const{bad,count}=conflicts();const n0=S.p.n,now=performance.now();
+  if(bad.size){for(const b of bad)S.shake[b]=now;S.combo=0;sfx.bad();buzz([20,40,20]);if(!calm){cv.classList.remove("shake");void cv.offsetWidth;cv.classList.add("shake")}}
+  else{S.combo++;const cb=Math.min(S.combo,6);sfx.place(count-1);buzz(10+cb*4);burst(p.x,p.y,12+cb*7,cb>=3?FW[(cb+1)%5]:"255,215,130",150+cb*25);
+   rings.push({x:p.x,y:p.y,age:0,life:.5,r0:p.cs*.3,r1:p.cs*(1.4+cb*.25),rgb:"255,225,150"});
+   waves.push({x:k%n0,y:Math.floor(k/n0),t0:now+120,sp:9,amp:.45+cb*.12,max:1.6+cb*.5});beams.push({x:k%n0,y:Math.floor(k/n0),t0:now+60});
+   if(S.combo>=2&&count<n0){praise(p.x,p.y-p.cs*.5,tr("praise")[Math.min(S.combo-2,4)]);clip("hint",.35,1+S.combo*.08)}}
+  if(S.auto){const n=S.p.n;for(let j=0;j<n*n;j++)if(S.cells[j]===0&&j!==k&&blockedBy(j)){S.undo.push([j,0,1]);S.cells[j]=1;S.at[j]=performance.now()+120+Math.hypot(j%n-k%n,Math.floor(j/n)-Math.floor(k/n))*70}}}
+ else if(was===2){S.combo=0;sfx.lift();burst(p.x,p.y,6,"200,200,255",90)}else sfx.mark();
  pips();check()}
 function check(){const n=S.p.n,{bad,count}=conflicts();if(count!==n||bad.size)return;S.done=true;clearInterval(S.tick);S.hintCell=-1;
  const secs=Math.round((Date.now()-S.t0)/1000),got=S.used===0?3:S.used===1?2:1,key=S.mode==="daily"?"d"+todayKey():"l"+S.level,best=load("best."+key,null);
@@ -297,13 +330,18 @@ function check(){const n=S.p.n,{bad,count}=conflicts();if(count!==n||bad.size)re
  if(S.mode==="daily"){const lastD=load("dailyLast",0),st=load("streak",0),tk=todayKey();if(lastD!==tk){const y=new Date();y.setDate(y.getDate()-1);save("streak",lastD===dayKey(y)?st+1:1);save("dailyLast",tk)}
   info+=" · "+tr("streak")+" "+load("streak",1);$("next").style.display="none";say(tr("dailyDone"))}
  else{save("level",S.level+1);$("next").style.display="";say("")}
- [...$("stars").children].forEach((s,i)=>s.classList.toggle("got",i<got));$("winInfo").textContent=info;
+ [...$("stars").children].forEach((s,i)=>s.classList.toggle("got",i<got));$("winInfo").textContent=info;$("t-win").textContent=tr(got===3?"win3":got===2?"win2":"win");
+ const sheetAt=calm?300:350+n*130+900;
+ if(!calm){const lk=S.undo.length?S.undo[S.undo.length-1][0]:0,bb=cv.getBoundingClientRect();flash();waves.push({x:(n-1)/2,y:(n-1)/2,t0:performance.now()+80,sp:7,amp:1.25,max:99});waves.push({x:(n-1)/2,y:(n-1)/2,t0:performance.now()+620,sp:7,amp:.7,max:99});
+  setTimeout(()=>praise(VW/2,bb.top+bb.height*.45,tr(got===3?"win3":got===2?"win2":"win"),true),250);
+  for(let j=0;j<7;j++)setTimeout(()=>{if(S.done)firework(VW*(.15+Math.random()*.7),VH*(.1+Math.random()*.32),FW[j%5])},500+j*330+Math.random()*120);
+  for(let j=0;j<got;j++)setTimeout(()=>{if(!S.done)return;const b=$("stars").children[j].getBoundingClientRect();burst(b.left+b.width/2,b.top+b.height/2,22,"255,215,120",220);rings.push({x:b.left+b.width/2,y:b.top+b.height/2,age:0,life:.45,r0:16,r1:70,rgb:"255,225,150"});clip("rise",.6,1+j*.2)||tone(SCALE[j*2+3],.3,"triangle",.12);buzz(18)},sheetAt+420+j*180)}
  // release every lantern into the sky, then show the result sheet
  const now=performance.now();let i=0;S.cells.forEach((v,k)=>{if(v!==2)return;const p=cellPage(k);floaters.push({k,i,x:p.x,y:p.y,h:p.cs*.78,v:70+Math.random()*40,born:now+350+i*130,live:false});i++});
- setTimeout(()=>sfx.win(),350);if(!calm)for(let j=0;j<34;j++)sparks.push({x:Math.random()*VW,y:-20,vx:(Math.random()-.5)*40,vy:120+Math.random()*160,g:40,age:-(.6+n*.13+Math.random()*1.2),life:2.6,size:14+Math.random()*18,rot:Math.random()*6,spin:(Math.random()-.5)*5,tex:"symbol_02",col:j%3?"255,207,107":"255,255,255"});buzz([30,60,30,60,60]);pips();setTimeout(()=>$("win").classList.add("on"),calm?300:350+n*130+700)}
+ setTimeout(()=>sfx.win(),350);if(!calm)for(let j=0;j<34;j++)sparks.push({x:Math.random()*VW,y:-20,vx:(Math.random()-.5)*40,vy:120+Math.random()*160,g:40,age:-(.6+n*.13+Math.random()*1.2),life:2.6,size:14+Math.random()*18,rot:Math.random()*6,spin:(Math.random()-.5)*5,tex:"symbol_02",col:j%3?"255,207,107":"255,255,255"});buzz([30,60,30,60,60]);pips();setTimeout(()=>{if(S.done)$("win").classList.add("on")},sheetAt)}
 function start(){clearInterval(S.tick);$("win").classList.remove("on");floaters.length=0;S.p=null;show("game");say(tr("gen"));
  setTimeout(()=>{const n=S.mode==="daily"?7:sizeFor(S.level),seed=S.mode==="daily"?todayKey():S.level*7919+n;
-  S.p=makePuzzle(n,seed);S.cells=new Array(n*n).fill(0);S.undo=[];S.at=[];S.shake=[];S.gone=new Set();S.hints=3;S.used=0;S.done=false;S.hintCell=-1;S.t0=Date.now();
+  S.p=makePuzzle(n,seed);S.cells=new Array(n*n).fill(0);S.undo=[];S.at=[];S.shake=[];S.gone=new Set();S.hints=3;S.used=0;S.done=false;S.hintCell=-1;S.combo=0;S.introT=performance.now()+60;waves.length=beams.length=0;S.t0=Date.now();
   S.tick=setInterval(()=>{$("time").textContent=fmt(Math.round((Date.now()-S.t0)/1000))},500);$("time").textContent="0:00";
   layout();text();pips();say(tr("how"));window.__lantern=S},30)}
 // ---------- input ----------
@@ -313,8 +351,8 @@ cv.addEventListener("pointerdown",e=>{const k=cellAt(e);if(k<0)return;drag={k,mo
 cv.addEventListener("pointermove",e=>{if(!drag)return;const k=cellAt(e);if(k<0)return;if(k!==drag.k||drag.moved){if(!drag.moved){drag.moved=true;if(S.cells[drag.k]===0)setCell(drag.k,1)}if(S.cells[k]===0)setCell(k,1)}});
 cv.addEventListener("pointerup",()=>{if(drag&&!drag.moved)setCell(drag.k,(S.cells[drag.k]+1)%3);drag=null});
 cv.addEventListener("pointercancel",()=>{drag=null});
-$("undo").onclick=()=>{if(S.done)return;sfx.tap();let u=S.undo.pop();while(u){S.cells[u[0]]=u[1];S.at[u[0]]=performance.now();if(!u[2])break;u=S.undo.pop()}S.hintCell=-1;pips()};
-$("reset").onclick=()=>{if(S.done)return;sfx.tap();S.cells.fill(0);S.undo=[];S.hintCell=-1;pips()};
+$("undo").onclick=()=>{if(S.done)return;sfx.tap();S.combo=0;let u=S.undo.pop();while(u){S.cells[u[0]]=u[1];S.at[u[0]]=performance.now();if(!u[2])break;u=S.undo.pop()}S.hintCell=-1;pips()};
+$("reset").onclick=()=>{if(S.done)return;sfx.tap();S.combo=0;S.cells.fill(0);S.undo=[];S.hintCell=-1;pips()};
 $("hint").onclick=()=>{if(S.done)return;if(S.hints<=0){say(tr("noHints"));return}const h=findHint();if(!h)return;sfx.hint();S.hints--;S.used++;if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;say(tr(h.why));text()};
 $("next").onclick=()=>{S.level=load("level",S.level+1);start()};
 $("homeBtn").onclick=$("back").onclick=()=>{sfx.tap();clearInterval(S.tick);$("win").classList.remove("on");floaters.length=0;S.level=load("level",S.level);show("home")};
