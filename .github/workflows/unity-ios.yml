@@ -1,12 +1,15 @@
-name: Unity probe
+name: Unity iOS
 
-# Feasibility check: can a Unity 6 project be built for iOS entirely in CI?
+# Builds the Unity project in the cloud: Linux exports the Xcode project, macOS compiles it.
 on:
   push:
     branches: [game/plan-and-first-prototype]
     paths:
-      - 'game/supermarket/unity-probe/**'
-      - '.github/workflows/unity-probe.yml'
+      - 'game/supermarket/unity/**'
+      - '.github/workflows/unity-ios.yml'
+
+env:
+  PROJECT: game/supermarket/unity
 
 jobs:
   unity:
@@ -15,23 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Free disk space (the editor image is over 8 GB)
-        run: |
-          df -h /
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
-          sudo docker image prune -af >/dev/null
-          df -h /
-          free -g
-
-      - name: Check licence secrets
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        run: |
-          for v in UNITY_LICENSE UNITY_EMAIL UNITY_PASSWORD; do
-            if [ -z "${!v}" ]; then echo "::warning::secret $v is not set"; else echo "$v is set"; fi
-          done
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.PROJECT }}/Library
+          key: unity-library-ios-${{ hashFiles('game/supermarket/unity/Packages/manifest.json', 'game/supermarket/unity/ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: unity-library-ios-
 
       - uses: game-ci/unity-builder@v4
         env:
@@ -39,18 +30,12 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: game/supermarket/unity-probe
+          projectPath: ${{ env.PROJECT }}
           targetPlatform: iOS
           unityVersion: 6000.0.23f1
           buildMethod: CiBuild.IOS
           allowDirtyBuild: true
-
-      - name: Show output
-        if: always()
-        run: |
-          df -h /
-          sudo du -sh build 2>/dev/null || true
-          sudo find build -maxdepth 3 | head -40 || true
+          customParameters: -buildNumber ${{ github.run_number }}
 
       - uses: actions/upload-artifact@v4
         with:
