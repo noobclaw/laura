@@ -7,12 +7,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/bench/words.dart';
-import 'package:ohmbench/tool/examples.dart';
-import 'package:ohmbench/tool/store.dart';
-import 'package:ohmbench/tool/ui/editor_screen.dart';
-import 'package:ohmbench/tool/ui/home_screen.dart';
-import 'package:ohmbench/tool/ui/lab_theme.dart';
+import 'package:ohmbench/i18n/lang.dart';
+import 'package:ohmbench/workshop/examples.dart';
+import 'package:ohmbench/workshop/store.dart';
+import 'package:ohmbench/screens/editor_screen.dart';
+import 'package:ohmbench/screens/home_screen.dart';
+import 'package:ohmbench/screens/lab_theme.dart';
 
 import 'screens_test.dart' show loadShotFonts, shotTheme;
 
@@ -142,7 +142,7 @@ void main() {
         testWidgets('$store $lang ${i + 1}', (tester) async {
           tester.view.physicalSize = Size(w, 2778);
           tester.view.devicePixelRatio = 3;
-          BenchLanguage.override.value = lang;
+          Lang.picked.value = lang;
           final shot = _shots[i];
           final ps = ProjectStore();
           await tester.pumpWidget(RepaintBoundary(

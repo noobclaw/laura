@@ -11,14 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ohmbench/bench/words.dart';
-import 'package:ohmbench/tool/examples.dart';
-import 'package:ohmbench/tool/schematic/document.dart';
-import 'package:ohmbench/tool/store.dart';
-import 'package:ohmbench/tool/ui/editor_screen.dart';
-import 'package:ohmbench/tool/ui/home_screen.dart';
-import 'package:ohmbench/tool/ui/lab_theme.dart';
-import 'package:ohmbench/tool/ui/settings_screen.dart';
+import 'package:ohmbench/i18n/lang.dart';
+import 'package:ohmbench/workshop/examples.dart';
+import 'package:ohmbench/circuit/schematic/document.dart';
+import 'package:ohmbench/workshop/store.dart';
+import 'package:ohmbench/screens/editor_screen.dart';
+import 'package:ohmbench/screens/home_screen.dart';
+import 'package:ohmbench/screens/lab_theme.dart';
+import 'package:ohmbench/screens/settings_screen.dart';
 
 const _flutter = r'D:\dev\flutter\bin\cache\artifacts\material_fonts';
 
@@ -141,7 +141,7 @@ void main() {
 
   testWidgets('1 home first open', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'zh';
+    Lang.picked.value = 'zh';
     await tester.pumpWidget(_frame(HomeScreen(store: ProjectStore())));
     await _settle(tester);
     await _shot(tester, '1_home_first_open_zh');
@@ -149,7 +149,7 @@ void main() {
 
   testWidgets('2 home with data', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'zh';
+    Lang.picked.value = 'zh';
     await tester.pumpWidget(_frame(HomeScreen(store: _withData())));
     await _settle(tester);
     await _shot(tester, '2_home_data_zh');
@@ -157,7 +157,7 @@ void main() {
 
   testWidgets('3 editor running', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'zh';
+    Lang.picked.value = 'zh';
     final store = ProjectStore();
     final project = store.create(kExamples[2].title, kExamples[2].build());
     await tester.pumpWidget(
@@ -169,7 +169,7 @@ void main() {
 
   testWidgets('4 empty bench', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'zh';
+    Lang.picked.value = 'zh';
     final store = ProjectStore();
     final project = store.create('新电路', const SchematicDocument());
     await tester.pumpWidget(
@@ -180,7 +180,7 @@ void main() {
 
   testWidgets('5 error state', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'zh';
+    Lang.picked.value = 'zh';
     final store = ProjectStore();
     // A DC source with a wire straight across it: a short the solver
     // refuses to put a number on.
@@ -197,7 +197,7 @@ void main() {
 
   testWidgets('6 dark: settings', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'zh';
+    Lang.picked.value = 'zh';
     await tester.pumpWidget(_frame(OhmSettingsScreen(store: _withData())));
     await _settle(tester, 10);
     await _shot(tester, '6_dark_settings_zh');
@@ -205,7 +205,7 @@ void main() {
 
   testWidgets('7 home at text scale 2.0', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'en';
+    Lang.picked.value = 'en';
     await tester.pumpWidget(
         _frame(HomeScreen(store: _withData()), textScale: 2));
     await _settle(tester);
@@ -215,7 +215,7 @@ void main() {
 
   testWidgets('8 home in English', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'en';
+    Lang.picked.value = 'en';
     await tester.pumpWidget(_frame(HomeScreen(store: _withData())));
     await _settle(tester);
     await _shot(tester, '8_home_data_en');
@@ -223,7 +223,7 @@ void main() {
 
   testWidgets('9 home, reduce motion', (tester) async {
     await sized(tester);
-    BenchLanguage.override.value = 'en';
+    Lang.picked.value = 'en';
     await tester.pumpWidget(
         _frame(HomeScreen(store: ProjectStore()), reduceMotion: true));
     await _settle(tester, 4);
@@ -233,7 +233,7 @@ void main() {
   for (final ex in kExamples) {
     testWidgets('editor ${ex.id}', (tester) async {
       await sized(tester);
-      BenchLanguage.override.value = 'en';
+      Lang.picked.value = 'en';
       final store = ProjectStore();
       var doc = ex.build();
       // Close the switches so the running shot shows current.
