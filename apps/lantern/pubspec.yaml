@@ -2,7 +2,7 @@ name: lantern
 description: "Lantern: a lantern logic puzzle. The game itself is the web build in assets/game, shown in a full-screen WebView."
 publish_to: 'none'
 
-version: 0.4.1+1
+version: 1.0.0+1
 
 environment:
   sdk: ^3.12.2
