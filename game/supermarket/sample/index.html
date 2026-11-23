@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Souq Tycoon — main screen sample</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;overflow:hidden;background:#140f2e;font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif;color:#fff;user-select:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+.top{position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;gap:8px;align-items:center;z-index:3}
+.pill{display:flex;align-items:center;gap:7px;padding:7px 12px 7px 7px;border-radius:999px;background:linear-gradient(#2b235e,#191340);border:1.5px solid rgba(255,214,130,.55);box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18);font-weight:800;font-size:17px;letter-spacing:.2px}
+.pill i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:15px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 2px 4px rgba(0,0,0,.4)}
+.coin i{background:radial-gradient(circle at 35% 30%,#fff3b0,#ffc531 55%,#d98a00);color:#7a4300}.gem i{background:radial-gradient(circle at 35% 30%,#d9fbff,#39c8f0 55%,#1273c4);color:#063a66}
+.rate{margin-inline-start:auto;font-size:14px;color:#ffe7a8;background:linear-gradient(#3a2a12,#22170a);border-color:rgba(255,190,90,.6)}
+.star{position:fixed;top:calc(max(10px,env(safe-area-inset-top)) + 50px);left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:3px;padding:5px 12px;border-radius:999px;background:rgba(15,10,40,.6);backdrop-filter:blur(6px);font-size:15px;color:#ffd35a;text-shadow:0 0 8px rgba(255,200,80,.8)}
+.star b{color:#fff;font-size:13px;margin-inline-end:6px;text-shadow:none;letter-spacing:.3px}
+.rush{position:fixed;left:12px;right:12px;bottom:214px;z-index:3;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:18px;background:linear-gradient(90deg,#ff7a2f,#ff3d6e);box-shadow:0 10px 24px rgba(255,80,60,.45),inset 0 1px 0 rgba(255,255,255,.4);font-weight:800}
+.rush em{font-style:normal;font-size:24px}.rush span{flex:1;font-size:16px;line-height:1.15}.rush small{display:block;font-weight:600;font-size:12px;opacity:.9}
+.rush button{border:0;border-radius:12px;padding:9px 14px;font:inherit;font-size:15px;color:#b3260a;background:linear-gradient(#fff,#ffe9c9);box-shadow:0 4px 0 #c9662b}
+.card{position:fixed;left:12px;right:12px;bottom:96px;z-index:3;display:flex;gap:12px;align-items:center;padding:12px;border-radius:22px;background:linear-gradient(#34296f,#1d1647);border:1.5px solid rgba(255,255,255,.16);box-shadow:0 14px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.14)}
+.card .ic{width:58px;height:58px;border-radius:16px;background:radial-gradient(circle at 30% 25%,#ffd9a0,#f08a2e 60%,#b8540f);display:grid;place-items:center;font-size:30px;box-shadow:inset 0 -5px 0 rgba(0,0,0,.2)}
+.card .tx{flex:1;min-width:0}.card b{display:block;font-size:17px}.card small{display:block;font-size:13px;color:#c9c2f0;margin-top:2px}
+.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.14);margin-top:7px;overflow:hidden}.bar u{display:block;height:100%;width:64%;border-radius:99px;background:linear-gradient(90deg,#ffd35a,#ff8a2e)}
+.up{border:0;border-radius:16px;padding:9px 14px;min-width:96px;font:inherit;font-weight:800;color:#4a2408;background:linear-gradient(#ffe38f,#ffb53d);box-shadow:0 5px 0 #c97a12,0 10px 18px rgba(0,0,0,.35);text-align:center}
+.up small{display:block;color:#7a4a10;font-size:12px;margin:0}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:3;display:flex;justify-content:space-around;padding:8px 8px max(10px,env(safe-area-inset-bottom));background:linear-gradient(rgba(20,14,50,.2),#120c33 40%);backdrop-filter:blur(8px)}
+.nav div{position:relative;width:62px;text-align:center;font-size:11.5px;font-weight:700;color:#bdb6ea}
+.nav i{display:grid;place-items:center;width:50px;height:50px;margin:0 auto 3px;border-radius:17px;font-style:normal;font-size:24px;background:linear-gradient(#3b3080,#241b58);box-shadow:0 5px 0 #130d36,inset 0 1px 0 rgba(255,255,255,.2)}
+.nav .on{color:#ffe08a}.nav .on i{background:linear-gradient(#ffd66b,#ff9d2e);box-shadow:0 5px 0 #b86a0c,0 0 18px rgba(255,180,60,.6);transform:translateY(-6px)}
+.nav s{position:absolute;top:-4px;right:2px;min-width:18px;height:18px;border-radius:9px;background:#ff3d5a;color:#fff;font-size:11px;line-height:18px;text-decoration:none;box-shadow:0 2px 6px rgba(255,60,90,.6)}
+#coins{position:fixed;inset:0;pointer-events:none;z-index:2}
+.fly{position:absolute;font-weight:900;font-size:16px;color:#ffe27a;text-shadow:0 2px 0 #7a4300,0 0 10px rgba(255,200,60,.9);animation:fly 1.5s ease-out forwards}
+@keyframes fly{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-8px) scale(1.15)}100%{transform:translateY(-62px) scale(1);opacity:0}}
+@media(prefers-reduced-motion:reduce){.fly{animation-duration:.01s}}
+</style></head><body>
+<canvas id="gl"></canvas><div id="coins"></div>
+<div class="top"><div class="pill coin"><i>$</i><span id="coin">48.2M</span></div><div class="pill gem"><i>◆</i>126</div><div class="pill rate">+312K /s</div></div>
+<div class="star"><b>Riyadh · Store 1</b>★★★☆☆</div>
+<div class="rush"><em>⚡</em><span>Rush hour in 0:42<small>Work the till yourself for ×3 income</small></span><button>Get ready</button></div>
+<div class="card"><div class="ic">🌶️</div><div class="tx"><b>Dates &amp; Spices · Lv 64</b><small>Saffron threads · 18.4K per customer</small><div class="bar"><u></u></div></div><button class="up">Upgrade<small>2.1M</small></button></div>
+<div class="nav"><div class="on"><i>🏬</i>Store</div><div><i>🧑‍💼</i>Managers<s>1</s></div><div><i>📋</i>Tasks<s>3</s></div><div><i>🤝</i>Guild</div><div><i>🗺️</i>Cities</div></div>
+<script src="vendor/three.min.js"></script><script src="scene.js"></script>
+</body></html>
