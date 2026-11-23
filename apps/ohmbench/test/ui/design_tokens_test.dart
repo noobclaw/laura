@@ -63,7 +63,7 @@ void main() {
     // Non-visual timers (save coalescing, rerun debounce) are behaviour.
     final allowed = {'lab_theme.dart'};
     final offenders = <String>[];
-    for (final f in Directory('lib/tool/ui').listSync().whereType<File>()) {
+    for (final f in Directory('lib/screens').listSync().whereType<File>()) {
       final name = f.uri.pathSegments.last;
       if (allowed.contains(name)) continue;
       final lines = f.readAsLinesSync();
