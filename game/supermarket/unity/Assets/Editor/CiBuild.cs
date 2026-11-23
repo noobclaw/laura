@@ -60,7 +60,7 @@ public static class CiBuild
     static void Snap(Souq.Game g, string name)
     {
         // the camera keeps this target for the whole session, so screen positions are worked out for the right size
-        g.Tick(0.001f); Canvas.ForceUpdateCanvases(); g.cam.Render();
+        Canvas.ForceUpdateCanvases(); g.Tick(0.001f); Canvas.ForceUpdateCanvases(); g.cam.Render();
         RenderTexture.active = shotRt;
         var tex = new Texture2D(shotRt.width, shotRt.height, TextureFormat.RGB24, false);
         tex.ReadPixels(new Rect(0, 0, shotRt.width, shotRt.height), 0, 0); tex.Apply();
@@ -107,7 +107,7 @@ public static class CiBuild
             if (step % (600 * 4) == 0 && step > 0)
             {
                 int open = 0; string lv = ""; for (int d = 0; d < nd; d++) if (s.dOpen[d]) { open++; lv += s.dLevel[d] + "/" + s.dStaff[d] + " "; }
-                Debug.Log("AUDIT t=" + (t / 60).ToString("0") + "m coin=" + Souq.Loc.Num(s.coin) + " shown/min=" + Souq.Loc.Num(sim.EarnPerMin) + " real/min=" + Souq.Loc.Num((paid - lastPaid) / 10) + " shoppers=" + sim.custs.Count + " park=" + s.parkLevel + " cash=" + sim.CashOpen + " ad=" + s.adLevel + " star=" + s.star + " task=" + s.task + " gems=" + s.gem + " lv/staff: " + lv);
+                Debug.Log("AUDIT t=" + (t / 60).ToString("0") + "m coin=" + Souq.Loc.Num(s.coin) + " full/min=" + Souq.Loc.Num(sim.EarnPerMin) + " flow/min=" + Souq.Loc.Num(sim.FlowPerMin) + " real/min=" + Souq.Loc.Num((paid - lastPaid) / 10) + " shoppers=" + sim.custs.Count + " park=" + s.parkLevel + " cash=" + sim.CashOpen + " ad=" + s.adLevel + " star=" + s.star + " task=" + s.task + " gems=" + s.gem + " lv/staff: " + lv);
                 lastPaid = paid;
             }
         }

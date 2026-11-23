@@ -31,6 +31,7 @@ namespace Souq
             if (!overlay) { canvas.worldCamera = cam; canvas.planeDistance = 1f; }
             var sc = go.GetComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080, 2340); sc.matchWidthOrHeight = 0;
             root = (RectTransform)go.transform;
+            if (overlay && Screen.height > 0) { var sa = Screen.safeArea; float k = 1080f / Mathf.Max(1, Screen.width); topInset = (Screen.height - sa.yMax) * k; botInset = sa.yMin * k; }
             labels = U.Fill(U.Rect(root, "labels")); hud = U.Fill(U.Rect(root, "hud")); sheetLayer = U.Fill(U.Rect(root, "sheets")); fx = U.Fill(U.Rect(root, "fx"));
             BuildTop(); BuildOffers(); BuildNav(); BuildLabels();
             toast = U.Shade(U.Txt(fx, "", 54, Color.white)); U.Pin(toast.rectTransform, 0.5f, 0.5f, 0, 420, 960, 150); toast.gameObject.SetActive(false);
@@ -38,9 +39,10 @@ namespace Souq
             Refresh(true);
         }
 
+        float topInset, botInset;
         void BuildTop()
         {
-            float top = -120;
+            float top = -(Mathf.Max(96, topInset + 14));
             var coin = U.Img(hud, Spr.Round, U.Navy, "coinPill"); coinPill = U.Pin(coin.rectTransform, 0, 1, 28, top, 500, 118);
             var ci = U.Img(coin.transform, Spr.Coin, Color.white, "icon", false); U.Pin(ci.rectTransform, 0, 0.5f, 12, 0, 96, 96);
             coinTxt = U.Txt(coin.transform, "0", 54, Color.white, TextAnchor.MiddleLeft); U.Place(coinTxt.rectTransform, 0, 0.36f, 1, 1, 122, 0, -16, -4);
@@ -80,7 +82,7 @@ namespace Souq
 
         void BuildNav()
         {
-            var bar = U.Img(hud, Spr.Round, U.Navy, "nav", true, true); U.Place(bar.rectTransform, 0, 0, 1, 0, 20, 44, -20, 250);
+            var bar = U.Img(hud, Spr.Round, U.Navy, "nav", true, true); float nb = Mathf.Max(30, botInset * 0.6f + 14); U.Place(bar.rectTransform, 0, 0, 1, 0, 20, nb, -20, nb + 206);
             string[] keys = { "checkouts", "parking", "boostsNav", "gradeNav", "shop" }; Color[] cols = { U.Green, U.Blue, U.Purple, U.Gold, U.Red };
             Sprite[] ic = { Spr.Coin, null, Spr.Person, Spr.Star, Spr.Gem }; Action[] act = { () => OpenCheckouts(), () => OpenParking(), () => OpenBoosts(), () => OpenGrade(), () => OpenShop() };
             for (int i = 0; i < 5; i++)
@@ -108,9 +110,8 @@ namespace Souq
         // ---------- per frame ----------
         public Vector2 ToCanvas(Vector3 world)
         {
-            var sp = g.cam.WorldToScreenPoint(world); Vector2 lp;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, sp, canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera, out lp);
-            return lp + root.rect.size * 0.5f;                       // from centre-based to bottom-left-based
+            var sp = g.cam.WorldToScreenPoint(world); var size = root.rect.size;      // bottom-left based, in canvas units
+            return new Vector2(sp.x / Mathf.Max(1, g.cam.pixelWidth) * size.x, sp.y / Mathf.Max(1, g.cam.pixelHeight) * size.y);
         }
         Vector2 CanvasPosOf(RectTransform rt) { Vector3 w = rt.TransformPoint(rt.rect.center); Vector2 lp = root.InverseTransformPoint(w); return lp + root.rect.size * 0.5f; }
 
@@ -135,7 +136,7 @@ namespace Souq
 
         void Refresh(bool first)
         {
-            rateTxt.text = "+" + Loc.Num(sim.EarnPerMin) + Loc.Fix(Loc.Raw("permin")); gemTxt.text = Loc.Num(s.gem); gradeTxt.text = s.star.ToString();
+            rateTxt.text = "+" + Loc.Num(sim.FlowPerMin) + Loc.Fix(Loc.Raw("permin")); gemTxt.text = Loc.Num(s.gem); gradeTxt.text = s.star.ToString();
             if (s.task < T.Tasks.Length)
             {
                 var t = T.Tasks[s.task]; double v = Math.Min(sim.TaskValue(t), t.need); bool done = sim.TaskDone;
@@ -157,7 +158,7 @@ namespace Souq
             foreach (var o in offers)
             {
                 bool on = o.show(); o.rt.gameObject.SetActive(on); if (!on) continue;
-                U.Pin(o.rt, 1, 1, -24, -420 - row * 196, 170, 176); o.timer.text = o.text(); row++;
+                U.Pin(o.rt, 1, 1, -24, -(Mathf.Max(96, topInset + 14) + 300) - row * 196, 170, 176); o.timer.text = o.text(); row++;
             }
             navDot[0].gameObject.SetActive(s.coin >= sim.CashHireCost() || AnyCashUp()); navDot[1].gameObject.SetActive(s.coin >= sim.ParkCost());
             navDot[2].gameObject.SetActive(AnyEpic()); navDot[3].gameObject.SetActive(s.coin >= sim.StarCost()); navDot[4].gameObject.SetActive(false);
@@ -455,7 +456,7 @@ namespace Souq
             {
                 a.btn.label.text = Loc.G(s.sfx ? "on" : "off"); b.btn.label.text = Loc.G(s.music ? "on" : "off"); c.btn.label.text = Loc.Ar ? "English" : Loc.Shape("العربية");
                 int served = 0; foreach (int v in s.served) served += v;
-                stats.text = Loc.Fix(Loc.Raw("total") + ": " + Loc.Num(s.assets)) + "\n" + Loc.Fix(Loc.Raw("income") + ": " + Loc.Num(sim.EarnPerMin) + Loc.Raw("permin")) + "\n" + Loc.Fix(Loc.Raw("served") + ": " + Loc.Num(served)) + "\n" + Loc.Fix(Loc.Raw("shoppers") + ": " + sim.custs.Count) + "\n\n" + Loc.G("test");
+                stats.text = Loc.Fix(Loc.Raw("total") + ": " + Loc.Num(s.assets)) + "\n" + Loc.Fix(Loc.Raw("income") + ": " + Loc.Num(sim.FlowPerMin) + Loc.Raw("permin")) + "\n" + Loc.Fix(Loc.Raw("served") + ": " + Loc.Num(served)) + "\n" + Loc.Fix(Loc.Raw("shoppers") + ": " + sim.custs.Count) + "\n\n" + Loc.G("test");
             };
             sheetRefresh();
         }

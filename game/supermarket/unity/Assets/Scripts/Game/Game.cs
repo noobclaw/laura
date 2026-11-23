@@ -110,6 +110,7 @@ namespace Souq
             Save s = null; var json = PlayerPrefs.GetString(SaveKey, "");
             if (json.Length > 0) { try { s = JsonUtility.FromJson<Save>(json); } catch { s = null; } }
             if (s == null || !s.Valid()) s = Save.Fresh();
+            s.Repair();
             if (string.IsNullOrEmpty(s.lang)) s.lang = Application.systemLanguage == SystemLanguage.Arabic ? "ar" : "en";
             return s;
         }
@@ -180,7 +181,7 @@ namespace Souq
         /// Called when the player wants something they cannot pay for. A long wait brings up the time-skip offer.
         public void Stuck(double cost)
         {
-            double perSec = sim.EarnPerMin / 60; if (perSec <= 0 || double.IsInfinity(cost)) return;
+            double perSec = sim.FlowPerMin / 60; if (perSec <= 0 || double.IsInfinity(cost)) return;
             double wait = (cost - sim.s.coin) / perSec; if (wait < 600 || stuckCd > 0) return;
             stuckCd = 90; int idx = wait <= 3600 ? 0 : wait <= 4 * 3600 ? 1 : 2; ui.StuckPopup(wait, idx);
         }

@@ -34,6 +34,14 @@ namespace Souq.Core
         }
 
         /// Repairs a save from an older or damaged file so array reads are always in range.
+        public void Repair()
+        {
+            dOpen[0] = true; if (cLevel[0] < 1) cLevel[0] = 1;
+            for (int i = 0; i < T.ND; i++) { dLevel[i] = Math.Max(1, Math.Min(T.MaxLevel, dLevel[i])); dStaff[i] = Math.Max(1, Math.Min(T.MaxStaff, dStaff[i])); dSpeed[i] = Math.Max(0, Math.Min(T.ProdMax, dSpeed[i])); if (i > 0 && !dOpen[i - 1]) dOpen[i] = false; }
+            for (int i = 0; i < T.NC; i++) cLevel[i] = Math.Max(0, Math.Min(T.CashLevelMax, cLevel[i]));
+            for (int i = 0; i < T.Epics.Length; i++) epic[i] = Math.Max(0, Math.Min(T.Epics[i].max, epic[i]));
+            parkLevel = Math.Min(T.ParkMax, parkLevel); adLevel = Math.Min(T.AdLevelMax, adLevel); if (gem < 0) gem = 0; if (task < 0) task = 0;
+        }
         public bool Valid() =>
             dLevel != null && dLevel.Length == T.ND && dSpeed != null && dSpeed.Length == T.ND && dStaff != null && dStaff.Length == T.ND &&
             dOpen != null && dOpen.Length == T.ND && cLevel != null && cLevel.Length == T.NC && epic != null && epic.Length == T.Epics.Length &&
@@ -109,6 +117,17 @@ namespace Souq.Core
         public int OpenDepts { get { int n = 0; foreach (var o in s.dOpen) if (o) n++; return n; } }
         /// Income per minute if every department worked without pause.
         public double EarnPerMin { get { double e = 0; for (int d = 0; d < T.ND; d++) if (s.dOpen[d]) e += Price(d) * DeptSpeed(d); return e; } }
+        /// Income per minute the store can really take: limited by how many cars arrive and how fast the checkouts clear.
+        public double FlowPerMin
+        {
+            get
+            {
+                double a = Arrivals, cash = 0; for (int c = 0; c < T.NC; c++) if (s.cLevel[c] > 0) cash += CashSpeed(c);
+                double scale = a > 0 ? Math.Min(1, cash / a) : 0, e = 0;
+                for (int d = 0; d < T.ND; d++) if (s.dOpen[d]) e += Price(d) * Math.Min(DeptSpeed(d), a * T.Visit[d] / 100.0) * scale;
+                return e;
+            }
+        }
         public double AdBoostCap => T.AdBoostMax + EpicAdd(EpicKind.AdTime);
         public double OfflineCap => s.offlinePro ? T.OfflineCapPro : T.OfflineCap;
 
@@ -175,7 +194,7 @@ namespace Souq.Core
         public double GiftReward() => EarnPerMin * OpenDepts;
         public double CollectGift(Cust c) { if (!c.gift) return 0; c.gift = false; double r = GiftReward(); Earn(r); return r; }
         /// Income for `secs` of an idle store; used for offline pay and time-skip items.
-        public double IdleIncome(double secs) => EarnPerMin / 60 * Math.Max(0, secs);
+        public double IdleIncome(double secs) => FlowPerMin / 60 * Math.Max(0, secs);
         public double OfflineReward(double now)
         {
             double away = now - s.lastSeen;

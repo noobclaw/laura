@@ -91,7 +91,8 @@ namespace Souq
         public Transform root; public Camera cam; public Sim sim;
         public DeptView[] depts = new DeptView[T.ND];
         public GameObject[] cashDesk = new GameObject[T.NC]; public GameObject[] cashStaff = new GameObject[T.NC]; Renderer[] cashScreen = new Renderer[T.NC];
-        public GameObject truck, vip; public Vector3 truckPos = new Vector3(13.5f, 0, 6f), vipPos = new Vector3(-13.5f, 0, -2.5f), busPos = new Vector3(13.5f, 0, -3.2f);
+        public GameObject truck, vip; public Vector3 truckPos = new Vector3(6.3f, 0, -1.25f), vipPos = new Vector3(-6.3f, 0, -1.25f), busPos = new Vector3(8.3f, 0, -4.4f);
+        public const float RoadZ = -4.4f;
         readonly Dictionary<int, Actor> actors = new Dictionary<int, Actor>(); readonly List<int> gone = new List<int>();
         Transform slotRoot; int slotsBuilt; float time; Light sun; Material neonA, neonB; Renderer[] roofLights = new Renderer[0];
         public static readonly Color[] DeptColor =
@@ -111,7 +112,7 @@ namespace Souq
         public static Vector3 QueuePos(int d, int k, int q) => DeptCenter(d) + new Vector3((k - 2) * 1.3f, 0, 0.75f - q * 0.85f);
         public static Vector3 CashPos(int c) => new Vector3(-7.35f + c * 2.1f, 0, CashZ);
         public static Vector3 CashQueuePos(int c, int q) => CashPos(c) + new Vector3(0.75f, 0, 1.0f + q * 0.8f);
-        public static Vector3 SlotPos(int i) => new Vector3(-7.5f + (i % 6) * 3f, 0, -8.5f - (i / 6) * 4.4f);
+        public static Vector3 SlotPos(int i) => new Vector3(-7.5f + (i % 6) * 3f, 0, -9.0f - (i / 6) * 4.4f);
         static readonly Vector3 Door = new Vector3(0, 0, 0.2f);
 
         public World(Sim s) { sim = s; }
@@ -131,9 +132,9 @@ namespace Souq
             float depth = StoreDepth;
             // ground: asphalt lot, pavement, shop floor in a two-tone checker
             Kit.Box(root, new Vector3(0, -0.3f, depth / 2 - 22), new Vector3(120, 0.5f, depth + 110), Kit.Mat(new Color(0.20f, 0.21f, 0.30f), 0.05f), "asphalt");
-            Kit.Box(root, new Vector3(0, -0.14f, -3.4f), new Vector3(120, 0.3f, 4.6f), Kit.Mat(new Color(0.16f, 0.17f, 0.24f), 0.3f), "road");
-            for (int i = -14; i <= 14; i++) Kit.Box(root, new Vector3(i * 3.6f, 0.02f, -3.4f), new Vector3(1.6f, 0.02f, 0.14f), Kit.Mat(new Color(0.95f, 0.85f, 0.45f)), "dash");
-            Kit.Box(root, new Vector3(0, -0.1f, -0.65f), new Vector3(HalfW * 2 + 5, 0.3f, 1.3f), Kit.Mat(new Color(0.74f, 0.72f, 0.78f)), "pavement");
+            Kit.Box(root, new Vector3(0, -0.14f, RoadZ), new Vector3(120, 0.3f, 3.6f), Kit.Mat(new Color(0.16f, 0.17f, 0.24f), 0.3f), "road");
+            for (int i = -14; i <= 14; i++) Kit.Box(root, new Vector3(i * 3.6f, 0.02f, RoadZ), new Vector3(1.6f, 0.02f, 0.14f), Kit.Mat(new Color(0.95f, 0.85f, 0.45f)), "dash");
+            Kit.Box(root, new Vector3(0, -0.1f, -1.25f), new Vector3(HalfW * 2 + 5, 0.3f, 2.5f), Kit.Mat(new Color(0.74f, 0.72f, 0.78f)), "pavement");
             var tileA = Kit.Mat(new Color(0.97f, 0.95f, 0.90f), 0.45f); var tileB = Kit.Mat(new Color(0.91f, 0.89f, 0.85f), 0.45f);
             for (int ix = 0; ix < 6; ix++) for (int iz = 0; iz < Mathf.CeilToInt(depth / 3f); iz++)
                 Kit.Box(root, new Vector3(-HalfW + 1.5f + ix * 3f, -0.05f, 1.5f + iz * 3f), new Vector3(3f, 0.1f, 3f), (ix + iz) % 2 == 0 ? tileA : tileB, "tile");
@@ -161,17 +162,17 @@ namespace Souq
             for (int i = 0; i < 6; i++)
             {
                 float x = -12.5f + i * 5f;
-                Kit.Spawn("c_streetlight", root, new Vector3(x, 0, -0.9f), 180, 3.4f, true);
-                Kit.Shape(PrimitiveType.Sphere, root, new Vector3(x, 3.25f, -1.5f), Vector3.one * 0.35f, neonA);
+                Kit.Spawn("c_streetlight", root, new Vector3(x, 0, -2.3f), 180, 3.4f, true);
+                Kit.Shape(PrimitiveType.Sphere, root, new Vector3(x, 3.25f, -2.9f), Vector3.one * 0.35f, neonA);
             }
-            for (int i = 0; i < 5; i++) { Kit.Spawn("c_bush", root, new Vector3(-11f + i * 1.3f, 0, -0.75f), i * 40, 1.1f); Kit.Spawn("c_bush", root, new Vector3(5.8f + i * 1.3f, 0, -0.75f), i * 70, 1.1f); }
-            Kit.Spawn("c_bench", root, new Vector3(-4.2f, 0, -0.75f), 180, 1.6f); Kit.Spawn("c_bench", root, new Vector3(4.2f, 0, -0.75f), 180, 1.6f);
+            for (int i = 0; i < 3; i++) { Kit.Spawn("c_bush", root, new Vector3(-9.6f - i * 1.3f, 0, -1.2f), i * 40, 1.1f); Kit.Spawn("c_bush", root, new Vector3(9.6f + i * 1.3f, 0, -1.2f), i * 70, 1.1f); }
+            Kit.Spawn("c_bench", root, new Vector3(-3.4f, 0, -1.0f), 180, 1.5f); Kit.Spawn("c_bench", root, new Vector3(3.4f, 0, -1.0f), 180, 1.5f);
             string[] bl = { "c_building_A", "c_building_B", "c_building_C", "c_building_D" };
             for (int i = 0; i < 7; i++) { Kit.Spawn(bl[i % 4], root, new Vector3(-17.5f, 0, 2 + i * 8.5f), 90, 7.5f); Kit.Spawn(bl[(i + 2) % 4], root, new Vector3(17.5f, 0, 10 + i * 8.5f), -90, 7.5f); }
             for (int i = 0; i < 5; i++) Kit.Spawn(bl[(i + 1) % 4], root, new Vector3(-16 + i * 8f, 0, depth + 6f), 180, 7.5f);
             // delivery bay and VIP bay
-            Kit.Box(root, new Vector3(truckPos.x, 0.02f, truckPos.z), new Vector3(3.2f, 0.04f, 5.2f), Kit.Mat(new Color(0.95f, 0.75f, 0.2f)), "truckBay");
-            Kit.Box(root, new Vector3(vipPos.x, 0.02f, vipPos.z), new Vector3(3.0f, 0.04f, 2.4f), Kit.Mat(new Color(0.75f, 0.35f, 0.95f)), "vipBay");
+            Kit.Box(root, new Vector3(truckPos.x, 0.07f, truckPos.z), new Vector3(4.2f, 0.04f, 2.2f), Kit.Mat(new Color(0.95f, 0.75f, 0.2f)), "truckBay");
+            Kit.Box(root, new Vector3(vipPos.x, 0.07f, vipPos.z), new Vector3(4.2f, 0.04f, 2.2f), Kit.Mat(new Color(0.75f, 0.35f, 0.95f)), "vipBay");
 
             for (int c = 0; c < T.NC; c++) BuildCash(c);
             for (int d = 0; d < T.ND; d++) BuildDept(d);
@@ -284,9 +285,9 @@ namespace Souq
             {
                 a.car = new GameObject("car"); a.car.transform.SetParent(root, false);
                 Kit.Spawn(CarKit[c.look % CarKit.Length], a.car.transform, Vector3.zero, 0, 2.6f);
-                a.carPos = new Vector3(-30, 0, -3.4f); a.car.transform.position = a.carPos; a.carYaw = 90;
+                a.carPos = new Vector3(-30, 0, RoadZ); a.car.transform.position = a.carPos; a.carYaw = 90;
             }
-            a.go.transform.position = c.slot >= 0 ? new Vector3(-30, 0, -3.4f) : busPos; a.go.SetActive(c.slot < 0);
+            a.go.transform.position = c.slot >= 0 ? new Vector3(-30, 0, RoadZ) : busPos; a.go.SetActive(c.slot < 0);
             return a;
         }
 
@@ -323,7 +324,7 @@ namespace Souq
         Vector3 Target(Cust c, out bool busy)
         {
             busy = false; float t = c.dur > 0 ? Mathf.Clamp01(c.t / c.dur) : 1;
-            Vector3 slot = c.slot >= 0 ? SlotPos(c.slot) + new Vector3(0.9f, 0, 0.6f) : busPos; var lane = new Vector3(slot.x, 0, -1.2f);
+            Vector3 slot = c.slot >= 0 ? SlotPos(c.slot) + new Vector3(0.9f, 0, 0.6f) : busPos; var lane = new Vector3(slot.x, 0, -2.4f);
             switch (c.st)
             {
                 case CS.CarIn: return slot;
@@ -345,7 +346,7 @@ namespace Souq
             for (int d = 0; d < T.ND; d++)
             {
                 var v = depts[d];
-                if (v.pop > 0) { v.pop = Mathf.Max(0, v.pop - dt * 1.6f); float k = 1 + 0.22f * Mathf.Sin(v.pop * Mathf.PI) * v.pop; v.props.localScale = new Vector3(k, 1 + 0.5f * (k - 1), k); v.props.position = v.center * (1 - k) ; }
+                if (v.pop > 0) { Kit.SetColor(v.pad.sharedMaterial, Color.Lerp(sim.s.dOpen[d] ? Color.Lerp(DeptColor[d], Color.white, 0.55f) : new Color(0.55f, 0.56f, 0.62f), Color.white, v.pop)); v.pop = Mathf.Max(0, v.pop - dt * 1.6f); float k = 1 + 0.22f * Mathf.Sin(v.pop * Mathf.PI) * v.pop; v.props.localScale = new Vector3(k, 1 + 0.5f * (k - 1), k); v.props.position = v.center * (1 - k) ; }
                 if (!sim.s.dOpen[d]) continue;
                 for (int k = 0; k < sim.s.dStaff[d]; k++)
                 {
@@ -367,7 +368,7 @@ namespace Souq
                 float t = c.dur > 0 ? Mathf.Clamp01(c.t / c.dur) : 1;
                 if (a.car != null)
                 {
-                    var slot = SlotPos(c.slot); Vector3 from = new Vector3(-30, 0, -3.4f), turn = new Vector3(slot.x, 0, -3.4f), exit = new Vector3(30, 0, -3.4f);
+                    var slot = SlotPos(c.slot); Vector3 from = new Vector3(-30, 0, RoadZ), turn = new Vector3(slot.x, 0, RoadZ), exit = new Vector3(30, 0, RoadZ);
                     Vector3 cp = c.st == CS.CarIn ? Along(from, turn, slot, Mathf.SmoothStep(0, 1, t)) : c.st == CS.CarOut ? Along(slot, turn, exit, t * t) : slot;
                     var dir = cp - a.carPos; if (dir.sqrMagnitude > 1e-5f) a.carYaw = Mathf.LerpAngle(a.carYaw, Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg, 0.35f);
                     a.carPos = cp; a.car.transform.position = cp; a.car.transform.rotation = Quaternion.Euler(0, a.carYaw, 0);
@@ -391,9 +392,9 @@ namespace Souq
             foreach (int id in gone) { var a = actors[id]; Kit.Kill(a.go); Kit.Kill(a.car); actors.Remove(id); }
 
             // delivery truck and VIP car wait in their bays until tapped
-            if (sim.truckHere && truck == null) { truck = Kit.Spawn("c_car_stationwagon", root, truckPos, 0, 3.6f); AddMarker(truck, new Color(1f, 0.8f, 0.2f)); }
+            if (sim.truckHere && truck == null) { truck = Kit.Spawn("c_car_stationwagon", root, truckPos + Vector3.up * 0.09f, 90, 3.4f); AddMarker(truck, new Color(1f, 0.8f, 0.2f)); }
             if (!sim.truckHere && truck != null) { Kit.Kill(truck); truck = null; }
-            if (sim.vipHere && vip == null) { vip = Kit.Spawn("c_car_sedan", root, vipPos, 90, 3.0f); AddMarker(vip, new Color(0.85f, 0.4f, 1f)); }
+            if (sim.vipHere && vip == null) { vip = Kit.Spawn("c_car_sedan", root, vipPos + Vector3.up * 0.09f, 90, 3.2f); AddMarker(vip, new Color(0.85f, 0.4f, 1f)); }
             if (!sim.vipHere && vip != null) { Kit.Kill(vip); vip = null; }
             Bob(truck); Bob(vip);
         }
