@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lantern — gameplay prototype</title>
+<style>
+/* Gameplay prototype, not final art. Placeholder palette and shapes only.
+   One lantern per row, column and garden bed; lanterns never touch. */
+:root{--bg:#fbf9f4;--ink:#17323a;--mute:#5d737a;--line:#17323a;--bad:#c8321e;--card:#fff;--acc:#0f6b74}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI","Noto Sans","Noto Sans Arabic",sans-serif;overflow-x:clip}
+main{max-width:520px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-size:28px;line-height:1.05;margin:4px 0}
+.sub{color:var(--mute);font-size:14px;margin:0 0 12px}
+.bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:10px 0;flex-wrap:wrap}
+.stat{font-variant-numeric:tabular-nums;font-weight:600}
+.tabs{display:flex;gap:6px}
+button{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;min-height:44px;padding:0 14px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button[aria-pressed=true]{background:var(--ink);color:#fff}
+button:disabled{opacity:.4;cursor:default}
+#board{direction:ltr;display:grid;aspect-ratio:1;width:100%;border:3px solid var(--line);border-radius:6px;overflow:hidden;touch-action:none;user-select:none;background:var(--line)}
+.c{position:relative;min-height:0;overflow:hidden;display:grid;place-items:center;border:0 solid var(--line);border-right-width:1px;border-bottom-width:1px;font-size:0}
+.c.rb{border-right-width:3px}.c.bb{border-bottom-width:3px}
+.c.x::after{content:"";width:18%;aspect-ratio:1;border-radius:50%;background:var(--ink);opacity:.45}
+.c.l::after{content:"";width:56%;aspect-ratio:.88;border-radius:46% 46% 40% 40%;background:#e2552f;box-shadow:inset 0 -6px 0 #b83e1d,inset 0 5px 0 #f58a5e,0 0 0 2px var(--ink);animation:pop .16s ease-out}
+.c.l.bad::after{background:#fff;box-shadow:0 0 0 3px var(--bad)}
+.c.bad{outline:3px solid var(--bad);outline-offset:-3px}
+.c.hint{outline:4px dashed var(--acc);outline-offset:-4px}
+@keyframes pop{from{transform:scale(.4)}to{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.c.l::after{animation:none}}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+#msg{min-height:48px;margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#eaf3f2;font-size:15px}
+#win{display:none;margin-top:12px;padding:16px;border:2px solid var(--line);border-radius:12px;background:var(--card);text-align:center}
+#win.on{display:block}
+#win b{font-size:24px;display:block}
+.stars{font-size:28px;letter-spacing:4px;color:#e2552f}
+label.opt{display:flex;gap:8px;align-items:center;min-height:44px;font-size:14px;color:var(--mute)}
+footer{margin-top:20px;color:var(--mute);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<header><h1 id="t-title"></h1><div class="tabs"><button id="lang" aria-label="Language"></button></div></header>
+<p class="sub" id="t-rules"></p>
+<div class="bar">
+  <div class="tabs"><button id="mLevels" aria-pressed="true"></button><button id="mDaily" aria-pressed="false"></button></div>
+  <div class="stat"><span id="lvl"></span> · <span id="time">0:00</span></div>
+</div>
+<div id="board" role="grid" aria-label="Puzzle board"></div>
+<div class="tools"><button id="undo"></button><button id="hint"></button><button id="reset"></button></div>
+<label class="opt"><input type="checkbox" id="auto"> <span id="t-auto"></span></label>
+<p id="msg" role="status" aria-live="polite"></p>
+<div id="win"><b id="t-win"></b><div class="stars" id="stars"></div><p id="winInfo"></p><button id="next"></button></div>
+<footer id="t-foot"></footer>
+</main>
+<script>
+{
+// ---------- text (all UI strings live here; nothing hard-coded below) ----------
+const T={
+ en:{title:"Lantern",rules:"One lantern in every row, column and coloured bed. Lanterns never touch, not even diagonally.",levels:"Levels",daily:"Daily",level:"Level",undo:"Undo",hint:"Hint",reset:"Reset",auto:"Auto-mark blocked cells",
+  how:"Tap once to mark a cell as empty, twice to place a lantern. Drag to mark several.",win:"Solved!",next:"Next puzzle",best:"Best",time:"Time",dailyDone:"Come back tomorrow for a new daily puzzle.",streak:"Daily streak",
+  hRow:"This cell shares a row with a lantern, so it must stay empty.",hCol:"This cell shares a column with a lantern, so it must stay empty.",hReg:"This cell shares a bed with a lantern, so it must stay empty.",hAdj:"This cell touches a lantern, so it must stay empty.",
+  hOnlyRow:"Only one free cell is left in this row. The lantern goes here.",hOnlyCol:"Only one free cell is left in this column. The lantern goes here.",hOnlyReg:"Only one free cell is left in this bed. The lantern goes here.",
+  hBad:"This lantern breaks a rule. Remove it.",hWrong:"This lantern is in the wrong place. Remove it.",hGive:"No simple step found. This cell holds a lantern.",noHints:"No hints left for this puzzle.",hintsLeft:"Hints left",
+  foot:"Gameplay prototype. Placeholder art, no sound, no ads, no purchases.",gen:"Building puzzle…"},
+ ar:{title:"فانوس",rules:"فانوس واحد في كل صف وكل عمود وكل حوض ملوّن. الفوانيس لا تتلامس أبداً، ولا حتى قُطرياً.",levels:"المراحل",daily:"اليومي",level:"المرحلة",undo:"تراجع",hint:"تلميح",reset:"إعادة",auto:"تعليم الخانات المحجوبة تلقائياً",
+  how:"اضغط مرة لتعليم الخانة فارغة، ومرتين لوضع فانوس. اسحب لتعليم عدة خانات.",win:"تم الحل!",next:"اللغز التالي",best:"الأفضل",time:"الوقت",dailyDone:"عُد غداً للغز يومي جديد.",streak:"سلسلة الأيام",
+  hRow:"هذه الخانة في صف فيه فانوس، فيجب أن تبقى فارغة.",hCol:"هذه الخانة في عمود فيه فانوس، فيجب أن تبقى فارغة.",hReg:"هذه الخانة في حوض فيه فانوس، فيجب أن تبقى فارغة.",hAdj:"هذه الخانة تلامس فانوساً، فيجب أن تبقى فارغة.",
+  hOnlyRow:"بقيت خانة واحدة متاحة في هذا الصف. الفانوس هنا.",hOnlyCol:"بقيت خانة واحدة متاحة في هذا العمود. الفانوس هنا.",hOnlyReg:"بقيت خانة واحدة متاحة في هذا الحوض. الفانوس هنا.",
+  hBad:"هذا الفانوس يخالف القواعد. أزِله.",hWrong:"هذا الفانوس في مكان خاطئ. أزِله.",hGive:"لا توجد خطوة بسيطة. في هذه الخانة فانوس.",noHints:"لا تلميحات متبقية لهذا اللغز.",hintsLeft:"التلميحات المتبقية",
+  foot:"نموذج أولي للعب. رسوم مؤقتة، بلا صوت ولا إعلانات ولا مشتريات.",gen:"جارٍ إنشاء اللغز…"}};
+// ---------- storage (optional; the game works without it) ----------
+const mem={};
+const load=(k,d)=>{try{const v=localStorage.getItem("lantern."+k);return v==null?(k in mem?mem[k]:d):JSON.parse(v)}catch(e){return k in mem?mem[k]:d}};
+const save=(k,v)=>{mem[k]=v;try{localStorage.setItem("lantern."+k,JSON.stringify(v))}catch(e){}};
+// ---------- generator: unique-solution puzzles from a seed ----------
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+function shuffle(a,r){for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nbs(k,n){const y=Math.floor(k/n),x=k%n,o=[];if(y>0)o.push(k-n);if(y<n-1)o.push(k+n);if(x>0)o.push(k-1);if(x<n-1)o.push(k+1);return o}
+function perm(n,r){const p=[],used=new Array(n).fill(false);const go=row=>{if(row===n)return true;for(const c of shuffle([...Array(n).keys()],r)){if(used[c])continue;if(row>0&&Math.abs(p[row-1]-c)<2)continue;used[c]=true;p[row]=c;if(go(row+1))return true;used[c]=false}return false};go(0);return p}
+function grow(n,p,r){const g=new Array(n*n).fill(-1);for(let i=0;i<n;i++)g[i*n+p[i]]=i;let left=n*n-n;while(left>0){const cand=[];for(let k=0;k<n*n;k++)if(g[k]<0&&nbs(k,n).some(j=>g[j]>=0))cand.push(k);const k=cand[Math.floor(r()*cand.length)];const o=nbs(k,n).filter(j=>g[j]>=0);g[k]=g[o[Math.floor(r()*o.length)]];left--}return g}
+function countSolutions(n,g,limit){let cnt=0;const cu=new Array(n).fill(false),ru=new Array(n).fill(false);const go=(row,prev)=>{if(cnt>=limit)return;if(row===n){cnt++;return}for(let c=0;c<n;c++){if(cu[c])continue;if(prev>=0&&Math.abs(prev-c)<2)continue;const rg=g[row*n+c];if(ru[rg])continue;cu[c]=ru[rg]=true;go(row+1,c);cu[c]=ru[rg]=false}};go(0,-1);return cnt}
+function makePuzzle(n,seed){const r=rng(seed);for(let t=0;t<20000;t++){const p=perm(n,r);for(let k=0;k<20;k++){const g=grow(n,p,r);if(countSolutions(n,g,2)===1)return{n,g,sol:p}}}return null}
+// ---------- state ----------
+const PAL=["#f6c9bd","#bfe3d0","#c9d8f4","#f5e3a8","#dcc9ee","#bfe6ea","#f3cfe0","#d6e4b4"];
+const S={lang:load("lang","en"),mode:"levels",level:load("level",1),p:null,cells:[],undo:[],hints:3,used:0,t0:0,tick:0,done:false,auto:load("auto",false)};
+const $=id=>document.getElementById(id), tr=k=>T[S.lang][k];
+const todayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
+const sizeFor=l=>5+Math.min(3,Math.floor((l-1)/5));
+const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+// ---------- rules ----------
+function conflicts(){const n=S.p.n,g=S.p.g,bad=new Set(),L=[];S.cells.forEach((v,k)=>{if(v===2)L.push(k)});
+ for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const a=L[i],b=L[j],ay=Math.floor(a/n),ax=a%n,by=Math.floor(b/n),bx=b%n;
+  if(ay===by||ax===bx||g[a]===g[b]||(Math.abs(ay-by)<2&&Math.abs(ax-bx)<2)){bad.add(a);bad.add(b)}}
+ return{bad,count:L.length}}
+function blockedBy(k){const n=S.p.n,g=S.p.g,y=Math.floor(k/n),x=k%n;for(let j=0;j<n*n;j++){if(S.cells[j]!==2||j===k)continue;const jy=Math.floor(j/n),jx=j%n;
+  if(jy===y)return"hRow";if(jx===x)return"hCol";if(g[j]===g[k])return"hReg";if(Math.abs(jy-y)<2&&Math.abs(jx-x)<2)return"hAdj"}return null}
+function findHint(){const n=S.p.n,g=S.p.g,{bad}=conflicts();
+ for(const k of bad)return{k,why:"hBad"};
+ for(let k=0;k<n*n;k++)if(S.cells[k]===2&&S.p.sol[Math.floor(k/n)]!==k%n)return{k,why:"hWrong"};
+ for(let k=0;k<n*n;k++)if(S.cells[k]===0){const why=blockedBy(k);if(why)return{k,why,set:1}}
+ const free=k=>S.cells[k]!==1&&!blockedBy(k), has=(ks)=>ks.some(k=>S.cells[k]===2);
+ const groups=[];for(let i=0;i<n;i++){groups.push({ks:[...Array(n).keys()].map(x=>i*n+x),why:"hOnlyRow"});groups.push({ks:[...Array(n).keys()].map(y=>y*n+i),why:"hOnlyCol"});groups.push({ks:[...Array(n*n).keys()].filter(k=>g[k]===i),why:"hOnlyReg"})}
+ for(const gr of groups){if(has(gr.ks))continue;const f=gr.ks.filter(free);if(f.length===1)return{k:f[0],why:gr.why,set:2}}
+ for(let y=0;y<n;y++){const k=y*n+S.p.sol[y];if(S.cells[k]!==2)return{k,why:"hGive",set:2}}
+ return null}
+// ---------- render ----------
+function text(){document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";
+ $("t-title").textContent=tr("title");$("t-rules").textContent=tr("rules");$("mLevels").textContent=tr("levels");$("mDaily").textContent=tr("daily");
+ $("undo").textContent=tr("undo");$("reset").textContent=tr("reset");$("t-auto").textContent=tr("auto");$("t-win").textContent=tr("win");$("next").textContent=tr("next");
+ $("t-foot").textContent=tr("foot");$("lang").textContent=S.lang==="en"?"العربية":"English";$("hint").textContent=tr("hint")+" ("+S.hints+")";
+ $("lvl").textContent=S.mode==="daily"?tr("daily"):tr("level")+" "+S.level}
+function draw(){const n=S.p.n,g=S.p.g,{bad}=conflicts(),b=$("board");
+ if(b.children.length!==n*n){b.style.gridTemplateColumns=b.style.gridTemplateRows=`repeat(${n},minmax(0,1fr))`;b.innerHTML=Array.from({length:n*n},(_,k)=>`<div class="c" data-k="${k}" role="gridcell"></div>`).join("")}
+ [...b.children].forEach((el,k)=>{const x=k%n,y=Math.floor(k/n);el.style.background=PAL[g[k]%PAL.length];
+  el.className="c"+(S.cells[k]===1?" x":S.cells[k]===2?" l":"")+(bad.has(k)?" bad":"")+(x<n-1&&g[k]!==g[k+1]?" rb":"")+(y<n-1&&g[k]!==g[k+n]?" bb":"")+(S.hintCell===k?" hint":"");
+  el.setAttribute("aria-label",`r${y+1} c${x+1} ${["empty","marked","lantern"][S.cells[k]]}`)});
+ $("undo").disabled=!S.undo.length||S.done}
+function say(m){$("msg").textContent=m}
+// ---------- actions ----------
+function setCell(k,v,rec=true){if(S.done||S.cells[k]===v)return;if(rec)S.undo.push([k,S.cells[k]]);S.cells[k]=v;S.hintCell=-1;
+ if(v===2&&S.auto){const n=S.p.n;for(let j=0;j<n*n;j++)if(S.cells[j]===0&&j!==k&&blockedBy(j)){S.undo.push([j,0,1]);S.cells[j]=1}}
+ draw();check()}
+function check(){const n=S.p.n,{bad,count}=conflicts();if(count!==n||bad.size)return;S.done=true;clearInterval(S.tick);
+ const secs=Math.round((Date.now()-S.t0)/1000),stars=S.used===0?3:S.used===1?2:1,key=S.mode==="daily"?"d"+todayKey():"l"+S.level,best=load("best."+key,null);
+ if(best==null||secs<best)save("best."+key,secs);
+ let info=tr("time")+" "+fmt(secs)+" · "+tr("best")+" "+fmt(Math.min(secs,best??secs));
+ if(S.mode==="daily"){const last=load("dailyLast",0),st=load("streak",0),tk=todayKey();if(last!==tk){const y=new Date();y.setDate(y.getDate()-1);const yk=y.getFullYear()*10000+(y.getMonth()+1)*100+y.getDate();save("streak",last===yk?st+1:1);save("dailyLast",tk)}
+  info+=" · "+tr("streak")+" "+load("streak",1);$("next").style.display="none";say(tr("dailyDone"))}
+ else{save("level",S.level+1);$("next").style.display="";say("")}
+ $("stars").textContent="★".repeat(stars)+"☆".repeat(3-stars);$("winInfo").textContent=info;$("win").classList.add("on");draw()}
+function start(){clearInterval(S.tick);$("win").classList.remove("on");say(tr("gen"));
+ setTimeout(()=>{const n=S.mode==="daily"?7:sizeFor(S.level),seed=S.mode==="daily"?todayKey():S.level*7919+n;
+  S.p=makePuzzle(n,seed);S.cells=new Array(n*n).fill(0);S.undo=[];S.hints=3;S.used=0;S.done=false;S.hintCell=-1;S.t0=Date.now();
+  S.tick=setInterval(()=>{$("time").textContent=fmt(Math.round((Date.now()-S.t0)/1000))},500);$("time").textContent="0:00";
+  $("board").innerHTML="";text();draw();say(tr("how"));window.__lantern=S},20)}
+// ---------- input ----------
+let drag=null;
+$("board").addEventListener("pointerdown",e=>{const el=e.target.closest(".c");if(!el)return;const k=+el.dataset.k;drag={k,moved:false};$("board").setPointerCapture(e.pointerId)});
+$("board").addEventListener("pointermove",e=>{if(!drag)return;const el=document.elementFromPoint(e.clientX,e.clientY)?.closest?.(".c");if(!el)return;const k=+el.dataset.k;
+ if(k!==drag.k||drag.moved){if(!drag.moved){drag.moved=true;if(S.cells[drag.k]===0)setCell(drag.k,1)}if(S.cells[k]===0)setCell(k,1)}});
+$("board").addEventListener("pointerup",()=>{if(drag&&!drag.moved)setCell(drag.k,(S.cells[drag.k]+1)%3);drag=null});
+$("undo").onclick=()=>{if(S.done)return;let u=S.undo.pop();while(u){S.cells[u[0]]=u[1];if(!u[2])break;u=S.undo.pop()}draw()};
+$("reset").onclick=()=>{if(S.done)return;S.cells.fill(0);S.undo=[];S.hintCell=-1;draw()};
+$("hint").onclick=()=>{if(S.done)return;if(S.hints<=0){say(tr("noHints"));return}const h=findHint();if(!h)return;S.hints--;S.used++;S.hintCell=h.k;
+ if(h.why==="hGive")setCell(h.k,2);S.hintCell=h.k;draw();say(tr(h.why)+" ("+tr("hintsLeft")+": "+S.hints+")");text()};
+$("next").onclick=()=>{S.level=load("level",S.level+1);start()};
+$("mLevels").onclick=()=>{S.mode="levels";$("mLevels").setAttribute("aria-pressed",true);$("mDaily").setAttribute("aria-pressed",false);start()};
+$("mDaily").onclick=()=>{S.mode="daily";$("mDaily").setAttribute("aria-pressed",true);$("mLevels").setAttribute("aria-pressed",false);start()};
+$("lang").onclick=()=>{S.lang=S.lang==="en"?"ar":"en";save("lang",S.lang);text();if(!S.done)say(tr("how"))};
+$("auto").checked=S.auto;$("auto").onchange=e=>{S.auto=e.target.checked;save("auto",S.auto)};
+text();start();
+}
+</script>
+</body>
+</html>
