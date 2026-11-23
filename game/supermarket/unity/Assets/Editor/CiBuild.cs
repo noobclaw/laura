@@ -49,6 +49,29 @@ public static class CiBuild
         }
     }
 
+    // Renders the current editor scene through a camera to a PNG, so there is something to look at without a device.
+    public static void Shot(string name, Vector3 pos, Vector3 euler, float fov)
+    {
+        try
+        {
+            Debug.Log("CiBuild.Shot device: " + SystemInfo.graphicsDeviceType + " / " + SystemInfo.graphicsDeviceName);
+            var go = new GameObject("ShotCam"); var cam = go.AddComponent<Camera>();
+            cam.transform.position = pos; cam.transform.rotation = Quaternion.Euler(euler); cam.fieldOfView = fov;
+            cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.05f, 0.07f, 0.13f);
+            var rt = new RenderTexture(540, 1170, 24, RenderTextureFormat.ARGB32);
+            cam.targetTexture = rt; cam.Render();
+            RenderTexture.active = rt;
+            var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); tex.Apply();
+            RenderTexture.active = null; cam.targetTexture = null;
+            Directory.CreateDirectory("../../../shots");
+            File.WriteAllBytes("../../../shots/" + name + ".png", tex.EncodeToPNG());
+            UnityEngine.Object.DestroyImmediate(go);
+            Debug.Log("CiBuild.Shot wrote " + name);
+        }
+        catch (Exception e) { Debug.LogWarning("CiBuild.Shot failed: " + e); }
+    }
+
     public static void IOS()
     {
         Directory.CreateDirectory("Assets/Settings");
@@ -66,6 +89,15 @@ public static class CiBuild
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Main.unity");
+
+        // render probe: a lit cube
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.GetComponent<Renderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/BaseLit.mat");
+            var l = new GameObject("L").AddComponent<Light>(); l.type = LightType.Directional; l.transform.rotation = Quaternion.Euler(50, -30, 0);
+            Shot("probe", new Vector3(0, 2, -4), new Vector3(25, 0, 0), 40);
+            UnityEngine.Object.DestroyImmediate(cube); UnityEngine.Object.DestroyImmediate(l.gameObject);
+        }
 
         PlayerSettings.companyName = "noobclaw";
         PlayerSettings.productName = "Souq Tycoon";
