@@ -58,7 +58,7 @@ public static class CiBuild
 
     static void Snap(Souq.Game g, string name)
     {
-        var rt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32); rt.antiAliasing = 4;
+        var rt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32);
         g.cam.targetTexture = rt; Canvas.ForceUpdateCanvases(); g.cam.Render();
         RenderTexture.active = rt;
         var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
