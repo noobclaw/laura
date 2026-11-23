@@ -11,18 +11,18 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr(zh: '设置', en: 'Settings', ja: '設定'))),
+      appBar: AppBar(title: Text(tr(zh: '设置', en: 'Settings', zht: '設定', ja: '設定', es: 'Ajustes', pt: 'Ajustes', de: 'Einstellungen', fr: 'Réglages'))),
       body: ListView(
         children: [
           ...tool.buildSettingsItems(context),
           const LanguageTile(),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text(tr(zh: '隐私政策', en: 'Privacy policy', ja: 'プライバシーポリシー')),
+            title: Text(tr(zh: '隐私政策', en: 'Privacy policy', zht: '隱私權政策', ja: 'プライバシーポリシー', es: 'Política de privacidad', pt: 'Política de privacidade', de: 'Datenschutzerklärung', fr: 'Politique de confidentialité')),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => _TextPage(
-                  title: tr(zh: '隐私政策', en: 'Privacy policy', ja: 'プライバシーポリシー'),
+                  title: tr(zh: '隐私政策', en: 'Privacy policy', zht: '隱私權政策', ja: 'プライバシーポリシー', es: 'Política de privacidad', pt: 'Política de privacidade', de: 'Datenschutzerklärung', fr: 'Politique de confidentialité'),
                   body: Branding.privacyPolicy,
                 ),
               ),
@@ -30,7 +30,7 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: Text(tr(zh: '关于', en: 'About', ja: 'このアプリについて')),
+            title: Text(tr(zh: '关于', en: 'About', zht: '關於', ja: 'このアプリについて', es: 'Acerca de', pt: 'Sobre', de: 'Über', fr: 'À propos')),
             subtitle: Text('${Branding.appName} ${Branding.version}'),
             onTap: () => showAboutDialog(
               context: context,
@@ -57,7 +57,7 @@ class LanguageTile extends StatelessWidget {
       valueListenable: AppLanguage.override,
       builder: (context, code, _) => ListTile(
         leading: const Icon(Icons.translate),
-        title: Text(tr(zh: '语言', en: 'Language', ja: '言語')),
+        title: Text(tr(zh: '语言', en: 'Language', zht: '語言', ja: '言語', es: 'Idioma', pt: 'Idioma', de: 'Sprache', fr: 'Langue')),
         subtitle: Text(AppLanguage.label(code)),
         onTap: () => _pick(context, code),
       ),
@@ -69,7 +69,7 @@ class LanguageTile extends StatelessWidget {
     final chosen = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: Text(tr(zh: '语言', en: 'Language', ja: '言語')),
+        title: Text(tr(zh: '语言', en: 'Language', zht: '語言', ja: '言語', es: 'Idioma', pt: 'Idioma', de: 'Sprache', fr: 'Langue')),
         children: [
           for (final c in <String?>[null, ...AppLanguage.choices])
             ListTile(

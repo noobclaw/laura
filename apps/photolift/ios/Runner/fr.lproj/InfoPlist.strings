@@ -1,0 +1,3 @@
+/* Localized launcher name and permission text. */
+"CFBundleDisplayName" = "PixelLift";
+"NSPhotoLibraryAddUsageDescription" = "PixelLift enregistre une photo améliorée dans votre photothèque uniquement lorsque vous touchez Enregistrer. Rien n'est lu dans votre photothèque et rien n'est envoyé.";

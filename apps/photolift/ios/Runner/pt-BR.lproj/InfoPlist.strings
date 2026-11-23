@@ -1,0 +1,3 @@
+/* Localized launcher name and permission text. */
+"CFBundleDisplayName" = "PixelLift";
+"NSPhotoLibraryAddUsageDescription" = "O PixelLift salva uma foto melhorada na sua fototeca só quando você toca em Salvar. Nada é lido da sua fototeca e nada é enviado.";

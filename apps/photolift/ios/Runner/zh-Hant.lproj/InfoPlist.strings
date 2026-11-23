@@ -1,0 +1,3 @@
+/* Localized launcher name and permission text. */
+"CFBundleDisplayName" = "離線老照片修復";
+"NSPhotoLibraryAddUsageDescription" = "只有當你點擊「儲存」時，才會把修復好的照片存入相簿。應用不讀取相簿內容，也不會上傳任何照片。";

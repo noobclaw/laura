@@ -48,7 +48,16 @@ class ShellApp extends StatelessWidget {
         // System widgets (tooltips, dialogs…) follow the device language;
         // our own strings do too via core/l10n.dart `tr()`.
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        supportedLocales: const [Locale('en'), Locale('zh')],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('zh'),
+          Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          Locale('ja'),
+          Locale('es'),
+          Locale('pt'),
+          Locale('de'),
+          Locale('fr'),
+        ],
         theme: buildPhotoLiftTheme(Brightness.light),
         darkTheme: buildPhotoLiftTheme(Brightness.dark),
         // Purchase results surface as snackbars on whatever screen is open —
@@ -71,7 +80,7 @@ class _HomeScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: tr(zh: '设置', en: 'Settings'),
+            tooltip: tr(zh: '设置', en: 'Settings', zht: '設定', ja: '設定', es: 'Ajustes', pt: 'Ajustes', de: 'Einstellungen', fr: 'Réglages'),
             onPressed: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => SettingsPage(tool: tool))),

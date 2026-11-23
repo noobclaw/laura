@@ -1,3 +1,4 @@
+import '../core/l10n.dart';
 import 'models.dart';
 
 /// Time estimate for a job, in seconds per megapixel of *output*, learned
@@ -54,15 +55,26 @@ class EtaModel {
 }
 
 /// Human-friendly duration for estimates and results ("约 12 秒", "~2 min").
-String formatEta(double seconds, {required bool zh}) {
-  if (!seconds.isFinite) return zh ? '计算中…' : 'estimating…';
-  if (seconds < 1) return zh ? '不到 1 秒' : 'under 1 s';
+String formatEta(double seconds) {
+  if (!seconds.isFinite) {
+    return tr(zh: '计算中…', en: 'estimating…', zht: '計算中…',
+        ja: '計算中…', es: 'calculando…', pt: 'calculando…',
+        de: 'wird berechnet …', fr: 'calcul…');
+  }
+  if (seconds < 1) {
+    return tr(zh: '不到 1 秒', en: 'under 1 s', zht: '不到 1 秒',
+        ja: '1 秒未満', es: 'menos de 1 s', pt: 'menos de 1 s',
+        de: 'unter 1 s', fr: 'moins d\'1 s');
+  }
   if (seconds < 60) {
     final s = seconds.round();
-    return zh ? '约 $s 秒' : '~$s s';
+    return tr(zh: '约 $s 秒', en: '~$s s', zht: '約 $s 秒', ja: '約 $s 秒');
   }
   final m = (seconds / 60).floor();
   final s = (seconds - m * 60).round();
-  if (m >= 10 || s == 0) return zh ? '约 $m 分钟' : '~$m min';
-  return zh ? '约 $m 分 $s 秒' : '~${m}m ${s}s';
+  if (m >= 10 || s == 0) {
+    return tr(zh: '约 $m 分钟', en: '~$m min', zht: '約 $m 分鐘', ja: '約 $m 分');
+  }
+  return tr(zh: '约 $m 分 $s 秒', en: '~${m}m ${s}s', zht: '約 $m 分 $s 秒',
+      ja: '約 $m 分 $s 秒');
 }

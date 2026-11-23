@@ -126,8 +126,8 @@ class _CompareSliderState extends State<CompareSlider>
                     child: Image.file(widget.before, fit: BoxFit.contain, cacheWidth: cacheW,
                         gaplessPlayback: true),
                   ),
-                  _Label(tr(zh: '原图', en: 'Before'), alignment: Alignment.topLeft),
-                  _Label(tr(zh: '修复后', en: 'After'), alignment: Alignment.topRight),
+                  _Label(tr(zh: '原图', en: 'Before', zht: '原圖', ja: '元画像', es: 'Antes', pt: 'Antes', de: 'Vorher', fr: 'Avant'), alignment: Alignment.topLeft),
+                  _Label(tr(zh: '修复后', en: 'After', zht: '修復後', ja: '復元後', es: 'Después', pt: 'Depois', de: 'Nachher', fr: 'Après'), alignment: Alignment.topRight),
                   Positioned(
                     left: _fraction * width - 1.5,
                     top: 0,

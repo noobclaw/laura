@@ -56,15 +56,15 @@ class _ResultScreenState extends State<ResultScreen> {
       final stamp = r.createdAt.toIso8601String().replaceAll(RegExp(r'[-:]'), '').split('.').first;
       await MediaBridge.saveToGallery(_out.path, displayName: 'PixelLift_${stamp}_${r.scale}x.jpg');
       if (!mounted) return;
-      _snack(tr(zh: '已保存到相册', en: 'Saved to Photos'));
+      _snack(tr(zh: '已保存到相册', en: 'Saved to Photos', zht: '已儲存到相簿', ja: '写真に保存しました', es: 'Guardado en Fotos', pt: 'Salvo em Fotos', de: 'In Fotos gesichert', fr: 'Enregistré dans Photos'));
     } on MediaException catch (e) {
       if (!mounted) return;
       if (e.code == 'permission_denied') {
         _snack(
           tr(zh: '没有写入相册的权限,请在系统设置里允许「添加照片」。',
-              en: 'Permission to add to Photos was denied — allow "Add Photos" in Settings.'),
+              en: 'Permission to add to Photos was denied — allow "Add Photos" in Settings.', zht: '沒有寫入相簿的權限，請在系統設定裡允許「加入照片」。', ja: '写真への追加が許可されていません。設定で「写真を追加」を許可してください。', es: 'Se denegó el permiso para añadir a Fotos: permite "Añadir fotos" en Ajustes.', pt: 'A permissão para adicionar a Fotos foi negada — permita "Adicionar fotos" em Ajustes.', de: 'Die Berechtigung zum Hinzufügen zu Fotos wurde verweigert – erlaube „Fotos hinzufügen“ in den Einstellungen.', fr: 'L\'autorisation d\'ajouter à Photos a été refusée — autorisez « Ajouter des photos » dans Réglages.'),
           action: SnackBarAction(
-              label: tr(zh: '去设置', en: 'Settings'), onPressed: MediaBridge.openSettings),
+              label: tr(zh: '去设置', en: 'Settings', zht: '設定', ja: '設定', es: 'Ajustes', pt: 'Ajustes', de: 'Einstellungen', fr: 'Réglages'), onPressed: MediaBridge.openSettings),
         );
       } else {
         _snack(describeUpscaleError(e));
@@ -90,7 +90,7 @@ class _ResultScreenState extends State<ResultScreen> {
         sharePositionOrigin: origin,
       ));
     } catch (e) {
-      if (mounted) _snack(tr(zh: '分享失败:$e', en: 'Share failed: $e'));
+      if (mounted) _snack(tr(zh: '分享失败:$e', en: 'Share failed: $e', zht: '分享失敗：$e', ja: '共有に失敗しました：$e', es: 'No se pudo compartir: $e', pt: 'Falha ao compartilhar: $e', de: 'Teilen fehlgeschlagen: $e', fr: 'Échec du partage : $e'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -100,14 +100,13 @@ class _ResultScreenState extends State<ResultScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(tr(zh: '删除这条记录?', en: 'Delete this result?')),
+        title: Text(tr(zh: '删除这条记录?', en: 'Delete this result?', zht: '刪除這筆紀錄？', ja: 'この結果を削除しますか？', es: '¿Eliminar este resultado?', pt: 'Excluir este resultado?', de: 'Dieses Ergebnis löschen?', fr: 'Supprimer ce résultat ?')),
         content: Text(tr(
           zh: '会删除应用内的原图副本和修复结果;已保存到相册的照片不受影响。',
-          en: 'Removes the in-app source copy and result; anything already saved to Photos stays.',
-        )),
+          en: 'Removes the in-app source copy and result; anything already saved to Photos stays.', zht: '會刪除應用內的原圖副本和修復結果；已儲存到相簿的照片不受影響。', ja: 'アプリ内の元画像のコピーと結果を削除します。写真に保存済みのものは残ります。', es: 'Elimina la copia original y el resultado de la app; lo que ya guardaste en Fotos se queda.', pt: 'Remove a cópia original e o resultado do app; o que já foi salvo em Fotos fica.', de: 'Entfernt die App-Kopie des Originals und das Ergebnis; bereits in Fotos Gesichertes bleibt.', fr: 'Supprime la copie d\'origine et le résultat dans l\'app ; ce qui est déjà dans Photos reste.')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr(zh: '取消', en: 'Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr(zh: '删除', en: 'Delete'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr(zh: '取消', en: 'Cancel', zht: '取消', ja: 'キャンセル', es: 'Cancelar', pt: 'Cancelar', de: 'Abbrechen', fr: 'Annuler'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr(zh: '删除', en: 'Delete', zht: '刪除', ja: '削除', es: 'Eliminar', pt: 'Excluir', de: 'Löschen', fr: 'Supprimer'))),
         ],
       ),
     );
@@ -125,11 +124,11 @@ class _ResultScreenState extends State<ResultScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.fresh
-            ? tr(zh: '修复完成', en: 'Restored')
-            : tr(zh: '修复结果', en: 'Result')),
+            ? tr(zh: '修复完成', en: 'Restored', zht: '修復完成', ja: '復元しました', es: 'Restaurada', pt: 'Restaurada', de: 'Restauriert', fr: 'Restaurée')
+            : tr(zh: '修复结果', en: 'Result', zht: '修復結果', ja: '結果', es: 'Resultado', pt: 'Resultado', de: 'Ergebnis', fr: 'Résultat')),
         actions: [
           IconButton(
-            tooltip: tr(zh: '删除', en: 'Delete'),
+            tooltip: tr(zh: '删除', en: 'Delete', zht: '刪除', ja: '削除', es: 'Eliminar', pt: 'Excluir', de: 'Löschen', fr: 'Supprimer'),
             icon: const Icon(Icons.delete_outline),
             onPressed: _busy ? null : _delete,
           ),
@@ -147,11 +146,11 @@ class _ResultScreenState extends State<ResultScreen> {
                   ButtonSegment(
                       value: _View.compare,
                       icon: const Icon(Icons.compare),
-                      label: Text(tr(zh: '前后对比', en: 'Compare'))),
+                      label: Text(tr(zh: '前后对比', en: 'Compare', zht: '前後對比', ja: '比較', es: 'Comparar', pt: 'Comparar', de: 'Vergleichen', fr: 'Comparer'))),
                   ButtonSegment(
                       value: _View.zoom,
                       icon: const Icon(Icons.zoom_in),
-                      label: Text(tr(zh: '放大细看', en: 'Zoom'))),
+                      label: Text(tr(zh: '放大细看', en: 'Zoom', zht: '放大細看', ja: 'ズーム', es: 'Zoom', pt: 'Zoom', de: 'Zoom', fr: 'Zoom'))),
                 ],
                 selected: {_view},
                 showSelectedIcon: false,
@@ -171,8 +170,8 @@ class _ResultScreenState extends State<ResultScreen> {
               const SizedBox(height: 8),
               Text(
                 _view == _View.compare
-                    ? tr(zh: '左右拖动分界线对比', en: 'Drag the divider to compare')
-                    : tr(zh: '双指缩放查看细节', en: 'Pinch to inspect the detail'),
+                    ? tr(zh: '左右拖动分界线对比', en: 'Drag the divider to compare', zht: '左右拖動分界線對比', ja: '境界線をドラッグして比較', es: 'Arrastra la línea para comparar', pt: 'Arraste a linha para comparar', de: 'Trennlinie ziehen zum Vergleichen', fr: 'Faites glisser la ligne pour comparer')
+                    : tr(zh: '双指缩放查看细节', en: 'Pinch to inspect the detail', zht: '雙指縮放查看細節', ja: 'ピンチで細部を確認', es: 'Pellizca para ver los detalles', pt: 'Faça pinça para ver os detalhes', de: 'Mit zwei Fingern zoomen für Details', fr: 'Pincez pour voir les détails'),
                 textAlign: TextAlign.center,
                 style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
@@ -185,8 +184,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 onColor: cs.onTertiaryContainer,
                 text: tr(
                   zh: '这次用的是基础放大(此设备上 AI 引擎不可用),效果会弱于 AI 修复。',
-                  en: 'This result used basic resampling — the AI engine is not available on this device, so it is weaker than an AI restore.',
-                ),
+                  en: 'This result used basic resampling — the AI engine is not available on this device, so it is weaker than an AI restore.', zht: '這次用的是基礎放大（此裝置上 AI 引擎無法使用），效果會弱於 AI 修復。', ja: '今回は標準の拡大を使いました（この端末では AI エンジンが使えません）。AI 復元より効果は控えめです。', es: 'Este resultado usó ampliación básica: el motor de IA no está disponible en este dispositivo, así que el efecto es menor que con IA.', pt: 'Este resultado usou ampliação básica — o motor de IA não está disponível neste aparelho, então o efeito é menor que com IA.', de: 'Dieses Ergebnis nutzt einfaches Skalieren – die KI-Engine ist auf diesem Gerät nicht verfügbar, daher schwächer als eine KI-Restaurierung.', fr: 'Ce résultat utilise un agrandissement simple — le moteur d\'IA n\'est pas disponible sur cet appareil, l\'effet est donc moindre.'),
               ),
               const SizedBox(height: 12),
             ],
@@ -199,11 +197,10 @@ class _ResultScreenState extends State<ResultScreen> {
                 onColor: cs.onSurfaceVariant,
                 text: tr(
                   zh: '右下角有一个小小的 PixelLift 标签。升级 Pro 后不再添加。',
-                  en: 'A small PixelLift tag sits in the bottom-right corner. Pro results carry no tag.',
-                ),
+                  en: 'A small PixelLift tag sits in the bottom-right corner. Pro results carry no tag.', zht: '右下角有一個小小的 PixelLift 標籤。升級 Pro 後不再添加。', ja: '右下に小さな PixelLift ロゴが入っています。Pro では入りません。', es: 'Hay una pequeña marca PixelLift en la esquina inferior derecha. Los resultados Pro no la llevan.', pt: 'Há uma pequena marca PixelLift no canto inferior direito. Os resultados Pro não têm marca.', de: 'Unten rechts sitzt ein kleines PixelLift-Zeichen. Pro-Ergebnisse haben keins.', fr: 'Une petite marque PixelLift figure en bas à droite. Les résultats Pro n\'en ont pas.'),
                 action: TextButton(
                   onPressed: () => showProSheet(context),
-                  child: Text(tr(zh: '了解 Pro', en: 'About Pro')),
+                  child: Text(tr(zh: '了解 Pro', en: 'About Pro', zht: '了解 Pro', ja: 'Pro について', es: 'Sobre Pro', pt: 'Sobre o Pro', de: 'Über Pro', fr: 'À propos de Pro')),
                 ),
               ),
             ],
@@ -215,7 +212,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     child: FilledButton.icon(
                       onPressed: _busy ? null : _save,
                       icon: const Icon(Icons.save_alt),
-                      label: Text(tr(zh: '保存到相册', en: 'Save to Photos')),
+                      label: Text(tr(zh: '保存到相册', en: 'Save to Photos', zht: '儲存到相簿', ja: '写真に保存', es: 'Guardar en Fotos', pt: 'Salvar em Fotos', de: 'In Fotos sichern', fr: 'Enregistrer dans Photos')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -224,7 +221,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       builder: (btnCtx) => OutlinedButton.icon(
                         onPressed: _busy ? null : () => _share(btnCtx),
                         icon: const Icon(Icons.ios_share),
-                        label: Text(tr(zh: '分享', en: 'Share')),
+                        label: Text(tr(zh: '分享', en: 'Share', zht: '分享', ja: '共有', es: 'Compartir', pt: 'Compartilhar', de: 'Teilen', fr: 'Partager')),
                       ),
                     ),
                   ),
@@ -283,10 +280,11 @@ class _StatsStrip extends StatelessWidget {
         ? const Duration(milliseconds: 900)
         : Duration.zero;
     String fmtSecs(double v) {
-      if (v < 60) return zh ? '${v.toStringAsFixed(1)} 秒' : '${v.toStringAsFixed(1)} s';
+      final cjk = zh || AppLanguage.effectiveCode == 'ja';
+      if (v < 60) return cjk ? '${v.toStringAsFixed(1)} 秒' : '${v.toStringAsFixed(1)} s';
       final m = v ~/ 60;
       final sec = (v - m * 60).round();
-      return zh ? '$m 分 $sec 秒' : '${m}m ${sec}s';
+      return cjk ? '$m 分 $sec 秒' : '${m}m ${sec}s';
     }
     return Card(
       child: Padding(
@@ -298,7 +296,7 @@ class _StatsStrip extends StatelessWidget {
               children: [
                 Expanded(
                   child: _StatTile(
-                    label: tr(zh: '用时', en: 'Time'),
+                    label: tr(zh: '用时', en: 'Time', zht: '用時', ja: '所要時間', es: 'Tiempo', pt: 'Tempo', de: 'Dauer', fr: 'Durée'),
                     duration: dur,
                     end: r.elapsedMs / 1000,
                     format: fmtSecs,
@@ -307,7 +305,7 @@ class _StatsStrip extends StatelessWidget {
                 _vDivider(cs),
                 Expanded(
                   child: _StatTile(
-                    label: tr(zh: '放大倍数', en: 'Upscale'),
+                    label: tr(zh: '放大倍数', en: 'Upscale', zht: '放大倍數', ja: '拡大倍率', es: 'Ampliación', pt: 'Ampliação', de: 'Vergrößerung', fr: 'Agrandissement'),
                     duration: dur,
                     end: r.scale.toDouble(),
                     format: (v) => '${v.round()}x',
@@ -325,7 +323,7 @@ class _StatsStrip extends StatelessWidget {
                       final w = (r.inWidth + (r.outWidth - r.inWidth) * t).round();
                       final h = (r.inHeight + (r.outHeight - r.inHeight) * t).round();
                       return _StatText(
-                        label: tr(zh: '分辨率', en: 'Resolution'),
+                        label: tr(zh: '分辨率', en: 'Resolution', zht: '解析度', ja: '解像度', es: 'Resolución', pt: 'Resolução', de: 'Auflösung', fr: 'Résolution'),
                         value: '$w × $h',
                       );
                     },
@@ -335,7 +333,7 @@ class _StatsStrip extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              '${tr(zh: '降噪', en: 'Denoise')} ${r.denoise.label} · '
+              '${tr(zh: '降噪', en: 'Denoise', zht: '降噪', ja: 'ノイズ除去', es: 'Reducir ruido', pt: 'Reduzir ruído', de: 'Entrauschen', fr: 'Débruitage')} ${r.denoise.label} · '
               '${r.engine.label} · ${r.inWidth} × ${r.inHeight} → ${r.outWidth} × ${r.outHeight}',
               style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
@@ -463,7 +461,7 @@ class _MissingCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             tr(zh: '结果文件已不存在(可能被系统清理)。可以删除这条记录。',
-                en: 'The result file is gone (the system may have cleaned it up). You can delete this entry.'),
+                en: 'The result file is gone (the system may have cleaned it up). You can delete this entry.', zht: '結果檔案已不存在（可能被系統清理）。可以刪除這筆紀錄。', ja: '結果ファイルが見つかりません（システムに削除された可能性があります）。この項目は削除できます。', es: 'El archivo del resultado ya no existe (puede que el sistema lo haya borrado). Puedes eliminar esta entrada.', pt: 'O arquivo do resultado não existe mais (o sistema pode tê-lo apagado). Você pode excluir esta entrada.', de: 'Die Ergebnisdatei ist weg (vielleicht vom System bereinigt). Du kannst diesen Eintrag löschen.', fr: 'Le fichier du résultat n\'existe plus (le système l\'a peut-être nettoyé). Vous pouvez supprimer cette entrée.'),
             textAlign: TextAlign.center,
           ),
         ],

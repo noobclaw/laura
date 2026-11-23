@@ -157,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 28),
                   Row(
                     children: [
-                      Text(tr(zh: '最近修复', en: 'Recent'), style: text.titleLarge),
+                      Text(tr(zh: '最近修复', en: 'Recent', zht: '最近修復', ja: '最近の復元', es: 'Recientes', pt: 'Recentes', de: 'Zuletzt', fr: 'Récents'), style: text.titleLarge),
                       const Spacer(),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 250),
@@ -250,7 +250,7 @@ class _HeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      tr(zh: '让老照片\n重新清晰', en: 'Bring old\nphotos back'),
+                      tr(zh: '让老照片\n重新清晰', en: 'Bring old\nphotos back', zht: '讓老照片\n重新清晰', ja: '古い写真を\nもう一度鮮明に', es: 'Devuelve la vida\na tus fotos', pt: 'Traga suas fotos\nantigas de volta', de: 'Alte Fotos\nwieder scharf', fr: 'Redonnez vie\nà vos photos'),
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 26,
@@ -260,7 +260,7 @@ class _HeroCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      tr(zh: 'AI 放大 · 降噪 · 全程离线', en: 'AI upscale · denoise · fully offline'),
+                      tr(zh: 'AI 放大 · 降噪 · 全程离线', en: 'AI upscale · denoise · fully offline', zht: 'AI 放大 · 降噪 · 全程離線', ja: 'AI拡大 · ノイズ除去 · 完全オフライン', es: 'IA: ampliar · reducir ruido · sin conexión', pt: 'IA: ampliar · reduzir ruído · offline', de: 'KI-Vergrößern · Entrauschen · offline', fr: 'IA : agrandir · débruiter · hors ligne'),
                       style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.82),
                           fontSize: 13.5,
@@ -285,9 +285,9 @@ class _HeroCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _Pill(tr(zh: '2x / 4x 放大', en: '2x / 4x upscale')),
-              _Pill(tr(zh: '照片不离开手机', en: 'Photos stay on device')),
-              _Pill(tr(zh: '无订阅', en: 'No subscription')),
+              _Pill(tr(zh: '2x / 4x 放大', en: '2x / 4x upscale', zht: '2x / 4x 放大', ja: '2x / 4x 拡大', es: 'Ampliar 2x / 4x', pt: 'Ampliar 2x / 4x', de: '2x / 4x vergrößern', fr: 'Agrandir 2x / 4x')),
+              _Pill(tr(zh: '照片不离开手机', en: 'Photos stay on device', zht: '照片不離開手機', ja: '写真は端末から出ません', es: 'Las fotos no salen del móvil', pt: 'As fotos ficam no celular', de: 'Fotos bleiben auf dem Gerät', fr: 'Les photos restent sur l\'appareil')),
+              _Pill(tr(zh: '无订阅', en: 'No subscription', zht: '無訂閱', ja: 'サブスクなし', es: 'Sin suscripción', pt: 'Sem assinatura', de: 'Kein Abo', fr: 'Sans abonnement')),
             ],
           ),
           const SizedBox(height: 20),
@@ -330,8 +330,8 @@ class _HeroCard extends StatelessWidget {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             busy
-                                ? tr(zh: '正在打开相册…', en: 'Opening Photos…')
-                                : tr(zh: '选择照片', en: 'Choose a photo'),
+                                ? tr(zh: '正在打开相册…', en: 'Opening Photos…', zht: '正在開啟相簿…', ja: '写真を開いています…', es: 'Abriendo Fotos…', pt: 'Abrindo Fotos…', de: 'Fotos wird geöffnet …', fr: 'Ouverture de Photos…')
+                                : tr(zh: '选择照片', en: 'Choose a photo', zht: '選擇照片', ja: '写真を選ぶ', es: 'Elegir una foto', pt: 'Escolher uma foto', de: 'Foto auswählen', fr: 'Choisir une photo'),
                             maxLines: 1,
                           ),
                         ),
@@ -380,9 +380,9 @@ class _QuotaCard extends StatelessWidget {
       return Card(
         child: ListTile(
           leading: const Icon(Icons.workspace_premium, color: kLiftGold),
-          title: Text(tr(zh: 'Pro 已解锁', en: 'Pro unlocked'),
+          title: Text(tr(zh: 'Pro 已解锁', en: 'Pro unlocked', zht: 'Pro 已解鎖', ja: 'Pro 解除済み', es: 'Pro desbloqueado', pt: 'Pro desbloqueado', de: 'Pro freigeschaltet', fr: 'Pro débloqué'),
               style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-          subtitle: Text(tr(zh: '不限张数 · 2x / 4x · 无标签', en: 'Unlimited · 2x / 4x · no tag')),
+          subtitle: Text(tr(zh: '不限张数 · 2x / 4x · 无标签', en: 'Unlimited · 2x / 4x · no tag', zht: '不限張數 · 2x / 4x · 無標籤', ja: '枚数無制限 · 2x / 4x · ロゴなし', es: 'Ilimitado · 2x / 4x · sin marca', pt: 'Ilimitado · 2x / 4x · sem marca', de: 'Unbegrenzt · 2x / 4x · ohne Zeichen', fr: 'Illimité · 2x / 4x · sans marque')),
         ),
       );
     }
@@ -399,8 +399,8 @@ class _QuotaCard extends StatelessWidget {
                 children: [
                   Text(
                     remaining > 0
-                        ? tr(zh: '今天还可免费修复 $remaining 张', en: '$remaining free photos left today')
-                        : tr(zh: '今天的免费额度已用完', en: 'Today\'s free photos are used up'),
+                        ? tr(zh: '今天还可免费修复 $remaining 张', en: '$remaining free photos left today', zht: '今天還可免費修復 $remaining 張', ja: '今日はあと $remaining 枚無料で復元できます', es: 'Te quedan $remaining fotos gratis hoy', pt: 'Restam $remaining fotos grátis hoje', de: 'Heute noch $remaining Fotos gratis', fr: 'Encore $remaining photos gratuites aujourd\'hui')
+                        : tr(zh: '今天的免费额度已用完', en: 'Today\'s free photos are used up', zht: '今天的免費額度已用完', ja: '今日の無料枠は使い切りました', es: 'Ya usaste las fotos gratis de hoy', pt: 'As fotos grátis de hoje acabaram', de: 'Die Gratis-Fotos für heute sind aufgebraucht', fr: 'Les photos gratuites du jour sont épuisées'),
                     style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
@@ -423,7 +423,7 @@ class _QuotaCard extends StatelessWidget {
                       // English label does not fit beside the bars; wrap
                       // rather than overflow.
                       Flexible(
-                        child: Text(tr(zh: '免费版 2x · 带角标', en: 'Free: 2x · corner tag'),
+                        child: Text(tr(zh: '免费版 2x · 带角标', en: 'Free: 2x · corner tag', zht: '免費版 2x · 帶角標', ja: '無料版：2x · ロゴ入り', es: 'Gratis: 2x · con marca', pt: 'Grátis: 2x · com marca', de: 'Gratis: 2x · mit Zeichen', fr: 'Gratuit : 2x · avec marque'),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
@@ -435,7 +435,7 @@ class _QuotaCard extends StatelessWidget {
             ),
             TextButton(
               onPressed: () => showProSheet(context),
-              child: Text(tr(zh: '升级 Pro', en: 'Go Pro')),
+              child: Text(tr(zh: '升级 Pro', en: 'Go Pro', zht: '升級 Pro', ja: 'Pro にアップグレード', es: 'Hazte Pro', pt: 'Seja Pro', de: 'Pro holen', fr: 'Passer à Pro')),
             ),
           ],
         ),
@@ -475,14 +475,13 @@ class _EmptyHistory extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(tr(zh: '还没有修复过的照片', en: 'Nothing restored yet'),
+          Text(tr(zh: '还没有修复过的照片', en: 'Nothing restored yet', zht: '還沒有修復過的照片', ja: 'まだ復元した写真はありません', es: 'Aún no has restaurado nada', pt: 'Nada restaurado ainda', de: 'Noch nichts restauriert', fr: 'Rien de restauré pour l\'instant'),
               style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
           Text(
             tr(
               zh: '找一张模糊的翻拍或扫描老照片试试,\n通常一两分钟内就能看到前后对比。',
-              en: 'Try a blurry scan or re-photographed print —\nyou\'ll usually see a before/after within a couple of minutes.',
-            ),
+              en: 'Try a blurry scan or re-photographed print —\nyou\'ll usually see a before/after within a couple of minutes.', zht: '找一張模糊的翻拍或掃描老照片試試，\n通常一兩分鐘內就能看到前後對比。', ja: 'ぼやけたスキャン画像やプリントを撮った写真で試してみましょう。\nたいてい数分でビフォー・アフターが見られます。', es: 'Prueba con un escaneo borroso o una foto impresa fotografiada:\nnormalmente verás el antes/después en un par de minutos.', pt: 'Experimente um scan borrado ou uma foto impressa fotografada —\nnormalmente você vê o antes/depois em poucos minutos.', de: 'Probier einen unscharfen Scan oder einen abfotografierten Abzug –\nmeist siehst du Vorher/Nachher nach ein, zwei Minuten.', fr: 'Essayez un scan flou ou un tirage rephotographié —\nvous verrez l\'avant/après en général en quelques minutes.'),
             textAlign: TextAlign.center,
             style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.45),
           ),

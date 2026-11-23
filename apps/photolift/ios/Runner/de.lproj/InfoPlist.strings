@@ -1,0 +1,3 @@
+/* Localized launcher name and permission text. */
+"CFBundleDisplayName" = "PixelLift";
+"NSPhotoLibraryAddUsageDescription" = "PixelLift sichert ein verbessertes Foto nur dann in deiner Fotomediathek, wenn du auf Sichern tippst. Es wird nichts aus deiner Mediathek gelesen und nichts hochgeladen.";

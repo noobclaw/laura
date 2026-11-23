@@ -85,7 +85,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
     if (s == 4 && !widget.store.pro) {
       showProSheet(context,
           reason: tr(zh: '4x 放大是 Pro 功能;免费版可用 2x。',
-              en: '4x upscaling is a Pro feature; the free tier offers 2x.'));
+              en: '4x upscaling is a Pro feature; the free tier offers 2x.', zht: '4x 放大是 Pro 功能；免費版可用 2x。', ja: '4x 拡大は Pro の機能です。無料版は 2x まで使えます。', es: 'Ampliar 4x es una función Pro; la versión gratis ofrece 2x.', pt: 'Ampliar 4x é um recurso Pro; a versão grátis oferece 2x.', de: '4x-Vergrößerung ist eine Pro-Funktion; gratis gibt es 2x.', fr: 'L\'agrandissement 4x est une fonction Pro ; la version gratuite offre 2x.'));
       return;
     }
     setState(() => _scale = s);
@@ -102,7 +102,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
       showProSheet(context,
           reason: tr(
               zh: '今天的 ${PhotoLiftStore.freeDailyLimit} 张免费额度已用完。明天再来,或升级 Pro 不限张数。',
-              en: 'Today\'s ${PhotoLiftStore.freeDailyLimit} free photos are used up. Come back tomorrow, or go Pro for unlimited.'));
+              en: 'Today\'s ${PhotoLiftStore.freeDailyLimit} free photos are used up. Come back tomorrow, or go Pro for unlimited.', zht: '今天的 ${PhotoLiftStore.freeDailyLimit} 張免費額度已用完。明天再來，或升級 Pro 不限張數。', ja: '今日の無料枠（${PhotoLiftStore.freeDailyLimit} 枚）を使い切りました。明日またどうぞ。Pro なら枚数無制限です。', es: 'Ya usaste las ${PhotoLiftStore.freeDailyLimit} fotos gratis de hoy. Vuelve mañana o hazte Pro para no tener límite.', pt: 'As ${PhotoLiftStore.freeDailyLimit} fotos grátis de hoje acabaram. Volte amanhã ou seja Pro para não ter limite.', de: 'Die ${PhotoLiftStore.freeDailyLimit} Gratis-Fotos für heute sind aufgebraucht. Komm morgen wieder oder hol dir Pro für unbegrenzt viele.', fr: 'Les ${PhotoLiftStore.freeDailyLimit} photos gratuites du jour sont épuisées. Revenez demain ou passez à Pro pour l\'illimité.'));
       return;
     }
     setState(() {
@@ -136,7 +136,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
       _ticker?.cancel();
       setState(() => _setPhase(_Phase.configure));
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr(zh: '已取消', en: 'Cancelled'))));
+          SnackBar(content: Text(tr(zh: '已取消', en: 'Cancelled', zht: '已取消', ja: 'キャンセルしました', es: 'Cancelado', pt: 'Cancelado', de: 'Abgebrochen', fr: 'Annulé'))));
     } catch (e) {
       if (!mounted) return;
       _ticker?.cancel();
@@ -144,12 +144,12 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(tr(zh: '处理失败', en: 'Processing failed')),
+          title: Text(tr(zh: '处理失败', en: 'Processing failed', zht: '處理失敗', ja: '処理に失敗しました', es: 'Falló el procesamiento', pt: 'Falha no processamento', de: 'Verarbeitung fehlgeschlagen', fr: 'Échec du traitement')),
           content: Text(describeUpscaleError(e)),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text(tr(zh: '好', en: 'OK'))),
+                child: Text(tr(zh: '好', en: 'OK', zht: '好', ja: 'OK', es: 'OK', pt: 'OK', de: 'OK', fr: 'OK'))),
           ],
         ),
       );
@@ -175,8 +175,8 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
       child: Scaffold(
         appBar: AppBar(
           title: Text(running
-              ? tr(zh: '正在修复…', en: 'Restoring…')
-              : tr(zh: '修复设置', en: 'Restore')),
+              ? tr(zh: '正在修复…', en: 'Restoring…', zht: '正在修復…', ja: '復元中…', es: 'Restaurando…', pt: 'Restaurando…', de: 'Wird restauriert …', fr: 'Restauration…')
+              : tr(zh: '修复设置', en: 'Restore', zht: '修復設定', ja: '復元の設定', es: 'Restaurar', pt: 'Restaurar', de: 'Restaurieren', fr: 'Restaurer')),
         ),
         body: SafeArea(
           child: ListView(
@@ -228,7 +228,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tr(zh: '放大倍数', en: 'Upscale'), style: text.titleMedium),
+                Text(tr(zh: '放大倍数', en: 'Upscale', zht: '放大倍數', ja: '拡大倍率', es: 'Ampliación', pt: 'Ampliação', de: 'Vergrößerung', fr: 'Agrandissement'), style: text.titleMedium),
                 const SizedBox(height: 10),
                 SegmentedButton<int>(
                   segments: [
@@ -244,7 +244,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
                   onSelectionChanged: (s) => _pickScale(s.first),
                 ),
                 const SizedBox(height: 18),
-                Text(tr(zh: '降噪', en: 'Denoise'), style: text.titleMedium),
+                Text(tr(zh: '降噪', en: 'Denoise', zht: '降噪', ja: 'ノイズ除去', es: 'Reducir ruido', pt: 'Reduzir ruído', de: 'Entrauschen', fr: 'Débruitage'), style: text.titleMedium),
                 const SizedBox(height: 10),
                 SegmentedButton<DenoiseLevel>(
                   segments: [
@@ -259,8 +259,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
                 Text(
                   tr(
                     zh: '翻拍、扫描件、老手机照片多带噪点,建议「轻度」;非常脏的照片再用「强」。',
-                    en: 'Scans, re-photographed prints and old phone shots are usually noisy — start with Light; use Strong only for very dirty photos.',
-                  ),
+                    en: 'Scans, re-photographed prints and old phone shots are usually noisy — start with Light; use Strong only for very dirty photos.', zht: '翻拍、掃描檔、舊手機照片多帶雜訊，建議「輕度」；非常髒的照片再用「強」。', ja: 'スキャン画像・撮り直したプリント・昔のケータイ写真はノイズが多めです。まずは「弱」、汚れがひどい写真だけ「強」を使ってください。', es: 'Los escaneos, las fotos impresas fotografiadas y las de móviles antiguos suelen tener ruido: empieza con Suave y usa Fuerte solo en fotos muy sucias.', pt: 'Scans, fotos impressas refotografadas e fotos de celulares antigos costumam ter ruído — comece com Leve e use Forte só em fotos muito sujas.', de: 'Scans, abfotografierte Abzüge und alte Handyfotos rauschen meist – beginne mit Leicht und nimm Stark nur bei sehr verschmutzten Fotos.', fr: 'Les scans, tirages rephotographiés et photos d\'anciens téléphones sont souvent bruités — commencez par Léger et réservez Fort aux photos très sales.'),
                   style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
                 ),
               ],
@@ -275,7 +274,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
               children: [
                 _InfoRow(
                   icon: Icons.photo_size_select_large,
-                  label: tr(zh: '输出尺寸', en: 'Output size'),
+                  label: tr(zh: '输出尺寸', en: 'Output size', zht: '輸出尺寸', ja: '出力サイズ', es: 'Tamaño de salida', pt: 'Tamanho de saída', de: 'Ausgabegröße', fr: 'Taille de sortie'),
                   value: '${_outSize.width} × ${_outSize.height}',
                 ),
                 if (_willDownscale) ...[
@@ -283,16 +282,15 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
                   Text(
                     tr(
                       zh: '原图较大,会先缩到 ${_fit.width} × ${_fit.height} 再放大,以免占满内存。',
-                      en: 'The source is large; it is first reduced to ${_fit.width} × ${_fit.height} so the result fits in memory.',
-                    ),
+                      en: 'The source is large; it is first reduced to ${_fit.width} × ${_fit.height} so the result fits in memory.', zht: '原圖較大，會先縮到 ${_fit.width} × ${_fit.height} 再放大，以免佔滿記憶體。', ja: '元画像が大きいため、メモリに収まるよう先に ${_fit.width} × ${_fit.height} に縮小します。', es: 'La imagen original es grande; primero se reduce a ${_fit.width} × ${_fit.height} para que el resultado quepa en memoria.', pt: 'A imagem original é grande; ela é reduzida primeiro para ${_fit.width} × ${_fit.height} para o resultado caber na memória.', de: 'Das Original ist groß; es wird zuerst auf ${_fit.width} × ${_fit.height} verkleinert, damit das Ergebnis in den Speicher passt.', fr: 'L\'original est grand ; il est d\'abord réduit à ${_fit.width} × ${_fit.height} pour que le résultat tienne en mémoire.'),
                     style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
                 const Divider(height: 20),
                 _InfoRow(
                   icon: Icons.timer_outlined,
-                  label: tr(zh: '预计用时', en: 'Estimated time'),
-                  value: formatEta(eta, zh: isZhLocale),
+                  label: tr(zh: '预计用时', en: 'Estimated time', zht: '預計用時', ja: '予想時間', es: 'Tiempo estimado', pt: 'Tempo estimado', de: 'Geschätzte Dauer', fr: 'Durée estimée'),
+                  value: formatEta(eta),
                 ),
               ],
             ),
@@ -303,7 +301,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
           child: FilledButton.icon(
             onPressed: _start,
             icon: const Icon(Icons.auto_awesome),
-            label: Text(tr(zh: '开始修复', en: 'Restore')),
+            label: Text(tr(zh: '开始修复', en: 'Restore', zht: '開始修復', ja: '復元する', es: 'Restaurar', pt: 'Restaurar', de: 'Restaurieren', fr: 'Restaurer')),
           ),
         ),
         if (!store.pro) ...[
@@ -311,8 +309,7 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
           Text(
             tr(
               zh: '免费版结果角落带一个小小的 PixelLift 标签;Pro 去掉。',
-              en: 'Free results carry a small PixelLift tag in the corner; Pro removes it.',
-            ),
+              en: 'Free results carry a small PixelLift tag in the corner; Pro removes it.', zht: '免費版結果角落帶一個小小的 PixelLift 標籤；Pro 會去掉。', ja: '無料版の結果には隅に小さな PixelLift ロゴが入ります。Pro では入りません。', es: 'Los resultados gratis llevan una pequeña marca PixelLift en la esquina; Pro la quita.', pt: 'Os resultados grátis têm uma pequena marca PixelLift no canto; o Pro remove.', de: 'Gratis-Ergebnisse tragen ein kleines PixelLift-Zeichen in der Ecke; Pro entfernt es.', fr: 'Les résultats gratuits portent une petite marque PixelLift dans le coin ; Pro la retire.'),
             textAlign: TextAlign.center,
             style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
@@ -336,10 +333,10 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
         ? math.max(0.0, elapsed / _progress.fraction - elapsed)
         : math.max(0.0, _estimateSec - elapsed);
     final stageLabel = switch (_progress.stage) {
-      'decode' => tr(zh: '读取照片…', en: 'Reading photo…'),
-      'encode' => tr(zh: '正在保存结果…', en: 'Saving the result…'),
+      'decode' => tr(zh: '读取照片…', en: 'Reading photo…', zht: '讀取照片…', ja: '写真を読み込み中…', es: 'Leyendo la foto…', pt: 'Lendo a foto…', de: 'Foto wird gelesen …', fr: 'Lecture de la photo…'),
+      'encode' => tr(zh: '正在保存结果…', en: 'Saving the result…', zht: '正在儲存結果…', ja: '結果を保存中…', es: 'Guardando el resultado…', pt: 'Salvando o resultado…', de: 'Ergebnis wird gesichert …', fr: 'Enregistrement du résultat…'),
       _ => tr(zh: 'AI 放大中 ${_progress.done}/${_progress.total} 块',
-          en: 'AI upscaling, tile ${_progress.done}/${_progress.total}'),
+          en: 'AI upscaling, tile ${_progress.done}/${_progress.total}', zht: 'AI 放大中 ${_progress.done}/${_progress.total} 塊', ja: 'AI拡大中 ${_progress.done}/${_progress.total} ブロック', es: 'Ampliando con IA, bloque ${_progress.done}/${_progress.total}', pt: 'Ampliando com IA, bloco ${_progress.done}/${_progress.total}', de: 'KI vergrößert, Kachel ${_progress.done}/${_progress.total}', fr: 'Agrandissement IA, bloc ${_progress.done}/${_progress.total}'),
     };
     return Card(
       child: Padding(
@@ -397,9 +394,9 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
                                   Text('${(v * 100).round()}%', style: text.displaySmall),
                                   Text(
                                     _progress.stage == 'encode'
-                                        ? tr(zh: '快好了', en: 'almost done')
-                                        : tr(zh: '剩余 ${formatEta(remaining, zh: isZhLocale)}',
-                                            en: '${formatEta(remaining, zh: isZhLocale)} left'),
+                                        ? tr(zh: '快好了', en: 'almost done', zht: '快好了', ja: 'まもなく完了', es: 'ya casi', pt: 'quase pronto', de: 'fast fertig', fr: 'presque fini')
+                                        : tr(zh: '剩余 ${formatEta(remaining)}',
+                                            en: '${formatEta(remaining)} left', zht: '剩餘 ${formatEta(remaining)}', ja: '残り ${formatEta(remaining)}', es: 'quedan ${formatEta(remaining)}', pt: 'faltam ${formatEta(remaining)}', de: 'noch ${formatEta(remaining)}', fr: 'encore ${formatEta(remaining)}'),
                                     style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                                   ),
                                 ],
@@ -426,13 +423,13 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
             const SizedBox(height: 6),
             Text(
               tr(zh: '${_scale}x · ${_outSize.width} × ${_outSize.height} · 模型在本机运行',
-                  en: '${_scale}x · ${_outSize.width} × ${_outSize.height} · running on this device'),
+                  en: '${_scale}x · ${_outSize.width} × ${_outSize.height} · running on this device', zht: '${_scale}x · ${_outSize.width} × ${_outSize.height} · 模型在本機執行', ja: '${_scale}x · ${_outSize.width} × ${_outSize.height} · 端末上で処理中', es: '${_scale}x · ${_outSize.width} × ${_outSize.height} · se ejecuta en este dispositivo', pt: '${_scale}x · ${_outSize.width} × ${_outSize.height} · rodando neste aparelho', de: '${_scale}x · ${_outSize.width} × ${_outSize.height} · läuft auf diesem Gerät', fr: '${_scale}x · ${_outSize.width} × ${_outSize.height} · sur cet appareil'),
               style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
             const SizedBox(height: 6),
             Text(
               tr(zh: '处理期间请保持 PixelLift 在前台,屏幕不会自动熄灭',
-                  en: 'Keep PixelLift open — the screen stays awake while it works'),
+                  en: 'Keep PixelLift open — the screen stays awake while it works', zht: '處理期間請保持 PixelLift 在前景，螢幕不會自動關閉', ja: '処理中は PixelLift を開いたままにしてください（画面は自動で消えません）', es: 'Mantén PixelLift abierta: la pantalla no se apaga mientras trabaja', pt: 'Mantenha o PixelLift aberto — a tela fica ligada enquanto ele trabalha', de: 'Lass PixelLift geöffnet – der Bildschirm bleibt währenddessen an', fr: 'Gardez PixelLift ouvert — l\'écran reste allumé pendant le traitement'),
               textAlign: TextAlign.center,
               style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
@@ -441,8 +438,8 @@ class _LiftScreenState extends State<LiftScreen> with SingleTickerProviderStateM
               onPressed: _cancelling ? null : _cancel,
               icon: const Icon(Icons.close),
               label: Text(_cancelling
-                  ? tr(zh: '正在停止…', en: 'Stopping…')
-                  : tr(zh: '取消', en: 'Cancel')),
+                  ? tr(zh: '正在停止…', en: 'Stopping…', zht: '正在停止…', ja: '停止中…', es: 'Deteniendo…', pt: 'Parando…', de: 'Wird gestoppt …', fr: 'Arrêt…')
+                  : tr(zh: '取消', en: 'Cancel', zht: '取消', ja: 'キャンセル', es: 'Cancelar', pt: 'Cancelar', de: 'Abbrechen', fr: 'Annuler')),
             ),
           ],
         ),

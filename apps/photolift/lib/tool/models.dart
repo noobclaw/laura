@@ -14,9 +14,9 @@ enum DenoiseLevel {
   final String modelKey;
 
   String get label => switch (this) {
-        DenoiseLevel.off => tr(zh: '关', en: 'Off'),
-        DenoiseLevel.light => tr(zh: '轻度', en: 'Light'),
-        DenoiseLevel.strong => tr(zh: '强', en: 'Strong'),
+        DenoiseLevel.off => tr(zh: '关', en: 'Off', zht: '關', ja: 'オフ', es: 'No', pt: 'Desligado', de: 'Aus', fr: 'Désactivé'),
+        DenoiseLevel.light => tr(zh: '轻度', en: 'Light', zht: '輕度', ja: '弱', es: 'Suave', pt: 'Leve', de: 'Leicht', fr: 'Léger'),
+        DenoiseLevel.strong => tr(zh: '强', en: 'Strong', zht: '強', ja: '強', es: 'Fuerte', pt: 'Forte', de: 'Stark', fr: 'Fort'),
       };
 
   static DenoiseLevel fromIndex(int? i) =>
@@ -40,9 +40,9 @@ enum EngineKind {
   bool get isAi => this != EngineKind.dartFallback;
 
   String get label => switch (this) {
-        EngineKind.ncnnGpu => tr(zh: 'AI · GPU', en: 'AI · GPU'),
-        EngineKind.ncnnCpu => tr(zh: 'AI · CPU', en: 'AI · CPU'),
-        EngineKind.dartFallback => tr(zh: '基础放大', en: 'Basic resample'),
+        EngineKind.ncnnGpu => tr(zh: 'AI · GPU', en: 'AI · GPU', zht: 'AI · GPU', ja: 'AI · GPU', es: 'IA · GPU', pt: 'IA · GPU', de: 'KI · GPU', fr: 'IA · GPU'),
+        EngineKind.ncnnCpu => tr(zh: 'AI · CPU', en: 'AI · CPU', zht: 'AI · CPU', ja: 'AI · CPU', es: 'IA · CPU', pt: 'IA · CPU', de: 'KI · CPU', fr: 'IA · CPU'),
+        EngineKind.dartFallback => tr(zh: '基础放大', en: 'Basic resample', zht: '基礎放大', ja: '標準の拡大', es: 'Ampliación básica', pt: 'Ampliação básica', de: 'Einfaches Skalieren', fr: 'Agrandissement simple'),
       };
 }
 

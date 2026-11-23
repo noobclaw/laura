@@ -51,12 +51,10 @@ class PurchaseService {
   String get _unavailableMsg => _isApple
       ? tr(
           zh: '应用商店不可用(请确认已登录 App Store)',
-          en: 'Store unavailable (make sure you are signed in to the App Store)',
-        )
+          en: 'Store unavailable (make sure you are signed in to the App Store)', zht: 'App Store 無法使用（請確認已登入 App Store）', ja: 'ストアを利用できません（App Store にサインインしているか確認してください）', es: 'Tienda no disponible (asegúrate de haber iniciado sesión en el App Store)', pt: 'Loja indisponível (verifique se você entrou na App Store)', de: 'Store nicht verfügbar (bitte im App Store anmelden)', fr: 'Store indisponible (vérifiez que vous êtes connecté à l\'App Store)')
       : tr(
           zh: '应用商店不可用(需要从 Google Play 安装并登录)',
-          en: 'Store unavailable (install via Google Play and sign in)',
-        );
+          en: 'Store unavailable (install via Google Play and sign in)', zht: '應用商店無法使用（需要從 Google Play 安裝並登入）', ja: 'ストアを利用できません（Google Play からインストールしてサインインしてください）', es: 'Tienda no disponible (instala desde Google Play e inicia sesión)', pt: 'Loja indisponível (instale pelo Google Play e faça login)', de: 'Store nicht verfügbar (über Google Play installieren und anmelden)', fr: 'Store indisponible (installez via Google Play et connectez-vous)');
 
   /// Call once at startup. [onUnlocked] flips the app's persisted Pro flag;
   /// it fires for both fresh purchases and restores.
@@ -137,15 +135,15 @@ class PurchaseService {
         if (p.productID == kProProductId) {
           _onUnlocked?.call();
           notice.value = p.status == PurchaseStatus.restored
-              ? tr(zh: '已恢复 Pro,欢迎回来!', en: 'Pro restored — welcome back!')
-              : tr(zh: 'Pro 已解锁,感谢支持!', en: 'Pro unlocked — thank you!');
+              ? tr(zh: '已恢复 Pro,欢迎回来!', en: 'Pro restored — welcome back!', zht: '已恢復 Pro，歡迎回來！', ja: 'Pro を復元しました。おかえりなさい！', es: 'Pro restaurado: ¡bienvenido de nuevo!', pt: 'Pro restaurado — bem-vindo de volta!', de: 'Pro wiederhergestellt – willkommen zurück!', fr: 'Pro restauré — bon retour !')
+              : tr(zh: 'Pro 已解锁,感谢支持!', en: 'Pro unlocked — thank you!', zht: 'Pro 已解鎖，感謝支持！', ja: 'Pro を解除しました。ありがとうございます！', es: 'Pro desbloqueado: ¡gracias!', pt: 'Pro desbloqueado — obrigado!', de: 'Pro freigeschaltet – danke!', fr: 'Pro débloqué — merci !');
         }
       } else if (p.status == PurchaseStatus.error) {
         notice.value = p.error?.message ??
-            tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again');
+            tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again', zht: '購買失敗，請稍後再試', ja: '購入に失敗しました。もう一度お試しください', es: 'La compra falló, inténtalo de nuevo', pt: 'A compra falhou, tente novamente', de: 'Kauf fehlgeschlagen, bitte erneut versuchen', fr: 'L\'achat a échoué, veuillez réessayer');
       } else if (p.status == PurchaseStatus.pending) {
         notice.value =
-            tr(zh: '等待支付确认…', en: 'Waiting for payment confirmation…');
+            tr(zh: '等待支付确认…', en: 'Waiting for payment confirmation…', zht: '等待付款確認…', ja: '支払いの確認を待っています…', es: 'Esperando la confirmación del pago…', pt: 'Aguardando a confirmação do pagamento…', de: 'Warte auf Zahlungsbestätigung …', fr: 'En attente de confirmation du paiement…');
       }
       if (p.pendingCompletePurchase) {
         try {
@@ -169,8 +167,7 @@ class PurchaseService {
       if (resp.productDetails.isEmpty) {
         notice.value = tr(
           zh: '商品暂不可用,请稍后重试',
-          en: 'Product not available yet, please try again later',
-        );
+          en: 'Product not available yet, please try again later', zht: '商品暫時無法使用，請稍後再試', ja: '商品はまだ利用できません。しばらくしてからお試しください', es: 'El producto aún no está disponible, inténtalo más tarde', pt: 'Produto ainda indisponível, tente mais tarde', de: 'Produkt noch nicht verfügbar, bitte später erneut versuchen', fr: 'Produit pas encore disponible, réessayez plus tard');
         return;
       }
       await InAppPurchase.instance.buyNonConsumable(
@@ -179,7 +176,7 @@ class PurchaseService {
     } catch (e) {
       debugPrint('buyPro failed: $e');
       notice.value =
-          tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again');
+          tr(zh: '购买失败,请稍后重试', en: 'Purchase failed, please try again', zht: '購買失敗，請稍後再試', ja: '購入に失敗しました。もう一度お試しください', es: 'La compra falló, inténtalo de nuevo', pt: 'A compra falhou, tente novamente', de: 'Kauf fehlgeschlagen, bitte erneut versuchen', fr: 'L\'achat a échoué, veuillez réessayer');
     }
   }
 
@@ -192,20 +189,19 @@ class PurchaseService {
       return;
     }
     _restoreDelivered = false;
-    notice.value = tr(zh: '正在查找已购记录…', en: 'Looking for past purchases…');
+    notice.value = tr(zh: '正在查找已购记录…', en: 'Looking for past purchases…', zht: '正在尋找購買紀錄…', ja: '過去の購入を確認しています…', es: 'Buscando compras anteriores…', pt: 'Procurando compras anteriores…', de: 'Suche nach früheren Käufen …', fr: 'Recherche des achats précédents…');
     try {
       await InAppPurchase.instance.restorePurchases();
     } catch (e) {
       debugPrint('restore failed: $e');
-      notice.value = tr(zh: '恢复购买失败', en: 'Could not restore purchases');
+      notice.value = tr(zh: '恢复购买失败', en: 'Could not restore purchases', zht: '恢復購買失敗', ja: '購入を復元できませんでした', es: 'No se pudieron restaurar las compras', pt: 'Não foi possível restaurar as compras', de: 'Käufe konnten nicht wiederhergestellt werden', fr: 'Impossible de restaurer les achats');
       return;
     }
     await Future<void>.delayed(const Duration(seconds: 5));
     if (!_restoreDelivered) {
       notice.value = tr(
         zh: '这个商店账号下没有找到可恢复的购买',
-        en: 'No previous purchase was found for this store account',
-      );
+        en: 'No previous purchase was found for this store account', zht: '這個商店帳號下沒有找到可恢復的購買', ja: 'このストアアカウントでは過去の購入が見つかりませんでした', es: 'No se encontró ninguna compra anterior en esta cuenta', pt: 'Nenhuma compra anterior foi encontrada nesta conta', de: 'Für dieses Store-Konto wurde kein früherer Kauf gefunden', fr: 'Aucun achat précédent trouvé pour ce compte');
     }
   }
 
@@ -279,11 +275,10 @@ class RestorePurchasesTile extends StatelessWidget {
     if (pro) return const SizedBox.shrink();
     return ListTile(
       leading: const Icon(Icons.restore),
-      title: Text(tr(zh: '恢复购买', en: 'Restore purchases')),
+      title: Text(tr(zh: '恢复购买', en: 'Restore purchases', zht: '恢復購買', ja: '購入を復元', es: 'Restaurar compras', pt: 'Restaurar compras', de: 'Käufe wiederherstellen', fr: 'Restaurer les achats')),
       subtitle: Text(tr(
         zh: '换机或重装后找回已购的 Pro',
-        en: 'Recover Pro after a reinstall or new device',
-      )),
+        en: 'Recover Pro after a reinstall or new device', zht: '換機或重新安裝後找回已購的 Pro', ja: '再インストールや機種変更の後に Pro を復元', es: 'Recupera Pro tras reinstalar o cambiar de dispositivo', pt: 'Recupere o Pro após reinstalar ou trocar de aparelho', de: 'Pro nach Neuinstallation oder Gerätewechsel zurückholen', fr: 'Récupérez Pro après une réinstallation ou un nouvel appareil')),
       onTap: () => PurchaseService.instance.restore(),
     );
   }

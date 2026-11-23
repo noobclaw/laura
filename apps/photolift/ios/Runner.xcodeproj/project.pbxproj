@@ -76,6 +76,12 @@
 		PL0000000000000000000008 /* openmp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = openmp.framework; path = Frameworks/openmp.framework; sourceTree = "<group>"; };
 		PL0000000000000000000009 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		PL000000000000000000000A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		PL0000000000000000000035 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = "fr.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		PL0000000000000000000034 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = "de.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		PL0000000000000000000033 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		PL0000000000000000000032 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = "es.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		PL0000000000000000000031 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = "ja.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		PL0000000000000000000030 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -244,6 +250,12 @@
 				en,
 				Base,
 				"zh-Hans",
+				"zh-Hant",
+				ja,
+				es,
+				"pt-BR",
+				de,
+				fr,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
@@ -385,6 +397,12 @@
 			children = (
 				PL0000000000000000000009 /* en */,
 				PL000000000000000000000A /* zh-Hans */,
+				PL0000000000000000000030 /* zh-Hant */,
+				PL0000000000000000000031 /* ja */,
+				PL0000000000000000000032 /* es */,
+				PL0000000000000000000033 /* pt-BR */,
+				PL0000000000000000000034 /* de */,
+				PL0000000000000000000035 /* fr */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

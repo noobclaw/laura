@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:photolift/core/l10n.dart';
 import 'package:photolift/tool/eta.dart';
 import 'package:photolift/tool/models.dart';
 import 'package:photolift/tool/quota.dart';
@@ -73,10 +74,18 @@ void main() {
     });
 
     test('formatEta', () {
-      expect(formatEta(0.4, zh: false), 'under 1 s');
-      expect(formatEta(12, zh: true), '约 12 秒');
-      expect(formatEta(95, zh: false), '~1m 35s');
-      expect(formatEta(600, zh: true), '约 10 分钟');
+      final prev = AppLanguage.override.value;
+      addTearDown(() => AppLanguage.override.value = prev);
+      AppLanguage.override.value = 'en';
+      expect(formatEta(0.4), 'under 1 s');
+      expect(formatEta(95), '~1m 35s');
+      AppLanguage.override.value = 'zh';
+      expect(formatEta(12), '约 12 秒');
+      expect(formatEta(600), '约 10 分钟');
+      AppLanguage.override.value = 'zht';
+      expect(formatEta(12), '約 12 秒');
+      AppLanguage.override.value = 'de';
+      expect(formatEta(0.4), 'unter 1 s');
     });
   });
 }
