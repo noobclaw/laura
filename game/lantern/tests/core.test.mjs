@@ -1,6 +1,6 @@
 // Rule and generator checks. Run: node game/lantern/tests/core.test.mjs
 import fs from "node:fs";import path from "node:path";import {fileURLToPath} from "node:url";
-const dir=path.dirname(fileURLToPath(import.meta.url)),src=["core.js","solver.js","i18n.js"].map(f=>fs.readFileSync(path.join(dir,"../prototype3d",f),"utf8")).join("\n");
+const dir=path.dirname(fileURLToPath(import.meta.url)),src=["core.js","levels.js","solver.js","i18n.js"].map(f=>fs.readFileSync(path.join(dir,"../prototype3d",f),"utf8")).join("\n");
 const stub=`const document={getElementById:()=>({}),createElement:()=>({getContext:()=>({})}),body:{appendChild(){}},documentElement:{}};const localStorage={getItem:()=>null,setItem(){}};
 const matchMedia=()=>({matches:false});class Audio{canPlayType(){return ""}addEventListener(){}};class Image{};const navigator={};const window={};const addEventListener=()=>{};const S={sound:false,lang:"en"};`;
 const api=new Function(stub+src+";return {makePuzzle,countSolutions,conflicts,blockedBy,findHint,sizeFor,S,T,solveSteps,levelPuzzle,dailyPuzzle,levelSpec,LANGS}")();

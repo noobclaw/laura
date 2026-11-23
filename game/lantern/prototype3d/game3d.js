@@ -131,7 +131,7 @@ const LIGHTS=Array.from({length:8},()=>{const l=new THREE.PointLight(0xffa850,0,
 function setBad(l,b){const u=l.userData;if(u.isBad===b)return;u.isBad=b;u.body.material=b?LM.bad:LM.good;for(const r of u.ribs)r.material=b?LM.ribBad:LM.rib}
 
 // ---------- board ----------
-const PALC=[[0x35b3a8,0x1f7a73],[0xa56bd6,0x6f3f9c],[0xec6f8e,0xab4562],[0x5f86ea,0x3a57ad],[0x86bf5c,0x557f38],[0xe3bd6a,0xa5843c],[0x52bdea,0x2f83ad],[0x98a2cc,0x5f6896]];
+const PALC=[[0x35b3a8,0x1f7a73],[0xa56bd6,0x6f3f9c],[0xec6f8e,0xab4562],[0x5f86ea,0x3a57ad],[0x86bf5c,0x557f38],[0xe3bd6a,0xa5843c],[0x52bdea,0x2f83ad],[0x98a2cc,0x5f6896],[0xf2894a,0xa8582a],[0xf1ead6,0xa9a084]]; // ten colours: boards go up to ten regions and no two may share one
 const tileGeo=(()=>{const h=.4,r=.13,s=new THREE.Shape();s.moveTo(-h+r,-h);s.lineTo(h-r,-h);s.quadraticCurveTo(h,-h,h,-h+r);s.lineTo(h,h-r);s.quadraticCurveTo(h,h,h-r,h);s.lineTo(-h+r,h);s.quadraticCurveTo(-h,h,-h,h-r);s.lineTo(-h,-h+r);s.quadraticCurveTo(-h,-h,-h+r,-h);
   const g=new THREE.ExtrudeGeometry(s,{depth:.14,bevelEnabled:true,bevelThickness:.05,bevelSize:.05,bevelSegments:4,curveSegments:6});g.rotateX(-Math.PI/2);g.translate(0,.05,0);return g})();
 const tileMat=PALC.map(([a])=>[0,.07].map(k=>{const c=new THREE.Color(a).lerp(new THREE.Color(0xffffff),k);return M(c,{roughness:.38,metalness:.05,map:tileTex,emissive:c,emissiveMap:tileTex,emissiveIntensity:.34})}));
@@ -156,7 +156,7 @@ function buildBoard(){while(board.children.length)drop(board,board.children[0]);
   // torii gate behind the board
   {const red=M(0xc8382e,{roughness:.6}),blk=M(0x2a1c1c),g=new THREE.Group(),w=n/2+.4;for(const sx of[-1,1]){g.add(mesh(new THREE.CylinderGeometry(.13,.16,2.9,10),red,sx*w,1.45,0));g.add(mesh(new THREE.CylinderGeometry(.2,.22,.3,10),blk,sx*w,.15,0))}
     g.add(mesh(new THREE.BoxGeometry(w*2+1.5,.2,.34),blk,0,3.02,0));g.add(mesh(new THREE.BoxGeometry(w*2+1.2,.18,.28),red,0,2.84,0));g.add(mesh(new THREE.BoxGeometry(w*2+.6,.16,.22),red,0,2.3,0));g.add(mesh(new THREE.BoxGeometry(.2,.4,.2),red,0,2.58,0));g.position.set(0,0,-(n/2+2.3));board.add(g)}
-  for(let k=0;k<n*n;k++){const x=k%n,y=Math.floor(k/n),rg=g[k]%8,L=x===0||g[k-1]!==g[k],Rr=x===n-1||g[k+1]!==g[k],Tp=y===0||g[k-n]!==g[k],B=y===n-1||g[k+n]!==g[k],i=.07;
+  for(let k=0;k<n*n;k++){const x=k%n,y=Math.floor(k/n),rg=g[k]%PALC.length,L=x===0||g[k-1]!==g[k],Rr=x===n-1||g[k+1]!==g[k],Tp=y===0||g[k-n]!==g[k],B=y===n-1||g[k+n]!==g[k],i=.07;
     const w=1-(L?i:0)-(Rr?i:0),d=1-(Tp?i:0)-(B?i:0),pl=mesh(new THREE.BoxGeometry(w,.12,d),plateMat[rg],cx(k,n)+((L?i:0)-(Rr?i:0))/2,.4,cz(k,n)+((Tp?i:0)-(B?i:0))/2,false);board.add(pl);
     const tile=mesh(tileGeo,tileMat[rg][(x+y)%2],cx(k,n),.26,cz(k,n),false);board.add(tile);
     const ring=mesh(badRingGeo,badRingMat,cx(k,n),TOP+.03,cz(k,n),false);ring.rotation.x=Math.PI/2;ring.visible=false;board.add(ring);
@@ -321,7 +321,8 @@ function fail(){S.done=true;S.failed=true;S.failAt=Date.now();failText();clearIn
   const run=S.run;setTimeout(()=>{if(S.run===run&&S.failed)$("fail").classList.add("on")},calm?200:900)}
 function start(same=false){S.run++;clearInterval(S.tick);$("win").classList.remove("on");$("fail").classList.remove("on");show("game");say(tr("gen"));S.demo=false;
   const run=S.run;setTimeout(()=>{if(S.run!==run)return;const p=same&&S.p?S.p:S.mode==="daily"?dailyPuzzle(todayKey()):levelPuzzle(S.level),n=p.n;clearRocks();
-    setPuzzle(p,new Array(n*n).fill(0));S.hints=3;S.used=0;S.t0=Date.now();S.rockEvery=S.mode==="daily"?7:Math.max(5,9-S.level*.06);S.rockClock=S.rockEvery-4;
+    setPuzzle(p,new Array(n*n).fill(0));S.hints=3;S.used=0;S.t0=Date.now();S.rockEvery=(S.mode==="daily"?7:Math.max(5,9-S.level*.06))*Math.max(1,n*n/49); // bigger boards take longer, so rocks fall slower in proportion to the tile count
+    S.rockClock=S.rockEvery-4;
     S.tick=setInterval(()=>{$("time").textContent=fmt(Math.round((Date.now()-S.t0)/1000))},500);$("time").textContent="0:00";text();pips();meter();say(tr("how"));window.__lantern=S},30)}
 
 // ---------- input ----------

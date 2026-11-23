@@ -38,22 +38,31 @@ function solveSteps(n,g,lit=[],maxGrade=5){
   return{steps,solved:L.size===n,grade,lights:[...L]}}
 
 // What each level asks for. Sizes grow slowly and each band first teaches a rule, then mixes it in.
+// Board size and grade band per level. Boards reach 10 wide, the top of what LinkedIn Queens-style games commonly ship.
 function levelSpec(l){
   if(l<=3)return{n:5,min:1,max:1};
-  if(l<=8)return{n:5,min:1,max:2};
-  if(l<=14)return{n:5,min:2,max:3};
-  if(l<=22)return{n:6,min:2,max:3};
-  if(l<=32)return{n:6,min:3,max:4};
-  if(l<=46)return{n:7,min:3,max:4};
-  if(l<=60)return{n:7,min:3,max:5};
-  return{n:8,min:3,max:5}}
+  if(l<=6)return{n:5,min:1,max:2};
+  if(l<=12)return{n:6,min:2,max:3};
+  if(l<=22)return{n:7,min:2,max:4};
+  if(l<=40)return{n:8,min:3,max:4};
+  if(l<=60)return{n:9,min:3,max:5};
+  if(l<=100)return{n:10,min:3,max:5};
+  return{n:[9,10,8,10][l%4],min:3,max:5}}
 const sizeFor=l=>levelSpec(l).n;
 // Same seed and spec always give the same puzzle. Candidates are drawn until one is unique, logic-solvable and in the grade band.
 function gradedPuzzle(n,seed,min,max,budget){const r=rng(seed);let best=null;budget=budget||[0,0,0,0,0,4000,12000,60000,400000][n];
   for(let t=0;t<budget;t++){const p=perm(n,r),g=grow(n,p,r);if(countSolutions(n,g,2)!==1)continue;const s=solveSteps(n,g,[],max);if(!s.solved)continue;
     if(s.grade>=min)return{n,g,sol:p,grade:s.grade};if(!best||s.grade>best.grade)best={n,g,sol:p,grade:s.grade}}
   return best}
-const levelPuzzle=l=>{const s=levelSpec(l);return gradedPuzzle(s.n,l*7919+s.n,s.min,s.max)};
+// Levels come from the shipped list (levels.js). Past its end the last 120 boards come round again, turned or
+// mirrored and with the colours shifted, so they do not look the same.
+function decodeLevel(str){const n=parseInt(str[0],36),g=[],sol=[];for(let i=0;i<n*n;i++)g.push(parseInt(str[1+i],36));for(let i=0;i<n;i++)sol.push(parseInt(str[1+n*n+i],36));return{n,g,sol,grade:+str[1+n*n+n]}}
+function turnLevel(p,t,shift){const n=p.n,at=(x,y)=>{if(t&1)x=n-1-x;if(t&2)y=n-1-y;if(t&4){const q=x;x=y;y=q}return[x,y]},g=new Array(n*n),sol=new Array(n);
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const[a,b]=at(x,y);g[b*n+a]=(p.g[y*n+x]+shift)%n}
+  p.sol.forEach((x,y)=>{const[a,b]=at(x,y);sol[b]=a});return{n,g,sol,grade:p.grade}}
+function levelPuzzle(l){const L=typeof LEVELS==="undefined"?[]:LEVELS;if(l<=L.length)return decodeLevel(L[l-1]);
+  if(L.length>=120){const k=l-L.length-1,loop=Math.floor(k/120);return turnLevel(decodeLevel(L[L.length-120+k%120]),1+loop%7,1+loop%5)}
+  const s=levelSpec(l);return gradedPuzzle(Math.min(s.n,8),l*7919+s.n,s.min,s.max)}
 const dailyPuzzle=key=>gradedPuzzle(7,key,2,4);
 
 // Next step for the player: fix a mistake first, otherwise the next deduction the solver makes that the board does not show yet.
