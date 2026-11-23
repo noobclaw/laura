@@ -277,7 +277,7 @@ function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;drawSky(t);update(
 // ---------- UI ----------
 function text(){document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";
   for(const k of["title","rules","play","daily","undo","hint","reset","auto","snd","load","fail","rotate","lang","blast","shop","shop2","close"])$("t-"+k).textContent=tr(k==="shop2"?"shop":k);
-  $("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("failInfo").textContent=tr("failInfo");$("langName").textContent=LANGS.find(l=>l[0]===S.lang)[1];for(const b of $("langList").children)b.setAttribute("aria-pressed",b.dataset.lang===S.lang);
+  $("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("langName").textContent=LANGS.find(l=>l[0]===S.lang)[1];for(const b of $("langList").children)b.setAttribute("aria-pressed",b.dataset.lang===S.lang);
   $("playSub").textContent=fmtN("levelN",load("level",1));const st=load("streak",0),done=load("dailyLast",0)===todayKey();
   $("dailySub").textContent=(done?tr("doneToday"):tr("newToday"))+(st>0?" · "+tr("streak")+" "+st:"");
   $("snd").setAttribute("aria-pressed",S.sound||S.music);$("t-snd2").textContent=tr("snd");$("sndClose").textContent=tr("close");for(const[id,k,v]of[["sfxT","sfx",S.sound],["musT","mus",S.music]]){$(id).textContent=tr(k)+" · "+tr(v?"on":"off");$(id).setAttribute("aria-pressed",v)}$("auto").setAttribute("aria-pressed",S.auto);$("hintN").textContent=S.hints+S.inv.hints;
@@ -317,7 +317,7 @@ function check(){const n=S.p.n,{bad,count}=conflicts();if(count!==n||bad.size)re
     for(let j=0;j<7;j++)setTimeout(()=>{if(live())firework(VW*(.15+Math.random()*.7),VH*(.1+Math.random()*.3),FW[j%5])},500+j*330+Math.random()*120);
     for(let j=0;j<got;j++)setTimeout(()=>{if(!live())return;const b=$("stars").children[j].getBoundingClientRect();burst(b.left+b.width/2,b.top+b.height/2,22,"255,215,120",220);rings.push({x:b.left+b.width/2,y:b.top+b.height/2,age:0,life:.45,r0:16,r1:70,rgb:"255,225,150"});clip("rise",.6,1+j*.2)||tone(SCALE[j*2+3],.3,"triangle",.12);buzz(18)},sheetAt+420+j*180)}
   setTimeout(()=>{if(live())$("win").classList.add("on")},sheetAt)}
-function fail(){S.done=true;S.failed=true;clearInterval(S.tick);trauma=1;sfx.bad();buzz([60,40,120]);meter();
+function fail(){S.done=true;S.failed=true;S.failAt=Date.now();failText();clearInterval(S.tick);trauma=1;sfx.bad();buzz([60,40,120]);meter();
   const run=S.run;setTimeout(()=>{if(S.run===run&&S.failed)$("fail").classList.add("on")},calm?200:900)}
 function start(same=false){S.run++;clearInterval(S.tick);$("win").classList.remove("on");$("fail").classList.remove("on");show("game");say(tr("gen"));S.demo=false;
   const run=S.run;setTimeout(()=>{if(S.run!==run)return;const p=same&&S.p?S.p:S.mode==="daily"?dailyPuzzle(todayKey()):levelPuzzle(S.level),n=p.n;clearRocks();
@@ -340,14 +340,27 @@ $("blast").onclick=()=>{if(S.done||!S.p||S.screen!=="game")return;if(S.inv.blast
 // ---------- shop ----------
 // Purchases run in the native app (StoreKit through the Flutter frame). The page only asks and is told the result.
 // Products are consumables: the items are added here, on the device, when the app reports a finished purchase.
-const PRODUCTS={"com.noobclaw.lantern.hints10":{key:"buyHints",info:"buyHintsInfo",give:()=>{S.inv.hints+=10}},"com.noobclaw.lantern.blasts5":{key:"buyBlasts",info:"buyBlastsInfo",give:()=>{S.inv.blasts+=5}}};
+const ID="com.noobclaw.lantern.",RESCUE=ID+"bundle_m";
+// Price ladder: two single items at the entry price, then three packs. `h`/`b` = hints and rock blasts granted.
+const PRODUCTS={[ID+"hints10"]:{key:"buyHints",info:"buyHintsInfo",h:10,b:0},[ID+"blasts5"]:{key:"buyBlasts",info:"buyBlastsInfo",h:0,b:5},
+  [ID+"bundle_s"]:{key:"packS",h:40,b:10},[RESCUE]:{key:"packM",h:80,b:25},[ID+"bundle_l"]:{key:"packL",h:200,b:70}};
+for(const p of Object.values(PRODUCTS))p.give=()=>{S.inv.hints+=p.h;S.inv.blasts+=p.b};
+const fill=(k,o)=>tr(k).replace(/\{(\w)\}/g,(m,c)=>o[c]);
 const native=window.LanternNative&&typeof window.LanternNative.postMessage==="function"?window.LanternNative:null,prices=load("iap.prices",{});let shopMsg="";
 const toNative=o=>{try{native.postMessage(JSON.stringify(o))}catch(e){}};
-function shopText(){const el=$("shopList");if(!el)return;el.innerHTML=Object.entries(PRODUCTS).map(([id,p])=>`<div class="item"><div><b>${tr(p.key)}</b><small>${tr(p.info)}</small><small class="own">${fmtN("owned",id.endsWith("hints10")?S.inv.hints:S.inv.blasts)}</small></div><button class="btn" data-id="${id}">${prices[id]||"…"}</button></div>`).join("");$("shopMsg").textContent=shopMsg||(native?"":tr("noStore"))}
+function shopText(){const el=$("shopList");if(!el)return;$("inv").textContent=fill("invLine",{h:S.inv.hints,b:S.inv.blasts});
+  el.innerHTML=Object.entries(PRODUCTS).map(([id,p])=>`<div class="item${p.info?"":" pack"}"><div><b>${tr(p.key)}</b><small>${p.info?tr(p.info):fill("packInfo",p)}</small></div><button class="btn" data-id="${id}">${prices[id]||"…"}</button></div>`).join("");
+  $("shopMsg").textContent=shopMsg||(native?"":tr("noStore"));failText()}
+// Out of rocks room: the player may carry on with the same board by spending one rock blast, or by buying the rescue pack on the spot.
+function failText(){const has=S.inv.blasts>0,p=PRODUCTS[RESCUE];$("revive").textContent=has?tr("revive"):fill("reviveBuy",{p:prices[RESCUE]||"…"});
+  $("failInfo").textContent=has?tr("failInfo"):fill("reviveInfo",p)}
+function revive(){if(!S.failed||S.inv.blasts<=0)return;S.inv.blasts--;saveInv();S.failed=false;S.done=false;S.rockClock=0;S.t0+=Date.now()-(S.failAt||Date.now());
+  $("fail").classList.remove("on");blast(rocks.length);K.hopV=3.4;K.cheer=1.5;clearInterval(S.tick);S.tick=setInterval(()=>{$("time").textContent=fmt(Math.round((Date.now()-S.t0)/1000))},500);sfx.hint();text();meter()}
+$("revive").onclick=()=>{if(!S.failed)return;if(S.inv.blasts>0){revive();return}if(!native){openShop();return}sfx.tap();$("revive").textContent=tr("buying");toNative({type:"buy",id:RESCUE})};
 function openShop(){sfx.tap();shopMsg="";shopText();$("shop").classList.add("on");if(native)toNative({type:"products",ids:Object.keys(PRODUCTS)})}
 window.lanternStore={
   onProducts(list){for(const p of list||[])prices[p.id]=p.price;save("iap.prices",prices);shopText()},
-  onResult(r){const p=PRODUCTS[r&&r.id];if(r&&r.status==="ok"&&p){const seen=load("iap.done",[]);if(r.tx&&seen.includes(r.tx))return;p.give();saveInv();if(r.tx){seen.push(r.tx);save("iap.done",seen.slice(-50))}shopMsg=tr("bought");sfx.win();text()}else if(r&&r.status==="fail"){shopMsg=tr("buyFail");shopText()}else{shopMsg="";shopText()}}};
+  onResult(r){const p=PRODUCTS[r&&r.id];if(r&&r.status==="ok"&&p){const seen=load("iap.done",[]);if(r.tx&&seen.includes(r.tx))return;p.give();saveInv();if(r.tx){seen.push(r.tx);save("iap.done",seen.slice(-50))}shopMsg=tr("bought");sfx.win();text();if(S.failed&&r.id===RESCUE)revive()}else if(r&&r.status==="fail"){shopMsg=tr("buyFail");shopText()}else{shopMsg="";shopText()}}};
 $("shopList").onclick=e=>{const b=e.target.closest("button[data-id]");if(!b)return;if(!native){shopMsg=tr("noStore");shopText();return}sfx.tap();shopMsg=tr("buying");shopText();toNative({type:"buy",id:b.dataset.id})};
 if(native)setTimeout(()=>toNative({type:"products",ids:Object.keys(PRODUCTS)}),1500); // ask for prices at launch so the shop never opens on a placeholder
 $("shopClose").onclick=()=>{sfx.tap();$("shop").classList.remove("on")};$("shopChip").onclick=openShop;
