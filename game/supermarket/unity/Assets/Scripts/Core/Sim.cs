@@ -112,7 +112,7 @@ namespace Souq.Core
         public int ParkSpaces => 6 * s.parkLevel;
         public double ParkCost() => s.parkLevel >= T.ParkMax ? double.PositiveInfinity : T.ParkCost[s.parkLevel - 1];
         public double Arrivals => Math.Floor(100 * (8 + 0.8 * (s.adLevel - 1))) / 100;      // cars per minute
-        public double AdLevelCost() => s.adLevel >= T.AdLevelMax ? double.PositiveInfinity : Math.Floor(40 * Math.Pow(1.2, s.adLevel - 1));
+        public double AdLevelCost() => s.adLevel >= T.AdLevelMax ? double.PositiveInfinity : Math.Floor(4 * Math.Pow(1.3, s.adLevel - 1));
         public double StarCost() => s.star + 1 >= T.StarCost.Length ? double.PositiveInfinity : T.StarCost[s.star + 1];
         public double WalkMult => 1 + EpicAdd(EpicKind.Walk);
         public int OpenDepts { get { int n = 0; foreach (var o in s.dOpen) if (o) n++; return n; } }

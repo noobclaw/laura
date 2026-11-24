@@ -18,7 +18,7 @@ namespace Souq.Core
 
         public static readonly string[] DeptKey = { "produce", "bakery", "butcher", "seafood", "spices", "fashion", "fragrance", "electronics", "phones", "jewellery", "cars" };
         // Sized so nothing in the game needs a number past the trillions (2026-11-23 rebalance; model in game/supermarket/econ/model.py).
-        public static readonly double[] Build = { 0, 5e3, 1.5e5, 1.2e6, 6e6, 3e7, 1.5e8, 8e8, 3e9, 1.2e10, 5e10 };
+        public static readonly double[] Build = { 0, 2e3, 4e4, 4e5, 2.5e6, 1.5e7, 8e7, 5e8, 2e9, 1e10, 5e10 };
         public static readonly double[] BasePrice = { 2, 8, 50, 150, 800, 5e3, 2.5e4, 8e4, 2e5, 8e5, 2e6 };
         public static readonly double[] UpBase = { 2, 15, 60, 200, 600, 2e3, 5e3, 1.5e4, 4e4, 1.2e5, 3e5 };
         public static readonly double[] UpRate = { 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045 };
@@ -53,7 +53,7 @@ namespace Souq.Core
         public static int ParkMax => ParkCost.Length + 1;
 
         // store grades: profit multiplier is the value itself, not a running product
-        public static readonly double[] StarCost = { 0, 3e6, 1.2e7, 6e7, 2.5e8, 1e9, 4e9, 1.2e10, 3e10, 8e10, 2e11, 4e11, 8e11, 1.5e12, 3e12, 5e12 };
+        public static readonly double[] StarCost = { 0, 2e6, 1.2e7, 6e7, 2.5e8, 1e9, 4e9, 1.2e10, 3e10, 8e10, 2e11, 4e11, 8e11, 1.5e12, 3e12, 5e12 };
         public static readonly double[] StarProfit = { 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20 };
 
         public static readonly EpicDef[] Epics = MakeEpics();
