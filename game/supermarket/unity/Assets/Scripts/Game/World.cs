@@ -465,7 +465,7 @@ namespace Souq
             // the section's name on a board mounted above its own fixtures
             float bz = v.center.z + 4.02f; var post = new Geo(); post.C(Art.Steel).Box(0.09f, 3.2f, 0.09f, mx - 4.0f, 0, bz).Box(0.09f, 3.2f, 0.09f, mx + 4.0f, 0, bz).C(Art.White).Box(8.1f, 0.07f, 0.2f, mx, 3.2f, bz).Box(8.1f, 0.07f, 0.2f, mx, 2.56f, bz); post.Make("boardFrame", g.transform, Kit.Solid);
             var board = new Geo(); board.C(Color.white).Box(8.0f, 0.58f, 0.14f, mx, 2.62f, bz); board.Make("board", g.transform, v.signMat, false);
-            v.name = Kit.Label(Loc.G(T.DeptKey[d]), g.transform, new Vector3(mx, 2.91f, bz - 0.09f), 0.34f, Color.white);
+            v.name = Kit.Label(Loc.G(T.DeptKey[d]), g.transform, new Vector3(mx - (open ? 1.1f : 0), 2.91f, bz - 0.09f), 0.34f, Color.white);
             v.props = new GameObject("props").transform; v.props.SetParent(g.transform, false);
             for (int k = 0; k < T.MaxStaff; k++)
             {
