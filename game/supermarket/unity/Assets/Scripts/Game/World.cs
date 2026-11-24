@@ -734,6 +734,7 @@ namespace Souq
             }
             for (int c = 0; c < T.NC; c++) cashDesk[c].SetActive(s.cLevel[c] > 0);
             if (StageOf(s.star) != stageBuilt || RowsNow() != rowsBuilt) RefreshStore();
+            for (int d = 0; d < T.ND; d++) { bool on = DeptShown(d); if (depts[d].root.gameObject.activeSelf != on) depts[d].root.gameObject.SetActive(on); }
             if (s.star != bandStar) { bandStar = s.star; bandMat.SetColor("_Tint", Geo.Hex(GradeBand[Mathf.Clamp(s.star, 0, GradeBand.Length - 1)]).linear); }
             int want = sim.ParkSpaces;
             if (want != slotsBuilt)
@@ -862,7 +863,10 @@ namespace Souq
         /// Five store sizes across the fifteen grades: corner shop, neighbourhood market, chain supermarket, hypermarket, flagship.
         static readonly int[] StageRows = { 1, 2, 3, 5, 6 };
         /// Rows of sections the building covers now: what its size allows, or more if the player has opened further back.
-        int RowsNow() { int top = 0; for (int d = 0; d < T.ND; d++) if (sim.s.dOpen[d]) top = d; return Mathf.Clamp(Mathf.Max(StageRows[StageOf(sim.s.star)], top / 2 + 1), 1, 6); }
+        // the building covers every open section plus the next one to fit out; sections are opened in order, so the first closed one is next
+        int RowsNow() { int next = 0; while (next < T.ND && sim.s.dOpen[next]) next++; return Mathf.Clamp(Mathf.Max(StageRows[StageOf(sim.s.star)], Mathf.Min(next, T.ND - 1) / 2 + 1), 1, 6); }
+        /// Sections behind the back wall are not drawn at all until the building grows over them.
+        public bool DeptShown(int d) => d / 2 < Mathf.Max(rowsBuilt, 1);
         public static int StageOf(int star) => star <= 0 ? 0 : star <= 3 ? 1 : star <= 7 ? 2 : star <= 11 ? 3 : 4;
         /// Rebuilds the shop front for the current size and writes the player's store name on the sign.
         public void RefreshStore()
