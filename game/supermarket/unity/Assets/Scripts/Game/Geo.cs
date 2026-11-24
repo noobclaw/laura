@@ -79,6 +79,19 @@ namespace Souq
             int cnt = p.Count - n0; for (int k = 0; k < cnt; k++) { ix.Add(s); ix.Add(n0 + (k + 1) % cnt); ix.Add(n0 + k); }
             return this;
         }
+        /// Rounded-corner block with its base at y: a car body, a cushion, a tray. `taper` pulls the top edge in.
+        public Geo Puck(float w, float d, float r, float h, float x = 0, float y = 0, float z = 0, float taper = 0)
+        {
+            Slab(w - taper * 2, d - taper * 2, Mathf.Max(0.01f, r - taper), x, y, z, h);
+            r = Mathf.Min(r, Mathf.Min(w, d) / 2); int s = p.Count, per = 6, cnt = 0; float lo = 1 - Shade, r1 = Mathf.Max(0.01f, r - taper);
+            for (int corner = 0; corner < 4; corner++)
+            {
+                float sx = corner == 0 || corner == 3 ? 1 : -1, sz = corner < 2 ? 1 : -1, cx = x + sx * (w / 2 - r), cz = z + sz * (d / 2 - r);
+                for (int k = 0; k <= per; k++) { float a = (corner * 90 + k * 90f / per) * Mathf.Deg2Rad, c = Mathf.Cos(a), sn = Mathf.Sin(a); V(cx + c * r, y, cz + sn * r, c, taper / Mathf.Max(0.01f, h), sn, lo); V(cx + c * r1, y + h, cz + sn * r1, c, taper / Mathf.Max(0.01f, h), sn, 1); cnt++; }
+            }
+            for (int k = 0; k < cnt; k++) { int a0 = s + k * 2, b0 = s + ((k + 1) % cnt) * 2; ix.Add(a0); ix.Add(a0 + 1); ix.Add(b0 + 1); ix.Add(a0); ix.Add(b0 + 1); ix.Add(b0); }
+            return this;
+        }
         public Mesh ToMesh(string name = "geo")
         {
             var mesh = new Mesh { name = name }; if (p.Count > 65000) mesh.indexFormat = IndexFormat.UInt32;

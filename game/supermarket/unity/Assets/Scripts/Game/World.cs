@@ -77,6 +77,8 @@ namespace Souq
         public static void Bread(Geo g, float x, float z, int rows, int seed)
         {
             g.C(Wood2).Box(0.08f, 2.1f, 0.6f, x - 0.85f, 0, z).Box(0.08f, 2.1f, 0.6f, x + 0.85f, 0, z).C("#8a5628").Box(1.78f, 2.1f, 0.06f, x, 0, z + 0.3f);
+            g.C("#6e4420").Box(1.86f, 0.22f, 0.66f, x, 2.1f, z).C("#f7e3b4").Box(1.0f, 0.13f, 0.02f, x - 0.3f, 2.145f, z - 0.335f).C(Dark).Box(0.44f, 0.16f, 0.02f, x + 0.6f, 2.13f, z - 0.335f).C(White).Box(0.3f, 0.02f, 0.022f, x + 0.6f, 2.23f, z - 0.335f).Box(0.2f, 0.02f, 0.022f, x + 0.6f, 2.18f, z - 0.335f);
+            for (int b = 0; b < 4; b++) g.C("#fff1a6").Ball(0.06f, 0.06f, 0.06f, x - 0.6f + b * 0.4f, 2.05f, z - 0.2f, 8, 5);
             string[] crust = { "#d99a4e", "#c9833a", "#e6b06a", "#e0a85a", "#cf8f3f" };
             for (int s = 0; s < 4; s++)
             {
@@ -102,7 +104,8 @@ namespace Souq
                 if (fish) g.C(c).Ball(0.1f, 0.05f, 0.17f, bx, by + 0.03f, bz, 9, 5).Box(0.02f, 0.06f, 0.1f, bx, by, bz + 0.18f);
                 else if (i % 2 == 0) g.C(c).Box(0.2f, 0.09f, 0.26f, bx, by - 0.03f, bz); else g.C(c).Cyl(0.1f, 0.1f, 0.08f, bx, by - 0.03f, bz, 10);
             }
-            g.C(Dark).Box(0.3f, 0.26f, 0.26f, x + 0.6f, 1.5f, z + 0.3f);
+            for (int i = 0; i < 3 && rows > 0; i++) g.C(Steel).Box(0.015f, 0.16f, 0.015f, x - 0.62f + i * 0.5f, 1.1f, z - 0.1f).C(i == 1 ? "#ff3b4a" : White).Box(0.15f, 0.09f, 0.015f, x - 0.62f + i * 0.5f, 1.24f, z - 0.1f);
+            g.C(Dark).Box(0.3f, 0.26f, 0.26f, x + 0.6f, 1.5f, z + 0.3f).C("#7dff9a").Box(0.2f, 0.1f, 0.02f, x + 0.6f, 1.62f, z + 0.165f);
         }
         /// Upright chiller; `rows` of 4 shelves are stocked.
         public static void Fridge(Geo g, float x, float z, int rows, string accent, bool tubs, int seed)
@@ -111,7 +114,7 @@ namespace Souq
             string[][] pc = { new[] { "#ffffff", "#2f8fe6" }, new[] { "#fff3b0", "#f29b1d" }, new[] { "#ffd9e8", "#e8438b" }, new[] { "#d9f2cf", "#39b54a" } };
             for (int s = 0; s < 4; s++)
             {
-                float y = 0.34f + s * 0.46f; g.C(Steel).Box(1.7f, 0.04f, 0.5f, x, y, z); if (s >= rows) continue;
+                float y = 0.34f + s * 0.46f; g.C(Steel).Box(1.7f, 0.04f, 0.5f, x, y, z).C("#bfe9ff").Box(1.7f, 0.035f, 0.015f, x, y, z - 0.255f); if (s == 0) g.C("#f4fdff").Box(1.7f, 0.07f, 0.1f, x, 2.21f, z - 0.2f).C("#d2f1ff").Box(1.7f, 0.5f, 0.02f, x, 1.78f, z + 0.29f); if (s >= rows) continue;
                 for (int i = 0; i < 8; i++)
                 {
                     float bx = x - 0.74f + i * 0.21f; var c = pc[(s + seed) % 4];
@@ -129,6 +132,8 @@ namespace Souq
             for (int s = 0; s < 4; s++)
             {
                 float y = 0.16f + s * 0.5f; g.C(White).Box(1.84f, 0.045f, 0.56f, x, y, z).C("#ffec5c").Box(1.84f, 0.07f, 0.02f, x, y - 0.02f, z - 0.28f); if (s >= rows) continue;
+                for (int t = 0; t < 6; t++) g.C(White).Box(0.16f, 0.05f, 0.012f, x - 0.75f + t * 0.3f, y - 0.012f, z - 0.292f);
+                if (s == 2) g.C("#ff3b4a").Box(0.22f, 0.2f, 0.02f, x + 0.55f - (kind % 3) * 0.5f, y - 0.2f, z - 0.3f).C(White).Box(0.14f, 0.03f, 0.022f, x + 0.55f - (kind % 3) * 0.5f, y - 0.1f, z - 0.3f).Box(0.1f, 0.03f, 0.022f, x + 0.55f - (kind % 3) * 0.5f, y - 0.15f, z - 0.3f);
                 float bx = x - 0.86f;
                 while (bx < x + 0.8f)
                 {
@@ -176,14 +181,33 @@ namespace Souq
         /// Chunky car, nose toward +z.
         public static void Car(Geo g, Color body, bool lux = false)
         {
-            Color d = body * 0.8f; d.a = 1; float len = lux ? 4.6f : 4.0f; var keep = g.M;
-            g.C(body).Box(1.75f, 0.52f, len, 0, 0.3f, 0).C(d).Box(1.79f, 0.12f, len + 0.04f, 0, 0.3f, 0).C(body).Box(1.56f, 0.5f, 2.1f, 0, 0.82f, -0.15f).C("#bfe6ff").Box(1.58f, 0.36f, 1.7f, 0, 0.88f, -0.15f).C("#d9f1ff").Box(1.36f, 0.36f, 2.12f, 0, 0.88f, -0.15f).C(body).Box(1.6f, 0.06f, 2.14f, 0, 1.3f, -0.15f).Box(0.08f, 0.5f, 0.1f, -0.76f, 0.82f, -0.15f).Box(0.08f, 0.5f, 0.1f, 0.76f, 0.82f, -0.15f);
-            foreach (var w in new[] { new Vector2(-0.82f, 1.25f), new Vector2(0.82f, 1.25f), new Vector2(-0.82f, -1.3f), new Vector2(0.82f, -1.3f) })
+            Color d = body * 0.72f; d.a = 1; Color hi = Color.Lerp(body, Color.white, 0.22f); float len = lux ? 4.6f : 4.0f, cz = -0.2f; var keep = g.M;
+            // skirt and bumpers, body tub, a lighter shoulder line, bonnet and boot lids
+            g.C("#23262d").Puck(1.8f, len + 0.06f, 0.5f, 0.2f, 0, 0.14f, 0);
+            g.C(body).Puck(1.78f, len, 0.52f, 0.42f, 0, 0.28f, 0, 0.05f).C(hi).Puck(1.66f, len - 0.12f, 0.48f, 0.05f, 0, 0.7f, 0, 0.03f);
+            // glasshouse: dark glass block, body-colour pillars, rounded roof
+            g.C("#2f4a66").Puck(1.5f, 2.15f, 0.4f, 0.4f, 0, 0.74f, cz, 0.1f).C("#8fd0ff").Puck(1.3f, 1.9f, 0.3f, 0.02f, 0, 1.135f, cz);
+            foreach (float sx in new[] { -1f, 1f }) foreach (float sz in new[] { -0.92f, 0.05f, 0.9f }) g.C(body).Box(0.07f, 0.4f, 0.09f, sx * (0.7f - Mathf.Abs(sz) * 0.04f), 0.74f, cz + sz);
+            g.C(body).Puck(1.36f, 1.98f, 0.36f, 0.07f, 0, 1.13f, cz, 0.03f).C(hi).Puck(1.1f, 1.6f, 0.3f, 0.02f, 0, 1.2f, cz);
+            // door seams, handles and mirrors
+            foreach (float sx in new[] { -1f, 1f })
             {
-                g.At(keep * Matrix4x4.TRS(new Vector3(w.x + (w.x < 0 ? -0.02f : 0.24f), 0.33f, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#22262e").Cyl(0.33f, 0.33f, 0.22f, 0, 0, 0, 14).C(Steel).Cyl(0.17f, 0.17f, 0.24f, 0, 0, 0, 10);
+                g.C(d).Box(0.02f, 0.36f, 0.03f, sx * 0.885f, 0.32f, cz + 0.05f).Box(0.02f, 0.36f, 0.03f, sx * 0.885f, 0.32f, cz - 0.95f).Box(0.02f, 0.36f, 0.03f, sx * 0.885f, 0.32f, cz + 1.0f);
+                g.C(Steel).Box(0.03f, 0.04f, 0.16f, sx * 0.89f, 0.58f, cz + 0.4f).Box(0.03f, 0.04f, 0.16f, sx * 0.89f, 0.58f, cz - 0.55f);
+                g.C(body).Box(0.16f, 0.1f, 0.12f, sx * 0.9f, 0.76f, cz + 0.98f);
             }
-            g.At(keep).C("#fff7c2").Box(0.34f, 0.14f, 0.04f, -0.55f, 0.52f, len / 2).Box(0.34f, 0.14f, 0.04f, 0.55f, 0.52f, len / 2).C("#ff5a5a").Box(0.3f, 0.12f, 0.04f, -0.58f, 0.55f, -len / 2).Box(0.3f, 0.12f, 0.04f, 0.58f, 0.55f, -len / 2).C(Dark).Box(1.5f, 0.14f, 0.06f, 0, 0.34f, len / 2);
-            if (lux) g.C("#ffd43b").Box(1.77f, 0.05f, len + 0.02f, 0, 0.56f, 0).Box(0.5f, 0.1f, 0.1f, 0, 0.82f, len / 2 - 0.3f);
+            // wheels sit in dark arches
+            foreach (var w in new[] { new Vector2(-0.84f, len / 2 - 0.78f), new Vector2(0.84f, len / 2 - 0.78f), new Vector2(-0.84f, -len / 2 + 0.72f), new Vector2(0.84f, -len / 2 + 0.72f) })
+            {
+                float sx = w.x < 0 ? -1 : 1;
+                g.At(keep * Matrix4x4.TRS(new Vector3(w.x - sx * 0.1f + (sx < 0 ? 0 : 0.26f), 0.34f, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#15171c").Cyl(0.43f, 0.43f, 0.26f, 0, 0, 0, 16);
+                g.At(keep * Matrix4x4.TRS(new Vector3(w.x + (sx < 0 ? -0.04f : 0.26f), 0.34f, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#22262e").Cyl(0.34f, 0.34f, 0.22f, 0, 0, 0, 16).C(Steel).Cyl(0.19f, 0.19f, 0.24f, 0, 0, 0, 12).C("#8b939f").Cyl(0.07f, 0.07f, 0.26f, 0, 0, 0, 8);
+            }
+            // lamps, grille, plates
+            g.At(keep).C("#fff7c2").Puck(0.4f, 0.1f, 0.05f, 0.16f, -0.56f, 0.46f, len / 2 - 0.03f).Puck(0.4f, 0.1f, 0.05f, 0.16f, 0.56f, 0.46f, len / 2 - 0.03f);
+            g.C("#ff4d4d").Puck(0.42f, 0.1f, 0.05f, 0.13f, -0.56f, 0.5f, -len / 2 + 0.03f).Puck(0.42f, 0.1f, 0.05f, 0.13f, 0.56f, 0.5f, -len / 2 + 0.03f);
+            g.C(Dark).Box(0.62f, 0.14f, 0.06f, 0, 0.44f, len / 2).C(White).Box(0.44f, 0.12f, 0.03f, 0, 0.22f, len / 2 + 0.02f).Box(0.44f, 0.12f, 0.03f, 0, 0.22f, -len / 2 - 0.02f);
+            if (lux) g.C("#ffd43b").Puck(1.8f, len + 0.02f, 0.52f, 0.05f, 0, 0.5f, 0).Box(0.12f, 0.12f, 0.12f, 0, 0.7f, len / 2 - 0.35f);
         }
         /// Delivery truck, cab toward +z.
         public static void Truck(Geo g)
