@@ -184,7 +184,7 @@ namespace Souq
     {
         public GameObject go; public Transform body; public bool walking; public float phase, speed = 1; Transform legL, legR, armL, armR; bool push;
         static readonly string[] Shirt = { "#ff6b6b", "#4dabf7", "#ffd43b", "#69db7c", "#b197fc", "#ffa94d", "#f783ac", "#3bc9db", "#ffffff" };
-        static readonly string[] Pants = { "#3b4a6b", "#55607a", "#7a5a3c", "#2f3642" }, Skin = { "#f6c9a0", "#e9b184", "#c98d5e", "#8f5b3a", "#fbd6b5" }, Hair = { "#3a2a20", "#6b4423", "#111418", "#c9a24a", "#8a3b22" };
+        static readonly string[] Pants = { "#3b5b8c", "#2f4a78", "#55607a", "#7a5a3c", "#2f3642", "#c8b08a", "#6a8fbf" }, Skin = { "#f6c9a0", "#e9b184", "#c98d5e", "#8f5b3a", "#fbd6b5" }, Hair = { "#3a2a20", "#6b4423", "#111418", "#d9b45a", "#e8cf7a", "#a8452a", "#8a8f99", "#c98a4b" };
         public static bool Rigged => true;
         public static void Reset() { }
 
@@ -199,7 +199,7 @@ namespace Souq
             go = new GameObject("person"); go.transform.SetParent(parent, false); body = new GameObject("body").transform; body.SetParent(go.transform, false);
             phase = (look % 97) * 0.13f; push = pushing; bool staff = uniform.HasValue;
             uint h = (uint)look * 2654435761u; h ^= h >> 15;
-            int outfit = staff ? 0 : (int)(h % 10); bool kid = !staff && outfit < 5 && (h / 10) % 6 == 0; int hairStyle = (int)((h / 60) % 6), acc = (int)((h / 360) % 6); float wide = staff ? 1f : 0.88f + ((h / 2160) % 5) * 0.07f;
+            int outfit = staff ? 0 : (int)(h % 10); if (!Loc.Ar && outfit >= 7) outfit = (int)(h % 5); else if (Loc.Ar && outfit == 9) outfit = 7; bool kid = !staff && outfit < 5 && (h / 10) % 6 == 0; int hairStyle = (int)((h / 60) % 6), acc = (int)((h / 360) % 6); float wide = staff ? 1f : 0.88f + ((h / 2160) % 5) * 0.07f;
             float tall = staff ? 1.06f : kid ? 0.70f : 0.92f + ((h / 10800) % 5) * 0.04f; body.localScale = new Vector3(tall, tall, tall);
             string skin = Skin[(int)((h / 7) % (uint)Skin.Length)], bot = Pants[(int)((h / 3) % (uint)Pants.Length)], hair = Hair[(int)((h / 5) % (uint)Hair.Length)];
             Color top = staff ? uniform.Value : Geo.Hex(Shirt[(int)(h % (uint)Shirt.Length)]); bool robe = false; string robeCol = null, cloth = null; int head = hairStyle;   // 0 short 1 long 2 ponytail 3 curly 4 bun 5 bald
@@ -209,6 +209,13 @@ namespace Souq
             var g = new Geo();
             g.C(top).Ball(0.3f * wide, 0.36f, 0.23f * wide, 0, 0.82f, 0, 14, 9);
             if (robe) g.C(robeCol).Cyl(0.33f * wide, 0.25f * wide, 0.62f, 0, 0.1f, 0, 14); else g.C(bot).Cyl(0.26f * wide, 0.27f * wide, 0.12f, 0, 0.44f, 0, 12);
+            if (!staff && !robe)
+            {
+                int style = (int)((h / 41) % 4);
+                if (style == 0) g.C(top * 0.82f).Ball(0.2f, 0.18f, 0.12f, 0, 1.12f, -0.2f, 9, 5).Box(0.26f * wide, 0.12f, 0.05f, 0, 0.62f, 0.21f * wide);                                             // hoodie: hood and pouch
+                else if (style == 1) { g.C(Art.White).Box(0.16f * wide, 0.44f, 0.04f, 0, 0.62f, 0.215f * wide); g.C(top * 0.8f).Box(0.05f, 0.44f, 0.045f, -0.1f * wide, 0.62f, 0.22f * wide).Box(0.05f, 0.44f, 0.045f, 0.1f * wide, 0.62f, 0.22f * wide); }   // open jacket over a white tee
+                else if (style == 2) for (int k = 0; k < 3; k++) g.C(Art.White).Box(0.5f * wide, 0.045f, 0.4f * wide, 0, 0.66f + k * 0.13f, 0);                                                  // striped tee
+            }
             if (staff)
             {
                 // uniform: section-coloured shirt, long white apron with a coloured pocket, name badge, peaked cap
@@ -233,7 +240,8 @@ namespace Souq
                 if (acc == 0) g.C("#1f2430").Box(0.16f, 0.1f, 0.03f, -0.12f, 1.4f, 0.3f).Box(0.16f, 0.1f, 0.03f, 0.12f, 1.4f, 0.3f).Box(0.1f, 0.03f, 0.03f, 0, 1.46f, 0.3f);                         // glasses
                 else if (acc == 1 && head < 5) g.C("#e8cf8f").Cyl(0.46f, 0.46f, 0.03f, 0, 1.7f, 0, 16).Cyl(0.27f, 0.25f, 0.15f, 0, 1.73f, 0, 14).C("#d9483b").Cyl(0.275f, 0.275f, 0.04f, 0, 1.74f, 0, 14);     // sun hat
                 else if (acc == 2) g.C(Pack[(int)((h / 29) % (uint)Pack.Length)]).Box(0.36f, 0.42f, 0.17f, 0, 0.6f, -0.28f * wide).C("#20242c").Box(0.2f, 0.12f, 0.03f, 0, 0.72f, -0.38f * wide);      // backpack
-                else if (acc == 3 && !robe) g.C(Geo.Hex(Shirt[(int)((h / 31) % (uint)Shirt.Length)])).Box(0.5f * wide, 0.1f, 0.38f * wide, 0, 0.93f, 0.0f);                                              // scarf round the shoulders
+                else if (acc == 3 && head < 6) g.C(Pack[(int)((h / 31) % (uint)Pack.Length)]).Ball(0.35f, 0.17f, 0.33f, 0, 1.67f, 0, 16, 6).Box(0.4f, 0.04f, 0.28f, 0, 1.6f, 0.33f);        // baseball cap
+                else if (acc == 4 && !robe) g.C(Art.Dark).Box(0.06f, 0.2f, 0.16f, -0.34f, 1.42f, 0).Box(0.06f, 0.2f, 0.16f, 0.34f, 1.42f, 0).Box(0.7f, 0.05f, 0.08f, 0, 1.78f, 0);                                              // headphones                                              // scarf round the shoulders
             }
             g.Make("torso", body, Kit.Solid);
             // limbs hang from their pivots so a turn at the hip or shoulder swings them

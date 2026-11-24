@@ -401,7 +401,7 @@ namespace Souq
                 sheetRefresh = () => SetRow(r0, Loc.Fix(Loc.Raw("price") + " " + Loc.Num(T.BasePrice[d] * sim.ProfitMult)), Loc.G("build"), T.Build[d], s.coin >= T.Build[d]);
                 sheetRefresh(); return;
             }
-            var body = OpenSheet(Loc.G(T.DeptKey[d]), World.DeptColor[d], 900); openDept = d;
+            var body = OpenSheet(Loc.G(T.DeptKey[d]), World.DeptColor[d], 1090); openDept = d;
             var info = U.Txt(body, "", 34, U.Ink); U.Place(info.rectTransform, 0, 1, 1, 1, 0, -150, 0, -4);
             var barBg = U.Img(body, Spr.Round, U.Soft, "tierBg"); U.Place(barBg.rectTransform, 0, 1, 1, 1, 0, -216, 0, -160);
             var bar = U.Img(barBg.transform, Spr.Round, World.DeptColor[d], "tier"); U.Place(bar.rectTransform, 0, 0, 0.5f, 1, 4, 4, -4, -4);
@@ -564,7 +564,7 @@ namespace Souq
         {
             var body = OpenSheet(Loc.G("settings"), new Color(0.30f, 0.34f, 0.50f), 980); Row a = null, b = null, c = null;
             a = AddRow(body, -10, 140, Loc.G("sound"), U.Blue, () => { s.sfx = !s.sfx; }); b = AddRow(body, -160, 140, Loc.G("music"), U.Blue, () => { s.music = !s.music; g.audio.SetMusic(s.music); });
-            c = AddRow(body, -310, 140, Loc.G("lang"), U.Purple, () => g.SetLang(Loc.Codes[(Loc.Lang + 1) % Loc.Codes.Length]));
+            c = AddRow(body, -310, 140, Loc.G("lang"), U.Purple, () => LangPopup());
             foreach (var r in new[] { a, b, c }) { r.btn.bg.transform.Find("ci").gameObject.SetActive(false); U.Place(r.btn.label.rectTransform, 0, 0, 1, 1, 10, 4, -10, -4); }
             var stats = U.Txt(body, "", 32, U.Ink, U.Lead(false)); U.Place(stats.rectTransform, 0, 0, 1, 1, 10, 10, -10, -480);
             sheetRefresh = () =>
@@ -599,6 +599,21 @@ namespace Souq
             var yes = U.Button(body, AdLabel("watch"), U.Green, 44, () => g.Ad(() => { ClosePopup(); onYes(); })); U.Place(yes.rt, 0.08f, 0, 0.92f, 0, 0, 100, 0, 220);
             var no = U.Txt(body, Loc.G("nothanks"), 32, new Color(0.45f, 0.48f, 0.60f)); U.Place(no.rectTransform, 0, 0, 1, 0, 0, 0, 0, 80); no.raycastTarget = true; no.gameObject.AddComponent<Button>().onClick.AddListener(() => { ClosePopup(); onNo?.Invoke(); });
         }
+        /// All eight languages at once, each written in its own script.
+        public void LangPopup()
+        {
+            RectTransform card; var body = OpenPopup(Loc.G("lang"), U.Purple, 1000, out card); Font cjk = null;
+            try { cjk = Font.CreateDynamicFontFromOSFont(new[] { "PingFang TC", "Hiragino Sans", "Apple SD Gothic Neo", "Noto Sans CJK TC", "Noto Sans CJK JP", "Noto Sans CJK KR" }, 40); } catch { cjk = null; }
+            for (int i = 0; i < Loc.Codes.Length; i++)
+            {
+                int k = i; bool now = i == Loc.Lang; string name = i == 1 ? Loc.Shape(Loc.Names[1]) : Loc.Names[i];
+                var b = U.Button(body, name, now ? U.Gold : U.Blue, 46, () => { ClosePopup(); CloseSheet(); if (k != Loc.Lang) g.SetLang(Loc.Codes[k]); }, "lang" + i);
+                U.Place(b.rt, (i % 2) * 0.5f, 1, (i % 2) * 0.5f + 0.5f, 1, 12, -(i / 2 + 1) * 178 + 12, -12, -(i / 2) * 178 - 8);
+                if ((i == 2 || i == 3 || i == 7) && cjk != null) b.label.font = cjk;
+            }
+            var no = U.Txt(body, Loc.G("close"), 34, new Color(0.45f, 0.48f, 0.60f)); U.Place(no.rectTransform, 0, 0, 1, 0, 0, 0, 0, 80); no.raycastTarget = true; no.gameObject.AddComponent<Button>().onClick.AddListener(() => ClosePopup());
+        }
+
         public void VipPopup()
         {
             RectTransform card; var body = OpenPopup(Loc.G("vip"), U.Purple, 700, out card);
