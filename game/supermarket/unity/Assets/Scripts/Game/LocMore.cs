@@ -79,9 +79,9 @@ vipd|大口のお客様が来店中|큰손 고객이 도착했어요|Ein Großku
 bus|観光バス|관광버스|Reisebus|Car de touristes|Autobús turístico|觀光巴士
 busd|お客様でいっぱいのバスを呼ぶ|손님 가득한 버스를 부르세요|Hol einen Bus voller Kunden|Faites venir un car plein de clients|Trae un autobús lleno de clientes|叫來一車顧客
 qbuy|スピード接客|빠른 서비스|Eilservice|Service express|Servicio rápido|極速服務
-qbuyd|2分間スタッフの速さが2倍|2분간 직원 속도 2배|Personal 2 Min doppelt so schnell|Personnel deux fois plus rapide pendant 2 min|El personal va el doble de rápido 2 min|店員速度加倍 2 分鐘
+qbuyd|3分間スタッフの速さが2倍|3분간 직원 속도 2배|Personal 3 Min doppelt so schnell|Personnel deux fois plus rapide pendant 3 min|El personal va el doble de rápido 3 min|店員速度加倍 3 分鐘
 qcheck|スピード会計|빠른 계산|Schnellkasse|Caisse express|Caja rápida|極速結帳
-qcheckd|30秒間レジの速さが2倍|30초간 계산대 속도 2배|Kassen 30 s doppelt so schnell|Caisses deux fois plus rapides pendant 30 s|Cajas el doble de rápido 30 s|收銀速度加倍 30 秒
+qcheckd|2分間すべての会計が2倍|2분간 모든 결제 2배|2 Min lang zählt jede Rechnung doppelt|Chaque note compte double pendant 2 min|Cada cuenta paga el doble 2 min|2 分鐘內每張帳單收入加倍
 adboost|広告キャンペーン|광고 캠페인|Werbekampagne|Campagne de pub|Campaña publicitaria|廣告活動
 adboostd|30分間利益2倍|30분간 수익 2배|30 Min doppelter Gewinn|Profit doublé pendant 30 min|Beneficio doble 30 min|30 分鐘雙倍利潤
 watch|広告を見る|광고 보기|WERBUNG ANSEHEN|VOIR LA PUB|VER ANUNCIO|看廣告

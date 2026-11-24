@@ -99,7 +99,7 @@ namespace Souq.Core
         public bool QuickBuy => s.quickBuyEnd > Now();
         public bool QuickCheck => s.quickCheckEnd > Now();
         public double ProfitMult => T.StarProfit[s.star] * (1 + EpicAdd(EpicKind.Profit)) * (s.profitX2 ? 2 : 1);
-        public double Price(int d) => T.BasePrice[d] * Math.Pow(T.PriceGrowth, s.dLevel[d] - 1) * T.TierProduct(s.dLevel[d]) * ProfitMult;
+        public double Price(int d) => T.BasePrice[d] * (1 + T.PriceStep * (s.dLevel[d] - 1)) * T.TierProduct(s.dLevel[d]) * ProfitMult;
         public double StaffSpeed(int d) => (T.SpeedBase[d] + s.dSpeed[d] * T.SpeedStep(d)) * (1 + EpicAdd(EpicKind.Manager, d));
         public double DeptSpeed(int d) => StaffSpeed(d) * s.dStaff[d];
         public double ServiceSecs(int d) => 60.0 / StaffSpeed(d) * (QuickBuy ? 0.5 : 1);
@@ -132,7 +132,7 @@ namespace Souq.Core
                 double a = ParkedArrivals, cash = 0; for (int c = 0; c < T.NC; c++) if (s.cLevel[c] > 0) cash += CashSpeed(c);
                 double scale = a > 0 ? Math.Min(1, cash / a) : 0, e = 0;
                 for (int d = 0; d < T.ND; d++) if (s.dOpen[d]) e += Price(d) * Math.Min(DeptSpeed(d), a * T.Visit[d] / 100.0) * scale;
-                return e;
+                return e * (QuickCheck ? 2 : 1);
             }
         }
         public double OfflineCap => s.offlinePro ? T.OfflineCapPro : T.OfflineCap;
@@ -239,10 +239,24 @@ namespace Souq.Core
             c.st = CS.ToCash; c.t = 0; c.dur = (float)(2.4 / WalkMult);
         }
 
+        /// Shoppers waiting at a busy till walk over to one with a shorter line (a till that just opened fills at once).
+        void RebalanceCheckouts()
+        {
+            for (int guard = 0; guard < 8; guard++)
+            {
+                int lo = -1, hi = -1;
+                for (int k = 0; k < T.NC; k++) { if (s.cLevel[k] <= 0) continue; if (lo < 0 || cq[k].Count < cq[lo].Count) lo = k; if (hi < 0 || cq[k].Count > cq[hi].Count) hi = k; }
+                if (lo < 0 || hi < 0 || cq[hi].Count - cq[lo].Count < 2) return;
+                var c = cq[hi][cq[hi].Count - 1]; if (c.st != CS.CashQueue && c.st != CS.ToCash) return;
+                cq[hi].Remove(c); cq[lo].Add(c); c.cash = lo; c.st = CS.ToCash; c.t = 0; c.dur = (float)(1.2 / WalkMult);
+            }
+        }
+
         public void Tick(double dt)
         {
             if (dt <= 0) return; if (dt > 0.25) dt = 0.25;
             s.played += dt;
+            RebalanceCheckouts();
             // arrivals
             spawnT += dt; double gap = 60.0 / Arrivals;
             if (spawnT >= gap) { spawnT = 0; if (!MarketFull()) Spawn(false); }
@@ -282,7 +296,7 @@ namespace Souq.Core
                     case CS.Paying:
                         if (c.t >= c.dur)
                         {
-                            cq[c.cash].Remove(c); Earn(c.bill); OnPaid?.Invoke(c, c.bill);
+                            double bill = c.bill * (QuickCheck ? 2 : 1); cq[c.cash].Remove(c); Earn(bill); OnPaid?.Invoke(c, bill);
                             c.st = CS.WalkOut; c.t = 0; c.dur = (float)(3.0 / WalkMult);
                         }
                         break;

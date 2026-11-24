@@ -15,7 +15,7 @@ public static class EconAudit
     {
         public string name; public int session; public Save s; public Sim sim; public double clock = 1e9;
         public List<string> events = new List<string>(); public double[] openDay = new double[T.ND]; public double[] starDay = new double[16];
-        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1, earlyHour = 1; public string hourWhere = ""; public Dictionary<string, int> hourBuys = new Dictionary<string, int>(), worstBuys = new Dictionary<string, int>();
+        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1, earlyHour = 1, at10 = 0, at60 = 0; public List<double> levelGain = new List<double>(); public string hourWhere = ""; public Dictionary<string, int> hourBuys = new Dictionary<string, int>(), worstBuys = new Dictionary<string, int>();
         public List<double> sessionGrowth = new List<double>(); public int freeGems; public double[] servedAcc = new double[T.ND];
         public string end;
     }
@@ -139,6 +139,7 @@ public static class EconAudit
                 if (day < 10) r.maxWait = Math.Max(r.maxWait, Math.Max(0, (cheapest - s.coin) / Math.Max(f, 1e-9)));
                 if (t % 60 == 59) { double hg = f / Math.Max(hourFlow, 1e-9); if (day < 5 && (day > 0 || t > 60)) r.earlyHour = Math.Max(r.earlyHour, hg); if (day >= 5 && hg > r.maxHour) { r.maxHour = hg; r.hourWhere = "day " + (day + 1) + " minute " + (t + 1); r.worstBuys = new Dictionary<string, int>(r.hourBuys); } hourFlow = f; r.hourBuys.Clear(); }
                 r.maxCoin = Math.Max(r.maxCoin, s.coin);
+                if (day == 0 && t == 9) r.at10 = f; if (day == 0 && t == 59) r.at60 = f;
             }
             r.sessionGrowth.Add(Flow(m) / Math.Max(startFlow, 1e-9));
             s.lastSeen = r.clock; r.clock += (24 * 60 - Session) * 60;
@@ -195,6 +196,7 @@ public static class EconAudit
             if (!cheap && gn > 0) r.paid.Add(cc / gn);
             n++; r.buys++; string kk = pick.k.ToString(); r.hourBuys[kk] = (r.hourBuys.TryGetValue(kk, out int hv) ? hv : 0) + 1;
             double after = Flow(m); if (pick.k != K.Build && before > 0) r.maxJump = Math.Max(r.maxJump, after / before);
+            if (pick.k == K.Level && day == 0 && before > 0) r.levelGain.Add(after / before - 1);
             double dayF = day + t / (double)r.session;
             if (pick.k == K.Build) { r.openDay[pick.i] = dayF; r.events.Add("open " + pick.i + " day " + (day + 1) + " +" + t + "m"); }
             if (pick.k == K.Star) { r.starDay[s.star] = dayF; r.events.Add("grade " + s.star + " day " + (day + 1) + " +" + t + "m"); }
@@ -240,6 +242,9 @@ public static class EconAudit
             rule(last >= 0 && (r.session <= 90 ? last >= 13 && last <= 21 : last >= 6 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.session <= 90 ? " (target day 14-21)" : " (target day 7-21)"));
             rule(smooth, "R5b gaps between openings from the 5th section on (days): " + gaps + "(no gap more than 3x the one before)");
             rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 6 on x" + r.maxHour.ToString("0.0") + " (limit 10) at " + r.hourWhere + ", bought then: " + string.Join(", ", new List<string>(Pairs(r.worstBuys))) + "; biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3); first five days (fast on purpose) up to x" + r.earlyHour.ToString("0") + " an hour");
+            r.levelGain.Sort(); double lg = r.levelGain.Count > 0 ? r.levelGain[r.levelGain.Count / 2] : 0;
+            rule(lg >= 0.02, "R8 a level bought on day 1 raises income by a median " + (100 * lg).ToString("0.0") + "% (at least 2%, so upgrades are felt)");
+            rule(r.at10 >= 100 && r.at60 >= 3000, "R9 income after 10 min " + Souq.Loc.Num(r.at10) + "/min (at least 100), after 60 min " + Souq.Loc.Num(r.at60) + "/min (at least 3K)");
             rule(r.freeGems >= epicTotal * 0.1 && r.freeGems <= epicTotal * 0.5, "R7 free gems cover " + (100.0 * r.freeGems / epicTotal).ToString("0") + "% of all boosts in 30 days (target 10-50%)");
             sb.AppendLine("Events: " + string.Join("; ", r.events) + "\n");
         }

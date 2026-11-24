@@ -10,7 +10,7 @@ def nice(x):
     return 10*e
 class T: pass
 t=T()
-t.MaxLevel=1000; t.Step=0.05; t.PriceGeo=1.007; t.MileEvery=50; t.MileMul=1.3;
+t.MaxLevel=1000; t.Step=0.1; t.TierLv=[25,50,100,150,200,300,400,500,600,700,800,900,1000]; t.TierMul=[2,2,2,2,2]+[1.5]*8; t.PriceGeo=1.007; t.MileEvery=50; t.MileMul=1.3;
 t.Base=[2,9,40,180,800,3.5e3,1.5e4,6.5e4,2.8e5,1.2e6,5e6]
 t.UpBase=[b*0.6 for b in t.Base]
 t.Ceil=1e18; t.UpRate=[(t.Ceil/u)**(1/999) for u in t.UpBase]
@@ -25,7 +25,7 @@ t.CashOpen=[0,200,2e3,2e4,3e5,5e6,1e8,2e9]; t.CashBase=[7,4,4,4.5,4.5,5,5,5.5]; 
 t.CashUpBase=[10,10,25,60,150,400,1e3,2.5e3]; t.CashUpRate=1.25
 t.StarProfit=[1,1.5,2,2.6,3.3,4.1,5,6,7.2,8.5,10,12,14,16.5,19,22]
 t.StarCost=[0]+[1e6*8**i for i in range(15)]
-t.Offline=120; t.Session=90; t.TruckEvery=50/60
+t.Offline=120; t.Build=[0,400,1500,1e4,1e6,2e7,8e7,4e8,2.5e9,2.5e10,2.5e11]; t.StarCost=[0,4e3,4e5,6e6,5e7,5e8,3e9,1e10,5e10,4e11,2e12,8e12,2e13,1.5e14,1e16,6e17]; t.Session=90; t.TruckEvery=50/60
 def fmt(x):
     if x<1000: return '%.3g'%x
     u=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc']; e=int(math.log10(x)//3)
@@ -35,7 +35,11 @@ class Sim:
         s.t=t; s.lv=[1]*ND; s.op=[True]+[False]*(ND-1); s.st=[1]*ND; s.sp=[0]*ND; s.cl=[1]+[0]*7
         s.park=1; s.ad=1; s.star=0; s.coin=1000.0; s.profitEpic=0; s.mgr=[0]*ND; s.res=[0]*ND
     def mult(s): return s.t.StarProfit[s.star]*(1+0.2*s.profitEpic)
-    def price(s,d): L=s.lv[d]; return s.t.Base[d]*s.t.PriceGeo**(L-1)*s.t.MileMul**(L//s.t.MileEvery)*s.mult()
+    def price(s,d):
+        L=s.lv[d]; m=1
+        for lv,k in zip(s.t.TierLv,s.t.TierMul):
+            if L>=lv: m*=k
+        return s.t.Base[d]*(1+s.t.Step*(L-1))*m*s.mult()
     def staffSpeed(s,d): return s.t.Speed[d]*(1+s.t.SpeedStep*s.sp[d])*(1+0.5*s.mgr[d])
     def arrivals(s): return min(s.t.CarsBase+s.t.CarsStep*(s.ad-1), s.t.ParkPer*s.park/s.t.Stay)
     def cash(s): return sum(s.t.CashBase[c]+(s.cl[c]-1)*s.t.CashStep for c in range(8) if s.cl[c]>0)
@@ -142,7 +146,7 @@ def play(t,days=21,style='best',trace=None):
     for day in range(days):
         t0=tm
         while tm<t0+t.Session-1e-9:
-            f=s.flow(); s.coin+=f*dt*(1+0.35/t.TruckEvery); tm+=dt     # delivery trucks tapped while playing
+            f=s.flow(); s.coin+=f*dt*(1+0.35/t.TruckEvery+0.375); tm+=dt     # delivery trucks tapped while playing
             if int(tm)!=int(tm-dt): flows.append((tm,f,day))
             buy()
             if int(tm)!=int(tm-dt):
@@ -175,7 +179,7 @@ def flowAt(flows,tm):
     return flows[-1][1]
 def tune(t,rounds=14,days=21,damp=0.4,quiet=False):
     S=t.Session
-    tb=[0,5,15,40,1*S+20,2*S+20,3*S+40,5*S+20,7*S+40,10*S+20,14*S+20]
+    tb=[0,5,15,40,1*S+60,3*S+20,4*S+40,6*S+20,8*S+20,11*S+20,15*S+20]
     ts=[0]+[x*S for x in (0.4,1,1.6,2.4,3.3,4.3,5.5,7,8.5,10.5,12.5,14.5,17,19.5,22)]
     tl=[700,680,650,620,580,540,480,420,350,280,200]
     for r in range(rounds):

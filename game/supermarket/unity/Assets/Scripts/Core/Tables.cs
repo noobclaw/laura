@@ -20,20 +20,19 @@ namespace Souq.Core
         public const double PriceCeiling = 1e18;
 
         public static readonly string[] DeptKey = { "produce", "bakery", "butcher", "seafood", "spices", "fashion", "fragrance", "electronics", "phones", "jewellery", "cars" };
-        public static readonly double[] Build = { 0, 400, 1500, 1e4, 1e6, 2e7, 8e7, 4e8, 2.5e9, 2.5e10, 2.5e11 };
+        public static readonly double[] Build = { 0, 800, 8e3, 8e4, 6e6, 2.5e7, 1.2e8, 8e8, 8e9, 4e10, 2.5e11 };
         public static readonly double[] BasePrice = { 2, 9, 40, 180, 800, 3.5e3, 1.5e4, 6.5e4, 2.8e5, 1.2e6, 5e6 };
-        /// Sale price grows by this factor every level, on top of the bonus every 50 levels.
-        public const double PriceGrowth = 1.007;
+        /// Each level adds this share of the base price (+10% at level 2, so early levels are felt), on top of the level bonuses.
+        public const double PriceStep = 0.1;
         public static readonly double[] UpBase = { 1.2, 5.4, 24, 108, 480, 2.1e3, 9e3, 3.9e4, 1.68e5, 7.2e5, 3e6 };
         /// Chosen so that level 1000 of each section costs PriceCeiling: UpRate = (PriceCeiling / UpBase)^(1/999).
         public static readonly double[] UpRate = { 1.04217, 1.04060, 1.03905, 1.03749, 1.03594, 1.03441, 1.03290, 1.03139, 1.02988, 1.02838, 1.02691 };
         public static readonly double[] SpeedBase = { 3.6, 3.0, 2.6, 2.4, 2.1, 1.9, 1.7, 1.5, 1.3, 1.1, 0.94 };   // shoppers served per minute by one staff member
         public static readonly int[] Visit = { 95, 80, 70, 65, 55, 50, 45, 40, 35, 30, 25 };                     // % chance a shopper plans a stop
 
-        public static readonly int[] TierLv = MakeTiers();
-        public static readonly double[] TierMul = MakeTierMul();
-        static int[] MakeTiers() { var a = new int[MaxLevel / 50]; for (int i = 0; i < a.Length; i++) a[i] = 50 * (i + 1); return a; }
-        static double[] MakeTierMul() { var a = new double[MaxLevel / 50]; for (int i = 0; i < a.Length; i++) a[i] = 1.3; return a; }
+        /// Bonus levels: big doublings early so a new section takes off, gentler x1.5 later so the numbers stay in range.
+        public static readonly int[] TierLv = { 25, 50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000 };
+        public static readonly double[] TierMul = { 2, 2, 2, 2, 2, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5 };
 
         public static double SpeedStep(int d) => SpeedBase[d] * 0.04;
         public static double ProdCostAt(int d, int n) => UpBase[d] * 10 * Math.Pow(1.15, n);
@@ -56,7 +55,7 @@ namespace Souq.Core
         public const double CarsBase = 6, CarsStep = 1.5, AdCostBase = 20, AdCostRate = 1.33;
 
         // store grades: profit multiplier is the value itself, not a running product
-        public static readonly double[] StarCost = { 0, 4e3, 4e5, 6e6, 5e7, 5e8, 3e9, 1e10, 5e10, 4e11, 2e12, 8e12, 2e13, 1.5e14, 1e16, 6e17 };
+        public static readonly double[] StarCost = { 0, 2e7, 5e8, 5e9, 2e10, 8e10, 2e11, 6e11, 5e12, 2e13, 1e14, 2e14, 8e14, 4e15, 8e15, 1e17 };
         public static readonly double[] StarProfit = { 1, 1.5, 2, 2.6, 3.3, 4.1, 5, 6, 7.2, 8.5, 10, 12, 14, 16.5, 19, 22 };
 
         public static readonly EpicDef[] Epics = MakeEpics();
@@ -111,6 +110,6 @@ namespace Souq.Core
         // paid extras (rule values; store prices live in Store.cs)
         public const int LoginGems = 100, AdGems = 30;
         public const double OfflineMinAway = 180, OfflineCap = 14400, OfflineCapPro = 28800, OfflineRate = 0.5;   // away pay: half speed, up to 4 h (8 h with Night Manager)
-        public const double QuickBuySecs = 120, QuickCheckSecs = 30;
+        public const double QuickBuySecs = 180, QuickCheckSecs = 120;
     }
 }
