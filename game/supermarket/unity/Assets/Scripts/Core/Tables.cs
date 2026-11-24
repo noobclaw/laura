@@ -20,7 +20,7 @@ namespace Souq.Core
         public const double PriceCeiling = 1e18;
 
         public static readonly string[] DeptKey = { "produce", "bakery", "butcher", "seafood", "spices", "fashion", "fragrance", "electronics", "phones", "jewellery", "cars" };
-        public static readonly double[] Build = { 0, 400, 1500, 1e4, 1e6, 5e6, 2.5e7, 2.5e8, 2e9, 2e10, 1.5e11 };
+        public static readonly double[] Build = { 0, 400, 1500, 1e4, 1e6, 6e6, 8e7, 4e8, 3e9, 4e10, 4e11 };
         public static readonly double[] BasePrice = { 2, 9, 40, 180, 800, 3.5e3, 1.5e4, 6.5e4, 2.8e5, 1.2e6, 5e6 };
         /// Sale price grows by this factor every level, on top of the bonus every 50 levels.
         public const double PriceGrowth = 1.007;

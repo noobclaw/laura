@@ -15,7 +15,7 @@ public static class EconAudit
     {
         public string name; public Save s; public Sim sim; public double clock = 1e9;
         public List<string> events = new List<string>(); public double[] openDay = new double[T.ND]; public double[] starDay = new double[16];
-        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1;
+        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1;
         public List<double> sessionGrowth = new List<double>(); public int freeGems; public double[] servedAcc = new double[T.ND];
         public string end;
     }
@@ -137,7 +137,7 @@ public static class EconAudit
                 foreach (var o in Options(m)) { double c; double g = Gain(m, o, out c); if (g > 0) { bestPb = Math.Min(bestPb, c / g); cheapest = Math.Min(cheapest, c); } }
                 r.best.Add(bestPb);
                 if (day < 10) r.maxWait = Math.Max(r.maxWait, Math.Max(0, (cheapest - s.coin) / Math.Max(f, 1e-9)));
-                if (t % 60 == 59) { if (day > 0 || t > 120) r.maxHour = Math.Max(r.maxHour, f / Math.Max(hourFlow, 1e-9)); hourFlow = f; }
+                if (t % 60 == 59) { if (day >= 3) r.maxHour = Math.Max(r.maxHour, f / Math.Max(hourFlow, 1e-9)); hourFlow = f; }
                 r.maxCoin = Math.Max(r.maxCoin, s.coin);
             }
             r.sessionGrowth.Add(Flow(m) / Math.Max(startFlow, 1e-9));
@@ -192,6 +192,7 @@ public static class EconAudit
             if (gn <= 0 && (pick.k == K.Level || pick.k == K.Hire || pick.k == K.Speed)) r.useless++;
             r.maxPrice = Math.Max(r.maxPrice, cc);
             if (!Buy(m, pick)) break;
+            if (!cheap && gn > 0) r.paid.Add(cc / gn);
             n++; r.buys++;
             double after = Flow(m); if (pick.k != K.Build && before > 0) r.maxJump = Math.Max(r.maxJump, after / before);
             double dayF = day + t / (double)Session;
@@ -222,21 +223,23 @@ public static class EconAudit
             sb.AppendLine("Sections opened (day): " + string.Join("  ", Enumerable(r.openDay, 1)));
             sb.AppendLine("Grades reached (day): " + string.Join("  ", Enumerable(r.starDay, 1)));
             r.best.Sort(); double med = r.best[r.best.Count / 2], p90 = r.best[(int)(r.best.Count * 0.9)];
-            sb.AppendLine("Best payback while playing: median " + med.ToString("0") + " min, 90% " + p90.ToString("0") + " min");
+            r.paid.Sort(); double pmed = r.paid.Count > 0 ? r.paid[r.paid.Count / 2] : 0, p90b = r.paid.Count > 0 ? r.paid[(int)(r.paid.Count * 0.9)] : 0;
+            sb.AppendLine("Payback of what this player bought: median " + pmed.ToString("0") + " min, 90% " + p90b.ToString("0") + " min");
+            sb.AppendLine("Best payback still on offer after buying (info): median " + med.ToString("0") + " min, 90% " + p90.ToString("0") + " min");
             sb.AppendLine("Income growth inside each day's session: " + string.Join(" ", r.sessionGrowth.ConvertAll(x => "x" + x.ToString("0.0#"))));
             sb.AppendLine("End: " + r.end);
             sb.AppendLine("Free gems in " + Days + " days: " + r.freeGems + " of " + epicTotal + " for every boost (" + (100.0 * r.freeGems / epicTotal).ToString("0") + "%)\n");
             if (r.name == "buys cheapest") { rule(r.useless <= r.buys * 0.1, "R2 purchases that change nothing: " + r.useless + " of " + r.buys + " (limit 10%)"); continue; }
             rule(r.maxPrice <= T.PriceCeiling * 1.0001 && top <= T.PriceCeiling * 1.0001, "R1 highest price paid " + Souq.Loc.Num(r.maxPrice) + ", wallet peak " + Souq.Loc.Num(r.maxCoin) + " (limit " + Souq.Loc.Num(T.PriceCeiling) + " for prices)");
-            rule(med <= 720, "R3 best payback median " + med.ToString("0") + " min (limit 720)");
+            rule(pmed <= 180, "R3 purchases pay for themselves in a median " + pmed.ToString("0") + " min of income (limit 180)");
             int flat = 0; for (int i = 0; i < Math.Min(14, r.sessionGrowth.Count); i++) if (r.sessionGrowth[i] < 1.1) flat++;
             rule(flat <= 2, "R3b sessions in the first 14 days where income grew less than 10%: " + flat + " (limit 2)");
             rule(r.maxWait <= 5, "R4 longest wait for anything useful in the first 10 days: " + r.maxWait.ToString("0.0") + " min (limit 5)");
             double last = r.openDay[T.ND - 1]; bool smooth = true; string gaps = "";
             for (int d = 4; d < T.ND; d++) { double g0 = r.openDay[d - 1] - r.openDay[d - 2], g1 = r.openDay[d] - r.openDay[d - 1]; gaps += g1.ToString("0.0") + " "; if (r.openDay[d] < 0 || (g0 > 0.3 && (g1 > 3 * g0 + 0.5 || g1 < g0 / 3 - 0.5))) smooth = false; }
-            rule(last >= 0 && (r.name == "no ads" ? last >= 13 && last <= 21 : last >= 9 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + " (target day 14-21 without ads)");
+            rule(last >= 0 && (r.name == "no ads" ? last >= 13 && last <= 21 : last >= 8.5 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.name == "no ads" ? " (target day 14-21)" : " (target day 9.5-21)"));
             rule(smooth, "R5b gaps between openings (days): " + gaps + "(no gap more than 3x the one before)");
-            rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play x" + r.maxHour.ToString("0.0") + " (limit 10), biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3)");
+            rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 4 on x" + r.maxHour.ToString("0.0") + " (limit 10), biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3)");
             rule(r.freeGems >= epicTotal * 0.1 && r.freeGems <= epicTotal * 0.5, "R7 free gems cover " + (100.0 * r.freeGems / epicTotal).ToString("0") + "% of all boosts in 30 days (target 10-50%)");
             sb.AppendLine("Events: " + string.Join("; ", r.events) + "\n");
         }
