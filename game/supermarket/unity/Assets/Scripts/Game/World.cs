@@ -62,6 +62,34 @@ namespace Souq
     {
         public const string Wood = "#c98a4b", Wood2 = "#a96d35", Steel = "#cfd6de", White = "#fbfbf6", Dark = "#2c3440", Red = "#d43b3b";
         static readonly string[][] Fruit = { new[] { "#e5352c", "#f0584a" }, new[] { "#ff9a1f", "#ffb347" }, new[] { "#7ac943", "#9bd95e" }, new[] { "#ffd93b", "#ffe873" }, new[] { "#8e44ad", "#a65fc2" }, new[] { "#f4f0e0", "#e8e0c8" } };
+        /// Each shelf section sells in its own two or three colours, so sections read apart at a glance: drinks, snacks, dry goods, cleaning, beauty.
+        public static readonly string[][][] GoodsPal =
+        {
+            new[] { new[] { "#e5352c", "#ffffff" }, new[] { "#ff9a1f", "#fff3d6" }, new[] { "#2f9e44", "#ffe066" } },
+            new[] { new[] { "#ffd43b", "#e5352c" }, new[] { "#e5352c", "#ffd43b" }, new[] { "#ff922b", "#ffffff" } },
+            new[] { new[] { "#c79a5b", "#7a4a1e" }, new[] { "#f1e0b0", "#b5651d" }, new[] { "#8d6e63", "#ffe8b0" } },
+            new[] { new[] { "#1c7ed6", "#ffffff" }, new[] { "#ffffff", "#1c7ed6" }, new[] { "#22b8cf", "#ffe066" } },
+            new[] { new[] { "#f06595", "#ffffff" }, new[] { "#cc5de8", "#ffd6ec" }, new[] { "#ffffff", "#f06595" } },
+        };
+        /// A big model of what the section sells, standing on its name board.
+        public static void Emblem(Geo g, int d, float x, float y, float z)
+        {
+            g.C(White).Cyl(0.62f, 0.62f, 0.06f, x, y - 0.04f, z, 20).C("#d9d2c3").Cyl(0.66f, 0.66f, 0.03f, x, y - 0.06f, z, 20);
+            switch (d)
+            {
+                case 0: g.C("#e5352c").Ball(0.42f, 0.4f, 0.42f, x - 0.12f, y + 0.4f, z, 14, 9).C("#6b4226").Cyl(0.03f, 0.03f, 0.16f, x - 0.12f, y + 0.76f, z, 6).C("#3fa652").Ball(0.16f, 0.05f, 0.09f, x + 0.02f, y + 0.9f, z, 8, 5).C("#ff9a1f").At(x + 0.36f, y + 0.5f, z - 0.2f, 0, 0, -20).Cyl(0.02f, 0.14f, 0.7f, 0, -0.35f, 0, 10).C("#3fa652").Ball(0.12f, 0.14f, 0.12f, 0, 0.42f, 0, 8, 5).At(); break;
+                case 1: g.C("#d99a4e").At(x, y + 0.5f, z, 0, 0, 35).Ball(0.2f, 0.62f, 0.2f, 0, 0, 0, 12, 9); for (int k = -2; k <= 2; k++) g.C("#fbe3a8").Box(0.3f, 0.035f, 0.1f, 0, k * 0.2f, -0.17f); g.At().C("#c9772e").Ball(0.26f, 0.2f, 0.24f, x - 0.3f, y + 0.2f, z - 0.25f, 10, 7).C("#f6e7c8").Ball(0.12f, 0.06f, 0.12f, x - 0.3f, y + 0.38f, z - 0.25f, 8, 5); break;
+                case 2: g.C("#c0392b").At(x, y + 0.45f, z, 0, 0, 25).Ball(0.5f, 0.36f, 0.2f, 0, 0, 0, 14, 9).C("#f3b0a0").Ball(0.3f, 0.2f, 0.21f, 0.05f, 0.02f, -0.02f, 10, 7).C("#fff7e8").Cyl(0.08f, 0.08f, 0.42f, -0.2f, -0.02f, 0, 8).Ball(0.11f, 0.1f, 0.11f, -0.2f, 0.42f, 0, 8, 5).At(); break;
+                case 3: g.C("#4aa3df").Ball(0.52f, 0.28f, 0.16f, x - 0.05f, y + 0.5f, z, 14, 9).C("#2d7fb8").At(x + 0.5f, y + 0.5f, z, 0, 0, 45).Box(0.3f, 0.3f, 0.08f).At().Box(0.2f, 0.14f, 0.06f, x - 0.05f, y + 0.74f, z).C(White).Ball(0.07f, 0.07f, 0.04f, x - 0.35f, y + 0.56f, z - 0.14f, 8, 5).C(Dark).Ball(0.035f, 0.035f, 0.03f, x - 0.36f, y + 0.56f, z - 0.17f, 6, 4); break;
+                case 4: g.C(White).Box(0.5f, 0.7f, 0.4f, x, y, z).C("#2f8fe6").Box(0.52f, 0.26f, 0.42f, x, y + 0.2f, z).C(White).At(x, y + 0.7f, z, 0, 0, 0).Box(0.5f, 0.02f, 0.4f).At(x - 0.12f, y + 0.7f, z, 0, 0, 55).Box(0.3f, 0.03f, 0.4f, 0.15f, 0, 0).At(x + 0.12f, y + 0.7f, z, 0, 0, -55).Box(0.3f, 0.03f, 0.4f, -0.15f, 0, 0).At().C("#2f8fe6").Box(0.06f, 0.1f, 0.4f, x, y + 0.92f, z); break;
+                case 5: g.C("#e8b96a").Cyl(0.02f, 0.2f, 0.55f, x, y, z, 10).C("#ff8fb8").Ball(0.26f, 0.24f, 0.26f, x, y + 0.6f, z, 12, 8).C("#fff3d6").Ball(0.21f, 0.2f, 0.21f, x + 0.04f, y + 0.9f, z, 12, 8).C("#e5352c").Ball(0.07f, 0.07f, 0.07f, x + 0.04f, y + 1.1f, z, 8, 5); break;
+                case 6: g.C("#ff9a1f").Cyl(0.2f, 0.2f, 0.6f, x, y, z, 12).Cyl(0.2f, 0.08f, 0.2f, x, y + 0.6f, z, 12).Cyl(0.08f, 0.08f, 0.12f, x, y + 0.8f, z, 10).C(White).Cyl(0.205f, 0.205f, 0.22f, x, y + 0.2f, z, 12).C("#e5352c").Cyl(0.1f, 0.1f, 0.07f, x, y + 0.92f, z, 10); break;
+                case 7: g.C("#ffd43b").Ball(0.36f, 0.5f, 0.16f, x, y + 0.52f, z, 12, 9).Box(0.6f, 0.07f, 0.06f, x, y + 0.98f, z).Box(0.6f, 0.07f, 0.06f, x, y + 0.02f, z).C("#e5352c").Ball(0.24f, 0.2f, 0.17f, x, y + 0.52f, z, 10, 7).C(White).Ball(0.1f, 0.06f, 0.18f, x, y + 0.52f, z, 8, 5); break;
+                case 8: g.C("#d8b77a").Ball(0.38f, 0.44f, 0.3f, x, y + 0.42f, z, 12, 9).Cyl(0.16f, 0.24f, 0.14f, x, y + 0.8f, z, 10).C("#8a5a2b").Cyl(0.17f, 0.17f, 0.05f, x, y + 0.8f, z, 10).C("#b5651d").Box(0.34f, 0.2f, 0.02f, x, y + 0.32f, z - 0.3f); break;
+                case 9: g.C("#1c7ed6").Box(0.44f, 0.6f, 0.26f, x, y, z).Cyl(0.08f, 0.08f, 0.14f, x, y + 0.6f, z, 8).C(White).Box(0.34f, 0.26f, 0.27f, x, y + 0.16f, z).C("#e5352c").Box(0.4f, 0.14f, 0.16f, x - 0.08f, y + 0.74f, z).Box(0.1f, 0.2f, 0.1f, x - 0.22f, y + 0.56f, z); break;
+                default: g.C("#ffd43b").Cyl(0.16f, 0.16f, 0.5f, x, y, z, 12).C("#fff3d6").Cyl(0.13f, 0.13f, 0.14f, x, y + 0.5f, z, 12).C("#e5356b").Cyl(0.1f, 0.1f, 0.22f, x, y + 0.64f, z, 10).At(x, y + 0.86f, z, 0, 0, 30).Cyl(0.1f, 0.03f, 0.14f, 0, 0, 0, 10).At().C("#f06595").Ball(0.14f, 0.14f, 0.14f, x + 0.38f, y + 0.16f, z - 0.1f, 10, 6).C("#ffd43b").Cyl(0.06f, 0.06f, 0.1f, x + 0.38f, y + 0.28f, z - 0.1f, 8); break;
+            }
+        }
         static readonly string[][] Pal = { new[] { "#e5352c", "#ffd93b" }, new[] { "#2f8fe6", "#ffffff" }, new[] { "#ff9a1f", "#7a4a2a" }, new[] { "#39b54a", "#fff36b" }, new[] { "#8e44ad", "#ffd9e8" }, new[] { "#00b3b3", "#ffffff" } };
         public static readonly string[] Goods = { "#e5352c", "#ffd93b", "#2f8fe6", "#39b54a", "#ff9a1f", "#ffffff" };
 
@@ -140,8 +168,9 @@ namespace Souq
             g.C(Steel).Box(0.05f, 1.94f, 0.05f, x - 0.88f, 0.28f, z - 0.34f).Box(0.05f, 1.94f, 0.05f, x + 0.88f, 0.28f, z - 0.34f).Box(0.04f, 1.94f, 0.04f, x, 0.28f, z - 0.34f).Box(1.8f, 0.05f, 0.05f, x, 2.2f, z - 0.34f);
         }
         /// Shelf unit; kind 0 boxes and cans, 1 cans, 2 bags, 3 bottles, 4 jugs. `rows` of 4 are stocked.
-        public static void Gondola(Geo g, float x, float z, int rows, int kind, string accent, System.Random rnd)
+        public static void Gondola(Geo g, float x, float z, int rows, int kind, string accent, System.Random rnd, string[][] pal = null)
         {
+            pal = pal ?? Pal; int run = 0;
             g.C("#e9edf2").Box(1.86f, 2.15f, 0.1f, x, 0, z + 0.3f).C(Steel).Box(1.9f, 0.16f, 0.62f, x, 0, z).C(accent).Box(1.9f, 0.14f, 0.64f, x, 2.15f, z + 0.02f);
             for (int s = 0; s < 4; s++)
             {
@@ -151,15 +180,15 @@ namespace Souq
                 float bx = x - 0.86f;
                 while (bx < x + 0.8f)
                 {
-                    var pc = Pal[rnd.Next(Pal.Length)]; int k = kind == 0 ? (s % 2 == 0 ? 0 : 1) : kind; float w = k == 0 ? 0.2f : k == 1 ? 0.14f : k == 2 ? 0.17f : k == 3 ? 0.13f : 0.22f; int n = 2 + rnd.Next(3);
+                    var pc = pal[(run++ + s) % pal.Length]; int k = kind; float w = k == 0 ? 0.3f : k == 1 ? 0.2f : k == 2 ? 0.27f : k == 3 ? 0.19f : 0.3f; int n = 3;
                     for (int i = 0; i < n && bx < x + 0.84f; i++)
                     {
                         float cx = bx + w / 2, by = y + 0.045f, bz = z - 0.14f;
-                        if (k == 0) g.C(pc[0]).Box(w - 0.02f, 0.36f, 0.13f, cx, by, bz).C(pc[1]).Box(w - 0.015f, 0.12f, 0.135f, cx, by + 0.125f, bz);
-                        else if (k == 1) g.C(pc[0]).Cyl(0.06f, 0.06f, 0.2f, cx, by, bz, 9).C(pc[1]).Cyl(0.062f, 0.062f, 0.07f, cx, by + 0.055f, bz, 9).C(Steel).Cyl(0.05f, 0.05f, 0.02f, cx, by + 0.2f, bz, 9);
-                        else if (k == 2) g.C(pc[0]).Ball(0.085f, 0.16f, 0.06f, cx, by + 0.17f, bz, 9, 6).C(pc[1]).Box(0.1f, 0.08f, 0.065f, cx, by + 0.13f, bz);
-                        else if (k == 3) g.C(pc[0]).Cyl(0.055f, 0.055f, 0.24f, cx, by, bz, 9).Cyl(0.055f, 0.025f, 0.08f, cx, by + 0.24f, bz, 9).C(pc[1]).Cyl(0.057f, 0.057f, 0.09f, cx, by + 0.07f, bz, 9).Cyl(0.03f, 0.03f, 0.04f, cx, by + 0.32f, bz, 8);
-                        else g.C(pc[0]).Box(w - 0.03f, 0.3f, 0.15f, cx, by, bz).C(pc[1]).Box(w - 0.025f, 0.11f, 0.155f, cx, by + 0.09f, bz).C(Dark).Cyl(0.035f, 0.035f, 0.05f, cx - 0.04f, by + 0.3f, bz, 8);
+                        if (k == 0) g.C(pc[0]).Box(w - 0.03f, 0.4f, 0.2f, cx, by, bz).C(pc[1]).Box(w - 0.025f, 0.15f, 0.205f, cx, by + 0.13f, bz).Ball(0.07f, 0.07f, 0.02f, cx, by + 0.32f, bz - 0.1f, 8, 5);
+                        else if (k == 1) g.C(pc[0]).Cyl(0.085f, 0.085f, 0.3f, cx, by, bz, 10).C(pc[1]).Cyl(0.088f, 0.088f, 0.1f, cx, by + 0.1f, bz, 10).C(pc[1]).Cyl(0.06f, 0.06f, 0.06f, cx, by + 0.3f, bz, 9).Ball(0.045f, 0.045f, 0.045f, cx, by + 0.37f, bz, 8, 5);
+                        else if (k == 2) g.C(pc[0]).Ball(0.13f, 0.2f, 0.09f, cx, by + 0.2f, bz, 10, 7).Box(0.24f, 0.03f, 0.03f, cx, by + 0.39f, bz).C(pc[1]).Ball(0.085f, 0.09f, 0.095f, cx, by + 0.2f, bz, 9, 6);
+                        else if (k == 3) g.C(pc[0]).Cyl(0.08f, 0.08f, 0.25f, cx, by, bz, 10).Cyl(0.08f, 0.032f, 0.09f, cx, by + 0.25f, bz, 10).C(pc[1]).Cyl(0.083f, 0.083f, 0.1f, cx, by + 0.07f, bz, 10).Cyl(0.04f, 0.04f, 0.05f, cx, by + 0.34f, bz, 8);
+                        else g.C(pc[0]).Box(w - 0.04f, 0.3f, 0.2f, cx, by, bz).C(pc[1]).Box(w - 0.035f, 0.12f, 0.205f, cx, by + 0.08f, bz).C(pc[1]).Cyl(0.045f, 0.045f, 0.07f, cx - 0.06f, by + 0.3f, bz, 8).C(pc[0]).Box(0.12f, 0.035f, 0.05f, cx + 0.03f, by + 0.33f, bz);
                         bx += w;
                     }
                     bx += 0.03f;
@@ -599,7 +628,7 @@ namespace Souq
             for (float z = -3.2f; z <= 3.2f; z += 0.62f) f.Box(0.05f, 0.003f, 0.36f, mx - 3.7f, 0.012f, mz + z).Box(0.05f, 0.003f, 0.36f, mx + 3.7f, 0.012f, mz + z);
             f.Make("field", g.transform, Kit.Solid, false);
             // the section's name on a board mounted above its own fixtures
-            float bz = v.center.z + 4.02f; var post = new Geo(); post.C(Art.Steel).Box(0.09f, 3.2f, 0.09f, mx - 4.0f, 0, bz).Box(0.09f, 3.2f, 0.09f, mx + 4.0f, 0, bz).C(Art.White).Box(8.1f, 0.07f, 0.2f, mx, 3.2f, bz).Box(8.1f, 0.07f, 0.2f, mx, 2.56f, bz); post.Make("boardFrame", g.transform, Kit.Solid);
+            float bz = v.center.z + 4.02f; var post = new Geo(); post.C(Art.Steel).Box(0.09f, 3.2f, 0.09f, mx - 4.0f, 0, bz).Box(0.09f, 3.2f, 0.09f, mx + 4.0f, 0, bz).C(Art.White).Box(8.1f, 0.07f, 0.2f, mx, 3.2f, bz).Box(8.1f, 0.07f, 0.2f, mx, 2.56f, bz); Art.Emblem(post, d, mx - 3.35f, 3.3f, bz); post.Make("boardFrame", g.transform, Kit.Solid);
             var board = new Geo(); board.C(Color.white).Box(8.0f, 0.58f, 0.14f, mx, 2.62f, bz); board.Make("board", g.transform, v.signMat, false);
             v.name = Kit.Label(Loc.G(T.DeptKey[d]), g.transform, new Vector3(mx - 1.1f, 2.91f, bz - 0.09f), 0.34f, Color.white);
             v.props = new GameObject("props").transform; v.props.SetParent(g.transform, false);
@@ -650,7 +679,7 @@ namespace Souq
                     case 3: Art.Counter(g, x, z - 0.15f, Mathf.Min(2, (mine + 1) / 2), true, hex); break;
                     case 4: Art.Fridge(g, x, z, mine, hex, false, u); break;
                     case 5: Art.Fridge(g, x, z, mine, hex, true, u); break;
-                    default: Art.Gondola(g, x, z, mine, d == 6 ? 3 : d == 7 ? 2 : d == 8 ? 0 : d == 9 ? 4 : 1, hex, rr); break;
+                    default: Art.Gondola(g, x, z, mine, d == 6 ? 3 : d == 7 ? 2 : d == 8 ? 0 : d == 9 ? 4 : 1, hex, rr, Art.GoodsPal[d - 6]); break;
                 }
             }
             float span = units * 2.04f, mid = cx + (SlotX[0] + SlotX[units - 1]) / 2;

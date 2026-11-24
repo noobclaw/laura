@@ -114,6 +114,7 @@ restore|購入を復元|구매 복원|Käufe wiederherstellen|Restaurer les acha
 restored|購入を復元しました|구매를 복원했어요|Käufe wiederhergestellt|Achats restaurés|Compras restauradas|已恢復購買
 nostore|App Store に接続できません。後でもう一度お試しください|App Store에 연결할 수 없어요. 나중에 다시 시도하세요|App Store nicht erreichbar, bitte später erneut versuchen|App Store indisponible, réessayez plus tard|App Store no disponible, inténtalo más tarde|無法連上 App Store，請稍後再試
 waitpay|承認待ち|승인 대기 중|Wartet auf Freigabe|En attente d’approbation|Esperando aprobación|等待家長同意
+payfail|購入できませんでした。請求はされていません|구매가 완료되지 않았어요. 결제되지 않았습니다|Kauf nicht abgeschlossen. Es wurde nichts berechnet|Achat non abouti. Vous n’avez pas été débité|La compra no se completó. No se te ha cobrado|購買沒有完成，沒有扣款
 warp|タイムスキップ|시간 건너뛰기|Zeitsprung|Saut dans le temps|Salto de tiempo|時間跳躍
 warpd|この収入を今すぐ受け取る|이만큼의 수입을 지금 받기|Erhalte dieses Einkommen sofort|Recevez ce revenu tout de suite|Recibe estos ingresos ahora mismo|立即獲得這些收入
 stuck|待ちたくない？|기다리기 싫으세요?|Keine Lust zu warten?|Pas envie d'attendre ?|¿No quieres esperar?|不想等？

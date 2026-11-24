@@ -94,7 +94,7 @@ namespace Souq
             busy = false; Finish(true);
             if (ok) g.audio.Play("win");
         }
-        void OnFailed(FailedOrder o) { busy = false; Finish(false); }
+        void OnFailed(FailedOrder o) { busy = false; Finish(false); if (o.FailureReason != PurchaseFailureReason.UserCancelled) g.ui.Notice(Loc.G("payfail")); }
         bool GrantOrder(Order o, bool consumablesToo)
         {
             bool any = false; string tx = o.Info != null ? o.Info.TransactionID : null;
@@ -113,16 +113,16 @@ namespace Souq
 #if UNITY_EDITOR
             done?.Invoke(Grant(p, "editor-" + Guid.NewGuid().ToString("N"))); return;
 #else
-            if (iap == null || !connected) { g.ui.Toast(Loc.G("nostore")); done?.Invoke(false); return; }
+            if (iap == null || !connected) { g.ui.Notice(Loc.G("nostore")); done?.Invoke(false); return; }
             if (busy) return;
-            var ap = iap.GetProductById(p.Sku); if (ap == null) { g.ui.Toast(Loc.G("nostore")); done?.Invoke(false); return; }
+            var ap = iap.GetProductById(p.Sku); if (ap == null) { g.ui.Notice(Loc.G("nostore")); done?.Invoke(false); return; }
             busy = true; pending = done; iap.PurchaseProduct(ap);
 #endif
         }
         public void Restore()
         {
-            if (iap == null || !connected) { g.ui.Toast(Loc.G("nostore")); return; }
-            iap.RestoreTransactions((ok, msg) => { if (ok) iap.FetchPurchases(); g.ui.Toast(Loc.G(ok ? "restored" : "nostore")); });
+            if (iap == null || !connected) { g.ui.Notice(Loc.G("nostore")); return; }
+            iap.RestoreTransactions((ok, msg) => { if (ok) iap.FetchPurchases(); g.ui.Notice(Loc.G(ok ? "restored" : "nostore")); });
         }
     }
 

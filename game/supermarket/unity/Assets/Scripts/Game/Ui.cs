@@ -590,6 +590,14 @@ namespace Souq
             U.Pin(ok.rt, 0.5f, 1, 0, -280, 520, 120); ok.rt.pivot = new Vector2(0.5f, 1);
         }
 
+        /// A message the player cannot miss, with one button to close it.
+        public void Notice(string text)
+        {
+            RectTransform card; var body = OpenPopup(Loc.G("shop"), U.Red, 520, out card);
+            var t = U.Txt(body, text, 40, U.Ink); U.Place(t.rectTransform, 0, 0, 1, 1, 30, 170, -30, -20);
+            var ok = U.Button(body, "OK", U.Blue, 44, () => ClosePopup()); U.Pin(ok.rt, 0.5f, 0, 0, 30, 420, 110); ok.rt.pivot = new Vector2(0.5f, 0);
+        }
+
         // ---------- pop-ups ----------
         public void ClosePopup() { if (popup != null) { Kit.Kill(popup.gameObject); popup = null; } }
         RectTransform OpenPopup(string title, Color band, float h, out RectTransform cardRt)

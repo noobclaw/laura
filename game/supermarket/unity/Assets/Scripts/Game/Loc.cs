@@ -50,7 +50,7 @@ namespace Souq
             {"stuck", new[]{"Don't want to wait?","لا تريد الانتظار؟"}}, {"needgems", new[]{"Not enough gems","الجواهر غير كافية"}},
             {"test", new[]{"TEST BUILD - purchases are free and not charged","نسخة تجريبية - المشتريات مجانية"}},
             {"restore", new[]{"Restore purchases","استعادة المشتريات"}}, {"restored", new[]{"Purchases restored","تمت استعادة المشتريات"}},
-            {"nostore", new[]{"App Store not available, try again later","متجر التطبيقات غير متاح، حاول لاحقاً"}}, {"waitpay", new[]{"Waiting for approval","بانتظار الموافقة"}},
+            {"nostore", new[]{"App Store not available, try again later","متجر التطبيقات غير متاح، حاول لاحقاً"}}, {"waitpay", new[]{"Waiting for approval","بانتظار الموافقة"}}, {"payfail", new[]{"Purchase did not go through. You were not charged.","لم تكتمل عملية الشراء ولم يتم خصم أي مبلغ."}},
             {"storename", new[]{"Store name","اسم المتجر"}}, {"rename", new[]{"RENAME","تغيير"}}, {"save", new[]{"SAVE","حفظ"}}, {"namenote", new[]{"Shown on your shop sign","يظهر على لافتة متجرك"}},
             {"stage0", new[]{"CORNER SHOP","دكان الحي"}}, {"stage1", new[]{"NEIGHBOURHOOD MARKET","سوق الحي"}}, {"stage2", new[]{"SUPERMARKET","سوبر ماركت"}}, {"stage3", new[]{"HYPERMARKET","هايبر ماركت"}}, {"stage4", new[]{"FLAGSHIP STORE","المتجر الرئيسي"}},
             {"sound", new[]{"Sound","الصوت"}}, {"music", new[]{"Music","الموسيقى"}}, {"lang", new[]{"Language","اللغة"}}, {"on", new[]{"ON","تشغيل"}}, {"off", new[]{"OFF","إيقاف"}},
