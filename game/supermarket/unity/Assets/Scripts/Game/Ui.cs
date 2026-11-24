@@ -562,11 +562,12 @@ namespace Souq
 
         public void OpenSettings()
         {
-            var body = OpenSheet(Loc.G("settings"), new Color(0.30f, 0.34f, 0.50f), 980); Row a = null, b = null, c = null;
+            var body = OpenSheet(Loc.G("settings"), new Color(0.30f, 0.34f, 0.50f), 1130); Row a = null, b = null, c = null;
             a = AddRow(body, -10, 140, Loc.G("sound"), U.Blue, () => { s.sfx = !s.sfx; }); b = AddRow(body, -160, 140, Loc.G("music"), U.Blue, () => { s.music = !s.music; g.audio.SetMusic(s.music); });
             c = AddRow(body, -310, 140, Loc.G("lang"), U.Purple, () => LangPopup());
-            foreach (var r in new[] { a, b, c }) { r.btn.bg.transform.Find("ci").gameObject.SetActive(false); U.Place(r.btn.label.rectTransform, 0, 0, 1, 1, 10, 4, -10, -4); }
-            var stats = U.Txt(body, "", 32, U.Ink, U.Lead(false)); U.Place(stats.rectTransform, 0, 0, 1, 1, 10, 10, -10, -480);
+            Row n = AddRow(body, -460, 140, Loc.G("storename"), U.Green, () => NamePopup()); n.btn.label.text = Loc.G("rename");
+            foreach (var r in new[] { a, b, c, n }) { r.btn.bg.transform.Find("ci").gameObject.SetActive(false); U.Place(r.btn.label.rectTransform, 0, 0, 1, 1, 10, 4, -10, -4); }
+            var stats = U.Txt(body, "", 32, U.Ink, U.Lead(false)); U.Place(stats.rectTransform, 0, 0, 1, 1, 10, 10, -10, -630);
             sheetRefresh = () =>
             {
                 a.btn.label.text = Loc.G(s.sfx ? "on" : "off"); b.btn.label.text = Loc.G(s.music ? "on" : "off"); c.btn.label.text = Loc.Lang == 1 ? Loc.Shape(Loc.Names[1]) : Loc.Names[Loc.Lang];
@@ -574,6 +575,19 @@ namespace Souq
                 stats.text = Loc.Fix(Loc.Raw("total") + ": " + Loc.Num(s.assets)) + "\n" + Loc.Fix(Loc.Raw("income") + ": " + Loc.Num(sim.FlowPerMin) + Loc.Raw("permin")) + "\n" + Loc.Fix(Loc.Raw("served") + ": " + Loc.Num(served)) + "\n" + Loc.Fix(Loc.Raw("shoppers") + ": " + sim.custs.Count) + "\n\n" + Loc.G("test");
             };
             sheetRefresh();
+        }
+
+        /// Lets the player type the name that goes on the shop sign (up to 16 characters).
+        public void NamePopup()
+        {
+            RectTransform card; var body = OpenPopup(Loc.G("storename"), U.Green, 620, out card);
+            var box = U.Img(body, Spr.Round, Color.white, "box", true, true); U.Pin(box.rectTransform, 0.5f, 1, 0, -40, 760, 130); box.rectTransform.pivot = new Vector2(0.5f, 1);
+            var txt = U.Txt(box.transform, "", 52, U.Ink); U.Place(txt.rectTransform, 0, 0, 1, 1, 24, 6, -24, -6); txt.supportRichText = false; txt.resizeTextForBestFit = false; txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+            var hint = U.Txt(box.transform, "SOUQ MARKET", 52, new Color(0.6f, 0.63f, 0.72f)); U.Place(hint.rectTransform, 0, 0, 1, 1, 24, 6, -24, -6);
+            var input = box.gameObject.AddComponent<InputField>(); input.textComponent = txt; input.placeholder = hint; input.characterLimit = 16; input.lineType = InputField.LineType.SingleLine; input.text = s.storeName ?? "";
+            var note = U.Txt(body, Loc.G("namenote"), 30, new Color(0.35f, 0.40f, 0.55f)); U.Pin(note.rectTransform, 0.5f, 1, 0, -190, 760, 60); note.rectTransform.pivot = new Vector2(0.5f, 1);
+            var ok = U.Button(body, Loc.G("save"), U.Green, 44, () => { s.storeName = (input.text ?? "").Replace("\n", " ").Trim(); g.world.RefreshStore(); g.SaveNow(); ClosePopup(); g.audio.Play("win"); });
+            U.Pin(ok.rt, 0.5f, 1, 0, -280, 520, 120); ok.rt.pivot = new Vector2(0.5f, 1);
         }
 
         // ---------- pop-ups ----------

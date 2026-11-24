@@ -141,6 +141,9 @@ public static class CiBuild
         g.focus = new Vector3(0, 0, 14); g.zoom = 13f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "2_close");
         g.focus = new Vector3(0, 0, -8); g.zoom = 18f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "3_parking");
         g.focus = new Vector3(0, 0, 3); g.zoom = 13f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "4_front");
+        { int keep = g.sim.s.star; string[] nm = { "", "Laura's Market", "MEGA MART", "سوق لورا" }; int[] st = { 2, 5, 9, 13 };
+          for (int i = 0; i < 4; i++) { g.sim.s.star = st[i]; g.sim.s.storeName = nm[i]; g.world.SyncStatic(); g.world.RefreshStore(); g.focus = new Vector3(0, 0, 1.5f); g.zoom = 17f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "14_stage" + (i + 1)); }
+          g.sim.s.star = keep; g.sim.s.storeName = ""; g.world.SyncStatic(); g.world.RefreshStore(); }
         g.focus = new Vector3(0, 0, 36); g.zoom = 14f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "5_shelves");
         g.focus = new Vector3(0, 0, 8); g.zoom = 20.5f; g.PlaceCamera();
         g.ui.OpenDept(1); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "6_department");

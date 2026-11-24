@@ -290,7 +290,7 @@ namespace Souq
         public static void Usa(Geo s, float halfW, float roadZ)
         {
             // a flag either side of the name board
-            foreach (float px in new[] { -5.3f, 3.5f }) { s.C(Steel).Cyl(0.05f, 0.06f, 3.3f, px, 3.0f, -0.3f, 8).C("#ffd43b").Ball(0.1f, 0.1f, 0.1f, px, 6.34f, -0.3f, 8, 5); Flag(s, px + 0.05f, 5.2f, -0.3f, 1.9f); }
+            foreach (float px in new[] { -8.1f, 6.1f }) { s.C(Steel).Cyl(0.05f, 0.06f, 3.3f, px, 3.0f, -0.3f, 8).C("#ffd43b").Ball(0.1f, 0.1f, 0.1f, px, 6.34f, -0.3f, 8, 5); Flag(s, px + 0.05f, 5.2f, -0.3f, 1.9f); }
             // road paint: double yellow centre line, white edge lines, a striped crossing with stop bars
             float y = -0.113f;
             s.C("#4b5263").Slab(27, 0.5f, 0.02f, 0, y - 0.002f, roadZ, 0.003f);
@@ -482,7 +482,7 @@ namespace Souq
         public GameObject truck, vip, usa; public Vector3 truckPos = new Vector3(6.4f, 0, -1.3f), vipPos = new Vector3(-6.4f, 0, -1.3f), busPos = new Vector3(8.3f, 0, -4.4f);
         public const float RoadZ = -4.4f;
         readonly Dictionary<int, Actor> actors = new Dictionary<int, Actor>(); readonly List<int> gone = new List<int>();
-        Transform slotRoot; int slotsBuilt; float time; Light sun; Material bandMat; int bandStar = -1; Mesh cartMesh; readonly System.Random rnd = new System.Random(7);
+        Transform slotRoot; int slotsBuilt; float time; Light sun; Material bandMat; int bandStar = -1, stageBuilt = -1; TextMesh storeSign, storeTag; GameObject stageGo; Mesh cartMesh; readonly System.Random rnd = new System.Random(7);
         class Pop { public Transform t; public float age, dur, delay; public Vector3 scale; }
         readonly List<Pop> pops = new List<Pop>();
         public float shake;
@@ -554,7 +554,8 @@ namespace Souq
             var b = new Geo(); b.C(Color.white).Box(0.64f, 0.46f, depth + 0.04f, -HalfW - 0.3f, 2.1f, depth / 2).Box(0.64f, 0.46f, depth + 0.04f, HalfW + 0.3f, 2.1f, depth / 2).Box(HalfW * 2 + 1.24f, 0.6f, 0.64f, 0, 3.3f, depth + 0.3f).Box(6.4f, 1.22f, 0.44f, 0, 3.0f, -0.05f);
             foreach (float x in new[] { -HalfW - 0.3f, -2.85f, 2.85f, HalfW + 0.3f }) b.Box(0.64f, 0.3f, 0.64f, x, 0, -0.05f);
             b.Make("band", root, bandMat);
-            Kit.Label("SOUQ MARKET", root, new Vector3(0, 3.62f, -0.29f), 0.56f, new Color(1f, 0.97f, 0.84f));
+            storeSign = Kit.Label("SOUQ MARKET", root, new Vector3(0, 3.62f, -0.29f), 0.56f, new Color(1f, 0.97f, 0.84f));
+            storeTag = Kit.Label("", root, new Vector3(0, 3.2f, -0.29f), 0.2f, new Color(1f, 0.97f, 0.84f));
 
             // street: cart bay, planters, lamps, trees, bays for the truck and the VIP car
             var s = new Geo();
@@ -707,6 +708,7 @@ namespace Souq
                 for (int k = 0; k < T.MaxStaff; k++) v.staff[k].go.SetActive(s.dOpen[d] && k < s.dStaff[d]);
             }
             for (int c = 0; c < T.NC; c++) cashDesk[c].SetActive(s.cLevel[c] > 0);
+            if (StageOf(s.star) != stageBuilt) RefreshStore();
             if (s.star != bandStar) { bandStar = s.star; bandMat.SetColor("_Tint", Geo.Hex(GradeBand[Mathf.Clamp(s.star, 0, GradeBand.Length - 1)]).linear); }
             int want = sim.ParkSpaces;
             if (want != slotsBuilt)
@@ -832,7 +834,70 @@ namespace Souq
 
         public void PopDept(int d) { depts[d].pop = 1f; }
         /// After a change of language.
-        public void RefreshSigns() { if (usa != null) usa.SetActive(!Loc.Ar); for (int d = 0; d < T.ND; d++) if (depts[d] != null && depts[d].name != null) Kit.SetLabel(depts[d].name, Loc.G(T.DeptKey[d])); }
+        /// Five store sizes across the fifteen grades: corner shop, neighbourhood market, chain supermarket, hypermarket, flagship.
+        public static int StageOf(int star) => star <= 0 ? 0 : star <= 3 ? 1 : star <= 7 ? 2 : star <= 11 ? 3 : 4;
+        /// Rebuilds the shop front for the current size and writes the player's store name on the sign.
+        public void RefreshStore()
+        {
+            int st = StageOf(sim.s.star); stageBuilt = st; Kit.Kill(stageGo); stageGo = new GameObject("stage"); stageGo.transform.SetParent(root, false);
+            var g = new Geo(); var band = new Geo(); band.C(Color.white); float z = -0.05f; string gold = "#ffd43b", cream = "#fff3d6";
+            float signY = 3.62f, signH = 0.56f, signW = 5.4f;
+            if (st == 0)
+            {
+                // corner shop: a hand-painted board and a little striped awning over the door
+                for (int k = 0; k < 10; k++) g.C(k % 2 == 0 ? "#e5484d" : "#ffffff").At(-2.52f + k * 0.56f, 2.75f, z - 0.75f, 0, -24).Box(0.56f, 0.05f, 1.2f).At();
+                g.C(Art.Steel).Box(0.05f, 0.05f, 1.0f, -2.75f, 2.5f, z - 0.75f).Box(0.05f, 0.05f, 1.0f, 2.75f, 2.5f, z - 0.75f);
+            }
+            if (st >= 1)
+            {
+                // awnings over both window runs, bulbs along the sign
+                foreach (float sx in new[] { -1f, 1f }) for (int k = 0; k < 10; k++) g.C(k % 2 == 0 ? "#e5484d" : "#ffffff").At(sx * (3.2f + k * 0.6f), 2.55f, z - 0.6f, 0, -26).Box(0.6f, 0.05f, 1.1f).At();
+                for (int k = 0; k < 13; k++) g.C(k % 2 == 0 ? gold : "#fff7c2").Ball(0.07f, 0.07f, 0.07f, -3f + k * 0.5f, 4.3f, z - 0.25f, 8, 5);
+            }
+            if (st >= 2)
+            {
+                // chain supermarket: a light-box pediment above the band, glass canopy over the doors, coloured fascia along the front
+                float pw = st >= 3 ? 9.4f : 7.4f, ph = st >= 3 ? 1.9f : 1.4f;
+                band.Box(pw, ph, 0.5f, 0, 4.22f, z); g.C(cream).Box(pw + 0.2f, 0.12f, 0.6f, 0, 4.22f + ph, z).Box(pw + 0.2f, 0.1f, 0.6f, 0, 4.2f, z);
+                for (int k = 0; k <= (int)(pw / 0.45f); k++) g.C(k % 2 == 0 ? gold : "#fff7c2").Ball(0.07f, 0.07f, 0.07f, -pw / 2 + 0.1f + k * 0.45f, 4.22f + ph - 0.14f, z - 0.27f, 8, 5).Ball(0.07f, 0.07f, 0.07f, -pw / 2 + 0.1f + k * 0.45f, 4.36f, z - 0.27f, 8, 5);
+                g.C("#bfe6ff").Box(6.2f, 0.06f, 1.5f, 0, 2.95f, z - 0.9f).C(Art.Steel).Box(6.3f, 0.08f, 0.08f, 0, 2.95f, z - 1.65f).Box(0.08f, 0.08f, 1.5f, -3.1f, 2.95f, z - 0.9f).Box(0.08f, 0.08f, 1.5f, 3.1f, 2.95f, z - 0.9f);
+                foreach (float sx in new[] { -1f, 1f }) band.Box(HalfW - 2.9f, 0.5f, 0.36f, sx * (2.9f + (HalfW - 2.9f) / 2), 3.0f, z);
+                signY = 4.22f + ph / 2 + 0.08f; signH = st >= 3 ? 0.9f : 0.72f; signW = pw - 0.9f;
+            }
+            if (st >= 3)
+            {
+                // hypermarket: tall entrance pillars, neon outline, roof plant and searchlights
+                foreach (float sx in new[] { -1f, 1f })
+                {
+                    g.C(Art.White).Box(0.7f, 6.4f, 0.7f, sx * 4.95f, 0, z).C(gold).Box(0.8f, 0.14f, 0.8f, sx * 4.95f, 6.4f, z).Ball(0.22f, 0.22f, 0.22f, sx * 4.95f, 6.75f, z, 10, 6);
+                    g.C("#36e0ff").Box(0.06f, 1.7f, 0.06f, sx * 4.55f, 4.32f, z - 0.28f).C("#ff5fb0").Box(0.06f, 1.5f, 0.06f, sx * 4.42f, 4.42f, z - 0.28f);
+                    for (int k = 0; k < 3; k++) g.C("#aeb6c2").Box(1.1f, 0.5f, 0.9f, sx * (6.2f + k * 1.3f), 4.2f, StoreDepth + 0.3f).C("#7d8794").Box(0.9f, 0.08f, 0.7f, sx * (6.2f + k * 1.3f), 4.7f, StoreDepth + 0.3f);
+                }
+                g.C("#36e0ff").Box(8.9f, 0.06f, 0.06f, 0, 4.36f, z - 0.28f).Box(8.9f, 0.06f, 0.06f, 0, 5.98f, z - 0.28f);
+            }
+            if (st >= 4)
+            {
+                // flagship: corner towers with gold domes, a crown on the pediment, balloons by the doors
+                foreach (float sx in new[] { -1f, 1f })
+                {
+                    float tx = sx * (HalfW + 0.3f);
+                    g.C(Art.White).Box(0.9f, 5.2f, 0.9f, tx, 3.0f, z).C(gold).Box(1.05f, 0.16f, 1.05f, tx, 8.2f, z).Ball(0.5f, 0.55f, 0.5f, tx, 8.75f, z, 12, 8).Cyl(0.03f, 0.03f, 0.6f, tx, 9.2f, z, 6).Ball(0.1f, 0.1f, 0.1f, tx, 9.85f, z, 8, 5);
+                    for (int k = 0; k < 3; k++) g.C("#bfe6ff").Box(0.5f, 0.7f, 0.04f, tx, 3.6f + k * 1.4f, z - 0.46f);
+                    string[] bc = { "#e5484d", "#3b82f6", "#ffd43b", "#3fa652", "#c084fc" };
+                    for (int k = 0; k < 5; k++) { float bx = sx * (3.35f + (k % 3) * 0.28f - 0.2f), by = 2.3f + k * 0.34f; g.C(bc[k]).Ball(0.24f, 0.29f, 0.24f, bx, by, z - 1.9f - (k % 2) * 0.15f, 10, 7).C("#e8e8e8").Box(0.012f, by - 1.2f, 0.012f, bx, 1.1f, z - 1.9f - (k % 2) * 0.15f); }
+                }
+                for (int k = -2; k <= 2; k++) g.C(gold).At(k * 0.9f, 6.2f, z, 0, 0, 45).Box(0.5f, 0.5f, 0.3f).At();
+                g.C(gold).Box(4.4f, 0.2f, 0.4f, 0, 6.12f, z);
+            }
+            g.Make("front", stageGo.transform, Kit.Solid); if (st >= 2) band.Make("frontband", stageGo.transform, bandMat);
+            // the name: the player's own if they set one
+            string name = string.IsNullOrWhiteSpace(sim.s.storeName) ? "SOUQ MARKET" : sim.s.storeName.Trim(); bool arabic = false; foreach (char ch in name) if (ch >= 0x600 && ch <= 0x6FF) { arabic = true; break; }
+            storeSign.transform.localScale = Vector3.one; storeSign.characterSize = signH * 10f / 110f * 1.3f; storeSign.transform.position = new Vector3(0, signY, z - 0.27f);
+            Kit.SetLabel(storeSign, arabic ? Loc.Shape(name) : name);
+            float wide = storeSign.GetComponent<MeshRenderer>().bounds.size.x; if (wide > signW) storeSign.transform.localScale = Vector3.one * (signW / wide);
+            Kit.SetLabel(storeTag, Loc.G("stage" + st)); storeTag.transform.position = st >= 2 ? new Vector3(0, 3.62f, z - 0.24f) : new Vector3(0, 3.22f, z - 0.24f); storeTag.characterSize = (st >= 2 ? 0.42f : 0.2f) * 10f / 110f * 1.3f;
+        }
+        public void RefreshSigns() { if (stageBuilt >= 0) RefreshStore(); if (usa != null) usa.SetActive(!Loc.Ar); for (int d = 0; d < T.ND; d++) if (depts[d] != null && depts[d].name != null) Kit.SetLabel(depts[d].name, Loc.G(T.DeptKey[d])); }
         public Actor ActorOf(Cust c) { Actor a; return actors.TryGetValue(c.id, out a) ? a : null; }
         public Cust CustAt(GameObject go) { foreach (var c in sim.custs) { Actor a; if (actors.TryGetValue(c.id, out a) && a.go == go) return c; } return null; }
         public int ActorCount => actors.Count;

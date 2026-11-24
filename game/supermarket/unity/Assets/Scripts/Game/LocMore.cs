@@ -101,6 +101,15 @@ x2|利益2倍|수익 2배|Doppelter Gewinn|Profit doublé|Beneficio doble|雙倍
 x2d|すべての売上がずっと2倍|모든 판매 영구 2배|Alle Verkäufe x2, für immer|Toutes les ventes x2, pour toujours|Todas las ventas x2, para siempre|所有銷售永久 x2
 offpro|夜間マネージャー|야간 매니저|Nachtmanager|Gérant de nuit|Gerente nocturno|夜班經理
 offprod|留守中も最大12時間稼ぐ|부재 중 최대 12시간 수익|Verdiene bis zu 12 Std in Abwesenheit|Gagnez jusqu'à 12 h en votre absence|Gana hasta 12 h mientras no estás|離線最多賺 12 小時
+storename|店の名前|가게 이름|Ladenname|Nom du magasin|Nombre de la tienda|店名
+rename|変更|변경|ÄNDERN|RENOMMER|CAMBIAR|改名
+save|保存|저장|SPEICHERN|ENREGISTRER|GUARDAR|儲存
+namenote|お店の看板に表示されます|가게 간판에 표시됩니다|Steht auf deinem Ladenschild|Affiché sur votre enseigne|Se muestra en tu letrero|會顯示在你的店招牌上
+stage0|街角の店|동네 가게|ECKLADEN|ÉPICERIE DU COIN|TIENDA DE BARRIO|街角小店
+stage1|ご近所マーケット|동네 마켓|NACHBARSCHAFTSMARKT|MARCHÉ DE QUARTIER|MERCADO DEL BARRIO|社區超市
+stage2|スーパーマーケット|슈퍼마켓|SUPERMARKT|SUPERMARCHÉ|SUPERMERCADO|連鎖超市
+stage3|ハイパーマーケット|하이퍼마켓|HYPERMARKT|HYPERMARCHÉ|HIPERMERCADO|大賣場
+stage4|旗艦店|플래그십 스토어|FLAGSHIP-STORE|MAGASIN PHARE|TIENDA INSIGNIA|集團旗艦店
 restore|購入を復元|구매 복원|Käufe wiederherstellen|Restaurer les achats|Restaurar compras|恢復購買
 restored|購入を復元しました|구매를 복원했어요|Käufe wiederhergestellt|Achats restaurés|Compras restauradas|已恢復購買
 nostore|App Store に接続できません。後でもう一度お試しください|App Store에 연결할 수 없어요. 나중에 다시 시도하세요|App Store nicht erreichbar, bitte später erneut versuchen|App Store indisponible, réessayez plus tard|App Store no disponible, inténtalo más tarde|無法連上 App Store，請稍後再試

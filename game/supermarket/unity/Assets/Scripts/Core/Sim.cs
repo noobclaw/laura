@@ -20,7 +20,7 @@ namespace Souq.Core
         public int tut = 0;                     // first-steps guide: step reached, 99 when finished
         public bool noAds, profitX2, offlinePro, starter;
         public string[] txDone = new string[0];
-        public string lang = ""; public bool sfx = true, music = true;
+        public string lang = ""; public bool sfx = true, music = true; public string storeName = "";
         public double played = 0; public int adsWatched = 0;
 
         public static Save Fresh()
