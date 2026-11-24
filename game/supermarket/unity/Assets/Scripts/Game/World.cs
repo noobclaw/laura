@@ -105,7 +105,7 @@ namespace Souq
     public class Person
     {
         public GameObject go; public Transform body; public Animation anim; public bool rig, walking; public float phase, speed = 1;
-        static GameObject src; static AnimationClip walk, idle; static bool looked;
+        static GameObject src; static AnimationClip walk, idle; static bool looked; static float fit = 1;
         static readonly Color[] Shirt = { new Color(0.86f,0.25f,0.25f), new Color(0.25f,0.50f,0.88f), new Color(0.96f,0.80f,0.30f), new Color(0.30f,0.70f,0.48f), new Color(0.62f,0.42f,0.85f), new Color(0.95f,0.55f,0.25f), new Color(0.92f,0.92f,0.95f), new Color(0.30f,0.34f,0.42f), new Color(0.95f,0.60f,0.72f), new Color(0.35f,0.75f,0.80f) };
         static readonly Color[] Pants = { new Color(0.75f,0.72f,0.62f), new Color(0.30f,0.38f,0.55f), new Color(0.25f,0.25f,0.28f), new Color(0.55f,0.45f,0.35f), new Color(0.50f,0.55f,0.50f) };
         static readonly Color[] Skin = { new Color(1f,0.86f,0.72f), new Color(0.93f,0.74f,0.58f), new Color(0.78f,0.57f,0.42f), new Color(0.58f,0.40f,0.28f), new Color(0.42f,0.28f,0.20f) };
@@ -115,9 +115,15 @@ namespace Souq
         static void Look()
         {
             if (looked) return; looked = true;
-            src = Resources.Load<GameObject>("People/Walking"); walk = FirstClip("People/Walking"); idle = FirstClip("People/Idle"); if (idle != null && !idle.legacy) idle = null;
+            src = Resources.Load<GameObject>("People/Shopper"); if (src == null) src = Resources.Load<GameObject>("People/Walking"); walk = FirstClip("People/Walking"); idle = FirstClip("People/Idle"); if (idle != null && !idle.legacy) idle = null;
             if (src == null || walk == null || !walk.legacy) { Debug.LogWarning("Person: rigged character unavailable (model " + (src != null) + ", walk " + (walk != null) + "), using stand-ins"); src = null; }
-            else Debug.Log("Person: rigged character ready, idle clip " + (idle != null));
+            else
+            {
+                // whatever units the file came in, an adult stands 1.75 m tall
+                var probe = UnityEngine.Object.Instantiate(src); float h = 0; foreach (var r in probe.GetComponentsInChildren<Renderer>()) h = Mathf.Max(h, r.bounds.max.y - probe.transform.position.y);
+                UnityEngine.Object.DestroyImmediate(probe); fit = h > 0.01f ? 1.75f / h : 1f;
+                Debug.Log("Person: rigged character ready, idle clip " + (idle != null) + ", raw height " + h.ToString("0.00") + " scale " + fit.ToString("0.000"));
+            }
         }
         public static bool Rigged { get { Look(); return src != null; } }
 
@@ -127,7 +133,7 @@ namespace Souq
             if (src == null) { Fallback(look, uniform); return; }
             rig = true; body = new GameObject("body").transform; body.SetParent(go.transform, false);
             var m = UnityEngine.Object.Instantiate(src); m.name = "model"; m.transform.SetParent(body, false);
-            float sc = 0.95f + ((look * 7) % 11) * 0.011f; body.localScale = Vector3.one * sc;
+            float sc = (0.95f + ((look * 7) % 11) * 0.011f) * fit; body.localScale = Vector3.one * sc;
             anim = m.GetComponent<Animation>(); if (anim == null) anim = m.AddComponent<Animation>();
             anim.playAutomatically = false; anim.cullingType = AnimationCullingType.BasedOnRenderers;
             anim.AddClip(walk, "walk"); anim.AddClip(idle != null ? idle : walk, "idle"); anim["walk"].wrapMode = WrapMode.Loop; anim["idle"].wrapMode = WrapMode.Loop;
@@ -270,7 +276,7 @@ namespace Souq
             var paint = Kit.Mat(new Color(0.93f, 0.90f, 0.80f), 0.1f); var yellow = Kit.Mat(new Color(0.95f, 0.78f, 0.22f), 0.1f);
             for (int i = -14; i <= 14; i++) Kit.Box(root, new Vector3(i * 3.6f, -0.035f, RoadZ), new Vector3(1.6f, 0.02f, 0.13f), yellow, "dash");
             Kit.Box(root, new Vector3(0, -0.2f, -1.25f), new Vector3(HalfW * 2 + 9, 0.5f, 2.5f), Kit.Tiled("G_concrete", HalfW * 2 + 9, 2.5f, 3f, new Color(0.72f, 0.71f, 0.70f)), "walk");
-            Kit.Box(root, new Vector3(0, -0.25f, depth / 2), new Vector3(HalfW * 2, 0.5f, depth), Kit.Tiled("G_floor", HalfW * 2, depth, 2.4f, new Color(0.93f, 0.92f, 0.88f)), "floor");
+            Kit.Box(root, new Vector3(0, -0.25f, depth / 2), new Vector3(HalfW * 2, 0.5f, depth), Kit.Tiled("G_tiles", HalfW * 2, depth, 3.2f, new Color(0.93f, 0.92f, 0.88f)), "floor");
             // walls: white plaster with the brand band; the front is left open so the checkouts stay in view
             var wallSide = Kit.Tiled("G_plaster", depth, 3.4f, 3f, new Color(0.96f, 0.95f, 0.92f)); var wallBack = Kit.Tiled("G_plaster", HalfW * 2, 5f, 3f, new Color(0.96f, 0.95f, 0.92f));
             bandMat = Kit.Mat(GradeBand[0], 0.35f); var trim = Kit.Mat(new Color(0.20f, 0.21f, 0.24f), 0.3f);
