@@ -75,7 +75,6 @@ namespace Souq
         }
         void BuildOffers()
         {
-            AddOffer("adboost", new Color(0.98f, 0.55f, 0.15f), Spr.Megaphone ?? Spr.Coin, () => true, () => sim.AdActive ? "x2 " + Loc.Time(s.adEnd - g.Now()) : "x2", () => OfferPopup("adboost", "adboostd", () => { if (!sim.AdBoost()) Toast(Loc.G("max")); else { Flash(new Color(1f, 0.8f, 0.3f)); g.audio.Play("power"); } }));
             AddOffer("vip", U.Purple, Spr.Star, () => sim.vipHere, () => Loc.Num(sim.vipReward), () => VipPopup());
             AddOffer("bus", U.Blue, Spr.Bus ?? Spr.Person, () => sim.busOffer, () => "+10-49", () => OfferPopup("bus", "busd", () => { int n = sim.AcceptBus(); Toast("+" + n + " " + Loc.G("bus")); g.audio.Play("power"); }, () => sim.busOffer = false));
             AddOffer("qbuy", U.Green, Spr.Bolt ?? Spr.Person, () => sim.quickBuyOffer || sim.QuickBuy, () => sim.QuickBuy ? Loc.Time(s.quickBuyEnd - g.Now()) : "x2", () => { if (!sim.QuickBuy) OfferPopup("qbuy", "qbuyd", () => { sim.StartQuickBuy(); g.audio.Play("power"); }, () => sim.quickBuyOffer = false); });
@@ -591,13 +590,12 @@ namespace Souq
             var crt = cardRt; Run(0.3f, k => { if (crt != null) crt.localScale = Vector3.one * OutBack(k); });
             return U.Place(U.Rect(card.transform, "body"), 0, 0, 1, 1, 40, 40, -40, -170);
         }
-        string AdLabel(string key) => s.noAds ? Loc.G("go") : Loc.G(key);
 
         public void OfferPopup(string title, string desc, Action onYes, Action onNo = null)
         {
             RectTransform card; var body = OpenPopup(Loc.G(title), U.Blue, 620, out card);
             var d = U.Txt(body, Loc.G(desc), 40, U.Ink); U.Place(d.rectTransform, 0, 0.5f, 1, 1, 0, 0, 0, 0);
-            var yes = U.Button(body, AdLabel("watch"), U.Green, 44, () => g.Ad(() => { ClosePopup(); onYes(); })); U.Place(yes.rt, 0.08f, 0, 0.92f, 0, 0, 100, 0, 220);
+            var yes = U.Button(body, Loc.G("go"), U.Green, 44, () => { ClosePopup(); onYes(); }); U.Place(yes.rt, 0.08f, 0, 0.92f, 0, 0, 100, 0, 220);
             var no = U.Txt(body, Loc.G("nothanks"), 32, new Color(0.45f, 0.48f, 0.60f)); U.Place(no.rectTransform, 0, 0, 1, 0, 0, 0, 0, 80); no.raycastTarget = true; no.gameObject.AddComponent<Button>().onClick.AddListener(() => { ClosePopup(); onNo?.Invoke(); });
         }
         /// All eight languages at once, each written in its own script.
@@ -621,18 +619,18 @@ namespace Souq
             var d = U.Txt(body, Loc.G("vipd"), 38, U.Ink); U.Place(d.rectTransform, 0, 0.72f, 1, 1, 0, 0, 0, 0);
             var ic = U.Img(body, Spr.Coin, Color.white, "coin", false); U.Pin(ic.rectTransform, 0.5f, 0.5f, -230, 30, 110, 110); ic.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             var amt = U.Txt(body, Loc.Num(sim.vipReward), 84, new Color(0.95f, 0.62f, 0.05f), TextAnchor.MiddleLeft); U.Pin(amt.rectTransform, 0.5f, 0.5f, -150, 30, 520, 130); amt.rectTransform.pivot = new Vector2(0, 0.5f);
-            var yes = U.Button(body, AdLabel("watch"), U.Green, 44, () => g.Ad(() => { var at = CanvasPosOf(card); ClosePopup(); double r = sim.CollectVip(); FlyIcons(Spr.Coin, at, coinPill, 14); Float("+" + Loc.Num(r), at, U.Gold, 70); Flash(U.Gold); g.audio.Play("win"); })); U.Place(yes.rt, 0.08f, 0, 0.92f, 0, 0, 100, 0, 220);
+            int gm = sim.vipGems; var gi = U.Img(body, Spr.Gem, Color.white, "gem", false); U.Pin(gi.rectTransform, 0.5f, 0.5f, 170, -70, 80, 80); gi.rectTransform.pivot = new Vector2(0.5f, 0.5f); var gt = U.Txt(body, "+" + gm, 56, U.Blue, TextAnchor.MiddleLeft); U.Pin(gt.rectTransform, 0.5f, 0.5f, 220, -70, 160, 90); gt.rectTransform.pivot = new Vector2(0, 0.5f);
+            var yes = U.Button(body, Loc.G("collect"), U.Green, 44, () => { var at = CanvasPosOf(card); ClosePopup(); double r = sim.CollectVip(); FlyIcons(Spr.Coin, at, coinPill, 14); FlyIcons(Spr.Gem, at, gemPill, gm * 2); Float("+" + Loc.Num(r), at, U.Gold, 70); Flash(U.Gold); g.audio.Play("win"); }); U.Place(yes.rt, 0.08f, 0, 0.92f, 0, 0, 100, 0, 220);
             var no = U.Txt(body, Loc.G("nothanks"), 32, new Color(0.45f, 0.48f, 0.60f)); U.Place(no.rectTransform, 0, 0, 1, 0, 0, 0, 0, 80); no.raycastTarget = true; no.gameObject.AddComponent<Button>().onClick.AddListener(() => { ClosePopup(); sim.DismissVip(); });
         }
         public void OfflinePopup(double reward, double away, bool capped)
         {
-            RectTransform card; var body = OpenPopup(Loc.G("welcome"), new Color(0.95f, 0.65f, 0.10f), capped && !s.offlinePro ? 1120 : 800, out card);
+            RectTransform card; var body = OpenPopup(Loc.G("welcome"), new Color(0.95f, 0.65f, 0.10f), capped && !s.offlinePro ? 960 : 640, out card);
             var d = U.Txt(body, Loc.G("away") + "\n" + Loc.Time(away), 36, U.Ink); U.Place(d.rectTransform, 0, 1, 1, 1, 0, -150, 0, 0);
             var ic = U.Img(body, Spr.Coin, Color.white, "coin", false); U.Pin(ic.rectTransform, 0.5f, 1, -250, -170, 110, 110);
             var amt = U.Txt(body, Loc.Num(reward), 88, new Color(0.95f, 0.62f, 0.05f), TextAnchor.MiddleLeft); U.Pin(amt.rectTransform, 0.5f, 1, -120, -160, 540, 130); amt.rectTransform.pivot = new Vector2(0, 1);
             Action<double> pay = m => { var at = CanvasPosOf(card); ClosePopup(); g.pendingOffline = 0; sim.Earn(reward * m); FlyIcons(Spr.Coin, at, coinPill, 16); Float("+" + Loc.Num(reward * m), at, U.Gold, 70); g.audio.Play("win"); if (m > 1) Flash(U.Gold); };
-            var x3 = U.Button(body, s.noAds ? Loc.G("free3") : Loc.G("collect3"), U.Green, 44, () => g.Ad(() => pay(2))); U.Pin(x3.rt, 0.5f, 1, 0, -330, 760, 130); x3.rt.pivot = new Vector2(0.5f, 1);
-            var x1 = U.Button(body, Loc.G("collect"), U.Blue, 40, () => pay(1)); U.Pin(x1.rt, 0.5f, 1, 0, -486, 520, 104); x1.rt.pivot = new Vector2(0.5f, 1);
+                        var x1 = U.Button(body, Loc.G("collect"), U.Green, 44, () => pay(1)); U.Pin(x1.rt, 0.5f, 1, 0, -330, 760, 130); x1.rt.pivot = new Vector2(0.5f, 1);
             if (capped && !s.offlinePro)
             {
                 // the shopper lost income past the cap: the moment the longer cap is worth most to them

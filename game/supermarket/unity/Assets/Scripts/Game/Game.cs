@@ -22,7 +22,6 @@ namespace Souq
             Products.Add(new Product { id = "starter", key = "starter", desc = "starterd", price = "$1.99", tag = "best", owned = s => s.starter });
             Products.Add(new Product { id = "x2", key = "x2", desc = "x2d", price = "$9.99", tag = "popular", owned = s => s.profitX2 });
             Products.Add(new Product { id = "offpro", key = "offpro", desc = "offprod", price = "$5.99", owned = s => s.offlinePro });
-            Products.Add(new Product { id = "noads", key = "noads", desc = "noadsd", price = "$7.99", owned = s => s.noAds });
             Products.Add(new Product { id = "gems1", key = "gems", price = "$0.99", gems = 80 });
             Products.Add(new Product { id = "gems2", key = "gems", price = "$4.99", gems = 500 });
             Products.Add(new Product { id = "gems3", key = "gems", price = "$9.99", gems = 1200, tag = "popular" });
@@ -212,12 +211,6 @@ namespace Souq
         }
 
         // ---------- rewards ----------
-        /// Rewarded-ad slot. No ad network is connected in this build, so the reward follows a short pause.
-        public void Ad(Action reward)
-        {
-            if (sim.s.noAds) { reward(); return; }
-            sim.s.adsWatched++; ui.Toast("AD (test)"); ui.Run(0.6f, k => { }, () => reward());
-        }
         public bool Warp(int i)
         {
             if (!sim.SpendGems(Store.WarpGems[i])) return false;

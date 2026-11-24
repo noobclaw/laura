@@ -69,7 +69,7 @@ namespace Souq.Core
         readonly Random rng = new Random();
         double spawnT, giftT; int nextId = 1; public int busPending;
         public bool truckHere, vipHere; public double truckT = 20, vipT = 90, busT = 150, qbT = 110, qcT = 170;
-        public bool busOffer, quickBuyOffer, quickCheckOffer; public double vipReward;
+        public bool busOffer, quickBuyOffer, quickCheckOffer; public double vipReward; public int vipGems;
 
         public event Action<Cust, int, double> OnServed;   // shopper, department, price added
         public event Action<Cust, double> OnPaid;          // shopper, bill
@@ -96,10 +96,9 @@ namespace Souq.Core
         }
         public int Epic(EpicKind k, int dept = -1) { int i = EpicIndex(k, dept); return i < 0 ? 0 : s.epic[i]; }
         double EpicAdd(EpicKind k, int dept = -1) { int i = EpicIndex(k, dept); return i < 0 ? 0 : T.Epics[i].add * s.epic[i]; }
-        public bool AdActive => s.adEnd > Now();
         public bool QuickBuy => s.quickBuyEnd > Now();
         public bool QuickCheck => s.quickCheckEnd > Now();
-        public double ProfitMult => T.StarProfit[s.star] * (1 + EpicAdd(EpicKind.Profit)) * (AdActive ? 2 : 1) * (s.profitX2 ? 2 : 1);
+        public double ProfitMult => T.StarProfit[s.star] * (1 + EpicAdd(EpicKind.Profit)) * (s.profitX2 ? 2 : 1);
         public double Price(int d) => T.BasePrice[d] * Math.Pow(T.PriceGrowth, s.dLevel[d] - 1) * T.TierProduct(s.dLevel[d]) * ProfitMult;
         public double StaffSpeed(int d) => (T.SpeedBase[d] + s.dSpeed[d] * T.SpeedStep(d)) * (1 + EpicAdd(EpicKind.Manager, d));
         public double DeptSpeed(int d) => StaffSpeed(d) * s.dStaff[d];
@@ -136,7 +135,6 @@ namespace Souq.Core
                 return e;
             }
         }
-        public double AdBoostCap => T.AdBoostMax + EpicAdd(EpicKind.AdTime);
         public double OfflineCap => s.offlinePro ? T.OfflineCapPro : T.OfflineCap;
 
         // ---------- spending ----------
@@ -182,23 +180,13 @@ namespace Souq.Core
         // ---------- timed rewards ----------
         public double TruckReward() => FlowPerMin * (0.2 + 0.3 * rng.NextDouble()) * (1 + EpicAdd(EpicKind.Truck));
         public double CollectTruck() { if (!truckHere) return 0; truckHere = false; truckT = 35 + 30 * rng.NextDouble(); double r = TruckReward(); Earn(r); s.trucks++; Changed(); return r; }
-        public double RollVip()
-        {
-            int[] w = { 60, 40, 10, 5 }; double[] k = { 1, 10, 50, 300 };
-            int roll = rng.Next(115), i = 0; while (i < 3 && roll >= w[i]) { roll -= w[i]; i++; }
-            return FlowPerMin * (0.8 + (k[i] - 0.8) * rng.NextDouble());
-        }
-        public void DismissVip() { vipHere = false; vipT = 150 + 60 * rng.NextDouble(); }
-        public double CollectVip() { if (!vipHere) return 0; double r = vipReward; DismissVip(); Earn(r); Changed(); return r; }
+        /// A VIP pulls up every 5-7 minutes: 1.5-3 minutes of income and 1-3 gems for a tap.
+        public double RollVip() { vipGems = 1 + rng.Next(3); return FlowPerMin * (1.5 + 1.5 * rng.NextDouble()); }
+        public void DismissVip() { vipHere = false; vipT = 300 + 120 * rng.NextDouble(); }
+        public double CollectVip() { if (!vipHere) return 0; double r = vipReward; int gm = vipGems; DismissVip(); Earn(r); s.gem += gm; Changed(); return r; }
         public int AcceptBus() { busOffer = false; int n = 10 + rng.Next(40); busPending += n; return n; }
         public void StartQuickBuy() { quickBuyOffer = false; s.quickBuyEnd = Now() + T.QuickBuySecs; Changed(); }
         public void StartQuickCheck() { quickCheckOffer = false; s.quickCheckEnd = Now() + T.QuickCheckSecs; Changed(); }
-        public bool CanAdBoost => s.adEnd - Now() <= AdBoostCap - T.AdBoostStep;
-        public bool AdBoost()
-        {
-            if (!CanAdBoost) return false;
-            s.adEnd = Math.Max(s.adEnd, Now()) + T.AdBoostStep; Changed(); return true;
-        }
         public double GiftReward() => FlowPerMin * OpenDepts * 0.5;
         public double CollectGift(Cust c) { if (!c.gift) return 0; c.gift = false; double r = GiftReward(); Earn(r); return r; }
         /// Income for `secs` of an idle store; used for offline pay and time-skip items.

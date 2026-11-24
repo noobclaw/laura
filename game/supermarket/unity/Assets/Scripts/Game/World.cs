@@ -754,7 +754,6 @@ namespace Souq
                 p.age += dt; float k = Mathf.Clamp01(p.age / p.dur); p.t.localScale = p.scale * Mathf.Max(0.001f, OutBack(k)); if (k >= 1) { p.t.localScale = p.scale; pops.RemoveAt(i); }
             }
             shake = Mathf.Max(0, shake - dt * 2.6f);
-            bool ad = sim.AdActive;
             for (int d = 0; d < T.ND; d++)
             {
                 var v = depts[d];
@@ -766,7 +765,6 @@ namespace Souq
                     if (sim.s.dOpen[d]) v.signMat.SetColor("_Tint", (DeptColor[d] * (1f + 1.2f * v.pop)).linear);
                     if (v.pop <= 0) { v.props.localScale = Vector3.one; v.props.localPosition = Vector3.zero; }
                 }
-                else if (sim.s.dOpen[d] && ad) v.signMat.SetColor("_Tint", (DeptColor[d] * (1.05f + 0.2f * Mathf.Sin(time * 3f + d))).linear);
                 if (!sim.s.dOpen[d]) continue;
                 for (int k = 0; k < sim.s.dStaff[d]; k++) { bool serving = sim.dq[d][k].Count > 0 && sim.dq[d][k][0].st == CS.Served; v.staff[k].Set(false, serving ? 1 : 0, time, dt); }
             }

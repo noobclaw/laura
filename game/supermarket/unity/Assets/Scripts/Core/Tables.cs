@@ -3,7 +3,7 @@ using System;
 
 namespace Souq.Core
 {
-    public enum EpicKind { Profit, Walk, Manager, Truck, CashierSpeed, StaffCost, CashierCost, AdTime, Research }
+    public enum EpicKind { Profit, Walk, Manager, Truck, CashierSpeed, StaffCost, CashierCost, AdTime, Research }   // AdTime is no longer offered (no ads)
 
     public struct EpicDef { public EpicKind kind; public int dept; public double add; public int cost; public int max; }
 
@@ -70,7 +70,6 @@ namespace Souq.Core
             l.Add(new EpicDef { kind = EpicKind.CashierSpeed, dept = -1, add = 0.06, cost = 30, max = 10 });
             l.Add(new EpicDef { kind = EpicKind.StaffCost, dept = -1, add = 0.03, cost = 20, max = 10 });
             l.Add(new EpicDef { kind = EpicKind.CashierCost, dept = -1, add = 0.03, cost = 20, max = 10 });
-            l.Add(new EpicDef { kind = EpicKind.AdTime, dept = -1, add = 1200, cost = 30, max = 6 });
             for (int d = 0; d < ND; d++) l.Add(new EpicDef { kind = EpicKind.Research, dept = d, add = 0.03, cost = 6 + 2 * d, max = 10 });
             return l.ToArray();
         }
@@ -112,6 +111,6 @@ namespace Souq.Core
         // paid extras (rule values; store prices live in Store.cs)
         public const int LoginGems = 100, AdGems = 30;
         public const double OfflineMinAway = 180, OfflineCap = 14400, OfflineCapPro = 28800, OfflineRate = 0.5;   // away pay: half speed, up to 4 h (8 h with Night Manager)
-        public const double AdBoostStep = 1800, AdBoostMax = 21600, QuickBuySecs = 120, QuickCheckSecs = 30;
+        public const double QuickBuySecs = 120, QuickCheckSecs = 30;
     }
 }

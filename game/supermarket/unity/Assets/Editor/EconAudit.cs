@@ -10,10 +10,10 @@ using Souq.Core;
 
 public static class EconAudit
 {
-    const int Days = 30, Session = 90;           // minutes played per day
+    const int Days = 30;
     class Run
     {
-        public string name; public Save s; public Sim sim; public double clock = 1e9;
+        public string name; public int session; public Save s; public Sim sim; public double clock = 1e9;
         public List<string> events = new List<string>(); public double[] openDay = new double[T.ND]; public double[] starDay = new double[16];
         public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1, earlyHour = 1; public string hourWhere = ""; public Dictionary<string, int> hourBuys = new Dictionary<string, int>(), worstBuys = new Dictionary<string, int>();
         public List<double> sessionGrowth = new List<double>(); public int freeGems; public double[] servedAcc = new double[T.ND];
@@ -110,21 +110,21 @@ public static class EconAudit
     }
 
     // ---------- one player ----------
-    static Run Play(string name, bool ads, bool cheap)
+    static Run Play(string name, int Session, bool cheap)
     {
-        var r = new Run { name = name, s = Save.Fresh() }; r.sim = new Sim(r.s, () => r.clock); var m = r.sim; var s = r.s;
+        var r = new Run { name = name, session = Session, s = Save.Fresh() }; r.sim = new Sim(r.s, () => r.clock); var m = r.sim; var s = r.s;
         s.tut = 99; for (int d = 0; d < T.ND; d++) r.openDay[d] = d == 0 ? 0 : -1; for (int k = 0; k < r.starDay.Length; k++) r.starDay[k] = -1;
-        double minute = 0; double truckT = 0;
+        double minute = 0; double truckT = 0, vipT = 5;
         for (int day = 0; day < Days; day++)
         {
             m.DailyLogin(day + 1);
-            if (day > 0 && s.parkLevel > 1) { double off = m.OfflineReward(r.clock) * (ads ? 2 : 1); m.Earn(off); }
+            if (day > 0 && s.parkLevel > 1) m.Earn(m.OfflineReward(r.clock));
             double startFlow = Flow(m); double lastBuy = 0, hourFlow = startFlow;
-            if (ads) s.adEnd = r.clock + Session * 60;                     // keeps the x2 campaign running while playing
             for (int t = 0; t < Session; t++)
             {
                 double f = Flow(m); m.Earn(f); r.clock += 60; minute++; truckT += 1;
                 while (truckT >= 50 / 60.0) { truckT -= 50 / 60.0; m.truckHere = true; m.CollectTruck(); }
+                vipT -= 1; if (vipT <= 0) { vipT = 6; m.vipHere = true; m.vipReward = m.RollVip(); r.freeGems += m.vipGems; m.CollectVip(); }
                 // shoppers served, for goals that count them
                 double a = m.ParkedArrivals;
                 for (int d = 0; d < T.ND; d++) if (s.dOpen[d]) { r.servedAcc[d] += Math.Min(m.DeptSpeed(d), a * T.Visit[d] / 100.0); int n = (int)r.servedAcc[d]; s.served[d] += n; r.servedAcc[d] -= n; }
@@ -195,7 +195,7 @@ public static class EconAudit
             if (!cheap && gn > 0) r.paid.Add(cc / gn);
             n++; r.buys++; string kk = pick.k.ToString(); r.hourBuys[kk] = (r.hourBuys.TryGetValue(kk, out int hv) ? hv : 0) + 1;
             double after = Flow(m); if (pick.k != K.Build && before > 0) r.maxJump = Math.Max(r.maxJump, after / before);
-            double dayF = day + t / (double)Session;
+            double dayF = day + t / (double)r.session;
             if (pick.k == K.Build) { r.openDay[pick.i] = dayF; r.events.Add("open " + pick.i + " day " + (day + 1) + " +" + t + "m"); }
             if (pick.k == K.Star) { r.starDay[s.star] = dayF; r.events.Add("grade " + s.star + " day " + (day + 1) + " +" + t + "m"); }
         }
@@ -214,8 +214,8 @@ public static class EconAudit
         for (int d = 0; d < T.ND; d++) top = Math.Max(top, T.HireBase(d, 4)); for (int d = 0; d < T.ND; d++) top = Math.Max(top, T.ProdCostAt(d, T.ProdMax - 1));
         double epicTotal = 0; foreach (var e in T.Epics) epicTotal += e.cost * e.max * (e.max + 1) / 2.0;
 
-        var runs = new[] { Play("no ads", false, false), Play("watches ads", true, false), Play("buys cheapest", false, true) };
-        sb.AppendLine("# Economy audit (" + Days + " days, " + Session + " min a day)\n");
+        var runs = new[] { Play("plays 90 min a day", 90, false), Play("plays 3 h a day", 180, false), Play("buys cheapest, 90 min a day", 90, true) };
+        sb.AppendLine("# Economy audit (" + Days + " days, no ads in the game)\n");
         sb.AppendLine("Highest price anywhere in the tables: " + Souq.Loc.Num(top) + " (ceiling " + Souq.Loc.Num(T.PriceCeiling) + ")\n");
         foreach (var r in runs)
         {
@@ -229,7 +229,7 @@ public static class EconAudit
             sb.AppendLine("Income growth inside each day's session: " + string.Join(" ", r.sessionGrowth.ConvertAll(x => "x" + x.ToString("0.0#"))));
             sb.AppendLine("End: " + r.end);
             sb.AppendLine("Free gems in " + Days + " days: " + r.freeGems + " of " + epicTotal + " for every boost (" + (100.0 * r.freeGems / epicTotal).ToString("0") + "%)\n");
-            if (r.name == "buys cheapest") { rule(r.useless <= r.buys * 0.1, "R2 purchases that change nothing: " + r.useless + " of " + r.buys + " (limit 10%)"); continue; }
+            if (r.name.StartsWith("buys cheapest")) { rule(r.useless <= r.buys * 0.1, "R2 purchases that change nothing: " + r.useless + " of " + r.buys + " (limit 10%)"); continue; }
             rule(r.maxPrice <= T.PriceCeiling * 1.0001 && top <= T.PriceCeiling * 1.0001, "R1 highest price paid " + Souq.Loc.Num(r.maxPrice) + ", wallet peak " + Souq.Loc.Num(r.maxCoin) + " (limit " + Souq.Loc.Num(T.PriceCeiling) + " for prices)");
             rule(pmed <= 180, "R3 purchases pay for themselves in a median " + pmed.ToString("0") + " min of income (limit 180)");
             int flat = 0; for (int i = 0; i < Math.Min(14, r.sessionGrowth.Count); i++) if (r.sessionGrowth[i] < 1.1) flat++;
@@ -237,7 +237,7 @@ public static class EconAudit
             rule(r.maxWait <= 5, "R4 longest wait for anything useful in the first 10 days: " + r.maxWait.ToString("0.0") + " min (limit 5)");
             double last = r.openDay[T.ND - 1]; bool smooth = true; string gaps = "";
             for (int d = 5; d < T.ND; d++) { double g0 = r.openDay[d - 1] - r.openDay[d - 2], g1 = r.openDay[d] - r.openDay[d - 1]; gaps += g1.ToString("0.0") + " "; if (r.openDay[d] < 0 || (g0 > 0.3 && (g1 > 3 * g0 + 0.5 || g1 < g0 / 3 - 0.5))) smooth = false; }
-            rule(last >= 0 && (r.name == "no ads" ? last >= 13 && last <= 21 : last >= 8.5 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.name == "no ads" ? " (target day 14-21)" : " (target day 9.5-21)"));
+            rule(last >= 0 && (r.session <= 90 ? last >= 13 && last <= 21 : last >= 6 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.session <= 90 ? " (target day 14-21)" : " (target day 7-21)"));
             rule(smooth, "R5b gaps between openings from the 5th section on (days): " + gaps + "(no gap more than 3x the one before)");
             rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 6 on x" + r.maxHour.ToString("0.0") + " (limit 10) at " + r.hourWhere + ", bought then: " + string.Join(", ", new List<string>(Pairs(r.worstBuys))) + "; biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3); first five days (fast on purpose) up to x" + r.earlyHour.ToString("0") + " an hour");
             rule(r.freeGems >= epicTotal * 0.1 && r.freeGems <= epicTotal * 0.5, "R7 free gems cover " + (100.0 * r.freeGems / epicTotal).ToString("0") + "% of all boosts in 30 days (target 10-50%)");
