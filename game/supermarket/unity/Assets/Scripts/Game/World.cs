@@ -17,6 +17,20 @@ namespace Souq
             if (Solid == null) { var sh = Shader.Find("Souq/Solid"); if (sh == null) { Missing++; sh = Shader.Find("Universal Render Pipeline/Unlit"); } Solid = new Material(sh); }
             if (Glow == null) { Glow = new Material(Solid); if (Glow.HasProperty("_Glow")) Glow.SetFloat("_Glow", 1f); }
         }
+        static Material blobMat; static Mesh blobMesh; static bool blobLooked;
+        /// A soft dark patch on the floor under something, so it sits on the ground instead of floating.
+        public static void Shadow(Transform parent, Vector3 local, float w, float d)
+        {
+            if (!blobLooked) { blobLooked = true; var sh = Resources.Load<Shader>("Shaders/SouqBlob"); if (sh != null) blobMat = new Material(sh); }
+            if (blobMat == null) return;
+            if (blobMesh == null)
+            {
+                blobMesh = new Mesh { name = "blob" }; blobMesh.vertices = new[] { new Vector3(-0.5f, 0, -0.5f), new Vector3(0.5f, 0, -0.5f), new Vector3(0.5f, 0, 0.5f), new Vector3(-0.5f, 0, 0.5f) };
+                blobMesh.uv = new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }; blobMesh.triangles = new[] { 0, 2, 1, 0, 3, 2 }; blobMesh.RecalculateBounds();
+            }
+            var go = new GameObject("shadow"); go.transform.SetParent(parent, false); go.transform.localPosition = local; go.transform.localScale = new Vector3(w, 1, d);
+            go.AddComponent<MeshFilter>().sharedMesh = blobMesh; var mr = go.AddComponent<MeshRenderer>(); mr.sharedMaterial = blobMat; mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; mr.receiveShadows = false;
+        }
         static Shader textShader; static bool textLooked;
         /// Lettering on a sign in the scene, `height` metres tall, readable from the camera side.
         public static TextMesh Label(string text, Transform parent, Vector3 pos, float height, Color color)
@@ -295,6 +309,7 @@ namespace Souq
                 var at = Limb("arm", arm, new Vector3(s * 0.33f * wide, 1.0f, 0)); if (s < 0) armL = at; else armR = at;
             }
             if (staff) { var it = new Geo(); it.C("#ffd24a").Box(0.2f, 0.2f, 0.16f, 0, -0.6f, 0.08f).C("#e8453c").Box(0.21f, 0.07f, 0.17f, 0, -0.6f, 0.08f); item = it.Make("item", armR, Kit.Solid); item.SetActive(false); }
+            Kit.Shadow(go.transform, new Vector3(0, 0.03f, 0), 1.25f, 1.1f);
             Pose(0, 0);
         }
 
@@ -445,7 +460,7 @@ namespace Souq
         void BuildCash(int c)
         {
             var p = CashPos(c); var holder = new GameObject("cash" + c); holder.transform.SetParent(root, false);
-            var g = new Geo(); Art.Checkout(g, p.x, p.z, rnd); g.Make("desk", holder.transform, Kit.Solid);
+            var g = new Geo(); Art.Checkout(g, p.x, p.z, rnd); g.Make("desk", holder.transform, Kit.Solid); Kit.Shadow(holder.transform, new Vector3(p.x, 0.03f, p.z), 2.6f, 3.4f);
             cashLamp[c] = Kit.GlowTint(new Color(0.32f, 0.88f, 0.48f)); var lamp = new Geo(); lamp.C(Color.white).Box(0.46f, 0.46f, 0.08f, p.x - 0.36f, 2.75f, p.z - 1.05f).At(p.x - 0.1f, 1.2f, p.z - 0.75f, 0, 17).Box(0.4f, 0.3f, 0.04f); lamp.Make("lamp", holder.transform, cashLamp[c], false);
             cashStaff[c] = new Person(holder.transform, 31 + c * 5, Geo.Hex(Art.Red)); cashStaff[c].go.transform.position = p + new Vector3(-0.78f, 0, -0.3f); cashStaff[c].go.transform.rotation = Quaternion.Euler(0, 90, 0);
             cashDesk[c] = holder;
@@ -523,7 +538,23 @@ namespace Souq
             if (tier >= 1) { g.C(hex).Box(0.7f, 1.1f, 0.7f, cx - 3.7f, 0, v.center.z + 1.3f).C(Art.White).Box(0.74f, 0.1f, 0.74f, cx - 3.7f, 0.5f, v.center.z + 1.3f); for (int i = 0; i < 9; i++) g.C(Art.Goods[rr.Next(Art.Goods.Length)]).Ball(0.1f, 0.13f, 0.07f, cx - 3.9f + (i % 3) * 0.2f, 1.22f, v.center.z + 1.1f + (i / 3) * 0.2f, 8, 5); }
             if (tier >= 2) { g.C(Art.Wood2).Box(0.75f, 0.42f, 0.55f, cx + 3.7f, 0, v.center.z + 1.3f).C(Art.Wood).Box(0.79f, 0.07f, 0.59f, cx + 3.7f, 0.36f, v.center.z + 1.3f); for (int i = 0; i < 6; i++) g.C(Art.Goods[rr.Next(Art.Goods.Length)]).Ball(0.13f, 0.11f, 0.13f, cx + 3.48f + (i % 3) * 0.22f, 0.5f, v.center.z + 1.2f + (i / 3) * 0.2f, 9, 6); }
             if (tier >= 4) { for (int i = 0; i < 12; i++) g.C(i % 2 == 0 ? hex : "#ffd43b").At(cx - 3.6f + i * 0.65f, 3.2f - 0.25f * Mathf.Sin(i / 11f * Mathf.PI), v.center.z + 2.4f, 0, 0, 45).Box(0.26f, 0.26f, 0.02f); g.At(); }
+            // front corners: a planter and a stack of baskets with a floor stand
+            float fz = v.center.z - 2.55f; var pr = new System.Random(d * 53 + 3);
+            g.C("#e9e3d6").Cyl(0.3f, 0.36f, 0.5f, cx - 3.45f, 0, fz, 12).C("#5a3d28").Cyl(0.31f, 0.31f, 0.04f, cx - 3.45f, 0.48f, fz, 12);
+            for (int i = 0; i < 6; i++) g.C(i % 2 == 0 ? "#3fa652" : "#57bf63").Ball(0.24f, 0.3f, 0.24f, cx - 3.45f + (float)(pr.NextDouble() - 0.5) * 0.36f, 0.8f + (i % 3) * 0.2f, fz + (float)(pr.NextDouble() - 0.5) * 0.36f, 9, 6);
+            for (int i = 0; i < 5; i++) g.C(i % 2 == 0 ? hex : Art.Dark).Box(0.62f - i * 0.01f, 0.1f, 0.44f, cx + 3.45f, 0.02f + i * 0.11f, fz);
+            g.C(Art.Steel).Cyl(0.03f, 0.03f, 1.25f, cx + 2.85f, 0, fz, 8).Cyl(0.2f, 0.2f, 0.03f, cx + 2.85f, 0, fz, 10).C(hex).Box(0.5f, 0.62f, 0.03f, cx + 2.85f, 1.2f, fz).C(Art.White).Box(0.38f, 0.07f, 0.035f, cx + 2.85f, 1.62f, fz).Box(0.3f, 0.05f, 0.035f, cx + 2.85f, 1.48f, fz).C("#ffd43b").Box(0.38f, 0.16f, 0.035f, cx + 2.85f, 1.27f, fz);
             var go = g.Make("fixtures", v.props, Kit.Solid);
+            for (int u = 0; u < units; u++) Kit.Shadow(go.transform, new Vector3(cx + SlotX[u], 0.03f, z - 0.25f), 2.9f, 2.3f);
+            Kit.Shadow(go.transform, new Vector3(cx - 3.45f, 0.03f, fz), 1.3f, 1.3f); Kit.Shadow(go.transform, new Vector3(cx + 3.3f, 0.03f, fz), 1.7f, 1.1f);
+            // painted queue lanes: a standing spot at each counter place and chevrons leading up to it
+            var ln = new Geo(); ln.Shade = 0; Color paint = Color.Lerp(col, Color.white, 0.5f);
+            for (int k = 0; k < T.MaxStaff; k++)
+            {
+                float lx = StaffPos(d, k).x; ln.At().C(paint).Slab(0.78f, 0.78f, 0.39f, lx, 0.013f, v.center.z + 1.0f, 0.003f).C(Art.White).Slab(0.56f, 0.56f, 0.28f, lx, 0.0165f, v.center.z + 1.0f, 0.003f).C(paint).Slab(0.4f, 0.4f, 0.2f, lx, 0.02f, v.center.z + 1.0f, 0.003f);
+                for (float zz = v.center.z + 0.15f; zz > v.center.z - 2.0f; zz -= 0.72f) ln.C(paint).At(lx - 0.13f, 0.013f, zz, -35).Box(0.34f, 0.004f, 0.08f).At(lx + 0.13f, 0.013f, zz, 35).Box(0.34f, 0.004f, 0.08f);
+            }
+            ln.Make("lanes", go.transform, Kit.Solid, false);
             if (animate) { v.pop = 1f; if (!wasOpen) AddPop(go, 0, 0.45f); }
         }
 
@@ -538,7 +569,7 @@ namespace Souq
             a.gift = gift.Make("gift", a.go.transform, Kit.Glow, false); a.gift.transform.localPosition = new Vector3(0, 2.3f, 0); a.gift.SetActive(false); a.gift.AddComponent<SphereCollider>().radius = 1.6f;
             if (c.slot >= 0)
             {
-                var cg = new Geo(); Art.Car(cg, Geo.Hex(CarCol[c.look % CarCol.Length])); a.car = cg.Make("car", root, Kit.Solid);
+                var cg = new Geo(); Art.Car(cg, Geo.Hex(CarCol[c.look % CarCol.Length])); a.car = cg.Make("car", root, Kit.Solid); Kit.Shadow(a.car.transform, new Vector3(0, 0.04f, 0), 2.9f, 5.2f);
                 a.carPos = new Vector3(-30, -0.12f, RoadZ); a.car.transform.position = a.carPos; a.carYaw = 90;
             }
             a.go.transform.position = c.slot >= 0 ? new Vector3(-30, 0, RoadZ) : busPos; a.go.SetActive(c.slot < 0);
@@ -655,9 +686,9 @@ namespace Souq
             foreach (int id in gone) { var a = actors[id]; Kit.Kill(a.go); Kit.Kill(a.car); actors.Remove(id); }
 
             // delivery truck and VIP car wait in their bays until tapped
-            if (sim.truckHere && truck == null) { var g = new Geo(); Art.Truck(g); truck = g.Make("truck", root, Kit.Solid); truck.transform.position = truckPos + new Vector3(0, -0.1f, 0); truck.transform.rotation = Quaternion.Euler(0, -90, 0); AddMarker(truck, new Color(1f, 0.8f, 0.2f)); AddPop(truck, 0, 0.4f); }
+            if (sim.truckHere && truck == null) { var g = new Geo(); Art.Truck(g); truck = g.Make("truck", root, Kit.Solid); Kit.Shadow(truck.transform, new Vector3(0, 0.04f, 0.1f), 3.2f, 6.6f); truck.transform.position = truckPos + new Vector3(0, -0.1f, 0); truck.transform.rotation = Quaternion.Euler(0, -90, 0); AddMarker(truck, new Color(1f, 0.8f, 0.2f)); AddPop(truck, 0, 0.4f); }
             if (!sim.truckHere && truck != null) { Kit.Kill(truck); truck = null; }
-            if (sim.vipHere && vip == null) { var g = new Geo(); Art.Car(g, new Color(0.16f, 0.14f, 0.2f), true); vip = g.Make("vip", root, Kit.Solid); vip.transform.position = vipPos + new Vector3(0, -0.1f, 0); vip.transform.rotation = Quaternion.Euler(0, 90, 0); AddMarker(vip, new Color(0.85f, 0.45f, 1f)); AddPop(vip, 0, 0.4f); }
+            if (sim.vipHere && vip == null) { var g = new Geo(); Art.Car(g, new Color(0.16f, 0.14f, 0.2f), true); vip = g.Make("vip", root, Kit.Solid); Kit.Shadow(vip.transform, new Vector3(0, 0.04f, 0), 2.9f, 5.8f); vip.transform.position = vipPos + new Vector3(0, -0.1f, 0); vip.transform.rotation = Quaternion.Euler(0, 90, 0); AddMarker(vip, new Color(0.85f, 0.45f, 1f)); AddPop(vip, 0, 0.4f); }
             if (!sim.vipHere && vip != null) { Kit.Kill(vip); vip = null; }
             Spin(truck); Spin(vip);
         }
