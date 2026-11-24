@@ -101,6 +101,10 @@ x2|利益2倍|수익 2배|Doppelter Gewinn|Profit doublé|Beneficio doble|雙倍
 x2d|すべての売上がずっと2倍|모든 판매 영구 2배|Alle Verkäufe x2, für immer|Toutes les ventes x2, pour toujours|Todas las ventas x2, para siempre|所有銷售永久 x2
 offpro|夜間マネージャー|야간 매니저|Nachtmanager|Gérant de nuit|Gerente nocturno|夜班經理
 offprod|留守中も最大8時間稼ぐ|부재 중 최대 8시간 수익|Verdiene bis zu 8 Std in Abwesenheit|Gagnez jusqu'à 8 h en votre absence|Gana hasta 8 h mientras no estás|離線最多賺 8 小時
+restore|購入を復元|구매 복원|Käufe wiederherstellen|Restaurer les achats|Restaurar compras|恢復購買
+restored|購入を復元しました|구매를 복원했어요|Käufe wiederhergestellt|Achats restaurés|Compras restauradas|已恢復購買
+nostore|App Store に接続できません。後でもう一度お試しください|App Store에 연결할 수 없어요. 나중에 다시 시도하세요|App Store nicht erreichbar, bitte später erneut versuchen|App Store indisponible, réessayez plus tard|App Store no disponible, inténtalo más tarde|無法連上 App Store，請稍後再試
+waitpay|承認待ち|승인 대기 중|Wartet auf Freigabe|En attente d’approbation|Esperando aprobación|等待家長同意
 warp|タイムスキップ|시간 건너뛰기|Zeitsprung|Saut dans le temps|Salto de tiempo|時間跳躍
 warpd|この収入を今すぐ受け取る|이만큼의 수입을 지금 받기|Erhalte dieses Einkommen sofort|Recevez ce revenu tout de suite|Recibe estos ingresos ahora mismo|立即獲得這些收入
 stuck|待ちたくない？|기다리기 싫으세요?|Keine Lust zu warten?|Pas envie d'attendre ?|¿No quieres esperar?|不想等？

@@ -6,32 +6,39 @@ using Souq.Core;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Purchasing;
 
 namespace Souq
 {
-    public class Product { public string id, key, desc, price, tag; public int gems; public Func<Save, bool> owned; }
+    public class Product { public string id, key, desc, price, tag; public int gems; public bool once; public Func<Save, bool> owned; public string Sku => "com.noobclaw.souq." + id; }
 
-    /// Shop catalogue. This build has no payment connection: Buy() grants at once and the shop says so on screen.
+    /// Shop catalogue and Apple in-app purchases (Unity IAP 5). The App Store product IDs are "com.noobclaw.souq." + id;
+    /// each must exist in App Store Connect with the same type (once = non-consumable, otherwise consumable).
     public class Store
     {
         public static readonly int[] WarpHours = { 1, 4, 24 }; public static readonly int[] WarpGems = { 40, 120, 500 };
         public readonly List<Product> Products = new List<Product>(); readonly Game g;
+        StoreController iap; bool connected, busy; Action<bool> pending; readonly Dictionary<string, string> localPrice = new Dictionary<string, string>();
+        public bool Ready => connected;
         public Store(Game game)
         {
             g = game;
-            Products.Add(new Product { id = "starter", key = "starter", desc = "starterd", price = "$1.99", tag = "best", owned = s => s.starter });
-            Products.Add(new Product { id = "x2", key = "x2", desc = "x2d", price = "$9.99", tag = "popular", owned = s => s.profitX2 });
-            Products.Add(new Product { id = "offpro", key = "offpro", desc = "offprod", price = "$5.99", owned = s => s.offlinePro });
-            Products.Add(new Product { id = "gems1", key = "gems", price = "$0.99", gems = 80 });
-            Products.Add(new Product { id = "gems2", key = "gems", price = "$4.99", gems = 500 });
-            Products.Add(new Product { id = "gems3", key = "gems", price = "$9.99", gems = 1200, tag = "popular" });
-            Products.Add(new Product { id = "gems4", key = "gems", price = "$19.99", gems = 2800 });
-            Products.Add(new Product { id = "gems5", key = "gems", price = "$49.99", gems = 8000 });
-            Products.Add(new Product { id = "gems6", key = "gems", price = "$99.99", gems = 18000, tag = "best" });
+            Products.Add(new Product { id = "starter", key = "starter", desc = "starterd", price = "$1.99", tag = "best", once = true, owned = s => s.starter });
+            Products.Add(new Product { id = "x2", key = "x2", desc = "x2d", price = "$9.99", tag = "popular", once = true, owned = s => s.profitX2 });
+            Products.Add(new Product { id = "offpro", key = "offpro", desc = "offprod", price = "$5.99", once = true, owned = s => s.offlinePro });
+            Products.Add(new Product { id = "gems80", key = "gems", price = "$0.99", gems = 80 });
+            Products.Add(new Product { id = "gems500", key = "gems", price = "$4.99", gems = 500 });
+            Products.Add(new Product { id = "gems1200", key = "gems", price = "$9.99", gems = 1200, tag = "popular" });
+            Products.Add(new Product { id = "gems2800", key = "gems", price = "$19.99", gems = 2800 });
+            Products.Add(new Product { id = "gems8000", key = "gems", price = "$49.99", gems = 8000 });
+            Products.Add(new Product { id = "gems18000", key = "gems", price = "$99.99", gems = 18000, tag = "best" });
         }
         public Product Find(string id) { foreach (var p in Products) if (p.id == id) return p; return null; }
+        Product BySku(string sku) { foreach (var p in Products) if (p.Sku == sku) return p; return null; }
+        /// The App Store's own price text for the player's country once the store has answered, else the US price.
+        public string PriceOf(Product p) => localPrice.TryGetValue(p.id, out var t) && !string.IsNullOrEmpty(t) ? t : p.price;
 
-        /// Gives the goods for one transaction id exactly once; a repeated id is ignored.
+        /// Gives the goods for one transaction id exactly once; a repeated id or an owned one-time item is ignored.
         public bool Grant(Product p, string tx)
         {
             var s = g.sim.s; if (p == null || string.IsNullOrEmpty(tx)) return false;
@@ -43,12 +50,80 @@ namespace Souq
                 case "starter": s.starter = true; g.sim.AddGems(300); g.sim.Earn(g.sim.IdleIncome(4 * 3600)); break;
                 case "x2": s.profitX2 = true; break;
                 case "offpro": s.offlinePro = true; break;
-                case "noads": s.noAds = true; break;
                 default: g.sim.AddGems(p.gems); break;
             }
             g.SaveNow(); return true;
         }
-        public void Buy(Product p, Action<bool> done) { bool ok = Grant(p, "test-" + Guid.NewGuid().ToString("N")); done?.Invoke(ok); }
+
+        // ---------- Apple payments ----------
+        public async void StartIap()
+        {
+            try
+            {
+                try { await Unity.Services.Core.UnityServices.InitializeAsync(); } catch (Exception e) { Debug.LogWarning("IAP: services init: " + e.Message); }
+                iap = UnityIAPServices.StoreController();
+                iap.OnPurchasePending += OnPending;
+                iap.OnPurchaseFailed += OnFailed;
+                iap.OnPurchaseDeferred += o => { busy = false; Finish(false); g.ui.Toast(Loc.G("waitpay")); };
+                iap.OnProductsFetched += OnFetched;
+                iap.OnProductsFetchFailed += f => Debug.LogWarning("IAP: products not fetched: " + f);
+                iap.OnPurchasesFetched += OnPurchasesFetched;
+                iap.OnStoreDisconnected += d => { connected = false; Debug.LogWarning("IAP: store disconnected: " + d.message); };
+                await iap.Connect();
+                var defs = new List<ProductDefinition>();
+                foreach (var p in Products) defs.Add(new ProductDefinition(p.Sku, p.once ? ProductType.NonConsumable : ProductType.Consumable));
+                iap.FetchProducts(defs);
+            }
+            catch (Exception e) { Debug.LogWarning("IAP: start failed: " + e); }
+        }
+        void OnFetched(List<UnityEngine.Purchasing.Product> list)
+        {
+            connected = true;
+            foreach (var ap in list) { var p = BySku(ap.definition.id); if (p != null && ap.metadata != null) localPrice[p.id] = ap.metadata.localizedPriceString; }
+            iap.FetchPurchases();                                      // finishes any payment that was interrupted last time
+        }
+        void OnPurchasesFetched(Orders orders)
+        {
+            // one-time items already paid for (another device, a reinstall): give them back
+            foreach (var o in orders.ConfirmedOrders) GrantOrder(o, false);
+        }
+        void OnPending(PendingOrder o)
+        {
+            bool ok = GrantOrder(o, true);
+            iap.ConfirmPurchase(o);                                    // always confirm, or Apple keeps redelivering it
+            busy = false; Finish(true);
+            if (ok) g.audio.Play("win");
+        }
+        void OnFailed(FailedOrder o) { busy = false; Finish(false); }
+        bool GrantOrder(Order o, bool consumablesToo)
+        {
+            bool any = false; string tx = o.Info != null ? o.Info.TransactionID : null;
+            foreach (var item in o.CartOrdered.Items())
+            {
+                var p = item.Product != null ? BySku(item.Product.definition.id) : null; if (p == null) continue;
+                if (!consumablesToo && !p.once) continue;
+                if (Grant(p, string.IsNullOrEmpty(tx) ? "restore-" + p.id : tx)) any = true;
+            }
+            return any;
+        }
+        void Finish(bool ok) { var cb = pending; pending = null; cb?.Invoke(ok); }
+
+        public void Buy(Product p, Action<bool> done)
+        {
+#if UNITY_EDITOR
+            done?.Invoke(Grant(p, "editor-" + Guid.NewGuid().ToString("N"))); return;
+#else
+            if (iap == null || !connected) { g.ui.Toast(Loc.G("nostore")); done?.Invoke(false); return; }
+            if (busy) return;
+            var ap = iap.GetProductById(p.Sku); if (ap == null) { g.ui.Toast(Loc.G("nostore")); done?.Invoke(false); return; }
+            busy = true; pending = done; iap.PurchaseProduct(ap);
+#endif
+        }
+        public void Restore()
+        {
+            if (iap == null || !connected) { g.ui.Toast(Loc.G("nostore")); return; }
+            iap.RestoreTransactions((ok, msg) => { if (ok) iap.FetchPurchases(); g.ui.Toast(Loc.G(ok ? "restored" : "nostore")); });
+        }
     }
 
     public class AudioKit

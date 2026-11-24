@@ -536,7 +536,7 @@ namespace Souq
         {
             var body = OpenSheet(Loc.G("shop"), U.Red, 1700); var list = g.store.Products; int warps = Store.WarpHours.Length;
             var content = Scroll(body, list.Count * 180 + warps * 162 + 140);
-            var note = U.Txt(content, Loc.G("test"), 28, U.Red); U.Place(note.rectTransform, 0, 1, 1, 1, 0, -90, 0, -4);
+            var restore = U.Button(content, Loc.G("restore"), new Color(0.45f, 0.50f, 0.66f), 28, () => g.store.Restore(), "restore"); U.Pin(restore.rt, 0.5f, 1, 0, -14, 520, 76); restore.rt.pivot = new Vector2(0.5f, 1);
             var rows = new List<Row>(); float y = -120;
             foreach (var p in list)
             {
@@ -553,7 +553,7 @@ namespace Souq
             }
             sheetRefresh = () =>
             {
-                for (int i = 0; i < list.Count; i++) { var p = list[i]; bool own = p.owned != null && p.owned(s); rows[i].sub.text = p.desc != null ? Loc.G(p.desc) : ""; rows[i].btn.label.text = own ? Loc.G("owned") : Loc.G("buy"); rows[i].cost.text = own ? "" : p.price; U.Enable(rows[i].btn, !own); }
+                for (int i = 0; i < list.Count; i++) { var p = list[i]; bool own = p.owned != null && p.owned(s); rows[i].sub.text = p.desc != null ? Loc.G(p.desc) : ""; rows[i].btn.label.text = own ? Loc.G("owned") : Loc.G("buy"); rows[i].cost.text = own ? "" : g.store.PriceOf(p); U.Enable(rows[i].btn, !own); }
                 for (int i = 0; i < warps; i++) SetRow(warpRows[i], "+" + Loc.Num(sim.IdleIncome(Store.WarpHours[i] * 3600)), Loc.G("buy"), Store.WarpGems[i], s.gem >= Store.WarpGems[i]);
             };
             sheetRefresh();
@@ -635,7 +635,7 @@ namespace Souq
             {
                 // the shopper lost income past the cap: the moment the longer cap is worth most to them
                 var note = U.Txt(body, Loc.Fix(Loc.Raw("capped") + " " + (int)(T.OfflineCap / 3600) + Loc.Raw("hours")) + "\n" + Loc.G("offprod"), 30, U.Red); U.Pin(note.rectTransform, 0.5f, 0, 0, 140, 800, 100); note.rectTransform.pivot = new Vector2(0.5f, 0);
-                var p = g.store.Find("offpro"); var bb = U.Button(body, Loc.G("offpro") + "  " + p.price, U.Red, 36, () => g.store.Buy(p, ok => { if (ok) Toast(Loc.G("owned")); })); U.Pin(bb.rt, 0.5f, 0, 0, 16, 700, 110); bb.rt.pivot = new Vector2(0.5f, 0);
+                var p = g.store.Find("offpro"); var bb = U.Button(body, Loc.G("offpro") + "  " + g.store.PriceOf(p), U.Red, 36, () => g.store.Buy(p, ok => { if (ok) Toast(Loc.G("owned")); })); U.Pin(bb.rt, 0.5f, 0, 0, 16, 700, 110); bb.rt.pivot = new Vector2(0.5f, 0);
             }
         }
         /// Shown when the player taps something they cannot afford and the wait is long.

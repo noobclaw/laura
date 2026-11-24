@@ -49,6 +49,8 @@ namespace Souq
             {"warp", new[]{"Time Skip","تخطي الوقت"}}, {"warpd", new[]{"Get this much income right now","احصل على هذا الدخل الآن"}},
             {"stuck", new[]{"Don't want to wait?","لا تريد الانتظار؟"}}, {"needgems", new[]{"Not enough gems","الجواهر غير كافية"}},
             {"test", new[]{"TEST BUILD - purchases are free and not charged","نسخة تجريبية - المشتريات مجانية"}},
+            {"restore", new[]{"Restore purchases","استعادة المشتريات"}}, {"restored", new[]{"Purchases restored","تمت استعادة المشتريات"}},
+            {"nostore", new[]{"App Store not available, try again later","متجر التطبيقات غير متاح، حاول لاحقاً"}}, {"waitpay", new[]{"Waiting for approval","بانتظار الموافقة"}},
             {"sound", new[]{"Sound","الصوت"}}, {"music", new[]{"Music","الموسيقى"}}, {"lang", new[]{"Language","اللغة"}}, {"on", new[]{"ON","تشغيل"}}, {"off", new[]{"OFF","إيقاف"}},
             {"served", new[]{"Shoppers served","عملاء تمت خدمتهم"}}, {"total", new[]{"Total earned","إجمالي الأرباح"}}, {"shoppers", new[]{"Shoppers in store","المتسوقون في المتجر"}},
             {"manager", new[]{"Manager","مدير"}}, {"research", new[]{"Research","أبحاث"}},

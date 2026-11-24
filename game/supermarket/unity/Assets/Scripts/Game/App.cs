@@ -19,6 +19,7 @@ namespace Souq
             g = new Game(); g.Start(Game.LoadSave(), true);
             g.sim.DailyLogin((int)(g.Now() / 86400));
             g.Intro();
+            g.store.StartIap();
             g.CheckOffline();
         }
 
