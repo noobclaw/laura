@@ -214,7 +214,7 @@ namespace Souq
                 int style = (int)((h / 41) % 4);
                 if (style == 0) g.C(top * 0.82f).Ball(0.2f, 0.18f, 0.12f, 0, 1.12f, -0.2f, 9, 5).Box(0.26f * wide, 0.12f, 0.05f, 0, 0.62f, 0.21f * wide);                                             // hoodie: hood and pouch
                 else if (style == 1) { g.C(Art.White).Box(0.16f * wide, 0.44f, 0.04f, 0, 0.62f, 0.215f * wide); g.C(top * 0.8f).Box(0.05f, 0.44f, 0.045f, -0.1f * wide, 0.62f, 0.22f * wide).Box(0.05f, 0.44f, 0.045f, 0.1f * wide, 0.62f, 0.22f * wide); }   // open jacket over a white tee
-                else if (style == 2) for (int k = 0; k < 3; k++) g.C(Art.White).Box(0.5f * wide, 0.045f, 0.4f * wide, 0, 0.66f + k * 0.13f, 0);                                                  // striped tee
+                else if (style == 2) g.C(Art.White).Ball(0.11f, 0.11f, 0.03f, 0, 0.9f, 0.215f * wide, 10, 5);                                                  // tee with a chest print
             }
             if (staff)
             {
