@@ -13,92 +13,105 @@ namespace Souq.Core
 
     public static class T
     {
+        // 2026-11-23: every number below is our own, tuned with game/supermarket/econ/model.py and checked by Editor/EconAudit.cs.
         public const int ND = 11, NC = 8, MaxStaff = 5, MaxQueue = 4, CashQueueMax = 12;
-        public const int MaxLevel = 300, ProdMax = 40, CashLevelMax = 50, AdLevelMax = 100;
+        public const int MaxLevel = 1000, ProdMax = 50, CashLevelMax = 40, AdLevelMax = 40;
+        /// No price anywhere in the game is above this; level 1000 of every section costs about this much.
+        public const double PriceCeiling = 1e18;
 
         public static readonly string[] DeptKey = { "produce", "bakery", "butcher", "seafood", "spices", "fashion", "fragrance", "electronics", "phones", "jewellery", "cars" };
-        // Sized so nothing in the game needs a number past the trillions (2026-11-23 rebalance; model in game/supermarket/econ/model.py).
-        public static readonly double[] Build = { 0, 2e3, 4e4, 4e5, 2.5e6, 1.5e7, 8e7, 5e8, 2e9, 1e10, 5e10 };
-        public static readonly double[] BasePrice = { 2, 8, 50, 150, 800, 5e3, 2.5e4, 8e4, 2e5, 8e5, 2e6 };
-        public static readonly double[] UpBase = { 2, 15, 60, 200, 600, 2e3, 5e3, 1.5e4, 4e4, 1.2e5, 3e5 };
-        public static readonly double[] UpRate = { 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045, 1.045 };
-        public static readonly double[] SpeedBase = { 28, 19, 8, 6, 3, 1.2, 0.6, 0.5, 0.4, 0.32, 0.25 };   // customers per minute, per staff
-        public static readonly int[] Visit = { 90, 90, 85, 70, 60, 50, 40, 30, 20, 12, 6 };                 // % chance a shopper plans a stop
+        public static readonly double[] Build = { 0, 400, 1500, 1e4, 1e6, 5e6, 2.5e7, 2.5e8, 2e9, 2e10, 1.5e11 };
+        public static readonly double[] BasePrice = { 2, 9, 40, 180, 800, 3.5e3, 1.5e4, 6.5e4, 2.8e5, 1.2e6, 5e6 };
+        /// Sale price grows by this factor every level, on top of the bonus every 50 levels.
+        public const double PriceGrowth = 1.007;
+        public static readonly double[] UpBase = { 1.2, 5.4, 24, 108, 480, 2.1e3, 9e3, 3.9e4, 1.68e5, 7.2e5, 3e6 };
+        /// Chosen so that level 1000 of each section costs PriceCeiling: UpRate = (PriceCeiling / UpBase)^(1/999).
+        public static readonly double[] UpRate = { 1.04217, 1.04060, 1.03905, 1.03749, 1.03594, 1.03441, 1.03290, 1.03139, 1.02988, 1.02838, 1.02691 };
+        public static readonly double[] SpeedBase = { 3.6, 3.0, 2.6, 2.4, 2.1, 1.9, 1.7, 1.5, 1.3, 1.1, 0.94 };   // shoppers served per minute by one staff member
+        public static readonly int[] Visit = { 95, 80, 70, 65, 55, 50, 45, 40, 35, 30, 25 };                     // % chance a shopper plans a stop
 
-        public static readonly int[] TierLv = { 25, 50, 100, 150, 200, 300 };
-        public static readonly double[] TierMul = { 1.5, 1.5, 1.5, 1.5, 1.5, 1.5 };
+        public static readonly int[] TierLv = MakeTiers();
+        public static readonly double[] TierMul = MakeTierMul();
+        static int[] MakeTiers() { var a = new int[MaxLevel / 50]; for (int i = 0; i < a.Length; i++) a[i] = 50 * (i + 1); return a; }
+        static double[] MakeTierMul() { var a = new double[MaxLevel / 50]; for (int i = 0; i < a.Length; i++) a[i] = 1.3; return a; }
 
-        public static double PriceStep(int d) => BasePrice[d] * 0.08;
-        public static double SpeedStep(int d) => SpeedBase[d] * 0.05;
-        public static double ProdBase(int d) => UpBase[d] * 20;
-        public static double ProdRate(int d) => 1.12;
+        public static double SpeedStep(int d) => SpeedBase[d] * 0.04;
+        public static double ProdCostAt(int d, int n) => UpBase[d] * 10 * Math.Pow(1.15, n);
         /// Price to hire staff number `have + 1` (have = 1..4).
-        public static double HireBase(int d, int have)
-        {
-            double first = d == 0 ? 200 : Build[d] * 0.5;
-            return first * Math.Pow(5, have - 1);
-        }
+        public static double HireBase(int d, int have) => Math.Max(50, Build[d] * 0.3) * Math.Pow(3, have - 1);
         public static int Tier(int level) { int k = 0; while (k < TierLv.Length && level >= TierLv[k]) k++; return k; }
         public static double TierProduct(int level) { double m = 1; for (int k = 0; k < TierLv.Length && level >= TierLv[k]; k++) m *= TierMul[k]; return m; }
 
         // checkouts
-        public static readonly double[] CashHire = { 0, 150, 2e3, 5e4, 2e6, 5e7, 1e9, 2e10 };      // price to open checkout k (0-based)
-        public static readonly double[] CashUpBase = { 6, 6, 18, 300, 1500, 3000, 12000, 12000 };
-        public static readonly double[] CashUpRate = { 1.2, 1.2, 1.22, 1.24, 1.25, 1.26, 1.27, 1.28 };
-        public static readonly double[] CashSpeedBase = { 5, 5, 7, 8, 10, 12, 14, 14 };                 // customers per minute
-        public static readonly double[] CashSpeedStep = { .1, .1, .1, .1, .2, .2, .24, .28 };
+        public static readonly double[] CashHire = { 0, 200, 2e3, 2e4, 3e5, 5e6, 1e8, 2e9 };                    // price to open checkout k (0-based)
+        public static readonly double[] CashUpBase = { 10, 10, 25, 60, 150, 400, 1e3, 2.5e3 };
+        public const double CashUpRate = 1.25;
+        public static readonly double[] CashSpeedBase = { 7, 4, 4, 4.5, 4.5, 5, 5, 5.5 };                         // shoppers per minute
+        public const double CashSpeedStep = 0.1;
 
-        // parking: index = current level - 1, value = price of the next level
-        public static readonly double[] ParkCost = { 60, 250, 1e3, 4e3, 1.5e4, 6e4, 2.5e5, 1e6, 4e6, 1.5e7, 5e7, 1.5e8, 5e8, 1.5e9, 5e9, 1.5e10, 4e10, 1e11, 2.5e11, 6e11, 1.5e12, 4e12 };
+        // car park and adverts
+        public const int ParkPer = 6; public const double StayMin = 1.3;                                           // a car holds its bay about 1.3 minutes
+        public static readonly double[] ParkCost = { 60, 150, 400, 1e3, 2.5e3, 8e3, 2e4, 5e4, 1.2e5, 3e5, 8e5, 2.5e6, 6e6, 1.5e7 };
         public static int ParkMax => ParkCost.Length + 1;
+        public const double CarsBase = 6, CarsStep = 1.5, AdCostBase = 20, AdCostRate = 1.33;
 
         // store grades: profit multiplier is the value itself, not a running product
-        public static readonly double[] StarCost = { 0, 2e6, 1.2e7, 6e7, 2.5e8, 1e9, 4e9, 1.2e10, 3e10, 8e10, 2e11, 4e11, 8e11, 1.5e12, 3e12, 5e12 };
-        public static readonly double[] StarProfit = { 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20 };
+        public static readonly double[] StarCost = { 0, 4e3, 4e5, 6e6, 5e7, 5e8, 3e9, 1e10, 5e10, 4e11, 2e12, 8e12, 2e13, 1.5e14, 1e16, 6e17 };
+        public static readonly double[] StarProfit = { 1, 1.5, 2, 2.6, 3.3, 4.1, 5, 6, 7.2, 8.5, 10, 12, 14, 16.5, 19, 22 };
 
         public static readonly EpicDef[] Epics = MakeEpics();
         static EpicDef[] MakeEpics()
         {
             var l = new System.Collections.Generic.List<EpicDef>();
-            l.Add(new EpicDef { kind = EpicKind.Profit, dept = -1, add = 0.25, cost = 150, max = 20 });
-            l.Add(new EpicDef { kind = EpicKind.Walk, dept = -1, add = 0.05, cost = 20, max = 10 });
-            for (int d = 0; d < ND; d++) l.Add(new EpicDef { kind = EpicKind.Manager, dept = d, add = 0.5, cost = 100 * (d + 1), max = 1 });
-            l.Add(new EpicDef { kind = EpicKind.Truck, dept = -1, add = 0.5, cost = 30, max = 20 });
-            l.Add(new EpicDef { kind = EpicKind.CashierSpeed, dept = -1, add = 0.05, cost = 25, max = 10 });
-            l.Add(new EpicDef { kind = EpicKind.StaffCost, dept = -1, add = 0.02, cost = 15, max = 20 });
-            l.Add(new EpicDef { kind = EpicKind.CashierCost, dept = -1, add = 0.02, cost = 15, max = 20 });
-            l.Add(new EpicDef { kind = EpicKind.AdTime, dept = -1, add = 1800, cost = 25, max = 6 });
-            for (int d = 0; d < ND; d++) l.Add(new EpicDef { kind = EpicKind.Research, dept = d, add = 0.019, cost = 5 + 3 * d, max = 50 });
+            l.Add(new EpicDef { kind = EpicKind.Profit, dept = -1, add = 0.2, cost = 120, max = 15 });
+            l.Add(new EpicDef { kind = EpicKind.Walk, dept = -1, add = 0.04, cost = 30, max = 10 });
+            for (int d = 0; d < ND; d++) l.Add(new EpicDef { kind = EpicKind.Manager, dept = d, add = 0.5, cost = 60 * (d + 1), max = 1 });
+            l.Add(new EpicDef { kind = EpicKind.Truck, dept = -1, add = 0.4, cost = 25, max = 10 });
+            l.Add(new EpicDef { kind = EpicKind.CashierSpeed, dept = -1, add = 0.06, cost = 30, max = 10 });
+            l.Add(new EpicDef { kind = EpicKind.StaffCost, dept = -1, add = 0.03, cost = 20, max = 10 });
+            l.Add(new EpicDef { kind = EpicKind.CashierCost, dept = -1, add = 0.03, cost = 20, max = 10 });
+            l.Add(new EpicDef { kind = EpicKind.AdTime, dept = -1, add = 1200, cost = 30, max = 6 });
+            for (int d = 0; d < ND; d++) l.Add(new EpicDef { kind = EpicKind.Research, dept = d, add = 0.03, cost = 6 + 2 * d, max = 10 });
             return l.ToArray();
         }
 
         public static readonly TaskDef[] Tasks = MakeTasks();
         static TaskDef Tk(TaskKind k, int d, double need, double coin, int gem) => new TaskDef { kind = k, dept = d, need = need, coin = coin, gem = gem };
+        /// Goals in order: each new section gets built, then pushed through its bonus levels; grades and side goals in between.
         static TaskDef[] MakeTasks()
         {
-            return new[]
+            var l = new System.Collections.Generic.List<TaskDef>
             {
-                Tk(TaskKind.DeptLevel, 0, 25, 150, 0), Tk(TaskKind.DeptServed, 0, 20, 0, 5), Tk(TaskKind.Trucks, -1, 5, 600, 0),
-                Tk(TaskKind.ParkLevel, -1, 3, 0, 6), Tk(TaskKind.BuildDept, 1, 1, 0, 10), Tk(TaskKind.DeptLevel, 0, 50, 6e3, 0),
-                Tk(TaskKind.DeptLevel, 1, 25, 0, 8), Tk(TaskKind.ParkLevel, -1, 4, 3e4, 0), Tk(TaskKind.DeptServed, 1, 50, 4e4, 0),
-                Tk(TaskKind.DeptLevel, 0, 100, 0, 10), Tk(TaskKind.DeptServed, 0, 250, 0, 5), Tk(TaskKind.BuildDept, 2, 1, 0, 25),
-                Tk(TaskKind.Trucks, -1, 20, 0, 20), Tk(TaskKind.DeptLevel, 2, 50, 0, 5), Tk(TaskKind.Assets, -1, 2e7, 0, 15),
-                Tk(TaskKind.DeptLevel, 2, 100, 0, 10), Tk(TaskKind.DeptLevel, 1, 200, 0, 10), Tk(TaskKind.DeptLevel, 0, 200, 0, 10),
-                Tk(TaskKind.BuildDept, 3, 1, 0, 25), Tk(TaskKind.Star, -1, 1, 0, 50), Tk(TaskKind.DeptLevel, 3, 200, 0, 8),
-                Tk(TaskKind.DeptServed, 3, 250, 0, 5), Tk(TaskKind.BuildDept, 4, 1, 0, 25), Tk(TaskKind.DeptServed, 0, 1000, 0, 10),
-                Tk(TaskKind.DeptServed, 4, 100, 0, 10), Tk(TaskKind.Trucks, -1, 50, 0, 50), Tk(TaskKind.BuildDept, 5, 1, 0, 50),
-                Tk(TaskKind.Star, -1, 2, 0, 100), Tk(TaskKind.DeptLevel, 4, 300, 0, 15), Tk(TaskKind.DeptLevel, 5, 250, 0, 20),
-                Tk(TaskKind.DeptLevel, 0, 300, 0, 30), Tk(TaskKind.Star, -1, 3, 0, 150), Tk(TaskKind.BuildDept, 6, 1, 0, 40),
-                Tk(TaskKind.DeptLevel, 6, 200, 0, 15), Tk(TaskKind.BuildDept, 7, 1, 0, 45), Tk(TaskKind.DeptLevel, 7, 200, 0, 15),
-                Tk(TaskKind.Star, -1, 4, 0, 200), Tk(TaskKind.BuildDept, 8, 1, 0, 60), Tk(TaskKind.DeptLevel, 8, 300, 0, 25),
-                Tk(TaskKind.Trucks, -1, 150, 0, 80), Tk(TaskKind.BuildDept, 9, 1, 0, 80), Tk(TaskKind.Star, -1, 5, 0, 250),
-                Tk(TaskKind.DeptLevel, 9, 300, 0, 30), Tk(TaskKind.BuildDept, 10, 1, 0, 100), Tk(TaskKind.Star, -1, 6, 0, 300),
+                Tk(TaskKind.DeptLevel, 0, 10, 100, 0), Tk(TaskKind.DeptServed, 0, 15, 0, 5), Tk(TaskKind.ParkLevel, -1, 2, 0, 5),
+                Tk(TaskKind.BuildDept, 1, 1, 0, 10), Tk(TaskKind.Trucks, -1, 5, 300, 0), Tk(TaskKind.DeptLevel, 0, 50, 0, 10),
+                Tk(TaskKind.BuildDept, 2, 1, 0, 10), Tk(TaskKind.DeptLevel, 1, 50, 0, 10), Tk(TaskKind.Star, -1, 1, 0, 20),
+                Tk(TaskKind.BuildDept, 3, 1, 0, 15), Tk(TaskKind.ParkLevel, -1, 5, 0, 10), Tk(TaskKind.DeptLevel, 0, 100, 0, 15),
+                Tk(TaskKind.Trucks, -1, 30, 0, 15), Tk(TaskKind.Star, -1, 2, 0, 30), Tk(TaskKind.DeptLevel, 2, 100, 0, 15),
             };
+            int[] grades = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            int g = 0;
+            for (int d = 4; d < ND; d++)
+            {
+                l.Add(Tk(TaskKind.BuildDept, d, 1, 0, 20 + 5 * d));
+                l.Add(Tk(TaskKind.DeptLevel, d - 1, 150, 0, 15 + 2 * d));
+                l.Add(Tk(TaskKind.DeptServed, d, 100, 0, 10 + d));
+                l.Add(Tk(TaskKind.DeptLevel, d - 3, 250 + 25 * d, 0, 20 + 2 * d));
+                l.Add(Tk(TaskKind.Star, -1, grades[g], 0, 30 + 10 * g)); g++;
+                if (d % 2 == 0) l.Add(Tk(TaskKind.Trucks, -1, 30 * d, 0, 20 + 3 * d));
+            }
+            for (; g < grades.Length; g++)
+            {
+                l.Add(Tk(TaskKind.DeptLevel, ND - 1, 150 + 75 * g, 0, 40 + 5 * g));
+                l.Add(Tk(TaskKind.DeptLevel, (g * 3) % ND, 500 + 40 * g, 0, 40 + 5 * g));
+                l.Add(Tk(TaskKind.Star, -1, grades[g], 0, 60 + 15 * g));
+            }
+            for (int d = 0; d < ND; d++) l.Add(Tk(TaskKind.DeptLevel, d, 1000, 0, 150));
+            return l.ToArray();
         }
 
         // paid extras (rule values; store prices live in Store.cs)
         public const int LoginGems = 100, AdGems = 30;
-        public const double OfflineMinAway = 180, OfflineCap = 21600, OfflineCapPro = 43200;
+        public const double OfflineMinAway = 180, OfflineCap = 14400, OfflineCapPro = 28800, OfflineRate = 0.5;   // away pay: half speed, up to 4 h (8 h with Night Manager)
         public const double AdBoostStep = 1800, AdBoostMax = 21600, QuickBuySecs = 120, QuickCheckSecs = 30;
     }
 }

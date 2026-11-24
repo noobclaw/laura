@@ -67,8 +67,8 @@ income|収入|수입|Einkommen|Revenu|Ingresos|收入
 welcome|おかえりなさい！|다시 오셨군요!|Willkommen zurück!|Bon retour !|¡Bienvenido de nuevo!|歡迎回來！
 away|留守の間もお店は稼いでいました|자리를 비운 동안 매장이 벌었어요|Dein Laden hat in deiner Abwesenheit verdient|Votre magasin a gagné en votre absence|Tu tienda ganó mientras no estabas|你不在時店鋪也在賺錢
 collect|受け取る|받기|ABHOLEN|RÉCUPÉRER|RECOGER|領取
-collect3|広告を見て x3|광고 보고 x3|WERBUNG ANSEHEN  x3|VOIR LA PUB  x3|VER ANUNCIO  x3|看廣告 x3
-free3|受け取る x3|받기 x3|ABHOLEN  x3|RÉCUPÉRER  x3|RECOGER  x3|領取 x3
+collect3|広告を見て x2|광고 보고 x2|WERBUNG ANSEHEN  x2|VOIR LA PUB  x2|VER ANUNCIO  x2|看廣告 x2
+free3|受け取る x2|받기 x2|ABHOLEN  x2|RÉCUPÉRER  x2|RECOGER  x2|領取 x2
 capped|稼ぎが止まった時間：|수익이 멈춘 시간:|Einnahmen gestoppt nach|Gains arrêtés après|Las ganancias pararon tras|收益上限時間：
 hours|時間|시간|Std|h|h|時
 mins|分|분|Min|min|min|分
@@ -100,7 +100,7 @@ noadsd|広告報酬がすぐにもらえる|광고 보상을 즉시 획득|Jede 
 x2|利益2倍|수익 2배|Doppelter Gewinn|Profit doublé|Beneficio doble|雙倍利潤
 x2d|すべての売上がずっと2倍|모든 판매 영구 2배|Alle Verkäufe x2, für immer|Toutes les ventes x2, pour toujours|Todas las ventas x2, para siempre|所有銷售永久 x2
 offpro|夜間マネージャー|야간 매니저|Nachtmanager|Gérant de nuit|Gerente nocturno|夜班經理
-offprod|留守中も最大12時間稼ぐ|부재 중 최대 12시간 수익|Verdiene bis zu 12 Std in Abwesenheit|Gagnez jusqu'à 12 h en votre absence|Gana hasta 12 h mientras no estás|離線最多賺 12 小時
+offprod|留守中も最大8時間稼ぐ|부재 중 최대 8시간 수익|Verdiene bis zu 8 Std in Abwesenheit|Gagnez jusqu'à 8 h en votre absence|Gana hasta 8 h mientras no estás|離線最多賺 8 小時
 warp|タイムスキップ|시간 건너뛰기|Zeitsprung|Saut dans le temps|Salto de tiempo|時間跳躍
 warpd|この収入を今すぐ受け取る|이만큼의 수입을 지금 받기|Erhalte dieses Einkommen sofort|Recevez ce revenu tout de suite|Recibe estos ingresos ahora mismo|立即獲得這些收入
 stuck|待ちたくない？|기다리기 싫으세요?|Keine Lust zu warten?|Pas envie d'attendre ?|¿No quieres esperar?|不想等？
@@ -117,21 +117,21 @@ shoppers|来店中のお客様|매장 내 고객|Kunden im Laden|Clients en maga
 manager|店長|매니저|Manager|Manager|Gerente|店長
 research|研究|연구|Forschung|Recherche|Investigación|研究
 e_profit|品質保証|품질 보증|Produktgarantie|Garantie produit|Garantía de producto|品質保證
-e_profitd|すべての利益 +25%|모든 수익 +25%|Gesamter Gewinn +25%|Tout le profit +25%|Todo el beneficio +25%|所有利潤 +25%
+e_profitd|すべての利益 +20%|모든 수익 +20%|Gesamter Gewinn +20%|Tout le profit +20%|Todo el beneficio +20%|所有利潤 +20%
 e_walk|やる気満々のお客様|의욕적인 고객|Eifrige Kunden|Clients pressés|Clientes con ganas|積極的顧客
-e_walkd|お客様の歩く速さ +5%|고객 이동 속도 +5%|Kunden gehen 5% schneller|Les clients marchent 5% plus vite|Los clientes caminan un 5% más rápido|顧客步行速度 +5%
+e_walkd|お客様の歩く速さ +4%|고객 이동 속도 +4%|Kunden gehen 4% schneller|Les clients marchent 4% plus vite|Los clientes caminan un 4% más rápido|顧客步行速度 +4%
 e_mgrd|スタッフの速さ +50%|직원 속도 +50%|Personal arbeitet 50% schneller|Personnel 50% plus rapide|El personal trabaja un 50% más rápido|店員速度 +50%
 e_truck|スピード配達|빠른 배송|Schnelllieferung|Livraison rapide|Entrega rápida|快速送貨
-e_truckd|トラックの報酬 +50%|트럭 보상 +50%|Lieferungen zahlen 50% mehr|Les camions rapportent 50% de plus|Los camiones pagan un 50% más|貨車報酬 +50%
+e_truckd|トラックの報酬 +40%|트럭 보상 +40%|Lieferungen zahlen 40% mehr|Les camions rapportent 40% de plus|Los camiones pagan un 40% más|貨車報酬 +40%
 e_cash|ロボットヘルパー|로봇 도우미|Roboterhelfer|Robots assistants|Robots ayudantes|機器人幫手
-e_cashd|レジの速さ +5%|계산대 속도 +5%|Kassen 5% schneller|Caisses 5% plus rapides|Cajas un 5% más rápidas|收銀速度 +5%
+e_cashd|レジの速さ +6%|계산대 속도 +6%|Kassen 6% schneller|Caisses 6% plus rapides|Cajas un 6% más rápidas|收銀速度 +6%
 e_staff|雇用助成|고용 지원금|Lohnzuschuss|Aide à l'embauche|Subsidio laboral|僱用補助
-e_staffd|雇用コスト -2%|고용 비용 -2%|Einstellen kostet 2% weniger|Embaucher coûte 2% de moins|Contratar cuesta un 2% menos|僱用成本 -2%
+e_staffd|雇用コスト -3%|고용 비용 -3%|Einstellen kostet 3% weniger|Embaucher coûte 3% de moins|Contratar cuesta un 3% menos|僱用成本 -3%
 e_ccost|仕入れ契約|공급 계약|Lieferantendeal|Accord fournisseur|Acuerdo con proveedores|供應商合約
-e_ccostd|レジのコスト -2%|계산대 비용 -2%|Kassen kosten 2% weniger|Les caisses coûtent 2% de moins|Las cajas cuestan un 2% menos|收銀台成本 -2%
+e_ccostd|レジのコスト -3%|계산대 비용 -3%|Kassen kosten 3% weniger|Les caisses coûtent 3% de moins|Las cajas cuestan un 3% menos|收銀台成本 -3%
 e_ad|ゴールデンタイム|프라임 타임|Beste Sendezeit|Heure de grande écoute|Horario estelar|黃金時段
-e_add|広告キャンペーンを30分延長できる|광고 캠페인을 30분 더 진행|Werbekampagne kann 30 Min länger laufen|La campagne peut durer 30 min de plus|La campaña puede durar 30 min más|廣告活動可延長 30 分鐘
-e_resd|強化コスト -1.9%|업그레이드 비용 -1.9%|Ausbau kostet 1,9% weniger|Les améliorations coûtent 1,9% de moins|Las mejoras cuestan un 1,9% menos|升級成本 -1.9%
+e_add|広告キャンペーンを20分延長できる|광고 캠페인을 20분 더 진행|Werbekampagne kann 20 Min länger laufen|La campagne peut durer 20 min de plus|La campaña puede durar 20 min más|廣告活動可延長 20 分鐘
+e_resd|強化コスト -3%|업그레이드 비용 -3%|Ausbau kostet 3% weniger|Les améliorations coûtent 3% de moins|Las mejoras cuestan un 3% menos|升級成本 -3%
 t_lvl|{0}をレベル{1}にする|{0}을(를) 레벨 {1}까지 올리기|{0} auf Stufe {1} bringen|Monter {0} au niveau {1}|Sube {0} al nivel {1}|將{0}升到等級 {1}
 t_srv|{0}で{1}人を接客する|{0}에서 고객 {1}명 응대|{1} Kunden bei {0} bedienen|Servir {1} clients au rayon {0}|Atiende a {1} clientes en {0}|在{0}服務 {1} 位顧客
 t_truck|配達トラックを{1}台受け取る|배송 트럭 {1}대 받기|{1} Lieferungen annehmen|Récupérer {1} livraisons|Recoge {1} camiones de reparto|領取 {1} 輛送貨車

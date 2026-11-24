@@ -431,7 +431,7 @@ namespace Souq
                 bar.rectTransform.anchorMax = new Vector2(Mathf.Clamp01((lv - lo) / (float)Mathf.Max(1, hi - lo)), 1);
                 barTxt.text = top ? Loc.G("max") : Loc.Fix(Loc.Raw("next") + " " + hi + "  x" + T.TierMul[tier]);
                 for (int i = 0; i < 3; i++) U.Enable(modeBtns[i], true); modeBtns[buyMode].bg.color = U.Gold;
-                double cost = sim.LevelCost(d); if (buyMode == 1) { double c = 0; for (int i = 0; i < 10; i++) c += Math.Floor(Math.Pow(T.UpRate[d], lv - 1 + i) * T.UpBase[d] * 100) / 100; cost = c * (sim.LevelCost(d) / Math.Max(1e-9, Math.Floor(Math.Pow(T.UpRate[d], lv - 1) * T.UpBase[d] * 100) / 100)); }
+                double cost = sim.LevelCost(d); if (buyMode == 1) { double c = 0; for (int i = 0; i < 10 && lv + i < T.MaxLevel; i++) c += sim.LevelCostAt(d, lv + i); cost = c; }
                 SetRow(up, Loc.Fix(Loc.Raw("price") + " " + Loc.Num(sim.Price(d))), Loc.G("upgrade"), buyMode == 2 ? sim.LevelCost(d) : cost, s.coin >= sim.LevelCost(d), lv >= T.MaxLevel);
                 SetRow(hire, s.dStaff[d] + " / " + T.MaxStaff, Loc.G("hire"), sim.HireCost(d), s.coin >= sim.HireCost(d), s.dStaff[d] >= T.MaxStaff);
                 SetRow(train, Loc.Fix(Loc.Num(sim.StaffSpeed(d)) + Loc.Raw("permin")), Loc.G("train"), sim.ProdCost(d), s.coin >= sim.ProdCost(d), s.dSpeed[d] >= T.ProdMax);
@@ -631,7 +631,7 @@ namespace Souq
             var ic = U.Img(body, Spr.Coin, Color.white, "coin", false); U.Pin(ic.rectTransform, 0.5f, 1, -250, -170, 110, 110);
             var amt = U.Txt(body, Loc.Num(reward), 88, new Color(0.95f, 0.62f, 0.05f), TextAnchor.MiddleLeft); U.Pin(amt.rectTransform, 0.5f, 1, -120, -160, 540, 130); amt.rectTransform.pivot = new Vector2(0, 1);
             Action<double> pay = m => { var at = CanvasPosOf(card); ClosePopup(); g.pendingOffline = 0; sim.Earn(reward * m); FlyIcons(Spr.Coin, at, coinPill, 16); Float("+" + Loc.Num(reward * m), at, U.Gold, 70); g.audio.Play("win"); if (m > 1) Flash(U.Gold); };
-            var x3 = U.Button(body, s.noAds ? Loc.G("free3") : Loc.G("collect3"), U.Green, 44, () => g.Ad(() => pay(3))); U.Pin(x3.rt, 0.5f, 1, 0, -330, 760, 130); x3.rt.pivot = new Vector2(0.5f, 1);
+            var x3 = U.Button(body, s.noAds ? Loc.G("free3") : Loc.G("collect3"), U.Green, 44, () => g.Ad(() => pay(2))); U.Pin(x3.rt, 0.5f, 1, 0, -330, 760, 130); x3.rt.pivot = new Vector2(0.5f, 1);
             var x1 = U.Button(body, Loc.G("collect"), U.Blue, 40, () => pay(1)); U.Pin(x1.rt, 0.5f, 1, 0, -486, 520, 104); x1.rt.pivot = new Vector2(0.5f, 1);
             if (capped && !s.offlinePro)
             {

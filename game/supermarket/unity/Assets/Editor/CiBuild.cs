@@ -186,6 +186,7 @@ public static class CiBuild
     {
         Setup();
         SimAudit();
+        EconAudit.RunAndWrite(shotDir);
         try { GameShots(); } catch (Exception e) { Debug.LogWarning("CiBuild: GameShots failed: " + e); }
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
