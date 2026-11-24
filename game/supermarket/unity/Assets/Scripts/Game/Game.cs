@@ -253,7 +253,7 @@ namespace Souq
             if (tier > tierBefore)
             {
                 audio.Play("win"); audio.Play("whoosh"); ui.Flash(col); world.shake = 1f; punch = 1;
-                ui.Ribbon("x" + T.TierMul[tier - 1] + " " + Loc.Raw("bonus"), Loc.G(T.DeptKey[d]), col, true); ui.Confetti(Mid, 60); ui.FlyIcons(Spr.Star, Mid, ui.coinPill, 8);
+                ui.Ribbon(Loc.Fix("x" + T.TierMul[tier - 1] + " " + Loc.Raw("bonus")), Loc.G(T.DeptKey[d]), col, true); ui.Confetti(Mid, 60); ui.FlyIcons(Spr.Star, Mid, ui.coinPill, 8);
             }
         }
         public void OnHire(int d) { world.SyncStatic(); world.PopDept(d); audio.Play("pop"); var at = ui.ToCanvas(World.StaffPos(d, sim.s.dStaff[d] - 1) + Vector3.up * 1.2f); ui.Burst(at, U.Blue, 10, 1.2f); world.shake = Mathf.Max(world.shake, 0.3f); }

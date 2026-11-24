@@ -115,7 +115,7 @@ namespace Souq
         static void Look()
         {
             if (looked) return; looked = true;
-            src = Resources.Load<GameObject>("People/Walking"); walk = FirstClip("People/Walking"); idle = FirstClip("People/Idle");
+            src = Resources.Load<GameObject>("People/Walking"); walk = FirstClip("People/Walking"); idle = FirstClip("People/Idle"); if (idle != null && !idle.legacy) idle = null;
             if (src == null || walk == null || !walk.legacy) { Debug.LogWarning("Person: rigged character unavailable (model " + (src != null) + ", walk " + (walk != null) + "), using stand-ins"); src = null; }
             else Debug.Log("Person: rigged character ready, idle clip " + (idle != null));
         }
