@@ -15,7 +15,7 @@ public static class EconAudit
     {
         public string name; public Save s; public Sim sim; public double clock = 1e9;
         public List<string> events = new List<string>(); public double[] openDay = new double[T.ND]; public double[] starDay = new double[16];
-        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1;
+        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1; public string hourWhere = ""; public Dictionary<string, int> hourBuys = new Dictionary<string, int>(), worstBuys = new Dictionary<string, int>();
         public List<double> sessionGrowth = new List<double>(); public int freeGems; public double[] servedAcc = new double[T.ND];
         public string end;
     }
@@ -137,7 +137,7 @@ public static class EconAudit
                 foreach (var o in Options(m)) { double c; double g = Gain(m, o, out c); if (g > 0) { bestPb = Math.Min(bestPb, c / g); cheapest = Math.Min(cheapest, c); } }
                 r.best.Add(bestPb);
                 if (day < 10) r.maxWait = Math.Max(r.maxWait, Math.Max(0, (cheapest - s.coin) / Math.Max(f, 1e-9)));
-                if (t % 60 == 59) { if (day >= 3) r.maxHour = Math.Max(r.maxHour, f / Math.Max(hourFlow, 1e-9)); hourFlow = f; }
+                if (t % 60 == 59) { double hg = f / Math.Max(hourFlow, 1e-9); if (day >= 3 && hg > r.maxHour) { r.maxHour = hg; r.hourWhere = "day " + (day + 1) + " minute " + (t + 1); r.worstBuys = new Dictionary<string, int>(r.hourBuys); } hourFlow = f; r.hourBuys.Clear(); }
                 r.maxCoin = Math.Max(r.maxCoin, s.coin);
             }
             r.sessionGrowth.Add(Flow(m) / Math.Max(startFlow, 1e-9));
@@ -193,7 +193,7 @@ public static class EconAudit
             r.maxPrice = Math.Max(r.maxPrice, cc);
             if (!Buy(m, pick)) break;
             if (!cheap && gn > 0) r.paid.Add(cc / gn);
-            n++; r.buys++;
+            n++; r.buys++; string kk = pick.k.ToString(); r.hourBuys[kk] = (r.hourBuys.TryGetValue(kk, out int hv) ? hv : 0) + 1;
             double after = Flow(m); if (pick.k != K.Build && before > 0) r.maxJump = Math.Max(r.maxJump, after / before);
             double dayF = day + t / (double)Session;
             if (pick.k == K.Build) { r.openDay[pick.i] = dayF; r.events.Add("open " + pick.i + " day " + (day + 1) + " +" + t + "m"); }
@@ -239,13 +239,14 @@ public static class EconAudit
             for (int d = 4; d < T.ND; d++) { double g0 = r.openDay[d - 1] - r.openDay[d - 2], g1 = r.openDay[d] - r.openDay[d - 1]; gaps += g1.ToString("0.0") + " "; if (r.openDay[d] < 0 || (g0 > 0.3 && (g1 > 3 * g0 + 0.5 || g1 < g0 / 3 - 0.5))) smooth = false; }
             rule(last >= 0 && (r.name == "no ads" ? last >= 13 && last <= 21 : last >= 8.5 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.name == "no ads" ? " (target day 14-21)" : " (target day 9.5-21)"));
             rule(smooth, "R5b gaps between openings (days): " + gaps + "(no gap more than 3x the one before)");
-            rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 4 on x" + r.maxHour.ToString("0.0") + " (limit 10), biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3)");
+            rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 4 on x" + r.maxHour.ToString("0.0") + " (limit 10) at " + r.hourWhere + ", bought then: " + string.Join(", ", new List<string>(Pairs(r.worstBuys))) + "; biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3)");
             rule(r.freeGems >= epicTotal * 0.1 && r.freeGems <= epicTotal * 0.5, "R7 free gems cover " + (100.0 * r.freeGems / epicTotal).ToString("0") + "% of all boosts in 30 days (target 10-50%)");
             sb.AppendLine("Events: " + string.Join("; ", r.events) + "\n");
         }
         sb.Insert(0, "RESULT: " + (fails == 0 ? "all rules pass" : fails + " rule(s) fail") + "\n\n");
         return sb.ToString();
     }
+    static IEnumerable<string> Pairs(Dictionary<string, int> d) { foreach (var kv in d) yield return kv.Key + " " + kv.Value; }
     static IEnumerable<string> Enumerable(double[] a, int from) { for (int i = from; i < a.Length; i++) yield return a[i] < 0 ? "-" : (a[i] + 1).ToString("0.0"); }
 
     public static void RunAndWrite(string dir)
