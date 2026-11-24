@@ -202,7 +202,7 @@ public static class CiBuild
         PlayerSettings.companyName = "noobclaw";
         PlayerSettings.productName = "Souq Tycoon";
         PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, "com.noobclaw.souq");
-        PlayerSettings.bundleVersion = "0.2.0";
+        PlayerSettings.bundleVersion = "1.0";
         PlayerSettings.iOS.buildNumber = Arg("-buildNumber", "1");
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
         PlayerSettings.iOS.targetOSVersionString = "15.0";
