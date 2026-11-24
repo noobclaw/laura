@@ -193,35 +193,138 @@ namespace Souq
             }
         }
         /// Chunky car, nose toward +z.
-        public static void Car(Geo g, Color body, bool lux = false)
+        /// kind: 0 sedan, 1 pickup, 2 SUV, 3 muscle car, 4 yellow cab, 5 wood-panel wagon, 6 compact. Nose toward +z.
+        public static void Car(Geo g, Color body, bool lux = false, int kind = 0)
         {
-            Color d = body * 0.72f; d.a = 1; Color hi = Color.Lerp(body, Color.white, 0.22f); float len = lux ? 4.6f : 4.0f, cz = -0.2f; var keep = g.M;
-            // skirt and bumpers, body tub, a lighter shoulder line, bonnet and boot lids
-            g.C("#23262d").Puck(1.8f, len + 0.06f, 0.5f, 0.2f, 0, 0.14f, 0);
-            g.C(body).Puck(1.78f, len, 0.52f, 0.42f, 0, 0.28f, 0, 0.05f).C(hi).Puck(1.66f, len - 0.12f, 0.48f, 0.05f, 0, 0.7f, 0, 0.03f);
-            // glasshouse: dark glass block, body-colour pillars, rounded roof
-            g.C("#2f4a66").Puck(1.5f, 2.15f, 0.4f, 0.4f, 0, 0.74f, cz, 0.1f).C("#8fd0ff").Puck(1.3f, 1.9f, 0.3f, 0.02f, 0, 1.135f, cz);
-            foreach (float sx in new[] { -1f, 1f }) foreach (float sz in new[] { -0.92f, 0.05f, 0.9f }) g.C(body).Box(0.07f, 0.4f, 0.09f, sx * (0.7f - Mathf.Abs(sz) * 0.04f), 0.74f, cz + sz);
-            g.C(body).Puck(1.36f, 1.98f, 0.36f, 0.07f, 0, 1.13f, cz, 0.03f).C(hi).Puck(1.1f, 1.6f, 0.3f, 0.02f, 0, 1.2f, cz);
-            // door seams, handles and mirrors
+            if (lux) kind = 0; if (kind == 4) body = Geo.Hex("#ffc61a");
+            Color d = body * 0.72f; d.a = 1; Color hi = Color.Lerp(body, Color.white, 0.22f); var keep = g.M;
+            float len = lux ? 5.2f : kind == 1 ? 4.4f : kind == 2 ? 4.2f : kind == 3 ? 4.3f : kind == 5 ? 4.3f : kind == 6 ? 3.3f : 4.0f;
+            float lift = kind == 1 || kind == 2 ? 0.12f : 0, bh = kind == 2 ? 0.56f : kind == 3 ? 0.36f : 0.42f, wr = kind == 1 || kind == 2 ? 0.4f : 0.34f, corner = kind == 1 || kind == 2 || kind == 3 ? 0.32f : 0.52f;
+            float cabLen = lux ? 3.3f : kind == 1 ? 1.4f : kind == 2 ? 2.8f : kind == 3 ? 1.55f : kind == 5 ? 2.9f : kind == 6 ? 1.9f : 2.15f;
+            float cz = lux ? -0.3f : kind == 1 ? 0.3f : kind == 2 ? -0.45f : kind == 3 ? -0.5f : kind == 5 ? -0.55f : -0.2f, cabH = kind == 3 ? 0.3f : kind == 2 || kind == 6 ? 0.46f : 0.4f;
+            float by = 0.28f + lift, deck = by + bh, roof = deck + cabH;
+            // skirt and bumpers, body tub, a lighter shoulder line
+            g.C("#23262d").Puck(1.8f, len + 0.06f, corner, 0.2f, 0, 0.14f + lift, 0);
+            g.C(body).Puck(1.78f, len, corner, bh, 0, by, 0, 0.05f).C(hi).Puck(1.66f, len - 0.12f, corner - 0.04f, 0.05f, 0, deck, 0, 0.03f);
+            g.C(Steel).Box(1.5f, 0.1f, 0.06f, 0, by - 0.02f, len / 2 + 0.02f).Box(1.5f, 0.1f, 0.06f, 0, by - 0.02f, -len / 2 - 0.02f);
+            // glasshouse: dark glass block with a bright reflection band, body-colour pillars, rounded roof
+            g.C("#2f4a66").Puck(1.5f, cabLen, 0.4f, cabH, 0, deck + 0.04f, cz, 0.1f).C("#9fd8ff").Box(1.12f, 0.03f, 0.05f, 0, deck + cabH * 0.62f, cz + cabLen / 2 - 0.085f).Box(1.12f, 0.03f, 0.05f, 0, deck + cabH * 0.62f, cz - cabLen / 2 + 0.085f);
+            foreach (float sx in new[] { -1f, 1f }) foreach (float sz in new[] { -0.43f, 0.02f, 0.42f }) g.C(body).Box(0.07f, cabH, 0.09f, sx * (0.7f - Mathf.Abs(sz) * 0.08f), deck + 0.04f, cz + sz * cabLen);
+            Color roofCol = kind == 6 ? Geo.Hex(White) : body;
+            g.C(roofCol).Puck(1.36f, cabLen - 0.17f, 0.36f, 0.07f, 0, roof + 0.03f, cz, 0.03f).C(Color.Lerp(roofCol, Color.white, 0.25f)).Puck(1.1f, cabLen - 0.55f, 0.3f, 0.02f, 0, roof + 0.1f, cz);
+            float rt = roof + 0.12f;
+            // door seams, handles, mirrors, wipers
             foreach (float sx in new[] { -1f, 1f })
             {
-                g.C(d).Box(0.02f, 0.36f, 0.03f, sx * 0.885f, 0.32f, cz + 0.05f).Box(0.02f, 0.36f, 0.03f, sx * 0.885f, 0.32f, cz - 0.95f).Box(0.02f, 0.36f, 0.03f, sx * 0.885f, 0.32f, cz + 1.0f);
-                g.C(Steel).Box(0.03f, 0.04f, 0.16f, sx * 0.89f, 0.58f, cz + 0.4f).Box(0.03f, 0.04f, 0.16f, sx * 0.89f, 0.58f, cz - 0.55f);
-                g.C(body).Box(0.16f, 0.1f, 0.12f, sx * 0.9f, 0.76f, cz + 0.98f);
+                g.C(d).Box(0.02f, bh - 0.08f, 0.03f, sx * 0.885f, by + 0.04f, cz + 0.02f * cabLen).Box(0.02f, bh - 0.08f, 0.03f, sx * 0.885f, by + 0.04f, cz - 0.44f * cabLen).Box(0.02f, bh - 0.08f, 0.03f, sx * 0.885f, by + 0.04f, cz + 0.46f * cabLen);
+                g.C(Steel).Box(0.03f, 0.04f, 0.16f, sx * 0.89f, deck - 0.12f, cz + 0.2f * cabLen).Box(0.03f, 0.04f, 0.16f, sx * 0.89f, deck - 0.12f, cz - 0.25f * cabLen);
+                g.C(body).Box(0.17f, 0.1f, 0.12f, sx * 0.91f, deck + 0.04f, cz + 0.46f * cabLen).C(Steel).Box(0.02f, 0.07f, 0.09f, sx * 0.99f, deck + 0.055f, cz + 0.46f * cabLen - 0.02f);
             }
-            // wheels sit in dark arches
-            foreach (var w in new[] { new Vector2(-0.84f, len / 2 - 0.78f), new Vector2(0.84f, len / 2 - 0.78f), new Vector2(-0.84f, -len / 2 + 0.72f), new Vector2(0.84f, -len / 2 + 0.72f) })
+            g.C("#15171c").Box(0.5f, 0.015f, 0.03f, -0.3f, deck + 0.055f, cz + cabLen / 2 + 0.06f).Box(0.5f, 0.015f, 0.03f, 0.3f, deck + 0.055f, cz + cabLen / 2 + 0.06f);
+            // wheels with rims and hub caps, set into dark arches
+            foreach (var w in new[] { new Vector2(-0.84f, len / 2 - 0.8f), new Vector2(0.84f, len / 2 - 0.8f), new Vector2(-0.84f, -len / 2 + 0.74f), new Vector2(0.84f, -len / 2 + 0.74f) })
             {
                 float sx = w.x < 0 ? -1 : 1;
-                g.At(keep * Matrix4x4.TRS(new Vector3(w.x - sx * 0.1f + (sx < 0 ? 0 : 0.26f), 0.34f, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#15171c").Cyl(0.43f, 0.43f, 0.26f, 0, 0, 0, 16);
-                g.At(keep * Matrix4x4.TRS(new Vector3(w.x + (sx < 0 ? -0.04f : 0.26f), 0.34f, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#22262e").Cyl(0.34f, 0.34f, 0.22f, 0, 0, 0, 16).C(Steel).Cyl(0.19f, 0.19f, 0.24f, 0, 0, 0, 12).C("#8b939f").Cyl(0.07f, 0.07f, 0.26f, 0, 0, 0, 8);
+                g.At(keep * Matrix4x4.TRS(new Vector3(w.x - sx * 0.1f + (sx < 0 ? 0 : 0.26f), wr, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#15171c").Cyl(wr + 0.09f, wr + 0.09f, 0.26f, 0, 0, 0, 16);
+                g.At(keep * Matrix4x4.TRS(new Vector3(w.x + (sx < 0 ? -0.04f : 0.26f), wr, w.y), Quaternion.Euler(0, 0, 90), Vector3.one)); g.C("#22262e").Cyl(wr, wr, 0.22f, 0, 0, 0, 16).C(Steel).Cyl(wr * 0.56f, wr * 0.56f, 0.24f, 0, 0, 0, 12).C("#8b939f").Cyl(wr * 0.2f, wr * 0.2f, 0.26f, 0, 0, 0, 8);
             }
-            // lamps, grille, plates
-            g.At(keep).C("#fff7c2").Puck(0.4f, 0.1f, 0.05f, 0.16f, -0.56f, 0.46f, len / 2 - 0.03f).Puck(0.4f, 0.1f, 0.05f, 0.16f, 0.56f, 0.46f, len / 2 - 0.03f);
-            g.C("#ff4d4d").Puck(0.42f, 0.1f, 0.05f, 0.13f, -0.56f, 0.5f, -len / 2 + 0.03f).Puck(0.42f, 0.1f, 0.05f, 0.13f, 0.56f, 0.5f, -len / 2 + 0.03f);
-            g.C(Dark).Box(0.62f, 0.14f, 0.06f, 0, 0.44f, len / 2).C(White).Box(0.44f, 0.12f, 0.03f, 0, 0.22f, len / 2 + 0.02f).Box(0.44f, 0.12f, 0.03f, 0, 0.22f, -len / 2 - 0.02f);
-            if (lux) g.C("#ffd43b").Puck(1.8f, len + 0.02f, 0.52f, 0.05f, 0, 0.5f, 0).Box(0.12f, 0.12f, 0.12f, 0, 0.7f, len / 2 - 0.35f);
+            // lamps, grille with bars, plates, exhaust
+            float ly = by + bh * 0.45f;
+            g.At(keep).C("#fff7c2").Puck(0.4f, 0.1f, 0.05f, 0.16f, -0.56f, ly, len / 2 - 0.03f).Puck(0.4f, 0.1f, 0.05f, 0.16f, 0.56f, ly, len / 2 - 0.03f).C("#ffb347").Box(0.1f, 0.1f, 0.06f, -0.8f, ly, len / 2 - 0.1f).Box(0.1f, 0.1f, 0.06f, 0.8f, ly, len / 2 - 0.1f);
+            g.C("#ff4d4d").Puck(0.42f, 0.1f, 0.05f, 0.13f, -0.56f, ly + 0.04f, -len / 2 + 0.03f).Puck(0.42f, 0.1f, 0.05f, 0.13f, 0.56f, ly + 0.04f, -len / 2 + 0.03f);
+            g.C(Dark).Box(0.62f, 0.16f, 0.06f, 0, ly - 0.01f, len / 2); for (int k = 0; k < 4; k++) g.C(Steel).Box(0.56f, 0.015f, 0.065f, 0, ly + 0.01f + k * 0.035f, len / 2);
+            g.C(White).Box(0.44f, 0.12f, 0.03f, 0, by - 0.04f, len / 2 + 0.05f).Box(0.44f, 0.12f, 0.03f, 0, by - 0.04f, -len / 2 - 0.05f).C("#3b6fb5").Box(0.44f, 0.03f, 0.032f, 0, by + 0.05f, -len / 2 - 0.05f);
+            g.C("#8b939f").Box(0.09f, 0.07f, 0.16f, 0.55f, 0.16f + lift, -len / 2 - 0.02f);
+            if (lux) g.C("#ffd43b").Puck(1.8f, len + 0.02f, corner, 0.05f, 0, by + 0.22f, 0).Box(0.12f, 0.12f, 0.12f, 0, deck + 0.04f, len / 2 - 0.35f).C("#20242c").Puck(0.9f, 1.2f, 0.2f, 0.015f, 0, rt, cz);
+            else if (kind == 0) g.C("#20303f").Puck(0.8f, 0.75f, 0.14f, 0.015f, 0, rt, cz + 0.25f);                                   // sunroof
+            else if (kind == 1)
+            {
+                // open load bed with a tool chest, a hay bale and crates; chunky bull bar
+                float z0 = -len / 2 + 0.14f, z1 = cz - cabLen / 2 - 0.03f, bl = z1 - z0, bc = (z0 + z1) / 2;
+                g.C("#2a2d33").Box(1.52f, 0.02f, bl, 0, deck + 0.05f, bc).C(body).Box(0.1f, 0.2f, bl, -0.8f, deck + 0.03f, bc).Box(0.1f, 0.2f, bl, 0.8f, deck + 0.03f, bc).Box(1.7f, 0.2f, 0.1f, 0, deck + 0.03f, z0);
+                g.C(Steel).Box(1.46f, 0.26f, 0.36f, 0, deck + 0.07f, z1 - 0.22f).C("#8b939f").Box(1.48f, 0.03f, 0.38f, 0, deck + 0.33f, z1 - 0.22f);
+                g.C("#e3c15a").Box(0.7f, 0.34f, 0.5f, -0.33f, deck + 0.07f, bc - 0.35f).C("#b9923a").Box(0.72f, 0.03f, 0.06f, -0.33f, deck + 0.4f, bc - 0.2f).Box(0.72f, 0.03f, 0.06f, -0.33f, deck + 0.4f, bc - 0.5f);
+                g.C(Wood).Box(0.5f, 0.3f, 0.5f, 0.42f, deck + 0.07f, bc - 0.3f).C(Wood2).Box(0.52f, 0.04f, 0.52f, 0.42f, deck + 0.2f, bc - 0.3f);
+                g.C(Dark).Box(1.5f, 0.3f, 0.08f, 0, by, len / 2 + 0.08f).Box(0.08f, 0.5f, 0.08f, -0.5f, by, len / 2 + 0.08f).Box(0.08f, 0.5f, 0.08f, 0.5f, by, len / 2 + 0.08f);
+            }
+            else if (kind == 2)
+            {
+                // roof rails with a cargo box, spare wheel on the tailgate
+                g.C(Steel).Box(0.05f, 0.06f, cabLen - 0.7f, -0.56f, rt, cz).Box(0.05f, 0.06f, cabLen - 0.7f, 0.56f, rt, cz).Box(1.14f, 0.04f, 0.05f, 0, rt + 0.04f, cz + 0.6f).Box(1.14f, 0.04f, 0.05f, 0, rt + 0.04f, cz - 0.6f);
+                g.C("#20242c").Puck(0.8f, 1.5f, 0.25f, 0.22f, 0, rt + 0.08f, cz, 0.06f).C(Steel).Box(0.3f, 0.02f, 0.06f, 0, rt + 0.3f, cz + 0.5f);
+                g.At(keep * Matrix4x4.TRS(new Vector3(0, by + 0.34f, -len / 2 - 0.16f), Quaternion.Euler(90, 0, 0), Vector3.one)).C("#22262e").Cyl(0.32f, 0.32f, 0.16f, 0, 0, 0, 14).C(body).Cyl(0.2f, 0.2f, 0.17f, 0, 0, 0, 12).At(keep);
+            }
+            else if (kind == 3)
+            {
+                // twin racing stripes nose to tail, bonnet scoop, boot spoiler, side pipes
+                foreach (float sx in new[] { -0.2f, 0.2f }) g.C(White).Box(0.2f, 0.012f, len - 0.5f, sx, deck + 0.052f, 0).Box(0.2f, 0.012f, cabLen - 0.5f, sx, rt, cz);
+                g.C("#15171c").Puck(0.5f, 0.6f, 0.12f, 0.1f, 0, deck + 0.05f, len / 2 - 1.0f, 0.03f).Box(0.4f, 0.05f, 0.03f, 0, deck + 0.08f, len / 2 - 0.69f);
+                g.C(body).Box(1.6f, 0.05f, 0.28f, 0, deck + 0.26f, -len / 2 + 0.22f).Box(0.06f, 0.22f, 0.1f, -0.6f, deck + 0.04f, -len / 2 + 0.22f).Box(0.06f, 0.22f, 0.1f, 0.6f, deck + 0.04f, -len / 2 + 0.22f);
+                g.C(Steel).Box(0.06f, 0.06f, 1.2f, -0.9f, 0.2f, 0).Box(0.06f, 0.06f, 1.2f, 0.9f, 0.2f, 0);
+            }
+            else if (kind == 4)
+            {
+                // roof light, checker bands across bonnet and boot and along the sills
+                g.C(Dark).Box(0.7f, 0.04f, 0.26f, 0, rt, cz).C(White).Puck(0.62f, 0.2f, 0.06f, 0.16f, 0, rt + 0.04f, cz).C("#ff8a1f").Box(0.3f, 0.1f, 0.21f, 0, rt + 0.07f, cz);
+                for (int k = 0; k < 10; k++) { g.C(k % 2 == 0 ? "#15171c" : White).Box(0.15f, 0.012f, 0.15f, -0.675f + k * 0.15f, deck + 0.052f, len / 2 - 0.5f).Box(0.15f, 0.012f, 0.15f, -0.675f + k * 0.15f, deck + 0.052f, -len / 2 + 0.4f); }
+                for (int k = 0; k < 14; k++) foreach (float sx in new[] { -1f, 1f }) g.C(k % 2 == 0 ? "#15171c" : White).Box(0.02f, 0.12f, 0.15f, sx * 0.895f, by + 0.18f, -1.0f + k * 0.15f);
+            }
+            else if (kind == 5)
+            {
+                // wood side panels, roof rack loaded for a road trip
+                foreach (float sx in new[] { -1f, 1f }) g.C(Wood2).Box(0.03f, 0.24f, len - 1.7f, sx * 0.89f, by + 0.08f, -0.15f).C("#e6c08a").Box(0.035f, 0.03f, len - 1.7f, sx * 0.89f, by + 0.32f, -0.15f).Box(0.035f, 0.03f, len - 1.7f, sx * 0.89f, by + 0.05f, -0.15f);
+                g.C(Wood2).Box(1.3f, 0.2f, 0.03f, 0, by + 0.12f, -len / 2 - 0.0f);
+                g.C(Steel).Box(0.05f, 0.05f, cabLen - 0.8f, -0.56f, rt, cz).Box(0.05f, 0.05f, cabLen - 0.8f, 0.56f, rt, cz);
+                g.C("#8a5a34").Box(0.9f, 0.22f, 0.6f, -0.05f, rt + 0.05f, cz + 0.55f).C("#e6c08a").Box(0.92f, 0.03f, 0.08f, -0.05f, rt + 0.14f, cz + 0.4f).Box(0.92f, 0.03f, 0.08f, -0.05f, rt + 0.14f, cz + 0.7f);
+                g.C("#e5484d").Box(0.6f, 0.26f, 0.42f, 0.1f, rt + 0.05f, cz - 0.2f).C(White).Box(0.62f, 0.07f, 0.44f, 0.1f, rt + 0.31f, cz - 0.2f).C("#3b82f6").Puck(0.5f, 0.9f, 0.2f, 0.16f, -0.1f, rt + 0.05f, cz - 0.95f, 0.04f);
+            }
+        }
+        /// Main-street America round the shop: flag, mailbox, hydrant, news racks, ice chest, soda machine, hot-dog cart, pumpkins on hay, stop sign, trolley corral.
+        public static void Usa(Geo s, float halfW)
+        {
+            // flag on a pole by the kerb
+            float fx = -halfW - 2.7f, fz = -1.3f, st = 1.3f / 13f;
+            s.C(Steel).Cyl(0.06f, 0.08f, 6.6f, fx, 0, fz, 10).C("#ffd43b").Ball(0.12f, 0.12f, 0.12f, fx, 6.68f, fz, 10, 6).C("#b9b2a2").Cyl(0.3f, 0.36f, 0.22f, fx, 0, fz, 12);
+            for (int k = 0; k < 13; k++) s.C(k % 2 == 0 ? "#c8102e" : "#ffffff").Box(2.3f, st, 0.03f, fx + 0.06f + 1.15f, 5.1f + k * st, fz);
+            s.C("#0a3161").Box(0.98f, st * 7, 0.04f, fx + 0.06f + 0.49f, 5.1f + st * 6, fz);
+            for (int r = 0; r < 4; r++) for (int c = 0; c < 5; c++) s.C("#ffffff").Box(0.07f, 0.07f, 0.05f, fx + 0.2f + c * 0.18f + (r % 2) * 0.05f, 5.1f + st * 6 + 0.07f + r * 0.16f, fz);
+            // blue mailbox
+            float mx = halfW + 2.9f;
+            s.C("#1f4fa8").Box(0.56f, 0.8f, 0.5f, mx, 0.2f, -0.9f).At(mx, 1.0f, -0.9f, 0, 0, 90).Cyl(0.25f, 0.25f, 0.56f, 0, -0.28f, 0, 12).At().C("#17336b").Box(0.08f, 0.2f, 0.08f, mx - 0.2f, 0, -1.08f).Box(0.08f, 0.2f, 0.08f, mx + 0.2f, 0, -1.08f).Box(0.08f, 0.2f, 0.08f, mx - 0.2f, 0, -0.72f).Box(0.08f, 0.2f, 0.08f, mx + 0.2f, 0, -0.72f);
+            s.C(White).Box(0.4f, 0.14f, 0.02f, mx, 0.62f, -1.16f).C("#c8102e").Box(0.4f, 0.03f, 0.022f, mx, 0.58f, -1.16f).C("#17336b").Box(0.44f, 0.05f, 0.03f, mx, 0.92f, -1.16f);
+            // news racks
+            string[] rack = { "#c8102e", "#ffc61a", "#1f4fa8" };
+            for (int k = 0; k < 3; k++) { float x = mx + 0.9f + k * 0.62f; s.C(rack[k]).Box(0.5f, 0.75f, 0.45f, x, 0.35f, -0.9f).C(Dark).Box(0.1f, 0.35f, 0.1f, x, 0, -0.9f).Box(0.4f, 0.03f, 0.4f, x, 0, -0.9f).C("#cfe6f5").Box(0.4f, 0.36f, 0.02f, x, 0.62f, -1.13f).C(White).Box(0.34f, 0.2f, 0.02f, x, 0.66f, -1.12f).C(Dark).Box(0.3f, 0.03f, 0.025f, x, 0.8f, -1.12f); }
+            // fire hydrant at the kerb
+            float hx = halfW + 0.9f, hz = -3.05f;
+            s.C("#d6262c").Cyl(0.2f, 0.2f, 0.06f, hx, 0, hz, 10).Cyl(0.14f, 0.14f, 0.5f, hx, 0.06f, hz, 10).Cyl(0.18f, 0.18f, 0.05f, hx, 0.5f, hz, 10).Ball(0.15f, 0.13f, 0.15f, hx, 0.58f, hz, 10, 6).Cyl(0.05f, 0.05f, 0.08f, hx, 0.7f, hz, 6).Box(0.44f, 0.1f, 0.1f, hx, 0.33f, hz).Box(0.1f, 0.1f, 0.2f, hx, 0.3f, hz - 0.14f);
+            // ice chest and soda machine against the shop front
+            float ix = halfW + 1.15f;
+            s.C(White).Box(1.7f, 1.25f, 0.75f, ix, 0.08f, -0.55f).C("#8b939f").Box(1.74f, 0.08f, 0.79f, ix, 0, -0.55f).C("#1f6fd6").Box(1.74f, 0.3f, 0.79f, ix, 1.33f, -0.55f).C(Steel).Box(0.04f, 0.9f, 0.03f, ix, 0.3f, -0.94f).Box(0.2f, 0.04f, 0.05f, ix - 0.2f, 0.8f, -0.95f).Box(0.2f, 0.04f, 0.05f, ix + 0.2f, 0.8f, -0.95f);
+            for (int k = 0; k < 5; k++) s.C("#dff3ff").Box(0.14f, 0.14f, 0.03f, ix - 0.6f + k * 0.3f, 0.3f + (k % 2) * 0.14f, -0.935f);
+            float vx = -halfW - 0.9f;
+            s.C("#d6262c").Box(0.95f, 2.0f, 0.75f, vx, 0.06f, -0.55f).C(Dark).Box(0.99f, 0.06f, 0.79f, vx, 0, -0.55f).Box(0.5f, 0.22f, 0.03f, vx - 0.1f, 0.25f, -0.935f).C(White).Box(0.6f, 0.9f, 0.02f, vx - 0.1f, 0.85f, -0.93f).C("#ffd43b").Box(0.12f, 0.5f, 0.03f, vx + 0.35f, 1.0f, -0.935f);
+            for (int k = 0; k < 4; k++) s.C("#d6262c").At(vx - 0.1f, 1.0f + k * 0.2f, -0.945f, 0, 0, 18).Box(0.56f, 0.06f, 0.012f).At();
+            // hot-dog cart under a striped umbrella
+            float cx = -halfW - 2.6f, cz = -2.9f;
+            s.C(Steel).Box(1.5f, 0.7f, 0.8f, cx, 0.45f, cz).C("#c8102e").Box(1.54f, 0.16f, 0.84f, cx, 0.6f, cz).C("#ffd43b").Box(1.54f, 0.05f, 0.84f, cx, 0.76f, cz).C("#8b939f").Box(1.56f, 0.04f, 0.86f, cx, 1.15f, cz);
+            foreach (float sx in new[] { -0.55f, 0.55f }) s.At(cx + sx, 0.3f, cz - 0.45f, 0, 90).C("#22262e").Cyl(0.3f, 0.3f, 0.08f, 0, 0, 0, 12).C(Steel).Cyl(0.12f, 0.12f, 0.1f, 0, 0, 0, 8).At();
+            s.C(Steel).Cyl(0.03f, 0.03f, 1.7f, cx, 1.15f, cz, 6); for (int k = 0; k < 8; k++) { float a0 = k / 8f * Mathf.PI * 2; s.C(k % 2 == 0 ? "#c8102e" : "#ffffff").At(cx + Mathf.Cos(a0) * 0.55f, 2.55f, cz + Mathf.Sin(a0) * 0.55f, -k * 45f, 0, -20).Box(1.15f, 0.04f, 0.92f).At(); }
+            s.C("#ffd43b").Ball(0.08f, 0.08f, 0.08f, cx, 2.9f, cz, 8, 5).C("#e8a15a").Box(0.3f, 0.07f, 0.1f, cx - 0.4f, 1.19f, cz - 0.1f).C("#b5432c").Box(0.32f, 0.05f, 0.05f, cx - 0.4f, 1.24f, cz - 0.1f).C("#ffd43b").Cyl(0.05f, 0.05f, 0.2f, cx + 0.3f, 1.19f, cz, 8).C("#c8102e").Cyl(0.05f, 0.05f, 0.2f, cx + 0.45f, 1.19f, cz, 8);
+            // pumpkins on hay bales
+            float px = halfW + 2.6f, pz = -2.75f; var rnd = new System.Random(7);
+            s.C("#e3c15a").Box(1.1f, 0.5f, 0.6f, px, 0, pz).Box(1.1f, 0.5f, 0.6f, px + 1.15f, 0, pz).Box(1.1f, 0.5f, 0.6f, px + 0.55f, 0.5f, pz + 0.05f).C("#b9923a").Box(1.12f, 0.03f, 0.05f, px, 0.5f, pz - 0.15f).Box(1.12f, 0.03f, 0.05f, px + 1.15f, 0.5f, pz - 0.15f).Box(1.12f, 0.03f, 0.05f, px + 0.55f, 1.0f, pz - 0.1f);
+            for (int k = 0; k < 7; k++) { float x = px - 0.6f + k * 0.42f, y = k == 3 ? 1.0f : (k == 1 || k == 5) ? 0.5f : 0, z = pz - (y > 0 ? 0 : 0.55f), r = 0.2f + (float)rnd.NextDouble() * 0.1f; s.C(k % 3 == 2 ? "#f2a33a" : "#f07818").Ball(r, r * 0.8f, r, x, y + r * 0.8f, z, 10, 6).C("#3f7a34").Cyl(0.03f, 0.02f, 0.1f, x, y + r * 1.55f, z, 6); }
+            // stop sign at the lot exit
+            float sx2 = halfW + 3.6f, sz2 = -6.3f;
+            s.C(Steel).Cyl(0.05f, 0.05f, 2.6f, sx2, 0, sz2, 8).At(Matrix4x4.TRS(new Vector3(sx2, 2.75f, sz2 - 0.02f), Quaternion.Euler(-90, 0, 0) * Quaternion.Euler(0, 22.5f, 0), Vector3.one)).C(White).Cyl(0.52f, 0.52f, 0.03f, 0, 0, 0, 8).C("#c8102e").Cyl(0.46f, 0.46f, 0.05f, 0, 0, 0, 8).At();
+            // trolley corral in the lot
+            float qx = halfW + 2.4f, qz = -13f;
+            s.C(Steel).Box(0.07f, 1.0f, 0.07f, qx - 0.8f, 0, qz + 1.4f).Box(0.07f, 1.0f, 0.07f, qx + 0.8f, 0, qz + 1.4f).Box(0.07f, 1.0f, 0.07f, qx - 0.8f, 0, qz - 1.4f).Box(0.07f, 1.0f, 0.07f, qx + 0.8f, 0, qz - 1.4f).Box(0.06f, 0.06f, 2.8f, qx - 0.8f, 0.95f, qz).Box(0.06f, 0.06f, 2.8f, qx + 0.8f, 0.95f, qz).Box(0.06f, 0.06f, 2.8f, qx - 0.8f, 0.5f, qz).Box(0.06f, 0.06f, 2.8f, qx + 0.8f, 0.5f, qz).Box(1.6f, 0.06f, 0.06f, qx, 0.95f, qz + 1.4f);
+            s.C(Steel).Cyl(0.04f, 0.04f, 2.6f, qx, 0, qz + 1.4f, 6).C("#1f4fa8").Box(1.0f, 0.6f, 0.05f, qx, 2.1f, qz + 1.4f).C(White).Box(0.8f, 0.08f, 0.06f, qx, 2.5f, qz + 1.4f).Box(0.6f, 0.08f, 0.06f, qx, 2.3f, qz + 1.4f);
+            for (int k = 0; k < 3; k++) { s.At(qx, 0, qz + 0.6f - k * 0.34f, 180); Cart(s); } s.At();
+            // red, white and blue pennants along the shop front
+            for (int k = 0; k < 26; k++) { float x = -halfW + 0.5f + k * (halfW * 2 - 1f) / 25f; s.C(k % 3 == 0 ? "#c8102e" : k % 3 == 1 ? "#ffffff" : "#1f4fa8").At(x, 2.45f - 0.12f * Mathf.Abs(Mathf.Sin(k * 0.6f)), -0.3f, 0, 0, 45).Box(0.2f, 0.2f, 0.02f); } s.At();
         }
         /// Delivery truck, cab toward +z.
         public static void Truck(Geo g)
@@ -261,15 +364,18 @@ namespace Souq
             if (outfit == 5 || outfit == 6) { robe = true; robeCol = Dress[(int)((h / 11) % (uint)Dress.Length)]; top = Geo.Hex(robeCol); head = 1 + (int)((h / 13) % 3) % 3; if (head == 3) head = 4; }
             else if (outfit == 7) { robe = true; robeCol = (h / 17) % 2 == 0 ? "#2b2d3a" : "#4a3f6b"; top = Geo.Hex(robeCol); head = 6; cloth = Scarf[(int)((h / 19) % (uint)Scarf.Length)]; }
             else if (outfit == 8) { robe = true; robeCol = "#f7f5ee"; top = Geo.Hex(robeCol); head = 7; cloth = (h / 23) % 2 == 0 ? "#ffffff" : "#e8443c"; }
-            var g = new Geo();
+            var g = new Geo(); bool varsity = false;
             g.C(top).Ball(0.3f * wide, 0.36f, 0.23f * wide, 0, 0.82f, 0, 14, 9);
             if (robe) g.C(robeCol).Cyl(0.33f * wide, 0.25f * wide, 0.62f, 0, 0.1f, 0, 14); else g.C(bot).Cyl(0.26f * wide, 0.27f * wide, 0.12f, 0, 0.44f, 0, 12);
             if (!staff && !robe)
             {
-                int style = (int)((h / 41) % 4);
+                int style = (int)((h / 41) % (Loc.Ar ? 4u : 7u));
                 if (style == 0) g.C(top * 0.82f).Ball(0.2f, 0.18f, 0.12f, 0, 1.12f, -0.2f, 9, 5).Box(0.26f * wide, 0.12f, 0.05f, 0, 0.62f, 0.21f * wide);                                             // hoodie: hood and pouch
                 else if (style == 1) { g.C(Art.White).Box(0.16f * wide, 0.44f, 0.04f, 0, 0.62f, 0.215f * wide); g.C(top * 0.8f).Box(0.05f, 0.44f, 0.045f, -0.1f * wide, 0.62f, 0.22f * wide).Box(0.05f, 0.44f, 0.045f, 0.1f * wide, 0.62f, 0.22f * wide); }   // open jacket over a white tee
-                else if (style == 2) g.C(Art.White).Ball(0.11f, 0.11f, 0.03f, 0, 0.9f, 0.215f * wide, 10, 5);                                                  // tee with a chest print
+                else if (style == 2) g.C(Art.White).Ball(0.11f, 0.11f, 0.03f, 0, 0.9f, 0.215f * wide, 10, 5);
+                else if (style == 4) { varsity = true; g.C(Art.White).Box(0.14f, 0.16f, 0.03f, -0.1f * wide, 0.84f, 0.2f * wide).Cyl(0.27f * wide, 0.27f * wide, 0.06f, 0, 0.5f, 0, 12).C("#20242c").Box(0.03f, 0.46f, 0.03f, 0, 0.58f, 0.225f * wide); }      // letterman jacket: white sleeves, chest letter, ribbed hem
+                else if (style == 5) { g.C(Art.White).Box(0.2f, 0.24f, 0.03f, 0, 0.68f, 0.222f * wide).Box(0.2f, 0.24f, 0.03f, 0, 0.72f, -0.222f * wide).Box(0.5f * wide, 0.05f, 0.3f * wide, 0, 1.02f, 0); }                                           // team jersey: big number panels, shoulder stripe
+                else if (style == 6) { Color dk = top * 0.6f; dk.a = 1; for (int k = 0; k < 3; k++) g.C(dk).Box(0.56f * wide, 0.035f, 0.44f * wide, 0, 0.62f + k * 0.15f, 0); for (int k = -1; k <= 1; k++) g.C(dk).Box(0.035f, 0.5f, 0.45f * wide, k * 0.15f * wide, 0.58f, 0); }   // plaid flannel                                                  // tee with a chest print
             }
             if (staff)
             {
@@ -296,11 +402,12 @@ namespace Souq
                 else if (acc == 1 && head < 5) g.C("#e8cf8f").Cyl(0.46f, 0.46f, 0.03f, 0, 1.7f, 0, 16).Cyl(0.27f, 0.25f, 0.15f, 0, 1.73f, 0, 14).C("#d9483b").Cyl(0.275f, 0.275f, 0.04f, 0, 1.74f, 0, 14);     // sun hat
                 else if (acc == 2) g.C(Pack[(int)((h / 29) % (uint)Pack.Length)]).Box(0.36f, 0.42f, 0.17f, 0, 0.6f, -0.28f * wide).C("#20242c").Box(0.2f, 0.12f, 0.03f, 0, 0.72f, -0.38f * wide);      // backpack
                 else if (acc == 3 && head < 6) g.C(Pack[(int)((h / 31) % (uint)Pack.Length)]).Ball(0.35f, 0.17f, 0.33f, 0, 1.67f, 0, 16, 6).Box(0.4f, 0.04f, 0.28f, 0, 1.6f, 0.33f);        // baseball cap
+                else if (acc == 5 && !Loc.Ar && head < 5 && (h / 47) % 2 == 0) g.C("#b98a55").Cyl(0.5f, 0.52f, 0.03f, 0, 1.7f, 0, 16).Box(0.2f, 0.09f, 0.7f, -0.44f, 1.71f, 0).Box(0.2f, 0.09f, 0.7f, 0.44f, 1.71f, 0).Cyl(0.27f, 0.22f, 0.22f, 0, 1.73f, 0, 14).C("#5a3d28").Cyl(0.275f, 0.275f, 0.045f, 0, 1.74f, 0, 14);   // cowboy hat
                 else if (acc == 4 && !robe) g.C(Art.Dark).Box(0.06f, 0.2f, 0.16f, -0.34f, 1.42f, 0).Box(0.06f, 0.2f, 0.16f, 0.34f, 1.42f, 0).Box(0.7f, 0.05f, 0.08f, 0, 1.78f, 0);                                              // headphones                                              // scarf round the shoulders
             }
             g.Make("torso", body, Kit.Solid);
             // limbs hang from their pivots so a turn at the hip or shoulder swings them
-            string legCol = robe ? robeCol : bot; Color sleeve = top;
+            string legCol = robe ? robeCol : bot; Color sleeve = varsity ? Geo.Hex(Art.White) : top;
             for (int s = -1; s <= 1; s += 2)
             {
                 var leg = new Geo(); leg.C(legCol).Cyl(0.1f, 0.11f, 0.4f, 0, -0.4f, 0, 10).C(robe ? "#6b4a2c" : "#2a2f38").Box(0.17f, 0.09f, 0.3f, 0, -0.48f, 0.03f);
@@ -364,7 +471,7 @@ namespace Souq
         public Transform root; public Camera cam; public Sim sim;
         public DeptView[] depts = new DeptView[T.ND];
         public GameObject[] cashDesk = new GameObject[T.NC]; public Person[] cashStaff = new Person[T.NC]; Material[] cashLamp = new Material[T.NC];
-        public GameObject truck, vip; public Vector3 truckPos = new Vector3(6.4f, 0, -1.3f), vipPos = new Vector3(-6.4f, 0, -1.3f), busPos = new Vector3(8.3f, 0, -4.4f);
+        public GameObject truck, vip, usa; public Vector3 truckPos = new Vector3(6.4f, 0, -1.3f), vipPos = new Vector3(-6.4f, 0, -1.3f), busPos = new Vector3(8.3f, 0, -4.4f);
         public const float RoadZ = -4.4f;
         readonly Dictionary<int, Actor> actors = new Dictionary<int, Actor>(); readonly List<int> gone = new List<int>();
         Transform slotRoot; int slotsBuilt; float time; Light sun; Material bandMat; int bandStar = -1; Mesh cartMesh; readonly System.Random rnd = new System.Random(7);
@@ -448,6 +555,10 @@ namespace Souq
             for (int i = 0; i < 12; i++) { float z = -30 + i * 9f; Art.Tree(s, -14.5f - (i % 2) * 2.2f, z, 1.1f + (i % 3) * 0.15f); Art.Tree(s, 14.5f + (i % 2) * 2.2f, z + 4, 1.1f + ((i + 1) % 3) * 0.15f); }
             s.C("#ffd24a").Slab(5.6f, 2.3f, 0.2f, truckPos.x, -0.09f, truckPos.z, 0.004f).C("#d9d4c8").Slab(5.3f, 2.0f, 0.14f, truckPos.x, -0.086f, truckPos.z, 0.004f).C("#b06be0").Slab(5.6f, 2.3f, 0.2f, vipPos.x, -0.09f, vipPos.z, 0.004f).C("#d9d4c8").Slab(5.3f, 2.0f, 0.14f, vipPos.x, -0.086f, vipPos.z, 0.004f);
             s.Make("street", root, Kit.Solid);
+            var us = new Geo(); Art.Usa(us, HalfW); usa = us.Make("usa", root, Kit.Solid);
+            Kit.Label("ICE", usa.transform, new Vector3(HalfW + 1.15f, 1.56f, -0.96f), 0.26f, Color.white); Kit.Label("STOP", usa.transform, new Vector3(HalfW + 3.6f, 2.75f, -6.42f), 0.2f, Color.white);
+            Kit.Shadow(usa.transform, new Vector3(-HalfW - 2.6f, 0.03f, -2.9f), 2.6f, 2.0f); Kit.Shadow(usa.transform, new Vector3(HalfW + 3.2f, 0.03f, -2.75f), 3.2f, 1.6f); Kit.Shadow(usa.transform, new Vector3(HalfW + 2.6f, 0.03f, -0.8f), 5.0f, 1.4f);
+            usa.SetActive(!Loc.Ar);
 
             var cg = new Geo(); Art.Cart(cg); cartMesh = cg.ToMesh("cart");
             for (int c = 0; c < T.NC; c++) BuildCash(c);
@@ -569,7 +680,7 @@ namespace Souq
             a.gift = gift.Make("gift", a.go.transform, Kit.Glow, false); a.gift.transform.localPosition = new Vector3(0, 2.3f, 0); a.gift.SetActive(false); a.gift.AddComponent<SphereCollider>().radius = 1.6f;
             if (c.slot >= 0)
             {
-                var cg = new Geo(); Art.Car(cg, Geo.Hex(CarCol[c.look % CarCol.Length])); a.car = cg.Make("car", root, Kit.Solid); Kit.Shadow(a.car.transform, new Vector3(0, 0.04f, 0), 2.9f, 5.2f);
+                var cg = new Geo(); Art.Car(cg, Geo.Hex(CarCol[c.look % CarCol.Length]), false, (int)((((uint)c.look * 2246822519u) >> 9) % 7)); a.car = cg.Make("car", root, Kit.Solid); Kit.Shadow(a.car.transform, new Vector3(0, 0.04f, 0), 2.9f, 5.2f);
                 a.carPos = new Vector3(-30, -0.12f, RoadZ); a.car.transform.position = a.carPos; a.carYaw = 90;
             }
             a.go.transform.position = c.slot >= 0 ? new Vector3(-30, 0, RoadZ) : busPos; a.go.SetActive(c.slot < 0);
@@ -714,7 +825,7 @@ namespace Souq
 
         public void PopDept(int d) { depts[d].pop = 1f; }
         /// After a change of language.
-        public void RefreshSigns() { for (int d = 0; d < T.ND; d++) if (depts[d] != null && depts[d].name != null) Kit.SetLabel(depts[d].name, Loc.G(T.DeptKey[d])); }
+        public void RefreshSigns() { if (usa != null) usa.SetActive(!Loc.Ar); for (int d = 0; d < T.ND; d++) if (depts[d] != null && depts[d].name != null) Kit.SetLabel(depts[d].name, Loc.G(T.DeptKey[d])); }
         public Actor ActorOf(Cust c) { Actor a; return actors.TryGetValue(c.id, out a) ? a : null; }
         public Cust CustAt(GameObject go) { foreach (var c in sim.custs) { Actor a; if (actors.TryGetValue(c.id, out a) && a.go == go) return c; } return null; }
         public int ActorCount => actors.Count;
