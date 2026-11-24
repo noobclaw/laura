@@ -137,7 +137,7 @@ public static class CiBuild
         int tris = 0, rends = 0; foreach (var mf in UnityEngine.Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None)) if (mf.sharedMesh != null && mf.gameObject.activeInHierarchy) { rends++; for (int k = 0; k < mf.sharedMesh.subMeshCount; k++) tris += (int)(mf.sharedMesh.GetIndexCount(k) / 3); }
         foreach (var sk in UnityEngine.Object.FindObjectsByType<SkinnedMeshRenderer>(FindObjectsSortMode.None)) if (sk.sharedMesh != null && sk.gameObject.activeInHierarchy) { rends++; for (int k = 0; k < sk.sharedMesh.subMeshCount; k++) tris += (int)(sk.sharedMesh.GetIndexCount(k) / 3); }
         Debug.Log("CiBuild: whole scene triangles=" + tris + " renderers=" + rends);
-        g.focus = new Vector3(0, 0, 8); g.zoom = 20.5f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
+        g.focus = new Vector3(0, 0, 8); g.zoom = 22f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
         g.focus = new Vector3(0, 0, 14); g.zoom = 13f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "2_close");
         g.focus = new Vector3(0, 0, -8); g.zoom = 18f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "3_parking");
         g.focus = new Vector3(0, 0, 3); g.zoom = 13f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "4_front");

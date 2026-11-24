@@ -111,7 +111,7 @@ namespace Souq
         public const float Pitch = 50f;
         public const string SaveKey = "save.v2";
         public Sim sim; public World world; public Ui ui; public Camera cam; public AudioKit audio; public Store store; public Tutorial tut;
-        public bool editor, overlay; public double pendingOffline; float saveT, stuckCd, paidFx; public Vector3 focus = new Vector3(0, 0, 8); public float zoom = 20.5f;
+        public bool editor, overlay; public double pendingOffline; float saveT, stuckCd, paidFx; public Vector3 focus = new Vector3(0, 0, 8); public float zoom = 22f;
         int starterShown; int combo; float comboT;
         // camera moves on its own for openings and transitions; a drag takes it back
         Vector3 glideFrom, glideTo; float glideZ0, glideZ1, glideT = -1, glideDur = 1; float punch;
@@ -152,7 +152,7 @@ namespace Souq
             cam.orthographic = true; cam.nearClipPlane = 0.3f; cam.farClipPlane = 400; cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.49f, 0.77f, 0.35f); cam.allowHDR = true;
             if (!editor) cgo.AddComponent<AudioListener>();
             PostFx();
-            world = new World(sim); world.Build(); PlaceCamera();
+            U.PickFont(); world = new World(sim); world.Build(); PlaceCamera();
             ui = new Ui(this); ui.Build(cam, overlay); tut = new Tutorial(this);
             sim.OnServed += (c, d, p) =>
             {
@@ -168,7 +168,7 @@ namespace Souq
         {
             focus = new Vector3(0, 0, -9); zoom = 22f; PlaceCamera();
             ui.Shutter(Loc.G("title"), Loc.G("opening"), new Color(0.80f, 0.13f, 0.15f), null, true);
-            ui.Run(0.1f, k => { }, () => Glide(new Vector3(0, 0, 8), 20.5f, 2.2f), 0.55f);
+            ui.Run(0.1f, k => { }, () => Glide(new Vector3(0, 0, 8), 22f, 2.2f), 0.55f);
         }
 
         void PostFx()
@@ -189,7 +189,7 @@ namespace Souq
         public void PlaceCamera()
         {
             // the store is as wide as the screen, so the view only travels along its length
-            focus.x = 0; focus.z = Mathf.Clamp(focus.z, MinZ, World.StoreDepth - 8f); zoom = Mathf.Clamp(zoom, 13f, 23f);
+            focus.x = 0; focus.z = Mathf.Clamp(focus.z, MinZ, World.StoreDepth - 8f); zoom = Mathf.Clamp(zoom, 13f, 24f);
             cam.transform.rotation = Quaternion.Euler(Pitch, 0, 0); cam.orthographicSize = zoom * (1 - 0.035f * Mathf.Sin(Mathf.Clamp01(punch) * Mathf.PI));
             var p = focus - cam.transform.forward * 90f; float sh = world != null ? world.shake : 0;
             if (sh > 0) p += cam.transform.right * (Mathf.Sin(Time.unscaledTime * 71f) * 0.22f * sh) + cam.transform.up * (Mathf.Sin(Time.unscaledTime * 53f) * 0.18f * sh);
@@ -266,7 +266,7 @@ namespace Souq
         }
         public void SetLang(string code)
         {
-            sim.s.lang = code; Loc.Set(code); Kit.Kill(ui.canvas.gameObject); ui = new Ui(this); ui.Build(cam, overlay); SaveNow();
+            sim.s.lang = code; Loc.Set(code); U.PickFont(); world.RefreshSigns(); Kit.Kill(ui.canvas.gameObject); ui = new Ui(this); ui.Build(cam, overlay); SaveNow();
         }
         public void CheckOffline()
         {

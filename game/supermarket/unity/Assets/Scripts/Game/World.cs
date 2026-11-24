@@ -17,6 +17,23 @@ namespace Souq
             if (Solid == null) { var sh = Shader.Find("Souq/Solid"); if (sh == null) { Missing++; sh = Shader.Find("Universal Render Pipeline/Unlit"); } Solid = new Material(sh); }
             if (Glow == null) { Glow = new Material(Solid); if (Glow.HasProperty("_Glow")) Glow.SetFloat("_Glow", 1f); }
         }
+        static Shader textShader; static bool textLooked;
+        /// Lettering on a sign in the scene, `height` metres tall, readable from the camera side.
+        public static TextMesh Label(string text, Transform parent, Vector3 pos, float height, Color color)
+        {
+            var go = new GameObject("label"); go.transform.SetParent(parent, false); go.transform.position = pos;
+            var tm = go.AddComponent<TextMesh>(); tm.anchor = TextAnchor.MiddleCenter; tm.alignment = TextAlignment.Center; tm.fontSize = 110; tm.characterSize = height * 10f / 110f * 1.3f; tm.color = color;
+            SetLabel(tm, text); return tm;
+        }
+        public static void SetLabel(TextMesh tm, string text)
+        {
+            var font = U.Font != null ? U.Font : Resources.Load<Font>("Font/Changa-Bold"); tm.font = font; tm.text = text; var mr = tm.GetComponent<MeshRenderer>(); if (font == null) return;
+            if (!textLooked) { textLooked = true; textShader = Resources.Load<Shader>("Shaders/SouqText3D"); }
+            if (textShader == null) { mr.sharedMaterial = font.material; return; }
+            var m = new Material(textShader); m.mainTexture = font.material.mainTexture; mr.sharedMaterial = m;
+            // a dynamic font may rebuild its glyph picture when new letters are asked for
+            Font.textureRebuilt += f => { if (f == font && m != null) m.mainTexture = f.material.mainTexture; };
+        }
         public static Material GlowTint(Color c) { var m = new Material(Glow); m.SetColor("_Tint", c.linear); return m; }
         public static void Kill(UnityEngine.Object o) { if (o == null) return; if (Application.isPlaying) UnityEngine.Object.Destroy(o); else UnityEngine.Object.DestroyImmediate(o); }
         public static Bounds BoundsOf(GameObject g)
@@ -270,7 +287,7 @@ namespace Souq
 
     public class DeptView
     {
-        public int d; public Transform root, props; public Vector3 center; public Material tapeMat, signMat;
+        public int d; public Transform root, props; public Vector3 center; public Material tapeMat, signMat; public TextMesh name;
         public Person[] staff = new Person[T.MaxStaff]; public int builtTier = -2, builtRows = -1; public bool builtOpen; public float pop; public BoxCollider hit;
     }
 
@@ -336,16 +353,25 @@ namespace Souq
 
             // shell: low side walls and a tall back wall with the brand band; open front with a portal
             var w = new Geo(); bandMat = new Material(Kit.Solid);
-            w.C(Art.White).Box(0.35f, 2.6f, depth, -HalfW - 0.17f, 0, depth / 2).Box(0.35f, 2.6f, depth, HalfW + 0.17f, 0, depth / 2).Box(HalfW * 2 + 0.7f, 4.2f, 0.35f, 0, 0, depth + 0.17f);
-            w.C("#e9e4d8").Box(0.43f, 0.1f, depth + 0.08f, -HalfW - 0.17f, 2.6f, depth / 2).Box(0.43f, 0.1f, depth + 0.08f, HalfW + 0.17f, 2.6f, depth / 2);
-            foreach (float x in new[] { -HalfW - 0.17f, -2.6f, 2.6f, HalfW + 0.17f }) w.C(Art.White).Box(0.5f, 3.0f, 0.5f, x, 0, -0.05f);
-            w.C(Art.White).Box(5.2f, 0.08f, 0.46f, 0, 3.08f, -0.05f).Box(5.2f, 0.08f, 0.46f, 0, 3.82f, -0.05f);
+            w.C(Art.White).Box(0.6f, 2.8f, depth, -HalfW - 0.3f, 0, depth / 2).Box(0.6f, 2.8f, depth, HalfW + 0.3f, 0, depth / 2).Box(HalfW * 2 + 1.2f, 4.2f, 0.6f, 0, 0, depth + 0.3f);
+            w.C("#d9d2c3").Box(0.7f, 0.14f, depth + 0.1f, -HalfW - 0.3f, 2.8f, depth / 2).Box(0.7f, 0.14f, depth + 0.1f, HalfW + 0.3f, 2.8f, depth / 2).Box(HalfW * 2 + 1.3f, 0.14f, 0.7f, 0, 4.2f, depth + 0.3f);
+            // shop front: a low wall with window frames either side of the doorway, and two glass doors slid open
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                float x0 = sx * 2.85f, x1 = sx * (HalfW + 0.05f), mid = (x0 + x1) / 2, len = Mathf.Abs(x1 - x0);
+                w.C(Art.White).Box(len, 0.9f, 0.3f, mid, 0, -0.05f).C("#d9d2c3").Box(len + 0.04f, 0.08f, 0.36f, mid, 0.9f, -0.05f).C(Art.Steel).Box(len, 0.07f, 0.1f, mid, 2.3f, -0.05f);
+                for (float x = Mathf.Min(x0, x1) + 0.05f; x <= Mathf.Max(x0, x1) + 0.01f; x += (len - 0.1f) / 4f) w.C(Art.Steel).Box(0.07f, 1.4f, 0.1f, x, 0.9f, -0.05f);
+                w.C(Art.Steel).Box(0.08f, 2.5f, 0.1f, sx * 2.25f, 0, -0.2f).Box(0.08f, 2.5f, 0.1f, sx * 1.25f, 0, -0.2f).Box(1.08f, 0.08f, 0.1f, sx * 1.75f, 2.5f, -0.2f).Box(1.08f, 0.12f, 0.1f, sx * 1.75f, 0, -0.2f).C("#bfe6ff").Box(0.9f, 0.05f, 0.04f, sx * 1.75f, 1.2f, -0.2f);
+            }
+            foreach (float x in new[] { -HalfW - 0.3f, -2.85f, 2.85f, HalfW + 0.3f }) w.C(Art.White).Box(0.6f, 3.0f, 0.6f, x, 0, -0.05f);
+            w.C(Art.White).Box(6.0f, 0.08f, 0.5f, 0, 3.08f, -0.05f).Box(6.0f, 0.08f, 0.5f, 0, 4.14f, -0.05f);
             // the store emblem: three fruits between two cream bars
-            w.C("#fff7d6").Box(1.5f, 0.12f, 0.06f, -1.5f, 3.42f, -0.29f).Box(1.5f, 0.12f, 0.06f, 1.5f, 3.42f, -0.29f).C("#ffd43b").Ball(0.24f, 0.24f, 0.08f, -0.3f, 3.46f, -0.29f).C("#7ac943").Ball(0.24f, 0.24f, 0.08f, 0.02f, 3.5f, -0.3f).C("#ff9a1f").Ball(0.24f, 0.24f, 0.08f, 0.32f, 3.46f, -0.29f);
+            w.C("#ffd43b").Ball(0.2f, 0.2f, 0.07f, -2.72f, 3.62f, -0.3f).C("#7ac943").Ball(0.2f, 0.2f, 0.07f, -2.46f, 3.7f, -0.31f).C("#ff9a1f").Ball(0.2f, 0.2f, 0.07f, 2.72f, 3.62f, -0.3f).C("#e5352c").Ball(0.2f, 0.2f, 0.07f, 2.46f, 3.7f, -0.31f);
             w.Make("shell", root, Kit.Solid);
-            var b = new Geo(); b.C(Color.white).Box(0.39f, 0.42f, depth + 0.04f, -HalfW - 0.17f, 2.0f, depth / 2).Box(0.39f, 0.42f, depth + 0.04f, HalfW + 0.17f, 2.0f, depth / 2).Box(HalfW * 2 + 0.74f, 0.6f, 0.39f, 0, 3.3f, depth + 0.17f).Box(5.6f, 0.95f, 0.4f, 0, 3.0f, -0.05f);
-            foreach (float x in new[] { -HalfW - 0.17f, -2.6f, 2.6f, HalfW + 0.17f }) b.Box(0.54f, 0.3f, 0.54f, x, 0, -0.05f);
+            var b = new Geo(); b.C(Color.white).Box(0.64f, 0.46f, depth + 0.04f, -HalfW - 0.3f, 2.1f, depth / 2).Box(0.64f, 0.46f, depth + 0.04f, HalfW + 0.3f, 2.1f, depth / 2).Box(HalfW * 2 + 1.24f, 0.6f, 0.64f, 0, 3.3f, depth + 0.3f).Box(6.4f, 1.22f, 0.44f, 0, 3.0f, -0.05f);
+            foreach (float x in new[] { -HalfW - 0.3f, -2.85f, 2.85f, HalfW + 0.3f }) b.Box(0.64f, 0.3f, 0.64f, x, 0, -0.05f);
             b.Make("band", root, bandMat);
+            Kit.Label("SOUQ MARKET", root, new Vector3(0, 3.62f, -0.29f), 0.56f, new Color(1f, 0.97f, 0.84f));
 
             // street: cart bay, planters, lamps, trees, bays for the truck and the VIP car
             var s = new Geo();
@@ -385,6 +411,10 @@ namespace Souq
             for (float x = -3.4f; x <= 3.4f; x += 0.62f) f.Box(0.36f, 0.003f, 0.05f, mx + x, 0.012f, mz - 3.55f).Box(0.36f, 0.003f, 0.05f, mx + x, 0.012f, mz + 3.55f);
             for (float z = -3.2f; z <= 3.2f; z += 0.62f) f.Box(0.05f, 0.003f, 0.36f, mx - 3.7f, 0.012f, mz + z).Box(0.05f, 0.003f, 0.36f, mx + 3.7f, 0.012f, mz + z);
             f.Make("field", g.transform, Kit.Solid, false);
+            // the section's name on a board mounted above its own fixtures
+            float bz = v.center.z + 4.02f; var post = new Geo(); post.C(Art.Steel).Box(0.09f, 3.2f, 0.09f, mx - 4.0f, 0, bz).Box(0.09f, 3.2f, 0.09f, mx + 4.0f, 0, bz).C(Art.White).Box(8.1f, 0.07f, 0.2f, mx, 3.2f, bz).Box(8.1f, 0.07f, 0.2f, mx, 2.56f, bz); post.Make("boardFrame", g.transform, Kit.Solid);
+            var board = new Geo(); board.C(Color.white).Box(8.0f, 0.58f, 0.14f, mx, 2.62f, bz); board.Make("board", g.transform, v.signMat, false);
+            v.name = Kit.Label(Loc.G(T.DeptKey[d]), g.transform, new Vector3(mx, 2.91f, bz - 0.09f), 0.34f, Color.white);
             v.props = new GameObject("props").transform; v.props.SetParent(g.transform, false);
             for (int k = 0; k < T.MaxStaff; k++)
             {
@@ -601,6 +631,8 @@ namespace Souq
         }
 
         public void PopDept(int d) { depts[d].pop = 1f; }
+        /// After a change of language.
+        public void RefreshSigns() { for (int d = 0; d < T.ND; d++) if (depts[d] != null && depts[d].name != null) Kit.SetLabel(depts[d].name, Loc.G(T.DeptKey[d])); }
         public Actor ActorOf(Cust c) { Actor a; return actors.TryGetValue(c.id, out a) ? a : null; }
         public Cust CustAt(GameObject go) { foreach (var c in sim.custs) { Actor a; if (actors.TryGetValue(c.id, out a) && a.go == go) return c; } return null; }
         public int ActorCount => actors.Count;

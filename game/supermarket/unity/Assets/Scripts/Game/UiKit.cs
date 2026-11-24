@@ -82,6 +82,13 @@ namespace Souq
     public static class U
     {
         public static Font Font;
+        /// Chinese, Japanese and Korean use the phone's own typeface; the bundled one covers Latin and Arabic.
+        public static void PickFont()
+        {
+            Font = null;
+            if (Loc.Cjk) { try { Font = UnityEngine.Font.CreateDynamicFontFromOSFont(Loc.Lang == 2 ? new[] { "Hiragino Sans", "HiraginoSans-W6", "Noto Sans CJK JP", "Noto Sans JP" } : Loc.Lang == 3 ? new[] { "Apple SD Gothic Neo", "AppleSDGothicNeo-Bold", "Noto Sans CJK KR", "Noto Sans KR" } : new[] { "PingFang TC", "PingFangTC-Semibold", "Noto Sans CJK TC", "Noto Sans TC" }, 40); } catch { Font = null; } }
+            if (Font == null) Font = Resources.Load<Font>("Font/Changa-Bold"); if (Font == null) Font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        }
         public static readonly Color Ink = new Color(0.13f, 0.15f, 0.25f), Panel = new Color(0.99f, 0.98f, 0.96f), Navy = new Color(0.10f, 0.13f, 0.27f, 0.94f),
             Gold = new Color(1f, 0.78f, 0.18f), Green = new Color(0.25f, 0.78f, 0.42f), Blue = new Color(0.22f, 0.56f, 0.98f), Red = new Color(0.95f, 0.30f, 0.35f),
             Purple = new Color(0.62f, 0.40f, 0.96f), Grey = new Color(0.70f, 0.72f, 0.78f), Soft = new Color(0.93f, 0.93f, 0.96f);

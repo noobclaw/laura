@@ -26,10 +26,7 @@ namespace Souq
         // ---------- build ----------
         public void Build(Camera cam, bool overlay)
         {
-            Spr.Init(); U.Font = null;
-            // Chinese, Japanese and Korean use the phone's own typeface; the bundled one covers Latin and Arabic
-            if (Loc.Cjk) { try { U.Font = Font.CreateDynamicFontFromOSFont(Loc.Lang == 2 ? new[] { "Hiragino Sans", "HiraginoSans-W6", "Noto Sans CJK JP", "Noto Sans JP" } : Loc.Lang == 3 ? new[] { "Apple SD Gothic Neo", "AppleSDGothicNeo-Bold", "Noto Sans CJK KR", "Noto Sans KR" } : new[] { "PingFang TC", "PingFangTC-Semibold", "Noto Sans CJK TC", "Noto Sans TC" }, 40); } catch { U.Font = null; } }
-            if (U.Font == null) U.Font = Resources.Load<Font>("Font/Changa-Bold"); if (U.Font == null) U.Font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            Spr.Init(); U.PickFont();
             var go = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)); go.layer = 5;
             canvas = go.GetComponent<Canvas>(); canvas.renderMode = overlay ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
             if (!overlay) { canvas.worldCamera = cam; canvas.planeDistance = 1f; }
@@ -134,7 +131,7 @@ namespace Souq
             coinTxt.text = Loc.Num(shownCoin);
             tick -= dt; if (tick <= 0) { tick = 0.15f; Refresh(false); }
             // department chips follow their departments
-            for (int d = 0; d < T.ND; d++) dl[d].rt.anchoredPosition = ToCanvas(World.DeptCenter(d) + new Vector3(0, 2.2f, 3.9f));
+            for (int d = 0; d < T.ND; d++) dl[d].rt.anchoredPosition = ToCanvas(World.DeptCenter(d) + new Vector3(0, 0.05f, -3.05f));
             float tm = Time.unscaledTime;
             foreach (var o in offers) if (o.rt.gameObject.activeSelf) o.rt.localScale = Vector3.one * (1 + 0.05f * Mathf.Sin(tm * 5f + o.rt.anchoredPosition.y));
         }
@@ -154,7 +151,9 @@ namespace Souq
             {
                 var l = dl[d]; bool open = s.dOpen[d], can = d == 0 || s.dOpen[d - 1];
                 l.rt.gameObject.SetActive(open || can);
-                l.name.text = Loc.G(T.DeptKey[d]);
+                // an open section carries its name on its own board, so the chip only shows the level
+                l.name.text = Loc.G(T.DeptKey[d]); l.name.gameObject.SetActive(!open); l.rt.sizeDelta = open ? new Vector2(210, 62) : new Vector2(330, 96);
+                U.Place(l.sub.rectTransform, 0, 0, 1, open ? 1f : 0.5f, 12, 4, -12, open ? -4 : 0);
                 l.sub.text = open ? Loc.Fix(Loc.Raw("level") + " " + s.dLevel[d]) : Loc.Fix(Loc.Raw("build") + " " + Loc.Num(T.Build[d]));
                 bool afford = open ? (s.coin >= sim.LevelCost(d) && s.dLevel[d] < T.MaxLevel) : s.coin >= T.Build[d];
                 l.dot.gameObject.SetActive(afford); l.bg.color = open ? U.Navy : (afford ? new Color(0.16f, 0.55f, 0.30f, 0.96f) : new Color(0.35f, 0.36f, 0.44f, 0.94f));
