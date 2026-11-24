@@ -7,7 +7,7 @@ namespace Souq.Core
     [Serializable]
     public class Save
     {
-        public int v = 3;                      // 3: our own 1000-level numbers; older saves start again
+        public int v = 4;                      // 4: first-version numbers restored; saves from the 300/1000-level trials start again
         public double coin = 1000, assets = 0;
         public int gem = 0;
         public double lastSeen = 0;            // unix seconds
@@ -47,7 +47,7 @@ namespace Souq.Core
             dLevel != null && dLevel.Length == T.ND && dSpeed != null && dSpeed.Length == T.ND && dStaff != null && dStaff.Length == T.ND &&
             dOpen != null && dOpen.Length == T.ND && cLevel != null && cLevel.Length == T.NC && epic != null && epic.Length == T.Epics.Length &&
             served != null && served.Length == T.ND && parkLevel >= 1 && adLevel >= 1 && star >= 0 && star < T.StarCost.Length &&
-            v >= 3 && !double.IsNaN(coin) && !double.IsInfinity(coin) && coin >= 0 && txDone != null;
+            v >= 4 && !double.IsNaN(coin) && !double.IsInfinity(coin) && coin >= 0 && txDone != null;
     }
 
     public enum CS { CarIn, WalkIn, ToDept, Queue, Served, ToCash, CashQueue, Paying, WalkOut, CarOut, Done }
@@ -65,7 +65,7 @@ namespace Souq.Core
         public readonly List<Cust> custs = new List<Cust>();
         public readonly List<Cust>[][] dq = new List<Cust>[T.ND][];
         public readonly List<Cust>[] cq = new List<Cust>[T.NC];
-        readonly bool[] slotUsed = new bool[T.ParkMax * T.ParkPer];
+        readonly bool[] slotUsed = new bool[T.ParkCost.Length * 6 + 6];
         readonly Random rng = new Random();
         double spawnT, giftT; int nextId = 1; public int busPending;
         public bool truckHere, vipHere; public double truckT = 20, vipT = 90, busT = 150, qbT = 110, qcT = 170;
@@ -83,42 +83,37 @@ namespace Souq.Core
         }
 
         // ---------- derived numbers ----------
-        static int[] epicIdx;
-        static int EpicIndex(EpicKind k, int dept)
+        public int Epic(EpicKind k, int dept = -1)
         {
-            if (epicIdx == null)
-            {
-                var a = new int[(Enum.GetValues(typeof(EpicKind)).Length) * (T.ND + 1)]; for (int i = 0; i < a.Length; i++) a[i] = -1;
-                for (int i = 0; i < T.Epics.Length; i++) a[(int)T.Epics[i].kind * (T.ND + 1) + T.Epics[i].dept + 1] = i;
-                epicIdx = a;
-            }
-            return epicIdx[(int)k * (T.ND + 1) + dept + 1];
+            for (int i = 0; i < T.Epics.Length; i++) if (T.Epics[i].kind == k && T.Epics[i].dept == dept) return s.epic[i];
+            return 0;
         }
-        public int Epic(EpicKind k, int dept = -1) { int i = EpicIndex(k, dept); return i < 0 ? 0 : s.epic[i]; }
-        double EpicAdd(EpicKind k, int dept = -1) { int i = EpicIndex(k, dept); return i < 0 ? 0 : T.Epics[i].add * s.epic[i]; }
+        double EpicAdd(EpicKind k, int dept = -1)
+        {
+            for (int i = 0; i < T.Epics.Length; i++) if (T.Epics[i].kind == k && T.Epics[i].dept == dept) return T.Epics[i].add * s.epic[i];
+            return 0;
+        }
         public bool QuickBuy => s.quickBuyEnd > Now();
         public bool QuickCheck => s.quickCheckEnd > Now();
-        public double ProfitMult => T.StarProfit[s.star] * (1 + EpicAdd(EpicKind.Profit)) * (s.profitX2 ? 2 : 1);
-        public double Price(int d) => T.BasePrice[d] * (1 + T.PriceStep * (s.dLevel[d] - 1)) * T.TierProduct(s.dLevel[d]) * ProfitMult;
+        public double ProfitMult => T.StarProfit[s.star] * Math.Pow(2, Epic(EpicKind.Profit)) * (s.profitX2 ? 2 : 1);
+        public double Price(int d) => (T.BasePrice[d] + (s.dLevel[d] - 1) * T.PriceStep(d)) * T.TierProduct(s.dLevel[d]) * ProfitMult;
         public double StaffSpeed(int d) => (T.SpeedBase[d] + s.dSpeed[d] * T.SpeedStep(d)) * (1 + EpicAdd(EpicKind.Manager, d));
         public double DeptSpeed(int d) => StaffSpeed(d) * s.dStaff[d];
         public double ServiceSecs(int d) => 60.0 / StaffSpeed(d) * (QuickBuy ? 0.5 : 1);
         public double LevelCost(int d) => LevelCostAt(d, s.dLevel[d]);
         /// Price of going from `level` to `level + 1`.
-        public double LevelCostAt(int d, int level) => Math.Ceiling(Math.Pow(T.UpRate[d], level - 1) * T.UpBase[d] * (1 - EpicAdd(EpicKind.Research, d)) * 10) / 10;
-        public double ProdCost(int d) => Math.Ceiling(T.ProdCostAt(d, s.dSpeed[d]));
+        public double LevelCostAt(int d, int level) => Math.Floor(Math.Pow(T.UpRate[d], level - 1) * T.UpBase[d] * 100) / 100 * (1 - EpicAdd(EpicKind.Research, d));
+        public double ProdCost(int d) => Math.Pow(T.ProdRate(d), s.dSpeed[d]) * T.ProdBase(d);
         public double HireCost(int d) => Math.Floor(T.HireBase(d, s.dStaff[d]) * (1 - EpicAdd(EpicKind.StaffCost)));
         public int CashOpen { get { int n = 0; foreach (var l in s.cLevel) if (l > 0) n++; return n; } }
-        public double CashSpeed(int c) => (T.CashSpeedBase[c] + (s.cLevel[c] - 1) * T.CashSpeedStep) * (1 + EpicAdd(EpicKind.CashierSpeed));
+        public double CashSpeed(int c) => (T.CashSpeedBase[c] + (s.cLevel[c] - 1) * T.CashSpeedStep[c]) * (1 + EpicAdd(EpicKind.CashierSpeed));
         public double CashSecs(int c) => 60.0 / CashSpeed(c) * (QuickCheck ? 0.5 : 1);
-        public double CashUpCost(int c) => Math.Ceiling(Math.Pow(T.CashUpRate, s.cLevel[c] - 1) * T.CashUpBase[c]);
+        public double CashUpCost(int c) => Math.Floor(10 * Math.Pow(T.CashUpRate[c], s.cLevel[c] - 1) * T.CashUpBase[c]) / 10;
         public double CashHireCost() { int n = CashOpen; return n >= T.NC ? double.PositiveInfinity : T.CashHire[n] * (1 - EpicAdd(EpicKind.CashierCost)); }
-        public int ParkSpaces => T.ParkPer * s.parkLevel;
+        public int ParkSpaces => 6 * s.parkLevel;
         public double ParkCost() => s.parkLevel >= T.ParkMax ? double.PositiveInfinity : T.ParkCost[s.parkLevel - 1];
-        public double Arrivals => T.CarsBase + T.CarsStep * (s.adLevel - 1);      // cars per minute the adverts bring
-        /// Cars per minute that can actually park: a full car park turns the rest away.
-        public double ParkedArrivals => Math.Min(Arrivals, ParkSpaces / T.StayMin);
-        public double AdLevelCost() => s.adLevel >= T.AdLevelMax ? double.PositiveInfinity : Math.Ceiling(T.AdCostBase * Math.Pow(T.AdCostRate, s.adLevel - 1));
+        public double Arrivals => Math.Floor(100 * (8 + 0.8 * (s.adLevel - 1))) / 100;      // cars per minute
+        public double AdLevelCost() => s.adLevel >= T.AdLevelMax ? double.PositiveInfinity : Math.Pow(2, s.adLevel + 1);
         public double StarCost() => s.star + 1 >= T.StarCost.Length ? double.PositiveInfinity : T.StarCost[s.star + 1];
         public double WalkMult => 1 + EpicAdd(EpicKind.Walk);
         public int OpenDepts { get { int n = 0; foreach (var o in s.dOpen) if (o) n++; return n; } }
@@ -129,7 +124,7 @@ namespace Souq.Core
         {
             get
             {
-                double a = ParkedArrivals, cash = 0; for (int c = 0; c < T.NC; c++) if (s.cLevel[c] > 0) cash += CashSpeed(c);
+                double a = Arrivals, cash = 0; for (int c = 0; c < T.NC; c++) if (s.cLevel[c] > 0) cash += CashSpeed(c);
                 double scale = a > 0 ? Math.Min(1, cash / a) : 0, e = 0;
                 for (int d = 0; d < T.ND; d++) if (s.dOpen[d]) e += Price(d) * Math.Min(DeptSpeed(d), a * T.Visit[d] / 100.0) * scale;
                 return e * (QuickCheck ? 2 : 1);
@@ -178,16 +173,21 @@ namespace Souq.Core
         }
 
         // ---------- timed rewards ----------
-        public double TruckReward() => FlowPerMin * (0.2 + 0.3 * rng.NextDouble()) * (1 + EpicAdd(EpicKind.Truck));
+        public double TruckReward() => EarnPerMin * (0.1 + 0.3 * rng.NextDouble()) * (1 + EpicAdd(EpicKind.Truck));
         public double CollectTruck() { if (!truckHere) return 0; truckHere = false; truckT = 35 + 30 * rng.NextDouble(); double r = TruckReward(); Earn(r); s.trucks++; Changed(); return r; }
-        /// A VIP pulls up every 5-7 minutes: 1.5-3 minutes of income and 1-3 gems for a tap.
-        public double RollVip() { vipGems = 1 + rng.Next(3); return FlowPerMin * (1.5 + 1.5 * rng.NextDouble()); }
-        public void DismissVip() { vipHere = false; vipT = 300 + 120 * rng.NextDouble(); }
+        public double RollVip()
+        {
+            vipGems = 1 + rng.Next(3);
+            int[] w = { 60, 40, 10, 5 }; double[] k = { 1, 10, 50, 300 };
+            int roll = rng.Next(115), i = 0; while (i < 3 && roll >= w[i]) { roll -= w[i]; i++; }
+            return EarnPerMin * (0.8 + (k[i] - 0.8) * rng.NextDouble());
+        }
+        public void DismissVip() { vipHere = false; vipT = 150 + 60 * rng.NextDouble(); }
         public double CollectVip() { if (!vipHere) return 0; double r = vipReward; int gm = vipGems; DismissVip(); Earn(r); s.gem += gm; Changed(); return r; }
         public int AcceptBus() { busOffer = false; int n = 10 + rng.Next(40); busPending += n; return n; }
         public void StartQuickBuy() { quickBuyOffer = false; s.quickBuyEnd = Now() + T.QuickBuySecs; Changed(); }
         public void StartQuickCheck() { quickCheckOffer = false; s.quickCheckEnd = Now() + T.QuickCheckSecs; Changed(); }
-        public double GiftReward() => FlowPerMin * OpenDepts * 0.5;
+        public double GiftReward() => EarnPerMin * OpenDepts;
         public double CollectGift(Cust c) { if (!c.gift) return 0; c.gift = false; double r = GiftReward(); Earn(r); return r; }
         /// Income for `secs` of an idle store; used for offline pay and time-skip items.
         public double IdleIncome(double secs) => FlowPerMin / 60 * Math.Max(0, secs);
@@ -195,7 +195,7 @@ namespace Souq.Core
         {
             double away = now - s.lastSeen;
             if (s.lastSeen <= 0 || s.parkLevel <= 1 || away < T.OfflineMinAway) return 0;   // a clock set backwards gives a negative gap and pays nothing
-            return IdleIncome(Math.Min(OfflineCap, away)) * T.OfflineRate;
+            return IdleIncome(Math.Min(OfflineCap, away));
         }
         public bool DailyLogin(int day) { if (day <= s.loginDay) return false; s.loginDay = day; s.gem += T.LoginGems; Changed(); return true; }
 

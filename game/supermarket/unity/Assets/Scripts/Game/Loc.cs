@@ -45,7 +45,7 @@ namespace Souq
             {"popular", new[]{"POPULAR","الأكثر طلباً"}}, {"starter", new[]{"Starter Pack","باقة البداية"}}, {"starterd", new[]{"300 gems + 4 h of income, once only","300 جوهرة + دخل 4 ساعات، مرة واحدة"}},
             {"noads", new[]{"No Ads","بدون إعلانات"}}, {"noadsd", new[]{"Every ad reward becomes instant","كل مكافآت الإعلانات فورية"}},
             {"x2", new[]{"Double Profit","ربح مضاعف"}}, {"x2d", new[]{"All sales x2, forever","كل المبيعات ×2 إلى الأبد"}},
-            {"offpro", new[]{"Night Manager","مدير الليل"}}, {"offprod", new[]{"Earn up to 8 h while away","اربح حتى 8 ساعات أثناء غيابك"}},
+            {"offpro", new[]{"Night Manager","مدير الليل"}}, {"offprod", new[]{"Earn up to 12 h while away","اربح حتى 12 ساعة أثناء غيابك"}},
             {"warp", new[]{"Time Skip","تخطي الوقت"}}, {"warpd", new[]{"Get this much income right now","احصل على هذا الدخل الآن"}},
             {"stuck", new[]{"Don't want to wait?","لا تريد الانتظار؟"}}, {"needgems", new[]{"Not enough gems","الجواهر غير كافية"}},
             {"test", new[]{"TEST BUILD - purchases are free and not charged","نسخة تجريبية - المشتريات مجانية"}},
@@ -54,15 +54,15 @@ namespace Souq
             {"sound", new[]{"Sound","الصوت"}}, {"music", new[]{"Music","الموسيقى"}}, {"lang", new[]{"Language","اللغة"}}, {"on", new[]{"ON","تشغيل"}}, {"off", new[]{"OFF","إيقاف"}},
             {"served", new[]{"Shoppers served","عملاء تمت خدمتهم"}}, {"total", new[]{"Total earned","إجمالي الأرباح"}}, {"shoppers", new[]{"Shoppers in store","المتسوقون في المتجر"}},
             {"manager", new[]{"Manager","مدير"}}, {"research", new[]{"Research","أبحاث"}},
-            {"e_profit", new[]{"Product Guarantee","ضمان المنتج"}}, {"e_profitd", new[]{"All profit +20%","كل الأرباح +20%"}},
-            {"e_walk", new[]{"Eager Shoppers","متسوقون متحمسون"}}, {"e_walkd", new[]{"Shoppers walk 4% faster","المتسوقون أسرع 4%"}},
+            {"e_profit", new[]{"Product Guarantee","ضمان المنتج"}}, {"e_profitd", new[]{"All profit x2","كل الأرباح ×2"}},
+            {"e_walk", new[]{"Eager Shoppers","متسوقون متحمسون"}}, {"e_walkd", new[]{"Shoppers walk 5% faster","المتسوقون أسرع 5%"}},
             {"e_mgrd", new[]{"Staff work 50% faster","الموظفون أسرع 50%"}},
-            {"e_truck", new[]{"Fast Delivery","توصيل سريع"}}, {"e_truckd", new[]{"Trucks pay 40% more","الشاحنات تدفع 40% أكثر"}},
-            {"e_cash", new[]{"Robot Helpers","روبوتات مساعدة"}}, {"e_cashd", new[]{"Checkouts 6% faster","الكاشير أسرع 6%"}},
-            {"e_staff", new[]{"Labour Subsidy","دعم العمالة"}}, {"e_staffd", new[]{"Hiring costs 3% less","التوظيف أرخص 3%"}},
-            {"e_ccost", new[]{"Supplier Deal","صفقة الموردين"}}, {"e_ccostd", new[]{"Checkouts cost 3% less","الكاشير أرخص 3%"}},
+            {"e_truck", new[]{"Fast Delivery","توصيل سريع"}}, {"e_truckd", new[]{"Trucks pay 50% more","الشاحنات تدفع 50% أكثر"}},
+            {"e_cash", new[]{"Robot Helpers","روبوتات مساعدة"}}, {"e_cashd", new[]{"Checkouts 5% faster","الكاشير أسرع 5%"}},
+            {"e_staff", new[]{"Labour Subsidy","دعم العمالة"}}, {"e_staffd", new[]{"Hiring costs 2% less","التوظيف أرخص 2%"}},
+            {"e_ccost", new[]{"Supplier Deal","صفقة الموردين"}}, {"e_ccostd", new[]{"Checkouts cost 2% less","الكاشير أرخص 2%"}},
             {"e_ad", new[]{"Prime Time","وقت الذروة"}}, {"e_add", new[]{"Ad campaign can run 20 min longer","الحملة تستمر 20 دقيقة إضافية"}},
-            {"e_resd", new[]{"Upgrades cost 3% less","الترقيات أرخص 3%"}},
+            {"e_resd", new[]{"Upgrades cost 1.9% less","الترقيات أرخص 1.9%"}},
             {"t_lvl", new[]{"Raise {0} to level {1}","ارفع {0} إلى المستوى {1}"}}, {"t_srv", new[]{"Serve {1} shoppers at {0}","اخدم {1} عميل في {0}"}},
             {"t_truck", new[]{"Collect {1} delivery trucks","استلم {1} شاحنة توصيل"}}, {"t_park", new[]{"Expand parking to level {1}","وسّع المواقف إلى المستوى {1}"}},
             {"t_build", new[]{"Build {0}","ابنِ {0}"}}, {"t_star", new[]{"Reach store grade {1}","صل إلى درجة المتجر {1}"}}, {"t_assets", new[]{"Earn {1} in total","اربح {1} إجمالاً"}},
@@ -83,7 +83,7 @@ namespace Souq
         /// Call on any finished line of text before it goes on screen.
         public static string Fix(string s) => Ar ? Shape(s) : s;
 
-        static readonly string[] Unit = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" };
+        static readonly string[] Unit = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg", "Tg", "Utg", "Dtg", "Ttg", "Qatg" };
         public static string Num(double v)
         {
             if (double.IsNaN(v) || double.IsInfinity(v)) return "-";
