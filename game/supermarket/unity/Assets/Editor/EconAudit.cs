@@ -242,8 +242,9 @@ public static class EconAudit
             rule(last >= 0 && (r.session <= 90 ? last >= 13 && last <= 21 : last >= 6 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.session <= 90 ? " (target day 14-21)" : " (target day 7-21)"));
             rule(smooth, "R5b gaps between openings from the 5th section on (days): " + gaps + "(no gap more than 3x the one before)");
             rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 6 on x" + r.maxHour.ToString("0.0") + " (limit 10) at " + r.hourWhere + ", bought then: " + string.Join(", ", new List<string>(Pairs(r.worstBuys))) + "; biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3); first five days (fast on purpose) up to x" + r.earlyHour.ToString("0") + " an hour");
-            r.levelGain.Sort(); double lg = r.levelGain.Count > 0 ? r.levelGain[r.levelGain.Count / 2] : 0;
-            rule(lg >= 0.02, "R8 a level bought on day 1 raises income by a median " + (100 * lg).ToString("0.0") + "% (at least 2%, so upgrades are felt)");
+            { var pr = new Sim(Save.Fresh(), () => 0); double p1 = pr.Price(0); pr.s.dLevel[0] = 10; double p10 = pr.Price(0); pr.s.dLevel[0] = 100; double p100 = pr.Price(0);
+              double first = Math.Pow(p10 / p1, 1 / 9.0) - 1, avg = Math.Pow(p100 / p1, 1 / 99.0) - 1;
+              rule(first >= 0.05 && avg >= 0.02, "R8 a level raises the sale price by " + (100 * first).ToString("0.0") + "% on average over levels 1-10 (at least 5%) and " + (100 * avg).ToString("0.0") + "% over levels 1-100 (at least 2%); level 100 sells for x" + (p100 / p1).ToString("0") + " the level-1 price"); }
             rule(r.at10 >= 100 && r.at60 >= 3000, "R9 income after 10 min " + Souq.Loc.Num(r.at10) + "/min (at least 100), after 60 min " + Souq.Loc.Num(r.at60) + "/min (at least 3K)");
             rule(r.freeGems >= epicTotal * 0.1 && r.freeGems <= epicTotal * 0.5, "R7 free gems cover " + (100.0 * r.freeGems / epicTotal).ToString("0") + "% of all boosts in 30 days (target 10-50%)");
             sb.AppendLine("Events: " + string.Join("; ", r.events) + "\n");

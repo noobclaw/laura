@@ -20,7 +20,7 @@ namespace Souq.Core
         public const double PriceCeiling = 1e18;
 
         public static readonly string[] DeptKey = { "produce", "bakery", "butcher", "seafood", "spices", "fashion", "fragrance", "electronics", "phones", "jewellery", "cars" };
-        public static readonly double[] Build = { 0, 800, 8e3, 8e4, 6e6, 2.5e7, 1.2e8, 8e8, 8e9, 4e10, 2.5e11 };
+        public static readonly double[] Build = { 0, 800, 8e3, 8e4, 6e6, 4e7, 3e8, 3e9, 5e10, 1e12, 3e13 };
         public static readonly double[] BasePrice = { 2, 9, 40, 180, 800, 3.5e3, 1.5e4, 6.5e4, 2.8e5, 1.2e6, 5e6 };
         /// Each level adds this share of the base price (+10% at level 2, so early levels are felt), on top of the level bonuses.
         public const double PriceStep = 0.1;
@@ -55,7 +55,7 @@ namespace Souq.Core
         public const double CarsBase = 6, CarsStep = 1.5, AdCostBase = 20, AdCostRate = 1.33;
 
         // store grades: profit multiplier is the value itself, not a running product
-        public static readonly double[] StarCost = { 0, 2e7, 5e8, 5e9, 2e10, 8e10, 2e11, 6e11, 5e12, 2e13, 1e14, 2e14, 8e14, 4e15, 8e15, 1e17 };
+        public static readonly double[] StarCost = { 0, 2e7, 5e8, 5e9, 2e10, 8e10, 3e11, 1.5e12, 1e13, 8e13, 6e14, 4e15, 2.5e16, 1e17, 4e17, 1e18 };
         public static readonly double[] StarProfit = { 1, 1.5, 2, 2.6, 3.3, 4.1, 5, 6, 7.2, 8.5, 10, 12, 14, 16.5, 19, 22 };
 
         public static readonly EpicDef[] Epics = MakeEpics();
