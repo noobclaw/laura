@@ -511,7 +511,7 @@ namespace Souq
         public GameObject truck, vip, usa; public Vector3 truckPos = new Vector3(6.4f, 0, -1.3f), vipPos = new Vector3(-6.4f, 0, -1.3f), busPos = new Vector3(8.3f, 0, -4.4f);
         public const float RoadZ = -4.4f;
         readonly Dictionary<int, Actor> actors = new Dictionary<int, Actor>(); readonly List<int> gone = new List<int>();
-        Transform slotRoot; int slotsBuilt; float time; Light sun; Material bandMat; int bandStar = -1, stageBuilt = -1; TextMesh storeSign, storeTag; GameObject stageGo; Mesh cartMesh; readonly System.Random rnd = new System.Random(7);
+        Transform slotRoot; int slotsBuilt; float time; Light sun; Material bandMat; int bandStar = -1, stageBuilt = -1, rowsBuilt = -1; TextMesh storeSign, storeTag; GameObject stageGo; Mesh cartMesh; readonly System.Random rnd = new System.Random(7);
         class Pop { public Transform t; public float age, dur, delay; public Vector3 scale; }
         readonly List<Pop> pops = new List<Pop>();
         public float shake;
@@ -556,8 +556,6 @@ namespace Souq
             g.C("#4b5263").Slab(27, 128, 1.2f, 0, -0.13f, -2.4f - 62);
             g.C("#ffd24a"); for (float x = -12; x < 12; x += 3) g.Slab(1.5f, 0.16f, 0.07f, x + 1, -0.118f, RoadZ, 0.004f);
             g.C("#d9d4c8").Slab(27, 2.6f, 0.3f, 0, -0.118f, -1.3f, 0.02f).C("#c7c1b3"); for (float x = -13; x <= 13; x += 1.3f) g.Box(0.03f, 0.004f, 2.5f, x, -0.098f, -1.3f);
-            g.C("#d9cdb6").Box(HalfW * 2, 0.1f, depth, 0, -0.1f, depth / 2);
-            for (int ix = 0; ix < 18; ix++) for (int iz = 0; iz < Mathf.CeilToInt(depth); iz++) g.C((ix + iz) % 2 == 0 ? "#f6efdf" : "#efe6d2").Box(0.975f, 0.004f, 0.975f, -HalfW + 0.5f + ix, 0, 0.5f + iz);
             // entrance mat and lane arrows
             g.C(Art.Red).Slab(3.4f, 1.3f, 0.2f, 0, 0.004f, 0.9f).C(Art.White).Slab(3.1f, 1.0f, 0.14f, 0, 0.018f, 0.9f, 0.002f).C(Art.Red).Slab(3.0f, 0.9f, 0.12f, 0, 0.021f, 0.9f, 0.002f);
             for (int c = 0; c < T.NC; c++) { float x = CashPos(c).x + 0.82f; g.C("#3ca05a").Box(0.18f, 0.004f, 0.5f, x, 0.004f, 2.1f).Box(0.5f, 0.004f, 0.16f, x, 0.004f, 1.85f).Box(0.3f, 0.004f, 0.16f, x, 0.004f, 1.72f); }
@@ -565,8 +563,6 @@ namespace Souq
 
             // shell: low side walls and a tall back wall with the brand band; open front with a portal
             var w = new Geo(); bandMat = new Material(Kit.Solid);
-            w.C(Art.White).Box(0.6f, 2.8f, depth, -HalfW - 0.3f, 0, depth / 2).Box(0.6f, 2.8f, depth, HalfW + 0.3f, 0, depth / 2).Box(HalfW * 2 + 1.2f, 4.2f, 0.6f, 0, 0, depth + 0.3f);
-            w.C("#d9d2c3").Box(0.7f, 0.14f, depth + 0.1f, -HalfW - 0.3f, 2.8f, depth / 2).Box(0.7f, 0.14f, depth + 0.1f, HalfW + 0.3f, 2.8f, depth / 2).Box(HalfW * 2 + 1.3f, 0.14f, 0.7f, 0, 4.2f, depth + 0.3f);
             // shop front: a low wall with window frames either side of the doorway, and two glass doors slid open
             foreach (float sx in new[] { -1f, 1f })
             {
@@ -580,7 +576,7 @@ namespace Souq
             // the store emblem: three fruits between two cream bars
             w.C("#ffd43b").Ball(0.2f, 0.2f, 0.07f, -2.72f, 3.62f, -0.3f).C("#7ac943").Ball(0.2f, 0.2f, 0.07f, -2.46f, 3.7f, -0.31f).C("#ff9a1f").Ball(0.2f, 0.2f, 0.07f, 2.72f, 3.62f, -0.3f).C("#e5352c").Ball(0.2f, 0.2f, 0.07f, 2.46f, 3.7f, -0.31f);
             w.Make("shell", root, Kit.Solid);
-            var b = new Geo(); b.C(Color.white).Box(0.64f, 0.46f, depth + 0.04f, -HalfW - 0.3f, 2.1f, depth / 2).Box(0.64f, 0.46f, depth + 0.04f, HalfW + 0.3f, 2.1f, depth / 2).Box(HalfW * 2 + 1.24f, 0.6f, 0.64f, 0, 3.3f, depth + 0.3f).Box(6.4f, 1.22f, 0.44f, 0, 3.0f, -0.05f);
+            var b = new Geo(); b.C(Color.white).Box(6.4f, 1.22f, 0.44f, 0, 3.0f, -0.05f);
             foreach (float x in new[] { -HalfW - 0.3f, -2.85f, 2.85f, HalfW + 0.3f }) b.Box(0.64f, 0.3f, 0.64f, x, 0, -0.05f);
             b.Make("band", root, bandMat);
             storeSign = Kit.Label("SOUQ MARKET", root, new Vector3(0, 3.62f, -0.29f), 0.56f, new Color(1f, 0.97f, 0.84f));
@@ -737,7 +733,7 @@ namespace Souq
                 for (int k = 0; k < T.MaxStaff; k++) v.staff[k].go.SetActive(s.dOpen[d] && k < s.dStaff[d]);
             }
             for (int c = 0; c < T.NC; c++) cashDesk[c].SetActive(s.cLevel[c] > 0);
-            if (StageOf(s.star) != stageBuilt) RefreshStore();
+            if (StageOf(s.star) != stageBuilt || RowsNow() != rowsBuilt) RefreshStore();
             if (s.star != bandStar) { bandStar = s.star; bandMat.SetColor("_Tint", Geo.Hex(GradeBand[Mathf.Clamp(s.star, 0, GradeBand.Length - 1)]).linear); }
             int want = sim.ParkSpaces;
             if (want != slotsBuilt)
@@ -864,12 +860,91 @@ namespace Souq
         public void PopDept(int d) { depts[d].pop = 1f; }
         /// After a change of language.
         /// Five store sizes across the fifteen grades: corner shop, neighbourhood market, chain supermarket, hypermarket, flagship.
+        static readonly int[] StageRows = { 1, 2, 3, 5, 6 };
+        /// Rows of sections the building covers now: what its size allows, or more if the player has opened further back.
+        int RowsNow() { int top = 0; for (int d = 0; d < T.ND; d++) if (sim.s.dOpen[d]) top = d; return Mathf.Clamp(Mathf.Max(StageRows[StageOf(sim.s.star)], top / 2 + 1), 1, 6); }
         public static int StageOf(int star) => star <= 0 ? 0 : star <= 3 ? 1 : star <= 7 ? 2 : star <= 11 ? 3 : 4;
         /// Rebuilds the shop front for the current size and writes the player's store name on the sign.
         public void RefreshStore()
         {
-            int st = StageOf(sim.s.star); stageBuilt = st; Kit.Kill(stageGo); stageGo = new GameObject("stage"); stageGo.transform.SetParent(root, false);
+            int st = StageOf(sim.s.star); stageBuilt = st; int rows = RowsNow(); rowsBuilt = rows; Kit.Kill(stageGo); stageGo = new GameObject("stage"); stageGo.transform.SetParent(root, false);
             var g = new Geo(); var band = new Geo(); band.C(Color.white); float z = -0.05f; string gold = "#ffd43b", cream = "#fff3d6";
+            float dz = DeptRow0 + (rows - 1) * DeptRowGap + 6.5f, full = StoreDepth;
+            // ---- the building itself: it reaches only as far back as the sections in use, and its floor, walls and car park change with its size
+            var fl = new Geo(); fl.Shade = 0;
+            string[] grout = { "#8a6a45", "#d9cdb6", "#cfd6dd", "#b9bec7", "#d9c9a8" };
+            fl.C(grout[st]).Box(HalfW * 2, 0.1f, dz, 0, -0.1f, dz / 2);
+            int nz = Mathf.CeilToInt(dz);
+            if (st == 0) { for (int iz = 0; iz < nz * 2; iz++) for (int ix = 0; ix < 6; ix++) fl.C((ix + iz) % 3 == 0 ? "#c89a66" : (ix + iz) % 3 == 1 ? "#b98a58" : "#d2a673").Box(2.97f, 0.004f, 0.47f, -HalfW + 1.5f + ix * 3f + (iz % 2 == 0 ? 0 : 0), 0, 0.25f + iz * 0.5f); }
+            else if (st == 1) { for (int ix = 0; ix < 18; ix++) for (int iz = 0; iz < nz; iz++) fl.C((ix + iz) % 2 == 0 ? "#f6efdf" : "#efe6d2").Box(0.975f, 0.004f, 0.975f, -HalfW + 0.5f + ix, 0, 0.5f + iz); }
+            else if (st == 2) { for (int ix = 0; ix < 9; ix++) for (int iz = 0; iz < (nz + 1) / 2; iz++) fl.C((ix + iz) % 2 == 0 ? "#ffffff" : "#e3edf5").Box(1.97f, 0.004f, 1.97f, -HalfW + 1f + ix * 2, 0, 1f + iz * 2); }
+            else if (st == 3)
+            {
+                for (int ix = 0; ix < 6; ix++) for (int iz = 0; iz < (nz + 2) / 3; iz++) fl.C((ix + iz) % 2 == 0 ? "#d9dce2" : "#cfd3da").Box(2.98f, 0.004f, 2.98f, -HalfW + 1.5f + ix * 3, 0, 1.5f + iz * 3);
+                fl.C("#ffc61a").Box(0.1f, 0.003f, dz - 3f, -0.42f, 0.0045f, dz / 2 + 0.6f).Box(0.1f, 0.003f, dz - 3f, 0.42f, 0.0045f, dz / 2 + 0.6f);
+            }
+            else
+            {
+                for (int ix = 0; ix < 9; ix++) for (int iz = 0; iz < (nz + 1) / 2; iz++) fl.C((ix + iz) % 2 == 0 ? "#f7f1ea" : "#e9dfd2").Box(1.97f, 0.004f, 1.97f, -HalfW + 1f + ix * 2, 0, 1f + iz * 2);
+                for (int iz = 0; iz <= nz; iz += 4) fl.C("#d9b44a").Box(HalfW * 2, 0.003f, 0.07f, 0, 0.0045f, iz);
+                fl.C("#b3202c").Box(0.9f, 0.003f, dz - 3.2f, 0, 0.0046f, dz / 2 + 0.7f).C("#d9b44a").Box(0.05f, 0.003f, dz - 3.2f, -0.48f, 0.0048f, dz / 2 + 0.7f).Box(0.05f, 0.003f, dz - 3.2f, 0.48f, 0.0048f, dz / 2 + 0.7f);
+            }
+            // land still to build on: bare earth behind the back wall, fenced off
+            if (dz < full - 0.5f)
+            {
+                fl.C("#c9b089").Box(HalfW * 2 + 1.2f, 0.1f, full - dz - 0.6f, 0, -0.1f, (full + dz + 0.6f) / 2);
+                for (int k = 0; k < 60; k++) { float px = (float)rnd.NextDouble() * 17 - 8.5f, pz = dz + 1 + (float)rnd.NextDouble() * (full - dz - 1.5f); fl.C(k % 2 == 0 ? "#bda47c" : "#d4bd98").Slab(0.6f + (float)rnd.NextDouble(), 0.4f + (float)rnd.NextDouble() * 0.5f, 0.2f, px, 0.001f, pz, 0.003f); }
+            }
+            // car park surface
+            float lotTop = -6.75f, lotLen = 58f;
+            if (st == 0)
+            {
+                fl.C("#b7a684").Slab(26.6f, lotLen, 0.6f, 0, -0.1235f, lotTop - lotLen / 2, 0.004f);
+                for (int k = 0; k < 500; k++) fl.C(k % 3 == 0 ? "#a89673" : k % 3 == 1 ? "#c8b996" : "#9c8a68").Slab(0.14f + (float)rnd.NextDouble() * 0.2f, 0.12f + (float)rnd.NextDouble() * 0.15f, 0.05f, (float)rnd.NextDouble() * 25 - 12.5f, -0.1195f, lotTop - 0.5f - (float)rnd.NextDouble() * (lotLen - 1), 0.001f);
+            }
+            else if (st == 3) fl.C("#383d4b").Slab(26.6f, lotLen, 0.6f, 0, -0.1235f, lotTop - lotLen / 2, 0.004f);
+            else if (st == 4) { for (int ix = 0; ix < 9; ix++) for (int iz = 0; iz < 20; iz++) fl.C((ix + iz) % 2 == 0 ? "#5d6278" : "#545a70").Slab(2.96f, 2.96f, 0.05f, -12f + ix * 3, -0.1235f, lotTop - 1.5f - iz * 3, 0.004f); }
+            if (st >= 2)
+            {
+                // hedges and lamps down both sides of the lot
+                foreach (float sx in new[] { -1f, 1f })
+                {
+                    fl.C("#c9c4b6").Box(0.7f, 0.14f, lotLen - 2, sx * 9.35f, -0.12f, lotTop - lotLen / 2);
+                    for (int k = 0; k < 28; k++) fl.C(k % 2 == 0 ? "#3fa652" : "#57bf63").Ball(0.4f, 0.42f, 0.5f, sx * 9.35f, 0.25f, lotTop - 1.2f - k * 2f, 9, 6);
+                    for (int k = 0; k < 7; k++) { float lz = lotTop - 3 - k * 8f; g.C(st >= 4 ? gold : Art.Steel).Cyl(0.07f, 0.09f, 4.2f, sx * 8.75f, -0.1f, lz, 8).C(Art.Steel).Box(0.9f, 0.08f, 0.14f, sx * 8.35f, 4.05f, lz).C("#fff7c2").Box(0.5f, 0.07f, 0.24f, sx * 8.1f, 3.98f, lz); }
+                }
+            }
+            fl.Make("floor", stageGo.transform, Kit.Solid, false);
+            // walls: brick, plaster, glass, panel, stone
+            string[] wallCol = { "#b5523b", "#ffffff", "#cfe9fa", "#dfe3ea", "#2f3340" }, capCol = { "#7a3526", "#d9d2c3", "#8fa3b5", "#9aa3b2", "#d9b44a" };
+            float wh = st >= 3 ? 3.4f : 2.8f, bh = st >= 3 ? 5.0f : 4.2f;
+            g.C(wallCol[st]).Box(0.6f, wh, dz, -HalfW - 0.3f, 0, dz / 2).Box(0.6f, wh, dz, HalfW + 0.3f, 0, dz / 2).Box(HalfW * 2 + 1.2f, bh, 0.6f, 0, 0, dz + 0.3f);
+            g.C(capCol[st]).Box(0.7f, 0.14f, dz + 0.1f, -HalfW - 0.3f, wh, dz / 2).Box(0.7f, 0.14f, dz + 0.1f, HalfW + 0.3f, wh, dz / 2).Box(HalfW * 2 + 1.3f, 0.14f, 0.7f, 0, bh, dz + 0.3f);
+            band.Box(0.64f, 0.46f, dz + 0.04f, -HalfW - 0.3f, 2.1f, dz / 2).Box(0.64f, 0.46f, dz + 0.04f, HalfW + 0.3f, 2.1f, dz / 2).Box(HalfW * 2 + 1.24f, 0.6f, 0.64f, 0, 3.3f, dz + 0.3f);
+            if (st == 0)
+            {
+                // mortar courses on the brick, front low walls and pillars in brick too
+                for (int k = 1; k < 8; k++) g.C("#d9b9a6").Box(HalfW * 2 + 1.22f, 0.03f, 0.62f, 0, k * 0.4f, dz + 0.3f).Box(0.62f, 0.03f, dz, -HalfW - 0.3f, k * 0.4f < 2.0f ? k * 0.4f : 2.7f, dz / 2).Box(0.62f, 0.03f, dz, HalfW + 0.3f, k * 0.4f < 2.0f ? k * 0.4f : 2.7f, dz / 2);
+                foreach (float sx in new[] { -1f, 1f }) g.C(wallCol[0]).Box(HalfW - 2.8f, 0.9f, 0.34f, sx * (2.85f + (HalfW - 2.8f) / 2), 0, z).C("#d9b9a6").Box(HalfW - 2.8f, 0.03f, 0.36f, sx * (2.85f + (HalfW - 2.8f) / 2), 0.45f, z);
+                foreach (float px in new[] { -HalfW - 0.3f, -2.85f, 2.85f, HalfW + 0.3f }) g.C(wallCol[0]).Box(0.64f, 2.98f, 0.64f, px, 0.3f, z);
+            }
+            else if (st == 2)
+            {
+                for (float zz = 1.5f; zz < dz; zz += 2f) g.C(Art.Steel).Box(0.64f, wh, 0.08f, -HalfW - 0.3f, 0, zz).Box(0.64f, wh, 0.08f, HalfW + 0.3f, 0, zz);
+                for (float xx = -HalfW; xx <= HalfW; xx += 2f) g.C(Art.Steel).Box(0.08f, bh, 0.64f, xx, 0, dz + 0.3f);
+            }
+            else if (st == 3)
+            {
+                // big advert boards along the back wall
+                string[] ad = { "#e5352c", "#ffd43b", "#2f8fe6", "#3fa652" };
+                for (int k = 0; k < 4; k++) { float ax = -6.6f + k * 4.4f; g.C(Art.White).Box(3.8f, 1.5f, 0.1f, ax, 3.3f, dz - 0.04f).C(ad[k]).Box(3.6f, 1.3f, 0.12f, ax, 3.4f, dz - 0.05f).C(Art.White).Ball(0.45f, 0.45f, 0.06f, ax - 1.0f, 4.05f, dz - 0.12f, 12, 6).Box(1.6f, 0.2f, 0.14f, ax + 0.6f, 4.15f, dz - 0.05f).Box(1.1f, 0.14f, 0.14f, ax + 0.35f, 3.8f, dz - 0.05f); }
+            }
+            else if (st == 4)
+            {
+                foreach (float gy in new[] { 0.3f, 3.1f }) g.C("#d9b44a").Box(HalfW * 2 + 1.22f, 0.07f, 0.62f, 0, gy + (gy > 1 ? 1.5f : 0), dz + 0.3f).Box(0.62f, 0.07f, dz, -HalfW - 0.3f, gy, dz / 2).Box(0.62f, 0.07f, dz, HalfW + 0.3f, gy, dz / 2);
+                foreach (float sx in new[] { -1f, 1f }) g.C(wallCol[4]).Box(HalfW - 2.8f, 0.9f, 0.34f, sx * (2.85f + (HalfW - 2.8f) / 2), 0, z).C("#d9b44a").Box(HalfW - 2.8f, 0.05f, 0.36f, sx * (2.85f + (HalfW - 2.8f) / 2), 0.85f, z);
+                foreach (float px in new[] { -2.85f, 2.85f }) g.C(wallCol[4]).Box(0.64f, 2.98f, 0.64f, px, 0.3f, z);
+            }
             float signY = 3.62f, signH = 0.56f, signW = 5.4f;
             if (st == 0)
             {
@@ -900,7 +975,7 @@ namespace Souq
                 {
                     g.C(Art.White).Box(0.7f, 6.4f, 0.7f, sx * 4.95f, 0, z).C(gold).Box(0.8f, 0.14f, 0.8f, sx * 4.95f, 6.4f, z).Ball(0.22f, 0.22f, 0.22f, sx * 4.95f, 6.75f, z, 10, 6);
                     g.C("#36e0ff").Box(0.06f, 1.7f, 0.06f, sx * 4.55f, 4.32f, z - 0.28f).C("#ff5fb0").Box(0.06f, 1.5f, 0.06f, sx * 4.42f, 4.42f, z - 0.28f);
-                    for (int k = 0; k < 3; k++) g.C("#aeb6c2").Box(1.1f, 0.5f, 0.9f, sx * (6.2f + k * 1.3f), 4.2f, StoreDepth + 0.3f).C("#7d8794").Box(0.9f, 0.08f, 0.7f, sx * (6.2f + k * 1.3f), 4.7f, StoreDepth + 0.3f);
+                    for (int k = 0; k < 3; k++) g.C("#aeb6c2").Box(1.1f, 0.5f, 0.9f, sx * (6.2f + k * 1.3f), bh + 0.14f, dz + 0.3f).C("#7d8794").Box(0.9f, 0.08f, 0.7f, sx * (6.2f + k * 1.3f), bh + 0.64f, dz + 0.3f);
                 }
                 g.C("#36e0ff").Box(8.9f, 0.06f, 0.06f, 0, 4.36f, z - 0.28f).Box(8.9f, 0.06f, 0.06f, 0, 5.98f, z - 0.28f);
             }
@@ -918,7 +993,7 @@ namespace Souq
                 for (int k = -2; k <= 2; k++) g.C(gold).At(k * 0.9f, 6.2f, z, 0, 0, 45).Box(0.5f, 0.5f, 0.3f).At();
                 g.C(gold).Box(4.4f, 0.2f, 0.4f, 0, 6.12f, z);
             }
-            g.Make("front", stageGo.transform, Kit.Solid); if (st >= 2) band.Make("frontband", stageGo.transform, bandMat);
+            g.Make("front", stageGo.transform, Kit.Solid); band.Make("frontband", stageGo.transform, bandMat);
             // the name: the player's own if they set one
             string name = string.IsNullOrWhiteSpace(sim.s.storeName) ? "SOUQ MARKET" : sim.s.storeName.Trim(); bool arabic = false; foreach (char ch in name) if (ch >= 0x600 && ch <= 0x6FF) { arabic = true; break; }
             storeSign.transform.localScale = Vector3.one; storeSign.characterSize = signH * 10f / 110f * 1.3f; storeSign.transform.position = new Vector3(0, signY, z - 0.27f);
