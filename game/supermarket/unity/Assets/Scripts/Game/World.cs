@@ -199,7 +199,7 @@ namespace Souq
     /// One toy-like person: large head, short body, limbs that swing when walking.
     public class Person
     {
-        public GameObject go; public Transform body; public bool walking; public float phase, speed = 1; Transform legL, legR, armL, armR; bool push;
+        public GameObject go; public Transform body; public bool walking; public float phase, speed = 1; Transform legL, legR, armL, armR; bool push; GameObject item;
         static readonly string[] Shirt = { "#ff6b6b", "#4dabf7", "#ffd43b", "#69db7c", "#b197fc", "#ffa94d", "#f783ac", "#3bc9db", "#ffffff" };
         static readonly string[] Pants = { "#3b5b8c", "#2f4a78", "#55607a", "#7a5a3c", "#2f3642", "#c8b08a", "#6a8fbf" }, Skin = { "#f6c9a0", "#e9b184", "#c98d5e", "#8f5b3a", "#fbd6b5" }, Hair = { "#3a2a20", "#6b4423", "#111418", "#d9b45a", "#e8cf7a", "#a8452a", "#8a8f99", "#c98a4b" };
         public static bool Rigged => true;
@@ -270,19 +270,46 @@ namespace Souq
                 var arm = new Geo(); arm.C(sleeve).Cyl(0.085f, 0.09f, 0.26f, 0, -0.26f, 0, 9).C(robe ? sleeve : Geo.Hex(skin)).Cyl(0.07f, 0.08f, 0.2f, 0, -0.46f, 0, 9).C(skin).Ball(0.085f, 0.085f, 0.085f, 0, -0.5f, 0, 9, 6);
                 var at = Limb("arm", arm, new Vector3(s * 0.33f * wide, 1.0f, 0)); if (s < 0) armL = at; else armR = at;
             }
-            Pose(0, false);
+            if (staff) { var it = new Geo(); it.C("#ffd24a").Box(0.2f, 0.2f, 0.16f, 0, -0.6f, 0.08f).C("#e8453c").Box(0.21f, 0.07f, 0.17f, 0, -0.6f, 0.08f); item = it.Make("item", armR, Kit.Solid); item.SetActive(false); }
+            Pose(0, 0);
         }
 
-        void Pose(float time, bool busy)
+        /// What the figure is doing with its hands: 0 nothing, 1 handing goods over, 2 scanning at a till, 3 reaching for a shelf, 4 waiting in line.
+        void Pose(float time, int act)
         {
             float ph = time * 9f * speed + phase, sw = walking ? Mathf.Sin(ph) : 0;
             legL.localRotation = Quaternion.Euler(-32f * sw, 0, 0); legR.localRotation = Quaternion.Euler(32f * sw, 0, 0);
-            float hold = push ? -62f : 0, work = busy ? 28f * Mathf.Sin(time * 9f + phase) : 0;
-            armL.localRotation = Quaternion.Euler(hold + (push ? 0 : 26f * sw) - Mathf.Max(0, work) * 1.6f, 0, -9f); armR.localRotation = Quaternion.Euler(hold - (push ? 0 : 26f * sw) - Mathf.Max(0, -work) * 1.6f, 0, 9f);
-            body.localPosition = new Vector3(0, walking ? 0.045f * Mathf.Abs(Mathf.Sin(ph)) : 0.012f * Mathf.Sin(time * 2.2f + phase), 0);
-            body.localRotation = Quaternion.Euler(walking ? 4f : busy ? 3f * Mathf.Sin(time * 9f + phase) : 0, busy ? 8f * Mathf.Sin(time * 4.5f + phase) : 0, walking ? 2.5f * sw : 0);
+            float hold = push ? -62f : 0, lx = hold + (push ? 0 : 26f * sw), rx = hold - (push ? 0 : 26f * sw), lz = -9f, rz = 9f, lean = walking ? 4f : 0, yaw = 0, roll = walking ? 2.5f * sw : 0, lift = 0;
+            bool holding = false;
+            if (!walking && act == 1)
+            {
+                // pick up from the shelf side, swing round, hold it out, let go
+                float c = Mathf.Repeat(time * 1.15f + phase, 1f), reach = Mathf.Sin(Mathf.Clamp01(c / 0.8f) * Mathf.PI);
+                rx = -20f - 72f * reach; lx = -14f - 30f * reach; rz = 4f; lean = 7f * reach; yaw = Mathf.Lerp(-28f, 10f, Mathf.SmoothStep(0, 1, c / 0.6f)); holding = c > 0.08f && c < 0.62f;
+            }
+            else if (!walking && act == 2)
+            {
+                // slide an item across the scanner, hand to hand
+                float c = time * 5.2f + phase, k = Mathf.Sin(c);
+                rx = -58f; lx = -52f; rz = 6f + 30f * k; lz = -6f + 24f * k; yaw = 9f * k; lean = 5f; holding = k > -0.2f;
+            }
+            else if (!walking && act == 3)
+            {
+                // one hand leaves the trolley and reaches up to the shelf
+                float c = Mathf.Repeat(time * 0.9f + phase, 1f), reach = Mathf.Sin(Mathf.Clamp01(c / 0.7f) * Mathf.PI);
+                rx = Mathf.Lerp(hold, -128f, reach); rz = 14f * reach; lean = -3f * reach; lift = 0.05f * reach; yaw = 10f * reach;
+            }
+            else if (!walking && act == 4)
+            {
+                // shifting weight, now and then a look round
+                float look = Mathf.Sin(time * 0.7f + phase * 3f); roll = 2.2f * Mathf.Sin(time * 1.3f + phase); yaw = look > 0.72f ? 26f * (look - 0.72f) / 0.28f : look < -0.8f ? -22f * (-look - 0.8f) / 0.2f : 0;
+            }
+            armL.localRotation = Quaternion.Euler(lx, 0, lz); armR.localRotation = Quaternion.Euler(rx, 0, rz);
+            if (item != null && item.activeSelf != holding) item.SetActive(holding);
+            body.localPosition = new Vector3(0, lift + (walking ? 0.045f * Mathf.Abs(Mathf.Sin(ph)) : 0.012f * Mathf.Sin(time * 2.2f + phase)), 0);
+            body.localRotation = Quaternion.Euler(lean, yaw, roll);
         }
-        public void Set(bool walk, bool busy, float time, float dt) { walking = walk; Pose(time, busy); }
+        public void Set(bool walk, int act, float time, float dt) { walking = walk; Pose(time, act); }
     }
 
     public class DeptView
@@ -566,12 +593,12 @@ namespace Souq
                 }
                 else if (sim.s.dOpen[d] && ad) v.signMat.SetColor("_Tint", (DeptColor[d] * (1.05f + 0.2f * Mathf.Sin(time * 3f + d))).linear);
                 if (!sim.s.dOpen[d]) continue;
-                for (int k = 0; k < sim.s.dStaff[d]; k++) { bool serving = sim.dq[d][k].Count > 0 && sim.dq[d][k][0].st == CS.Served; v.staff[k].Set(false, serving, time, dt); }
+                for (int k = 0; k < sim.s.dStaff[d]; k++) { bool serving = sim.dq[d][k].Count > 0 && sim.dq[d][k][0].st == CS.Served; v.staff[k].Set(false, serving ? 1 : 0, time, dt); }
             }
             for (int c = 0; c < T.NC; c++)
             {
                 if (sim.s.cLevel[c] <= 0) continue; bool paying = sim.cq[c].Count > 0 && sim.cq[c][0].st == CS.Paying;
-                cashStaff[c].Set(false, paying, time, dt);
+                cashStaff[c].Set(false, paying ? 2 : 0, time, dt);
                 cashLamp[c].SetColor("_Tint", ((paying ? new Color(0.32f, 0.92f, 0.5f) : new Color(0.45f, 0.72f, 1f)) * (paying ? 0.9f + 0.25f * Mathf.Sin(time * 14f) : 0.85f)).linear);
             }
 
@@ -596,7 +623,7 @@ namespace Souq
                 if (a.moving) a.go.transform.rotation = Quaternion.Slerp(a.go.transform.rotation, Quaternion.LookRotation(delta.normalized, Vector3.up), 0.25f);
                 else if (c.st == CS.Queue || c.st == CS.Served) a.go.transform.rotation = Quaternion.Slerp(a.go.transform.rotation, Quaternion.identity, 0.2f);
                 else if (c.st == CS.CashQueue || c.st == CS.Paying) a.go.transform.rotation = Quaternion.Slerp(a.go.transform.rotation, Quaternion.Euler(0, 180, 0), 0.2f);
-                a.p.speed = (float)sim.WalkMult; a.p.Set(a.moving, false, time, dt);
+                a.p.speed = (float)sim.WalkMult; a.p.Set(a.moving, c.st == CS.Served ? 3 : (c.st == CS.Queue || c.st == CS.CashQueue || c.st == CS.Paying) ? 4 : 0, time, dt);
                 a.goods.SetActive(c.bill > 0);
                 a.gift.SetActive(c.gift); if (c.gift) { a.gift.transform.localPosition = new Vector3(0, 2.3f + 0.12f * Mathf.Sin(time * 5f), 0); a.gift.transform.localRotation = Quaternion.Euler(0, time * 120f, 0); }
             }

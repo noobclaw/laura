@@ -44,23 +44,24 @@ namespace Souq
         void BuildTop()
         {
             float top = -(Mathf.Max(96, topInset + 14));
-            var coin = U.Img(hud, Spr.Round, U.Navy, "coinPill"); coinPill = U.Pin(coin.rectTransform, 0, 1, 28, top, 500, 118);
-            var ci = U.Img(coin.transform, Spr.Coin, Color.white, "icon", false); U.Pin(ci.rectTransform, 0, 0.5f, 12, 0, 96, 96);
-            coinTxt = U.Txt(coin.transform, "0", 54, Color.white, TextAnchor.MiddleLeft); U.Place(coinTxt.rectTransform, 0, 0.36f, 1, 1, 122, 0, -16, -4);
+            var coin = U.Plate(hud, Spr.PlateDark, U.Navy, "coinPill"); coinPill = U.Pin(coin.rectTransform, 0, 1, 28, top, 500, 118);
+            var ci = U.Img(coin.transform, Spr.Coin, Color.white, "icon", false); U.Pin(ci.rectTransform, 0, 0.5f, -6, 2, 124, 124);
+            coinTxt = U.Shade(U.Txt(coin.transform, "0", 54, Color.white, TextAnchor.MiddleLeft), 3, 0.5f); U.Place(coinTxt.rectTransform, 0, 0.36f, 1, 1, 122, 0, -16, -4);
             rateTxt = U.Txt(coin.transform, "", 28, new Color(0.62f, 0.95f, 0.70f), TextAnchor.MiddleLeft); U.Place(rateTxt.rectTransform, 0, 0, 1, 0.42f, 124, 6, -16, 0);
-            var gem = U.Img(hud, Spr.Round, U.Navy, "gemPill", true, true); gemPill = U.Pin(gem.rectTransform, 0, 1, 548, top, 330, 118);
-            var gi = U.Img(gem.transform, Spr.Gem, Color.white, "icon", false); U.Pin(gi.rectTransform, 0, 0.5f, 14, 0, 84, 84);
-            gemTxt = U.Txt(gem.transform, "0", 48, Color.white, TextAnchor.MiddleLeft); U.Place(gemTxt.rectTransform, 0, 0, 1, 1, 110, 0, -78, 0);
+            var gem = U.Plate(hud, Spr.PlateDark, U.Navy, "gemPill", true); gemPill = U.Pin(gem.rectTransform, 0, 1, 548, top, 330, 118);
+            var gi = U.Img(gem.transform, Spr.Gem, Color.white, "icon", false); U.Pin(gi.rectTransform, 0, 0.5f, -4, 2, 112, 112);
+            gemTxt = U.Shade(U.Txt(gem.transform, "0", 48, Color.white, TextAnchor.MiddleLeft), 3, 0.5f); U.Place(gemTxt.rectTransform, 0, 0, 1, 1, 110, 0, -78, 0);
             var plus = U.Button(gem.transform, "+", U.Green, 50, () => OpenShop(), "plus"); U.Pin(plus.rt, 1, 0.5f, -12, 4, 70, 70);
             var gear = U.Button(hud, "", new Color(0.30f, 0.34f, 0.50f), 40, () => OpenSettings(), "gear"); U.Pin(gear.rt, 1, 1, -28, top - 6, 150, 106);
             for (int i = 0; i < 3; i++) { var ln = U.Img(gear.bg.transform, Spr.Round, Color.white, "line"); U.Pin(ln.rectTransform, 0.5f, 0.5f, 0, (i - 1) * 24, 76, 12); ln.rectTransform.pivot = new Vector2(0.5f, 0.5f); }
             gradeTxt = U.Txt(gear.bg.transform, "", 10, Color.clear); U.Pin(gradeTxt.rectTransform, 0, 0, 0, 0, 2, 2);
             // task strip
-            var ts = U.Img(hud, Spr.Round, new Color(1, 1, 1, 0.95f), "task", true, true); taskStrip = U.Pin(ts.rectTransform, 0.5f, 1, 0, top - 136, 1024, 110);
-            taskBar = U.Img(ts.transform, Spr.Round, new Color(0.80f, 0.93f, 0.82f), "bar"); U.Place(taskBar.rectTransform, 0, 0, 0, 1, 6, 6, 6, -6);
-            taskTxt = U.Txt(ts.transform, "", 34, U.Ink, U.Lead()); U.Place(taskTxt.rectTransform, 0, 0, 1, 1, 28, 4, -300, -4);
-            taskProg = U.Txt(ts.transform, "", 30, new Color(0.35f, 0.40f, 0.55f), TextAnchor.MiddleRight); U.Place(taskProg.rectTransform, 1, 0, 1, 1, -290, 0, -24, 0);
-            taskBtn = U.Button(ts.transform, Loc.G("claim"), U.Green, 34, () => ClaimTask(), "claim"); U.Pin(taskBtn.rt, 1, 0.5f, -12, 4, 250, 84);
+            var ts = U.Plate(hud, Spr.PlateLight, new Color(1, 1, 1, 0.95f), "task", true); taskStrip = U.Pin(ts.rectTransform, 0.5f, 1, 0, top - 140, 1024, 124);
+            taskTxt = U.Txt(ts.transform, "", 34, U.Ink, U.Lead()); U.Place(taskTxt.rectTransform, 0, 0.40f, 1, 1, 30, 0, -290, -10);
+            var track = U.Plate(ts.transform, Spr.Slot, new Color(0, 0, 0, 0.18f), "track"); U.Place(track.rectTransform, 0, 0, 1, 0, 26, 16, -290, 52);
+            taskBar = U.Plate(track.transform, Spr.BarFill, U.Green, "bar"); U.Place(taskBar.rectTransform, 0, 0, 0, 1, 3, 3, -3, -3);
+            taskProg = U.Shade(U.Txt(track.transform, "", 26, Color.white), 2, 0.6f); U.Fill(taskProg.rectTransform);
+            taskBtn = U.Button(ts.transform, Loc.G("claim"), U.Green, 34, () => ClaimTask(), "claim"); U.Pin(taskBtn.rt, 1, 0.5f, -16, 4, 250, 88);
         }
 
         void AddOffer(string key, Color c, Sprite icon, Func<bool> show, Func<string> text, Action tap)
@@ -83,7 +84,7 @@ namespace Souq
 
         void BuildNav()
         {
-            var bar = U.Img(hud, Spr.Round, U.Navy, "nav", true, true); float nb = Mathf.Max(30, botInset * 0.6f + 14); U.Place(bar.rectTransform, 0, 0, 1, 0, 20, nb, -20, nb + 206);
+            var bar = U.Plate(hud, Spr.PlateDark, U.Navy, "nav", true); float nb = Mathf.Max(30, botInset * 0.6f + 14); U.Place(bar.rectTransform, 0, 0, 1, 0, 20, nb, -20, nb + 206);
             string[] keys = { "checkouts", "parking", "boostsNav", "gradeNav", "shop" }; Color[] cols = { U.Green, U.Blue, U.Purple, U.Gold, U.Red };
             Sprite[] ic = { Spr.Register ?? Spr.Coin, Spr.Parking, Spr.Bolt ?? Spr.Person, Spr.Crown ?? Spr.Star, Spr.Bag ?? Spr.Gem }; Action[] act = { () => OpenCheckouts(), () => OpenParking(), () => OpenBoosts(), () => OpenGrade(), () => OpenShop() };
             for (int i = 0; i < 5; i++)
@@ -144,7 +145,7 @@ namespace Souq
             {
                 var t = T.Tasks[s.task]; double v = Math.Min(sim.TaskValue(t), t.need); bool done = sim.TaskDone;
                 taskTxt.text = TaskText(t); taskProg.text = done ? "" : Loc.Num(v) + "/" + Loc.Num(t.need);
-                taskBar.rectTransform.anchorMax = new Vector2((float)(t.need > 0 ? v / t.need : 1), 1); taskBar.rectTransform.offsetMax = new Vector2(-6 * (float)(t.need > 0 ? v / t.need : 1), -6);
+                float tf = (float)(t.need > 0 ? v / t.need : 1); taskBar.gameObject.SetActive(tf > 0.001f); taskBar.rectTransform.anchorMax = new Vector2(Mathf.Max(0.09f, tf), 1); taskBar.rectTransform.offsetMax = new Vector2(-3, -3);
                 taskBtn.rt.gameObject.SetActive(done); taskStrip.gameObject.SetActive(true);
             }
             else taskStrip.gameObject.SetActive(false);
@@ -365,7 +366,7 @@ namespace Souq
             CloseSheet(); g.audio.Play("open");
             var holder = U.Fill(U.Rect(sheetLayer, "sheet")); sheet = holder;
             var dim = U.Img(holder, Spr.Square, new Color(0, 0, 0, 0.35f), "dim", false, true); U.Fill(dim.rectTransform); dim.gameObject.AddComponent<Button>().onClick.AddListener(() => CloseSheet());
-            var card = U.Img(holder, Spr.Round, U.Panel, "card", true, true); var crt = U.Place(card.rectTransform, 0, 0, 1, 0, 16, 30, -16, 30 + height);
+            var card = U.Plate(holder, Spr.PlateLight, U.Panel, "card", true); var crt = U.Place(card.rectTransform, 0, 0, 1, 0, 16, 30, -16, 30 + height);
             var head = U.Img(card.transform, Spr.Round, band, "head"); U.Place(head.rectTransform, 0, 1, 1, 1, 10, -128, -10, -10);
             var tt = U.Shade(U.Txt(head.transform, title, 52, Color.white)); U.Place(tt.rectTransform, 0, 0, 1, 1, 120, 0, -120, 0);
             var x = U.Button(head.transform, "X", U.Red, 44, () => CloseSheet(), "x"); U.Pin(x.rt, 1, 0.5f, -16, 4, 88, 84);
@@ -403,7 +404,7 @@ namespace Souq
             }
             var body = OpenSheet(Loc.G(T.DeptKey[d]), World.DeptColor[d], 1090); openDept = d;
             var info = U.Txt(body, "", 34, U.Ink); U.Place(info.rectTransform, 0, 1, 1, 1, 0, -150, 0, -4);
-            var barBg = U.Img(body, Spr.Round, U.Soft, "tierBg"); U.Place(barBg.rectTransform, 0, 1, 1, 1, 0, -216, 0, -160);
+            var barBg = U.Plate(body, Spr.Slot, U.Soft, "tierBg"); U.Place(barBg.rectTransform, 0, 1, 1, 1, 0, -216, 0, -160);
             var bar = U.Img(barBg.transform, Spr.Round, World.DeptColor[d], "tier"); U.Place(bar.rectTransform, 0, 0, 0.5f, 1, 4, 4, -4, -4);
             var barTxt = U.Txt(barBg.transform, "", 28, U.Ink); U.Fill(barTxt.rectTransform);
             // buy amount: 1, 10 or as many as the coins allow
@@ -584,7 +585,7 @@ namespace Souq
             popup = U.Fill(U.Rect(fx, "popup")); popup.SetAsFirstSibling();
             var dim = U.Img(popup, Spr.Square, new Color(0.03f, 0.04f, 0.12f, 0.62f), "dim", false, true); U.Fill(dim.rectTransform);
             var glow = U.Img(popup, Spr.Glow, new Color(band.r, band.g, band.b, 0.7f), "glow", false); U.Pin(glow.rectTransform, 0.5f, 0.5f, 0, 60, 1500, 1500); glow.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var card = U.Img(popup, Spr.Round, U.Panel, "card", true, true); cardRt = U.Pin(card.rectTransform, 0.5f, 0.5f, 0, 60, 900, h); cardRt.pivot = new Vector2(0.5f, 0.5f);
+            var card = U.Plate(popup, Spr.PlateLight, U.Panel, "card", true); cardRt = U.Pin(card.rectTransform, 0.5f, 0.5f, 0, 60, 900, h); cardRt.pivot = new Vector2(0.5f, 0.5f);
             var head = U.Img(card.transform, Spr.Round, band, "head"); U.Place(head.rectTransform, 0, 1, 1, 1, 10, -150, -10, -10);
             var tt = U.Shade(U.Txt(head.transform, title, 58, Color.white)); U.Fill(tt.rectTransform);
             var crt = cardRt; Run(0.3f, k => { if (crt != null) crt.localScale = Vector3.one * OutBack(k); });

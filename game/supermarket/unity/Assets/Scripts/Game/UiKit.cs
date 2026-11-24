@@ -10,6 +10,7 @@ namespace Souq
     {
         public static Sprite Round, Circle, Glow, Gem, Coin, Star, Person, Square, Ring, Arrow, Spark;
         // drawn as vector art and shipped as large pictures (game/supermarket/ui-art); null when a build has none
+        public static Sprite PlateDark, PlateLight, PlateGold, Slot, BarFill;
         public static Sprite ButtonFx, Register, Parking, Bolt, Crown, Bag, Gear, Truck, Bus, Megaphone, Clock, Gift, Cart, Up, Lock;
         static Sprite Load(string name, float ppu = 100, int border = 0)
         {
@@ -34,6 +35,7 @@ namespace Souq
         public static void Init()
         {
             if (Round != null) return;
+            float pp = 100f * 256 / 96; PlateDark = Load("plate_dark", pp, 80); PlateLight = Load("plate_light", pp, 80); PlateGold = Load("plate_gold", pp, 80); Slot = Load("slot", pp, 80); BarFill = Load("bar_fill", pp, 80);
             ButtonFx = Load("button_fx", 100f * 256 / 96, 80); Register = Load("register"); Parking = Load("parking"); Bolt = Load("bolt"); Crown = Load("crown"); Bag = Load("bag"); Gear = Load("gear");
             Truck = Load("truck"); Bus = Load("bus"); Megaphone = Load("megaphone"); Clock = Load("clock"); Gift = Load("gift"); Cart = Load("cart"); Up = Load("up"); Lock = Load("lock");
             Round = Make(96, (x, y) => W(Aa(Box(x, y, 1, 1, 0.52f), 0.04f)), 30);
@@ -113,6 +115,12 @@ namespace Souq
             var rt = Rect(parent, name); var i = rt.gameObject.AddComponent<Image>(); i.sprite = s; i.color = c; i.raycastTarget = hit;
             if (sliced && s == Spr.Round) { i.type = Image.Type.Sliced; i.pixelsPerUnitMultiplier = 1; }
             return i;
+        }
+        /// A drawn surface (dark, light, gold, groove); falls back to a flat rounded rectangle when the picture is missing.
+        public static Image Plate(Transform parent, Sprite s, Color fallback, string name = "plate", bool hit = false)
+        {
+            if (s == null) return Img(parent, Spr.Round, fallback, name, true, hit);
+            var i = Img(parent, s, Color.white, name, false, hit); i.type = Image.Type.Sliced; i.pixelsPerUnitMultiplier = 1; return i;
         }
         public static Text Txt(Transform parent, string s, int size, Color c, TextAnchor a = TextAnchor.MiddleCenter, string name = "txt")
         {
