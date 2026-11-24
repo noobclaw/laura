@@ -144,11 +144,11 @@ public static class CiBuild
         { int keepStar = g.sim.s.star; var keepOpen = (bool[])g.sim.s.dOpen.Clone(); string[] names = { "", "Joe's Corner", "Laura's Market", "MEGA MART", "سوق لورا" }; int[] stars = { 0, 2, 5, 9, 13 }; int[] open = { 2, 4, 6, 9, 11 };
           for (int si = 0; si < 5; si++)
           {
-              g.sim.s.star = stars[si]; g.sim.s.storeName = names[si]; for (int d = 0; d < T.ND; d++) g.sim.s.dOpen[d] = d < open[si];
+              g.sim.s.star = stars[si]; g.sim.s.storeName = names[si]; for (int d = 0; d < Souq.Core.T.ND; d++) g.sim.s.dOpen[d] = d < open[si];
               g.world.SyncStatic(true, false); g.world.RefreshStore(); g.focus = new Vector3(0, 0, 9f); g.zoom = 24f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "14_stage" + (si + 1));
               g.focus = new Vector3(0, 0, -16f); g.PlaceCamera(); g.Tick(0.02f); Snap(g, "15_lot" + (si + 1));
           }
-          g.sim.s.star = keepStar; g.sim.s.storeName = ""; for (int d = 0; d < T.ND; d++) g.sim.s.dOpen[d] = keepOpen[d]; g.world.SyncStatic(true, false); g.world.RefreshStore(); }
+          g.sim.s.star = keepStar; g.sim.s.storeName = ""; for (int d = 0; d < Souq.Core.T.ND; d++) g.sim.s.dOpen[d] = keepOpen[d]; g.world.SyncStatic(true, false); g.world.RefreshStore(); }
         g.focus = new Vector3(0, 0, 36); g.zoom = 14f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "5_shelves");
         g.focus = new Vector3(0, 0, 8); g.zoom = 20.5f; g.PlaceCamera();
         g.ui.OpenDept(1); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "6_department");
