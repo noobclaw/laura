@@ -9,6 +9,13 @@ namespace Souq
     public static class Spr
     {
         public static Sprite Round, Circle, Glow, Gem, Coin, Star, Person, Square, Ring, Arrow, Spark;
+        // drawn as vector art and shipped as large pictures (game/supermarket/ui-art); null when a build has none
+        public static Sprite ButtonFx, Register, Parking, Bolt, Crown, Bag, Gear, Truck, Bus, Megaphone, Clock, Gift, Cart, Up, Lock;
+        static Sprite Load(string name, float ppu = 100, int border = 0)
+        {
+            var tex = Resources.Load<Texture2D>("Ui/" + name); if (tex == null) return null;
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), ppu, 0, SpriteMeshType.FullRect, new Vector4(border, border, border, border));
+        }
         static Sprite Make(int n, Func<float, float, Color> f, int border = 0)
         {
             var t = new Texture2D(n, n, TextureFormat.RGBA32, false); t.wrapMode = TextureWrapMode.Clamp; t.filterMode = FilterMode.Bilinear;
@@ -27,6 +34,8 @@ namespace Souq
         public static void Init()
         {
             if (Round != null) return;
+            ButtonFx = Load("button_fx", 100f * 256 / 96, 80); Register = Load("register"); Parking = Load("parking"); Bolt = Load("bolt"); Crown = Load("crown"); Bag = Load("bag"); Gear = Load("gear");
+            Truck = Load("truck"); Bus = Load("bus"); Megaphone = Load("megaphone"); Clock = Load("clock"); Gift = Load("gift"); Cart = Load("cart"); Up = Load("up"); Lock = Load("lock");
             Round = Make(96, (x, y) => W(Aa(Box(x, y, 1, 1, 0.52f), 0.04f)), 30);
             Square = Make(8, (x, y) => Color.white);
             Ring = Make(128, (x, y) => { float d = Mathf.Sqrt(x * x + y * y); return W(Aa(Mathf.Abs(d - 0.84f) - 0.09f, 0.03f)); });
@@ -64,6 +73,7 @@ namespace Souq
                 float head = Mathf.Sqrt(x * x + (y - 0.42f) * (y - 0.42f)) - 0.34f; float body = Box(x, y + 0.52f, 0.62f, 0.44f, 0.4f);
                 return W(Aa(Mathf.Min(head, body), 0.04f));
             });
+            Coin = Load("coin") ?? Coin; Gem = Load("gem") ?? Gem; Star = Load("star") ?? Star; Person = Load("person") ?? Person;
         }
     }
 
@@ -115,7 +125,8 @@ namespace Souq
             var r = new Btn(); r.color = color; r.rt = Rect(parent, name);
             r.shade = Img(r.rt, Spr.Round, Color.Lerp(color, Color.black, 0.35f), "shade"); Place(r.shade.rectTransform, 0, 0, 1, 1, 0, -8, 0, -8);
             r.bg = Img(r.rt, Spr.Round, color, "bg", true, true); Fill(r.bg.rectTransform);
-            var hi = Img(r.bg.transform, Spr.Round, new Color(1, 1, 1, 0.22f), "hi"); Place(hi.rectTransform, 0, 0.5f, 1, 1, 6, 0, -6, -6);
+            if (Spr.ButtonFx != null) { var fx = Img(r.bg.transform, Spr.ButtonFx, Color.white, "fx", false); fx.type = Image.Type.Sliced; fx.pixelsPerUnitMultiplier = 1; Fill(fx.rectTransform); }
+            else { var hi = Img(r.bg.transform, Spr.Round, new Color(1, 1, 1, 0.22f), "hi"); Place(hi.rectTransform, 0, 0.5f, 1, 1, 6, 0, -6, -6); }
             r.label = Shade(Txt(r.bg.transform, label, size, Color.white), 2, 0.35f); Place(r.label.rectTransform, 0, 0, 1, 1, 14, 6, -14, -6);
             r.b = r.bg.gameObject.AddComponent<Button>(); r.b.transition = Selectable.Transition.None;
             var rt = r.rt; r.b.onClick.AddListener(() => { if (!r.on) { Ui.I?.Deny(rt); if (r.fireWhenOff) onClick?.Invoke(); return; } Ui.I?.Punch(rt); onClick?.Invoke(); });

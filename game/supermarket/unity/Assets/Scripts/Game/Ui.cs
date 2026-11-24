@@ -77,18 +77,18 @@ namespace Souq
         }
         void BuildOffers()
         {
-            AddOffer("adboost", new Color(0.98f, 0.55f, 0.15f), Spr.Coin, () => true, () => sim.AdActive ? "x2 " + Loc.Time(s.adEnd - g.Now()) : "x2", () => OfferPopup("adboost", "adboostd", () => { if (!sim.AdBoost()) Toast(Loc.G("max")); else { Flash(new Color(1f, 0.8f, 0.3f)); g.audio.Play("power"); } }));
+            AddOffer("adboost", new Color(0.98f, 0.55f, 0.15f), Spr.Megaphone ?? Spr.Coin, () => true, () => sim.AdActive ? "x2 " + Loc.Time(s.adEnd - g.Now()) : "x2", () => OfferPopup("adboost", "adboostd", () => { if (!sim.AdBoost()) Toast(Loc.G("max")); else { Flash(new Color(1f, 0.8f, 0.3f)); g.audio.Play("power"); } }));
             AddOffer("vip", U.Purple, Spr.Star, () => sim.vipHere, () => Loc.Num(sim.vipReward), () => VipPopup());
-            AddOffer("bus", U.Blue, Spr.Person, () => sim.busOffer, () => "+10-49", () => OfferPopup("bus", "busd", () => { int n = sim.AcceptBus(); Toast("+" + n + " " + Loc.G("bus")); g.audio.Play("power"); }, () => sim.busOffer = false));
-            AddOffer("qbuy", U.Green, Spr.Person, () => sim.quickBuyOffer || sim.QuickBuy, () => sim.QuickBuy ? Loc.Time(s.quickBuyEnd - g.Now()) : "x2", () => { if (!sim.QuickBuy) OfferPopup("qbuy", "qbuyd", () => { sim.StartQuickBuy(); g.audio.Play("power"); }, () => sim.quickBuyOffer = false); });
-            AddOffer("qcheck", U.Red, Spr.Coin, () => sim.quickCheckOffer || sim.QuickCheck, () => sim.QuickCheck ? Loc.Time(s.quickCheckEnd - g.Now()) : "x2", () => { if (!sim.QuickCheck) OfferPopup("qcheck", "qcheckd", () => { sim.StartQuickCheck(); g.audio.Play("power"); }, () => sim.quickCheckOffer = false); });
+            AddOffer("bus", U.Blue, Spr.Bus ?? Spr.Person, () => sim.busOffer, () => "+10-49", () => OfferPopup("bus", "busd", () => { int n = sim.AcceptBus(); Toast("+" + n + " " + Loc.G("bus")); g.audio.Play("power"); }, () => sim.busOffer = false));
+            AddOffer("qbuy", U.Green, Spr.Bolt ?? Spr.Person, () => sim.quickBuyOffer || sim.QuickBuy, () => sim.QuickBuy ? Loc.Time(s.quickBuyEnd - g.Now()) : "x2", () => { if (!sim.QuickBuy) OfferPopup("qbuy", "qbuyd", () => { sim.StartQuickBuy(); g.audio.Play("power"); }, () => sim.quickBuyOffer = false); });
+            AddOffer("qcheck", U.Red, Spr.Register ?? Spr.Coin, () => sim.quickCheckOffer || sim.QuickCheck, () => sim.QuickCheck ? Loc.Time(s.quickCheckEnd - g.Now()) : "x2", () => { if (!sim.QuickCheck) OfferPopup("qcheck", "qcheckd", () => { sim.StartQuickCheck(); g.audio.Play("power"); }, () => sim.quickCheckOffer = false); });
         }
 
         void BuildNav()
         {
             var bar = U.Img(hud, Spr.Round, U.Navy, "nav", true, true); float nb = Mathf.Max(30, botInset * 0.6f + 14); U.Place(bar.rectTransform, 0, 0, 1, 0, 20, nb, -20, nb + 206);
             string[] keys = { "checkouts", "parking", "boostsNav", "gradeNav", "shop" }; Color[] cols = { U.Green, U.Blue, U.Purple, U.Gold, U.Red };
-            Sprite[] ic = { Spr.Coin, null, Spr.Person, Spr.Star, Spr.Gem }; Action[] act = { () => OpenCheckouts(), () => OpenParking(), () => OpenBoosts(), () => OpenGrade(), () => OpenShop() };
+            Sprite[] ic = { Spr.Register ?? Spr.Coin, Spr.Parking, Spr.Bolt ?? Spr.Person, Spr.Crown ?? Spr.Star, Spr.Bag ?? Spr.Gem }; Action[] act = { () => OpenCheckouts(), () => OpenParking(), () => OpenBoosts(), () => OpenGrade(), () => OpenShop() };
             for (int i = 0; i < 5; i++)
             {
                 var b = U.Button(bar.transform, "", cols[i], 30, act[i], "nav" + i); U.Place(b.rt, i / 5f, 0, (i + 1) / 5f, 1, 12, 20, -12, -14); navRt[i] = b.rt;

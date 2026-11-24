@@ -158,6 +158,7 @@ public static class CiBuild
     }
 
     /// Everything a person would normally set up by hand in the editor: pipeline asset and the materials the game clones.
+    static bool urpOk;
     public static void Setup()
     {
         Directory.CreateDirectory("Assets/Settings");
@@ -166,7 +167,7 @@ public static class CiBuild
         AssetDatabase.Refresh();
 
         PlayerSettings.colorSpace = ColorSpace.Linear;
-        bool urp = SetupUrp();
+        urpOk = SetupUrp(); bool urp = urpOk;
 
         // Material assets keep the shaders in the build; runtime objects clone them.
         var shader = (urp ? Shader.Find("Universal Render Pipeline/Lit") : null) ?? Shader.Find("Standard");
@@ -211,7 +212,7 @@ public static class CiBuild
             options = BuildOptions.None,
         });
         var ok = report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded;
-        Debug.Log("CiBuild result: " + report.summary.result + ", errors: " + report.summary.totalErrors + ", urp: " + urp);
+        Debug.Log("CiBuild result: " + report.summary.result + ", errors: " + report.summary.totalErrors + ", urpOk: " + urpOk);
         EditorApplication.Exit(ok ? 0 : 1);
     }
 }

@@ -1,0 +1,74 @@
+// Draws the interface icons and the app icon as SVG, then saves crisp PNGs for the game.
+// Run: NODE_PATH=$(npm root -g) node icons.cjs
+const fs = require('fs'), path = require('path');
+const OUT = path.join(__dirname, 'svg'), PNG = path.join(__dirname, '../unity/Assets/Resources/Ui');
+fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(PNG, { recursive: true });
+const INK = '#1d2440';
+const defs = `
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3a6"/><stop offset=".45" stop-color="#ffcf3a"/><stop offset="1" stop-color="#f08a12"/></linearGradient>
+  <linearGradient id="goldD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6a81c"/><stop offset="1" stop-color="#c8640a"/></linearGradient>
+  <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fe3ff"/><stop offset=".5" stop-color="#3aa0ff"/><stop offset="1" stop-color="#2157d8"/></linearGradient>
+  <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a80"/><stop offset=".5" stop-color="#f0443e"/><stop offset="1" stop-color="#b81f2b"/></linearGradient>
+  <linearGradient id="green" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6f58a"/><stop offset=".5" stop-color="#4ccf5a"/><stop offset="1" stop-color="#1c9440"/></linearGradient>
+  <linearGradient id="purple" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0b8ff"/><stop offset=".5" stop-color="#a45cf5"/><stop offset="1" stop-color="#6a2fc4"/></linearGradient>
+  <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#d7deea"/><stop offset="1" stop-color="#98a4ba"/></linearGradient>
+  <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe0bf"/><stop offset="1" stop-color="#f0b282"/></linearGradient>
+  <filter id="drop" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#0b1030" flood-opacity=".35"/></filter>
+</defs>`;
+const S = (w = 9) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const shine = (d, o = .55) => `<path d="${d}" fill="#fff" opacity="${o}"/>`;
+const icons = {
+  coin: `<circle cx="128" cy="128" r="100" fill="url(#goldD)" ${S()}/><circle cx="128" cy="120" r="92" fill="url(#gold)"/><circle cx="128" cy="120" r="66" fill="none" stroke="#e08a10" stroke-width="8"/><path d="M128 72l15 31 34 5-25 24 6 34-30-16-30 16 6-34-25-24 34-5z" fill="#e08a10"/><path d="M128 66l15 31 34 5-25 24 6 34-30-16-30 16 6-34-25-24 34-5z" fill="#fff6c2"/>${shine('M60 96a74 74 0 0 1 96-52 84 84 0 0 0-96 52z', .7)}`,
+  gem: `<path d="M70 44h116l46 58-104 116L24 102z" fill="url(#blue)" ${S()}/><path d="M70 44l-46 58h72zM186 44l46 58h-72zM96 102h64l-32-58z" fill="#bff0ff" opacity=".85"/><path d="M96 102l32 116 32-116z" fill="#6cc4ff" opacity=".8"/><path d="M24 102h72l32 116zM232 102h-72l-32 116z" fill="#1f4fc8" opacity=".35"/>${shine('M78 54h44l-16 36H52z', .75)}`,
+  star: `<path d="M128 22l32 66 72 10-52 51 12 72-64-34-64 34 12-72-52-51 72-10z" fill="url(#gold)" ${S()}/><path d="M128 22l32 66 72 10-52 51 12 72-64-34z" fill="#e88c0c" opacity=".35"/>${shine('M128 44l-22 48-50 7 20 4 40-6z', .8)}`,
+  person: `<path d="M44 226c0-50 34-82 84-82s84 32 84 82z" fill="url(#blue)" ${S()}/><circle cx="128" cy="88" r="56" fill="url(#skin)" ${S()}/><path d="M74 82c0-36 24-56 54-56s54 20 54 56c-18-22-38-30-54-30s-36 8-54 30z" fill="#5a3a22" ${S(7)}/><circle cx="108" cy="96" r="7" fill="${INK}"/><circle cx="148" cy="96" r="7" fill="${INK}"/><path d="M112 116q16 12 32 0" fill="none" ${S(6)}/>${shine('M66 178q20-22 46-24l-10 22z', .5)}`,
+  register: `<rect x="34" y="128" width="188" height="96" rx="18" fill="url(#red)" ${S()}/><rect x="60" y="58" width="136" height="84" rx="14" fill="url(#steel)" ${S()}/><rect x="76" y="72" width="104" height="38" rx="8" fill="#16324a"/><path d="M90 98h18M118 98h18M146 98h18" stroke="#6dffb0" stroke-width="10" stroke-linecap="round"/><rect x="58" y="164" width="140" height="34" rx="10" fill="#fff" ${S(7)}/><circle cx="128" cy="181" r="8" fill="#ffcf3a" ${S(5)}/><rect x="148" y="24" width="52" height="40" rx="8" fill="#fff" ${S(7)}/><path d="M158 40h32M158 52h20" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>${shine('M48 142h160v14H48z', .35)}`,
+  parking: `<rect x="34" y="34" width="188" height="188" rx="42" fill="url(#blue)" ${S()}/><path d="M96 190V70h46c28 0 44 16 44 40s-16 40-44 40h-18v40z" fill="#fff" ${S(8)}/><rect x="124" y="94" width="20" height="32" rx="10" fill="#3aa0ff"/>${shine('M54 60q8-14 26-14h96q-60 6-108 40z', .45)}`,
+  bolt: `<path d="M150 18L52 144h62l-14 94 104-134h-64z" fill="url(#gold)" ${S()}/>${shine('M142 40l-66 88h28z', .7)}`,
+  crown: `<path d="M30 190l-10-112 58 44 50-84 50 84 58-44-10 112z" fill="url(#gold)" ${S()}/><rect x="30" y="184" width="196" height="38" rx="12" fill="url(#goldD)" ${S()}/><circle cx="128" cy="150" r="14" fill="#f0443e" ${S(6)}/><circle cx="78" cy="158" r="10" fill="#3aa0ff" ${S(6)}/><circle cx="178" cy="158" r="10" fill="#4ccf5a" ${S(6)}/>${shine('M40 104l34 26 22-10-48-36z', .6)}`,
+  bag: `<path d="M48 92h160l14 124a14 14 0 0 1-14 16H48a14 14 0 0 1-14-16z" fill="url(#red)" ${S()}/><path d="M88 100V76a40 40 0 0 1 80 0v24" fill="none" ${S(11)}/><path d="M128 124l34 28-34 44-34-44z" fill="url(#blue)" ${S(7)}/><path d="M128 124l-34 28h68z" fill="#bff0ff" opacity=".8"/>${shine('M54 104h40l-8 60H46z', .35)}`,
+  gear: `<path d="M110 20h36l6 28 22 10 25-15 25 25-15 25 10 22 28 6v36l-28 6-10 22 15 25-25 25-25-15-22 10-6 28h-36l-6-28-22-10-25 15-25-25 15-25-10-22-28-6v-36l28-6 10-22-15-25 25-25 25 15 22-10z" fill="url(#steel)" ${S()}/><circle cx="128" cy="128" r="38" fill="#5b6a86" ${S()}/>${shine('M70 76l20-16 20 8-30 26z', .7)}`,
+  truck: `<rect x="18" y="70" width="140" height="104" rx="14" fill="url(#steel)" ${S()}/><path d="M158 100h46l36 40v34h-82z" fill="url(#gold)" ${S()}/><path d="M172 112h26l22 26h-48z" fill="#bff0ff" ${S(6)}/><rect x="40" y="92" width="96" height="30" rx="8" fill="url(#red)"/><circle cx="70" cy="184" r="26" fill="#2c3440" ${S()}/><circle cx="70" cy="184" r="10" fill="#d7deea"/><circle cx="192" cy="184" r="26" fill="#2c3440" ${S()}/><circle cx="192" cy="184" r="10" fill="#d7deea"/>`,
+  bus: `<rect x="20" y="52" width="216" height="132" rx="28" fill="url(#blue)" ${S()}/><rect x="40" y="74" width="48" height="46" rx="8" fill="#e9f8ff" ${S(6)}/><rect x="104" y="74" width="48" height="46" rx="8" fill="#e9f8ff" ${S(6)}/><rect x="168" y="74" width="48" height="46" rx="8" fill="#e9f8ff" ${S(6)}/><rect x="20" y="136" width="216" height="18" fill="#ffcf3a" ${S(6)}/><circle cx="74" cy="192" r="24" fill="#2c3440" ${S()}/><circle cx="74" cy="192" r="9" fill="#d7deea"/><circle cx="182" cy="192" r="24" fill="#2c3440" ${S()}/><circle cx="182" cy="192" r="9" fill="#d7deea"/>`,
+  megaphone: `<path d="M40 104h44l96-58v164l-96-58H40z" fill="url(#red)" ${S()}/><rect x="24" y="100" width="40" height="56" rx="12" fill="url(#steel)" ${S()}/><path d="M70 154l14 60h34l-12-52z" fill="url(#steel)" ${S()}/><path d="M204 96q20 32 0 64M222 76q36 52 0 104" fill="none" stroke="#ffcf3a" stroke-width="12" stroke-linecap="round"/>${shine('M92 108l76-44v20l-76 40z', .4)}`,
+  clock: `<circle cx="128" cy="134" r="92" fill="url(#steel)" ${S()}/><circle cx="128" cy="134" r="70" fill="#fff" ${S(7)}/><path d="M128 86v50l34 22" fill="none" ${S(12)}/><rect x="108" y="18" width="40" height="30" rx="8" fill="url(#red)" ${S()}/><path d="M196 54l22 22" ${S(14)}/>`,
+  gift: `<rect x="34" y="104" width="188" height="124" rx="16" fill="url(#red)" ${S()}/><rect x="22" y="76" width="212" height="50" rx="14" fill="url(#red)" ${S()}/><rect x="108" y="76" width="40" height="152" fill="url(#gold)" ${S(7)}/><path d="M128 76C96 30 50 36 62 64c8 18 44 14 66 12zM128 76c32-46 78-40 66-12-8 18-44 14-66 12z" fill="url(#gold)" ${S()}/>${shine('M34 88h64v24H30z', .35)}`,
+  cart: `<path d="M24 46h30l10 34h160l-22 82H82z" fill="url(#steel)" ${S()}/><path d="M78 100h132M84 124h118M110 82v78M146 82v78M182 82v78" stroke="${INK}" stroke-width="6" opacity=".55"/><path d="M82 162l-8 30h124" fill="none" ${S()}/><circle cx="94" cy="212" r="18" fill="#2c3440" ${S()}/><circle cx="184" cy="212" r="18" fill="#2c3440" ${S()}/>`,
+  up: `<circle cx="128" cy="128" r="100" fill="url(#green)" ${S()}/><path d="M128 56l60 64h-36v62h-48v-62H68z" fill="#fff" ${S(8)}/>${shine('M52 100a80 80 0 0 1 100-50 96 96 0 0 0-100 50z', .5)}`,
+  lock: `<path d="M78 112V84a50 50 0 0 1 100 0v28" fill="none" ${S(22)}/><path d="M78 112V84a50 50 0 0 1 100 0v28" fill="none" stroke="#d7deea" stroke-width="10" stroke-linecap="round"/><rect x="48" y="108" width="160" height="124" rx="22" fill="url(#gold)" ${S()}/><circle cx="128" cy="160" r="16" fill="${INK}"/><rect x="120" y="164" width="16" height="36" rx="6" fill="${INK}"/>`,
+};
+const wrap = (body, size = 256) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 256 256">${defs}<g filter="url(#drop)">${body}</g></svg>`;
+// button surface overlay: gloss on top, shade below, a dark edge; laid over a tinted rounded rectangle and nine-sliced
+const buttonFx = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".48" stop-color="#fff" stop-opacity=".12"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient></defs><rect x="2" y="2" width="124" height="124" rx="34" fill="url(#g)"/><rect x="9" y="7" width="110" height="46" rx="27" fill="#fff" opacity=".22"/><rect x="2.5" y="2.5" width="123" height="123" rx="33.5" fill="none" stroke="#0b1030" stroke-opacity=".45" stroke-width="5"/><rect x="7" y="6" width="114" height="114" rx="29" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2.5"/></svg>`;
+const panelFx = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect x="2" y="2" width="124" height="124" rx="30" fill="#fff"/><rect x="2.5" y="2.5" width="123" height="123" rx="29.5" fill="none" stroke="#0b1030" stroke-opacity=".28" stroke-width="5"/></svg>`;
+// app icon: a brimming trolley bursting out of a sunburst
+const app = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">${defs}
+<defs><radialGradient id="bg" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#ffe45c"/><stop offset=".55" stop-color="#ff9a1f"/><stop offset="1" stop-color="#e8431f"/></radialGradient></defs>
+<rect width="1024" height="1024" fill="url(#bg)"/>
+<g opacity=".2" fill="#fff">${Array.from({ length: 12 }, (_, i) => `<path d="M512 470L${512 + 900 * Math.cos(i * Math.PI / 6 - .13)} ${470 + 900 * Math.sin(i * Math.PI / 6 - .13)}L${512 + 900 * Math.cos(i * Math.PI / 6 + .13)} ${470 + 900 * Math.sin(i * Math.PI / 6 + .13)}z"/>`).join('')}</g>
+<g transform="translate(150 150) scale(2.75)" filter="url(#drop)">
+  <rect x="62" y="34" width="50" height="78" rx="8" fill="url(#red)" ${S(7)}/><rect x="62" y="56" width="50" height="22" fill="#fff6c2"/>
+  <rect x="118" y="20" width="44" height="92" rx="8" fill="url(#blue)" ${S(7)}/><rect x="118" y="46" width="44" height="26" fill="#fff"/><rect x="130" y="8" width="20" height="18" rx="5" fill="#fff" ${S(6)}/>
+  <circle cx="186" cy="84" r="28" fill="url(#gold)" ${S(7)}/><path d="M186 56q8-16 22-12" fill="none" stroke="#1c9440" stroke-width="9" stroke-linecap="round"/>
+  <path d="M84 96q-22-14-10-40 26 2 30 30z" fill="url(#green)" ${S(7)}/>
+  <path d="M14 58h34l12 38h176l-26 96H78z" fill="url(#steel)" ${S(10)}/>
+  <path d="M74 120h152M82 150h136M112 100v90M152 100v90M192 100v90" stroke="${INK}" stroke-width="7" opacity=".5"/>
+  <path d="M78 192l-10 34h146" fill="none" ${S(10)}/>
+  <rect x="2" y="46" width="52" height="24" rx="12" fill="url(#red)" ${S(8)}/>
+  <circle cx="92" cy="248" r="22" fill="#2c3440" ${S(9)}/><circle cx="92" cy="248" r="8" fill="#d7deea"/><circle cx="200" cy="248" r="22" fill="#2c3440" ${S(9)}/><circle cx="200" cy="248" r="8" fill="#d7deea"/>
+</g>
+<g transform="translate(700 90) scale(1.05)" filter="url(#drop)">${icons.coin}</g><g transform="translate(40 610) scale(.8) rotate(-14 128 128)" filter="url(#drop)">${icons.coin}</g><g transform="translate(790 560) scale(.62) rotate(12 128 128)" filter="url(#drop)">${icons.star}</g>
+</svg>`;
+(async () => {
+  const { chromium } = require('playwright'); const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' }); const p = await b.newPage();
+  const shot = async (svg, w, h, file) => { await p.setViewportSize({ width: w, height: h }); await p.setContent(`<html><body style="margin:0;background:transparent">${svg}</body></html>`); await p.screenshot({ path: file, omitBackground: true, clip: { x: 0, y: 0, width: w, height: h } }); };
+  for (const [name, body] of Object.entries(icons)) { fs.writeFileSync(path.join(OUT, name + '.svg'), wrap(body)); await shot(wrap(body, 512), 512, 512, path.join(PNG, name + '.png')); }
+  fs.writeFileSync(path.join(OUT, 'button_fx.svg'), buttonFx); await shot(buttonFx.replace('width="128" height="128"', 'width="256" height="256"'), 256, 256, path.join(PNG, 'button_fx.png'));
+  fs.writeFileSync(path.join(OUT, 'panel.svg'), panelFx); await shot(panelFx.replace('width="128" height="128"', 'width="256" height="256"'), 256, 256, path.join(PNG, 'panel.png'));
+  fs.writeFileSync(path.join(OUT, 'app_icon.svg'), app); await shot(app, 1024, 1024, path.join(__dirname, '../unity/Assets/Icon/icon.png'));
+  // review sheet
+  const cells = Object.keys(icons).map(n => `<div style="width:150px;text-align:center;font:12px sans-serif;color:#fff"><div style="background:#2a66d9;border-radius:22px;padding:10px;margin:6px"><img src="file://${path.join(PNG, n + '.png')}" width="110"></div>${n}</div>`).join('');
+  await p.setViewportSize({ width: 1500, height: 760 }); await p.setContent(`<html><body style="margin:0;background:#1b2140;display:flex"><img src="file://${path.join(__dirname, '../unity/Assets/Icon/icon.png')}" width="560" style="margin:20px;border-radius:120px"><div style="display:flex;flex-wrap:wrap;align-content:flex-start;width:900px">${cells}</div></body></html>`); await p.waitForTimeout(600); await p.screenshot({ path: '/tmp/look/icons.png' });
+  await b.close(); console.log('icons', Object.keys(icons).length);
+})();
