@@ -95,7 +95,7 @@ namespace Souq.Core
         }
         public bool QuickBuy => s.quickBuyEnd > Now();
         public bool QuickCheck => s.quickCheckEnd > Now();
-        public double ProfitMult => T.StarProfit[s.star] * Math.Pow(2, Epic(EpicKind.Profit)) * (s.profitX2 ? 2 : 1);
+        public double ProfitMult => T.StarProfit[s.star] * Math.Pow(2, Epic(EpicKind.Profit)) * (s.profitX2 ? 2 : 1) * T.NoAdsBonus;
         public double Price(int d) => (T.BasePrice[d] + (s.dLevel[d] - 1) * T.PriceStep(d)) * T.TierProduct(s.dLevel[d]) * ProfitMult;
         public double StaffSpeed(int d) => (T.SpeedBase[d] + s.dSpeed[d] * T.SpeedStep(d)) * (1 + EpicAdd(EpicKind.Manager, d));
         public double DeptSpeed(int d) => StaffSpeed(d) * s.dStaff[d];
@@ -195,7 +195,7 @@ namespace Souq.Core
         {
             double away = now - s.lastSeen;
             if (s.lastSeen <= 0 || s.parkLevel <= 1 || away < T.OfflineMinAway) return 0;   // a clock set backwards gives a negative gap and pays nothing
-            return IdleIncome(Math.Min(OfflineCap, away));
+            return IdleIncome(Math.Min(OfflineCap, away)) * T.OfflineBonus;
         }
         public bool DailyLogin(int day) { if (day <= s.loginDay) return false; s.loginDay = day; s.gem += T.LoginGems; Changed(); return true; }
 

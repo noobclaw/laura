@@ -99,5 +99,7 @@ namespace Souq.Core
         public const int LoginGems = 100, AdGems = 30;
         public const double OfflineMinAway = 180, OfflineCap = 21600, OfflineCapPro = 43200;
         public const double QuickBuySecs = 180, QuickCheckSecs = 120;
+        /// The game has no ads, so what an ad used to give is always on: the x2 campaign, and x2 on away pay (ads gave x3).
+        public const double NoAdsBonus = 2, OfflineBonus = 2;
     }
 }
