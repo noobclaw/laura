@@ -129,7 +129,7 @@ public static class CiBuild
         s.cLevel[0] = 12; s.cLevel[1] = 8; s.cLevel[2] = 5; s.cLevel[3] = 2; s.cLevel[4] = 1;
         s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false; s.tut = Souq.Tutorial.Done;
         var g = new Souq.Game(); g.editor = true; g.Start(s, false);
-        shotRt = new RenderTexture(1080, 2340, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
+        shotRt = new RenderTexture(1290, 2796, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
         Canvas.ForceUpdateCanvases(); g.cam.Render();        // first frame warms up lighting
         g.sim.truckHere = true; g.sim.vipHere = true; g.sim.vipReward = 4.2e9; g.sim.busOffer = true;
         for (int i = 0; i < 1500; i++) g.Tick(0.05f);
