@@ -572,7 +572,7 @@ namespace Souq
             {
                 a.btn.label.text = Loc.G(s.sfx ? "on" : "off"); b.btn.label.text = Loc.G(s.music ? "on" : "off"); c.btn.label.text = Loc.Lang == 1 ? Loc.Shape(Loc.Names[1]) : Loc.Names[Loc.Lang];
                 int served = 0; foreach (int v in s.served) served += v;
-                stats.text = Loc.Fix(Loc.Raw("total") + ": " + Loc.Num(s.assets)) + "\n" + Loc.Fix(Loc.Raw("income") + ": " + Loc.Num(sim.FlowPerMin) + Loc.Raw("permin")) + "\n" + Loc.Fix(Loc.Raw("served") + ": " + Loc.Num(served)) + "\n" + Loc.Fix(Loc.Raw("shoppers") + ": " + sim.custs.Count) + "\n\n" + Loc.G("test");
+                stats.text = Loc.Fix(Loc.Raw("total") + ": " + Loc.Num(s.assets)) + "\n" + Loc.Fix(Loc.Raw("income") + ": " + Loc.Num(sim.FlowPerMin) + Loc.Raw("permin")) + "\n" + Loc.Fix(Loc.Raw("served") + ": " + Loc.Num(served)) + "\n" + Loc.Fix(Loc.Raw("shoppers") + ": " + sim.custs.Count);
             };
             sheetRefresh();
         }
