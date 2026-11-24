@@ -178,7 +178,7 @@ namespace Souq
                 var vol = new GameObject("PostFx").AddComponent<Volume>(); vol.isGlobal = true; var prof = ScriptableObject.CreateInstance<VolumeProfile>(); vol.sharedProfile = prof;
                 var bloom = prof.Add<Bloom>(true); bloom.intensity.value = 0.45f; bloom.threshold.value = 1.0f; bloom.scatter.value = 0.6f;
                 var tm = prof.Add<Tonemapping>(true); tm.mode.value = TonemappingMode.Neutral;
-                var ca = prof.Add<ColorAdjustments>(true); ca.saturation.value = 6f; ca.contrast.value = 4f; ca.postExposure.value = 0f;
+                var ca = prof.Add<ColorAdjustments>(true); ca.saturation.value = 14f; ca.contrast.value = 12f; ca.postExposure.value = -0.08f;
                 var vg = prof.Add<Vignette>(true); vg.intensity.value = 0.16f; vg.smoothness.value = 0.5f;
                 var data = cam.GetUniversalAdditionalCameraData(); data.renderPostProcessing = true; data.antialiasing = AntialiasingMode.None; cam.allowMSAA = true;   // edges are smoothed by multisampling, which does not soften the picture
             }

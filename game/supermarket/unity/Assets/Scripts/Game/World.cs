@@ -190,28 +190,60 @@ namespace Souq
 
         Transform Limb(string name, Geo g, Vector3 pivot) { var t = g.Make(name, body, Kit.Solid).transform; t.localPosition = pivot; return t; }
 
-        /// `uniform`: staff colour (apron and cap); null for a shopper. `pushing`: arms held forward on a trolley.
+        static readonly string[] Dress = { "#ff7aa8", "#7b5be6", "#22b8a5", "#f5a524", "#e5484d", "#3b82f6" }, Scarf = { "#e9c7a5", "#c94f7c", "#3b6fb5", "#2f9e8f", "#8a6fd1", "#f4f4f5" }, Pack = { "#e5484d", "#3b82f6", "#22b8a5", "#f5a524" };
+
+        /// `uniform`: staff colour; null for a shopper. `pushing`: arms held forward on a trolley.
+        /// Staff all wear the same full uniform. Shoppers vary: build, age, hair, clothes and what they carry.
         public Person(Transform parent, int look, Color? uniform, bool pushing = false)
         {
             go = new GameObject("person"); go.transform.SetParent(parent, false); body = new GameObject("body").transform; body.SetParent(go.transform, false);
-            phase = (look % 97) * 0.13f; push = pushing; float sc = 0.95f + ((look * 7) % 11) * 0.011f; body.localScale = Vector3.one * sc;
-            string skin = Skin[look % Skin.Length], bot = Pants[(look / 3) % Pants.Length], hair = Hair[(look / 5) % Hair.Length]; bool longHair = look % 5 < 2;
-            Color top = uniform.HasValue ? Geo.Hex(Art.White) : Geo.Hex(Shirt[look % Shirt.Length]);
+            phase = (look % 97) * 0.13f; push = pushing; bool staff = uniform.HasValue;
+            uint h = (uint)look * 2654435761u; h ^= h >> 15;
+            int outfit = staff ? 0 : (int)(h % 10); bool kid = !staff && outfit < 5 && (h / 10) % 6 == 0; int hairStyle = (int)((h / 60) % 6), acc = (int)((h / 360) % 6); float wide = staff ? 1f : 0.88f + ((h / 2160) % 5) * 0.07f;
+            float tall = staff ? 1.06f : kid ? 0.70f : 0.92f + ((h / 10800) % 5) * 0.04f; body.localScale = new Vector3(tall, tall, tall);
+            string skin = Skin[(int)((h / 7) % (uint)Skin.Length)], bot = Pants[(int)((h / 3) % (uint)Pants.Length)], hair = Hair[(int)((h / 5) % (uint)Hair.Length)];
+            Color top = staff ? uniform.Value : Geo.Hex(Shirt[(int)(h % (uint)Shirt.Length)]); bool robe = false; string robeCol = null, cloth = null; int head = hairStyle;   // 0 short 1 long 2 ponytail 3 curly 4 bun 5 bald
+            if (outfit == 5 || outfit == 6) { robe = true; robeCol = Dress[(int)((h / 11) % (uint)Dress.Length)]; top = Geo.Hex(robeCol); head = 1 + (int)((h / 13) % 3) % 3; if (head == 3) head = 4; }
+            else if (outfit == 7) { robe = true; robeCol = (h / 17) % 2 == 0 ? "#2b2d3a" : "#4a3f6b"; top = Geo.Hex(robeCol); head = 6; cloth = Scarf[(int)((h / 19) % (uint)Scarf.Length)]; }
+            else if (outfit == 8) { robe = true; robeCol = "#f7f5ee"; top = Geo.Hex(robeCol); head = 7; cloth = (h / 23) % 2 == 0 ? "#ffffff" : "#e8443c"; }
             var g = new Geo();
-            g.C(top).Ball(0.3f, 0.36f, 0.23f, 0, 0.82f, 0, 14, 9).C(bot).Cyl(0.26f, 0.27f, 0.12f, 0, 0.44f, 0, 12);
-            if (uniform.HasValue) g.C(uniform.Value).Box(0.36f, 0.5f, 0.05f, 0, 0.5f, 0.2f).C(Art.White).Box(0.14f, 0.12f, 0.06f, 0, 0.72f, 0.2f);
+            g.C(top).Ball(0.3f * wide, 0.36f, 0.23f * wide, 0, 0.82f, 0, 14, 9);
+            if (robe) g.C(robeCol).Cyl(0.33f * wide, 0.25f * wide, 0.62f, 0, 0.1f, 0, 14); else g.C(bot).Cyl(0.26f * wide, 0.27f * wide, 0.12f, 0, 0.44f, 0, 12);
+            if (staff)
+            {
+                // uniform: section-coloured shirt, long white apron with a coloured pocket, name badge, peaked cap
+                g.C(Art.White).Box(0.42f, 0.62f, 0.05f, 0, 0.36f, 0.2f).Box(0.06f, 0.3f, 0.04f, -0.15f, 0.9f, 0.2f).Box(0.06f, 0.3f, 0.04f, 0.15f, 0.9f, 0.2f).C(uniform.Value).Box(0.2f, 0.14f, 0.06f, 0, 0.5f, 0.2f).C("#ffd43b").Box(0.11f, 0.07f, 0.06f, 0.13f, 0.86f, 0.21f);
+            }
             g.C(skin).Cyl(0.1f, 0.1f, 0.08f, 0, 1.12f, 0, 9).Ball(0.33f, 0.31f, 0.3f, 0, 1.47f, 0, 16, 11);
-            g.C(hair).Ball(0.345f, 0.26f, 0.32f, 0, 1.56f, -0.035f, 16, 8); if (longHair) g.Ball(0.3f, 0.3f, 0.16f, 0, 1.3f, -0.2f, 12, 7);
+            if (staff) g.C(hair).Ball(0.335f, 0.2f, 0.31f, 0, 1.5f, -0.05f, 14, 7).C(uniform.Value).Ball(0.35f, 0.16f, 0.33f, 0, 1.68f, 0, 16, 6).Box(0.42f, 0.04f, 0.26f, 0, 1.6f, 0.34f).C(Art.White).Box(0.16f, 0.1f, 0.03f, 0, 1.7f, 0.32f);
+            else switch (head)
+            {
+                case 0: g.C(hair).Ball(0.345f, 0.26f, 0.32f, 0, 1.56f, -0.035f, 16, 8); break;
+                case 1: g.C(hair).Ball(0.345f, 0.26f, 0.32f, 0, 1.56f, -0.035f, 16, 8).Ball(0.3f, 0.34f, 0.16f, 0, 1.26f, -0.2f, 12, 7); break;
+                case 2: g.C(hair).Ball(0.345f, 0.26f, 0.32f, 0, 1.56f, -0.035f, 16, 8).Ball(0.11f, 0.24f, 0.11f, 0, 1.36f, -0.36f, 9, 6).C("#ff4f8b").Ball(0.07f, 0.05f, 0.07f, 0, 1.56f, -0.33f, 7, 4); break;
+                case 3: g.C(hair); for (int k = 0; k < 9; k++) { float a = k / 9f * Mathf.PI * 2; g.Ball(0.15f, 0.15f, 0.15f, Mathf.Cos(a) * 0.24f, 1.66f + (k % 2) * 0.04f, Mathf.Sin(a) * 0.22f - 0.04f, 8, 5); } g.Ball(0.22f, 0.16f, 0.22f, 0, 1.74f, -0.03f, 9, 5); break;
+                case 4: g.C(hair).Ball(0.345f, 0.26f, 0.32f, 0, 1.56f, -0.035f, 16, 8).Ball(0.15f, 0.15f, 0.15f, 0, 1.85f, -0.06f, 9, 6); break;
+                case 5: g.C(hair).Ball(0.21f, 0.13f, 0.1f, 0, 1.3f, 0.19f, 9, 5); break;     // bald, with a beard
+                case 6: g.C(cloth).Ball(0.37f, 0.35f, 0.33f, 0, 1.5f, -0.08f, 16, 9).Cyl(0.31f, 0.2f, 0.28f, 0, 0.98f, -0.02f, 12); break;      // headscarf
+                default: g.C("#fbfbf6").Ball(0.36f, 0.3f, 0.33f, 0, 1.55f, -0.07f, 16, 8).Box(0.6f, 0.52f, 0.07f, 0, 0.98f, -0.23f).C(cloth == "#ffffff" ? "#20242c" : "#20242c").Cyl(0.31f, 0.31f, 0.045f, 0, 1.69f, -0.04f, 14); break;   // head cloth with band
+            }
             g.C("#20242c").Ball(0.04f, 0.055f, 0.03f, -0.12f, 1.45f, 0.28f, 8, 5).Ball(0.04f, 0.055f, 0.03f, 0.12f, 1.45f, 0.28f, 8, 5).C("#f08a8a").Ball(0.05f, 0.03f, 0.02f, -0.2f, 1.36f, 0.24f, 8, 4).Ball(0.05f, 0.03f, 0.02f, 0.2f, 1.36f, 0.24f, 8, 4);
-            if (uniform.HasValue) g.C(uniform.Value).Ball(0.35f, 0.16f, 0.33f, 0, 1.68f, 0, 16, 6).Box(0.4f, 0.04f, 0.24f, 0, 1.6f, 0.34f);
+            if (!staff)
+            {
+                if (acc == 0) g.C("#1f2430").Box(0.16f, 0.1f, 0.03f, -0.12f, 1.4f, 0.3f).Box(0.16f, 0.1f, 0.03f, 0.12f, 1.4f, 0.3f).Box(0.1f, 0.03f, 0.03f, 0, 1.46f, 0.3f);                         // glasses
+                else if (acc == 1 && head < 5) g.C("#e8cf8f").Cyl(0.46f, 0.46f, 0.03f, 0, 1.7f, 0, 16).Cyl(0.27f, 0.25f, 0.15f, 0, 1.73f, 0, 14).C("#d9483b").Cyl(0.275f, 0.275f, 0.04f, 0, 1.74f, 0, 14);     // sun hat
+                else if (acc == 2) g.C(Pack[(int)((h / 29) % (uint)Pack.Length)]).Box(0.36f, 0.42f, 0.17f, 0, 0.6f, -0.28f * wide).C("#20242c").Box(0.2f, 0.12f, 0.03f, 0, 0.72f, -0.38f * wide);      // backpack
+                else if (acc == 3 && !robe) g.C(Geo.Hex(Shirt[(int)((h / 31) % (uint)Shirt.Length)])).Box(0.5f * wide, 0.1f, 0.38f * wide, 0, 0.93f, 0.0f);                                              // scarf round the shoulders
+            }
             g.Make("torso", body, Kit.Solid);
             // limbs hang from their pivots so a turn at the hip or shoulder swings them
+            string legCol = robe ? robeCol : bot; Color sleeve = top;
             for (int s = -1; s <= 1; s += 2)
             {
-                var leg = new Geo(); leg.C(bot).Cyl(0.1f, 0.11f, 0.4f, 0, -0.4f, 0, 10).C("#2a2f38").Box(0.17f, 0.09f, 0.3f, 0, -0.48f, 0.03f);
-                var lt = Limb("leg", leg, new Vector3(s * 0.13f, 0.48f, 0)); if (s < 0) legL = lt; else legR = lt;
-                var arm = new Geo(); arm.C(top).Cyl(0.085f, 0.09f, 0.26f, 0, -0.26f, 0, 9).C(skin).Cyl(0.07f, 0.08f, 0.2f, 0, -0.46f, 0, 9).Ball(0.085f, 0.085f, 0.085f, 0, -0.5f, 0, 9, 6);
-                var at = Limb("arm", arm, new Vector3(s * 0.33f, 1.0f, 0)); if (s < 0) armL = at; else armR = at;
+                var leg = new Geo(); leg.C(legCol).Cyl(0.1f, 0.11f, 0.4f, 0, -0.4f, 0, 10).C(robe ? "#6b4a2c" : "#2a2f38").Box(0.17f, 0.09f, 0.3f, 0, -0.48f, 0.03f);
+                var lt = Limb("leg", leg, new Vector3(s * 0.13f * wide, 0.48f, 0)); if (s < 0) legL = lt; else legR = lt;
+                var arm = new Geo(); arm.C(sleeve).Cyl(0.085f, 0.09f, 0.26f, 0, -0.26f, 0, 9).C(robe ? sleeve : Geo.Hex(skin)).Cyl(0.07f, 0.08f, 0.2f, 0, -0.46f, 0, 9).C(skin).Ball(0.085f, 0.085f, 0.085f, 0, -0.5f, 0, 9, 6);
+                var at = Limb("arm", arm, new Vector3(s * 0.33f * wide, 1.0f, 0)); if (s < 0) armL = at; else armR = at;
             }
             Pose(0, false);
         }
@@ -345,9 +377,6 @@ namespace Souq
             for (float x = -3.4f; x <= 3.4f; x += 0.62f) f.Box(0.36f, 0.003f, 0.05f, mx + x, 0.012f, mz - 3.55f).Box(0.36f, 0.003f, 0.05f, mx + x, 0.012f, mz + 3.55f);
             for (float z = -3.2f; z <= 3.2f; z += 0.62f) f.Box(0.05f, 0.003f, 0.36f, mx - 3.7f, 0.012f, mz + z).Box(0.05f, 0.003f, 0.36f, mx + 3.7f, 0.012f, mz + z);
             f.Make("field", g.transform, Kit.Solid, false);
-            // hanging board in the section colour
-            var sg = new Geo(); sg.C(Art.Dark).Box(0.05f, 0.5f, 0.05f, mx - 1.6f, 3.55f, v.center.z + 4.25f).Box(0.05f, 0.5f, 0.05f, mx + 1.6f, 3.55f, v.center.z + 4.25f).C(Art.White).Box(4.0f, 0.06f, 0.2f, mx, 3.5f, v.center.z + 4.25f).Box(4.0f, 0.06f, 0.2f, mx, 2.86f, v.center.z + 4.25f); sg.Make("boardTrim", g.transform, Kit.Solid);
-            var sb = new Geo(); sb.C(Color.white).Box(3.9f, 0.6f, 0.14f, mx, 2.9f, v.center.z + 4.25f); sb.Make("board", g.transform, v.signMat, false);
             v.props = new GameObject("props").transform; v.props.SetParent(g.transform, false);
             for (int k = 0; k < T.MaxStaff; k++)
             {

@@ -40,7 +40,7 @@ Shader "Souq/Solid"
                 if (dot(n, v) < 0) n = -n;
                 Light l = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
                 half wrap = saturate(dot(n, l.direction) * 0.55 + 0.45);
-                half shade = lerp(0.60, 1.0, l.shadowAttenuation);
+                half shade = lerp(0.42, 1.0, l.shadowAttenuation);
                 half3 hemi = lerp(half3(0.62, 0.60, 0.56), half3(0.88, 0.93, 1.0), n.y * 0.5 + 0.5);
                 half3 albedo = i.color.rgb * _Tint.rgb;
                 half3 lit = albedo * (hemi * 0.62 + l.color.rgb * wrap * 0.60 * shade);

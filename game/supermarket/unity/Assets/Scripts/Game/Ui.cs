@@ -134,7 +134,7 @@ namespace Souq
             coinTxt.text = Loc.Num(shownCoin);
             tick -= dt; if (tick <= 0) { tick = 0.15f; Refresh(false); }
             // department chips follow their departments
-            for (int d = 0; d < T.ND; d++) dl[d].rt.anchoredPosition = ToCanvas(World.DeptCenter(d) + new Vector3(0, 3.85f, 4.0f));
+            for (int d = 0; d < T.ND; d++) dl[d].rt.anchoredPosition = ToCanvas(World.DeptCenter(d) + new Vector3(0, 2.2f, 3.9f));
             float tm = Time.unscaledTime;
             foreach (var o in offers) if (o.rt.gameObject.activeSelf) o.rt.localScale = Vector3.one * (1 + 0.05f * Mathf.Sin(tm * 5f + o.rt.anchoredPosition.y));
         }
