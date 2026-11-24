@@ -262,7 +262,7 @@ namespace Souq
             sun.type = LightType.Directional; sun.color = new Color(1f, 0.97f, 0.92f); sun.intensity = 1.2f; sun.shadows = LightShadows.Soft; sun.shadowStrength = 0.5f;
             sun.transform.rotation = Quaternion.Euler(52, 24, 0);
 
-            float depth = StoreDepth, lotDepth = 70f;
+            float depth = StoreDepth, lotDepth = 120f;
             // ground: grass beyond, an asphalt lot, the road, a concrete walk and the shop floor
             Kit.Box(root, new Vector3(0, -0.36f, depth / 2 - 20), new Vector3(220, 0.5f, depth + 160), Kit.Mat(new Color(0.36f, 0.52f, 0.30f), 0.05f), "grass");
             Kit.Box(root, new Vector3(0, -0.3f, -lotDepth / 2 - 2.4f), new Vector3(44, 0.5f, lotDepth), Kit.Tiled("G_asphalt", 44, lotDepth, 6f, new Color(0.22f, 0.23f, 0.26f)), "lot");
