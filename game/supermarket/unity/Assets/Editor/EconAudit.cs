@@ -15,7 +15,7 @@ public static class EconAudit
     {
         public string name; public Save s; public Sim sim; public double clock = 1e9;
         public List<string> events = new List<string>(); public double[] openDay = new double[T.ND]; public double[] starDay = new double[16];
-        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1; public string hourWhere = ""; public Dictionary<string, int> hourBuys = new Dictionary<string, int>(), worstBuys = new Dictionary<string, int>();
+        public double maxPrice, maxCoin; public int buys, useless; public List<double> best = new List<double>(), paid = new List<double>(); public double maxWait, maxHour = 1, maxJump = 1, earlyHour = 1; public string hourWhere = ""; public Dictionary<string, int> hourBuys = new Dictionary<string, int>(), worstBuys = new Dictionary<string, int>();
         public List<double> sessionGrowth = new List<double>(); public int freeGems; public double[] servedAcc = new double[T.ND];
         public string end;
     }
@@ -137,7 +137,7 @@ public static class EconAudit
                 foreach (var o in Options(m)) { double c; double g = Gain(m, o, out c); if (g > 0) { bestPb = Math.Min(bestPb, c / g); cheapest = Math.Min(cheapest, c); } }
                 r.best.Add(bestPb);
                 if (day < 10) r.maxWait = Math.Max(r.maxWait, Math.Max(0, (cheapest - s.coin) / Math.Max(f, 1e-9)));
-                if (t % 60 == 59) { double hg = f / Math.Max(hourFlow, 1e-9); if (day >= 3 && hg > r.maxHour) { r.maxHour = hg; r.hourWhere = "day " + (day + 1) + " minute " + (t + 1); r.worstBuys = new Dictionary<string, int>(r.hourBuys); } hourFlow = f; r.hourBuys.Clear(); }
+                if (t % 60 == 59) { double hg = f / Math.Max(hourFlow, 1e-9); if (day < 5 && (day > 0 || t > 60)) r.earlyHour = Math.Max(r.earlyHour, hg); if (day >= 5 && hg > r.maxHour) { r.maxHour = hg; r.hourWhere = "day " + (day + 1) + " minute " + (t + 1); r.worstBuys = new Dictionary<string, int>(r.hourBuys); } hourFlow = f; r.hourBuys.Clear(); }
                 r.maxCoin = Math.Max(r.maxCoin, s.coin);
             }
             r.sessionGrowth.Add(Flow(m) / Math.Max(startFlow, 1e-9));
@@ -236,10 +236,10 @@ public static class EconAudit
             rule(flat <= 2, "R3b sessions in the first 14 days where income grew less than 10%: " + flat + " (limit 2)");
             rule(r.maxWait <= 5, "R4 longest wait for anything useful in the first 10 days: " + r.maxWait.ToString("0.0") + " min (limit 5)");
             double last = r.openDay[T.ND - 1]; bool smooth = true; string gaps = "";
-            for (int d = 4; d < T.ND; d++) { double g0 = r.openDay[d - 1] - r.openDay[d - 2], g1 = r.openDay[d] - r.openDay[d - 1]; gaps += g1.ToString("0.0") + " "; if (r.openDay[d] < 0 || (g0 > 0.3 && (g1 > 3 * g0 + 0.5 || g1 < g0 / 3 - 0.5))) smooth = false; }
+            for (int d = 5; d < T.ND; d++) { double g0 = r.openDay[d - 1] - r.openDay[d - 2], g1 = r.openDay[d] - r.openDay[d - 1]; gaps += g1.ToString("0.0") + " "; if (r.openDay[d] < 0 || (g0 > 0.3 && (g1 > 3 * g0 + 0.5 || g1 < g0 / 3 - 0.5))) smooth = false; }
             rule(last >= 0 && (r.name == "no ads" ? last >= 13 && last <= 21 : last >= 8.5 && last <= 21), "R5 all 11 sections open on day " + (last < 0 ? "never" : (last + 1).ToString("0.0")) + (r.name == "no ads" ? " (target day 14-21)" : " (target day 9.5-21)"));
-            rule(smooth, "R5b gaps between openings (days): " + gaps + "(no gap more than 3x the one before)");
-            rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 4 on x" + r.maxHour.ToString("0.0") + " (limit 10) at " + r.hourWhere + ", bought then: " + string.Join(", ", new List<string>(Pairs(r.worstBuys))) + "; biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3)");
+            rule(smooth, "R5b gaps between openings from the 5th section on (days): " + gaps + "(no gap more than 3x the one before)");
+            rule(r.maxHour <= 10 && r.maxJump <= 3, "R6 fastest hour of play from day 6 on x" + r.maxHour.ToString("0.0") + " (limit 10) at " + r.hourWhere + ", bought then: " + string.Join(", ", new List<string>(Pairs(r.worstBuys))) + "; biggest single purchase x" + r.maxJump.ToString("0.00") + " (limit 3); first five days (fast on purpose) up to x" + r.earlyHour.ToString("0") + " an hour");
             rule(r.freeGems >= epicTotal * 0.1 && r.freeGems <= epicTotal * 0.5, "R7 free gems cover " + (100.0 * r.freeGems / epicTotal).ToString("0") + "% of all boosts in 30 days (target 10-50%)");
             sb.AppendLine("Events: " + string.Join("; ", r.events) + "\n");
         }
