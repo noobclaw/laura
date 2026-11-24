@@ -279,50 +279,58 @@ namespace Souq
                 g.C("#e5484d").Box(0.6f, 0.26f, 0.42f, 0.1f, rt + 0.05f, cz - 0.2f).C(White).Box(0.62f, 0.07f, 0.44f, 0.1f, rt + 0.31f, cz - 0.2f).C("#3b82f6").Puck(0.5f, 0.9f, 0.2f, 0.16f, -0.1f, rt + 0.05f, cz - 0.95f, 0.04f);
             }
         }
-        /// Main-street America round the shop: flag, mailbox, hydrant, news racks, ice chest, soda machine, hot-dog cart, pumpkins on hay, stop sign, trolley corral.
-        public static void Usa(Geo s, float halfW)
+        /// Main-street America where the camera can see it: flags over the door, road paint, kerb islands with a flagpole, mailbox, news rack, hydrant and stop sign, pumpkins by the planters, pennants.
+        static void Flag(Geo s, float x, float y, float z, float w)
         {
-            // flag on a pole by the kerb
-            float fx = -halfW - 2.7f, fz = -1.3f, st = 1.3f / 13f;
-            s.C(Steel).Cyl(0.06f, 0.08f, 6.6f, fx, 0, fz, 10).C("#ffd43b").Ball(0.12f, 0.12f, 0.12f, fx, 6.68f, fz, 10, 6).C("#b9b2a2").Cyl(0.3f, 0.36f, 0.22f, fx, 0, fz, 12);
-            for (int k = 0; k < 13; k++) s.C(k % 2 == 0 ? "#c8102e" : "#ffffff").Box(2.3f, st, 0.03f, fx + 0.06f + 1.15f, 5.1f + k * st, fz);
-            s.C("#0a3161").Box(0.98f, st * 7, 0.04f, fx + 0.06f + 0.49f, 5.1f + st * 6, fz);
-            for (int r = 0; r < 4; r++) for (int c = 0; c < 5; c++) s.C("#ffffff").Box(0.07f, 0.07f, 0.05f, fx + 0.2f + c * 0.18f + (r % 2) * 0.05f, 5.1f + st * 6 + 0.07f + r * 0.16f, fz);
-            // blue mailbox
-            float mx = halfW + 2.9f;
-            s.C("#1f4fa8").Box(0.56f, 0.8f, 0.5f, mx, 0.2f, -0.9f).At(mx, 1.0f, -0.9f, 0, 0, 90).Cyl(0.25f, 0.25f, 0.56f, 0, -0.28f, 0, 12).At().C("#17336b").Box(0.08f, 0.2f, 0.08f, mx - 0.2f, 0, -1.08f).Box(0.08f, 0.2f, 0.08f, mx + 0.2f, 0, -1.08f).Box(0.08f, 0.2f, 0.08f, mx - 0.2f, 0, -0.72f).Box(0.08f, 0.2f, 0.08f, mx + 0.2f, 0, -0.72f);
-            s.C(White).Box(0.4f, 0.14f, 0.02f, mx, 0.62f, -1.16f).C("#c8102e").Box(0.4f, 0.03f, 0.022f, mx, 0.58f, -1.16f).C("#17336b").Box(0.44f, 0.05f, 0.03f, mx, 0.92f, -1.16f);
-            // news racks
-            string[] rack = { "#c8102e", "#ffc61a", "#1f4fa8" };
-            for (int k = 0; k < 3; k++) { float x = mx + 0.9f + k * 0.62f; s.C(rack[k]).Box(0.5f, 0.75f, 0.45f, x, 0.35f, -0.9f).C(Dark).Box(0.1f, 0.35f, 0.1f, x, 0, -0.9f).Box(0.4f, 0.03f, 0.4f, x, 0, -0.9f).C("#cfe6f5").Box(0.4f, 0.36f, 0.02f, x, 0.62f, -1.13f).C(White).Box(0.34f, 0.2f, 0.02f, x, 0.66f, -1.12f).C(Dark).Box(0.3f, 0.03f, 0.025f, x, 0.8f, -1.12f); }
-            // fire hydrant at the kerb
-            float hx = halfW + 0.9f, hz = -3.05f;
-            s.C("#d6262c").Cyl(0.2f, 0.2f, 0.06f, hx, 0, hz, 10).Cyl(0.14f, 0.14f, 0.5f, hx, 0.06f, hz, 10).Cyl(0.18f, 0.18f, 0.05f, hx, 0.5f, hz, 10).Ball(0.15f, 0.13f, 0.15f, hx, 0.58f, hz, 10, 6).Cyl(0.05f, 0.05f, 0.08f, hx, 0.7f, hz, 6).Box(0.44f, 0.1f, 0.1f, hx, 0.33f, hz).Box(0.1f, 0.1f, 0.2f, hx, 0.3f, hz - 0.14f);
-            // ice chest and soda machine against the shop front
-            float ix = halfW + 1.15f;
-            s.C(White).Box(1.7f, 1.25f, 0.75f, ix, 0.08f, -0.55f).C("#8b939f").Box(1.74f, 0.08f, 0.79f, ix, 0, -0.55f).C("#1f6fd6").Box(1.74f, 0.3f, 0.79f, ix, 1.33f, -0.55f).C(Steel).Box(0.04f, 0.9f, 0.03f, ix, 0.3f, -0.94f).Box(0.2f, 0.04f, 0.05f, ix - 0.2f, 0.8f, -0.95f).Box(0.2f, 0.04f, 0.05f, ix + 0.2f, 0.8f, -0.95f);
-            for (int k = 0; k < 5; k++) s.C("#dff3ff").Box(0.14f, 0.14f, 0.03f, ix - 0.6f + k * 0.3f, 0.3f + (k % 2) * 0.14f, -0.935f);
-            float vx = -halfW - 0.9f;
-            s.C("#d6262c").Box(0.95f, 2.0f, 0.75f, vx, 0.06f, -0.55f).C(Dark).Box(0.99f, 0.06f, 0.79f, vx, 0, -0.55f).Box(0.5f, 0.22f, 0.03f, vx - 0.1f, 0.25f, -0.935f).C(White).Box(0.6f, 0.9f, 0.02f, vx - 0.1f, 0.85f, -0.93f).C("#ffd43b").Box(0.12f, 0.5f, 0.03f, vx + 0.35f, 1.0f, -0.935f);
-            for (int k = 0; k < 4; k++) s.C("#d6262c").At(vx - 0.1f, 1.0f + k * 0.2f, -0.945f, 0, 0, 18).Box(0.56f, 0.06f, 0.012f).At();
-            // hot-dog cart under a striped umbrella
-            float cx = -halfW - 2.6f, cz = -2.9f;
-            s.C(Steel).Box(1.5f, 0.7f, 0.8f, cx, 0.45f, cz).C("#c8102e").Box(1.54f, 0.16f, 0.84f, cx, 0.6f, cz).C("#ffd43b").Box(1.54f, 0.05f, 0.84f, cx, 0.76f, cz).C("#8b939f").Box(1.56f, 0.04f, 0.86f, cx, 1.15f, cz);
-            foreach (float sx in new[] { -0.55f, 0.55f }) s.At(cx + sx, 0.3f, cz - 0.45f, 0, 90).C("#22262e").Cyl(0.3f, 0.3f, 0.08f, 0, 0, 0, 12).C(Steel).Cyl(0.12f, 0.12f, 0.1f, 0, 0, 0, 8).At();
-            s.C(Steel).Cyl(0.03f, 0.03f, 1.7f, cx, 1.15f, cz, 6); for (int k = 0; k < 8; k++) { float a0 = k / 8f * Mathf.PI * 2; s.C(k % 2 == 0 ? "#c8102e" : "#ffffff").At(cx + Mathf.Cos(a0) * 0.55f, 2.55f, cz + Mathf.Sin(a0) * 0.55f, -k * 45f, 0, -20).Box(1.15f, 0.04f, 0.92f).At(); }
-            s.C("#ffd43b").Ball(0.08f, 0.08f, 0.08f, cx, 2.9f, cz, 8, 5).C("#e8a15a").Box(0.3f, 0.07f, 0.1f, cx - 0.4f, 1.19f, cz - 0.1f).C("#b5432c").Box(0.32f, 0.05f, 0.05f, cx - 0.4f, 1.24f, cz - 0.1f).C("#ffd43b").Cyl(0.05f, 0.05f, 0.2f, cx + 0.3f, 1.19f, cz, 8).C("#c8102e").Cyl(0.05f, 0.05f, 0.2f, cx + 0.45f, 1.19f, cz, 8);
-            // pumpkins on hay bales
-            float px = halfW + 2.6f, pz = -2.75f; var rnd = new System.Random(7);
-            s.C("#e3c15a").Box(1.1f, 0.5f, 0.6f, px, 0, pz).Box(1.1f, 0.5f, 0.6f, px + 1.15f, 0, pz).Box(1.1f, 0.5f, 0.6f, px + 0.55f, 0.5f, pz + 0.05f).C("#b9923a").Box(1.12f, 0.03f, 0.05f, px, 0.5f, pz - 0.15f).Box(1.12f, 0.03f, 0.05f, px + 1.15f, 0.5f, pz - 0.15f).Box(1.12f, 0.03f, 0.05f, px + 0.55f, 1.0f, pz - 0.1f);
-            for (int k = 0; k < 7; k++) { float x = px - 0.6f + k * 0.42f, y = k == 3 ? 1.0f : (k == 1 || k == 5) ? 0.5f : 0, z = pz - (y > 0 ? 0 : 0.55f), r = 0.2f + (float)rnd.NextDouble() * 0.1f; s.C(k % 3 == 2 ? "#f2a33a" : "#f07818").Ball(r, r * 0.8f, r, x, y + r * 0.8f, z, 10, 6).C("#3f7a34").Cyl(0.03f, 0.02f, 0.1f, x, y + r * 1.55f, z, 6); }
-            // stop sign at the lot exit
-            float sx2 = halfW + 3.6f, sz2 = -6.3f;
-            s.C(Steel).Cyl(0.05f, 0.05f, 2.6f, sx2, 0, sz2, 8).At(Matrix4x4.TRS(new Vector3(sx2, 2.75f, sz2 - 0.02f), Quaternion.Euler(-90, 0, 0) * Quaternion.Euler(0, 22.5f, 0), Vector3.one)).C(White).Cyl(0.52f, 0.52f, 0.03f, 0, 0, 0, 8).C("#c8102e").Cyl(0.46f, 0.46f, 0.05f, 0, 0, 0, 8).At();
-            // trolley corral in the lot
-            float qx = halfW + 2.4f, qz = -13f;
-            s.C(Steel).Box(0.07f, 1.0f, 0.07f, qx - 0.8f, 0, qz + 1.4f).Box(0.07f, 1.0f, 0.07f, qx + 0.8f, 0, qz + 1.4f).Box(0.07f, 1.0f, 0.07f, qx - 0.8f, 0, qz - 1.4f).Box(0.07f, 1.0f, 0.07f, qx + 0.8f, 0, qz - 1.4f).Box(0.06f, 0.06f, 2.8f, qx - 0.8f, 0.95f, qz).Box(0.06f, 0.06f, 2.8f, qx + 0.8f, 0.95f, qz).Box(0.06f, 0.06f, 2.8f, qx - 0.8f, 0.5f, qz).Box(0.06f, 0.06f, 2.8f, qx + 0.8f, 0.5f, qz).Box(1.6f, 0.06f, 0.06f, qx, 0.95f, qz + 1.4f);
-            s.C(Steel).Cyl(0.04f, 0.04f, 2.6f, qx, 0, qz + 1.4f, 6).C("#1f4fa8").Box(1.0f, 0.6f, 0.05f, qx, 2.1f, qz + 1.4f).C(White).Box(0.8f, 0.08f, 0.06f, qx, 2.5f, qz + 1.4f).Box(0.6f, 0.08f, 0.06f, qx, 2.3f, qz + 1.4f);
-            for (int k = 0; k < 3; k++) { s.At(qx, 0, qz + 0.6f - k * 0.34f, 180); Cart(s); } s.At();
+            float hgt = w * 0.56f, st = hgt / 13f;
+            for (int k = 0; k < 13; k++) s.C(k % 2 == 0 ? "#c8102e" : "#ffffff").Box(w, st, 0.03f, x + w / 2, y + k * st, z);
+            s.C("#0a3161").Box(w * 0.42f, st * 7, 0.04f, x + w * 0.21f, y + st * 6, z);
+            for (int r = 0; r < 4; r++) for (int c = 0; c < 5; c++) s.C("#ffffff").Box(w * 0.03f, w * 0.03f, 0.05f, x + w * 0.05f + c * w * 0.08f + (r % 2) * w * 0.02f, y + st * 6.4f + r * st * 1.6f, z);
+        }
+        public static void Usa(Geo s, float halfW, float roadZ)
+        {
+            // a flag either side of the name board
+            foreach (float px in new[] { -5.3f, 3.5f }) { s.C(Steel).Cyl(0.05f, 0.06f, 3.3f, px, 3.0f, -0.3f, 8).C("#ffd43b").Ball(0.1f, 0.1f, 0.1f, px, 6.34f, -0.3f, 8, 5); Flag(s, px + 0.05f, 5.2f, -0.3f, 1.9f); }
+            // road paint: double yellow centre line, white edge lines, a striped crossing with stop bars
+            float y = -0.113f;
+            s.C("#4b5263").Slab(27, 0.5f, 0.02f, 0, y - 0.002f, roadZ, 0.003f);
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                s.C("#ffc61a").Slab(10.9f, 0.1f, 0.02f, sx * 8.05f, y + 0.002f, roadZ - 0.11f, 0.003f).Slab(10.9f, 0.1f, 0.02f, sx * 8.05f, y + 0.002f, roadZ + 0.11f, 0.003f);
+                s.C("#f4f4f0").Slab(0.4f, 3.3f, 0.05f, sx * 2.45f, y + 0.002f, roadZ - 0.05f, 0.003f).Slab(10.6f, 0.1f, 0.02f, sx * 8.2f, y + 0.002f, roadZ + 1.62f, 0.003f).Slab(10.6f, 0.1f, 0.02f, sx * 8.2f, y + 0.002f, roadZ - 1.75f, 0.003f);
+            }
+            for (int k = 0; k < 5; k++) s.C("#f4f4f0").Slab(3.6f, 0.4f, 0.05f, 0, y + 0.002f, roadZ + 1.5f - k * 0.76f, 0.003f);
+            // kerb islands between the parking columns
+            float iz = -6.35f; string[] rack = { "#c8102e", "#1f4fa8" };
+            for (int k = 0; k < 5; k++)
+            {
+                float x = -5.72f + k * 3f;
+                s.C("#c9c4b6").Puck(0.62f, 1.5f, 0.28f, 0.14f, x, -0.12f, iz).C("#6dbb4f").Puck(0.44f, 1.3f, 0.2f, 0.03f, x, 0.02f, iz);
+                if (k == 2)
+                {
+                    s.C(Steel).Cyl(0.06f, 0.08f, 6.4f, x, 0.02f, iz, 10).C("#ffd43b").Ball(0.12f, 0.12f, 0.12f, x, 6.5f, iz, 10, 6).C("#b9b2a2").Cyl(0.2f, 0.24f, 0.16f, x, 0.02f, iz, 12); Flag(s, x + 0.06f, 4.95f, iz, 2.6f);
+                }
+                else if (k == 1)
+                {
+                    s.C("#1f4fa8").Box(0.5f, 0.7f, 0.46f, x, 0.2f, iz).At(x, 0.9f, iz, 0, 0, 90).Cyl(0.23f, 0.23f, 0.5f, 0, -0.25f, 0, 12).At().C("#17336b").Box(0.07f, 0.2f, 0.07f, x - 0.18f, 0.02f, iz - 0.17f).Box(0.07f, 0.2f, 0.07f, x + 0.18f, 0.02f, iz - 0.17f).Box(0.07f, 0.2f, 0.07f, x - 0.18f, 0.02f, iz + 0.17f).Box(0.07f, 0.2f, 0.07f, x + 0.18f, 0.02f, iz + 0.17f);
+                    s.C(White).Box(0.36f, 0.13f, 0.02f, x, 0.56f, iz - 0.24f).C("#c8102e").Box(0.36f, 0.03f, 0.022f, x, 0.52f, iz - 0.24f).C("#17336b").Box(0.4f, 0.05f, 0.03f, x, 0.84f, iz - 0.24f);
+                }
+                else if (k == 3)
+                {
+                    float hz = iz - 0.35f;
+                    s.C("#d6262c").Cyl(0.19f, 0.19f, 0.06f, x, 0.02f, hz, 10).Cyl(0.13f, 0.13f, 0.48f, x, 0.08f, hz, 10).Cyl(0.17f, 0.17f, 0.05f, x, 0.5f, hz, 10).Ball(0.14f, 0.12f, 0.14f, x, 0.58f, hz, 10, 6).Cyl(0.05f, 0.05f, 0.08f, x, 0.69f, hz, 6).Box(0.42f, 0.1f, 0.1f, x, 0.33f, hz).Box(0.1f, 0.1f, 0.2f, x, 0.3f, hz - 0.13f);
+                    s.C(Steel).Cyl(0.05f, 0.05f, 2.5f, x, 0.02f, iz + 0.4f, 8).At(Matrix4x4.TRS(new Vector3(x, 2.65f, iz + 0.38f), Quaternion.Euler(-90, 0, 0) * Quaternion.Euler(0, 22.5f, 0), Vector3.one)).C(White).Cyl(0.5f, 0.5f, 0.03f, 0, 0, 0, 8).C("#c8102e").Cyl(0.44f, 0.44f, 0.05f, 0, 0, 0, 8).At();
+                }
+                else
+                {
+                    string col = rack[k / 4]; float rz = iz - 0.2f;
+                    s.C(col).Box(0.5f, 0.75f, 0.45f, x, 0.37f, rz).C(Dark).Box(0.1f, 0.35f, 0.1f, x, 0.02f, rz).Box(0.4f, 0.03f, 0.4f, x, 0.02f, rz).C("#cfe6f5").Box(0.4f, 0.36f, 0.02f, x, 0.64f, rz - 0.23f).C(White).Box(0.34f, 0.2f, 0.02f, x, 0.68f, rz - 0.235f).C(Dark).Box(0.3f, 0.03f, 0.025f, x, 0.82f, rz - 0.24f);
+                    s.C("#3fa652").Ball(0.26f, 0.24f, 0.26f, x, 0.2f, iz + 0.42f, 9, 6);
+                }
+            }
+            // pumpkins round the planters by the door
+            var rnd = new System.Random(7);
+            foreach (float sx in new[] { -1f, 1f }) for (int k = 0; k < 4; k++) { float x = sx * 3.3f - 0.5f + k * 0.34f, r = 0.15f + (float)rnd.NextDouble() * 0.08f, z = -1.82f - (k % 2) * 0.16f; s.C(k % 3 == 2 ? "#f2a33a" : "#f07818").Ball(r, r * 0.8f, r, x, r * 0.8f - 0.1f, z, 10, 6).C("#3f7a34").Cyl(0.03f, 0.02f, 0.1f, x, r * 1.55f - 0.1f, z, 6); }
             // red, white and blue pennants along the shop front
             for (int k = 0; k < 26; k++) { float x = -halfW + 0.5f + k * (halfW * 2 - 1f) / 25f; s.C(k % 3 == 0 ? "#c8102e" : k % 3 == 1 ? "#ffffff" : "#1f4fa8").At(x, 2.45f - 0.12f * Mathf.Abs(Mathf.Sin(k * 0.6f)), -0.3f, 0, 0, 45).Box(0.2f, 0.2f, 0.02f); } s.At();
         }
@@ -493,6 +501,8 @@ namespace Souq
         public static float StoreDepth => DeptRow0 + 5 * DeptRowGap + 6.5f;
         public static Vector3 StaffPos(int d, int k) => DeptCenter(d) + new Vector3((k - 2) * 1.3f, 0, 2.15f);
         public static Vector3 QueuePos(int d, int k, int q) => DeptCenter(d) + new Vector3((k - 2) * 1.3f, 0, 0.2f - q * 1.05f);
+        static readonly int[] KindMix = { 0, 1, 2, 3, 5, 6, 0, 1, 2, 6, 5, 3, 4, 1, 0, 2 };
+        static int CarKind(int look) { uint h = (uint)look * 2654435761u; h ^= h >> 13; h *= 0x5bd1e995u; h ^= h >> 15; return KindMix[h % (uint)KindMix.Length]; }
         public static Vector3 CashPos(int c) => new Vector3(-7.35f + c * 2.1f, 0, CashZ);
         public static Vector3 CashQueuePos(int c, int q) => CashPos(c) + new Vector3(0.82f, 0, 0.4f + q * 1.05f);
         public static Vector3 SlotPos(int i) => new Vector3(-7.5f + (i % 6) * 3f, 0, -9.0f - (i / 6) * 4.6f);
@@ -555,9 +565,8 @@ namespace Souq
             for (int i = 0; i < 12; i++) { float z = -30 + i * 9f; Art.Tree(s, -14.5f - (i % 2) * 2.2f, z, 1.1f + (i % 3) * 0.15f); Art.Tree(s, 14.5f + (i % 2) * 2.2f, z + 4, 1.1f + ((i + 1) % 3) * 0.15f); }
             s.C("#ffd24a").Slab(5.6f, 2.3f, 0.2f, truckPos.x, -0.09f, truckPos.z, 0.004f).C("#d9d4c8").Slab(5.3f, 2.0f, 0.14f, truckPos.x, -0.086f, truckPos.z, 0.004f).C("#b06be0").Slab(5.6f, 2.3f, 0.2f, vipPos.x, -0.09f, vipPos.z, 0.004f).C("#d9d4c8").Slab(5.3f, 2.0f, 0.14f, vipPos.x, -0.086f, vipPos.z, 0.004f);
             s.Make("street", root, Kit.Solid);
-            var us = new Geo(); Art.Usa(us, HalfW); usa = us.Make("usa", root, Kit.Solid);
-            Kit.Label("ICE", usa.transform, new Vector3(HalfW + 1.15f, 1.56f, -0.96f), 0.26f, Color.white); Kit.Label("STOP", usa.transform, new Vector3(HalfW + 3.6f, 2.75f, -6.42f), 0.2f, Color.white);
-            Kit.Shadow(usa.transform, new Vector3(-HalfW - 2.6f, 0.03f, -2.9f), 2.6f, 2.0f); Kit.Shadow(usa.transform, new Vector3(HalfW + 3.2f, 0.03f, -2.75f), 3.2f, 1.6f); Kit.Shadow(usa.transform, new Vector3(HalfW + 2.6f, 0.03f, -0.8f), 5.0f, 1.4f);
+            var us = new Geo(); Art.Usa(us, HalfW, RoadZ); usa = us.Make("usa", root, Kit.Solid);
+            Kit.Label("STOP", usa.transform, new Vector3(-5.72f + 9f, 2.65f, -6.05f), 0.19f, Color.white);
             usa.SetActive(!Loc.Ar);
 
             var cg = new Geo(); Art.Cart(cg); cartMesh = cg.ToMesh("cart");
@@ -680,7 +689,7 @@ namespace Souq
             a.gift = gift.Make("gift", a.go.transform, Kit.Glow, false); a.gift.transform.localPosition = new Vector3(0, 2.3f, 0); a.gift.SetActive(false); a.gift.AddComponent<SphereCollider>().radius = 1.6f;
             if (c.slot >= 0)
             {
-                var cg = new Geo(); Art.Car(cg, Geo.Hex(CarCol[c.look % CarCol.Length]), false, (int)((((uint)c.look * 2246822519u) >> 9) % 7)); a.car = cg.Make("car", root, Kit.Solid); Kit.Shadow(a.car.transform, new Vector3(0, 0.04f, 0), 2.9f, 5.2f);
+                var cg = new Geo(); Art.Car(cg, Geo.Hex(CarCol[c.look % CarCol.Length]), false, CarKind(c.look)); a.car = cg.Make("car", root, Kit.Solid); Kit.Shadow(a.car.transform, new Vector3(0, 0.04f, 0), 2.9f, 5.2f);
                 a.carPos = new Vector3(-30, -0.12f, RoadZ); a.car.transform.position = a.carPos; a.carYaw = 90;
             }
             a.go.transform.position = c.slot >= 0 ? new Vector3(-30, 0, RoadZ) : busPos; a.go.SetActive(c.slot < 0);
