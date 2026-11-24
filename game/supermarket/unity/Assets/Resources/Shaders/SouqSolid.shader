@@ -59,6 +59,7 @@ Shader "Souq/Solid"
             #pragma vertex vert
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
             CBUFFER_START(UnityPerMaterial)
                 half4 _Tint;

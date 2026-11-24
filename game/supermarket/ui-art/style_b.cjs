@@ -1,0 +1,21 @@
+// A second, more realistic treatment of four icons for comparison: no ink outline, metal and glass shading.
+const fs = require('fs'), path = require('path');
+const defs = `<defs>
+<radialGradient id="g1" cx=".35" cy=".28" r=".9"><stop offset="0" stop-color="#fff6c9"/><stop offset=".35" stop-color="#f7c948"/><stop offset=".75" stop-color="#c98a12"/><stop offset="1" stop-color="#8a5a06"/></radialGradient>
+<linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset=".5" stop-color="#d99a16"/><stop offset="1" stop-color="#7c4f05"/></linearGradient>
+<linearGradient id="b1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3f6ff"/><stop offset=".4" stop-color="#58b4f5"/><stop offset="1" stop-color="#143c9a"/></linearGradient>
+<linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fafcff"/><stop offset=".45" stop-color="#b9c3d1"/><stop offset=".55" stop-color="#8793a5"/><stop offset="1" stop-color="#d5dce6"/></linearGradient>
+<linearGradient id="r1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b5e"/><stop offset="1" stop-color="#a3161f"/></linearGradient>
+<filter id="sh" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#000" flood-opacity=".4"/></filter>
+<filter id="soft"><feGaussianBlur stdDeviation="3"/></filter></defs>`;
+const icons = {
+  coin: `<ellipse cx="128" cy="136" rx="98" ry="98" fill="#7c4f05"/><circle cx="128" cy="126" r="98" fill="url(#g1)"/><circle cx="128" cy="126" r="78" fill="none" stroke="#8a5a06" stroke-opacity=".55" stroke-width="5"/><circle cx="128" cy="126" r="74" fill="none" stroke="#fff3b8" stroke-opacity=".6" stroke-width="2"/><path d="M128 74l16 33 36 5-26 26 6 36-32-17-32 17 6-36-26-26 36-5z" fill="url(#g2)" stroke="#fff3b8" stroke-opacity=".5" stroke-width="2"/><ellipse cx="96" cy="76" rx="46" ry="20" fill="#fff" opacity=".45" transform="rotate(-28 96 76)" filter="url(#soft)"/>`,
+  gem: `<path d="M70 46h116l44 56-102 114L26 102z" fill="url(#b1)"/><path d="M70 46l-44 56h70zM186 46l44 56h-70z" fill="#fff" opacity=".35"/><path d="M96 102h64l-32-56z" fill="#fff" opacity=".6"/><path d="M96 102l32 114 32-114z" fill="#9bd8ff" opacity=".55"/><path d="M26 102h70l32 114z" fill="#0d2f86" opacity=".45"/><path d="M230 102h-70l-32 114z" fill="#0d2f86" opacity=".2"/><path d="M82 56h36l-14 30H60z" fill="#fff" opacity=".7" filter="url(#soft)"/>`,
+  cart: `<path d="M24 48h28l12 34h160l-22 80H82z" fill="url(#m1)"/><path d="M64 82h160l-4 14H68z" fill="#fff" opacity=".7"/><g stroke="#4a5568" stroke-width="4" opacity=".7"><path d="M76 104h136M82 126h122M88 146h110M106 84l6 76M142 84v76M178 84l-6 76"/></g><path d="M82 162l-8 30h126" fill="none" stroke="url(#m1)" stroke-width="10" stroke-linecap="round"/><rect x="14" y="40" width="44" height="16" rx="8" fill="url(#r1)"/><circle cx="94" cy="212" r="17" fill="#1f2530"/><circle cx="94" cy="212" r="7" fill="#aab4c2"/><circle cx="186" cy="212" r="17" fill="#1f2530"/><circle cx="186" cy="212" r="7" fill="#aab4c2"/>`,
+  register: `<rect x="36" y="130" width="184" height="94" rx="14" fill="url(#r1)"/><rect x="36" y="130" width="184" height="18" rx="9" fill="#fff" opacity=".25"/><rect x="62" y="60" width="132" height="82" rx="10" fill="url(#m1)"/><rect x="76" y="72" width="104" height="38" rx="6" fill="#0c2233"/><path d="M90 98h18M118 98h18M146 98h18" stroke="#5dffa8" stroke-width="8" stroke-linecap="round"/><rect x="60" y="166" width="136" height="32" rx="8" fill="url(#m1)"/><circle cx="128" cy="182" r="7" fill="url(#g1)"/>`,
+};
+(async () => {
+  const { chromium } = require('playwright'); const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' }); const p = await b.newPage();
+  for (const [n, body] of Object.entries(icons)) { const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">${defs}<g filter="url(#sh)">${body}</g></svg>`; await p.setViewportSize({ width: 512, height: 512 }); await p.setContent(`<html><body style="margin:0;background:transparent">${svg}</body></html>`); await p.screenshot({ path: `/tmp/look/b_${n}.png`, omitBackground: true }); }
+  await b.close();
+})();
