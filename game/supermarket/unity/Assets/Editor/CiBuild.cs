@@ -127,7 +127,7 @@ public static class CiBuild
         int[] lv = { 130, 62, 27, 9, 40, 80, 30, 60 }; int[] st = { 5, 4, 3, 2, 2, 3, 2, 3 };
         for (int d = 0; d < lv.Length; d++) { s.dOpen[d] = true; s.dLevel[d] = lv[d]; s.dStaff[d] = st[d]; s.dSpeed[d] = 3; }
         s.cLevel[0] = 12; s.cLevel[1] = 8; s.cLevel[2] = 5; s.cLevel[3] = 2; s.cLevel[4] = 1;
-        s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false; s.tut = Souq.Tutorial.Done;
+        s.parkLevel = 5; s.adLevel = 42; s.coin = 3.2e6; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false; s.tut = Souq.Tutorial.Done;
         var g = new Souq.Game(); g.editor = true; g.Start(s, false);
         shotRt = new RenderTexture(1080, 2340, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
         Canvas.ForceUpdateCanvases(); g.cam.Render();        // first frame warms up lighting

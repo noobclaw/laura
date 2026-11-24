@@ -7,7 +7,7 @@ namespace Souq.Core
     [Serializable]
     public class Save
     {
-        public int v = 1;
+        public int v = 2;                      // 2: prices rebalanced to stay within trillions; older saves start again
         public double coin = 1000, assets = 0;
         public int gem = 0;
         public double lastSeen = 0;            // unix seconds
@@ -47,7 +47,7 @@ namespace Souq.Core
             dLevel != null && dLevel.Length == T.ND && dSpeed != null && dSpeed.Length == T.ND && dStaff != null && dStaff.Length == T.ND &&
             dOpen != null && dOpen.Length == T.ND && cLevel != null && cLevel.Length == T.NC && epic != null && epic.Length == T.Epics.Length &&
             served != null && served.Length == T.ND && parkLevel >= 1 && adLevel >= 1 && star >= 0 && star < T.StarCost.Length &&
-            !double.IsNaN(coin) && !double.IsInfinity(coin) && coin >= 0 && txDone != null;
+            v >= 2 && !double.IsNaN(coin) && !double.IsInfinity(coin) && coin >= 0 && txDone != null;
     }
 
     public enum CS { CarIn, WalkIn, ToDept, Queue, Served, ToCash, CashQueue, Paying, WalkOut, CarOut, Done }
@@ -96,7 +96,7 @@ namespace Souq.Core
         public bool AdActive => s.adEnd > Now();
         public bool QuickBuy => s.quickBuyEnd > Now();
         public bool QuickCheck => s.quickCheckEnd > Now();
-        public double ProfitMult => T.StarProfit[s.star] * Math.Pow(2, Epic(EpicKind.Profit)) * (AdActive ? 2 : 1) * (s.profitX2 ? 2 : 1);
+        public double ProfitMult => T.StarProfit[s.star] * (1 + 0.25 * Epic(EpicKind.Profit)) * (AdActive ? 2 : 1) * (s.profitX2 ? 2 : 1);
         public double Price(int d) => (T.BasePrice[d] + (s.dLevel[d] - 1) * T.PriceStep(d)) * T.TierProduct(s.dLevel[d]) * ProfitMult;
         public double StaffSpeed(int d) => (T.SpeedBase[d] + s.dSpeed[d] * T.SpeedStep(d)) * (1 + EpicAdd(EpicKind.Manager, d));
         public double DeptSpeed(int d) => StaffSpeed(d) * s.dStaff[d];
@@ -112,7 +112,7 @@ namespace Souq.Core
         public int ParkSpaces => 6 * s.parkLevel;
         public double ParkCost() => s.parkLevel >= T.ParkMax ? double.PositiveInfinity : T.ParkCost[s.parkLevel - 1];
         public double Arrivals => Math.Floor(100 * (8 + 0.8 * (s.adLevel - 1))) / 100;      // cars per minute
-        public double AdLevelCost() => s.adLevel >= T.AdLevelMax ? double.PositiveInfinity : Math.Pow(2, s.adLevel + 1);
+        public double AdLevelCost() => s.adLevel >= T.AdLevelMax ? double.PositiveInfinity : Math.Floor(40 * Math.Pow(1.2, s.adLevel - 1));
         public double StarCost() => s.star + 1 >= T.StarCost.Length ? double.PositiveInfinity : T.StarCost[s.star + 1];
         public double WalkMult => 1 + EpicAdd(EpicKind.Walk);
         public int OpenDepts { get { int n = 0; foreach (var o in s.dOpen) if (o) n++; return n; } }

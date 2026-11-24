@@ -117,7 +117,7 @@ shoppers|来店中のお客様|매장 내 고객|Kunden im Laden|Clients en maga
 manager|店長|매니저|Manager|Manager|Gerente|店長
 research|研究|연구|Forschung|Recherche|Investigación|研究
 e_profit|品質保証|품질 보증|Produktgarantie|Garantie produit|Garantía de producto|品質保證
-e_profitd|すべての利益 x2|모든 수익 x2|Gesamter Gewinn x2|Tout le profit x2|Todo el beneficio x2|所有利潤 x2
+e_profitd|すべての利益 +25%|모든 수익 +25%|Gesamter Gewinn +25%|Tout le profit +25%|Todo el beneficio +25%|所有利潤 +25%
 e_walk|やる気満々のお客様|의욕적인 고객|Eifrige Kunden|Clients pressés|Clientes con ganas|積極的顧客
 e_walkd|お客様の歩く速さ +5%|고객 이동 속도 +5%|Kunden gehen 5% schneller|Les clients marchent 5% plus vite|Los clientes caminan un 5% más rápido|顧客步行速度 +5%
 e_mgrd|スタッフの速さ +50%|직원 속도 +50%|Personal arbeitet 50% schneller|Personnel 50% plus rapide|El personal trabaja un 50% más rápido|店員速度 +50%

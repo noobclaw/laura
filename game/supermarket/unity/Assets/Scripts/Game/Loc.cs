@@ -52,7 +52,7 @@ namespace Souq
             {"sound", new[]{"Sound","الصوت"}}, {"music", new[]{"Music","الموسيقى"}}, {"lang", new[]{"Language","اللغة"}}, {"on", new[]{"ON","تشغيل"}}, {"off", new[]{"OFF","إيقاف"}},
             {"served", new[]{"Shoppers served","عملاء تمت خدمتهم"}}, {"total", new[]{"Total earned","إجمالي الأرباح"}}, {"shoppers", new[]{"Shoppers in store","المتسوقون في المتجر"}},
             {"manager", new[]{"Manager","مدير"}}, {"research", new[]{"Research","أبحاث"}},
-            {"e_profit", new[]{"Product Guarantee","ضمان المنتج"}}, {"e_profitd", new[]{"All profit x2","كل الأرباح ×2"}},
+            {"e_profit", new[]{"Product Guarantee","ضمان المنتج"}}, {"e_profitd", new[]{"All profit +25%","كل الأرباح +25%"}},
             {"e_walk", new[]{"Eager Shoppers","متسوقون متحمسون"}}, {"e_walkd", new[]{"Shoppers walk 5% faster","المتسوقون أسرع 5%"}},
             {"e_mgrd", new[]{"Staff work 50% faster","الموظفون أسرع 50%"}},
             {"e_truck", new[]{"Fast Delivery","توصيل سريع"}}, {"e_truckd", new[]{"Trucks pay 50% more","الشاحنات تدفع 50% أكثر"}},
