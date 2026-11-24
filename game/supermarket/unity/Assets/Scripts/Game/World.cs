@@ -335,7 +335,7 @@ namespace Souq
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat; RenderSettings.ambientLight = Color.white; RenderSettings.fog = false;
             sun = new GameObject("Sun").AddComponent<Light>(); sun.transform.SetParent(root, false);
             sun.type = LightType.Directional; sun.color = new Color(1f, 0.96f, 0.88f); sun.intensity = 1f; sun.shadows = LightShadows.Soft; sun.shadowStrength = 1f;
-            sun.transform.rotation = Quaternion.Euler(58, 22, 0);
+            sun.transform.rotation = Quaternion.Euler(48, 62, 0);   // from the left, so shadows fall to the right where the camera can see them
 
             float depth = StoreDepth; var g = new Geo(); g.Shade = 0;
             // ground, all drawn as flat coloured pieces: grass, asphalt, pavement, cream tiles on a grout base
