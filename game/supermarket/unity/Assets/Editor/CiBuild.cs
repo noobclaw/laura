@@ -56,7 +56,9 @@ public static class CiBuild
         }
     }
 
-    static RenderTexture shotRt;
+    static RenderTexture shotRt; static string shotDir = "../../../shots";
+    /// Editor menu: play the sample store for a while and save pictures into the project folder.
+    public static void Shots() { shotDir = "Shots"; GameShots(); Debug.Log("CiBuild: pictures saved to " + Path.GetFullPath(shotDir)); }
     static void Snap(Souq.Game g, string name)
     {
         // the camera keeps this target for the whole session, so screen positions are worked out for the right size
@@ -65,8 +67,8 @@ public static class CiBuild
         var tex = new Texture2D(shotRt.width, shotRt.height, TextureFormat.RGB24, false);
         tex.ReadPixels(new Rect(0, 0, shotRt.width, shotRt.height), 0, 0); tex.Apply();
         RenderTexture.active = null;
-        Directory.CreateDirectory("../../../shots");
-        File.WriteAllBytes("../../../shots/" + name + ".png", tex.EncodeToPNG());
+        Directory.CreateDirectory(shotDir);
+        File.WriteAllBytes(shotDir + "/" + name + ".png", tex.EncodeToPNG());
         Debug.Log("CiBuild: wrote shot " + name);
     }
 
@@ -127,11 +129,11 @@ public static class CiBuild
         s.cLevel[0] = 12; s.cLevel[1] = 8; s.cLevel[2] = 5; s.cLevel[3] = 2; s.cLevel[4] = 1;
         s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false; s.tut = Souq.Tutorial.Done;
         var g = new Souq.Game(); g.editor = true; g.Start(s, false);
-        shotRt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
+        shotRt = new RenderTexture(1080, 2340, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
         Canvas.ForceUpdateCanvases(); g.cam.Render();        // first frame warms up lighting
         g.sim.truckHere = true; g.sim.vipHere = true; g.sim.vipReward = 4.2e9; g.sim.busOffer = true;
         for (int i = 0; i < 1500; i++) g.Tick(0.05f);
-        Debug.Log("CiBuild: shot scene actors=" + g.world.ActorCount + " kitMissing=" + Souq.Kit.Missing + " rigged=" + Souq.Person.Rigged);
+        Debug.Log("CiBuild: shot scene actors=" + g.world.ActorCount + " kitMissing=" + Souq.Kit.Missing + " codeBuilt=" + Souq.Person.Rigged);
         int tris = 0, rends = 0; foreach (var mf in UnityEngine.Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None)) if (mf.sharedMesh != null && mf.gameObject.activeInHierarchy) { rends++; for (int k = 0; k < mf.sharedMesh.subMeshCount; k++) tris += (int)(mf.sharedMesh.GetIndexCount(k) / 3); }
         foreach (var sk in UnityEngine.Object.FindObjectsByType<SkinnedMeshRenderer>(FindObjectsSortMode.None)) if (sk.sharedMesh != null && sk.gameObject.activeInHierarchy) { rends++; for (int k = 0; k < sk.sharedMesh.subMeshCount; k++) tris += (int)(sk.sharedMesh.GetIndexCount(k) / 3); }
         Debug.Log("CiBuild: whole scene triangles=" + tris + " renderers=" + rends);
@@ -155,7 +157,8 @@ public static class CiBuild
         g.ui.CloseSheet(); g.SetLang("de"); g.ui.OpenParking(); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "13_german");
     }
 
-    public static void IOS()
+    /// Everything a person would normally set up by hand in the editor: pipeline asset and the materials the game clones.
+    public static void Setup()
     {
         Directory.CreateDirectory("Assets/Settings");
         Directory.CreateDirectory("Assets/Resources");
@@ -165,15 +168,22 @@ public static class CiBuild
         PlayerSettings.colorSpace = ColorSpace.Linear;
         bool urp = SetupUrp();
 
-        // A material asset keeps the lit shader in the build; runtime objects clone it.
+        // Material assets keep the shaders in the build; runtime objects clone them.
         var shader = (urp ? Shader.Find("Universal Render Pipeline/Lit") : null) ?? Shader.Find("Standard");
         Debug.Log("CiBuild: base shader = " + (shader ? shader.name : "none"));
         AssetDatabase.CreateAsset(new Material(shader), "Assets/Resources/BaseLit.mat");
-        var emis = new Material(shader); emis.EnableKeyword("_EMISSION"); emis.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-        if (emis.HasProperty("_EmissionColor")) emis.SetColor("_EmissionColor", Color.white);
-        AssetDatabase.CreateAsset(emis, "Assets/Resources/BaseEmis.mat");
+        var solid = Shader.Find("Souq/Solid"); Debug.Log("CiBuild: solid shader " + (solid != null ? "found" : "MISSING"));
+        if (solid != null)
+        {
+            AssetDatabase.CreateAsset(new Material(solid), "Assets/Resources/Solid.mat");
+            var glow = new Material(solid); glow.SetFloat("_Glow", 1f); AssetDatabase.CreateAsset(glow, "Assets/Resources/SolidGlow.mat");
+        }
         AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
-        try { MkImport.Run(shader); } catch (Exception e) { Debug.LogWarning("CiBuild: MkImport failed: " + e); }
+    }
+
+    public static void IOS()
+    {
+        Setup();
         SimAudit();
         try { GameShots(); } catch (Exception e) { Debug.LogWarning("CiBuild: GameShots failed: " + e); }
 

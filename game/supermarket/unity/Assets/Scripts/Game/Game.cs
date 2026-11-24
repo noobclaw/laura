@@ -108,7 +108,7 @@ namespace Souq
 
     public class Game
     {
-        public const float Pitch = 46f;
+        public const float Pitch = 50f;
         public const string SaveKey = "save.v2";
         public Sim sim; public World world; public Ui ui; public Camera cam; public AudioKit audio; public Store store; public Tutorial tut;
         public bool editor, overlay; public double pendingOffline; float saveT, stuckCd, paidFx; public Vector3 focus = new Vector3(0, 0, 8); public float zoom = 20.5f;
@@ -149,7 +149,7 @@ namespace Souq
             overlay = overlayUi; Loc.Set(save.lang);
             sim = new Sim(save, Now); store = new Store(this); audio = new AudioKit(this, editor);
             var cgo = new GameObject("Main Camera"); cgo.tag = "MainCamera"; cam = cgo.AddComponent<Camera>();
-            cam.orthographic = true; cam.nearClipPlane = 0.3f; cam.farClipPlane = 400; cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.36f, 0.52f, 0.30f); cam.allowHDR = true;
+            cam.orthographic = true; cam.nearClipPlane = 0.3f; cam.farClipPlane = 400; cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.49f, 0.77f, 0.35f); cam.allowHDR = true;
             if (!editor) cgo.AddComponent<AudioListener>();
             PostFx();
             world = new World(sim); world.Build(); PlaceCamera();
@@ -176,11 +176,11 @@ namespace Souq
             try
             {
                 var vol = new GameObject("PostFx").AddComponent<Volume>(); vol.isGlobal = true; var prof = ScriptableObject.CreateInstance<VolumeProfile>(); vol.sharedProfile = prof;
-                var bloom = prof.Add<Bloom>(true); bloom.intensity.value = 0.55f; bloom.threshold.value = 1.05f; bloom.scatter.value = 0.6f;
+                var bloom = prof.Add<Bloom>(true); bloom.intensity.value = 0.45f; bloom.threshold.value = 1.0f; bloom.scatter.value = 0.6f;
                 var tm = prof.Add<Tonemapping>(true); tm.mode.value = TonemappingMode.Neutral;
-                var ca = prof.Add<ColorAdjustments>(true); ca.saturation.value = 12f; ca.contrast.value = 10f; ca.postExposure.value = 0.15f;
+                var ca = prof.Add<ColorAdjustments>(true); ca.saturation.value = 6f; ca.contrast.value = 4f; ca.postExposure.value = 0f;
                 var vg = prof.Add<Vignette>(true); vg.intensity.value = 0.16f; vg.smoothness.value = 0.5f;
-                var data = cam.GetUniversalAdditionalCameraData(); data.renderPostProcessing = true; data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
+                var data = cam.GetUniversalAdditionalCameraData(); data.renderPostProcessing = true; data.antialiasing = AntialiasingMode.None; cam.allowMSAA = true;   // edges are smoothed by multisampling, which does not soften the picture
             }
             catch (Exception e) { Debug.LogWarning("PostFx unavailable: " + e.Message); }
         }
