@@ -899,11 +899,11 @@ namespace Souq
             float lotTop = -6.75f, lotLen = 58f;
             if (st == 0)
             {
-                fl.C("#b7a684").Slab(26.6f, lotLen, 0.6f, 0, -0.1235f, lotTop - lotLen / 2, 0.004f);
-                for (int k = 0; k < 500; k++) fl.C(k % 3 == 0 ? "#a89673" : k % 3 == 1 ? "#c8b996" : "#9c8a68").Slab(0.14f + (float)rnd.NextDouble() * 0.2f, 0.12f + (float)rnd.NextDouble() * 0.15f, 0.05f, (float)rnd.NextDouble() * 25 - 12.5f, -0.1195f, lotTop - 0.5f - (float)rnd.NextDouble() * (lotLen - 1), 0.001f);
+                fl.C("#b7a684").Slab(26.6f, lotLen, 0.6f, 0, -0.118f, lotTop - lotLen / 2, 0.001f);
+                for (int k = 0; k < 500; k++) fl.C(k % 3 == 0 ? "#a89673" : k % 3 == 1 ? "#c8b996" : "#9c8a68").Slab(0.14f + (float)rnd.NextDouble() * 0.2f, 0.12f + (float)rnd.NextDouble() * 0.15f, 0.05f, (float)rnd.NextDouble() * 25 - 12.5f, -0.117f, lotTop - 0.5f - (float)rnd.NextDouble() * (lotLen - 1), 0.0008f);
             }
-            else if (st == 3) fl.C("#383d4b").Slab(26.6f, lotLen, 0.6f, 0, -0.1235f, lotTop - lotLen / 2, 0.004f);
-            else if (st == 4) { for (int ix = 0; ix < 9; ix++) for (int iz = 0; iz < 20; iz++) fl.C((ix + iz) % 2 == 0 ? "#5d6278" : "#545a70").Slab(2.96f, 2.96f, 0.05f, -12f + ix * 3, -0.1235f, lotTop - 1.5f - iz * 3, 0.004f); }
+            else if (st == 3) fl.C("#383d4b").Slab(26.6f, lotLen, 0.6f, 0, -0.118f, lotTop - lotLen / 2, 0.001f);
+            else if (st == 4) { for (int ix = 0; ix < 9; ix++) for (int iz = 0; iz < 20; iz++) fl.C((ix + iz) % 2 == 0 ? "#5d6278" : "#545a70").Slab(2.96f, 2.96f, 0.05f, -12f + ix * 3, -0.118f, lotTop - 1.5f - iz * 3, 0.001f); }
             if (st >= 2)
             {
                 // hedges and lamps down both sides of the lot
