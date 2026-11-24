@@ -11,3 +11,13 @@
 
 沒有使用：用戶購買的 `idle_supermarket` 包裡的任何圖片、音效、文字、程式碼。
 模型檔放在 `unity/Assets/Resources/Kit/`，檔名前綴 r／c／f／p 對應上面四個包。
+
+## 2026-11-23 — realistic American supermarket look (replaces the KayKit low-poly set, which is removed)
+
+| Where in the project | Source | Author | Licence | What we did to it |
+|---|---|---|---|---|
+| `unity/Assets/Resources/Mk/*.obj` (76 models), `unity/Assets/Art/MkTex/*` (151 textures) | Fab: "Neighborhood Market Kit - Realistic" (glTF download, listing 3b43168e-9116-4c94-87ae-c6d5331f9336; listing states it is AI-generated and uses fictional brands only) | Gridwright | Fab Standard License (commercial use in any engine; raw files may not be redistributed, so this repository must stay private) | Chose 76 of 256 models; converted glTF to OBJ with one group per material; thinned heavy meshes by vertex clustering (cars 68k to about 19k triangles); textures resized to 1024/512 and the occlusion-roughness-metal map repacked for Unity (R metal, G occlusion, A smoothness). Script: kept outside the repo, described in SPEC.md §10 |
+| `unity/Assets/Art/Ground/*` | Poly Haven: large_floor_tiles_02, interior_tiles, clean_asphalt, concrete_floor_02, white_plaster_02 (1k colour + normal) | Poly Haven | CC0 | none |
+| `unity/Assets/Resources/People/Walking.fbx`, `Idle.fbx` | Mixamo: character "Remy", animations "Walking" (in place) and "Breathing Idle" | Adobe | Mixamo terms: free for use in games incl. commercial; raw files may not be redistributed | none; shirt and trouser colours are tinted at run time |
+
+Not used in this build although downloaded: Poly Haven fruit and bread scans (too heavy for many shelf copies).

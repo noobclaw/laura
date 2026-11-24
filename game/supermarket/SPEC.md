@@ -155,3 +155,14 @@
 4. 鑽石不夠買永久升級 → 直接跳商店
 
 **這一版的限制**：內購和廣告都還沒接真實通道。商店裡點購買會直接到帳，畫面上寫明是測試版；「看廣告」是 0.6 秒的佔位。
+
+## 10. Look and feel (2026-11-23 rework)
+
+- **Setting**: an American supermarket. White plaster walls with a brand band (its colour changes with the store grade), tiled floor, asphalt car park, eleven sections: Fresh Produce, Bakery, Deli & Meat, Seafood, Dairy, Frozen Foods, Beverages, Snacks, Pantry, Household, Health & Beauty. The rule tables are unchanged; only names and art changed.
+- **Models**: market kit fixtures at real size (metres). A section shows 1–4 fixtures (one more per bonus level up to 4); open-shelf sections fill row by row as the level climbs to the next bonus.
+- **People**: one rigged character with walk and idle clips; shirts and trousers tinted per person, staff in the section colour. If the character is missing from a build, simple stand-ins are used.
+- **Camera**: fixed width, travels only along the store's length; pinch zoom 13–23.
+- **Feedback**: every tap makes a ripple and a click. An upgrade gives a rising-pitch note (combo counter from 3 in a row, hold the button to repeat), sparkles, hopping stock and new shelf rows popping in; a bonus level adds a ribbon, flash, shake and confetti. A sale at the till rings a register and throws coins to the counter.
+- **Transitions**: shutters lift at launch while the camera travels from the car park to the shop floor; a new section gets a "grand opening" camera move and ribbon; a new store grade closes and reopens the shutters.
+- **First steps**: five guided steps (open the first section, upgrade it, collect a delivery, expand parking, build the second section), 20 gems at the end.
+- **Languages**: English, Arabic, Japanese, Korean, German, French, Spanish, Traditional Chinese. Chinese, Japanese and Korean use the phone's own typeface.

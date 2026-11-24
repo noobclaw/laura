@@ -8,13 +8,19 @@ namespace Souq
 {
     public static class Loc
     {
-        public static bool Ar;
+        /// 0 English, 1 Arabic, 2 Japanese, 3 Korean, 4 German, 5 French, 6 Spanish, 7 Traditional Chinese
+        public static int Lang;
+        public static bool Ar => Lang == 1;
+        public static bool Cjk => Lang == 2 || Lang == 3 || Lang == 7;
+        public static readonly string[] Codes = { "en", "ar", "ja", "ko", "de", "fr", "es", "zh" };
+        public static readonly string[] Names = { "English", "العربية", "日本語", "한국어", "Deutsch", "Français", "Español", "繁體中文" };
+        public static void Set(string code) { Lang = Math.Max(0, Array.IndexOf(Codes, code)); }
         static readonly Dictionary<string, string[]> S = new Dictionary<string, string[]>
         {
-            {"produce", new[]{"Fresh Produce","الخضار والفواكه"}}, {"bakery", new[]{"Bakery","المخبز"}}, {"butcher", new[]{"Butcher","الملحمة"}},
-            {"seafood", new[]{"Seafood","المأكولات البحرية"}}, {"spices", new[]{"Dates & Spices","التمور والبهارات"}}, {"fashion", new[]{"Fashion","الأزياء"}},
-            {"fragrance", new[]{"Fragrance","العطور"}}, {"electronics", new[]{"Electronics","الإلكترونيات"}}, {"phones", new[]{"Phones","الجوالات"}},
-            {"jewellery", new[]{"Jewellery","المجوهرات"}}, {"cars", new[]{"Car Showroom","معرض السيارات"}},
+            {"produce", new[]{"Fresh Produce","الخضار والفواكه"}}, {"bakery", new[]{"Bakery","المخبز"}}, {"butcher", new[]{"Deli & Meat","اللحوم والأجبان"}},
+            {"seafood", new[]{"Seafood","المأكولات البحرية"}}, {"spices", new[]{"Dairy","الألبان"}}, {"fashion", new[]{"Frozen Foods","المجمدات"}},
+            {"fragrance", new[]{"Beverages","المشروبات"}}, {"electronics", new[]{"Snacks","الوجبات الخفيفة"}}, {"phones", new[]{"Pantry","البقالة"}},
+            {"jewellery", new[]{"Household","المنزل والتنظيف"}}, {"cars", new[]{"Health & Beauty","الصحة والجمال"}},
             {"build", new[]{"BUILD","بناء"}}, {"upgrade", new[]{"UPGRADE","ترقية"}}, {"level", new[]{"Level","المستوى"}}, {"max", new[]{"MAX","الأقصى"}},
             {"price", new[]{"Sale price","سعر البيع"}}, {"staff", new[]{"Staff","الموظفون"}}, {"hire", new[]{"HIRE","توظيف"}},
             {"speed", new[]{"Service speed","سرعة الخدمة"}}, {"train", new[]{"TRAIN","تدريب"}}, {"permin", new[]{"/min","/دقيقة"}},
@@ -59,10 +65,17 @@ namespace Souq
             {"t_truck", new[]{"Collect {1} delivery trucks","استلم {1} شاحنة توصيل"}}, {"t_park", new[]{"Expand parking to level {1}","وسّع المواقف إلى المستوى {1}"}},
             {"t_build", new[]{"Build {0}","ابنِ {0}"}}, {"t_star", new[]{"Reach store grade {1}","صل إلى درجة المتجر {1}"}}, {"t_assets", new[]{"Earn {1} in total","اربح {1} إجمالاً"}},
             {"full", new[]{"Checkouts are full! Open or upgrade one.","الكاشير ممتلئ! افتح أو طوّر واحداً."}},
+            {"tut1", new[]{"Tap the Fresh Produce section","اضغط على قسم الخضار والفواكه"}}, {"tut2", new[]{"Tap UPGRADE. Hold it to go faster!","اضغط ترقية. اضغط مطولاً للإسراع!"}},
+            {"tut3", new[]{"A delivery is here! Tap the truck","وصلت شحنة! اضغط على الشاحنة"}}, {"tut4", new[]{"Open Parking and expand it for more shoppers","افتح المواقف ووسّعها لجذب متسوقين أكثر"}},
+            {"tut5", new[]{"Save up and build the Bakery","اجمع المال وابنِ المخبز"}}, {"tutdone", new[]{"Great start! Here is a gift","بداية رائعة! هذه هدية لك"}},
+            {"opening", new[]{"GRAND OPENING","الافتتاح الكبير"}}, {"newstoret", new[]{"NEW STORE","متجر جديد"}}, {"title", new[]{"Souq Tycoon","سوق تايكون"}}, {"bonus", new[]{"BONUS","مكافأة"}},
             {"gift", new[]{"Gift!","هدية!"}}, {"daily", new[]{"Daily gift","هدية يومية"}}, {"tap", new[]{"Tap a department to upgrade it","اضغط على قسم لترقيته"}},
         };
 
-        public static string Raw(string key) { string[] v; if (!S.TryGetValue(key, out v)) return key; return v[Ar ? 1 : 0]; }
+        public static string Raw(string key) { string[] v; if (!S.TryGetValue(key, out v)) return key;
+            if (Lang >= 2) { string[] x; if (LocMore.X.TryGetValue(key, out x) && Lang - 2 < x.Length && !string.IsNullOrEmpty(x[Lang - 2])) return x[Lang - 2]; return v[0]; }
+            return v[Lang];
+        }
         public static string G(string key) => Fix(Raw(key));
         public static string F(string key, params object[] a) => Fix(string.Format(Raw(key), a));
         /// Call on any finished line of text before it goes on screen.

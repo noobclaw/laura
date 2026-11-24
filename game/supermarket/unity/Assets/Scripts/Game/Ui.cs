@@ -11,7 +11,8 @@ namespace Souq
     {
         public static Ui I;
         public Canvas canvas; public RectTransform root, hud, labels, fx, sheetLayer; Game g; Sim sim => g.sim; Save s => g.sim.s;
-        Text coinTxt, rateTxt, gemTxt, taskTxt, taskProg, gradeTxt; Image taskBar; U.Btn taskBtn; RectTransform coinPill, gemPill, taskStrip;
+        Text coinTxt, rateTxt, gemTxt, taskTxt, taskProg, gradeTxt; Image taskBar; U.Btn taskBtn; public RectTransform coinPill, gemPill; RectTransform taskStrip, tutLayer;
+        public RectTransform[] navRt = new RectTransform[5]; public RectTransform upRt, parkRt;
         readonly List<Tween> tweens = new List<Tween>(); double shownCoin = -1; float tick;
         class DeptLabel { public RectTransform rt; public Text name, sub; public Image bg, dot; }
         DeptLabel[] dl = new DeptLabel[T.ND];
@@ -25,14 +26,17 @@ namespace Souq
         // ---------- build ----------
         public void Build(Camera cam, bool overlay)
         {
-            Spr.Init(); U.Font = Resources.Load<Font>("Font/Changa-Bold"); if (U.Font == null) U.Font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            Spr.Init(); U.Font = null;
+            // Chinese, Japanese and Korean use the phone's own typeface; the bundled one covers Latin and Arabic
+            if (Loc.Cjk) { try { U.Font = Font.CreateDynamicFontFromOSFont(Loc.Lang == 2 ? new[] { "Hiragino Sans", "HiraginoSans-W6", "Noto Sans CJK JP", "Noto Sans JP" } : Loc.Lang == 3 ? new[] { "Apple SD Gothic Neo", "AppleSDGothicNeo-Bold", "Noto Sans CJK KR", "Noto Sans KR" } : new[] { "PingFang TC", "PingFangTC-Semibold", "Noto Sans CJK TC", "Noto Sans TC" }, 40); } catch { U.Font = null; } }
+            if (U.Font == null) U.Font = Resources.Load<Font>("Font/Changa-Bold"); if (U.Font == null) U.Font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             var go = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)); go.layer = 5;
             canvas = go.GetComponent<Canvas>(); canvas.renderMode = overlay ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
             if (!overlay) { canvas.worldCamera = cam; canvas.planeDistance = 1f; }
             var sc = go.GetComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080, 2340); sc.matchWidthOrHeight = 0;
             root = (RectTransform)go.transform;
             if (overlay && Screen.height > 0) { var sa = Screen.safeArea; float k = 1080f / Mathf.Max(1, Screen.width); topInset = (Screen.height - sa.yMax) * k; botInset = sa.yMin * k; }
-            labels = U.Fill(U.Rect(root, "labels")); hud = U.Fill(U.Rect(root, "hud")); sheetLayer = U.Fill(U.Rect(root, "sheets")); fx = U.Fill(U.Rect(root, "fx"));
+            labels = U.Fill(U.Rect(root, "labels")); hud = U.Fill(U.Rect(root, "hud")); sheetLayer = U.Fill(U.Rect(root, "sheets")); tutLayer = U.Fill(U.Rect(root, "tut")); fx = U.Fill(U.Rect(root, "fx"));
             BuildTop(); BuildOffers(); BuildNav(); BuildLabels();
             toast = U.Shade(U.Txt(fx, "", 54, Color.white)); U.Pin(toast.rectTransform, 0.5f, 0.5f, 0, 420, 960, 150); toast.gameObject.SetActive(false);
             fullWarn = U.Shade(U.Txt(hud, "", 36, new Color(1f, 0.85f, 0.4f))); U.Pin(fullWarn.rectTransform, 0.5f, 0, 0, 300, 900, 70); fullWarn.gameObject.SetActive(false);
@@ -87,7 +91,7 @@ namespace Souq
             Sprite[] ic = { Spr.Coin, null, Spr.Person, Spr.Star, Spr.Gem }; Action[] act = { () => OpenCheckouts(), () => OpenParking(), () => OpenBoosts(), () => OpenGrade(), () => OpenShop() };
             for (int i = 0; i < 5; i++)
             {
-                var b = U.Button(bar.transform, "", cols[i], 30, act[i], "nav" + i); U.Place(b.rt, i / 5f, 0, (i + 1) / 5f, 1, 12, 20, -12, -14);
+                var b = U.Button(bar.transform, "", cols[i], 30, act[i], "nav" + i); U.Place(b.rt, i / 5f, 0, (i + 1) / 5f, 1, 12, 20, -12, -14); navRt[i] = b.rt;
                 if (ic[i] != null) { var im = U.Img(b.bg.transform, ic[i], Color.white, "icon", false); U.Pin(im.rectTransform, 0.5f, 1, 0, -14, 86, 86); }
                 else { var p = U.Shade(U.Txt(b.bg.transform, "P", 76, Color.white)); U.Pin(p.rectTransform, 0.5f, 1, 0, -10, 100, 96); }
                 var lb = U.Txt(b.bg.transform, Loc.G(keys[i]), 28, Color.white); U.Place(lb.rectTransform, 0, 0, 1, 0, 4, 8, -4, 60);
@@ -113,7 +117,7 @@ namespace Souq
             var sp = g.cam.WorldToScreenPoint(world); var size = root.rect.size;      // bottom-left based, in canvas units
             return new Vector2(sp.x / Mathf.Max(1, g.cam.pixelWidth) * size.x, sp.y / Mathf.Max(1, g.cam.pixelHeight) * size.y);
         }
-        Vector2 CanvasPosOf(RectTransform rt) { Vector3 w = rt.TransformPoint(rt.rect.center); Vector2 lp = root.InverseTransformPoint(w); return lp + root.rect.size * 0.5f; }
+        public Vector2 CanvasPosOf(RectTransform rt) { Vector3 w = rt.TransformPoint(rt.rect.center); Vector2 lp = root.InverseTransformPoint(w); return lp + root.rect.size * 0.5f; }
 
         public void Update(float dt)
         {
@@ -123,13 +127,14 @@ namespace Souq
                 t.t += dt; float k = t.dur <= 0 ? 1 : Mathf.Clamp01(t.t / t.dur); t.step?.Invoke(k);
                 if (k >= 1) { tweens.RemoveAt(i); t.done?.Invoke(); }
             }
+            if (comboT > 0) { comboT -= dt; if (comboTxt != null) { comboTxt.color = new Color(comboTxt.color.r, comboTxt.color.g, comboTxt.color.b, Mathf.Clamp01(comboT * 4)); if (comboT <= 0) comboTxt.gameObject.SetActive(false); } }
             if (toastT > 0) { toastT -= dt; if (toastT <= 0) toast.gameObject.SetActive(false); else toast.color = new Color(1, 1, 1, Mathf.Clamp01(toastT * 3)); }
             double coin = s.coin; if (shownCoin < 0) shownCoin = coin;
             shownCoin += (coin - shownCoin) * Math.Min(1.0, dt * 12); if (Math.Abs(coin - shownCoin) < Math.Max(0.5, coin * 1e-4)) shownCoin = coin;
             coinTxt.text = Loc.Num(shownCoin);
             tick -= dt; if (tick <= 0) { tick = 0.15f; Refresh(false); }
             // department chips follow their departments
-            for (int d = 0; d < T.ND; d++) dl[d].rt.anchoredPosition = ToCanvas(World.DeptCenter(d) + new Vector3(0, 4.4f, 4.1f));
+            for (int d = 0; d < T.ND; d++) dl[d].rt.anchoredPosition = ToCanvas(World.DeptCenter(d) + new Vector3(0, 3.85f, 4.0f));
             float tm = Time.unscaledTime;
             foreach (var o in offers) if (o.rt.gameObject.activeSelf) o.rt.localScale = Vector3.one * (1 + 0.05f * Mathf.Sin(tm * 5f + o.rt.anchoredPosition.y));
         }
@@ -248,8 +253,113 @@ namespace Souq
             if (big) FlyIcons(Spr.Coin, at, coinPill, 5);
         }
 
+
+        // ---------- feedback: every tap, sale and upgrade answers back ----------
+        Image FxImg(Sprite sp, Color c, Vector2 at, float size, Transform layer = null)
+        {
+            var im = U.Img(layer ?? fx, sp, c, "fx", false); var rt = im.rectTransform; rt.anchorMin = rt.anchorMax = Vector2.zero; rt.pivot = new Vector2(0.5f, 0.5f); rt.sizeDelta = new Vector2(size, size); rt.anchoredPosition = at; return im;
+        }
+        bool OnScreen(Vector2 at) => at.x > -80 && at.x < root.rect.width + 80 && at.y > -80 && at.y < root.rect.height + 80;
+        public void Ripple(Vector2 at)
+        {
+            var im = FxImg(Spr.Ring, Color.white, at, 60);
+            Run(0.32f, k => { im.rectTransform.sizeDelta = Vector2.one * (60 + 190 * (1 - (1 - k) * (1 - k))); im.color = new Color(1, 1, 1, 0.75f * (1 - k)); }, () => Kit.Kill(im.gameObject));
+        }
+        public void Burst(Vector2 at, Color c, int n, float scale = 1f)
+        {
+            if (!OnScreen(at)) return;
+            for (int i = 0; i < n; i++)
+            {
+                float ang = (i + UnityEngine.Random.value * 0.7f) / n * Mathf.PI * 2, dist = UnityEngine.Random.Range(90f, 190f) * scale, sz = UnityEngine.Random.Range(34f, 62f) * scale, spin = UnityEngine.Random.Range(-240f, 240f);
+                var col = i % 3 == 0 ? Color.white : Color.Lerp(c, Color.white, 0.25f); var dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+                var im = FxImg(Spr.Spark, col, at, sz);
+                Run(UnityEngine.Random.Range(0.38f, 0.6f), k => { float e = 1 - (1 - k) * (1 - k); im.rectTransform.anchoredPosition = at + dir * dist * e + new Vector2(0, -70f * k * k); im.rectTransform.localScale = Vector3.one * (k < 0.2f ? k / 0.2f : 1 - (k - 0.2f) / 0.8f); im.rectTransform.localRotation = Quaternion.Euler(0, 0, spin * k); }, () => Kit.Kill(im.gameObject));
+            }
+        }
+        /// A sold item hops from the staff to the shopper.
+        public void ItemHop(Vector3 worldFrom, Vector3 worldTo, Color c)
+        {
+            if (Busy) return; Vector2 a = ToCanvas(worldFrom), b = ToCanvas(worldTo); if (!OnScreen(a)) return;
+            var im = FxImg(Spr.Round, Color.Lerp(c, Color.white, 0.2f), a, 40); im.type = Image.Type.Simple;
+            Run(0.3f, k => { im.rectTransform.anchoredPosition = Vector2.Lerp(a, b, k) + new Vector2(0, 90 * Mathf.Sin(k * Mathf.PI)); im.rectTransform.localRotation = Quaternion.Euler(0, 0, 200 * k); }, () => Kit.Kill(im.gameObject));
+        }
+        /// New stock jumps up over a department that was just upgraded.
+        public void ItemPop(Vector3 world, int d, int combo)
+        {
+            var at = ToCanvas(world); if (!OnScreen(at)) return; int n = Mathf.Min(2 + combo / 4, 6); var col = World.DeptColor[d];
+            for (int i = 0; i < n; i++)
+            {
+                float vx = UnityEngine.Random.Range(-260f, 260f), vy = UnityEngine.Random.Range(520f, 820f), spin = UnityEngine.Random.Range(-360f, 360f);
+                var im = FxImg(Spr.Round, i % 2 == 0 ? Color.Lerp(col, Color.white, 0.15f) : new Color(1f, 0.97f, 0.9f), at, UnityEngine.Random.Range(34f, 52f)); im.type = Image.Type.Simple;
+                Run(0.55f, k => { im.rectTransform.anchoredPosition = at + new Vector2(vx * k, vy * k - 1500f * k * k); im.rectTransform.localRotation = Quaternion.Euler(0, 0, spin * k); im.color = new Color(im.color.r, im.color.g, im.color.b, k < 0.8f ? 1 : (1 - k) * 5); }, () => Kit.Kill(im.gameObject));
+            }
+        }
+        Text comboTxt; float comboT;
+        public void Combo(int n, Color c)
+        {
+            if (comboTxt == null) { comboTxt = U.Shade(U.Txt(fx, "", 120, Color.white), 6, 0.5f); U.Pin(comboTxt.rectTransform, 0.5f, 1, 0, -520, 800, 170); comboTxt.rectTransform.pivot = new Vector2(0.5f, 0.5f); }
+            comboTxt.gameObject.SetActive(true); comboTxt.text = "x" + n; comboTxt.color = Color.Lerp(Color.white, Color.Lerp(U.Gold, U.Red, Mathf.Clamp01(n / 40f)), Mathf.Clamp01(n / 8f)); comboT = 1.0f;
+            var rt = comboTxt.rectTransform; float big = 1.25f + Mathf.Min(n, 40) * 0.012f; Run(0.16f, k => { if (rt != null) rt.localScale = Vector3.one * Mathf.Lerp(big, 1f, k); });
+        }
+        /// A coloured band sweeps across the screen for an opening or a bonus level.
+        public void Ribbon(string title, string sub, Color c, bool small = false)
+        {
+            float h = small ? 250 : 330, w = root.rect.width; var holder = U.Rect(fx, "ribbon"); U.Place(holder, 0, 0.5f, 1, 0.5f, 0, 190, 0, 190 + h);
+            var back = U.Img(holder, Spr.Square, Color.Lerp(c, Color.black, 0.35f), "back", false); U.Place(back.rectTransform, 0, 0, 1, 1, 0, -14, 0, 14);
+            var band = U.Img(holder, Spr.Square, c, "band", false); U.Fill(band.rectTransform);
+            var shine = U.Img(holder, Spr.Square, new Color(1, 1, 1, 0.22f), "shine", false); U.Place(shine.rectTransform, 0, 0.55f, 1, 1, 0, 0, 0, 0);
+            var t1 = U.Shade(U.Txt(holder, title, small ? 110 : 96, Color.white), 6, 0.45f); U.Place(t1.rectTransform, 0, 0.36f, 1, 1, 40, 0, -40, -8);
+            var t2 = U.Shade(U.Txt(holder, sub, 54, new Color(1f, 0.96f, 0.75f)), 4, 0.45f); U.Place(t2.rectTransform, 0, 0, 1, 0.42f, 40, 10, -40, 0);
+            Run(1.7f, k =>
+            {
+                if (holder == null) return; float x = k < 0.14f ? -w * (1 - OutBack(k / 0.14f)) : k > 0.86f ? w * ((k - 0.86f) / 0.14f) * ((k - 0.86f) / 0.14f) : 0;
+                holder.anchoredPosition = new Vector2(x, holder.anchoredPosition.y); float sc = k < 0.3f && k > 0.14f ? 1 + 0.12f * Mathf.Sin((k - 0.14f) / 0.16f * Mathf.PI) : 1; t1.rectTransform.localScale = Vector3.one * sc;
+            }, () => Kit.Kill(holder.gameObject));
+        }
+        public bool ShutterOn;
+        /// Roller shutters: closed at launch and opened, or closed and reopened around a change of store.
+        public void Shutter(string title, string sub, Color c, Action mid, bool startClosed)
+        {
+            ShutterOn = true; var holder = U.Fill(U.Rect(fx, "shutter")); var hit = U.Img(holder, Spr.Square, new Color(0, 0, 0, 0), "hit", false, true); U.Fill(hit.rectTransform);
+            float H = root.rect.height; var dark = Color.Lerp(c, Color.black, 0.3f);
+            var top = U.Img(holder, Spr.Square, c, "top", false); U.Place(top.rectTransform, 0, 0.5f, 1, 1, 0, 0, 0, 0);
+            var bot = U.Img(holder, Spr.Square, dark, "bot", false); U.Place(bot.rectTransform, 0, 0, 1, 0.5f, 0, 0, 0, 0);
+            for (int i = 0; i < 9; i++) { var l1 = U.Img(top.transform, Spr.Square, new Color(0, 0, 0, 0.10f), "slat", false); U.Place(l1.rectTransform, 0, i / 9f, 1, i / 9f, 0, 0, 0, 10); var l2 = U.Img(bot.transform, Spr.Square, new Color(0, 0, 0, 0.14f), "slat", false); U.Place(l2.rectTransform, 0, i / 9f, 1, i / 9f, 0, 0, 0, 10); }
+            var edge = U.Img(top.transform, Spr.Square, U.Gold, "edge", false); U.Place(edge.rectTransform, 0, 0, 1, 0, 0, 0, 0, 16);
+            var t1 = U.Shade(U.Txt(top.transform, title, 130, Color.white), 7, 0.45f); U.Place(t1.rectTransform, 0, 0, 1, 0, 50, 110, -50, 330);
+            var t2 = U.Shade(U.Txt(top.transform, sub, 62, new Color(1f, 0.93f, 0.6f)), 4, 0.45f); U.Place(t2.rectTransform, 0, 0, 1, 0, 50, 30, -50, 120);
+            Action<float> set = open => { if (holder == null) return; top.rectTransform.anchoredPosition = new Vector2(0, H * 0.52f * open); bot.rectTransform.anchoredPosition = new Vector2(0, -H * 0.52f * open); };
+            Action finish = () => { ShutterOn = false; if (holder != null) Kit.Kill(holder.gameObject); };
+            if (startClosed) { set(0); Run(0.75f, k => set(k * k * (3 - 2 * k)), finish, 0.6f); }
+            else
+            {
+                set(1); Run(0.32f, k => set(1 - k * k), () => { mid?.Invoke(); g.audio.Play("pop"); Run(0.6f, k => set(k * k * (3 - 2 * k)), finish, 0.8f); });
+            }
+        }
+
+        // ---------- first-steps pointer ----------
+        RectTransform tutRing, tutArrow, tutBubble; Text tutTxt; Vector2 tutAt; string tutKey;
+        public bool PopupOpen => popup != null;
+        public void TutPoint(Vector2 at, string key)
+        {
+            if (tutRing == null)
+            {
+                tutRing = FxImg(Spr.Ring, U.Gold, at, 200, tutLayer).rectTransform; tutArrow = FxImg(Spr.Arrow, U.Gold, at, 130, tutLayer).rectTransform;
+                var bub = U.Img(tutLayer, Spr.Round, U.Navy, "bubble"); tutBubble = bub.rectTransform; tutBubble.anchorMin = tutBubble.anchorMax = Vector2.zero; tutBubble.pivot = new Vector2(0.5f, 0.5f); tutBubble.sizeDelta = new Vector2(880, 170);
+                var line = U.Img(bub.transform, Spr.Round, U.Gold, "line"); U.Place(line.rectTransform, 0, 0, 1, 0, 30, 10, -30, 20);
+                tutTxt = U.Txt(bub.transform, "", 44, Color.white); U.Place(tutTxt.rectTransform, 0, 0, 1, 1, 34, 22, -34, -12);
+            }
+            tutRing.gameObject.SetActive(true); tutArrow.gameObject.SetActive(true); tutBubble.gameObject.SetActive(true);
+            if (tutKey != key) { tutKey = key; tutTxt.text = Loc.G(key); var b = tutBubble; Run(0.25f, k => { if (b != null) b.localScale = Vector3.one * OutBack(k); }); }
+            tutAt = at; float tm = Time.unscaledTime; float W = root.rect.width, H = root.rect.height;
+            tutRing.anchoredPosition = at; tutRing.sizeDelta = Vector2.one * (170 + 50 * Mathf.Abs(Mathf.Sin(tm * 4f)));
+            tutArrow.anchoredPosition = at + new Vector2(0, 150 + 34 * Mathf.Abs(Mathf.Sin(tm * 5f)));
+            float by = at.y > H * 0.5f ? at.y - 250 : at.y + 400; tutBubble.anchoredPosition = new Vector2(W / 2, Mathf.Clamp(by, 420, H - 420));
+        }
+        public void TutHide() { if (tutRing == null) return; tutRing.gameObject.SetActive(false); tutArrow.gameObject.SetActive(false); tutBubble.gameObject.SetActive(false); tutKey = null; }
+
         // ---------- sheets (bottom panels) ----------
-        public void CloseSheet() { if (sheet != null) { Kit.Kill(sheet.gameObject); sheet = null; sheetRefresh = null; openDept = -1; } }
+        public void CloseSheet() { if (sheet != null) { Kit.Kill(sheet.gameObject); sheet = null; sheetRefresh = null; openDept = -1; upRt = null; parkRt = null; } }
         RectTransform OpenSheet(string title, Color band, float height)
         {
             CloseSheet(); g.audio.Play("open");
@@ -300,14 +410,18 @@ namespace Souq
             string[] mk = { "x1", "x10", "xmax" }; var modeBtns = new U.Btn[3];
             for (int i = 0; i < 3; i++) { int m = i; modeBtns[i] = U.Button(body, Loc.G(mk[i]), U.Blue, 30, () => { buyMode = m; }, "mode" + i); U.Pin(modeBtns[i].rt, 1, 1, -(2 - i) * 150, -232, 140, 70); }
             Row up = null, hire = null, train = null;
-            up = AddRow(body, -322, 170, Loc.G("upgrade"), U.Green, () =>
+            Func<bool, bool> doUp = held =>
             {
                 int n = buyMode == 0 ? 1 : buyMode == 1 ? 10 : 100000, done = 0; int tier0 = T.Tier(s.dLevel[d]);
                 while (done < n && sim.LevelUp(d)) done++;
-                if (done == 0) { g.Stuck(sim.LevelCost(d)); return; }
-                g.OnLevel(d, tier0); Bought(up.btn.rt);
-            });
-            hire = AddRow(body, -506, 170, Loc.G("staff"), U.Blue, () => { if (sim.Hire(d)) { Bought(hire.btn.rt, true); g.world.PopDept(d); } else g.Stuck(sim.HireCost(d)); });
+                if (done == 0) { if (!held) g.Stuck(sim.LevelCost(d)); return false; }
+                g.OnLevel(d, tier0, done); Burst(CanvasPosOf(up.btn.rt), U.Green, 5, 0.8f);
+                if (held) { var rt = up.btn.rt; Run(0.1f, k => { if (rt != null) rt.localScale = Vector3.one * (1 + 0.08f * Mathf.Sin(k * Mathf.PI)); }); }
+                return true;
+            };
+            up = AddRow(body, -322, 170, Loc.G("upgrade"), U.Green, () => doUp(false));
+            upRt = up.btn.rt; var hold = up.btn.bg.gameObject.AddComponent<HoldRepeat>(); hold.onRepeat = () => doUp(true);
+            hire = AddRow(body, -506, 170, Loc.G("staff"), U.Blue, () => { if (sim.Hire(d)) { Bought(hire.btn.rt, true); g.OnHire(d); } else g.Stuck(sim.HireCost(d)); });
             train = AddRow(body, -690, 170, Loc.G("speed"), U.Purple, () => { if (sim.ProdUp(d)) Bought(train.btn.rt); else g.Stuck(sim.ProdCost(d)); });
             sheetRefresh = () =>
             {
@@ -350,7 +464,8 @@ namespace Souq
         public void OpenParking()
         {
             var body = OpenSheet(Loc.G("parking"), U.Blue, 560); Row a = null, b = null;
-            a = AddRow(body, -10, 170, Loc.G("spaces"), U.Blue, () => { if (sim.ParkUp()) Bought(a.btn.rt, true); else g.Stuck(sim.ParkCost()); });
+            a = AddRow(body, -10, 170, Loc.G("spaces"), U.Blue, () => { if (sim.ParkUp()) { Bought(a.btn.rt, true); g.world.shake = 0.4f; g.Glide(new Vector3(0, 0, g.MinZ + 6), g.zoom, 0.6f); } else g.Stuck(sim.ParkCost()); });
+            parkRt = a.btn.rt;
             b = AddRow(body, -194, 170, Loc.G("marketing"), U.Gold, () => { if (sim.AdLevelUp()) Bought(b.btn.rt); else g.Stuck(sim.AdLevelCost()); });
             sheetRefresh = () =>
             {
@@ -449,12 +564,12 @@ namespace Souq
         {
             var body = OpenSheet(Loc.G("settings"), new Color(0.30f, 0.34f, 0.50f), 980); Row a = null, b = null, c = null;
             a = AddRow(body, -10, 140, Loc.G("sound"), U.Blue, () => { s.sfx = !s.sfx; }); b = AddRow(body, -160, 140, Loc.G("music"), U.Blue, () => { s.music = !s.music; g.audio.SetMusic(s.music); });
-            c = AddRow(body, -310, 140, Loc.G("lang"), U.Purple, () => g.SetLang(!Loc.Ar));
+            c = AddRow(body, -310, 140, Loc.G("lang"), U.Purple, () => g.SetLang(Loc.Codes[(Loc.Lang + 1) % Loc.Codes.Length]));
             foreach (var r in new[] { a, b, c }) { r.btn.bg.transform.Find("ci").gameObject.SetActive(false); U.Place(r.btn.label.rectTransform, 0, 0, 1, 1, 10, 4, -10, -4); }
             var stats = U.Txt(body, "", 32, U.Ink, U.Lead(false)); U.Place(stats.rectTransform, 0, 0, 1, 1, 10, 10, -10, -480);
             sheetRefresh = () =>
             {
-                a.btn.label.text = Loc.G(s.sfx ? "on" : "off"); b.btn.label.text = Loc.G(s.music ? "on" : "off"); c.btn.label.text = Loc.Ar ? "English" : Loc.Shape("العربية");
+                a.btn.label.text = Loc.G(s.sfx ? "on" : "off"); b.btn.label.text = Loc.G(s.music ? "on" : "off"); c.btn.label.text = Loc.Lang == 1 ? Loc.Shape(Loc.Names[1]) : Loc.Names[Loc.Lang];
                 int served = 0; foreach (int v in s.served) served += v;
                 stats.text = Loc.Fix(Loc.Raw("total") + ": " + Loc.Num(s.assets)) + "\n" + Loc.Fix(Loc.Raw("income") + ": " + Loc.Num(sim.FlowPerMin) + Loc.Raw("permin")) + "\n" + Loc.Fix(Loc.Raw("served") + ": " + Loc.Num(served)) + "\n" + Loc.Fix(Loc.Raw("shoppers") + ": " + sim.custs.Count) + "\n\n" + Loc.G("test");
             };

@@ -18,6 +18,7 @@ namespace Souq
             new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
             g = new Game(); g.Start(Game.LoadSave(), true);
             g.sim.DailyLogin((int)(g.Now() / 86400));
+            g.Intro();
             g.CheckOffline();
         }
 

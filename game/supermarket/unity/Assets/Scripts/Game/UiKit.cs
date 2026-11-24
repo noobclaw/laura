@@ -8,7 +8,7 @@ namespace Souq
 {
     public static class Spr
     {
-        public static Sprite Round, Circle, Glow, Gem, Coin, Star, Person, Square;
+        public static Sprite Round, Circle, Glow, Gem, Coin, Star, Person, Square, Ring, Arrow, Spark;
         static Sprite Make(int n, Func<float, float, Color> f, int border = 0)
         {
             var t = new Texture2D(n, n, TextureFormat.RGBA32, false); t.wrapMode = TextureWrapMode.Clamp; t.filterMode = FilterMode.Bilinear;
@@ -29,6 +29,11 @@ namespace Souq
             if (Round != null) return;
             Round = Make(96, (x, y) => W(Aa(Box(x, y, 1, 1, 0.52f), 0.04f)), 30);
             Square = Make(8, (x, y) => Color.white);
+            Ring = Make(128, (x, y) => { float d = Mathf.Sqrt(x * x + y * y); return W(Aa(Mathf.Abs(d - 0.84f) - 0.09f, 0.03f)); });
+            // a fat arrow pointing down
+            Arrow = Make(128, (x, y) => { float head = Mathf.Max(Mathf.Abs(x) * 1.25f - (y + 0.95f), y - 0.05f); float stem = Box(x, y - 0.45f, 0.28f, 0.5f, 0.12f); return W(Aa(Mathf.Min(head, stem), 0.04f)); });
+            // a four-point sparkle
+            Spark = Make(96, (x, y) => { float ax = Mathf.Abs(x), ay = Mathf.Abs(y); float d = Mathf.Pow(ax, 0.55f) + Mathf.Pow(ay, 0.55f) - 0.95f; return W(Aa(d, 0.08f)); });
             Circle = Make(128, (x, y) => W(Aa(Mathf.Sqrt(x * x + y * y) - 0.96f, 0.03f)));
             Glow = Make(128, (x, y) => { float d = Mathf.Sqrt(x * x + y * y); float a = Mathf.Clamp01(1 - d); return W(a * a); });
             Coin = Make(128, (x, y) =>

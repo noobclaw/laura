@@ -2,6 +2,13 @@ name: Unity iOS
 
 # Builds the Unity project in the cloud: Linux exports the Xcode project, macOS compiles it.
 on:
+  # manual run: Actions tab > Unity iOS > Run workflow, pick this branch; tick the box to send the build to TestFlight
+  workflow_dispatch:
+    inputs:
+      ship:
+        description: 'Sign and upload to TestFlight'
+        type: boolean
+        default: true
   push:
     branches: [game/plan-and-first-prototype]
     paths:
@@ -67,7 +74,7 @@ jobs:
   # signing and TestFlight only when the commit message says [ship]
   xcode:
     needs: unity
-    if: contains(github.event.head_commit.message, '[ship]')
+    if: contains(github.event.head_commit.message, '[ship]') || (github.event_name == 'workflow_dispatch' && inputs.ship)
     runs-on: macos-15
     timeout-minutes: 45
     steps:

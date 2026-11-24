@@ -17,6 +17,7 @@ namespace Souq.Core
         public int parkLevel = 1, adLevel = 1, star = 0;
         public int[] epic; public int task = 0, trucks = 0; public int[] served;
         public int loginDay = 0;
+        public int tut = 0;                     // first-steps guide: step reached, 99 when finished
         public bool noAds, profitX2, offlinePro, starter;
         public string[] txDone = new string[0];
         public string lang = ""; public bool sfx = true, music = true;

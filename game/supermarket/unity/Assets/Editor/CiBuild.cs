@@ -122,26 +122,37 @@ public static class CiBuild
         Debug.Log("CiBuild: shots on " + SystemInfo.graphicsDeviceType + " / " + SystemInfo.graphicsDeviceName);
         EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         var s = Souq.Core.Save.Fresh();
-        int[] lv = { 130, 62, 27, 9, 1 }; int[] st = { 5, 4, 3, 2, 1 };
-        for (int d = 0; d < 5; d++) { s.dOpen[d] = true; s.dLevel[d] = lv[d]; s.dStaff[d] = st[d]; s.dSpeed[d] = 3; }
+        int[] lv = { 130, 62, 27, 9, 40, 80, 30, 60 }; int[] st = { 5, 4, 3, 2, 2, 3, 2, 3 };
+        for (int d = 0; d < lv.Length; d++) { s.dOpen[d] = true; s.dLevel[d] = lv[d]; s.dStaff[d] = st[d]; s.dSpeed[d] = 3; }
         s.cLevel[0] = 12; s.cLevel[1] = 8; s.cLevel[2] = 5; s.cLevel[3] = 2; s.cLevel[4] = 1;
-        s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false;
+        s.parkLevel = 5; s.adLevel = 42; s.coin = 7.4e12; s.gem = 345; s.task = 9; s.star = 1; s.lang = "en"; s.music = false; s.sfx = false; s.tut = Souq.Tutorial.Done;
         var g = new Souq.Game(); g.editor = true; g.Start(s, false);
         shotRt = new RenderTexture(720, 1560, 24, RenderTextureFormat.ARGB32); g.cam.targetTexture = shotRt;
         Canvas.ForceUpdateCanvases(); g.cam.Render();        // first frame warms up lighting
         g.sim.truckHere = true; g.sim.vipHere = true; g.sim.vipReward = 4.2e9; g.sim.busOffer = true;
         for (int i = 0; i < 1500; i++) g.Tick(0.05f);
-        g.focus = new Vector3(0, 0, 9); g.zoom = 19f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
-        g.focus = new Vector3(0, 0, 14); g.zoom = 11f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "2_close");
-        g.focus = new Vector3(0, 0, -6); g.zoom = 16f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "3_parking");
-        g.focus = new Vector3(0, 0, 8); g.zoom = 20f; g.PlaceCamera();
-        g.ui.OpenDept(1); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "4_department");
-        g.ui.CloseSheet(); g.ui.Banner("x2", Souq.World.DeptColor[0]); g.ui.Confetti(new Vector2(540, 1300), 60); g.ui.FlyIcons(Souq.Spr.Coin, new Vector2(540, 900), g.ui.hud, 12);
-        for (int i = 0; i < 12; i++) g.Tick(0.03f); Snap(g, "5_effects");
-        for (int i = 0; i < 60; i++) g.Tick(0.03f);
-        g.ui.OpenShop(); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "6_shop");
-        g.ui.CloseSheet(); g.ui.OfflinePopup(3.2e13, 30000, true); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "7_offline");
-        g.ui.ClosePopup(); g.SetLang(true); g.ui.OpenDept(0); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "8_arabic");
+        Debug.Log("CiBuild: shot scene actors=" + g.world.ActorCount + " kitMissing=" + Souq.Kit.Missing + " rigged=" + Souq.Person.Rigged);
+        int tris = 0, rends = 0; foreach (var mf in UnityEngine.Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None)) if (mf.sharedMesh != null && mf.gameObject.activeInHierarchy) { rends++; for (int k = 0; k < mf.sharedMesh.subMeshCount; k++) tris += (int)(mf.sharedMesh.GetIndexCount(k) / 3); }
+        foreach (var sk in UnityEngine.Object.FindObjectsByType<SkinnedMeshRenderer>(FindObjectsSortMode.None)) if (sk.sharedMesh != null && sk.gameObject.activeInHierarchy) { rends++; for (int k = 0; k < sk.sharedMesh.subMeshCount; k++) tris += (int)(sk.sharedMesh.GetIndexCount(k) / 3); }
+        Debug.Log("CiBuild: whole scene triangles=" + tris + " renderers=" + rends);
+        g.focus = new Vector3(0, 0, 8); g.zoom = 20.5f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "1_store");
+        g.focus = new Vector3(0, 0, 14); g.zoom = 13f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "2_close");
+        g.focus = new Vector3(0, 0, -8); g.zoom = 18f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "3_parking");
+        g.focus = new Vector3(0, 0, 3); g.zoom = 13f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "4_front");
+        g.focus = new Vector3(0, 0, 36); g.zoom = 14f; g.PlaceCamera(); g.Tick(0.02f); Snap(g, "5_shelves");
+        g.focus = new Vector3(0, 0, 8); g.zoom = 20.5f; g.PlaceCamera();
+        g.ui.OpenDept(1); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "6_department");
+        g.ui.CloseSheet(); for (int i = 0; i < 6; i++) { g.sim.s.coin = 1e13; g.sim.LevelUp(0); g.OnLevel(0, 4, 1); g.Tick(0.05f); }
+        g.ui.Ribbon("x4 BONUS", Souq.Loc.G("produce"), Souq.World.DeptColor[0], true); g.ui.Confetti(new Vector2(540, 1300), 60); g.ui.FlyIcons(Souq.Spr.Coin, new Vector2(540, 900), g.ui.coinPill, 12);
+        for (int i = 0; i < 10; i++) g.Tick(0.03f); Snap(g, "7_effects");
+        for (int i = 0; i < 80; i++) g.Tick(0.03f);
+        g.ui.TutPoint(g.ui.ToCanvas(Souq.World.DeptFx(0)), "tut1"); g.Tick(0.02f); Snap(g, "8_tutorial"); g.ui.TutHide();
+        g.ui.Shutter(Souq.Loc.G("title"), Souq.Loc.G("opening"), new Color(0.80f, 0.13f, 0.15f), null, true); for (int i = 0; i < 31; i++) g.Tick(0.03f); Snap(g, "9_shutter");
+        for (int i = 0; i < 40; i++) g.Tick(0.03f);
+        g.ui.OpenShop(); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "10_shop");
+        g.ui.CloseSheet(); g.ui.OfflinePopup(3.2e13, 30000, true); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "11_offline");
+        g.ui.ClosePopup(); g.SetLang("ar"); g.ui.OpenDept(0); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "12_arabic");
+        g.ui.CloseSheet(); g.SetLang("de"); g.ui.OpenParking(); for (int i = 0; i < 20; i++) g.Tick(0.03f); Snap(g, "13_german");
     }
 
     public static void IOS()
@@ -162,6 +173,7 @@ public static class CiBuild
         if (emis.HasProperty("_EmissionColor")) emis.SetColor("_EmissionColor", Color.white);
         AssetDatabase.CreateAsset(emis, "Assets/Resources/BaseEmis.mat");
         AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
+        try { MkImport.Run(shader); } catch (Exception e) { Debug.LogWarning("CiBuild: MkImport failed: " + e); }
         SimAudit();
         try { GameShots(); } catch (Exception e) { Debug.LogWarning("CiBuild: GameShots failed: " + e); }
 
@@ -171,7 +183,7 @@ public static class CiBuild
         PlayerSettings.companyName = "noobclaw";
         PlayerSettings.productName = "Souq Tycoon";
         PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, "com.noobclaw.souq");
-        PlayerSettings.bundleVersion = "0.1.0";
+        PlayerSettings.bundleVersion = "0.2.0";
         PlayerSettings.iOS.buildNumber = Arg("-buildNumber", "1");
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
         PlayerSettings.iOS.targetOSVersionString = "15.0";
