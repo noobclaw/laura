@@ -98,7 +98,10 @@ public static class CiBuild
             var g = new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();
             var cam = g.EditorSetup(pass == 1);
             string tag = pass == 0 ? "hider" : "hunter";
-            g.EditorCam(new Vector3(0f, 0.3f, -1f), 0f, 40f, 24f); Snap(cam, rt, tag + "_1_wide");
+            // the first frames after a scene is built come out unlit, so render a few before keeping any
+            g.EditorCam(new Vector3(0f, 0.3f, 0f), 32f, 34f, 30f);
+            cam.targetTexture = rt; for (int w = 0; w < 3; w++) cam.Render();
+            Snap(cam, rt, tag + "_1_wide");
             g.EditorCam(new Vector3(-4f, 0.3f, -4.5f), 20f, 32f, 8f); Snap(cam, rt, tag + "_2_belt");
             g.EditorCam(new Vector3(0f, 0.3f, -7.6f), 0f, 30f, 5f); Snap(cam, rt, tag + "_3_close");
             g.EditorCam(new Vector3(2f, 1.5f, 2f), -25f, 18f, 13f); Snap(cam, rt, tag + "_4_low");

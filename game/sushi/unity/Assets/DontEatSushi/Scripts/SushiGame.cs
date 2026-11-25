@@ -139,7 +139,7 @@ namespace DontEatSushi
                 {
                     bool island = Random.value < 0.4f;
                     Vector3 pos = island ? new Vector3(Random.Range(-7f, 7f), 0.5f, Random.Range(-1.5f, 1.5f)) : new Vector3(Random.Range(-15f, 15f), 0f, Random.Range(-9.6f, -7.2f));
-                    Color col = island ? new Color(0.90f, 0.86f, 0.78f) : new Color(0.74f, 0.54f, 0.32f);
+                    Color col = island ? new Color(0.80f, 0.74f, 0.64f) : new Color(0.74f, 0.54f, 0.32f);
                     var go = new GameObject("Bot");
                     go.transform.SetParent(root, false);
                     go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
@@ -294,7 +294,7 @@ namespace DontEatSushi
             var sl = sun.AddComponent<Light>();
             sl.type = LightType.Directional;
             sl.color = new Color(1f, 0.93f, 0.82f);
-            sl.intensity = 1.35f; sl.shadowStrength = 0.55f;
+            sl.intensity = 1.1f; sl.shadowStrength = 0.6f;
             sl.shadows = LightShadows.Soft;
 
             var wood = WoodTexture();
@@ -302,7 +302,7 @@ namespace DontEatSushi
             if (counterMat.HasProperty("_BaseMap")) counterMat.SetTextureScale("_BaseMap", new Vector2(4f, 3f));
             var darkWood = Mats.Lit(new Color(0.30f, 0.18f, 0.10f), 0.3f);
             var beltMat = Mats.Lit(new Color(0.14f, 0.14f, 0.16f), 0.45f);
-            var islandMat = Mats.Lit(new Color(0.90f, 0.86f, 0.78f), 0.25f);
+            var islandMat = Mats.Lit(new Color(0.80f, 0.74f, 0.64f), 0.25f);
 
             // 吧台、傳送帶、中島
             Prim(PrimitiveType.Cube, "Counter", new Vector3(0f, -0.5f, 0f), new Vector3(40f, 1f, 22f), counterMat, true);
@@ -337,7 +337,7 @@ namespace DontEatSushi
                 p.tr.SetPositionAndRotation(pos, Quaternion.Euler(0f, yaw, 0f));
                 var disc = Prim(PrimitiveType.Cylinder, "Disc", Vector3.zero, new Vector3(2.8f, 0.06f, 2.8f), Mats.Lit(plateCols[i % plateCols.Length], 0.6f), true, p.tr);
                 disc.transform.localPosition = new Vector3(0f, 0.06f, 0f);
-                var inner = Prim(PrimitiveType.Cylinder, "DiscInner", Vector3.zero, new Vector3(2.25f, 0.062f, 2.25f), Mats.Lit(Color.Lerp(plateCols[i % plateCols.Length], Color.white, 0.8f), 0.7f), false, p.tr);
+                var inner = Prim(PrimitiveType.Cylinder, "DiscInner", Vector3.zero, new Vector3(2.25f, 0.062f, 2.25f), Mats.Lit(Color.Lerp(plateCols[i % plateCols.Length], new Color(0.9f, 0.88f, 0.84f), 0.8f), 0.7f), false, p.tr);
                 inner.transform.localPosition = new Vector3(0f, 0.066f, 0f);
                 bool oneEmpty = (i == 0 || i == 1 || i == 3 || i == 4 || i == 8 || i == 10);
                 p.slots = new Slot[2];

@@ -28,7 +28,7 @@ namespace DontEatSushi
                 var tone = p.Add<Tonemapping>(true);
                 tone.mode.value = TonemappingMode.Neutral;
                 var ca = p.Add<ColorAdjustments>(true);
-                ca.postExposure.value = 0.25f; ca.contrast.value = 14f; ca.saturation.value = 16f;
+                ca.postExposure.value = -0.05f; ca.contrast.value = 12f; ca.saturation.value = 14f;
                 var wb = p.Add<WhiteBalance>(true);
                 wb.temperature.value = 10f;
                 var vg = p.Add<Vignette>(true);
