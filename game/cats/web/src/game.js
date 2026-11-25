@@ -389,7 +389,7 @@
       ray.set(origin, d); var hc = null, hd = pd, hp = null;
       targets.forEach(function (c) { ray.far = hd; var h = c.c.raycast(ray); if (h && h.distance < hd) { hd = h.distance; hc = c; hp = h.point; } });
       if (hc) { hits[hc.id] = (hits[hc.id] || 0) + 1; if (hits[hc.id] > bestN) { bestN = hits[hc.id]; best = hc; } hc.c.paint(hp, 0.028 + rnd() * 0.02, rgb, 0.3, 0, 0.8); } // paint mark on whoever was hit
-      else if (wp && pd < RULES.dog.range) { addSplat(tmp2.copy(origin).addScaledVector(d, pd), wn, 0.035 + rnd() * 0.05, rgb); if (i === 0) room.kick(tmp2.x, tmp2.y, tmp2.z, dir.x, dir.z, 2.2); }
+      else if (wp && pd < RULES.dog.range) { addSplat(tmp2.copy(origin).addScaledVector(d, pd), wn, 0.035 + rnd() * 0.05, rgb); if (i < 4) puff(tmp2, wn, rgb); if (i === 0) room.kick(tmp2.x, tmp2.y, tmp2.z, dir.x, dir.z, 2.2); }
       if (!hc && G.me && G.me.team === 'cat' && !G.me.out && dogEnt !== G.me) { var mc = G.me.c.center(tmp), t0 = Math.max(0, Math.min(pd, mc.clone().sub(origin).dot(d))); if (mc.distanceTo(tmp2.copy(origin).addScaledVector(d, t0)) < RULES.feel.nearMissPelletM) G.nearPellet = true; }
     }
     var target = best ? (best.decoyOf ? ent(best.decoyOf) : best) : null, fleeing = false;
@@ -434,6 +434,24 @@
 
   /* ------------------------------------------------------------------ dog first person */
   /* a chunky pump-action toy paint blaster held in the dog's paws (our own design) */
+  /* paint builds up on the blaster: every shot leaves a couple more blobs on barrel and receiver */
+  var GUNC = [[74, 163, 224], [242, 154, 74], [231, 110, 150], [150, 200, 90], [246, 207, 58], [150, 110, 200], [245, 241, 232], [200, 69, 46]], gunMats = [], gunGeo = null;
+  function gunSplat(seed) {
+    if (!G.vm || G.vmBlobs >= 70) return; var r = SG.rng(seed * 97 + 13), ci = Math.floor(r() * GUNC.length), c = GUNC[ci], k = r(), m;
+    if (!gunGeo) gunGeo = new THREE.SphereGeometry(1, 8, 6);
+    if (!gunMats[ci]) gunMats[ci] = new THREE.MeshStandardMaterial({ color: new THREE.Color(c[0] / 255, c[1] / 255, c[2] / 255).convertSRGBToLinear(), roughness: 0.22 });
+    m = new THREE.Mesh(gunGeo, gunMats[ci]); m.layers.set(1); var s0 = 0.008 + r() * 0.014;
+    if (k < 0.45) { var a = -0.5 + r() * 4.1, z = -0.2 - r() * 0.32; m.position.set(Math.cos(a) * 0.038, 0.018 + Math.sin(a) * 0.038, z); m.scale.set(s0, s0, s0 * (1 + r() * 1.6)); }      // barrel
+    else if (k < 0.75) { m.position.set((r() - 0.5) * 0.07, 0.05, -0.21 + r() * 0.24); m.scale.set(s0 * (1 + r()), s0 * 0.45, s0 * (1 + r())); }                                       // top of the receiver
+    else if (k < 0.92) { m.position.set(-0.0425, -0.04 + r() * 0.08, -0.21 + r() * 0.26); m.scale.set(s0 * 0.45, s0 * (1 + r() * 1.4), s0 * (1 + r())); }                              // the side you see
+    else { m.position.set((r() - 0.5) * 0.05, 0.0 + r() * 0.03, 0.08 + r() * 0.12); m.scale.set(s0, s0 * 0.5, s0); }                                                                     // stock
+    G.vm.add(m); G.vmBlobs++;
+  }
+  var puffGeo = null, puffMats = {};
+  function puff(pos, n, rgb) { // flecks of paint flying off where a pellet lands
+    if (!puffGeo) puffGeo = new THREE.PlaneGeometry(0.03, 0.03); var key = rgb.join(); if (!puffMats[key]) puffMats[key] = new THREE.MeshBasicMaterial({ color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255).convertSRGBToLinear(), side: THREE.DoubleSide });
+    for (var i = 0; i < 3; i++) { var m = new THREE.Mesh(puffGeo, puffMats[key]); m.position.copy(pos); m.layers.set(1); m.userData.shared = true; scene.add(m); G.confetti.push({ m: m, v: V(n.x * 1.6 + (rnd() - 0.5) * 2.2, n.y * 1.6 + 0.6 + rnd() * 1.6, n.z * 1.6 + (rnd() - 0.5) * 2.2), life: 0.35 + rnd() * 0.35, sp: (rnd() - 0.5) * 24 }); }
+  }
   function buildLauncher() {
     var g = new THREE.Group(), M = function (geo, mat, x, y, z, rx, ry, rz, par) { var m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx || 0, ry || 0, rz || 0); (par || g).add(m); m.layers.set(1); return m; };
     var std = function (c, r) { return new THREE.MeshStandardMaterial({ color: c, roughness: r || 0.38 }); };
@@ -453,7 +471,8 @@
     M(new THREE.SphereGeometry(0.055, 12, 10), paw, 0.0, -0.14, 0.03).scale.set(1.1, 0.9, 1.3);                   // rear paw on the grip
     var fl = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); fl.position.set(0, 0.018, -0.62); fl.layers.set(1); fl.visible = false; g.add(fl); G.vmFlash = fl;
     g.position.set(0.2, -0.21, -0.4); g.scale.setScalar(0.85);
-    camera.add(g); scene.add(camera); G.vm = g; G.recoil = 0;
+    camera.add(g); scene.add(camera); G.vm = g; G.recoil = 0; G.punch = 0; G.vmBlobs = 0;
+    for (var sb = 0; sb < 26; sb++) gunSplat(sb); // the blaster has seen a lot of paint already
   }
 
   /* ------------------------------------------------------------------ bot dog */
@@ -683,7 +702,7 @@
     var m = G.me; if (!m || m.team !== 'dog' || G.state.phase !== 'seek') return;
     var o = V(), d = V(); camera.getWorldPosition(o); camera.getWorldDirection(d);
     if (G.third) { o.set(m.x, m.y + m.eyeH, m.z); d.set(Math.sin(m.yaw) * Math.cos(m.pitch), Math.sin(m.pitch), Math.cos(m.yaw) * Math.cos(m.pitch)); }
-    if (fire(m, o, d)) G.recoil = 1;
+    if (fire(m, o, d)) { G.recoil = 1; G.punch = 1; gunSplat(G.vmBlobs + 1); gunSplat(G.vmBlobs + 7); }
   }
   /* 3: draw your own cat through objects (so you can see how you sit inside furniture) */
   G.setSeeThrough = function (on) {
@@ -914,9 +933,9 @@
       if (fp) { var bob = me.speed > 0.2 ? Math.sin(G.simT * 11) * 0.012 : 0; camera.position.set(me.x + Math.sin(me.yaw) * 0.12, me.y + eh + bob, me.z + Math.cos(me.yaw) * 0.12); camera.lookAt(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
       else { var t3 = Math.max(0.15, room.segWalls(me.x, me.y + eh, me.z, me.x - dx * 2.2, me.y + eh + 0.55 - dy * 1.3, me.z - dz * 2.2) - 0.06); camera.position.set(me.x - dx * 2.0 * t3, me.y + eh + (0.5 - dy * 1.2) * t3, me.z - dz * 2.0 * t3); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
       if (G.vm) { // idle sway, walk bob, recoil kick, pump stroke during the reload interval
-        G.recoil = Math.max(0, G.recoil - dt * 3.4); var rc = G.recoil * G.recoil, since = G.simT - G.state.players.you.lastShot, pu = since > 0.35 && since < 1.05 ? Math.sin((since - 0.35) / 0.7 * Math.PI) : 0, mv = me.speed > 0.2 ? 1 : 0;
-        G.vm.position.set(0.2 + Math.sin(G.time * 1.3) * 0.004 + Math.sin(G.simT * 5.5) * 0.007 * mv, -0.21 + Math.sin(G.time * 1.9) * 0.004 - Math.abs(Math.sin(G.simT * 5.5)) * 0.012 * mv + pu * 0.012, -0.4 + rc * 0.12);
-        G.vm.rotation.set(0.02 + rc * 0.42 - pu * 0.1, 0.09 + Math.sin(G.time * 0.9) * 0.01, pu * 0.14); G.vmPump.position.z = pu * 0.11;
+        G.recoil = Math.max(0, G.recoil - dt * 3.0); G.punch = Math.max(0, (G.punch || 0) - dt * 5.5); camera.rotateX(G.punch * G.punch * 0.045); camera.fov = G.opts.fov + G.punch * 2.5; /* the shot punches the view up and out */ var rc = G.recoil * G.recoil, since = G.simT - G.state.players.you.lastShot, pu = since > 0.35 && since < 1.05 ? Math.sin((since - 0.35) / 0.7 * Math.PI) : 0, mv = me.speed > 0.2 ? 1 : 0;
+        G.vm.position.set(0.2 + Math.sin(G.time * 1.3) * 0.004 + Math.sin(G.simT * 5.5) * 0.007 * mv, -0.21 + Math.sin(G.time * 1.9) * 0.004 - Math.abs(Math.sin(G.simT * 5.5)) * 0.012 * mv + pu * 0.012, -0.4 + rc * 0.2);
+        G.vm.rotation.set(0.02 + rc * 0.66 - pu * 0.1, 0.09 + Math.sin(G.time * 0.9) * 0.01, pu * 0.14); G.vmPump.position.z = pu * 0.11;
         G.vmFlash.visible = since < 0.06; if (G.vmFlash.visible) G.vmFlash.scale.setScalar(0.7 + rnd() * 0.8);
         if (pu > 0.5 && !G.pumped && since < 1) { G.pumped = true; bus.emit('pump'); } if (since > 1.1) G.pumped = false; }
     }

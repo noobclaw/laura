@@ -75,11 +75,14 @@
         rankT = 0; if (!G.me || d.add <= 0 || d.cat !== G.me.pid || (ui.role !== 'cat' && G.state.mode !== 'double')) return;
         if (G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { ovN = 0; ovSum = 0; } ovLast = G.simT; ovN++; ovSum += d.add;
         els.myScore.lastChild.textContent = d.score;
-        els.ovl.className = 'ovl lv' + Math.min(4, Math.floor(ovN / 4)); els.ovl.innerHTML = '<em>被看見了，卻沒被發現</em><b style="font-size:' + (46 + Math.min(44, ovN * 2.2)) + 'px">+' + ovSum + '</b><i>這一下 +' + d.add + '　累計 ' + d.score + '</i>';
+        els.ovl.className = 'ovl lv' + Math.min(4, Math.floor(ovN / 4)); els.ovl.innerHTML = '<em>被看見了，卻沒被發現</em><b style="font-size:' + (64 + Math.min(72, ovN * 3.2)) + 'px">+' + ovSum + '</b><u>連續 ' + ovN + ' 跳' + (d.add >= 40 ? '　正對著你！' : '') + '</u><i>這一下 +' + d.add + '　累計 ' + d.score + '</i>';
         void els.ovl.offsetWidth; els.ovl.classList.add('tick'); bus.emit('ovltick', { n: ovN, add: d.add });
       });
       bus.on('frame', function () {
-        if (ovN && G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { ovN = 0; els.ovl.className = 'ovl hide'; }
+        if (ovN && G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { // the hunter looked away: the streak is banked and flies over to your row in the ranking
+          var r0 = els.ovl.getBoundingClientRect(), fly = h('div', 'bank', '+' + ovSum, els.hud), r1 = els.rank.getBoundingClientRect(); fly.style.left = (r0.right - 150) + 'px'; fly.style.top = (r0.top + 20) + 'px'; void fly.offsetWidth; fly.style.left = (r1.left + 90) + 'px'; fly.style.top = (r1.top + 30) + 'px'; fly.style.fontSize = '20px'; fly.style.opacity = 0.2;
+          setTimeout(function () { fly.remove(); els.rank.classList.add('flash'); setTimeout(function () { els.rank.classList.remove('flash'); }, 450); }, 720); bus.emit('banked', { sum: ovSum, n: ovN });
+          ovN = 0; els.ovl.className = 'ovl hide'; rankT = 0; }
         rankT -= 1; if (rankT > 0 || !G.state) return; rankT = 20;
         var on = G.state.phase === 'seek' && (ui.role === 'cat' || G.settings.board); show(els.rank, on); if (!on) return;
         var P = G.state.players, ids = Object.keys(P).filter(function (id) { return P[id].team === 'cat' || P[id].score > 0 || G.state.mode === 'double'; }).sort(function (a, b) { return P[b].score - P[a].score; }).slice(0, 7);

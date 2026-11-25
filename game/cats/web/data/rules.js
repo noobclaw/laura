@@ -2,8 +2,8 @@
 window.SG_RULES = {
  "_comment": "All tuning numbers come from design/gdd/*.md. Edit here, then run: node tools/build-rules.js",
  "round": {
-  "prepSec": 120,
-  "seekSec": 180,
+  "prepSec": 90,
+  "seekSec": 240,
   "revealSec": 30,
   "minPlayers": 2
  },
@@ -94,8 +94,8 @@ window.SG_RULES = {
  },
  "solo": {
   "_comment": "defaults when playing alone with bots (ours); multiplayer keeps round.*",
-  "prepSec": 75,
-  "seekSec": 120,
+  "prepSec": 90,
+  "seekSec": 240,
   "mode": "infection",
   "botCatsWhenCat": 9,
   "botDogsWhenCat": 2,

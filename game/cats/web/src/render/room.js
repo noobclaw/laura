@@ -692,7 +692,7 @@
     /* ---- small rigid-body sim for the knockable props and the tennis balls ----
        bodies are discs with a height: they collide with each other and with the room, rest on each other (stacks),
        upright ones rock about their base edge and topple past the critical angle, lying cylinders roll across their axis. */
-    var GRAV = 9.8, _ax = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
+    var GRAV = 9.8 / (opt.scale || 1.5), /* plan units: 9.8 m/s² once the property is scaled */ _gdummy = 0, _ax = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
     knock.forEach(initBody);
     function initBody(k) {
       k.ball = k.shape === 'ball'; k.h = k.h || (k.ball ? k.r * 2 : k.shape === 'block' ? 0.075 : k.shape === 'roly' ? 0.2 : Math.max(0.07, k.r * 2.4));

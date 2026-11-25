@@ -38,7 +38,7 @@
 
   var FS_DOWN = [
     'uniform sampler2D tSrc; uniform vec2 uPx; uniform float uThresh;',
-    'vec3 pre(vec3 c){ if(uThresh<=0.) return c; float l=max(c.r,max(c.g,c.b)); float k=max(l-uThresh,0.); k=k*k/(k+0.6); return c*k/max(l,1e-4); }',
+    'vec3 pre(vec3 c){ if(uThresh<=0.) return c; float l=max(c.r,max(c.g,c.b)); float k=max(l-uThresh,0.); k=k*k/(k+0.6); return min(c*k/max(l,1e-4), vec3(1.6)); }',
     'void main(){',
     '  vec3 a=pre(texture(tSrc,vUv).rgb)*4.;',
     '  a+=pre(texture(tSrc,vUv+uPx*vec2(-1.,-1.)).rgb)+pre(texture(tSrc,vUv+uPx*vec2(1.,-1.)).rgb)+pre(texture(tSrc,vUv+uPx*vec2(-1.,1.)).rgb)+pre(texture(tSrc,vUv+uPx*vec2(1.,1.)).rgb);',
@@ -61,7 +61,7 @@
     '  vec3 c=texture(tScene,suv).rgb;',
     '  float ao=0.; for(int y=-1;y<=2;y++) for(int x=-1;x<=2;x++) ao+=texture(tAO,vUv+(vec2(float(x),float(y))-0.5)*uAOPx).r; ao/=16.;',
     '  ao=mix(1.,ao,uAO); c*=mix(vec3(0.42,0.30,0.24),vec3(1.),ao);', // warm-tinted occlusion, never pure black
-    '  c+=texture(tBloom,vUv).rgb*uBloom;',
+    '  c+=min(texture(tBloom,vUv).rgb,vec3(0.55))*uBloom;', // capped: glow, never a white-out
     '  c*=uExposure; c=aces(c);',
     '  float l=dot(c,vec3(0.2126,0.7152,0.0722));',
     '  c=mix(vec3(l),c,uSat);',
@@ -133,7 +133,7 @@
       // bloom: down chain with prefilter on the first step, then tent up-sampling
       var src = rtScene.texture, i;
       for (i = 0; i < NM; i++) {
-        mDown.uniforms.tSrc.value = src; mDown.uniforms.uThresh.value = i === 0 ? 1.5 : 0;
+        mDown.uniforms.tSrc.value = src; mDown.uniforms.uThresh.value = i === 0 ? 1.9 : 0;
         mDown.uniforms.uPx.value.set(1 / mips[i].d.width, 1 / mips[i].d.height);
         draw(mDown, mips[i].d); src = mips[i].d.texture;
       }

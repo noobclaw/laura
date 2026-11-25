@@ -264,7 +264,7 @@ LOSJS = """() => { window.LOS = function (e) { const c=e.c.center(), ray=new THR
 def modes_run(pg):
     boot(pg, setup="() => { const G=SG.game; G.settings.seek=60; }"); pg.evaluate(LOSJS)
     d = pg.evaluate("[SG.game.settings.mode, SG_RULES.solo.botCatsWhenCat, SG_RULES.solo.botDogsWhenCat, SG.game.settings.prep, SG.game.settings.seek]")
-    check("solo defaults: infection, 9 bot cats + 2 bot dogs, prep 75 s", d[0] == "infection" and d[1] == 9 and d[2] == 2 and d[3] == 75, d)
+    check("solo defaults: infection, 9 bot cats + 2 bot dogs, paint 90 s (search default 240 s in rules.json; this run overrides it to 60)", d[0] == "infection" and d[1] == 9 and d[2] == 2 and d[3] == 90 and d[4] == 60, d)
     lm = pg.evaluate("[window.__loadMs, SG.bootT.build, SG.bootT.first]"); results.append(("LOAD_MS", True, lm)); check("loading bar is shown and removed; time from script start to first frame is recorded", pg.locator("#boot").count() == 0 and lm[0] > 0, lm)
     mm = pg.locator(".mm .btn").all_inner_texts(); check("main menu: create room / find room / settings / quit + maps, language buttons", mm[:4] == ["建立房間", "尋找房間", "設定", "結束遊戲"] and pg.locator(".langs .lg").count() == 3, mm); shot(pg, "19-main-menu")
     pg.click("button[data-act=mm-options]"); pg.click(".op button[data-tab=general]"); pg.click(".op .cyc[data-k=lang] .nx"); pg.click(".op .cyc[data-k=lang] .nx"); drag(pg, ".op .sl[data-s=fov] .tr", 0.97); pg.click(".op .cyc[data-k=invertY] .nx"); shot(pg, "19b-options"); tabs = pg.locator(".op .side .btn").count(); o = pg.evaluate("SG.game.opts"); pg.click("button[data-act=op-back]"); en = pg.locator(".mm .btn").first.inner_text()
