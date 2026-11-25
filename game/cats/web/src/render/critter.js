@@ -30,16 +30,19 @@
      cats: len = torso length, hw/hh = torso half width / half height, sq = cross-section squareness (2 = ellipse, 4 = rounded
      slab, 9 = block), leg = visible leg length, headW/H/D = head half sizes, headUp = head centre above the spine.
      Shoulder height at scale 1 = leg + 2 * hh. bellyR/headR/chestR/hipR are kept for game.js (collision radius) and makeSpec. */
-  var NUB = { len: 0.1, r0: 0.036, r1: 0.032, up: 34, curl: 0 }; // the default tail on every build: a short thick nub that hangs against the rump, inside the outline
-  function nub(k) { return { len: NUB.len * k, r0: NUB.r0 * k, r1: NUB.r1 * k, up: NUB.up, curl: 0 }; }
+  /* cats are flat, ground-hugging mats with a cat's outline: len/hw/hh = slab length, half width, half thickness; plan = how round the
+     corners are seen from above; stub = length of the four little legs; headW/H/D = the low head bump at the front. `leg` is only the
+     jump class game.js reads (< 0.1 = low jumper). Top of the back when standing = stub + 2 * hh. */
+  var TAB = { len: 0.07, r0: 0.045, r1: 0.036, up: 90, curl: 0, flat: 0.3, y: 0 }; // default tail: a short flat tab at the rear, in the plane of the body
+  function tab(k) { return { len: TAB.len * k, r0: TAB.r0 * k, r1: TAB.r1 * k, up: 90, curl: 0, flat: 0.3, y: 0 }; }
   var CATS = {
-    mochi: { name: '麻糬', tag: '圓滾滾', kind: 'cat', len: 0.46, hw: 0.15, hh: 0.12, sq: 5, leg: 0.2, legRad: 0.056, paw: 0.06, headW: 0.138, headH: 0.102, headD: 0.09, headUp: 0.095, ear: { type: 'point', h: 0.062, w: 0.052, spread: 0.66, tilt: 26 }, tail: nub(1) },
-    soba: { name: '蕎麥', tag: '修長', kind: 'cat', len: 0.62, hw: 0.108, hh: 0.098, sq: 5, leg: 0.25, legRad: 0.042, paw: 0.045, headW: 0.104, headH: 0.086, headD: 0.085, headUp: 0.085, ear: { type: 'point', h: 0.066, w: 0.044, spread: 0.64, tilt: 22 }, tail: nub(0.85) },
-    wata: { name: '棉花', tag: '厚實', kind: 'cat', len: 0.54, hw: 0.178, hh: 0.132, sq: 4.6, leg: 0.19, legRad: 0.064, paw: 0.068, headW: 0.156, headH: 0.112, headD: 0.1, headUp: 0.1, ear: { type: 'point', h: 0.064, w: 0.056, spread: 0.68, tilt: 30 }, tail: nub(1.2) },
-    dango: { name: '糰子', tag: '短腿', kind: 'cat', len: 0.5, hw: 0.148, hh: 0.112, sq: 5, leg: 0.075, legRad: 0.054, paw: 0.058, headW: 0.136, headH: 0.098, headD: 0.09, headUp: 0.085, ear: { type: 'fold', h: 0.05, w: 0.052, spread: 0.66, tilt: 30 }, tail: nub(1) },
-    azuki: { name: '小豆', tag: '幼貓', kind: 'cat', scale: 0.7, len: 0.38, hw: 0.135, hh: 0.112, sq: 4.4, leg: 0.15, legRad: 0.052, paw: 0.056, headW: 0.144, headH: 0.114, headD: 0.1, headUp: 0.1, ear: { type: 'point', h: 0.07, w: 0.058, spread: 0.64, tilt: 24 }, tail: nub(0.9) },
-    chikuwa: { name: '竹輪', tag: '大耳長腿', kind: 'cat', len: 0.5, hw: 0.118, hh: 0.1, sq: 5, leg: 0.31, legRad: 0.042, paw: 0.045, headW: 0.112, headH: 0.09, headD: 0.086, headUp: 0.09, ear: { type: 'point', h: 0.12, w: 0.066, spread: 0.66, tilt: 30 }, tail: nub(0.9) },
-    tofu: { name: '豆腐', tag: '方塊', kind: 'cat', len: 0.42, hw: 0.155, hh: 0.125, sq: 9, leg: 0.2, legRad: 0.054, paw: 0.056, headW: 0.136, headH: 0.104, headD: 0.098, headUp: 0.095, ear: { type: 'point', h: 0.062, w: 0.054, spread: 0.66, tilt: 18 }, tail: nub(1) }
+    mochi: { name: '麻糬', tag: '圓墊', kind: 'cat', len: 0.42, hw: 0.18, hh: 0.055, sq: 5, plan: 0.15, stub: 0.03, leg: 0.18, legRad: 0.04, paw: 0.044, headW: 0.115, headH: 0.068, headD: 0.075, ear: { type: 'tab', h: 0.04, w: 0.04, spread: 0.74, tilt: 46 }, tail: tab(1) },
+    soba: { name: '蕎麥', tag: '長毯', kind: 'cat', len: 0.6, hw: 0.125, hh: 0.05, sq: 5, plan: 0.07, stub: 0.03, leg: 0.18, legRad: 0.036, paw: 0.04, headW: 0.095, headH: 0.062, headD: 0.07, ear: { type: 'tab', h: 0.038, w: 0.034, spread: 0.74, tilt: 44 }, tail: tab(0.85) },
+    wata: { name: '棉花', tag: '厚墊', kind: 'cat', len: 0.46, hw: 0.2, hh: 0.078, sq: 4, plan: 0.12, stub: 0.035, leg: 0.18, legRad: 0.048, paw: 0.052, headW: 0.13, headH: 0.088, headD: 0.085, ear: { type: 'tab', h: 0.042, w: 0.044, spread: 0.74, tilt: 46 }, tail: tab(1.2) },
+    dango: { name: '糰子', tag: '矮圓', kind: 'cat', len: 0.34, hw: 0.19, hh: 0.045, sq: 5, plan: 0.17, stub: 0.02, leg: 0.07, legRad: 0.04, paw: 0.044, headW: 0.11, headH: 0.058, headD: 0.07, ear: { type: 'tab', h: 0.034, w: 0.04, spread: 0.74, tilt: 52 }, tail: tab(0.9) },
+    azuki: { name: '小豆', tag: '迷你', kind: 'cat', scale: 0.7, len: 0.36, hw: 0.165, hh: 0.055, sq: 4.4, plan: 0.13, stub: 0.03, leg: 0.18, legRad: 0.04, paw: 0.044, headW: 0.12, headH: 0.072, headD: 0.08, ear: { type: 'tab', h: 0.046, w: 0.044, spread: 0.72, tilt: 42 }, tail: tab(0.9) },
+    chikuwa: { name: '竹輪', tag: '大耳', kind: 'cat', len: 0.44, hw: 0.165, hh: 0.052, sq: 5, plan: 0.1, stub: 0.04, leg: 0.18, legRad: 0.038, paw: 0.042, headW: 0.11, headH: 0.066, headD: 0.075, ear: { type: 'point', h: 0.085, w: 0.056, spread: 0.72, tilt: 40 }, tail: tab(0.9) },
+    tofu: { name: '豆腐', tag: '方磚', kind: 'cat', len: 0.4, hw: 0.18, hh: 0.06, sq: 9, plan: 0.02, stub: 0.03, leg: 0.18, legRad: 0.04, paw: 0.042, headW: 0.11, headH: 0.07, headD: 0.07, ear: { type: 'tab', h: 0.038, w: 0.04, spread: 0.74, tilt: 40 }, tail: tab(1) }
   };
   Object.keys(CATS).forEach(function (k) { var c = CATS[k]; c.bellyR = c.chestR = c.hipR = c.hw; c.headR = c.headW; });
   var DOGS = {
@@ -53,16 +56,16 @@
   SG.CATS = CATS; SG.DOGS = DOGS;
   /* ears / tail / collar can be chosen separately from the build */
   SG.CRITTER_OPTIONS = {
-    cat: { ear: [['', '小耳'], ['point', '立耳'], ['fold', '摺耳'], ['big', '大耳'], ['round', '圓耳']], tail: [['', '短尾'], ['none', '無尾'], ['long', '長尾'], ['fluffy', '粗尾'], ['curl', '捲尾']] },
+    cat: { ear: [['', '原本'], ['point', '立耳'], ['fold', '摺耳'], ['big', '大耳'], ['round', '圓耳']], tail: [['', '短尾'], ['none', '無尾'], ['long', '長尾'], ['fluffy', '粗尾'], ['curl', '捲尾']] },
     dog: { ear: [['', '原本'], ['point', '立耳'], ['flop', '垂耳'], ['fold', '摺耳']], tail: [['', '原本'], ['curl', '捲尾'], ['nub', '短尾'], ['long', '長尾'], ['pom', '毛球尾']], collar: [['', '無'], ['red', '紅項圈'], ['bell', '鈴鐺'], ['scarf', '領巾']] }
   };
   SG.makeSpec = function (base, o) {
     o = o || {}; var S = {}, k; for (k in base) S[k] = base[k];
     var HR = S.headR, L = S.len, dog = S.kind === 'dog', lr = dog ? S.legRad : S.legRad * 0.8;
-    var E = { point: { type: 'point', h: HR * (dog ? 0.75 : 0.72), w: HR * (dog ? 0.44 : 0.46), spread: 0.62, tilt: dog ? 12 : 16 }, fold: { type: 'fold', h: HR * 0.42, w: HR * 0.42, spread: 0.68, tilt: dog ? 40 : 30 }, big: { type: 'point', h: HR * (dog ? 1.05 : 1.2), w: HR * (dog ? 0.56 : 0.58), spread: dog ? 0.58 : 0.64, tilt: dog ? 18 : 24 }, round: { type: 'round', h: HR * 0.5, w: HR * 0.5, spread: 0.64, tilt: 22 }, flop: { type: 'flop', h: HR * 1.15, w: HR * 0.5, spread: 0.82, tilt: 0 } };
+    var E = { point: { type: 'point', h: HR * (dog ? 0.75 : 0.6), w: HR * (dog ? 0.44 : 0.42), spread: dog ? 0.62 : 0.72, tilt: dog ? 12 : 34 }, fold: { type: 'fold', h: HR * 0.42, w: HR * 0.42, spread: 0.68, tilt: dog ? 40 : 30 }, big: { type: 'point', h: HR * (dog ? 1.05 : 0.95), w: HR * (dog ? 0.56 : 0.52), spread: dog ? 0.58 : 0.72, tilt: dog ? 18 : 36 }, round: { type: 'round', h: HR * (dog ? 0.5 : 0.42), w: HR * (dog ? 0.5 : 0.42), spread: dog ? 0.64 : 0.74, tilt: dog ? 22 : 44 }, flop: { type: 'flop', h: HR * 1.15, w: HR * 0.5, spread: 0.82, tilt: 0 } };
     /* cats: every tail is carried low (never up in the air); the long ones are a deliberate choice */
     var T = dog ? { long: { len: L * 0.55, r0: lr * 0.8, r1: lr * 0.5, up: 128, curl: 8 }, nub: { len: L * 0.12, r0: lr * 0.9, r1: lr * 0.8, up: 115, curl: 0, segs: 1 }, curl: { len: L * 0.55, r0: lr * 1.1, r1: lr, up: 150, curl: 58, bushy: true }, pom: { len: L * 0.36, r0: 0.02, r1: 0.018, up: 160, curl: 0, segs: 2, pom: true } }
-      : { long: { len: L * 0.8, r0: lr * 0.7, r1: lr * 0.5, up: 62, curl: 9 }, bob: nub(1), none: { len: 0.05, r0: 0.02, r1: 0.016, up: 34, curl: 0, none: true }, fluffy: { len: L * 0.7, r0: lr * 0.9, r1: lr * 1.4, up: 60, curl: 8, bushy: true }, curl: { len: L * 0.7, r0: lr * 0.7, r1: lr * 0.55, up: 70, curl: 40 } };
+      : { long: { len: L * 0.7, r0: lr * 0.75, r1: lr * 0.5, up: 90, curl: 0, flat: 0.5, y: 0 }, bob: tab(1), none: { len: 0.05, r0: 0.02, r1: 0.016, up: 90, curl: 0, none: true, y: 0 }, fluffy: { len: L * 0.55, r0: lr * 1.0, r1: lr * 1.6, up: 90, curl: 0, bushy: true, flat: 0.45, y: 0 }, curl: { len: L * 0.6, r0: lr * 0.75, r1: lr * 0.55, up: 100, curl: 34, flat: 0.6, y: 0 } };
     if (o.ear && E[o.ear]) { S.ear = E[o.ear]; S.earPom = false; }
     if (o.tail && T[o.tail]) { S.tail = T[o.tail]; S.tailPomOff = !T[o.tail].pom; }
     if (o.collar) S.collar = o.collar;
@@ -94,26 +97,26 @@
   function L3(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
   var CPOSE = {
     stand: { label: '站立', amt: 0.5, f: function () { return {}; } },
-    crouch: { label: '壓低', amt: 0.5, f: function () { return { leg: [0.5, 0.5], neck: [10, 0, 0], head: [-10, 0, 0], S: [1.04, 0.93, 1.04] }; } },
-    /* page 1: the eight simple shapes */
-    ball: { label: '貓球', hint: '鬆 ↔ 緊', amt: 0.6, f: function (a) { return { m: [0, 1], leg: [0, 0], S: [lerp(1.1, 0.93, a), lerp(0.88, 0.93, a), lerp(1.28, 0.93, a)] }; } },
-    loaf: { label: '吐司', hint: '露頭 ↔ 收頭', amt: 0.7, f: function (a) { return { m: [lerp(0.3, 1, a), 0], leg: [0, 0], S: [lerp(1, 1.04, a), 1, lerp(1, 0.9, a)] }; } },
-    bolster: { label: '長條', hint: '短粗 ↔ 細長', amt: 0.4, f: function (a) { return { m: [1, 0], leg: [0, 0], S: [lerp(1, 0.72, a), lerp(1, 0.72, a), lerp(1.05, 1.8, a)] }; } },
-    pancake: { label: '貓餅', hint: '厚 ↔ 薄', amt: 0.75, f: function (a) { return { m: [1, 0], leg: [0, 0], S: [lerp(1.1, 1.5, a), lerp(0.55, 0.14, a), lerp(1.05, 1.4, a)] }; } },
-    arch: { label: '拱橋', hint: '低 ↔ 高', amt: 0.8, f: function (a) { return { m: [0, 0, lerp(0.6, 1, a)], leg: [0, 0] }; } },
-    lsit: { label: '靠牆坐', hint: '厚 ↔ 薄', amt: 0.6, f: function (a) { var k = lerp(1, 0.6, a), l = lerp(1, 1.3, a); return { m: [1, 0], pivot: [180, 0, 0], chest: [90, 0, 0], bodyS: [1, k, l], chestS: [1, k, l / k], leg: [0, 0] }; } },
-    tall: { label: '直立', hint: '矮胖 ↔ 高瘦', amt: 0.4, f: function (a) { return { m: [1, 0], pivot: [-90, 0, 0], leg: [0, 0], S: [lerp(1, 0.78, a), lerp(1, 0.78, a), lerp(1, 1.55, a)] }; } },
-    drape: { label: '掛邊', hint: '斜掛 ↔ 垂直', amt: 0.7, f: function (a, D) { var t = lerp(45, 96, a); return { m: [lerp(0.6, 1, a), 0], chest: [t, 0, 0], neck: [t * 0.1, 0, 0], leg: [0, 0], g: [-9, D.zb2 - 0.02] }; } },
+    crouch: { label: '壓低', amt: 0.5, f: function () { return { leg: [0.4, 0.4], S: [1.05, 0.72, 1.05] }; } },
+    /* page 1: the eight simple shapes, all starting from the flat mat */
+    ball: { label: '貓球', hint: '鬆 ↔ 緊', amt: 0.6, f: function (a) { return { m: [0, 1, 0], leg: [0, 0], S: [lerp(1.1, 0.93, a), lerp(0.88, 0.93, a), lerp(1.28, 0.93, a)] }; } },
+    loaf: { label: '吐司', hint: '微鼓 ↔ 方塊', amt: 0.7, f: function (a) { return { m: [lerp(0.5, 1, a), 0, 0], leg: [0, 0], S: [lerp(1, 1.12, a), lerp(1, 1.05, a), lerp(0.96, 0.72, a)] }; } },
+    bolster: { label: '捲筒', hint: '短粗 ↔ 細長', amt: 0.4, f: function (a) { return { m: [1, 0, 0], leg: [0, 0], S: [lerp(1, 0.74, a), lerp(1, 0.74, a), lerp(1, 1.7, a)] }; } },
+    pancake: { label: '貓餅', hint: '厚 ↔ 薄', amt: 0.75, f: function (a) { return { leg: [0, 0], S: [lerp(1, 1.14, a), lerp(0.85, 0.28, a), lerp(1, 1.14, a)] }; } },
+    arch: { label: '拱橋', hint: '低 ↔ 高', amt: 0.8, f: function (a) { return { m: [0, 0, lerp(0.45, 1, a)], leg: [0, 0] }; } },
+    lsit: { label: '摺角', hint: '斜 ↔ 直角', amt: 0.85, f: function (a) { return { chest: [-lerp(35, 100, a), 0, 0], leg: [0, 0] }; } },
+    tall: { label: '直立', hint: '板 ↔ 柱', amt: 0.3, f: function (a) { return { pivot: [-90, 0, 0], m: [a, 0, 0], leg: [0, 0] }; } },
+    drape: { label: '掛邊', hint: '斜掛 ↔ 垂直', amt: 0.8, f: function (a, D) { return { chest: [lerp(40, 96, a), 0, 0], leg: [0, 0], g: [-9, D.zb2 - 0.03] }; } },
     /* page 2 */
-    sit: { label: '坐下', hint: '矮 ↔ 挺', amt: 0.5, f: function (a, D) { var p = lerp(34, 64, a), c = Math.cos(p * D2R), s = Math.sin(p * D2R); return { pivot: [-p, 0, 0], hip: [p, 0, 0], sh: [p, 0, 0], neck: [p * 0.5, 0, 0], head: [p * 0.4, 0, 0], leg: [clamp((D.hh + (D.emb - D.hh) * c + (D.zf - D.zb1) * s) / D.H, 0.3, 2), 0] }; } },
-    side: { label: '側躺', hint: '伸腿 ↔ 收腿', amt: 0.3, f: function (a) { var lg = clamp((0.42 - a) / 0.08, 0, 1); return { pivot: [0, 0, 90], m: [sstep(0.0, 0.9, a), 0], leg: [lg, lg], sh: [-22 + a * 30, 0, 0], hp: [22 - a * 30, 0, 0], neck: [8, 0, 0] }; } },
-    sphinx: { label: '趴臥', hint: '縮手 ↔ 伸手', amt: 0.5, f: function (a) { return { leg: [lerp(0.35, 1.15, a), 0], sh: [-88, 0, 0], neck: [-lerp(0, 10, a), 0, 0], head: [lerp(0, 6, a), 0, 0] }; } },
-    stretch: { label: '斜坡', hint: '緩 ↔ 陡', amt: 0.5, f: function (a) { var p = lerp(12, 34, a); return { pivot: [p, 0, 0], m: [lerp(0.4, 1, a), 0], hp: [-p, 0, 0], leg: [0, lerp(0.8, 1.35, a)], neck: [-p * 0.3, 0, 0] }; } },
-    belly: { label: '翻肚', hint: '舉腳 ↔ 收腳', amt: 0.3, f: function (a) { var lg = clamp((0.42 - a) / 0.08, 0, 1) * 0.8; return { pivot: [0, 0, 180], m: [sstep(0.25, 1, a), 0], leg: [lg, lg], shL: [-35, 0, -14], shR: [-35, 0, 14], hpL: [35, 0, -14], hpR: [35, 0, 14], el: [50, 0, 0], kn: [-50, 0, 0], neck: [26, 0, 0], head: [-8, 0, 0] }; } },
-    curl: { label: '彎月', hint: '微彎 ↔ 半圈', amt: 0.6, f: function (a) { var t = lerp(22, 84, a); return { m: [1, 0], leg: [0, 0], chest: [0, t, 0], hip: [0, -t, 0], neck: [0, t * 0.35, 0], S: [1, 0.96, 1.12] }; } },
-    box: { label: '方塊', hint: '扁 ↔ 高', amt: 0.6, f: function (a) { return { m: [1, 0], leg: [0, 0], S: [lerp(1.12, 1.02, a), lerp(0.95, 1.3, a), lerp(0.7, 0.6, a)] }; } },
-    pawsup: { label: '斜靠', hint: '斜 ↔ 貼牆', amt: 0.5, f: function (a) { return { m: [lerp(0.6, 1, a), 0], pivot: [-lerp(38, 80, a), 0, 0], leg: [0, 0] }; } },
-    roll: { label: '打滾', amt: 0.3, emote: true, f: function () { return { pivot: [0, 0, 180], leg: [0.8, 0.8], sh: [-35, 0, 0], hp: [35, 0, 0], el: [50, 0, 0], kn: [-50, 0, 0], neck: [26, 0, 0] }; } }
+    sit: { label: '抬頭', hint: '低 ↔ 高', amt: 0.5, f: function (a) { var p = lerp(20, 72, a); return { chest: [-p, 0, 0], neck: [p * 0.45, 0, 0], head: [p * 0.2, 0, 0] }; } },
+    side: { label: '側立', hint: '伸腳 ↔ 收腳', amt: 0.6, f: function (a) { var lg = clamp((0.42 - a) / 0.08, 0, 1); return { pivot: [0, 0, 90], leg: [lg, lg] }; } },
+    sphinx: { label: '趴臥', hint: '低頭 ↔ 仰頭', amt: 0.5, f: function (a) { return { neck: [-lerp(6, 40, a), 0, 0], head: [lerp(0, 12, a), 0, 0] }; } },
+    stretch: { label: '斜坡', hint: '緩 ↔ 陡', amt: 0.5, f: function (a, D) { var p = lerp(8, 30, a); return { pivot: [p, 0, 0], hp: [-p, 0, 0], leg: [0, clamp(D.L * 0.86 * Math.sin(p * D2R) / D.H, 1, 9)] }; } },
+    belly: { label: '翻肚', hint: '舉腳 ↔ 收腳', amt: 0.3, f: function (a) { var lg = clamp((0.42 - a) / 0.08, 0, 1); return { pivot: [0, 0, 180], leg: [lg * 1.4, lg * 1.4], shL: [-20, 0, -20], shR: [-20, 0, 20], hpL: [20, 0, -20], hpR: [20, 0, 20] }; } },
+    curl: { label: '彎月', hint: '微彎 ↔ 半圈', amt: 0.6, f: function (a) { var t = lerp(22, 84, a); return { leg: [0, 0], chest: [0, t, 0], hip: [0, -t, 0], neck: [0, t * 0.35, 0] }; } },
+    box: { label: '方塊', hint: '扁 ↔ 高', amt: 0.6, f: function (a) { return { m: [1, 0, 0], leg: [0, 0], S: [1.06, lerp(0.9, 1.3, a), lerp(0.52, 0.42, a)] }; } },
+    pawsup: { label: '斜靠', hint: '斜 ↔ 貼牆', amt: 0.5, f: function (a) { return { pivot: [-lerp(38, 84, a), 0, 0], leg: [0, 0] }; } },
+    roll: { label: '打滾', amt: 0.3, emote: true, f: function () { return { pivot: [0, 0, 180], leg: [1.4, 1.4] }; } }
   };
   var ALIAS = { hind: 'tall', hang: 'drape' };
   Object.keys(CPOSE).forEach(function (k) { if (!POSES[k]) POSES[k] = {}; }); // every name is a valid pose for both kinds
@@ -207,7 +210,7 @@
     var ring = [], vv = [0], W = o.width || 0, mn = [1e9, 1e9], mx = [-1e9, -1e9], ax = o.ax || [0, 1];
     for (k = k0; k <= k1; k++) { // arc length round each ring, and mean distance to the previous ring
       var acc = [0], d = 0;
-      for (i = 0; i < NA; i++) { var a = (k * C + i) * 3, b = (k * C + i + 1) * 3; acc.push(acc[i] + Math.hypot(P[b] - P[a], P[b + 1] - P[a + 1], P[b + 2] - P[a + 2])); }
+      for (i = 0; i < NA; i++) { var a = (k * C + i) * 3, b = (k * C + i + 1) * 3; acc.push(acc[i] + Math.hypot(P[b] - P[a], P[b + 1] - P[a + 1], P[b + 2] - P[a + 2]) * (o.uw ? o.uw(i) : 1)); }
       ring.push(acc); if (!o.width) W = Math.max(W, acc[NA]);
       if (k > k0) { for (i = 0; i < NA; i++) { a = (k * C + i) * 3; b = ((k - 1) * C + i) * 3; d += Math.hypot(P[b] - P[a], P[b + 1] - P[a + 1], P[b + 2] - P[a + 2]) / NA; } vv.push(vv[k - k0 - 1] + d); }
       for (i = 0; i < NA; i++) { a = (k * C + i) * 3; mn[0] = Math.min(mn[0], P[a + ax[0]]); mx[0] = Math.max(mx[0], P[a + ax[0]]); mn[1] = Math.min(mn[1], P[a + ax[1]]); mx[1] = Math.max(mx[1], P[a + ax[1]]); }
@@ -246,44 +249,57 @@
 
   /* ---------- the canvas cat ---------- */
   function catDims(S) {
-    var D = { L: S.len, hw: S.hw, hh: S.hh, sq: S.sq || 3.6 }, L = D.L, hh = D.hh, hw = D.hw, blocky = D.sq > 5;
-    D.capm = blocky ? D.sq : 3.4; D.sqb = blocky ? D.sq : Math.max(D.sq, 6); /* belly corners are tighter than the back: a flat underside, and the legs come out of it */ D.hsq = blocky ? D.sq : Math.min(D.sq, 3.4); D.lsq = blocky ? 6 : 2.6;
-    D.zR = -L / 2; D.rcap = Math.min(hw, hh) * (blocky ? 0.45 : 0.85); D.zc0 = D.zR + D.rcap;
-    D.hW = S.headW; D.hH = S.headH; D.hD = S.headD; D.hy = S.headUp;
+    var D = { L: S.len, hw: S.hw, hh: S.hh, sq: S.sq || 5 }, L = D.L, hh = D.hh, hw = D.hw, blocky = D.sq > 6;
+    D.leg = S.stub != null ? S.stub : S.leg;
+    D.capm = blocky ? D.sq : 3; D.sqb = blocky ? D.sq : Math.max(D.sq, 6); D.hsq = blocky ? 6 : Math.min(D.sq, 3); D.lsq = blocky ? 6 : 2.6;
+    D.zR = -L / 2; D.rcap = hh * (blocky ? 0.4 : 0.9); D.zc0 = D.zR + D.rcap;                    // the thin rounded edge at the back
+    D.plan = clamp(S.plan == null ? 0.06 : S.plan, 0.012, L * 0.46); D.planm = S.planm || (blocky ? 6 : 2.3);  // corners seen from above
+    D.hW = S.headW; D.hH = S.headH; D.hD = S.headD; D.hy = S.headUp != null ? S.headUp : D.hH - hh;   // chin level with the belly: the head is a low bump on the front edge
     D.zH = L / 2 + D.hD * 0.1; D.zF = D.zH + D.hD; D.fcap = D.hD * (blocky ? 0.5 : 1);
-    D.zT0 = L / 2 - hh * 0.85; D.zT1 = D.zH - D.hD * 0.25; D.zB0 = L / 2 - hh * 0.5; D.zB1 = D.zH + D.hD * 0.1;
-    D.pinch = S.neckPinch == null ? (blocky ? 0.05 : 0.11) : S.neckPinch;
-    D.rL = S.legRad; D.rP = S.paw; D.emb = 0.012; D.tuck = Math.min(hh * 0.55, 0.075); /* leg pivot just inside the belly; a drawn-in leg is pulled this far up into the body */ D.H = D.emb + S.leg;
-    D.xl = hw - D.rL - 0.014; D.zf = D.zB0 + 0.015 - D.rL; D.zh = D.zR + D.rL + Math.min(0.04, D.rcap * 0.4);
+    D.zT0 = D.zH - D.hD * 1.0; D.zT1 = D.zH - D.hD * 0.1; D.zB0 = D.zT0; D.zB1 = D.zT1;
+    D.rL = S.legRad; D.rP = S.paw; D.emb = 0.012; D.tuck = Math.min(hh * 0.55, 0.075); D.H = D.emb + D.leg; // leg pivot just inside the belly; a drawn-in leg is pulled up into the body
+    D.zf = L / 2 - Math.max(0.065, D.plan * 0.5); D.zh = -D.zf; D.xl = planW(D, D.zf, L / 2) - D.rL - 0.016;
     D.zb1 = -0.13 * L; D.zb2 = 0.13 * L; D.bw = 0.105 * L;
-    D.zb3 = D.zT0 + hh * 0.2; D.zb4 = D.zH - D.hD * 0.5; if (D.zb4 < D.zb3 + 0.03) D.zb4 = D.zb3 + 0.03; D.bwn = Math.min(0.03, (D.zb4 - D.zb3) * 0.45, (D.zb3 - D.zb2 - D.bw) * 0.9);
-    D.vol = 4 * hw * hh * L * 0.86 + 8 * D.hW * D.hH * D.hD * 0.55;
-    D.zE = L / 2 + (8 * D.hW * D.hH * D.hD * 0.55) / (4 * hw * hh * 0.95);                 // front end of the "log" shape (head volume drawn in)
-    D.archA = 172 * D2R; D.archT = 0.62; D.archR = (D.zE - D.zR) * 1.22 / D.archA;
+    D.zb3 = D.zT0 + 0.012; D.zb4 = D.zH - D.hD * 0.45; if (D.zb3 < D.zb2 + D.bw + 0.01) D.zb3 = D.zb2 + D.bw + 0.01; if (D.zb4 < D.zb3 + 0.03) D.zb4 = D.zb3 + 0.03; D.bwn = Math.min(0.03, (D.zb4 - D.zb3) * 0.45, (D.zb3 - D.zb2 - D.bw) * 0.9);
+    var hv = 8 * D.hW * D.hH * D.hD * 0.55; D.vol = 4 * hw * hh * L * 0.9 + hv;
+    D.zE = L / 2 + hv / (4 * hw * hh * 0.95);                                 // front end of the head-less shapes (head volume drawn in)
+    D.logS = Math.sqrt(hw * hh) * (S.logK || 1); D.logCap = D.logS * 0.85; D.logn = blocky ? 8 : 3.2;   // "log": the mat rolled up / puffed up into a bolster of the same volume
+    D.archA = 172 * D2R; D.archR = (D.zE - D.zR) / D.archA;                   // "arch": the mat bent into a tent
     D.Rb = Math.pow(D.vol * 3 / (4 * PI), 1 / 3) * (blocky ? 0.84 : 1); D.bsq = blocky ? 5 : 2; D.zcb = 0.02;   // "ball"
     return D;
   }
-  /* cross-section of the body at z: top, bottom, half width, exponent */
+  /* half width of the slab outline at z (rounded corners in plan); the slab runs from zR to zEnd */
+  function planW(D, z, zEnd) {
+    var a = D.hw;
+    if (z < D.zR + D.plan) a *= capf((D.zR + D.plan - z) / D.plan, D.planm);
+    if (z > zEnd - D.plan) a *= capf((z - (zEnd - D.plan)) / D.plan, D.planm);
+    return a;
+  }
+  /* cross-section of the body at z: top, bottom, half width, exponents. mode 0 = the animal, 1 = log, 4 = plain slab without a head */
   function catSect(D, z, mode) {
-    var T = D.hh, B = -D.hh, a = D.hw, n = D.sq, nb = D.sqb, f;
-    if (mode === 1) { // log: the head is drawn into the body line
-      var zc = D.zE - D.rcap;
-      if (z > zc) { f = capf((z - zc) / D.rcap, D.capm); T *= f; B *= f; a *= f; }
-    } else {
-      var wt = sstep(D.zT0, D.zT1, z), wb = sstep(D.zB0, D.zB1, z), zp = (D.zT0 + D.zT1) / 2, pw = (D.zT1 - D.zT0) * 0.6, u = clamp(Math.abs(z - zp) / pw, 0, 1);
-      T = lerp(D.hh, D.hy + D.hH, wt); B = lerp(-D.hh, D.hy - D.hH, wb); a = lerp(D.hw, D.hW, wt) * (1 - D.pinch * (1 - u * u) * (1 - u * u)); n = lerp(D.sq, D.hsq, wt); nb = lerp(D.sqb, D.hsq, wb);
-      var zf0 = D.zF - D.fcap;
-      if (z > zf0) { f = capf((z - zf0) / D.fcap, D.hsq > 5 ? D.hsq : 3.6); T = D.hy + (T - D.hy) * f; B = D.hy + (B - D.hy) * f; a *= f; }
+    var T = D.hh, B = -D.hh, a, n = D.sq, nb = D.sqb, f = 1;
+    if (mode === 1) {
+      var s = D.logS, c = D.logCap; if (z > D.zE - c) f = capf((z - (D.zE - c)) / c, 2.6); if (z < D.zR + c) f = Math.min(f, capf((D.zR + c - z) / c, 2.6));
+      return { T: s * f, B: -s * f, a: s * f, n: D.logn, nb: D.logn };
     }
-    if (z < D.zc0) { f = capf((D.zc0 - z) / D.rcap, D.capm); T *= f; B *= f; a *= f; }
+    if (mode === 4) {
+      if (z > D.zE - D.rcap) f = capf((z - (D.zE - D.rcap)) / D.rcap, D.capm); if (z < D.zc0) f = Math.min(f, capf((D.zc0 - z) / D.rcap, D.capm));
+      return { T: T * f, B: B * f, a: planW(D, z, D.zE), n: n, nb: nb };
+    }
+    var wt = sstep(D.zT0, D.zT1, z), wb = sstep(D.zB0, D.zB1, z), aB = planW(D, z, D.L / 2), aH = D.hW * sstep(D.zT0 - D.hD * 0.5, D.zT1, z);
+    a = Math.pow(Math.pow(aB, 6) + Math.pow(aH, 6), 1 / 6);
+    T = lerp(D.hh, D.hy + D.hH, wt); B = lerp(-D.hh, D.hy - D.hH, wb); n = lerp(D.sq, D.hsq, wt); nb = lerp(D.sqb, Math.max(D.hsq, 4), wb);
+    var zf0 = D.zF - D.fcap;
+    if (z > zf0) { f = capf((z - zf0) / D.fcap, D.hsq > 5 ? D.hsq : 3.2); T = D.hy + (T - D.hy) * f; B = D.hy + (B - D.hy) * f; a *= f; }
+    if (z < D.zc0) { f = capf((D.zc0 - z) / D.rcap, D.capm); T *= f; B *= f; }
     return { T: T, B: B, a: a, n: n, nb: nb };
   }
   function catBody(D, NA) {
     // ring stations
     var zs = [], j, nc = 6, nf = 7, z, zm = Math.min(D.zT0, D.zB0), zf0 = D.zF - D.fcap;
     for (j = 0; j < nc; j++) zs.push(D.zc0 - D.rcap * Math.cos(j / nc * PI / 2));
-    var n1 = Math.max(4, Math.ceil((zm - D.zc0) / 0.036)); for (j = 0; j < n1; j++) zs.push(lerp(D.zc0, zm, j / n1));
-    var n2 = Math.max(5, Math.ceil((zf0 - zm) / 0.022)); for (j = 0; j < n2; j++) zs.push(lerp(zm, zf0, j / n2));
+    var n1 = Math.max(5, Math.ceil((zm - D.zc0) / 0.026)); for (j = 0; j < n1; j++) zs.push(lerp(D.zc0, zm, j / n1));
+    var n2 = Math.max(4, Math.ceil((zf0 - zm) / 0.02)); for (j = 0; j < n2; j++) zs.push(lerp(zm, zf0, j / n2));
     for (j = 0; j <= nf; j++) zs.push(zf0 + D.fcap * Math.sin(j / nf * PI / 2));
     var NR = zs.length - 1, C = NA + 1;
     // angles round the section: half way between even arc length and even parameter (more vertices on the rounded corners)
@@ -307,7 +323,7 @@
         }
         if (mode !== 0 && zz > zm) zz = zm + (zz - zm) * (D.zE - zm) / (D.zF - zm);
         if (mode === 3) { // arch: the log bent into a half ring, thinner so the opening shows
-          var sa = catSect(D, zz, 1), th = (zz - (D.zR + D.zE) / 2) / (D.zE - D.zR) * D.archA, ba = (sa.T - sa.B) / 2 * D.archT, aa = sa.a;
+          var sa = catSect(D, zz, 4), th = (zz - (D.zR + D.zE) / 2) / (D.zE - D.zR) * D.archA, ba = (sa.T - sa.B) / 2, aa = sa.a;
           if (k === 0 || k === NR) { aa = 0; ba = 0; }
           for (i = 0; i <= NA; i++) { var pa = phis[i % NA], ea = 2 / (Math.cos(pa) > 0 ? sa.nb : sa.n), rr = D.archR - ba * spow(Math.cos(pa), ea); o = (k * C + i) * 3; P[o] = aa * spow(Math.sin(pa), ea); P[o + 1] = rr * Math.cos(th); P[o + 2] = rr * Math.sin(th); }
           continue;
@@ -320,7 +336,7 @@
     }
     var base = fill(0), chain = ['hip', 'body', 'chest', 'neck', 'head'], bz = [D.zb1, D.zb2, D.zb3, D.zb4], bw = [D.bw, D.bw, D.bwn, D.bwn];
     function wz(zz) { return chainW(chain, bz, bw, zz); }
-    return { P: base.P, N: base.N, NR: NR, NA: NA, zs: zs, us: us, flip: gridFlip(base.P, base.N, NR, NA), M: [fill(1), fill(2), fill(3)], W: function (k) { return wz(zs[k]); }, wz: wz, nc: nc, nf: nf };
+    return { P: base.P, N: base.N, NR: NR, NA: NA, zs: zs, us: us, phis: phis, flip: gridFlip(base.P, base.N, NR, NA), M: [fill(1), fill(2), fill(3)], W: function (k) { return wz(zs[k]); }, wz: wz, nc: nc, nf: nf };
   }
   function buildCat(S, B) {
     var D = catDims(S), NA = 44, L = D.L, hh = D.hh, i;
@@ -330,14 +346,15 @@
     // charts: rump disc | bands of the unrolled tube (one block, no seams between them) | face disc
     function ringAt(z) { var b = 0; for (var k = 0; k <= NR; k++) if (Math.abs(zs[k] - z) < Math.abs(zs[b] - z)) b = k; return b; }
     var kc0 = capCut(G, false), kc1 = capCut(G, true), cuts = [kc0, ringAt(D.zb1), ringAt(D.zb2), ringAt(D.zb3 - D.bwn), ringAt(D.zb4), kc1], names = ['hips', 'belly', 'chest', 'neck', 'head'], W = 0, k;
-    for (k = kc0; k <= kc1; k++) { var per = 0; for (i = 0; i < NA; i++) { var a = (k * (NA + 1) + i) * 3; per += Math.hypot(G.P[a + 3] - G.P[a], G.P[a + 4] - G.P[a + 1], G.P[a + 5] - G.P[a + 2]); } W = Math.max(W, per); }
+    function uw(i) { return Math.cos((G.phis[i] + G.phis[i + 1]) / 2) > 0.3 ? 0.55 : 1; } // the underside gets about half the texel density: the big top plane is the canvas
+    for (k = kc0; k <= kc1; k++) { var per = 0; for (i = 0; i < NA; i++) { var a = (k * (NA + 1) + i) * 3; per += Math.hypot(G.P[a + 3] - G.P[a], G.P[a + 4] - G.P[a + 1], G.P[a + 5] - G.P[a + 2]) * uw(i); } W = Math.max(W, per); }
     B.gridChart('rump', G, 0, kc0, 'planar', { ax: [0, 1], flip: true, dens: 1.2, anchor: [0, 0, D.zR] });
-    for (i = 0; i < 5; i++) if (cuts[i + 1] > cuts[i]) B.gridChart(names[i], G, cuts[i], cuts[i + 1], 'unroll', { width: W, block: 1 });
+    for (i = 0; i < 5; i++) if (cuts[i + 1] > cuts[i]) B.gridChart(names[i], G, cuts[i], cuts[i + 1], 'unroll', { width: W, block: 1, uw: uw });
     B.gridChart('face', G, kc1, NR, 'planar', { ax: [0, 1], dens: 1.2, anchor: [0, D.hy, D.zF] });
     // legs: straight down from a pivot buried in the body, rounded sole
-    var H = D.H, rL = D.rL, rP = D.rP, footH = Math.min(0.05, S.leg * 0.45), rc = Math.min(0.02, rP * 0.4);
+    var H = D.H, rL = D.rL, rP = D.rP, footH = Math.min(0.05, D.leg * 0.45), rc = Math.min(0.02, rP * 0.4, footH * 0.4);
     function legRings(side, zdir) { // local frame: pivot at the origin (just inside the belly), belly line at y = -emb, sole at y = -H
-      var R = [], j, n, fz = Math.min(0.045, S.leg * 0.35), yb = -D.emb, y0 = yb - fz, fl = 0.22, top = Math.min(0.05, D.hh * 0.4);
+      var R = [], j, n, fz = Math.min(0.045, D.leg * 0.35), yb = -D.emb, y0 = yb - fz, fl = 0.22, top = Math.min(0.05, D.hh * 0.5);
       function ring(y, r, cz, k) { // a small fillet where the leg leaves the body, towards the middle of the body only (never outwards)
         var u = clamp((y - y0) / fz, 0, 1), m = 1 + fl * u * u; k = k == null ? 1 : k;
         R.push({ y: y, rx: r * k * (1 + (m - 1) * 0.5), rz: r * k * (1 + (m - 1) * 0.5), cx: -side * r * (m - 1) * 0.5, cz: (cz || 0) + zdir * r * (m - 1) * 0.5, e: D.lsq });
@@ -360,13 +377,14 @@
       B.gridChart(lg[5], g, 0, g.NR, 'unroll', { dens: 0.85, anchor: [px, py, pz], inner: true, joint: lg[0] });
     });
     // tail: four joints, straight in the bind pose, pointing up and back
-    var T = S.tail, tl = Math.max(0.05, T.len), tb = 0.05, seg = tl / 4, r0 = T.r0, r1 = T.r1;
-    B.joint('t0', 'hip', 0, hh * 0.5, D.zR + 0.05 - D.zb1, T.up, 0, 0);
+    var T = S.tail, tl = Math.max(0.05, T.len), tb = Math.min(0.05, D.rcap + 0.02), seg = tl / 4, r0 = T.r0, r1 = T.r1, tf = T.flat || 1;
+    B.joint('t0', 'hip', 0, T.y != null ? T.y : hh * 0.5, D.zR + Math.min(0.05, D.rcap + 0.02) - D.zb1, T.up, 0, 0);
     for (i = 1; i < 4; i++) B.joint('t' + i, 't' + (i - 1), 0, -seg, 0);
     var TR = [{ y: tb, rx: 0, rz: 0 }], nt = Math.max(6, Math.ceil(tl / 0.035));
     TR.push({ y: tb * 0.9, rx: r0 * 0.7, rz: r0 * 0.7 });
     for (i = 0; i <= nt; i++) { var u = i / nt, rr = T.bushy ? r0 + (r1 - r0) * Math.sin(u * PI * 0.75) : lerp(r0, r1, u); TR.push({ y: -(tl - r1) * u, rx: rr, rz: rr }); }
     var re = TR[TR.length - 1].rx; for (i = 1; i <= 3; i++) { var bt = i / 3 * PI / 2; TR.push({ y: -(tl - r1) - r1 * Math.sin(bt), rx: re * Math.cos(bt), rz: re * Math.cos(bt) }); }
+    TR.forEach(function (r) { r.rz *= tf; });
     var tg = tubeGrid(B.jmap.t0.w, TR, 10, -PI / 2, function (r) { return chainW(['t0', 't1', 't2', 't3'], [seg, seg * 2, seg * 3], [seg * 0.32, seg * 0.32, seg * 0.32], -r.y); });
     var tp = new THREE.Vector3().setFromMatrixPosition(B.jmap.t0.w);
     B.gridChart('tail', tg, 0, tg.NR, 'unroll', { dens: 0.8, anchor: [tp.x, tp.y, tp.z], inner: true, joint: 't0' });
@@ -377,14 +395,14 @@
       var ej = B.joint(s < 0 ? 'earL' : 'earR', 'head', ex - hj[12], ey - hj[13], ez - hj[14], E.type === 'fold' ? 55 : E.type === 'flop' ? 100 : 0, s * 24, -s * E.tilt);
       var R = [], ne = 5, th = Math.max(0.008, E.w * 0.16), j;
       R.push({ y: -0.012, rx: E.w, rz: th });
-      for (j = 0; j <= ne; j++) { var t = j / ne, w = E.type === 'round' || E.type === 'fold' ? E.w * Math.sqrt(Math.max(0, 1 - t * t * 0.96)) : E.w * (Math.pow(1 - t, 0.82) * 0.94 + 0.06); R.push({ y: 0.004 + (E.h - 0.004) * t, rx: w, rz: th * (1 - 0.55 * t) }); }
+      for (j = 0; j <= ne; j++) { var t = j / ne, w = E.type === 'round' || E.type === 'fold' || E.type === 'tab' ? E.w * Math.sqrt(Math.max(0, 1 - t * t * 0.96)) : E.w * (Math.pow(1 - t, 0.82) * 0.94 + 0.06); R.push({ y: 0.004 + (E.h - 0.004) * t, rx: w, rz: th * (1 - 0.55 * t) }); }
       R.push({ y: E.h + th * 0.5, rx: 0, rz: 0 });
       R.forEach(function (r) { r.e = 2; });
       var g = tubeGrid(ej.w, R, 10, 0, function () { return [[ej.name, 1]]; });
       B.gridChart(s < 0 ? 'earL' : 'earR', g, 0, g.NR, 'unroll', { dens: 0.8, anchor: [ex, ey, ez], inner: false, joint: ej.name });
     });
     B.D = D; B.body = G;
-    D.shoulder = S.leg + 2 * hh; D.top = D.shoulder - hh + D.hy + D.hH;
+    D.shoulder = D.leg + 2 * hh; D.top = D.leg + hh + D.hy + D.hH; D.eye = D.leg + hh + D.hy + D.hH * 0.4;
     return D;
   }
 
@@ -658,7 +676,7 @@
     var nj = jl.length, nv = bp.nv;
     if (cv) this.shJ = Object.keys(bp.shift).map(function (n) { return { g: self.joints[n], i: self.ji[n], p: self.joints[n].position.toArray(), sh: bp.shift[n], leg: n.length === 3 && n !== 'hip' && (n.slice(0, 2) === 'sh' || n.slice(0, 2) === 'hp') }; });
     this.cq = jl.map(function () { return new THREE.Quaternion(); }); this.cs = jl.map(function () { return new THREE.Vector3(1, 1, 1); });
-    this.pq = new THREE.Quaternion(); this.ps = new THREE.Vector3(1, 1, 1); this.cm = [0, 0, 0]; this.am = [0, 0, 0]; this.gz = null;
+    this.pq = new THREE.Quaternion(); this.ps = new THREE.Vector3(1, 1, 1); this.cm = [0, 0, 0]; this.am = [0, 0, 0]; this.madd = [0, 0, 0]; this.gz = null;
     this.REL = new Float64Array(nj * 16); this.SM = new Float64Array(nj * 16); this.SMp = new Float64Array(nj * 16); this.ver = 0; this._mdirty = true;
     this.RV = new Float32Array(bp.pos); this.RN = new Float32Array(bp.nrm); this.PV = new Float32Array(nv * 3);
     // one skinned mesh, one material
@@ -677,7 +695,7 @@
     this.an = { sp: 0, psp: 0, acc: 0, turn: 0, loco: 0, shuf: 0, run: 0, air: 0, vy: 0, py: 0, wasAir: 0, launch: 0, bk: 0, p: 0, pv: 0 };
     this._off = new THREE.Vector3(); this.liftY = 0; this.bob = 0; this._minY = 0;
     this.scale = (opt.scale || 1) * (S.scale || 1); this.root.scale.setScalar(this.scale);
-    this._blend(1); this._morph(); this._pose(); this._solve(true); this._lift0 = this.liftY;
+    this._blend(1); this._morph(); this._pose(); this._limbs(); this._solve(true); this._lift0 = this.liftY;
     if (S.coat && !bare) this.applyCoat(COATS[S.coat]);
   }
   var P = Critter.prototype;
@@ -739,7 +757,7 @@
     if (name !== this.pose || amount != null) this.poseAmount = amount != null ? clamp(+amount, 0, 1) : d ? d.amt : 0.5;
     this.pose = name;
   };
-  var TUCK = [[-30, 64, 0], [0, 50, 0], [0, 48, 0], [0, 42, 0]], ZERO3 = [0, 0, 0], ONE3 = [1, 1, 1], CURL3 = [-40, 0, 0], EARF = [68, 0, 0], TINY = [0.02, 0.02, 0.02], NOM = [0, 0, 0];
+  var TUCK = [[-30, 64, 0], [0, 50, 0], [0, 48, 0], [0, 42, 0]], ZERO3 = [0, 0, 0], ONE3 = [1, 1, 1], CURL3 = [-40, 0, 0], EARF = [68, 0, 0], TINY = [1e-4, 1e-4, 1e-4], NOM = [0, 0, 0];
   /* move the current pose towards the target by k (1 = jump). Returns true when it has arrived. */
   P._blend = function (k) {
     var S = this.spec, cv = this.canvas, posed = this.pose !== 'stand' && this.pose !== 'crouch', P0, done = true, i, n, v, sc, T = S.tail, tm = this.tailMode;
@@ -754,7 +772,7 @@
           else if (!v) v = ti === 0 ? ZERO3 : [T.curl, 0, 0];
           if (T.none && ti === 0) sc = TINY;
         } else if (c0 === 'e' && c1 === 'a') { if (posed && this._ear === 'flat') { v = [-95, 0, 0]; sc = TINY; } }
-        else if (P0.leg && n.length === 3 && ((c0 === 's' && c1 === 'h') || (c0 === 'h' && c1 === 'p'))) { var lg = P0.leg[c0 === 's' ? 0 : 1]; if (lg !== 1) { var th = lg < 1 ? lerp(0.3, 1, sstep(0, 0.8, lg)) : 1; sc = [th, Math.max(0.02, lg), th]; } }
+        else if (P0.leg && n.length === 3 && ((c0 === 's' && c1 === 'h') || (c0 === 'h' && c1 === 'p'))) { var lg = P0.leg[c0 === 's' ? 0 : 1]; if (lg <= 0.001) sc = TINY; else if (lg !== 1) { var th = lg < 1 ? lerp(0.3, 1, sstep(0, 0.8, lg)) : 1; sc = [th, lg, th]; } }
       } else {
         if (tm && posed && n.length === 2 && c0 === 't') v = tm === 'tuck' ? TUCK[Math.min(3, +c1)] : tm === 'straight' ? ZERO3 : CURL3;
         if (this._ear === 'flat' && (n === 'earL' || n === 'earR')) v = EARF;
@@ -776,19 +794,23 @@
   /* shape targets are blended on the CPU into the rest mesh, so every mesh that shares this geometry (see-through ghost, answer-check shell) follows */
   P._morph = function () {
     var bp = this.bp, cm = this.cm, am = this.am; if (!bp.morph.length) return;
-    if (Math.abs(cm[0] - am[0]) < 1e-5 && Math.abs(cm[1] - am[1]) < 1e-5 && Math.abs(cm[2] - am[2]) < 1e-5) return;
-    var a = cm[0], b = cm[1], c = cm[2], RV = this.RV, RN = this.RN, p0 = bp.pos, n0 = bp.nrm, d0 = bp.morph[0], d1 = bp.morph[1], d2 = bp.morph[2], n = bp.nv * 3, i;
+    var md = this.madd, a = cm[0] + md[0], b = cm[1] + md[1], c = cm[2] + md[2];
+    if (Math.abs(a - am[0]) < 1e-5 && Math.abs(b - am[1]) < 1e-5 && Math.abs(c - am[2]) < 1e-5) return;
+    var RV = this.RV, RN = this.RN, p0 = bp.pos, n0 = bp.nrm, d0 = bp.morph[0], d1 = bp.morph[1], d2 = bp.morph[2], n = bp.nv * 3, i;
     for (i = 0; i < n; i++) { RV[i] = p0[i] + a * d0.dp[i] + b * d1.dp[i] + c * d2.dp[i]; RN[i] = n0[i] + a * d0.dn[i] + b * d1.dn[i] + c * d2.dn[i]; }
     am[0] = a; am[1] = b; am[2] = c; this._mdirty = true;
     var g = this.skin.geometry; g.attributes.position.needsUpdate = true; g.attributes.normal.needsUpdate = true;
   };
   P._pose = function () {
     for (var i = 0; i < this.jl.length; i++) { var j = this.jl[i]; j.quaternion.copy(j.userData.q0).multiply(this.cq[i]); j.scale.copy(this.cs[i]); }
+    this.pivot.quaternion.copy(this.pq); this.pivot.scale.copy(this.ps); this._off.set(0, 0, 0); this.bob = 0;
+  };
+  P._limbs = function () {
+    var i;
     if (this.canvas) { // limbs ride on the body's shape targets; a drawn-in leg also goes up inside the body, all of it
-      var cm = this.cm, SJ = this.shJ;
+      var cm = this.am, SJ = this.shJ;
       for (i = 0; i < SJ.length; i++) { var q = SJ[i], h = q.sh, g = q.g, k; g.position.set(q.p[0], q.p[1], q.p[2]); for (k = 0; k < 3; k++) if (cm[k] && h[k]) { g.position.x += cm[k] * h[k][0]; g.position.y += cm[k] * h[k][1]; g.position.z += cm[k] * h[k][2]; } if (q.leg) { var sy = this.cs[q.i].y; if (sy < 1) g.position.y += (1 - sy) * this.bp.D.tuck; } }
     }
-    this.pivot.quaternion.copy(this.pq); this.pivot.scale.copy(this.ps); this._off.set(0, 0, 0); this.bob = 0;
   };
   /* bone matrices -> posed vertices (CPU, same maths as the GPU) -> ground contact, sample points */
   P._solve = function (snap) {
@@ -839,9 +861,10 @@
     if (this.frozen && this._still && !busy) return; // a frozen, settled animal costs nothing and moves nothing
     this.t += dt;
     var settled = this._blend(1 - Math.exp(-dt * 9));
-    this._morph(); this._pose();
-    if (this.frozen) { var A = this.an; A.loco = A.shuf = A.run = A.air = A.bk = A.p = A.pv = A.launch = A.acc = 0; A.sp = A.psp = this.speed || 0; A.py = this.root.position.y; this.squash = 0; this._airK = 0; this.lag = this.lagV = 0; }
+    this._pose();
+    if (this.frozen) { this.madd[0] = this.madd[1] = this.madd[2] = 0; var A = this.an; A.loco = A.shuf = A.run = A.air = A.bk = A.p = A.pv = A.launch = A.acc = A.flip = A.airT = 0; A.sp = A.psp = this.speed || 0; A.py = this.root.position.y; this.squash = 0; this._airK = 0; this.lag = this.lagV = 0; }
     else this._animate(dt, r, posed, this._stroke ? 0 : 1);
+    this._morph(); this._limbs();
     var J = this.joints;
     if (this.fidget > 0) { this.fidget -= dt; var fq = Math.sin(this.fidget * 26) * 0.35; if (J.earL) { addRot(J.earL, fq, 0, 0); } addRot(J['t' + (this.tailN - 1)], 0, 0, fq * 1.4); if (cv) addRot(J.body, 0, fq * 0.03, fq * 0.05); } // a tell: a quick twitch
     if (!cv) this.faceSkin.visible = this.eyesOpen > 0.5;
@@ -861,18 +884,24 @@
     A.shuf += ((turning ? 1 : 0) - A.shuf) * e12;
     A.run += ((crouch ? 0 : sstep(vWalk + (vRun - vWalk) * 0.3, vWalk + (vRun - vWalk) * 0.72, sp)) - A.run) * e8;
     var wT = A.loco * (1 - A.run) + A.shuf * 0.45 * (1 - A.loco), wG = A.loco * A.run, sc = this.scale;
-    var fT = clamp(sp / ((0.3 + 1.1 * S.leg) * sc), 2.4, 6.4), fG = clamp(sp / ((0.9 + 2.4 * S.leg) * sc), 2.4, 4.2), f = lerp(fT, fG, A.run);
+    var LG = cv ? this.bp.D.leg : S.leg, fT = clamp(sp / ((0.3 + 1.1 * LG) * sc), 2.4, cv ? 7.5 : 6.4), fG = clamp(sp / ((0.9 + 2.4 * LG) * sc), 2.4, 4.2), f = lerp(fT, fG, A.run), md = this.madd; md[0] = md[1] = md[2] = 0;
     if (!loco && A.shuf > 0.01) f = 5;
     if (A.loco > 0.01 || A.shuf > 0.01) this.walk += dt * PI * 2 * f;
-    var ph = this.walk, hS = Math.sqrt(Math.max(0.05, S.leg) / 0.18), pitch = 0, roll = 0, sx = 1, sy = 1, sz = 1, s, c, e, lift;
+    var ph = this.walk, hS = Math.sqrt(Math.max(0.05, LG) / 0.18), pitch = 0, roll = 0, sx = 1, sy = 1, sz = 1, s, c, e, lift;
     var hasEar = !!J.earL, flop = S.ear && S.ear.type === 'flop';
     if (wT > 0.003) { // trot: diagonal pairs, quick and bouncy, hips wiggle, tail whips
       var AT = (crouch ? 0.34 : 0.58) * (loco ? clamp(0.45 + sp / (vWalk * 1.5), 0.5, 1) : 0.6);
       var seq = [['shL', 'elL', 0], ['hpR', 'knR', 0.3], ['shR', 'elR', PI], ['hpL', 'knL', PI + 0.3]];
       for (i = 0; i < 4; i++) { s = Math.sin(ph + seq[i][2]); c = Math.cos(ph + seq[i][2]); lift = Math.max(0, c); addRot(J[seq[i][0]], -s * AT * wT, 0, 0); addRot(J[seq[i][1]], lift * AT * 1.5 * wT, 0, 0); J[seq[i][0]].scale.y *= 1 - lift * 0.15 * wT; }
       this.bob += Math.abs(Math.sin(ph)) * 0.03 * hS * wT * (crouch ? 0.4 : 1);
-      addRot(J.body, Math.sin(ph * 2) * 0.03 * wT, 0, Math.sin(ph) * 0.06 * wT);
-      addRot(J.hip, 0, Math.sin(ph) * 0.17 * wT, -Math.cos(ph) * 0.1 * wT); addRot(J.chest, 0, -Math.sin(ph) * 0.09 * wT, 0);
+      if (cv) { // a mat scuttling: the whole flat body wobbles from side to side and a ripple runs along it
+        addRot(J.body, Math.sin(ph * 2) * 0.03 * wT, 0, Math.sin(ph) * 0.11 * wT);
+        addRot(J.hip, Math.sin(ph * 2 + 1.6) * 0.1 * wT, Math.sin(ph) * 0.26 * wT, -Math.cos(ph) * 0.12 * wT); addRot(J.chest, Math.sin(ph * 2) * 0.1 * wT, -Math.sin(ph) * 0.2 * wT, Math.cos(ph) * 0.1 * wT);
+        addRot(J.neck, 0, Math.sin(ph) * 0.12 * wT, 0);
+      } else {
+        addRot(J.body, Math.sin(ph * 2) * 0.03 * wT, 0, Math.sin(ph) * 0.06 * wT);
+        addRot(J.hip, 0, Math.sin(ph) * 0.17 * wT, -Math.cos(ph) * 0.1 * wT); addRot(J.chest, 0, -Math.sin(ph) * 0.09 * wT, 0);
+      }
       addRot(J.head, Math.sin(ph * 2 + 0.6) * 0.06 * wT, Math.sin(ph) * 0.05 * wT, -Math.sin(ph) * 0.06 * wT);
       for (k = 0; k < TN; k++) addRot(J['t' + k], 0, 0, Math.sin(ph - 0.9 * k) * (0.14 + 0.07 * k) * wT);
       if (hasEar) { e = Math.sin(ph * 2 + 1) * 0.1 * wT; if (flop) { addRot(J.earL, 0, 0, -Math.abs(e) * 2); addRot(J.earR, 0, 0, Math.abs(e) * 2); } else { addRot(J.earL, e, 0, 0); addRot(J.earR, e, 0, 0); } }
@@ -881,18 +910,20 @@
       var ext = Math.cos(ph), fo = [['shL', 'elL', 0.2], ['shR', 'elR', -0.2]], hi = [['hpL', 'knL', 0.75], ['hpR', 'knR', 0.4]];
       for (i = 0; i < 2; i++) { e = Math.cos(ph + fo[i][2]); c = Math.max(0, -e); addRot(J[fo[i][0]], (-(e > 0 ? e * 1.05 : e * 0.6) - 0.06) * wG, 0, 0); addRot(J[fo[i][1]], c * 0.55 * wG, 0, 0); J[fo[i][0]].scale.y *= 1 - c * 0.26 * wG; }
       for (i = 0; i < 2; i++) { e = Math.cos(ph + hi[i][2]); c = Math.max(0, -e); addRot(J[hi[i][0]], ((e > 0 ? e * 1.05 : e * 0.7) + 0.04) * wG, 0, 0); addRot(J[hi[i][1]], c * 0.6 * wG, 0, 0); J[hi[i][0]].scale.y *= 1 - c * 0.26 * wG; }
-      addRot(J.chest, -ext * 0.24 * wG, 0, 0); addRot(J.hip, ext * 0.28 * wG, 0, 0); addRot(J.neck, ext * 0.16 * wG, 0, 0); addRot(J.head, ext * 0.08 * wG, 0, 0);
+      var gk = cv ? 0.45 : 1; if (cv) md[2] = Math.max(0, -ext) * 0.62 * wG; // the mat humps up like an inch-worm, then slaps down flat and long
+      addRot(J.chest, -ext * 0.24 * gk * wG, 0, 0); addRot(J.hip, ext * 0.28 * gk * wG, 0, 0); addRot(J.neck, ext * 0.16 * wG, 0, 0); addRot(J.head, ext * 0.08 * wG, 0, 0);
+      if (cv) roll += Math.sin(ph) * 0.06 * wG;
       pitch += (Math.sin(ph + 0.9) * 0.1 - 0.03) * wG;
       sx *= 1 - ext * 0.04 * wG; sy *= 1 - ext * 0.09 * wG; sz *= 1 + ext * 0.14 * wG;
-      this.bob += (0.5 + 0.5 * Math.cos(ph - 0.25)) * 0.13 * hS * wG; // the stretched-out moment is the top of the bound
+      this.bob += (0.5 + 0.5 * Math.cos(ph - 0.25)) * (cv ? 0.05 : 0.13 * hS) * wG; // the stretched-out moment is the top of the bound
       addRot(J.t0, (90 - S.tail.up) * D2R * (cv ? 0.5 : 0.75) * wG, 0, 0);
       for (k = 1; k < TN; k++) addRot(J['t' + k], Math.sin(ph - 0.7 * k - 1) * 0.22 * wG - (cv ? S.tail.curl * D2R * 0.8 * wG : 0), 0, 0);
       if (hasEar) { if (flop) { e = (0.55 + 0.45 * Math.sin(ph + 1)) * 1.0 * wG; addRot(J.earL, 0, 0, -e); addRot(J.earR, 0, 0, e); } else { e = (-0.55 + Math.sin(ph * 2) * 0.12) * wG; addRot(J.earL, e, 0, 0); addRot(J.earR, e, 0, 0); } }
     }
     if (this.tongue) { var tg = this.tongue, tw = Math.sin(ph * 0.5); tg.scale.set(1, 1, 1 + 1.4 * wG); tg.rotation.set(0.5 - 0.25 * wG, tw * 0.9 * wG, Math.sin(ph) * 0.3 * wG); tg.position.x = this.tongue0.x + tw * S.muzzleR * 0.45 * wG; }
     if (!posed) { // lean into turns, the spine bends into them, the tail lags behind
-      roll += clamp(-A.turn * 0.05 * (0.25 + Math.min(1.6, A.sp / 2.2)), -0.5, 0.5) * (0.2 + 0.8 * A.loco);
-      var yb = clamp(A.turn * 0.045, -0.3, 0.3) * (0.4 + 0.6 * A.loco);
+      roll += clamp(-A.turn * 0.05 * (0.25 + Math.min(1.6, A.sp / 2.2)), -0.5, 0.5) * (0.2 + 0.8 * A.loco) * (cv ? 0.4 : 1);   // a mat turns by pivoting flat
+      var yb = clamp(A.turn * (cv ? 0.075 : 0.045), -0.45, 0.45) * (0.4 + 0.6 * A.loco);
       addRot(J.chest, 0, yb, 0); addRot(J.hip, 0, -yb * 0.9, 0); addRot(J.head, 0, yb * 1.1, 0);
     }
     var lagT = posed ? 0 : clamp(-A.turn * 0.13, -0.9, 0.9);
@@ -907,7 +938,12 @@
     var yw = this.root.position.y, vy = dt > 0 ? clamp((yw - A.py) / dt, -12, 12) : 0; A.py = yw; var inAir = this.air > 0.02 ? 1 : 0; if (!inAir) vy = 0;
     A.vy += (vy - A.vy) * (1 - Math.exp(-dt * 20)); if (inAir && !A.wasAir) A.launch = 1; A.wasAir = inAir;
     A.air += (inAir - A.air) * (1 - Math.exp(-dt * 16));
-    if (A.air > 0.003) {
+    if (cv) { // a jumping mat is a tossed pancake: it flips in the air and settles flat when it lands
+      if (inAir) { A.airT = (A.airT || 0) + dt; if (A.airT > 0.07) A.flip = (A.flip || 0) + dt * PI * 2 / 0.85; }
+      else { A.airT = 0; if (A.flip) { var ft = Math.round(A.flip / (PI * 2)) * PI * 2; A.flip += (ft - A.flip) * (1 - Math.exp(-dt * 18)); if (Math.abs(ft - A.flip) < 0.002) A.flip = 0; } }
+      if (A.flip) pitch -= A.flip;
+      if (A.air > 0.003) { var uu = clamp(A.vy / (2.5 * Math.sqrt(sc)), -1, 1); sz *= 1 + 0.1 * Math.max(0, uu) * A.air; sy *= 1 - 0.1 * Math.max(0, uu) * A.air; }
+    } else if (A.air > 0.003) {
       var u = clamp(A.vy / (2.5 * Math.sqrt(sc)), -1, 1), up = Math.max(0, u), dn = Math.max(0, -u), a = A.air;
       addRot(J.shL, (-1.0 * up - 0.5 * dn) * a, 0, 0); addRot(J.shR, (-1.0 * up - 0.5 * dn) * a, 0, 0); addRot(J.elL, 0.5 * dn * a, 0, 0); addRot(J.elR, 0.5 * dn * a, 0, 0);
       addRot(J.hpL, (0.85 * up - 0.5 * dn) * a, 0, 0); addRot(J.hpR, (0.85 * up - 0.5 * dn) * a, 0, 0); addRot(J.knL, 0.7 * dn * a, 0, 0); addRot(J.knR, 0.7 * dn * a, 0, 0);
@@ -915,7 +951,7 @@
       addRot(J.t0, -0.5 * a, 0, 0);
     }
     if (A.launch > 0) { A.launch = Math.max(0, A.launch - dt / 0.24); e = 1 - A.launch; var q0 = e < 0.3 ? -Math.sin(e / 0.3 * PI) * 0.2 : Math.sin((e - 0.3) / 0.7 * PI) * 0.14; sy *= 1 + q0; sx *= 1 - q0 * 0.5; sz *= 1 - q0 * 0.5; }
-    if (this.squash > 0) { this.squash = Math.max(0, this.squash - dt * 5.5); var q2 = Math.sin(this.squash * PI) * 0.26; sy *= 1 - q2; sx *= 1 + q2 * 0.55; sz *= 1 + q2 * 0.55; }
+    if (this.squash > 0) { this.squash = Math.max(0, this.squash - dt * 5.5); var q2 = Math.sin(this.squash * PI) * (cv ? 0.45 : 0.26); sy *= 1 - q2; sx *= 1 + q2 * 0.45; sz *= 1 + q2 * 0.45; } // splat
     if (this._emote && live) { roll += Math.sin(t * 3.4) * 0.95; addRot(J.shL, Math.sin(t * 6.8) * 0.3, 0, 0); addRot(J.shR, -Math.sin(t * 6.8) * 0.3, 0, 0); addRot(J.hpL, -Math.sin(t * 6.8) * 0.25, 0, 0); addRot(J.hpR, Math.sin(t * 6.8) * 0.25, 0, 0); }
     if (this.tilt) addRot(J.head, 0, 0, this.tilt);
     if (live) { // idle life: only ever on a body that is not frozen
@@ -928,7 +964,7 @@
       for (k = 0; k < TN; k++) addRot(J['t' + k], 0, 0, tw2 * (0.5 + k * 0.35) * (dog && !this.wag ? 0.5 : 1));
       this.twitchT -= dt; if (this.twitchT < 0) { this.twitchT = 2 + r() * 5; this.twitch = 1; this.twSide = r() < 0.5 ? 'earL' : 'earR'; }
       this.twitch = Math.max(0, (this.twitch || 0) - dt * 5);
-      if (this.twitch > 0 && J[this.twSide]) addRot(J[this.twSide], Math.sin(this.twitch * 12) * 0.3, 0, 0);
+      if (this.twitch > 0 && J[this.twSide]) { addRot(J[this.twSide], Math.sin(this.twitch * 12) * 0.3, 0, 0); if (cv && !moving) addRot(J[this.twSide === 'earL' ? 'hpR' : 'shL'], Math.sin(this.twitch * 12) * 0.5, 0, 0); } // an ear, and a corner of the mat
       this.blinkT -= dt; if (this.blinkT < 0) this.blinkT = 2.2 + r() * 4;
       var bl = this.blinkT < 0.14 ? 0.12 : 1;
       this.lookT -= dt; if (this.lookT < 0) { this.lookT = 1.5 + r() * 3.5; this.lookTo = [(r() - 0.5) * 0.7, (r() - 0.5) * 0.3]; }
@@ -1107,7 +1143,7 @@
     return { min: [(mn[0] + po.x) * s, (mn[1] + po.y) * s, (mn[2] + po.z) * s], max: [(mx[0] + po.x) * s, (mx[1] + po.y) * s, (mx[2] + po.z) * s], size: [(mx[0] - mn[0]) * s, (mx[1] - mn[1]) * s, (mx[2] - mn[2]) * s] };
   };
   /* jump straight to the pose (no blending): for spawning already-posed bodies, icons and tests */
-  P.settle = function () { this._blend(1); this._morph(); this._pose(); this._solve(true); };
+  P.settle = function () { this.madd[0] = this.madd[1] = this.madd[2] = 0; this._blend(1); this._morph(); this._pose(); this._limbs(); this._solve(true); };
 
   /* ---------- dog coats (drawn into the same atlas the cats paint on) ---------- */
   function h3(x, y, z) { var s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return s - Math.floor(s); }

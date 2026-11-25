@@ -4,9 +4,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 POSE_ROW = r"""
 var names = SG.POSE_PAGES[__PG__], S = PV.size(), cols = 9, rows = names.length, w = S[0] / cols, h = S[1] / rows, out = {};
-var cams = [[1.5, 0.75, 2.0], [3.0, 0.3, 0.0], [0.0, 3.2, 0.3]], amts = [0, 0.5, 1];
+var cams = [[1.5, 0.95, 2.0], [3.0, 0.3, 0.0], [0.0, 3.2, 0.3]], amts = [0, 0.5, 1];
 names.forEach(function (n, r) { amts.forEach(function (a, ai) { PV.clear(); var b = n === 'drape' ? [6, 0.63, 0.24] : [0, 0, 0], c = PV.spawn('mochi', { pose: n, amount: a, x: b[0], y: b[1], z: b[2] }); out[n + '@' + a] = c.measure().size.map(function (v) { return +v.toFixed(3); });   // drape is shown on the table edge it is meant for
-  cams.forEach(function (cm, ci) { PV.look([cm[0] + b[0], cm[1] + b[1], cm[2] + b[2]], [b[0], 0.2 + b[1] * 0.75, b[2]], ci == 2 ? 20 : 19); PV.view((ai * 3 + ci) * w, r * h, w, h); }); }); });
+  cams.forEach(function (cm, ci) { PV.look([cm[0] + b[0], cm[1] + b[1], cm[2] + b[2]], [b[0], 0.14 + b[1] * 0.75, b[2]], ci == 2 ? 20 : 19); PV.view((ai * 3 + ci) * w, r * h, w, h); }); }); });
 names.forEach(function (n, r) { PV.label(4, r * h + 4, SG.POSE_INFO[n].label + ' ' + n + '  (' + SG.POSE_INFO[n].hint + ')'); });
 ['amount 0', 'amount 0.5', 'amount 1'].forEach(function (t, i) { PV.label(i * 3 * w + w * 1.2, S[1] - 22, t + ':  3/4 | side | top'); });
 return out;
