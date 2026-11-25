@@ -35,7 +35,7 @@ public static class CiBuild
             var create = assetType.GetMethod("Create", new[] { Type.GetType("UnityEngine.Rendering.Universal.ScriptableRendererData, " + asm, true) });
             var asset = (RenderPipelineAsset)create.Invoke(null, new object[] { data });
             AssetDatabase.CreateAsset(asset, "Assets/Settings/URP.asset");
-            foreach (var kv in new (string, object)[] { ("shadowDistance", 60f), ("msaaSampleCount", 4), ("shadowCascadeCount", 2), ("mainLightShadowmapResolution", 2048), ("supportsSoftShadows", true) })
+            foreach (var kv in new (string, object)[] { ("shadowDistance", 60f), ("msaaSampleCount", 4), ("supportsHDR", true), ("shadowCascadeCount", 2), ("mainLightShadowmapResolution", 2048), ("supportsSoftShadows", true) })
             {
                 try { var pi = assetType.GetProperty(kv.Item1, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance); if (pi != null && pi.GetSetMethod(true) != null) pi.SetValue(asset, kv.Item2); else Debug.Log("CiBuild: no setter for " + kv.Item1); }
                 catch (Exception e) { Debug.Log("CiBuild: could not set " + kv.Item1 + ": " + e.Message); }
@@ -98,10 +98,10 @@ public static class CiBuild
             var g = new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();
             var cam = g.EditorSetup(pass == 1);
             string tag = pass == 0 ? "hider" : "hunter";
-            g.EditorCam(new Vector3(0f, 0.3f, -3f), 0f, 48f, 26f); Snap(cam, rt, tag + "_1_wide");
-            g.EditorCam(new Vector3(-4f, 0.3f, -4.5f), 20f, 35f, 8f); Snap(cam, rt, tag + "_2_belt");
-            g.EditorCam(new Vector3(0f, 0.3f, -7.6f), 0f, 38f, 4.5f); Snap(cam, rt, tag + "_3_close");
-            g.EditorCam(new Vector3(0f, 4f, 0f), 180f, 12f, 30f); Snap(cam, rt, tag + "_4_from_back");
+            g.EditorCam(new Vector3(0f, 0.3f, -1f), 0f, 40f, 24f); Snap(cam, rt, tag + "_1_wide");
+            g.EditorCam(new Vector3(-4f, 0.3f, -4.5f), 20f, 32f, 8f); Snap(cam, rt, tag + "_2_belt");
+            g.EditorCam(new Vector3(0f, 0.3f, -7.6f), 0f, 30f, 5f); Snap(cam, rt, tag + "_3_close");
+            g.EditorCam(new Vector3(2f, 1.5f, 2f), -25f, 18f, 13f); Snap(cam, rt, tag + "_4_low");
         }
     }
 

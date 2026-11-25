@@ -52,7 +52,7 @@ namespace DontEatSushi
         [System.NonSerialized] public MeshRenderer playerRenderer;
         [System.NonSerialized] public bool playerAttached, playerMoving;
         [System.NonSerialized] public float maxSuspicion;
-        [System.NonSerialized] public Color bgColor = new Color(0.17f, 0.12f, 0.09f);
+        [System.NonSerialized] public Color bgColor = new Color(0.30f, 0.21f, 0.16f);
 
         Transform root;
         Camera cam;
@@ -286,8 +286,6 @@ namespace DontEatSushi
             maxSuspicion = 0f; survived = 0f; stroke = false;
             phase = Phase.Prep; timer = prepTime;
 
-            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.46f, 0.40f, 0.34f);
 
             // 燈
             var sun = new GameObject("KeyLight");
@@ -296,8 +294,8 @@ namespace DontEatSushi
             var sl = sun.AddComponent<Light>();
             sl.type = LightType.Directional;
             sl.color = new Color(1f, 0.93f, 0.82f);
-            sl.intensity = 1.15f;
-            sl.shadows = LightShadows.Hard;
+            sl.intensity = 1.35f; sl.shadowStrength = 0.55f;
+            sl.shadows = LightShadows.Soft;
 
             var wood = WoodTexture();
             var counterMat = Mats.Lit(Color.white, 0.35f, wood);
@@ -315,38 +313,7 @@ namespace DontEatSushi
             Prim(PrimitiveType.Cube, "BeltRight", new Vector3(A, 0.05f, 0f), new Vector3(3.2f, 0.1f, 2f * B - 3.2f), beltMat, true);
             Prim(PrimitiveType.Cube, "Island", new Vector3(0f, 0.25f, 0f), new Vector3(2f * A - 3.6f, 0.5f, 2f * B - 3.6f), islandMat, true);
 
-            // 背景
-            Prim(PrimitiveType.Cube, "Floor", new Vector3(0f, -7f, 0f), new Vector3(140f, 0.2f, 140f), Mats.Lit(new Color(0.22f, 0.16f, 0.12f), 0.1f), true);
-            Prim(PrimitiveType.Cube, "BackWall", new Vector3(0f, 5f, 17f), new Vector3(70f, 26f, 0.5f), Mats.Lit(new Color(0.86f, 0.78f, 0.64f), 0.05f), true);
-            for (int i = -3; i <= 3; i++)
-                Prim(PrimitiveType.Cube, "Beam", new Vector3(i * 9f, 5f, 16.6f), new Vector3(0.5f, 26f, 0.4f), darkWood, true);
-            Prim(PrimitiveType.Cube, "BeamTop", new Vector3(0f, 13.2f, 16.6f), new Vector3(70f, 0.6f, 0.5f), darkWood, true);
-            var noren = Mats.Lit(new Color(0.13f, 0.20f, 0.42f), 0.05f);
-            for (int i = -2; i <= 2; i++)
-                Prim(PrimitiveType.Cube, "Noren", new Vector3(i * 5.2f, 11f, 16.2f), new Vector3(4.9f, 3.6f, 0.08f), noren, true);
-            var lanternMat = Mats.Unlit(new Color(1f, 0.55f, 0.25f));
-            for (int i = -1; i <= 1; i++)
-            {
-                var lp = new Vector3(i * 10f, 8.5f, 7f);
-                Prim(PrimitiveType.Sphere, "Lantern", lp, new Vector3(1.6f, 2.1f, 1.6f), lanternMat, false);
-                var lg = new GameObject("LanternLight");
-                lg.transform.SetParent(root, false);
-                lg.transform.position = lp + Vector3.down * 1.2f;
-                var l = lg.AddComponent<Light>();
-                l.type = LightType.Point;
-                l.color = new Color(1f, 0.72f, 0.42f);
-                l.range = 22f;
-                l.intensity = 2.2f;
-            }
-
-            // 桌上小物
-            var soy = Mats.Lit(new Color(0.10f, 0.05f, 0.04f), 0.8f);
-            Prim(PrimitiveType.Cylinder, "SoyBottle", new Vector3(-6f, 0.7f, -8.6f), new Vector3(0.7f, 0.7f, 0.7f), soy, true);
-            Prim(PrimitiveType.Cylinder, "SoyCap", new Vector3(-6f, 1.5f, -8.6f), new Vector3(0.4f, 0.12f, 0.4f), Mats.Lit(new Color(0.78f, 0.12f, 0.10f), 0.5f), true);
-            Prim(PrimitiveType.Cylinder, "TeaCup", new Vector3(5.5f, 0.45f, -8.4f), new Vector3(0.9f, 0.45f, 0.9f), Mats.Lit(new Color(0.36f, 0.50f, 0.34f), 0.4f), true);
-            Prim(PrimitiveType.Cube, "ChopstickBox", new Vector3(9.5f, 0.3f, -8.6f), new Vector3(2.4f, 0.6f, 0.9f), Mats.Lit(new Color(0.12f, 0.10f, 0.10f), 0.6f), true);
-            Prim(PrimitiveType.Cube, "GingerBox", new Vector3(-10f, 0.35f, -8.5f), new Vector3(1.2f, 0.7f, 1.2f), Mats.Lit(new Color(0.75f, 0.14f, 0.12f), 0.6f), true);
-            Prim(PrimitiveType.Sphere, "Wasabi", new Vector3(-2.5f, 0.2f, -8.2f), new Vector3(0.5f, 0.4f, 0.5f), Mats.Lit(new Color(0.55f, 0.72f, 0.30f), 0.15f), true);
+            Dressing.Build(this, root);
 
             // 盤子和壽司
             SushiKind[] kinds = { SushiKind.Salmon, SushiKind.CucumberRoll, SushiKind.Tuna, SushiKind.Tamago, SushiKind.TunaRoll, SushiKind.Shrimp };
@@ -370,13 +337,15 @@ namespace DontEatSushi
                 p.tr.SetPositionAndRotation(pos, Quaternion.Euler(0f, yaw, 0f));
                 var disc = Prim(PrimitiveType.Cylinder, "Disc", Vector3.zero, new Vector3(2.8f, 0.06f, 2.8f), Mats.Lit(plateCols[i % plateCols.Length], 0.6f), true, p.tr);
                 disc.transform.localPosition = new Vector3(0f, 0.06f, 0f);
+                var inner = Prim(PrimitiveType.Cylinder, "DiscInner", Vector3.zero, new Vector3(2.25f, 0.062f, 2.25f), Mats.Lit(Color.Lerp(plateCols[i % plateCols.Length], Color.white, 0.8f), 0.7f), false, p.tr);
+                inner.transform.localPosition = new Vector3(0f, 0.066f, 0f);
                 bool oneEmpty = (i == 0 || i == 1 || i == 3 || i == 4 || i == 8 || i == 10);
                 p.slots = new Slot[2];
                 for (int s = 0; s < 2; s++)
                 {
                     var sg = new GameObject("Slot" + s);
                     sg.transform.SetParent(p.tr, false);
-                    sg.transform.localPosition = new Vector3(s == 0 ? -0.5f : 0.5f, 0.12f, 0f);
+                    sg.transform.localPosition = new Vector3(s == 0 ? -0.5f : 0.5f, 0.13f, 0f);
                     sg.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
                     var slot = new Slot { tr = sg.transform, plate = p };
                     if (s == 1 && oneEmpty)
@@ -408,6 +377,7 @@ namespace DontEatSushi
             cam.farClipPlane = 200f;
             cg.AddComponent<AudioListener>();
             Sfx.Init(cg);
+            Look.Apply(cam, root);
 
             SpawnPlayer(new Vector3(0f, 0f, -7.6f));
             camTarget = player.position;
