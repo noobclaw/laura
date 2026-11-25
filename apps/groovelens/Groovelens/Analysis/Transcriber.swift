@@ -327,10 +327,10 @@ enum ChartBuilder {
         // Ties (e.g. kick on 1 and 3) go to the earliest phase: a later phase would push the
         // first beats before bar 0 and drop their hits.
         func better(_ a: Float, _ b: Float) -> Bool { a > b + max(abs(b), 1e-3) * 0.02 }
-        var best4 = (score: -Float.infinity, phase: 0)
-        for p in 0..<4 { let s = score(bpb: 4, phase: p); if better(s, best4.score) { best4 = (s, p) } }
-        var best3 = (score: -Float.infinity, phase: 0)
-        for p in 0..<3 { let s = score(bpb: 3, phase: p); if better(s, best3.score) { best3 = (s, p) } }
+        var best4 = (score: score(bpb: 4, phase: 0), phase: 0)
+        for p in 1..<4 { let s = score(bpb: 4, phase: p); if better(s, best4.score) { best4 = (s, p) } }
+        var best3 = (score: score(bpb: 3, phase: 0), phase: 0)
+        for p in 1..<3 { let s = score(bpb: 3, phase: p); if better(s, best3.score) { best3 = (s, p) } }
         if best3.score > best4.score * 1.3 && best3.score > 0.1 { return (3, best3.phase) }
         return (4, best4.phase)
     }
