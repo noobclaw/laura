@@ -110,7 +110,7 @@
   function fitBody(e) {
     var c = e.c, pose = c.pose, amt = c.poseAmount; c.setPose('stand'); c.rearUp = 0; if (c.settle) c.settle(); c.root.updateMatrixWorld(true);
     var ms = c.measure().size; e.rad = Math.max(0.09, ms[0] * 0.46); e.halfLen = Math.max(e.rad, ms[2] * 0.46); e.h = Math.max(0.1, ms[1] * 0.9); e.step = RULES.move.stepUp;
-    if (e.team === 'dog' && c.anchor) { var a = c.anchor('eye', V()); e.eyeLo = Math.max(0.12, a.y - e.y); e.eyeF = Math.hypot(a.x - e.x, a.z - e.z); c.rearUp = 1; c.settle(); c.root.updateMatrixWorld(true); a = c.anchor('eye', a); e.eyeHi = Math.max(e.eyeLo, a.y - e.y); e.eyeFHi = Math.hypot(a.x - e.x, a.z - e.z); c.rearUp = 0; e.rear = 0; e.eyeH0 = e.eyeH = e.eyeLo; }
+    if (e.team === 'dog' && c.anchor) { var a = c.anchor('eye', V()); e.eyeLo = Math.max(0.12, a.y - e.y); e.eyeF = Math.hypot(a.x - e.x, a.z - e.z); c.rearUp = 1; c.settle(); c.root.updateMatrixWorld(true); a = c.anchor('eye', a); e.eyeHi = Math.max(e.eyeLo, a.y - e.y); e.eyeFHi = Math.hypot(a.x - e.x, a.z - e.z); c.rearUp = 0; e.rear = 0; if (!G.settings.breedEyes) { e.eyeLo = RULES.dog.eyeHeightDefault; e.eyeHi = RULES.dog.eyeHeightRear; } /* breeds are cosmetic: every dog looks from the same heights unless the host turns breed eye heights on */ e.eyeH0 = e.eyeH = e.eyeLo; }
     c.setPose(pose, amt); if (c.settle) c.settle();
   }
   var _bx = V(), _by = V(), _bz = V(), _bm = new THREE.Matrix4();
@@ -979,7 +979,7 @@
       roundExtras(dt);
     }
     // physics + animation for everyone
-    G.ents.forEach(function (e) { if (e.team !== 'dog' || e.eyeLo == null) return; e.rear += ((e.rearT || 0) - e.rear) * Math.min(1, dt * 9); if (Math.abs(e.rear - (e.rearT || 0)) < 0.004) e.rear = e.rearT || 0; e.c.rearUp = e.rear; var eh = e.eyeLo + (e.eyeHi - e.eyeLo) * e.rear; e.eyeH0 = eh; e.eyeH += ((e.crouch ? Math.max(0.1, eh * 0.8) : eh) - e.eyeH) * Math.min(1, dt * 14); });
+    G.ents.forEach(function (e) { if (e.team !== 'dog' || e.eyeLo == null) return; e.rear += ((e.rearT || 0) - e.rear) * Math.min(1, dt * 9); if (Math.abs(e.rear - (e.rearT || 0)) < 0.004) e.rear = e.rearT || 0; e.c.rearUp = e.rear; var eh = e.eyeLo + (e.eyeHi - e.eyeLo) * e.rear; e.eyeH0 = eh; e.eyeH += ((e.crouch ? Math.max(0.09, eh * 0.65) : eh) - e.eyeH) * Math.min(1, dt * 14); });
     var bumpers = [];
     for (var i = 0; i < G.ents.length; i++) {
       var e = G.ents[i];

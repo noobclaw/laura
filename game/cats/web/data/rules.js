@@ -59,6 +59,7 @@ window.SG_RULES = {
   "range": 25,
   "lowAmmoWarn": 1,
   "eyeHeightDefault": 0.2,
+  "eyeHeightRear": 0.47,
   "crouchEye": 0.55,
   "crouchSpeed": 0.5,
   "jumpHeight": 0.55,
