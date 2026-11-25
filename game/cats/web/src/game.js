@@ -568,11 +568,11 @@
       var WPS = room.route, w = WPS[ai.wp % WPS.length];
       if (ai.pathWp !== ai.wp || !ai.path) { ai.path = navPath(d.x, d.z, w[0], w[1]); ai.pathWp = ai.wp; ai.pi = 0; if (!ai.path) { ai.wp += 1; ai.path = null; return; } } // nowhere to stand there (upstairs, inside something): next goal
       var pt = ai.path[Math.min(ai.pi, ai.path.length - 1)]; tx = pt[0]; tz = pt[1];
-      if (Math.hypot(tx - d.x, tz - d.z) < 0.3) { ai.pi++; if (ai.pi >= ai.path.length) { ai.path = null; if (rnd() < 0.04 && ai.wp > 3) { ai.wp -= 2; bus.emit('say', { id: d.id, text: '再看一次' }); } else ai.wp += 1; ai.wait = rnd() < 0.3 ? 0.6 + rnd() * 0.9 : 0; ai.look = (rnd() - 0.5) * 2.4; } } }
+      if (Math.hypot(tx - d.x, tz - d.z) < 0.36) { ai.pi++; if (ai.pi >= ai.path.length) { ai.path = null; if (rnd() < 0.04 && ai.wp > 3) { ai.wp -= 2; bus.emit('say', { id: d.id, text: '再看一次' }); } else ai.wp += 1; ai.wait = rnd() < 0.3 ? 0.6 + rnd() * 0.9 : 0; ai.look = (rnd() - 0.5) * 2.4; } } }
     if (ai.wait > 0) { ai.wait -= dt; d.speed = 0; d.yaw += Math.sin(G.simT * 1.4) * dt * 0.9 + ai.look * dt * 0.4; return; }
-    var want = Math.atan2(tx - d.x, tz - d.z); d.yaw = turn(d.yaw, want, dt * 5);
-    var sp = RULES.bot.patrolSpeed, px = d.x, pz = d.z; d.pitch = 0.12 + 0.34 * Math.sin(G.simT * 0.8 + d.x); /* sweeps its gaze up and down while walking: shelves, beams and ceilings get looked at too */ moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
-    d.speed = Math.hypot(d.x - px, d.z - pz) / dt; if (d.speed < 0.2) { ai.stuck = (ai.stuck || 0) + dt; if (ai.stuck > 0.9) { if (ai.heard) ai.heard = null; else if (ai.path && !ai.repath) { ai.path = null; ai.repath = 1; } else { ai.wp++; ai.path = null; ai.repath = 0; } ai.stuck = 0; } } else { ai.stuck = 0; if (d.speed > 1) ai.repath = 0; }
+    var want = Math.atan2(tx - d.x, tz - d.z); d.yaw = turn(d.yaw, want, dt * 9); var dA = want - d.yaw; while (dA > Math.PI) dA -= 2 * Math.PI; while (dA < -Math.PI) dA += 2 * Math.PI;
+    var sp = RULES.bot.patrolSpeed * Math.max(0.15, Math.cos(dA)), px = d.x, pz = d.z; /* slows down to turn, so it never circles a point it cannot hit */ d.pitch = 0.12 + 0.34 * Math.sin(G.simT * 0.8 + d.x); /* sweeps its gaze up and down while walking: shelves, beams and ceilings get looked at too */ moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
+    d.speed = Math.hypot(d.x - px, d.z - pz) / dt; if (d.speed < 0.12) { ai.stuck = (ai.stuck || 0) + dt; if (ai.stuck > 0.9) { if (ai.heard) ai.heard = null; else if (ai.path && !ai.repath) { ai.path = null; ai.repath = 1; } else { ai.wp++; ai.path = null; ai.repath = 0; } ai.stuck = 0; } } else { ai.stuck = 0; if (d.speed > 1) ai.repath = 0; }
   }
   function turn(a, b, k) { var d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * Math.min(1, k); }
 
