@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- 貓躲狗找 — tiny studio for looking at the animals without booting the game.
+     file://…/tools/critter_preview.html            new critter.js
+     file://…/tools/critter_preview.html?old=1      the previous critter (tools/critter_old.js), for side-by-side shots
+     Driven from tools/critter_shots.py through window.PV. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #20242a; overflow: hidden; font-family: sans-serif; }
+  #gl { display: block; }
+  .lab { position: absolute; color: #fff; font-size: 13px; padding: 2px 6px; background: rgba(0, 0, 0, 0.55); border-radius: 3px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="labs"></div>
+<script src="../vendor/three.min.js"></script>
+<script src="../data/rules.js"></script>
+<script src="../src/render/tex.js"></script>
+<script src="../src/render/geo.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), s = document.createElement('script');
+  s.src = q.get('old') ? 'critter_old.js' : '../src/render/critter.js';
+  s.onload = start; s.onerror = function () { window.__error = 'critter script failed to load'; };
+  window.addEventListener('error', function (e) { window.__error = String(e.message) + ' @' + e.lineno; });
+  document.body.appendChild(s);
+  function start() {
+    var SG = window.SG, canvas = document.getElementById('gl'), W = innerWidth, H = innerHeight;
+    var R = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, preserveDrawingBuffer: true });
+    R.setPixelRatio(1); R.setSize(W, H, false); R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+    R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 0.92; R.outputColorSpace = THREE.SRGBColorSpace;
+    var scene = new THREE.Scene(); scene.background = new THREE.Color(0x8d939b);
+    // same kind of soft procedural environment as the game uses for glossy paint
+    var es = new THREE.Scene();
+    es.add(new THREE.Mesh(new THREE.SphereGeometry(10, 24, 12), new THREE.ShaderMaterial({ side: THREE.BackSide,
+      vertexShader: 'varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
+      fragmentShader: 'varying vec3 vP; void main(){ vec3 d=normalize(vP); vec3 c=mix(vec3(0.5,0.48,0.46),vec3(0.8,0.8,0.82),smoothstep(-0.3,0.6,d.y)); c+=vec3(3.0,2.8,2.4)*smoothstep(0.75,0.95,dot(d,normalize(vec3(-0.2,0.35,0.9)))); gl_FragColor=vec4(c,1.); }' })));
+    scene.environment = new THREE.PMREMGenerator(R).fromScene(es, 0.03).texture; scene.environmentIntensity = 0.55;
+    var key = new THREE.DirectionalLight(0xfff4e2, 2.0); key.position.set(-2.2, 4.2, 3.0); key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048); var sc = key.shadow.camera; sc.left = -4; sc.right = 4; sc.top = 4; sc.bottom = -4; sc.near = 0.5; sc.far = 14; key.shadow.bias = -0.0006; key.shadow.normalBias = 0.012;
+    var fill = new THREE.HemisphereLight(0xe8eef8, 0x9a8f84, 0.75);
+    scene.add(key, key.target, fill);
+    var stage = new THREE.Group(); scene.add(stage);
+    function mat(c, r) { return new THREE.MeshStandardMaterial({ color: c, roughness: r == null ? 0.85 : r }); }
+    var floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), mat(0x9c8a74)); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true;
+    var wall = new THREE.Mesh(new THREE.PlaneGeometry(30, 8), mat(0xb7b2a8)); wall.position.set(0, 4, -2.2); wall.receiveShadow = true;
+    var table = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.06, 0.8), mat(0x8a6a4c, 0.6)); table.position.set(6, 0.6, 0); table.castShadow = table.receiveShadow = true;
+    var tleg = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.57, 0.06), mat(0x7a5c40, 0.6)); tleg.position.set(6, 0.285, -0.3); tleg.castShadow = true;
+    stage.add(floor, wall, table, tleg);
+    var cam = new THREE.PerspectiveCamera(30, W / H, 0.05, 80), ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 80);
+    var ents = [], labs = document.getElementById('labs'), rnd = SG.rng ? SG.rng(7) : Math.random;
+    var PV = window.PV = {
+      SG: SG, R: R, scene: scene, cam: cam, ents: ents, floor: floor, wall: wall, stage: stage, key: key,
+      clear: function () { ents.forEach(function (c) { scene.remove(c.root); c.dispose(); }); ents.length = 0; labs.innerHTML = ''; },
+      spec: function (k, o) { var b = SG.CATS[k] || SG.DOGS[k]; return o ? SG.makeSpec(b, o) : b; },
+      /* o: { x, y, z, yaw, scale, pose, amount, tail, ears, atlas, opt:{ear,tail,collar}, live } */
+      spawn: function (k, o) {
+        o = o || {}; var c = new SG.Critter(typeof k === 'string' ? PV.spec(k, o.opt) : k, { seed: ents.length + 1, atlas: o.atlas || 1024, scale: o.scale || 1 });
+        c.root.position.set(o.x || 0, o.y || 0, o.z || 0); c.root.rotation.y = o.yaw || 0; if (o.quat) c.root.quaternion.fromArray(o.quat);
+        if (o.tail !== undefined) c.tailMode = o.tail; else if (c.kind === 'cat') c.tailMode = 'tuck';
+        if (o.ears !== undefined) { c.earMode = o.ears; c.earFlat = o.ears === 'flat'; }
+        if (o.pose) c.setPose(o.pose, o.amount);
+        if (c.faceSkin && c.kind === 'cat' && !o.face) { c.faceSkin.visible = false; c.blank = true; }
+        c.frozen = !o.live; scene.add(c.root); ents.push(c);
+        if (c.settle) c.settle(); else for (var i = 0; i < 80; i++) c.update(0.05, rnd);
+        c.root.updateMatrixWorld(true); return c;
+      },
+      step: function (n, dt) { for (var i = 0; i < (n || 1); i++) ents.forEach(function (c) { c.update(dt || 1 / 60, rnd); }); },
+      look: function (p, t, fov) { cam.fov = fov || 30; cam.position.set(p[0], p[1], p[2]); cam.lookAt(t[0], t[1], t[2]); },
+      view: function (x, y, w, h) { R.setViewport(x, H - y - h, w, h); R.setScissor(x, H - y - h, w, h); R.setScissorTest(true); cam.aspect = w / h; cam.updateProjectionMatrix(); R.render(scene, cam); },
+      /* orthographic view of a box (true silhouettes, for measuring) */
+      viewOrtho: function (x, y, w, h, dir, target, halfH) { var a = w / h; ortho.left = -halfH * a; ortho.right = halfH * a; ortho.top = halfH; ortho.bottom = -halfH; ortho.updateProjectionMatrix(); ortho.position.set(target[0] + dir[0] * 8, target[1] + dir[1] * 8, target[2] + dir[2] * 8); ortho.up.set(0, Math.abs(dir[1]) > 0.9 ? 0 : 1, Math.abs(dir[1]) > 0.9 ? -1 : 0); ortho.lookAt(target[0], target[1], target[2]); R.setViewport(x, H - y - h, w, h); R.setScissor(x, H - y - h, w, h); R.setScissorTest(true); R.render(scene, ortho); },
+      full: function () { PV.view(0, 0, W, H); },
+      label: function (x, y, text) { var d = document.createElement('div'); d.className = 'lab'; d.style.left = x + 'px'; d.style.top = y + 'px'; d.textContent = text; labs.appendChild(d); },
+      size: function () { return [W, H]; },
+      bg: function (hex) { scene.background = new THREE.Color(hex); },
+      /* paint n straight stripes across the body with the real 3D brush: planes of constant world z (across flank and back) */
+      stripes: function (c, n, rgb, width, axis) {
+        c.root.updateMatrixWorld(true); var m = c.measure(), ax = axis == null ? 2 : axis, lo = m.min[ax], hi = m.max[ax], inv = new THREE.Matrix4().copy(c.root.matrixWorld).invert().elements;
+        c.eachTexel(function (x, y, z) { var l = [inv[0] * x + inv[4] * y + inv[8] * z + inv[12], inv[1] * x + inv[5] * y + inv[9] * z + inv[13], inv[2] * x + inv[6] * y + inv[10] * z + inv[14]][ax] * c.scale; for (var i = 0; i < n; i++) { var cz = lo + (hi - lo) * (i + 0.5) / n; if (Math.abs(l - cz) < (width || 0.012)) return rgb || [200, 40, 40]; } return null; });
+      }
+    };
+    R.setClearColor(0x20242a); R.clear();
+    window.__ready = true;
+  }
+})();
+</script>
+</body>
+</html>
