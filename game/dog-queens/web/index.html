@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shiba Garden</title>
+<style>
+:root{--ink:#24365E;--soft:#6B7A9C;--mint:#2FBF9B;--mintD:#1E9478;--card:#fff;--bg1:#DDF2FF;--bg2:#F3FBF1;--warn:#F26B4E;--gold:#FFB534;
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:linear-gradient(var(--bg1),var(--bg2));color:var(--ink);font:600 16px/1.35 ui-rounded,"SF Pro Rounded","Hiragino Maru Gothic ProN","Nunito","Segoe UI",system-ui,sans-serif}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+img{display:block;-webkit-user-drag:none;pointer-events:none}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;padding:calc(var(--sat) + 10px) 14px calc(var(--sab) + 12px)}
+.screen.on{display:flex}
+
+/* buttons */
+.btn{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:58px;width:100%;border-radius:20px;background:var(--mint);color:#fff;font-weight:800;font-size:20px;box-shadow:0 5px 0 var(--mintD),0 10px 18px rgba(30,148,120,.25);transition:transform .08s,box-shadow .08s}
+.btn small{font-size:13px;font-weight:700;opacity:.9}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--mintD)}
+.btn.alt{background:#fff;color:var(--ink);box-shadow:0 5px 0 #C9D9EC,0 10px 18px rgba(36,54,94,.10)}
+.btn.alt:active{box-shadow:0 1px 0 #C9D9EC}
+.btn.gold{background:var(--gold);box-shadow:0 5px 0 #DB8E0E,0 10px 18px rgba(219,142,14,.25)}
+.link{font-size:15px;font-weight:700;color:var(--soft);padding:12px 18px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:20px;background:#fff;font-size:14px;font-weight:700;box-shadow:0 2px 0 #D5E2F1}
+.chip.off{color:var(--soft);background:#EEF4FA}
+.round{width:44px;height:44px;border-radius:22px;background:#fff;box-shadow:0 3px 0 #D5E2F1;display:grid;place-items:center}
+.round svg{width:22px;height:22px;stroke:var(--ink);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+[dir=rtl] .flip{transform:scaleX(-1)}
+
+/* home */
+#home h1{margin:3vh 0 2px;font-size:clamp(34px,10vw,46px);font-weight:900;letter-spacing:-.01em;text-align:center}
+#home .tag{margin:0;color:var(--soft);font-size:15px;text-align:center;max-width:300px}
+#hero{flex:1;min-height:0;width:100%;position:relative;margin:6px 0 10px}
+#hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{50%{transform:translateY(-6px) scale(1.015)}}
+.stack{width:min(100%,340px);display:flex;flex-direction:column;gap:14px}
+#ci{width:min(100%,340px);background:#fff;border-radius:20px;padding:10px 12px 12px;margin:14px 0;box-shadow:0 3px 0 #D5E2F1}
+#ci b{display:flex;justify-content:space-between;font-size:13px;color:var(--soft);margin-bottom:8px}
+#ciDots{display:flex;justify-content:space-between;align-items:center;direction:ltr}
+#ciDots i{width:30px;height:30px;border-radius:15px;background:#E6EEF7;display:grid;place-items:center;font-style:normal;font-size:12px;color:var(--soft)}
+#ciDots i.got{background:var(--mint);color:#fff}
+#ciDots i.gift{background:none;width:34px;height:34px}
+#ciDots i.gift img{width:34px;height:34px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:min(100%,360px)}
+
+/* game */
+#top{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between}
+#top .mid{text-align:center;line-height:1.15}
+#lvl{font-size:19px;font-weight:900}
+#diff{display:inline-block;font-size:12px;font-weight:800;padding:2px 10px;border-radius:10px;background:#fff;color:var(--soft)}
+#diff.g2{color:#B7791F;background:#FFF3D6}#diff.g3{color:#C2452D;background:#FFE4DC}
+#time{min-width:44px;text-align:center;font-variant-numeric:tabular-nums;color:var(--soft);font-size:15px}
+#hud{display:flex;gap:10px;margin:10px 0 8px}
+.pill{display:flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:19px;background:#fff;box-shadow:0 2px 0 #D5E2F1;font-size:18px;font-weight:900;direction:ltr}
+.pill img{width:28px;height:28px}
+#bones{background:#3D4F7D;box-shadow:0 2px 0 #2A3A63}
+#bones img{width:26px;height:26px;transition:opacity .3s,transform .3s}
+#bones img.gone{opacity:.18;transform:scale(.8) rotate(-20deg);filter:grayscale(1)}
+#rules{display:flex;gap:6px;width:100%;max-width:520px;margin-bottom:8px}
+.rule{flex:1;display:flex;align-items:center;gap:6px;background:#fff;border-radius:14px;padding:6px 7px;font-size:11.5px;line-height:1.2;font-weight:700;box-shadow:0 2px 0 #D5E2F1;min-width:0}
+.mini{flex:none;display:grid;grid-template-columns:repeat(3,12px);gap:1.5px;direction:ltr}
+.mini i{width:12px;height:12px;border-radius:3px;background:#E3EBF5;display:block}
+.mini i.c{background:#FFB3CC}.mini i.x{background:#FFB3CC no-repeat center/8px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 2l6 6M8 2l-6 6' stroke='%2324365E' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")}
+.mini i.n{background-color:#E3EBF5}.mini i.d{background:#FFE08A url(assets/art/C1_token.png) center/12px no-repeat}
+#boardWrap{flex:1;min-height:0;width:100%;display:grid;place-items:center}
+#board{direction:ltr;display:grid;gap:3px;padding:8px;background:#fff;border-radius:22px;box-shadow:0 6px 0 #D5E2F1,0 14px 30px rgba(36,54,94,.12);touch-action:none;width:min(100%,520px,var(--bh,100vh));aspect-ratio:1}
+#board.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.cell{position:relative;min-width:0;min-height:0;border-radius:22%;display:grid;place-items:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08),inset 0 2px 0 rgba(255,255,255,.35)}
+.cell.x::after{content:"";width:46%;height:46%;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 4l12 12M16 4L4 16' stroke='%2324365E' stroke-opacity='.5' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E");animation:xin .16s}
+.cell.x.no::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 4l12 12M16 4L4 16' stroke='%23E8452C' stroke-width='3.8' stroke-linecap='round'/%3E%3C/svg%3E");width:54%;height:54%}
+@keyframes xin{from{transform:scale(.3);opacity:0}}
+.cell img{position:absolute;inset:4%;width:92%;height:92%;animation:pop .34s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.2) translateY(-30%);opacity:0}}
+.cell.hop img{animation:hop .5s ease-out}
+@keyframes hop{35%{transform:translateY(-28%) scale(1.08)}70%{transform:translateY(4%) scale(.97)}}
+.cell.hint{outline:4px solid #fff;outline-offset:-2px;box-shadow:0 0 0 4px var(--ink),0 0 0 9px rgba(36,54,94,.25);z-index:2;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--ink),0 0 0 14px rgba(36,54,94,.08)}}
+.cell.ring::before{content:"";position:absolute;inset:-6%;border-radius:28%;border:4px solid #fff;animation:ring .45s ease-out forwards;pointer-events:none}
+@keyframes ring{to{inset:-45%;opacity:0}}
+#msg{min-height:44px;max-width:520px;width:100%;margin:8px 0 6px;padding:0 6px;text-align:center;font-size:14px;color:var(--soft);display:grid;place-items:center}
+#tools{display:flex;gap:16px;justify-content:center;width:100%;padding-bottom:2px}
+.tool{position:relative;width:64px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--soft)}
+.tool span.ic{width:58px;height:58px;border-radius:29px;background:#fff;box-shadow:0 4px 0 #D5E2F1;display:grid;place-items:center;transition:transform .08s}
+.tool:active span.ic{transform:translateY(3px);box-shadow:0 1px 0 #D5E2F1}
+.tool img{width:38px;height:38px}.tool svg{width:26px;height:26px;stroke:var(--ink);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tool em{position:absolute;top:-4px;right:0;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--warn);color:#fff;font-style:normal;font-size:12.5px;font-weight:900;display:grid;place-items:center;border:2px solid #fff}
+.tool em.zero{background:#9AA9C4}
+
+/* sheets */
+.sheet{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(27,40,72,.55);padding:20px}
+.sheet.on{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.card{width:min(100%,360px);max-height:calc(100% - 20px);overflow:auto;background:var(--card);border-radius:28px;padding:22px 20px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;animation:rise .3s cubic-bezier(.3,1.4,.5,1)}
+@keyframes rise{from{transform:translateY(40px) scale(.94);opacity:0}}
+.card h2{margin:0;font-size:26px;font-weight:900}
+.card p{margin:0;color:var(--soft);font-size:15px}
+.card .art{height:min(30vh,220px);width:auto}
+#win{background:rgba(27,40,72,.72)}
+#win .card{background:none;gap:10px;padding-top:0}
+#t-win{color:#FFD76A;font-size:clamp(36px,11vw,50px);font-weight:900;text-shadow:0 3px 0 #C97A12,0 8px 20px rgba(0,0,0,.35);animation:rise .5s cubic-bezier(.3,1.6,.5,1)}
+#winArt{height:min(34vh,280px);animation:jump 1.1s ease-in-out infinite}
+@keyframes jump{0%,100%{transform:translateY(0)}45%{transform:translateY(-16px) rotate(-2deg)}}
+#stars{display:flex;gap:10px;direction:ltr}
+#stars img{width:40px;height:40px;opacity:.22;filter:grayscale(1)}
+#stars img.got{opacity:1;filter:none;animation:pop .4s cubic-bezier(.3,1.6,.5,1) backwards}
+#stars img.got:nth-child(2){animation-delay:.15s}#stars img.got:nth-child(3){animation-delay:.3s}
+#winInfo{color:#fff;font-size:15px}
+#winStat{color:#BDF4E2;font-size:16px;font-weight:800;min-height:22px}
+#win .link{color:#DCE6F7}
+.list{width:100%;display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:start;background:#F2F7FC;border-radius:16px;padding:10px 12px}
+.item.pack{background:#FFF6DF}
+.item b{display:block;font-size:15px}.item small{display:block;color:var(--soft);font-size:12px;font-weight:600}
+.item .btn{width:auto;min-width:92px;min-height:42px;font-size:15px;padding:0 12px;border-radius:14px;flex:none}
+#inv,#shopMsg{font-size:13px;color:var(--soft);min-height:18px}
+#demo{direction:ltr;display:grid;grid-template-columns:repeat(5,34px);gap:3px;padding:6px;background:#F2F7FC;border-radius:14px}
+#demo i{width:34px;height:34px;border-radius:8px;background:#DCE7F3;display:grid;place-items:center}
+#demo i.dog{background:#FFE08A}#demo i.dog img{width:30px;height:30px}
+#demo i.hit{background:#BFEFDD;animation:xin .3s backwards}
+#demo i.hit::after{content:"";width:16px;height:16px;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 4l12 12M16 4L4 16' stroke='%2324365E' stroke-opacity='.6' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.rules3{width:100%;display:flex;flex-direction:column;gap:6px}
+.rules3 .rule{font-size:14px;padding:8px 10px;background:#F2F7FC;box-shadow:none;text-align:start}
+
+/* effects */
+#fxl{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.pop{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:24px;color:var(--mintD);text-shadow:0 2px 0 #fff,0 0 12px #fff;white-space:nowrap;animation:floatUp .9s ease-out forwards}
+.pop.bad{color:var(--warn)}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,-20%) scale(.6)}20%{opacity:1;transform:translate(-50%,-70%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-190%) scale(1)}}
+.conf{position:absolute;top:-20px;width:10px;height:14px;border-radius:3px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),108vh) rotate(var(--rot))}}
+#oopsArt{position:fixed;left:50%;bottom:calc(var(--sab) + 96px);width:150px;transform:translateX(-50%) translateY(60%) scale(.6);opacity:0;transition:transform .25s cubic-bezier(.3,1.4,.5,1),opacity .2s;z-index:15;pointer-events:none}
+#oopsArt.on{transform:translateX(-50%);opacity:1}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div id="home" class="screen on">
+  <h1 id="t-title"></h1><p class="tag" id="t-tag"></p>
+  <div id="hero"><img src="assets/art/B1_sit.png" alt=""></div>
+  <div class="stack">
+    <button class="btn" id="play"><span id="t-play"></span><small id="playSub"></small></button>
+    <button class="btn alt" id="daily"><span id="t-daily"></span><small id="dailySub"></small></button>
+  </div>
+  <div id="ci"><b><span id="t-checkin"></span><span id="ciDay"></span></b><div id="ciDots"></div></div>
+  <div class="chips">
+    <button class="chip" id="lang"></button><button class="chip" id="snd"></button><button class="chip" id="shopChip"></button>
+    <button class="chip" id="auto"></button><button class="chip" id="howChip"></button>
+  </div>
+</div>
+
+<div id="game" class="screen">
+  <div id="top">
+    <button class="round" id="back" aria-label="Home"><svg class="flip" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="mid"><div id="lvl"></div><span id="diff"></span></div>
+    <div id="time">0:00</div>
+  </div>
+  <div id="hud">
+    <div class="pill"><img src="assets/art/C1_token.png" alt=""><span id="count">0/0</span></div>
+    <div class="pill" id="bones"><img src="assets/art/D1_bone.png" alt=""><img src="assets/art/D1_bone.png" alt=""><img src="assets/art/D1_bone.png" alt=""></div>
+  </div>
+  <div id="rules"></div>
+  <div id="boardWrap"><div id="board"></div></div>
+  <div id="msg"></div>
+  <div id="tools">
+    <button class="tool" id="undo"><span class="ic"><svg class="flip" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4 12h10a6 6 0 010 12"/></svg></span><span id="t-undo"></span></button>
+    <button class="tool" id="hint"><span class="ic"><img src="assets/art/D2_treat.png" alt=""></span><em id="hintN">3</em><span id="t-hint"></span></button>
+    <button class="tool" id="ball"><span class="ic"><img src="assets/art/D3_ball.png" alt=""></span><em id="ballN">0</em><span id="t-ball"></span></button>
+    <button class="tool" id="reset"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.6-5.9M20 4v5h-5"/></svg></span><span id="t-reset"></span></button>
+  </div>
+</div>
+
+<img id="oopsArt" src="assets/art/B5_oops.png" alt="">
+<div id="fxl"></div>
+
+<div class="sheet" id="win"><div class="card">
+  <div id="t-win"></div><img id="winArt" src="assets/art/B3_celebrate.png" alt="">
+  <div id="stars"><img src="assets/art/D1_bone.png" alt=""><img src="assets/art/D1_bone.png" alt=""><img src="assets/art/D1_bone.png" alt=""></div>
+  <div id="winInfo"></div><div id="winStat"></div>
+  <button class="btn gold" id="next"></button><button class="link" id="homeBtn"></button>
+</div></div>
+
+<div class="sheet" id="fail"><div class="card">
+  <h2 id="t-fail"></h2><img class="art" src="assets/art/B8_sad.png" alt=""><p id="failInfo"></p>
+  <button class="btn gold" id="revive"></button><button class="btn alt" id="retry"></button>
+</div></div>
+
+<div class="sheet" id="shop"><div class="card">
+  <h2 id="t-shop"></h2><div id="inv"></div><div class="list" id="shopList"></div><div id="shopMsg"></div>
+  <button class="btn alt" id="shopClose"></button>
+</div></div>
+
+<div class="sheet" id="langSheet"><div class="card"><h2 id="t-lang"></h2><div class="list" id="langList"></div></div></div>
+
+<div class="sheet" id="sndSheet"><div class="card">
+  <h2 id="t-snd"></h2>
+  <div class="list"><div class="item"><b id="t-sfx"></b><button class="btn" id="sfxT"></button></div><div class="item"><b id="t-mus"></b><button class="btn" id="musT"></button></div></div>
+  <button class="btn alt" id="sndClose"></button>
+</div></div>
+
+<div class="sheet" id="tut"><div class="card">
+  <h2 id="t-tutTitle"></h2><p id="t-tut1"></p><div class="rules3" id="rules3"></div>
+  <div id="demo"></div><p id="t-tut2"></p><p id="t-how"></p>
+  <button class="btn" id="tutOk"></button>
+</div></div>
+
+<div class="sheet" id="ciSheet"><div class="card">
+  <h2 id="ciTitle"></h2><img class="art" src="assets/art/B2_wave.png" alt=""><p id="ciGift" style="font-size:18px;font-weight:800;color:var(--mintD)"></p>
+  <button class="btn" id="ciOk"></button>
+</div></div>
+
+<script src="assets/sfx.js"></script>
+<script src="core.js"></script>
+<script src="music.js"></script>
+<script src="levels.js"></script>
+<script src="solver.js"></script>
+<script src="i18n.js"></script>
+<script src="strings.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

@@ -90,6 +90,8 @@ def mouth(kind):
         return base.replace('L256 348', 'L256 344') + '<ellipse cx="256" cy="360" rx="13" ry="15" fill="#5A1E22"/><ellipse cx="256" cy="368" rx="8" ry="5" fill="#FF7685"/>'
     if kind == 'wobble':  # embarrassed wavy mouth
         return base + '<path d="M228 356 Q236 348 244 356 Q252 364 260 356 Q268 348 276 356 Q284 364 290 356" fill="none" stroke="#3A2218" stroke-width="4.5" stroke-linecap="round"/>'
+    if kind == 'frown':
+        return base + '<path d="M236 362 C246 350 266 350 276 362" fill="none" stroke="#3A2218" stroke-width="4.5" stroke-linecap="round"/>'
     if kind == 'sleep':
         return base + '<path d="M240 350 C248 358 264 358 272 350" fill="none" stroke="#3A2218" stroke-width="4.5" stroke-linecap="round"/>'
     return base

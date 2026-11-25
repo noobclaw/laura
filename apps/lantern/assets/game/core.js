@@ -1,5 +1,6 @@
-// Shared game logic: text, storage, puzzle generator, sound, rules, 2D effect helpers.
-// Copied from ../prototype/index.html so the 3D build has no dependency on it.
+// Shared game logic: text, storage, puzzle generator, sound, rules.
+// Copied from game/lantern/prototype3d/core.js without its canvas effect helpers. Storage keys keep the "lantern." prefix
+// on purpose: this build ships as an update of the same app, so saved progress and paid items carry over.
 // ---------- text (all UI strings live here) ----------
 const T={
  en:{title:"Lantern",rules:"Light one lantern in every row, column and colour. Lanterns never touch.",play:"Play",daily:"Daily puzzle",level:"Level",undo:"Undo",hint:"Hint",reset:"Restart",auto:"Auto-mark",snd:"Sound",home:"Home",
@@ -60,15 +61,3 @@ function conflicts(){const n=S.p.n,g=S.p.g,bad=new Set(),L=[];S.cells.forEach((v
  return{bad,count:L.length}}
 function blockedBy(k){const n=S.p.n,g=S.p.g,y=Math.floor(k/n),x=k%n;for(let j=0;j<n*n;j++){if(S.cells[j]!==2||j===k)continue;const jy=Math.floor(j/n),jx=j%n;
   if(jy===y)return"hRow";if(jx===x)return"hCol";if(g[j]===g[k])return"hReg";if(Math.abs(jy-y)<2&&Math.abs(jx-x)<2)return"hAdj"}return null}
-function glow(c,x,y,r,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(255,205,120,${a})`);g.addColorStop(.45,`rgba(255,160,70,${a*.38})`);g.addColorStop(1,"rgba(255,140,60,0)");c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill()}
-const back=t=>{const u=t-1;return 1+2.7*u*u*u+1.7*u*u};
-const TEX={},tintC={};for(const n of["star_06","star_07","star_09","circle_02","circle_05","magic_05","symbol_02"]){const im=new Image();im.onload=()=>{TEX[n]=im};im.src="assets/fx/"+n+".png"}
-function tex(n,rgb){const im=TEX[n];if(!im)return null;const key=n+rgb;if(!tintC[key]){const c=document.createElement("canvas");c.width=c.height=128;const x=c.getContext("2d");x.drawImage(im,0,0);x.globalCompositeOperation="source-in";x.fillStyle=`rgb(${rgb})`;x.fillRect(0,0,128,128);tintC[key]=c}return tintC[key]}
-const sparks=[],floaters=[],rings=[];const SPARK_TEX=["star_06","star_07","magic_05","circle_05"];
-function burst(x,y,n,col,sp=160){if(calm)return;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=sp*(.3+Math.random()*.7);sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:220,age:0,life:.5+Math.random()*.6,r:1.5+Math.random()*2.5,size:12+Math.random()*22,rot:Math.random()*6.28,spin:(Math.random()-.5)*6,tex:SPARK_TEX[i%4],col})}}
-function praise(x,y,txt,big){if(calm)return;const d=document.createElement("div");d.className="pop"+(big?" big":"");d.textContent=txt;d.style.left=Math.max(90,Math.min(VW-90,x))+"px";d.style.top=Math.max(80,y)+"px";document.body.appendChild(d);d.addEventListener("animationend",()=>d.remove())}
-const FW=["255,207,107","255,120,160","120,220,255","170,255,150","210,160,255"];
-function firework(x,y,rgb){if(calm)return;rings.push({x,y,age:0,life:.7,r0:10,r1:80,rgb});sparks.push({x,y,vx:0,vy:0,g:0,age:0,life:.3,size:220,rot:0,spin:2,tex:"star_09",col:"255,245,220"});
- for(let i=0;i<54;i++){const a=i/54*6.283+Math.random()*.2,v=120+Math.random()*190;sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:130,age:0,life:.9+Math.random()*.8,size:10+Math.random()*20,rot:Math.random()*6,spin:(Math.random()-.5)*8,tex:SPARK_TEX[i%3],col:i%5?rgb:"255,255,255"})}
- clip("place",.45,.45+Math.random()*.3)||tone(180+Math.random()*80,.3,"sine",.08);buzz(15)}
-function flash(){const f=$("flash");f.classList.remove("go");void f.offsetWidth;f.classList.add("go")}

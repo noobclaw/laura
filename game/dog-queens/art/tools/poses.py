@@ -117,4 +117,77 @@ body += fur_shape('M150 610 C150 560 210 540 300 540 C390 540 450 560 450 610 C4
 body += place(bandana(), SX, SY, SK) + place(head('sleep', 'sleep'), SX, SY, SK)
 body += paw(226, 646, 50, 24, 85) + paw(374, 646, 50, 24, 86)
 save('B7_sleep', svg(600, 720, body))
+
+# ---------- B8 sad (out of bones) ----------
+body = sitting_body(100) + front_legs(110)
+body += place(bandana(), HX, HY + 14, HK) + place(head('open', 'frown', ears='down'), HX, HY + 14, HK)
+body += ('<path d="M212 226 L262 240" stroke="#B4561C" stroke-width="7" stroke-linecap="round" opacity=".55"/>'
+         '<path d="M388 226 L338 240" stroke="#B4561C" stroke-width="7" stroke-linecap="round" opacity=".55"/>'
+         '<path d="M204 318 C196 338 192 350 200 358 C208 364 218 358 218 348 C218 338 212 330 204 318Z" fill="#9FD8F5"/>')
+save('B8_sad', svg(600, 720, body))
+
+# ---------- B2 wave hello ----------
+body = sitting_body(120)
+body += limb(256, 500, 254, 662, 60, 130) + limb(260, 530, 258, 664, 48, 131, cream=True) + paw(250, 678, 40, 22, 132)
+body += place(bandana(), HX, HY, HK) + place(head('joy', 'open'), HX, HY, HK)
+body += limb(400, 470, 500, 330, 56, 133) + paw(508, 314, 38, 34, 134)
+body += ('<path d="M548 262 q14 10 10 28" stroke="#F7A050" stroke-width="6" fill="none" stroke-linecap="round"/>'
+         '<path d="M566 246 q22 16 16 46" stroke="#F7A050" stroke-width="6" fill="none" stroke-linecap="round" opacity=".6"/>')
+save('B2_wave', svg(600, 720, body))
+
+# ---------- item icons ----------
+ICON_DEFS = ('<radialGradient id="boneG" cx="35%" cy="25%" r="85%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#FFF1DC"/><stop offset="1" stop-color="#E5C59E"/></radialGradient>'
+             '<radialGradient id="cookieG" cx="35%" cy="25%" r="85%"><stop offset="0" stop-color="#FFD98A"/><stop offset=".6" stop-color="#F0A84A"/><stop offset="1" stop-color="#C87A28"/></radialGradient>'
+             '<radialGradient id="ballG" cx="35%" cy="25%" r="85%"><stop offset="0" stop-color="#FF9AA6"/><stop offset=".55" stop-color="#F0566B"/><stop offset="1" stop-color="#B92F46"/></radialGradient>'
+             '<linearGradient id="boxG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#F3B32E"/></linearGradient>'
+             '<linearGradient id="lidG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFEFA6"/><stop offset="1" stop-color="#F8C645"/></linearGradient>'
+             '<linearGradient id="ribG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8FE3C6"/><stop offset=".5" stop-color="#4FC49E"/><stop offset="1" stop-color="#2FA380"/></linearGradient>')
+
+
+def icon(name, inner):
+    save(name, svg(256, 256, f'<defs>{ICON_DEFS}</defs>' + inner, px=512))
+
+
+BONE = 'M70 96 C46 72 78 40 102 62 C118 38 150 66 132 92 L176 136 C202 118 232 150 208 166 C232 190 200 222 176 200 C160 224 126 196 146 170 L102 126 C76 144 46 112 70 96Z'
+icon('D1_bone', '<ellipse cx="132" cy="236" rx="78" ry="9" fill="#3A2A20" opacity=".15" filter="url(#blur3)"/>'
+     f'<path d="{BONE}" fill="#D9B58C" transform="translate(0 7)"/><path d="{BONE}" fill="url(#boneG)"/>'
+     '<path d="M84 74 C92 64 104 66 108 76" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>'
+     '<path d="M112 110 L160 158" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".7"/>')
+
+
+def pawprint(cx, cy, k, fill):
+    return (f'<g transform="translate({cx} {cy}) scale({k})" fill="{fill}"><ellipse cx="0" cy="18" rx="30" ry="24"/>'
+            '<ellipse cx="-34" cy="-10" rx="12" ry="16" transform="rotate(-24 -34 -10)"/><ellipse cx="-13" cy="-28" rx="12" ry="17" transform="rotate(-8 -13 -28)"/>'
+            '<ellipse cx="13" cy="-28" rx="12" ry="17" transform="rotate(8 13 -28)"/><ellipse cx="34" cy="-10" rx="12" ry="16" transform="rotate(24 34 -10)"/></g>')
+
+
+icon('D2_treat', '<ellipse cx="128" cy="236" rx="74" ry="9" fill="#3A2A20" opacity=".15" filter="url(#blur3)"/>'
+     '<circle cx="128" cy="132" r="92" fill="#B56A1E"/><circle cx="128" cy="122" r="92" fill="url(#cookieG)"/>'
+     + pawprint(128, 129, 1.25, '#A9601C') + pawprint(128, 124, 1.25, '#FFE9B8') +
+     '<path d="M62 86 C78 58 110 44 140 44" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" opacity=".55"/>')
+icon('D3_ball', '<ellipse cx="128" cy="236" rx="70" ry="9" fill="#3A2A20" opacity=".15" filter="url(#blur3)"/>'
+     '<circle cx="128" cy="128" r="94" fill="url(#ballG)"/>'
+     '<path d="M40 156 C90 118 170 118 218 156" stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round" opacity=".92"/>'
+     '<path d="M128 46 l11 24 26 3 -19 18 5 26 -23 -13 -23 13 5 -26 -19 -18 26 -3z" fill="#FFE27A"/>'
+     '<ellipse cx="80" cy="84" rx="24" ry="12" fill="#fff" opacity=".45" transform="rotate(-38 80 84)"/>')
+icon('D4_gift', '<ellipse cx="128" cy="238" rx="80" ry="9" fill="#3A2A20" opacity=".15" filter="url(#blur3)"/>'
+     '<rect x="48" y="112" width="160" height="116" rx="16" fill="url(#boxG)"/><rect x="48" y="112" width="160" height="22" fill="#C98A14" opacity=".28"/>'
+     '<rect x="36" y="80" width="184" height="46" rx="14" fill="url(#lidG)"/><rect x="110" y="80" width="36" height="148" fill="url(#ribG)"/>'
+     '<path d="M128 80 C96 30 52 44 70 70 C80 84 110 82 128 80Z" fill="url(#ribG)"/><path d="M128 80 C160 30 204 44 186 70 C176 84 146 82 128 80Z" fill="url(#ribG)"/>'
+     '<circle cx="128" cy="78" r="12" fill="#3DB38F"/>' + pawprint(80, 184, .42, '#E09A1A') + pawprint(178, 184, .42, '#E09A1A') +
+     '<path d="M48 92 C70 88 92 86 104 86" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/>')
+
+# ---------- E1 app icon (square, full bleed) ----------
+tiles = ''
+cols = ['#FFB3CC', '#A8E6CF', '#A9D3FF', '#FFE08A', '#CDB8FF', '#FFC9A3']
+k = 0
+for yy in range(2):
+    for xx in range(4):
+        tiles += f'<rect x="{40 + xx * 240}" y="{560 + yy * 240}" width="224" height="224" rx="44" fill="{cols[(k * 5 + yy) % 6]}"/>'
+        tiles += f'<rect x="{40 + xx * 240}" y="{560 + yy * 240}" width="224" height="100" rx="44" fill="#fff" opacity=".22"/>'
+        k += 1
+body = ('<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BDEBFF"/><stop offset="1" stop-color="#E9F9FF"/></linearGradient></defs>'
+        '<rect width="1024" height="1024" fill="url(#sky)"/>' + tiles
+        + place(bandana(), 132, 150, 1.48) + place(head('open', 'smile'), 132, 150, 1.48))
+save('E1_icon', svg(1024, 1024, body, px=1024))
 print('ok')
