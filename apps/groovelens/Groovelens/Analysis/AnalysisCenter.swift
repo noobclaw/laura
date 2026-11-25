@@ -42,6 +42,8 @@ final class AnalysisCenter {
     private(set) var jobs: [UUID: AnalysisJob] = [:]
     private var tasks: [UUID: Task<Void, Never>] = [:]
     var transcriber: DrumTranscriber = SpectralDrumTranscriber()
+    /// Used to give a free-song slot back when an analysis fails.
+    @ObservationIgnored weak var profile: PlayerProfile?
 
     func job(for id: UUID) -> AnalysisJob? { jobs[id] }
 
@@ -72,7 +74,9 @@ final class AnalysisCenter {
         start(song: song, videoSource: nil, context: context)
     }
 
+    /// Callers must check the free-song allowance first (a failed run gave its slot back).
     func retry(song: Song, context: ModelContext) {
+        profile?.registerAnalysisStarted()
         song.status = .analyzing
         song.errorMessage = nil
         song.progress = 0
@@ -172,6 +176,7 @@ final class AnalysisCenter {
             } catch is CancellationError {
                 await MainActor.run {
                     guard alive() else { return }
+                    self?.profile?.refundAnalysis()
                     song.status = .failed
                     song.errorMessage = String(localized: "Analysis was cancelled.")
                     job.error = song.errorMessage
@@ -180,6 +185,7 @@ final class AnalysisCenter {
             } catch {
                 await MainActor.run {
                     guard alive() else { return }
+                    self?.profile?.refundAnalysis()
                     song.status = .failed
                     song.errorMessage = error.localizedDescription
                     job.error = error.localizedDescription

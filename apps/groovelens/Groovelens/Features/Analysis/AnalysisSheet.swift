@@ -8,6 +8,9 @@ struct AnalysisSheet: View {
 
     @Environment(AnalysisCenter.self) private var analysis
     @Environment(\.modelContext) private var context
+    @Environment(ProStore.self) private var store
+    @Environment(PlayerProfile.self) private var profile
+    @State private var proReason: ProReason?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var job: AnalysisJob? { analysis.job(for: song.id) }
@@ -54,6 +57,7 @@ struct AnalysisSheet: View {
             }
         }
         .interactiveDismissDisabled(false)
+        .sheet(item: $proReason) { ProSheet(reason: $0) }
         .onChange(of: song.status) { _, s in if s == .ready { Haptics.success() } else if s == .failed { Haptics.error() } }
     }
 
@@ -108,7 +112,11 @@ struct AnalysisSheet: View {
                 Text(song.errorMessage ?? String(localized: "Analysis failed")).font(Typo.body(14)).foregroundStyle(Palette.textDim)
                     .multilineTextAlignment(.center)
                 NeonButton(title: String(localized: "Try again"), symbol: "arrow.clockwise", fill: [Palette.danger, Palette.brand]) {
-                    analysis.retry(song: song, context: context)
+                    if store.canAnalyzeAnotherSong(started: profile.analysesStarted) {
+                        analysis.retry(song: song, context: context)
+                    } else {
+                        proReason = .songLimit
+                    }
                 }
             }
         case .analyzing:

@@ -233,6 +233,12 @@ final class PlayerProfile {
         save()
     }
 
+    /// A failed analysis gives its free-song slot back (PLAN: failures don't count).
+    func refundAnalysis() {
+        data.analysesStarted = max(0, data.analysesStarted - 1)
+        save()
+    }
+
     func hasAchievement(_ id: String) -> Bool { data.achievements.contains(id) }
 
     @discardableResult

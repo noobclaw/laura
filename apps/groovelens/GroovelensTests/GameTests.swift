@@ -352,7 +352,11 @@ final class ProfileTests: XCTestCase {
         let p = PlayerProfile(defaults: defaults)
         for _ in 0..<3 { p.registerAnalysisStarted() }
         XCTAssertEqual(p.analysesStarted, 3)
-        XCTAssertFalse(3 < ProStore.freeSongLimit)
+        XCTAssertFalse(p.analysesStarted < ProStore.freeSongLimit)
+        p.refundAnalysis()                       // a failed analysis gives its slot back
+        XCTAssertEqual(p.analysesStarted, 2)
+        p.refundAnalysis(); p.refundAnalysis(); p.refundAnalysis()
+        XCTAssertEqual(p.analysesStarted, 0)     // never negative
     }
 }
 

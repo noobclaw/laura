@@ -13,6 +13,7 @@ struct GroovelensApp: App {
                 .environment(store)
                 .environment(profile)
                 .environment(analysis)
+                .onAppear { analysis.profile = profile }
                 .preferredColorScheme(.dark)
                 .tint(Palette.brand)
         }

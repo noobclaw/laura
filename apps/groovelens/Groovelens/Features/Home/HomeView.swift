@@ -291,6 +291,7 @@ struct HomeView: View {
             importError = String(localized: "The original audio for this song is missing. Delete it and import again.")
             return
         }
+        guard store.canAnalyzeAnotherSong(started: profile.analysesStarted) else { proReason = .songLimit; return }
         analysis.retry(song: song, context: context)
         analyzingSong = song
     }
