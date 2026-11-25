@@ -571,8 +571,8 @@
     var dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(dp, 3)); dg.setAttribute('seed', new THREE.BufferAttribute(ds, 1));
     var dust = new THREE.Points(dg, new THREE.ShaderMaterial({
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { uTime: uTime, uEN: { value: EN } },
-      vertexShader: 'attribute float seed; uniform float uTime,uEN; varying float vA; void main(){ vec3 p=position; p.x+=sin(uTime*0.23+seed)*0.25; p.y+=sin(uTime*0.17+seed*2.)*0.2; p.z+=cos(uTime*0.19+seed*3.)*0.2; float inLight=smoothstep(0.0,0.5,(uEN+1.0-p.z)*0.69-p.y+0.35)*smoothstep(2.0,1.2,p.y); vA=inLight*(0.5+0.5*sin(uTime*1.3+seed*5.)); vec4 mv=modelViewMatrix*vec4(p,1.); gl_PointSize=(1.5+2.5*fract(seed*7.))*4.0/max(0.4,-mv.z); gl_Position=projectionMatrix*mv; }',
-      fragmentShader: 'varying float vA; void main(){ float d=length(gl_PointCoord-0.5); gl_FragColor=vec4(vec3(1.0,0.9,0.7)*smoothstep(0.5,0.0,d)*vA*0.9,1.); }'
+      vertexShader: 'attribute float seed; uniform float uTime,uEN; varying float vA; void main(){ vec3 p=position; p.x+=sin(uTime*0.23+seed)*0.25; p.y+=sin(uTime*0.17+seed*2.)*0.2; p.z+=cos(uTime*0.19+seed*3.)*0.2; float inLight=smoothstep(0.0,0.5,(uEN+1.0-p.z)*0.69-p.y+0.35)*smoothstep(2.0,1.2,p.y); vA=inLight*(0.5+0.5*sin(uTime*1.3+seed*5.)); vec4 mv=modelViewMatrix*vec4(p,1.); gl_PointSize=(1.2+1.8*fract(seed*7.))*3.0/max(0.5,-mv.z); gl_Position=projectionMatrix*mv; }',
+      fragmentShader: 'varying float vA; void main(){ float d=length(gl_PointCoord-0.5); gl_FragColor=vec4(vec3(1.0,0.9,0.7)*smoothstep(0.5,0.0,d)*vA*0.5,1.); }'
     }));
     dust.layers.set(1); dust.frustumCulled = false; fx.add(dust); count('光中的灰塵');
 
