@@ -1,0 +1,40 @@
+{
+  "identifier" : "9C0B4A31-5E11-4F7B-9E0A-3B4E8E0F6D21",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "14.99",
+      "familyShareable" : true,
+      "internalID" : "6A1F2C3D-4E5F-4061-8273-9A8B7C6D5E41",
+      "localizations" : [
+        {
+          "description" : "Unlimited songs, Kit mode scoring, speed trainer, every fill, exports and all stages.",
+          "displayName" : "Groovelens Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.noobclaw.groovelens.pro_unlock",
+      "referenceName" : "Groovelens Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

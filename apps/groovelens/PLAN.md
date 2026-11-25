@@ -1,0 +1,125 @@
+# Groovelens — 任何歌曲，變成可以玩的鼓譜
+
+> 2026-11-25 立項（用戶當日拍板：「四個都做，鼓譜先」、「原生 SwiftUI、先 iOS」、「要遊戲感、UI 要最好看、字體要好看、要多語言、不要中文標題、要支援內購」）。
+> 目錄 `apps/groovelens`，Bundle ID `com.noobclaw.groovelens`，內購 `com.noobclaw.groovelens.pro_unlock`（非消耗型買斷）。
+> 顯示名一律英文 **Groovelens**（不本地化）。視覺方向：設計畫布 C · Neon Rhythm Stage（https://claude.ai/artifact/BDTjv7FSEUfWnnyoaYDWU1）。
+> 技術路線：**原生 SwiftUI（iOS 17+），iPhone only，豎屏**。不用 Flutter 殼（用戶要求「不能工廠化」）；沿用 laura 的質量關卡（多語言、視覺、審計、CI 冒煙、變現）。
+
+## 差異化楔子（G2）
+
+**Drum2Notes 只能轉「純鼓」錄音、要上傳雲端、按月收費；Groovelens 在 iPhone 上直接把整首歌的鼓拆出來，寫成鼓譜，再變成一個能打分、能升級的節奏遊戲 —— 一次買斷，不聯網。**
+
+競品實查（2026-11-25）：Drum2Notes（Klangio，雲端訂閱，App Store 1 條評價，自述「分不開多種樂器」）、Drum Snap、Drums Transcriber（都很新、評價少）。付費面參照 Klangio 同系 Piano2Notes：年訂 $99.99，Android 50 萬+ 下載。
+
+## 核心循環
+
+```
+導入歌曲 → 端側分析（拆鼓 → 找拍子 → 認每一下 → 排成譜）→ 鼓譜
+        → 舞台（節奏遊戲：音符軌道 / 跟練 / 打分）→ 評級 + XP → 每日任務 / 升級 / 解鎖鼓組皮膚
+```
+
+## 功能清單
+
+### 1. 導入（Import）
+- **Files**：mp3 / m4a / wav / aiff / caf（`fileImporter`）。
+- **Video**：從相冊挑影片（`PhotosPicker`，**不需要相冊權限**），用 AVAssetReader 抽音軌。排練錄影、演出影片都能用。
+- **Record**：用麥克風錄一段（排練現場、自己打的鼓）。最長 10 分鐘。
+- 不支援 Apple Music 等 DRM 歌曲（系統不允許讀取），導入頁明說。
+
+### 2. 端側分析（Analysis）—— v1 用經典 DSP，v2 換 Core ML 模型
+| 步驟 | 方法 | 輸出 |
+|---|---|---|
+| 解碼 | AVAudioFile / AVAssetReader → 單聲道 Float32，22,050 Hz | PCM |
+| 拆鼓 | **HPSS**（諧波/打擊分離，Fitzgerald 2010）：STFT 幅度譜上時間向中值濾波 = 諧波，頻率向中值濾波 = 打擊，軟遮罩後 ISTFT | 鼓軌（drums）、去鼓伴奏（drumless） |
+| 起音 | 打擊譜分頻帶 spectral flux（低 30–150 Hz / 中 150–2.5 kHz / 噪 2.5–7 kHz / 高 7–11 kHz），自適應閾值 + 局部最大 | 每一下的時間與能量 |
+| 認鼓件 | 起音後 40 ms 的頻帶能量比 + 衰減時間 + 譜重心：底鼓、軍鼓、踩鑔（閉/開）、通鼓、疊音鑔、吊鑔 | 鼓件 + 力度 |
+| 找拍子 | 起音強度包絡自相關估速度 + 動態規劃拍點追蹤（Ellis 2007），允許速度漂移 | 拍點時間表、BPM |
+| 拍號 | 拍點上的重音週期（2/3/4） | 4/4、3/4、6/8 |
+| 排譜 | 每拍 12 等分網格（同時容納 16 分與三連音），就近量化；輕軍鼓 → 幽靈音 | 小節 × 音符 |
+| 段落 | 每小節節奏指紋做自相似矩陣分段；與鄰小節差異大且通鼓/軍鼓密度高 → **Fill** | Intro/Verse/Chorus/Fill 標籤 |
+
+- 分析在背景任務裡跑，畫面顯示四步進度和「拆線」動畫；可取消。
+- **可替換**：`DrumTranscriber` 協議。v2 換 Core ML 模型（ADTOF 類，CI 上轉換），v1 的 DSP 保留作為兜底。
+- **誠實提示**：v1 對「鼓聲清楚的錄音」最準；混音很滿的流行歌，踩鑔/吊鑔區分可能有誤，鼓譜可手動改（長按音符改鼓件/刪除）。
+
+### 3. 鼓譜（Chart）
+- 標準鼓譜記法：五線譜 + 鼓組圖例（底鼓 F4、軍鼓 C5、踩鑔 ×G5、開踩鑔 ○、通鼓、疊音 ×F5、吊鑔 ×A5），幽靈音加括號。
+- 播放時**音符逐個亮起**（按力度發光），播放頭平滑移動；點小節 = 從那裡播；拖選 = A-B 循環。
+- 長按音符：改鼓件 / 刪除 / 加音符（修正分析錯誤）。
+- 匯出（Pro）：**PDF**（頁腳「Made with Groovelens」）、**MIDI**（GM 鼓組映射）、**MusicXML**（可進 MuseScore / Sibelius）。
+
+### 4. 舞台（Stage）—— 節奏遊戲（招牌場景）
+- **音符軌道**：六條透視霓虹軌道（KICK / SNARE / HAT / TOM / RIDE / CRASH），音符滑向判定線，命中有光爆粒子 + 觸覺回饋。
+- **三種玩法**：
+  1. **Tap 模式**（免費）：沒有鼓也能玩，點螢幕下方六個鼓墊。
+  2. **Kit 模式**（Pro）：戴耳機對著真鼓打，麥克風聽你的每一下，按時間判定（不分鼓件，v1 限制，明說）。
+  3. **Watch 模式**：只看不打，學習用。
+- **判定**：Perfect ±35 ms / Great ±70 ms / Good ±120 ms / Miss；連擊、準確度、最大連擊。
+- **音軌切換**：原曲 / 去鼓伴奏（自己當鼓手）/ 只有鼓；速度 50–100%（不變調）；節拍器 click（跟拍點對齊，不是死板 BPM）；倒數 1 小節。
+- **練習工具**：段落循環；**速度階梯**（Pro）：每次乾淨過完循環自動 +5%，直到 100%。
+
+### 5. 結算（Results）
+- 評級 **S / A / B / C / D** + 0–3 星（S ≥95%、A ≥88%、B ≥75%、C ≥60%）。
+- **時間熱力圖**：每小節偏早/偏晚的顏色帶，一眼看出哪裡趕拍、哪裡拖拍。
+- 獲得 XP 數字滾動、升級動畫、解鎖提示。
+
+### 6. Fills 庫
+- 自動收集所有歌曲裡的 Fill，按歌曲/難度瀏覽，單獨進舞台練。免費看前 3 個，Pro 全部。
+
+### 7. 遊戲化（全部本地，SwiftData）
+| 系統 | 規則 |
+|---|---|
+| XP | 每次結算：命中數 × 判定係數 + 準確度獎勵 + 首次通關獎勵；速度越接近 100% 係數越高 |
+| 等級 | 1–50 級，曲線 `100 × n^1.4`；每 5 級一個稱號（Garage Kid → Session Pro → Groove Legend） |
+| 連續天數 | 當天完成 ≥1 次結算算一天；可用「休息日」保護 1 天/週 |
+| 每日任務 | 每天從曲庫生成 3 個：「在某首歌的 Chorus 拿到 90%」「用 80% 速度通關一個 Fill」「Tap 模式 50 連擊」；完成得 XP |
+| 成就 | 首次 S、100 連擊、連續 7 天、解鎖 10 個 Fill…（約 16 個） |
+| 鼓組皮膚 | 舞台主題：Neon（預設）、Vintage（暖橙膠片）、Studio（銀灰儀表）、Arcade（糖果色）；按等級解鎖，Pro 全開 |
+
+### 8. 免費 / Pro
+| | 免費 | Pro（一次買斷） |
+|---|---|---|
+| 分析歌曲 | 總共 3 首 | 無限 |
+| 鼓譜查看 / 播放 / 修正 | ✓ | ✓ |
+| 舞台 Tap / Watch 模式 | ✓ | ✓ |
+| 舞台 Kit 模式（麥克風打分） | — | ✓ |
+| 速度階梯、Fills 庫完整 | — | ✓ |
+| 匯出 PDF / MIDI / MusicXML | — | ✓ |
+| 鼓組皮膚 | 按等級解鎖 | 全部 |
+
+- **定價**：$14.99 一次買斷（中區 ¥98）。依據：Piano2Notes 年訂 $99.99、Drum2Notes 月訂制；端側處理零邊際成本，所以買斷能做到約對手一年價的 1/7，這就是賣點。上架 3 個月按轉化復盤。
+- 每個免費門都先彈 **Pro 解鎖頁**（列出 Pro 加了什麼 + 商店真實價格 + 解鎖 + 恢復購買），不直接拉起付款；價格用 StoreKit 2 `Product.displayPrice`，不寫死。
+
+### 9. 設定 / 其他
+- 恢復購買、輸入延遲校準（Kit 模式：打 8 下節拍自動測）、左手模式（軌道鏡像）、減少動態效果（跟系統）、關於與開源署名。
+- 語言跟隨系統：en（源）、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。
+- **評價請求**：第 3 次完成結算後調 `requestReview`，90 天最多一次。
+
+## 權限
+| 權限 | 用途 | 拒絕時 |
+|---|---|---|
+| 麥克風 `NSMicrophoneUsageDescription` | 錄音導入、Kit 模式聽你打鼓 | 該功能頁顯示說明 + 「打開設定」按鈕；其餘功能照用 |
+| 相冊 | **不需要**（PhotosPicker 不要權限） | — |
+| 網路 | 不用（內購走系統 StoreKit） | — |
+
+## 技術架構
+- SwiftUI + Observation（`@Observable`）、SwiftData（Song / Session / Progress）、AVFoundation（AVAudioEngine：三個 player node + AVAudioUnitTimePitch + click 節點；輸入 tap 做即時起音）、Accelerate（vDSP FFT、中值濾波）、StoreKit 2、Canvas + TimelineView（軌道 120 Hz、鼓譜）、Core Haptics。
+- 工程用 **XcodeGen**（`project.yml`），CI 生成 `.xcodeproj`；不提交 xcodeproj。
+- 字體：**Unbounded**（標題）+ **Chakra Petch**（HUD/數字）+ 系統字（內文，保 CJK 與動態字級），OFL 授權，隨 App 打包。
+
+## 里程碑
+- **M1（本輪）**：全部畫面 + DSP 分析 + 舞台 Tap/Watch/Kit + 結算 + 遊戲化 + 內購 + 匯出 + 10 語言 + CI 構建/測試/截圖。
+- **M2**：Core ML 鼓轉錄模型（準確度升級）、鎖屏 Live Activity 顯示分析進度、iPad。
+- **M3**：Android（看 iOS 表現再決定）。
+
+## 真機驗收清單
+1. 首次開啟 → 首頁霓虹軌道動畫流暢（60fps）、字體正確。
+2. Files 導入一首 m4a → 分析四步走完 → 鼓譜出現、播放時音符亮起。
+3. 相冊挑一段影片導入 → 能分析。
+4. Record → 首次彈麥克風權限 → 拒絕 → 看到說明和「打開設定」。
+5. 舞台 Tap 模式打一輪 → 判定、連擊、觸覺 → 結算評級、XP 滾動、熱力圖。
+6. 第 4 首歌分析 → 彈 Pro 解鎖頁 → 沙盒購買 → 解鎖；刪 App 重裝 → 恢復購買。
+7. Kit 模式（Pro）戴耳機對鼓打 → 判定合理；做一次延遲校準。
+8. 匯出 PDF / MIDI 並分享；PDF 頁腳有「Made with Groovelens」。
+9. 手機語言切到日文 / 繁中 → 全部介面已翻譯，App 名仍是 Groovelens。
+10. 背景切換、來電打斷 → 播放暫停、回來可繼續，不崩。
