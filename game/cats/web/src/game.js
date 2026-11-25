@@ -85,7 +85,8 @@
     o = o || {};
     var size = o.size || 1, c = new SG.Critter(spec, { seed: G.ents.length + 1, atlas: RULES.paint.textureSize, scale: size });
     scene.add(c.root);
-    if (team === 'cat') { c.tailMode = 'tuck'; c.faceSkin.visible = false; c.blank = true; } // the hider is a plain canvas: no face details to give it away
+    if (team === 'cat') { c.tailMode = 'tuck'; c.faceSkin.visible = false; c.blank = true; c.rim.value = 0; c.mat.envMapIntensity = 1; } /* same shading as the scenery: no fur sheen, no extra reflection, so equal base colour + roughness looks equal */
+    void 0; // the hider is a plain canvas: no face details to give it away
     var e = { size: size, id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
       rad: team === 'dog' ? RULES.dog.bodyRad : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
     if (o.pose) c.setPose(o.pose);
