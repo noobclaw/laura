@@ -102,7 +102,7 @@ namespace DontEatSushi
             {
                 timer = 8f;
                 player.gameObject.SetActive(false);
-                diner.enabled = false;
+                diner.gameObject.SetActive(false);   // 玩家自己就是食客，不需要再顯示一個
                 SpawnBots(4);
                 ammo = MaxAmmo; found = 0; ammoT = 0f; whistleT = 22f;
                 camTarget = new Vector3(0f, 0.3f, -3f); camDist = 13f; camPitch = 50f; camYaw = 0f;
@@ -446,7 +446,7 @@ namespace DontEatSushi
         {
             Build();
             phase = Phase.Hunt;
-            if (hunterView) { role = Role.Hunter; player.gameObject.SetActive(false); SpawnBots(4); }
+            if (hunterView) { role = Role.Hunter; player.gameObject.SetActive(false); diner.gameObject.SetActive(false); SpawnBots(4); }
             for (int i = 0; i < 160; i++) MovePlates(0.05f);
             return cam;
         }

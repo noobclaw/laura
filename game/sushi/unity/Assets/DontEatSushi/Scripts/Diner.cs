@@ -44,8 +44,11 @@ namespace DontEatSushi
             game = g;
             var skin = Mats.Lit(new Color(0.93f, 0.76f, 0.62f), 0.2f);
             var cloth = Mats.Lit(new Color(0.16f, 0.2f, 0.36f), 0.1f);
-            game.Prim(PrimitiveType.Capsule, "DinerBody", new Vector3(0f, 0.5f, -17.5f), new Vector3(10f, 6f, 5f), cloth, false, transform);
-            game.Prim(PrimitiveType.Sphere, "DinerHead", new Vector3(0f, 10.8f, -16.2f), new Vector3(5f, 5.4f, 5f), skin, false, transform);
+            // 巨人的身體不投影子，否則整個吧台都被蓋住
+            var body = game.Prim(PrimitiveType.Capsule, "DinerBody", new Vector3(0f, 0.5f, -17.5f), new Vector3(10f, 6f, 5f), cloth, false, transform);
+            var head = game.Prim(PrimitiveType.Sphere, "DinerHead", new Vector3(0f, 10.8f, -16.2f), new Vector3(5f, 5.4f, 5f), skin, false, transform);
+            body.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            head.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
             var eye = new GameObject("DinerEye");
             eye.transform.SetParent(transform, false);
