@@ -8,7 +8,7 @@
 set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"; dog="$here/../../game/dog-queens/web"; lan="$here/../../game/lantern/prototype3d"; dst="$here/assets/game"
 rm -rf "$dst"; mkdir -p "$dst/assets/art" "$dst/lantern/vendor" "$dst/lantern/assets/fx"
-cp "$dog/core.js" "$dog/music.js" "$dog/solver.js" "$dog/levels.js" "$dog/i18n.js" "$dog/strings.js" "$dog/game.js" "$dog/scene_switch.js" "$dst/"
+cp "$dog/core.js" "$dog/music.js" "$dog/solver.js" "$dog/levels.js" "$dog/i18n.js" "$dog/strings.js" "$dog/game.js" "$dog/scene_switch.js" "$dog/lantern_help.js" "$dst/"
 cp "$dog"/assets/art/*.png "$dst/assets/art/"
 cp "$dog/assets/sfx.js" "$dst/assets/"   # sounds travel as base64 inside this script
 cp "$lan/core.js" "$lan/music.js" "$lan/solver.js" "$lan/levels.js" "$lan/i18n.js" "$lan/game3d.js" "$dst/lantern/"
@@ -29,7 +29,7 @@ h=open(sys.argv[3],encoding="utf-8").read()
 h,n=re.subn(r'<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>\n?','',h);assert n==3,n
 h=common(h)
 a='<script src="game3d.js"></script>';assert h.count(a)==1
-h=h.replace(a,a+'\n<script src="../scene_switch.js"></script>')
+h=h.replace(a,a+'\n<script src="../scene_switch.js"></script>\n<script src="../lantern_help.js"></script>')
 assert "https://" not in h and "http://" not in h.replace("http://www.w3.org","")
 open(sys.argv[4],"w",encoding="utf-8").write(h)
 PY
