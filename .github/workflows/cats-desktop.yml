@@ -1,0 +1,71 @@
+name: Cats Desktop (Electron)
+
+# Runs the rule tests, then packages the web game as a Windows and a macOS client.
+# Download the zips from the run's Artifacts.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [game/cats-web, game/cats-desktop]
+    paths:
+      - 'game/cats/web/**'
+      - 'game/cats/desktop/**'
+      - '.github/workflows/cats-desktop.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Core rule tests
+        working-directory: game/cats/web
+        run: node tests/core.test.js
+
+  package:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+          - os: macos-latest
+            name: macOS
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        working-directory: game/cats/desktop
+        run: npm install --no-audit --no-fund
+      - name: Package (Windows x64)
+        if: runner.os == 'Windows'
+        working-directory: game/cats/desktop
+        shell: pwsh
+        run: |
+          node copy-web.js
+          npx electron-packager . CatsHideDogsSeek --platform=win32 --arch=x64 --out=dist --overwrite --asar --ignore="^/dist" --ignore="^/copy-web.js"
+          Compress-Archive -Path dist/CatsHideDogsSeek-win32-x64 -DestinationPath dist/CatsHideDogsSeek-Windows.zip
+      - name: Package (macOS universal)
+        if: runner.os == 'macOS'
+        working-directory: game/cats/desktop
+        run: |
+          node copy-web.js
+          npx electron-packager . CatsHideDogsSeek --platform=darwin --arch=universal --out=dist --overwrite --asar --ignore="^/dist" --ignore="^/copy-web.js"
+          APP="dist/CatsHideDogsSeek-darwin-universal/CatsHideDogsSeek.app"
+          # Ad-hoc signature only: lets the app launch on Apple Silicon, but Gatekeeper will still warn
+          # until a Developer ID certificate is added and the app is notarized.
+          codesign --force --deep -s - "$APP"
+          codesign --verify --deep "$APP"
+          ditto -c -k --keepParent "$APP" dist/CatsHideDogsSeek-macOS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CatsHideDogsSeek-${{ matrix.name }}
+          path: game/cats/desktop/dist/*.zip
+          if-no-files-found: error
