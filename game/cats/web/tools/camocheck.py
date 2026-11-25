@@ -29,11 +29,12 @@ JS = r"""(pose) => { const G=SG.game, W=SG.WS, post=SG.post, out=[]; G.settings.
  // floors and ceilings: the plainest patches on a grid
  const b=room.bounds, fl=[], ce=[];
  for (let x=b.x0+0.9; x<b.x1-0.9; x+=0.75) for (let z=b.z0+0.9; z<b.z1-0.9; z+=0.75) { const g=room.groundAt(x,z,0.3,0); if (g>0.3||g<-0.01||room.blocked(x,z,g,0.45,0.05,0.4)) continue; m.cling=null; m.x=x; m.z=z; m.y=g; G.place('you',x,g,z,0); const pk=patch(V3(x,g+0.005,z),[0,1,0]); if (pk.sd<2.2) fl.push({x,z,g,pk});
-   m.y=g+1.2; m.cling=null; if (G.tryAttach(m,0,0,[[1,1]])||(()=>{ for(let yy=g+1.5; yy<g+5; yy+=0.25){ m.y=yy; if(G.tryAttach(m,0,0,[[1,1]])) return true; } return false; })()) { const cy=m.y; const pk2=patch(V3(x,cy-0.005,z),[0,-1,0]); if (pk2.sd<2.2) ce.push({x,z,y:cy,pk:pk2}); m.cling=null; } }
+   let cp=null; for (const p of room.platforms) { if (p.y0>g+1.0 && x>p.x0+0.5 && x<p.x1-0.5 && z>p.z0+0.5 && z<p.z1-0.5 && (!cp||p.y0<cp.y0)) cp=p; }
+   if (cp) { m.cling=null; m.y=cp.y0-0.58; if (G.tryAttach(m,0,0,[[1,1]])) { const cy=m.y; const pk2=patch(V3(x,cy-0.005,z),[0,-1,0]); ce.push({x,z,y:cy,pk:pk2}); m.cling=null; } } }
  fl.sort((a,b2)=>a.pk.sd-b2.pk.sd); ce.sort((a,b2)=>a.pk.sd-b2.pk.sd);
  const pick3=(L)=>{ const o=[]; for(const c of L){ if(o.every(q=>Math.hypot(q.x-c.x,q.z-c.z)>3)) o.push(c); if(o.length>=3) break; } return o; };
  for (const c of pick3(fl)) { m.cling=null; G.place('you',c.x,c.g,c.z,0.4); G.step(0.1); measure('floor '+(c.x/W).toFixed(1)+','+(c.z/W).toFixed(1), 'floor', [0,1,0], c.pk); }
- for (const c of pick3(ce)) { m.cling=null; m.c.setPose('stand'); m.x=c.x; m.z=c.z; m.y=c.y-0.3; G.tryAttach(m,0,0,[[1,1]]); if(!m.cling){ out.push({spot:'ceiling', kind:'ceiling', err:'could not attach'}); continue; } G.step(0.1); measure('ceiling '+(c.x/W).toFixed(1)+','+(c.z/W).toFixed(1)+' y '+c.y.toFixed(2), 'ceiling', [0,-1,0], c.pk); }
+ for (const c of pick3(ce)) { m.cling=null; m.c.setPose('stand'); m.x=c.x; m.z=c.z; m.y=c.y-0.58; G.tryAttach(m,0,0,[[1,1]]); if(!m.cling){ out.push({spot:'ceiling', kind:'ceiling', err:'could not attach'}); continue; } G.step(0.1); measure('ceiling '+(c.x/W).toFixed(1)+','+(c.z/W).toFixed(1)+' y '+c.y.toFixed(2), 'ceiling', [0,-1,0], c.pk); }
  return {out, floorsFound:fl.length, ceilingsFound:ce.length}; }"""
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True, args=ARGS)

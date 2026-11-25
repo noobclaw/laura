@@ -85,7 +85,7 @@
     var row = function (k, label, on, dim) { return '<div class="kc' + (on ? ' on' : '') + (dim ? ' dim' : '') + '">' + key(k) + '<span>' + label + '</span></div>'; }, s = row('T', t('k_chat'));
     if (G.fly) s += G.fly.hide ? row('5', '回到身體') + row('WASD', '飛行') : row('4', t('watch')) + row('5', t('free')) + row('左鍵', t('next'));
     else if (me.team === 'cat') s += row('1', t('k_taunt')) + row('R', t('k_pose')) + row('F', t('k_paint'), G.paint.on) + row('右鍵', t('k_lock'), G.viewLock) + row('2', t('k_tags'), G.tags) + row('3', t('k_thru'), G.seeThrough !== false) + row('5', t('free')) + row('Y', '夠了（跳過）');
-    else s += row('左鍵', t('k_fire')) + row('右鍵', t('k_third'), G.third) + row('空白', t('k_jump')) + row('Ctrl', t('k_crouch')) + row('Shift', t('k_run')) + row('2', t('k_tags'), G.tags);
+    else s += row('左鍵', t('k_fire')) + row('右鍵', t('k_third'), G.third) + row('空白', t('k_jump')) + row('C', '按住：抬頭看高處', !!(G.me && G.me.rearT)) + row('Ctrl', t('k_crouch')) + row('Shift', t('k_run')) + row('2', t('k_tags'), G.tags);
     s += row('V', t('k_mic'), false, true) + row('B', t('k_ear'), false, true); c.innerHTML = s;
   }
   function cbar() {
@@ -94,7 +94,7 @@
     if (me.team === 'cat' && !G.fly) {
       var n = G.decoys.filter(function (d) { return d.c.root.visible; }).length, mx = SG.RULES.cat.maxDecoys;
       s += '<div class="slots">' + key('Q'); G.decoySlots.forEach(function (sl, i) { s += '<i class="dia' + (sl.e ? ' used' : sl.cd > 0 ? ' cd' : '') + '" data-slot="' + i + '" title="' + (sl.cd > 0 ? Math.ceil(sl.cd) + ' s' : '') + '">' + (!sl.e && sl.cd > 0 ? '<u>' + Math.ceil(sl.cd) + '</u>' : '') + '</i>'; }); s += '<span class="key x">X</span></div><div class="ctx">';
-      if (G.paint.on) s += kb('空白', t('eyedrop')) + kb('右鍵拖', t('brush')) + kb('V', t('shade')) + kb('中鍵拖', t('camrot')) + kb('滾輪', t('zoom'));
+      if (G.paint.on) s += kb('空白', t('eyedrop')) + kb('右鍵拖', t('brush')) + kb('雙擊', '填滿這一塊') + kb('H', '顯示沒塗到的') + kb('V', t('shade')) + kb('中鍵拖', t('camrot')) + kb('滾輪', t('zoom'));
       else if (me.cling) s += kb('Shift', t('rel')) + kb('Ctrl', t('down')) + kb('空白', t('up'));
       else s += kb('空白', '跳／跳向牆面黏住') + kb('Shift', t('k_run')) + kb('左鍵+A/D', '原地轉身');
       s += '</div>';

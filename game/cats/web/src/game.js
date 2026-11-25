@@ -51,8 +51,13 @@
         var last = performance.now();
         function frame(now) {
           if (G.opts.fpsCap && now - last < 1000 / G.opts.fpsCap - 1) { requestAnimationFrame(frame); return; }
-          var dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now; G.ft = G.ft == null ? dt : G.ft + (dt - G.ft) * 0.08; G.ftMax = Math.max((G.ftMax || 0) * 0.995, dt);
-          if (!G.paused) update(dt);
+          var raw = Math.max(0, Math.min(0.1, (now - last) / 1000)), dt = raw; last = now; G.ft = G.ft == null ? raw : G.ft + (raw - G.ft) * 0.08; G.ftMax = Math.max((G.ftMax || 0) * 0.995, raw);
+          // smooth motion: (1) frame timestamps jitter by a millisecond or two even when the display is perfectly regular, so a frame time close to the running average
+          // is replaced by that average (the small difference is paid back over the next frames); (2) a long frame is simulated in several short steps, so jumps,
+          // easing and collisions behave the same at 30 fps as at 240. Simulated time always equals displayed time: nothing needs interpolating.
+          G.dtAvg = G.dtAvg == null ? raw : G.dtAvg + (raw - G.dtAvg) * 0.08;
+          if (Math.abs(raw - G.dtAvg) < G.dtAvg * 0.25) { G.dtDebt = (G.dtDebt || 0) + raw - G.dtAvg; var pay = Math.max(-0.001, Math.min(0.001, G.dtDebt * 0.1)); dt = G.dtAvg + pay; G.dtDebt -= pay; } else G.dtDebt = 0;
+          if (!G.paused) { var nsub = Math.max(1, Math.ceil(dt / (1 / 90))); G.subSteps = nsub; for (var si = 0; si < nsub; si++) update(dt / nsub); }
           render(dt);
           G.frames = (G.frames || 0) + 1;
           requestAnimationFrame(frame);
@@ -109,7 +114,7 @@
   }
   var _bx = V(), _by = V(), _bz = V(), _bm = new THREE.Matrix4();
   function place(e) { // on the ground: yaw only. Stuck to a surface: body up = surface normal, head along cling.f
-    var r = e.c.root; r.position.set(e.x, e.y, e.z);
+    var r = e.c.root; r.position.set(e.x, e.y + (e.cling ? 0 : e.ryOff || 0), e.z);
     if (e.cling) { _by.fromArray(e.cling.n); _bz.fromArray(e.cling.f); _bx.crossVectors(_by, _bz); if (_bx.lengthSq() < 1e-6) _bx.set(1, 0, 0); _bx.normalize(); _bz.crossVectors(_bx, _by); _bm.makeBasis(_bx, _by, _bz); r.quaternion.setFromRotationMatrix(_bm); }
     else r.rotation.set(0, e.yaw, 0, 'YXZ');
   }
@@ -122,13 +127,15 @@
   function ent(id) { for (var i = 0; i < G.ents.length; i++) if (G.ents[i].id === id) return G.ents[i]; return null; }
   function cats() { return G.ents.filter(function (e) { return e.team === 'cat'; }); }
 
-  function pushOut(x, z, r, y0, y1, out) { // a circle against the solids between two heights: moved out along the shortest way
+  function pushOut(x, z, r, y0, y1, out, qx, qz) { // a circle against the solids between two heights: moved out along the shortest way
     var P = room.platforms, hit = null;
     for (var i = 0; i < P.length; i++) { var p = P[i]; if (p.y1 <= y0 || p.y0 >= y1) continue; if (x < p.x0 - r || x > p.x1 + r || z < p.z0 - r || z > p.z1 + r) continue;
       var cx = x < p.x0 ? p.x0 : x > p.x1 ? p.x1 : x, cz = z < p.z0 ? p.z0 : z > p.z1 ? p.z1 : z, ex = x - cx, ez = z - cz, d2 = ex * ex + ez * ez;
       if (d2 >= r * r) continue; hit = p;
       if (d2 > 1e-10) { var d = Math.sqrt(d2), k = (r - d) / d; x += ex * k; z += ez * k; }
-      else { var l = x - p.x0, rr = p.x1 - x, n = z - p.z0, f = p.z1 - z, m = Math.min(l, rr, n, f); if (m === l) x = p.x0 - r; else if (m === rr) x = p.x1 + r; else if (m === n) z = p.z0 - r; else z = p.z1 + r; } }
+      else { // the centre itself is inside (a thin post entered in one step): go back out on the side it came from, never pop through to the far side
+        var done = false; if (qx != null) { var bx = qx < p.x0 ? p.x0 : qx > p.x1 ? p.x1 : qx, bz = qz < p.z0 ? p.z0 : qz > p.z1 ? p.z1 : qz, fx2 = qx - bx, fz2 = qz - bz, fl = Math.hypot(fx2, fz2); if (fl > 1e-6) { x = bx + fx2 / fl * r; z = bz + fz2 / fl * r; done = true; } }
+        if (!done) { var l = x - p.x0, rr = p.x1 - x, n = z - p.z0, f = p.z1 - z, m = Math.min(l, rr, n, f); if (m === l) x = p.x0 - r; else if (m === rr) x = p.x1 + r; else if (m === n) z = p.z0 - r; else z = p.z1 + r; } } }
     out[0] = x; out[1] = z; return hit;
   }
   var _po = [0, 0];
@@ -137,7 +144,7 @@
     var dist = Math.hypot(dx, dz), n = Math.max(1, Math.ceil(dist / (r * 0.6))), sx = e.x, sz = e.z, hit = null, offs = hl > 0.01 ? [0, hl, -hl] : [0];
     for (var s = 0; s < n; s++) {
       var x = e.x + dx / n, z = e.z + dz / n;
-      for (var it = 0; it < 3; it++) { var any = false; for (var q = 0; q < offs.length; q++) { var px = x + fx * offs[q], pz = z + fz * offs[q], hp = pushOut(px, pz, r, y0, y1, _po); if (hp) { x += _po[0] - px; z += _po[1] - pz; hit = hp; any = true; } } if (!any) break; }
+      for (var it = 0; it < 3; it++) { var any = false; for (var q = 0; q < offs.length; q++) { var px = x + fx * offs[q], pz = z + fz * offs[q], hp = pushOut(px, pz, r, y0, y1, _po, e.x + fx * offs[q], e.z + fz * offs[q]); if (hp) { x += _po[0] - px; z += _po[1] - pz; hit = hp; any = true; } } if (!any) break; }
       // world edge, pond, the drop to the garden: the old point test, one axis at a time
       var wb = room.blocked(x, e.z, e.y, 0.05, e.step, 0.02); if (wb === true) { x = e.x; hit = hit || true; }
       wb = room.blocked(x, z, e.y, 0.05, e.step, 0.02); if (wb === true) { z = e.z; hit = hit || true; }
@@ -151,7 +158,8 @@
     if (e.y > g + 0.001 || e.vy > 0) {
       e.vy -= 9.8 * dt; e.y += e.vy * dt; e.air = true;
       if (e.y <= g && e.vy <= 0) { if (e.vy < -2) e.c.squash = 1; e.y = g; e.vy = 0; e.air = false; if (e === G.me) bus.emit('land'); }
-    } else { e.y = g; e.vy = 0; e.air = false; }
+    } else { if (g > e.y + 0.012) e.ryOff = (e.ryOff || 0) + e.y - g; /* stepping up: the collision height changes at once, the body you see rises over about a fifth of a second */ e.y = g; e.vy = 0; e.air = false; }
+    if (e.ryOff) { e.ryV = e.ryV || { v: 0 }; e.ryOff = smoothDamp(e.ryOff, 0, e.ryV, 0.11, 10, dt); if (Math.abs(e.ryOff) < 0.0005) { e.ryOff = 0; e.ryV.v = 0; } }
     e.onVac = Math.abs(g - room.vac.top) < 1e-3 && Math.hypot(e.x - room.vac.x, e.z - room.vac.z) < 0.2 * SG.WS && !e.air;
   }
 
@@ -220,7 +228,7 @@
   };
   G.start = function (side, breed) {
     G.lobby = null; if (lobbyMat) scene.remove(lobbyMat);
-    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.liked = false; G.likes = {}; G.seeThrough = true; G.cam.kk = null; G.cam.look = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.decoySlots = [{ cd: 0, e: null }, { cd: 0, e: null }]; G.embedT = 0;
+    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.liked = false; G.likes = {}; G.seeThrough = true; G.cam.kk = null; G.cam.t3 = null; G.cam.look = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.decoySlots = [{ cd: 0, e: null }, { cd: 0, e: null }]; G.embedT = 0;
     var WS = SG.WS, S = G.settings, mode = S.mode, players = [], nd = Math.max(1, Math.min(3, S.dogs || (side === 'cat' && mode !== 'double' ? RULES.solo.botDogsWhenCat : RULES.solo.botDogsWhenDog + 1)));
     RULES.round.prepSec = S.prep; RULES.round.seekSec = S.seek; RULES.round.revealSec = S.reveal; RULES.dog.startAmmo = S.ammo; RULES.dog.unlimited = !!S.unlimited;
     if (mode === 'double') side = 'cat';
@@ -554,23 +562,54 @@
 
   /* ------------------------------------------------------------------ walking grid for bots (ground level: house, engawa, garden, alleys) */
   var NAV = null;
+  var NAVR = 0.3, NAVH = 0.24; // the walking grid is cut for the flat dog: its half length all round, its height (so it also runs under tables)
   function buildNav() {
     var b = room.bounds, cs = 0.3, nx = Math.ceil((b.x1 - b.x0) / cs), nz = Math.ceil((b.z1 - b.z0) / cs), g = new Float32Array(nx * nz), ok = new Uint8Array(nx * nz), i, j;
-    for (j = 0; j < nz; j++) for (i = 0; i < nx; i++) { var x = b.x0 + (i + 0.5) * cs, z = b.z0 + (j + 0.5) * cs, y = room.groundAt(x, z, 0.3, 0); g[j * nx + i] = y; ok[j * nx + i] = y < 0.36 && !room.blocked(x, z, y, 0.24, 0.24, 0.62) ? 1 : 0; }
+    for (j = 0; j < nz; j++) for (i = 0; i < nx; i++) { var x = b.x0 + (i + 0.5) * cs, z = b.z0 + (j + 0.5) * cs, y = room.groundAt(x, z, 0.3, 0); g[j * nx + i] = y; ok[j * nx + i] = y < 0.36 && !room.blocked(x, z, y, NAVR, RULES.move.stepUp, NAVH) ? 1 : 0; }
     NAV = { x0: b.x0, z0: b.z0, cs: cs, nx: nx, nz: nz, g: g, ok: ok, prev: new Int32Array(nx * nz), q: new Int32Array(nx * nz) };
   }
-  function navCell(x, z, near) { // the cell under a point, or the closest walkable one within about a metre
-    var N = NAV, i = Math.max(0, Math.min(N.nx - 1, Math.floor((x - N.x0) / N.cs))), j = Math.max(0, Math.min(N.nz - 1, Math.floor((z - N.z0) / N.cs))); if (N.ok[j * N.nx + i] || !near) return N.ok[j * N.nx + i] ? j * N.nx + i : -1;
-    for (var r = 1; r <= 4; r++) for (var dj = -r; dj <= r; dj++) for (var di = -r; di <= r; di++) { var a = i + di, b2 = j + dj; if (a >= 0 && b2 >= 0 && a < N.nx && b2 < N.nz && N.ok[b2 * N.nx + a]) return b2 * N.nx + a; } return -1;
+  function navCell(x, z, near, y) { // the cell under a point, or the closest walkable one within about a metre; with y: only cells at that height (a body that fell off a ledge starts from where it really is)
+    var N = NAV, i = Math.max(0, Math.min(N.nx - 1, Math.floor((x - N.x0) / N.cs))), j = Math.max(0, Math.min(N.nz - 1, Math.floor((z - N.z0) / N.cs))), c0 = j * N.nx + i, lv = function (c) { return y == null || Math.abs(N.g[c] - y) < 0.3; }; if ((N.ok[c0] && lv(c0)) || !near) return N.ok[c0] ? c0 : -1;
+    for (var r = 1; r <= 4; r++) for (var dj = -r; dj <= r; dj++) for (var di = -r; di <= r; di++) { var a = i + di, b2 = j + dj; if (a >= 0 && b2 >= 0 && a < N.nx && b2 < N.nz && N.ok[b2 * N.nx + a] && lv(b2 * N.nx + a)) return b2 * N.nx + a; } return y == null ? -1 : navCell(x, z, near);
   }
-  function navPath(x0, z0, x1, z1) {
-    if (!NAV) buildNav(); var N = NAV, s = navCell(x0, z0, true), e = navCell(x1, z1, true); if (s < 0 || e < 0) return null; if (s === e) return [[x1, z1]];
+  function navPath(x0, z0, x1, z1, y0) {
+    if (!NAV) buildNav(); var N = NAV, s = navCell(x0, z0, true, y0), e = navCell(x1, z1, true); if (s < 0 || e < 0) return null; if (s === e) return [[x1, z1]];
     var prev = N.prev, q = N.q, h = 0, t = 0, nx = N.nx, DI = [1, -1, 0, 0, 1, 1, -1, -1], DJ = [0, 0, 1, -1, 1, -1, 1, -1], k; prev.fill(-1); prev[e] = e; q[t++] = e; // search back from the goal
     while (h < t && prev[s] < 0) { var c = q[h++], ci = c % nx, cj = (c - ci) / nx;
-      for (k = 0; k < 8; k++) { var ni = ci + DI[k], nj = cj + DJ[k]; if (ni < 0 || nj < 0 || ni >= nx || nj >= N.nz) continue; var n = nj * nx + ni; if (!N.ok[n] || prev[n] >= 0 || Math.abs(N.g[n] - N.g[c]) > 0.26) continue; if (k > 3 && (!N.ok[cj * nx + ni] || !N.ok[nj * nx + ci])) continue; prev[n] = c; q[t++] = n; } }
+      for (k = 0; k < 8; k++) { var ni = ci + DI[k], nj = cj + DJ[k]; if (ni < 0 || nj < 0 || ni >= nx || nj >= N.nz) continue; var n = nj * nx + ni; if (!N.ok[n] || prev[n] >= 0 || Math.abs(N.g[n] - N.g[c]) > RULES.move.stepUp + 0.02) continue; if (k > 3 && (!N.ok[cj * nx + ni] || !N.ok[nj * nx + ci])) continue; prev[n] = c; q[t++] = n; } }
     if (prev[s] < 0) return null; var out = [], c2 = prev[s], guard = 0; while (c2 !== e && guard++ < 9000) { out.push([N.x0 + (c2 % nx + 0.5) * N.cs, N.z0 + (Math.floor(c2 / nx) + 0.5) * N.cs]); c2 = prev[c2]; } out.push([N.x0 + (e % nx + 0.5) * N.cs, N.z0 + (Math.floor(e / nx) + 0.5) * N.cs]); return out;
   }
   G.navPath = navPath;
+  /* last resort: a body that is being pushed but has not moved for a while is put on the nearest free spot (never through a wall: the spot must be connected on the walking grid) */
+  function unstick(e) {
+    if (!NAV) buildNav(); var best = null, bd = 1e9, y0 = e.y + e.step, y1 = e.y + (e.h || 0.2);
+    for (var r = 0.08; r <= 0.56 && !best; r += 0.08) for (var a = 0; a < 6.28; a += 0.524) { var x = e.x + Math.cos(a) * r, z = e.z + Math.sin(a) * r; if (pushOut(x, z, (e.halfLen || e.rad) + 0.02, y0, y1, _po)) continue; if (room.blocked(x, z, e.y, 0.05, e.step, 0.02) === true || room.segWalls(e.x, e.y + 0.08, e.z, x, e.y + 0.08, z) < 1) continue; var d = Math.hypot(x - e.x, z - e.z); if (d < bd) { bd = d; best = [x, z]; } }
+    if (best) { e.x = best[0]; e.z = best[1]; bus.emit('unstuck', { id: e.id }); } return !!best;
+  }
+  G.unstick = unstick;
+  /* walk a dog-sized body along goals the way a player would (turn to the next point, push forward) and report every stall longer than a second.
+     goals: 'route' = the patrol tour through every room and doorway; 'edges' = points along every wall and furniture edge of the walking grid */
+  G.walkTest = function (which, o) {
+    o = o || {}; if (!NAV) buildNav(); var N = NAV, goals = [], i, j, e = o.ent || G.me, sp = o.speed || RULES.dog.speed, dt = 1 / 60, out = { goals: 0, reached: 0, skipped: [], stalls: [], nudges: 0, dist: 0, time: 0 };
+    if (which === 'route') goals = room.route.map(function (w) { return [w[0], w[1]]; });
+    else { for (j = 1; j < N.nz - 1; j += 2) for (i = 1; i < N.nx - 1; i += 2) { var c = j * N.nx + i; if (!N.ok[c]) continue; if (N.ok[c - 1] && N.ok[c + 1] && N.ok[c - N.nx] && N.ok[c + N.nx]) continue; goals.push([N.x0 + (i + 0.5) * N.cs, N.z0 + (j + 0.5) * N.cs]); }
+      var tour = [], cur = [e.x, e.z]; while (goals.length) { var bi = 0, bd = 1e9; for (i = 0; i < goals.length; i++) { var dd = Math.hypot(goals[i][0] - cur[0], goals[i][1] - cur[1]); if (dd < bd) { bd = dd; bi = i; } } cur = goals.splice(bi, 1)[0]; tour.push(cur); } goals = tour; if (o.max) goals = goals.slice(0, o.max); }
+    out.goals = goals.length; var un = G.unstuckOff; G.unstuckOff = !!o.noNudge;
+    for (var g = 0; g < goals.length; g++) {
+      var path = navPath(e.x, e.z, goals[g][0], goals[g][1], e.y); if (!path) { out.skipped.push(goals[g].map(function (v) { return +(v / SG.WS).toFixed(2); })); continue; }
+      var pi = 0, still = 0, lastD = 1e9, guard = 0, bad = false;
+      while (pi < path.length && guard++ < 60 * 40) {
+        var tx = path[pi][0], tz = path[pi][1], d = Math.hypot(tx - e.x, tz - e.z); if (d < 0.3) { pi++; lastD = 1e9; still = 0; continue; }
+        e.yaw = turn(e.yaw, Math.atan2(tx - e.x, tz - e.z), dt * 10); var px = e.x, pz = e.z; e.hitWallX = e.hitWallZ = 0; e.hitPlat = null; moveEnt(e, Math.sin(e.yaw) * sp * dt, Math.cos(e.yaw) * sp * dt, dt); physEnt(e, dt);
+        out.dist += Math.hypot(e.x - px, e.z - pz); out.time += dt;
+        if (d < lastD - 0.004) { lastD = d; still = 0; } else { still += dt; if (still > 1) { if (!bad) out.stalls.push({ at: [+(e.x / SG.WS).toFixed(2), +(e.z / SG.WS).toFixed(2)], y: +e.y.toFixed(2), to: [+(tx / SG.WS).toFixed(2), +(tz / SG.WS).toFixed(2)], goal: g }); bad = true; if (!o.noNudge && unstick(e)) out.nudges++; still = 0; lastD = 1e9; if (o.noNudge || guard > 60 * 30) break; } }
+      }
+      if (pi >= path.length) out.reached++; else if (!bad) out.stalls.push({ at: [+(e.x / SG.WS).toFixed(2), +(e.z / SG.WS).toFixed(2)], timeout: true, goal: g });
+    }
+    G.unstuckOff = un; out.dist = +out.dist.toFixed(1); out.time = +out.time.toFixed(1); return out;
+  };
+  /* how much of the walking grid a dog can reach from the entry point with a given step-up height */
+  G.navStats = function (step) { var s0 = RULES.move.stepUp; RULES.move.stepUp = step; NAV = null; buildNav(); var N = NAV, tot = 0, i; for (i = 0; i < N.ok.length; i++) tot += N.ok[i]; var un = []; room.route.forEach(function (w, k) { if (!navPath(G.dogSpawn[0], G.dogSpawn[1], w[0], w[1])) un.push(k); }); RULES.move.stepUp = s0; NAV = null; return { step: step, walkable: tot, routeGoals: room.route.length, unreachable: un }; };
 
   /* ------------------------------------------------------------------ bot dog */
   function botDog(d, dt) {
@@ -624,8 +663,8 @@
     }
     if (ai.heard) { tx = ai.heard[0]; tz = ai.heard[1]; ai.heardT = (ai.heardT || 0) + dt; if (Math.hypot(tx - d.x, tz - d.z) < 1.4 || ai.heardT > 6) { ai.heard = null; ai.heardT = 0; ai.wait = 2.0; } }
     else { // patrol: the tour gives the goals, the walking grid finds the way round furniture to each of them
-      var WPS = room.route, w = WPS[ai.wp % WPS.length];
-      if (ai.pathWp !== ai.wp || !ai.path) { ai.path = navPath(d.x, d.z, w[0], w[1]); ai.pathWp = ai.wp; ai.pi = 0; if (!ai.path) { ai.wp += 1; ai.path = null; return; } } // nowhere to stand there (upstairs, inside something): next goal
+      var WPS = G.botRoute || (G.botRoute = room.route.filter(function (q) { return !!navPath(G.dogSpawn[0], G.dogSpawn[1], q[0], q[1], 0); })), w = WPS[ai.wp % WPS.length];
+      if (ai.pathWp !== ai.wp || !ai.path) { ai.path = navPath(d.x, d.z, w[0], w[1], d.y); ai.pathWp = ai.wp; ai.pi = 0; if (!ai.path) { ai.wp += 1; ai.path = null; return; } } // nowhere to stand there (upstairs, inside something): next goal
       var pt = ai.path[Math.min(ai.pi, ai.path.length - 1)]; tx = pt[0]; tz = pt[1];
       if (Math.hypot(tx - d.x, tz - d.z) < 0.36) { ai.pi++; if (ai.pi >= ai.path.length) { ai.path = null; if (rnd() < 0.04 && ai.wp > 3) { ai.wp -= 2; bus.emit('say', { id: d.id, text: '再看一次' }); } else ai.wp += 1; ai.wait = rnd() < 0.3 ? 0.6 + rnd() * 0.9 : 0; ai.look = (rnd() - 0.5) * 2.4; } } }
     if (ai.wait > 0) { ai.wait -= dt; d.speed = 0; d.rearT = ai.wait > 0.3 ? 1 : 0; d.pitch = 0.25; d.yaw += Math.sin(G.simT * 1.4) * dt * 0.9 + ai.look * dt * 0.4; return; }
@@ -924,12 +963,13 @@
             if (G.guide === 0 && (G.moved = (G.moved || 0) + sp * dt) > 1.5) setGuide(1);
           }
           me.speed = Math.hypot(me.x - px, me.z - pz) / Math.max(dt, 1e-4);
+          stuckWatch(me, l > 0.01 && !me.cling, dt);
           if (me.onVac && me.speed < 0.05) { me.x += vdx; me.z += vdz; } // riding the robot vacuum counts as standing still
         } else {
           var yw = me.yaw; if (k.ArrowLeft) me.yaw += dt * 1.9; if (k.ArrowRight) me.yaw -= dt * 1.9; if (k.ArrowUp) me.pitch = Math.min(1.2, me.pitch + dt * 1.2); if (k.ArrowDown) me.pitch = Math.max(-1.2, me.pitch - dt * 1.2);
           var dcr = k.Control; me.crouch = !!dcr; me.rearT = k.c && !me.cling ? 1 : 0; /* hold C: rear up for a higher look (the body module's rearUp) */
           if (me.cling) { var cy0 = G.cam.yaw; G.cam.yaw = me.yaw + Math.PI; clingMove(me, f, s, dt); G.cam.yaw = cy0; }
-          else if (st.phase === 'seek') { me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; var sp2 = (k.Shift ? RULES.dog.runSpeed : RULES.dog.speed) * (dcr ? RULES.dog.crouchSpeed : 1), mx = Math.sin(yw) * f - Math.cos(yw) * s, mz = Math.cos(yw) * f + Math.sin(yw) * s, pl = Math.hypot(mx, mz), qx = me.x, qz = me.z; if (pl > 0.01) moveEnt(me, mx / pl * sp2 * dt, mz / pl * sp2 * dt, dt); me.speed = Math.hypot(me.x - qx, me.z - qz) / Math.max(dt, 1e-4); if (me.air && me.hitPlat && me.hitPlat !== true && me.y - room.groundAt(me.x, me.z, me.y + 0.1, 0) > 0.2) tryAttach(me, me.hitWallX || 0, me.hitWallX ? 0 : me.hitWallZ, [[me.hitWallX ? 0 : 2, (me.hitWallX || me.hitWallZ) > 0 ? 1 : -1]]); if (me.air && me.vy > 0 && !me.cling) tryAttach(me, 0, 0, [[1, 1]]); }
+          else if (st.phase === 'seek') { me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; var sp2 = (k.Shift ? RULES.dog.runSpeed : RULES.dog.speed) * (dcr ? RULES.dog.crouchSpeed : 1), mx = Math.sin(yw) * f - Math.cos(yw) * s, mz = Math.cos(yw) * f + Math.sin(yw) * s, pl = Math.hypot(mx, mz), qx = me.x, qz = me.z, dka = 1 - Math.exp(-dt * (pl > 0.01 ? RULES.cat.accel : RULES.cat.decel)); me.velx = (me.velx || 0) + ((pl > 0.01 ? mx / pl * sp2 : 0) - (me.velx || 0)) * dka; me.velz = (me.velz || 0) + ((pl > 0.01 ? mz / pl * sp2 : 0) - (me.velz || 0)) * dka; if (pl <= 0.01 && Math.hypot(me.velx, me.velz) < 0.2) me.velx = me.velz = 0; /* the dog eases into and out of its speed like the cat does: no instant starts, stops or reversals */ if (me.velx || me.velz) moveEnt(me, me.velx * dt, me.velz * dt, dt); if (me.hitWallX) me.velx = 0; if (me.hitWallZ) me.velz = 0; me.speed = Math.hypot(me.x - qx, me.z - qz) / Math.max(dt, 1e-4); stuckWatch(me, pl > 0.01, dt); if (me.air && me.hitPlat && me.hitPlat !== true && me.y - room.groundAt(me.x, me.z, me.y + 0.1, 0) > 0.2) tryAttach(me, me.hitWallX || 0, me.hitWallX ? 0 : me.hitWallZ, [[me.hitWallX ? 0 : 2, (me.hitWallX || me.hitWallZ) > 0 ? 1 : -1]]); if (me.air && me.vy > 0 && !me.cling) tryAttach(me, 0, 0, [[1, 1]]); }
           // the player dog also feeds the 見落とし score: pixels of each cat actually visible on this dog's screen
           G.ovT = (G.ovT || 0) - dt; if (G.ovT <= 0 && st.phase === 'seek') { G.ovT = RULES.overlooked.tickEverySec; overlookTick(me, G.third ? dogCam(me) : camera); }
         }
@@ -946,7 +986,7 @@
       e.c.speed = e.team === 'cat' && e.c.pose !== 'stand' && e.c.pose !== 'crouch' ? 0 : e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
-      if (e.team === 'cat' && e.c.flatU) { var posedF = e.c.pose !== 'stand' && e.c.pose !== 'crouch', fT = e.cling && posedF ? 0.9 : posedF && !e.air ? 0.45 : 0; e.c.flatU.value += (fT - e.c.flatU.value) * Math.min(1, dt * 6); if (e.cling) e.c.flatN.value.fromArray(e.cling.n); else e.c.flatN.value.set(0, 1, 0); e.c.skin.castShadow = !(e.cling && posedF); }
+      if (e.team === 'cat' && e.c.flatU) { var posedF = e.c.pose !== 'stand' && e.c.pose !== 'crouch', thin = posedF && !e.air && e.c.measure && e.c.measure().size[1] < 0.13, fT = (e.cling || thin) && posedF ? 0.9 : posedF && !e.air ? 0.45 : 0; /* OURS (labelled): a posed body that lies flat on a floor, wall or ceiling is shaded like that surface and casts no shadow */ e.c.flatU.value += (fT - e.c.flatU.value) * Math.min(1, dt * 6); if (e.cling) e.c.flatN.value.fromArray(e.cling.n); else e.c.flatN.value.set(0, 1, 0); e.c.skin.castShadow = !((e.cling || thin) && posedF); }
       if (e === me && e.team === 'cat') e.c.frozen = (e.c.pose !== 'stand' && e.c.pose !== 'crouch' || (G.paint.on && !(e.speed > 0.05) && !e.air)) || !!e.out; /* and it holds still under the brush */ /* your own posed body is perfectly still too */
       if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.walk) || !!e.out || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = false; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
@@ -964,6 +1004,7 @@
     paintFrame(dt);
     if (G.mode === 'play' && st) bus.emit('frame', { left: st.left, phase: st.phase });
   }
+  function stuckWatch(e, pushing, dt) { if (pushing && e.speed < 0.08 && !e.air && !G.unstuckOff) { e.stuckT = (e.stuckT || 0) + dt; if (e.stuckT > 0.8) { e.stuckT = 0; var P0 = room.platforms, inside = pushOut(e.x, e.z, e.rad * 0.6, e.y + e.step, e.y + (e.h || 0.2), _po); if (inside) unstick(e); } } else e.stuckT = 0; } // only when the body is actually wedged inside something, not when it simply faces a wall
   /* per-frame paint feel: brush cursor on the body, droplets, fill wipe, "white left" */
   function sideBlocked(ctr, d) { var r = 0.34 * (G.me.size || 1), x = ctr.x + d[0] * r, y = ctr.y + d[1] * r, z = ctr.z + d[2] * r; if (y < room.base(x, z) + 0.01) return true; tmp2.set(x, y, z); return !!segSolid(ctr, tmp2, 0) || room.segWalls(ctr.x, ctr.y, ctr.z, x, y, z) < 0.999; }
   function paintFrame(dt) {
@@ -1106,6 +1147,11 @@
   }
 
   /* ------------------------------------------------------------------ cameras */
+  /* critically damped approach with a top speed (the classic "smooth damp") */
+  function smoothDamp(cur, target, vel, smoothTime, maxSpeed, dt) {
+    if (!(dt > 0)) return cur; var om = 2 / smoothTime, x = om * dt, ex = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x), ch = cur - target, mc = maxSpeed * smoothTime; if (ch > mc) ch = mc; else if (ch < -mc) ch = -mc;
+    var t2 = cur - ch, tmpv = (vel.v + om * ch) * dt; vel.v = (vel.v - om * tmpv) * ex; var out = t2 + (ch + tmpv) * ex; if ((target - cur > 0) === (out > target)) { out = target; vel.v = 0; } return out;
+  }
   function updateCamera(dt) {
     var me = G.me, cm = G.cam;
     if (G.mode === 'title') {
@@ -1128,18 +1174,20 @@
         if (dn < need) { ox += cn[0] * (need - dn); oy += cn[1] * (need - dn); oz += cn[2] * (need - dn); } }
       var thru = G.paint.on && G.seeThrough !== false; // camera pass-through: in paint mode the camera goes through things and whatever is between it and you is cut away
       var tw = thru ? 1 : room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
-      cm.kk = cm.kk == null ? kk : cm.kk + (kk - cm.kk) * (1 - Math.exp(-dt * (kk < cm.kk ? 40 : 3.5))); kk = cm.kk; // pull in fast when something is in the way, ease back out slowly: no ping-pong
-      camera.near = thru ? Math.max(0.06, dist * kk - 0.42 * (me.size || 1)) : 0.06;
+      // the boom length follows a damped spring with a speed limit (never a jump); while the camera is still on its way in, whatever stands between
+      // it and the body is cut away with the near plane instead, so the view is never blocked and the picture never jolts
+      cm.kv = cm.kv || { v: 0 }; cm.kk = cm.kk == null ? kk : smoothDamp(cm.kk, kk, cm.kv, kk < cm.kk ? 0.16 : 0.5, 2.6 / Math.max(0.5, dist), dt); var lagK = Math.max(0, cm.kk - kk); kk = cm.kk;
+      var nearT = thru ? Math.max(0.06, dist * kk - 0.42 * (me.size || 1)) : lagK > 0.004 ? Math.min(Math.max(0.06, dist * kk - 0.4 * (me.size || 1)), lagK * dist * 1.12 + 0.14) : 0.06; camera.near = nearT;
       var px = ctr.x + ox * kk, py = Math.max(room.base(ctr.x, ctr.z) + 0.1, ty + oy * kk), pz = ctr.z + oz * kk;
-      camera.fov = 52 + (G.runK || 0) * 7; cm.look = (cm.look || V(ctr.x, ty, ctr.z)); cm.look.lerp(tmp2.set(ctr.x, ty, ctr.z), 1 - Math.exp(-dt * 22)); // the look-at point is damped too, so body bounce never shakes the picture
-      camera.position.lerp(tmp2.set(px + cm.look.x - ctr.x, py + cm.look.y - ty, pz + cm.look.z - ctr.z), 1 - Math.exp(-dt * 18)); camera.lookAt(cm.look);
+      camera.fov = 52 + (G.runK || 0) * 7; cm.look = (cm.look || V(ctr.x, ty, ctr.z)); cm.look.lerp(tmp2.set(ctr.x, ty, ctr.z), 1 - Math.exp(-dt * (22 + (me.speed || 0) * 7))); // the look-at point is damped too, so body bounce never shakes the picture
+      camera.position.lerp(tmp2.set(px + cm.look.x - ctr.x, py + cm.look.y - ty, pz + cm.look.z - ctr.z), 1 - Math.exp(-dt * (18 + (me.speed || 0) * 7))); camera.lookAt(cm.look); // the faster the body, the tighter the camera follows, so it never falls behind in a lurch
     } else if (me && me.team === 'dog') {
-      var eh = me.eyeH, fp = !G.third;
+      var eh = me.eyeH + (me.ryOff || 0), fp = !G.third;
       me.fp = fp; me.c.root.visible = !fp; if (G.vm) G.vm.visible = fp;
       var dx = Math.sin(me.yaw) * Math.cos(me.pitch), dy = Math.sin(me.pitch), dz = Math.cos(me.yaw) * Math.cos(me.pitch);
       camera.fov = G.opts.fov;
       if (fp) { var bob = me.speed > 0.2 ? Math.sin(G.simT * 11) * 0.006 : 0, ef = me.eyeF != null ? me.eyeF + (me.eyeFHi - me.eyeF) * me.rear : 0.12; camera.near = 0.03; camera.position.set(me.x + Math.sin(me.yaw) * ef, me.y + eh + bob, me.z + Math.cos(me.yaw) * ef); camera.lookAt(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
-      else { var t3 = Math.max(0.15, room.segWalls(me.x, me.y + eh, me.z, me.x - dx * 1.7, me.y + eh + 0.75 - dy * 1.1, me.z - dz * 1.7) - 0.06); camera.position.set(me.x - dx * 1.5 * t3, me.y + eh + (0.7 - dy * 1.0) * t3, me.z - dz * 1.5 * t3); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
+      else { var t3w = Math.max(0.15, room.segWalls(me.x, me.y + eh, me.z, me.x - dx * 1.7, me.y + eh + 0.75 - dy * 1.1, me.z - dz * 1.7) - 0.06); cm.t3v = cm.t3v || { v: 0 }; cm.t3 = cm.t3 == null ? t3w : smoothDamp(cm.t3, t3w, cm.t3v, t3w < cm.t3 ? 0.16 : 0.5, 1.6, dt); var t3 = cm.t3; camera.near = cm.t3 - t3w > 0.004 ? Math.min(1.2 * t3, (cm.t3 - t3w) * 1.9 + 0.14) : 0.03; camera.position.set(me.x - dx * 1.5 * t3, me.y + eh + (0.7 - dy * 1.0) * t3, me.z - dz * 1.5 * t3); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
       if (G.vm) { // idle sway, walk bob, recoil kick, pump stroke during the reload interval
         G.recoil = Math.max(0, G.recoil - dt * 3.0); G.punch = Math.max(0, (G.punch || 0) - dt * 5.5); camera.rotateX(G.punch * G.punch * 0.045); camera.fov = G.opts.fov + G.punch * 2.5; /* the shot punches the view up and out */ var rc = G.recoil * G.recoil, since = G.simT - G.state.players.you.lastShot, pu = since > 0.35 && since < 1.05 ? Math.sin((since - 0.35) / 0.7 * Math.PI) : 0, mv = me.speed > 0.2 ? 1 : 0;
         G.vm.position.set(0.2 + Math.sin(G.time * 1.3) * 0.004 + Math.sin(G.simT * 5.5) * 0.007 * mv, -0.21 + Math.sin(G.time * 1.9) * 0.004 - Math.abs(Math.sin(G.simT * 5.5)) * 0.012 * mv + pu * 0.012, -0.4 + rc * 0.2);
@@ -1209,9 +1257,9 @@
   function render(dt) { var S2 = G.settings, hv = G.mode === 'play' && G.me && G.me.team === 'dog' && G.state && G.state.phase === 'seek' && !G.fly, fu = post.final; fu.uMono.value = hv && S2.fMono ? 1 : 0; fu.uHorror.value = hv ? +S2.fHorror || 0 : 0; fu.uMosaic.value = hv && S2.fMosaic ? (+S2.fMosaic + 1) * Math.max(1, post.height / 1080) : 0; /* 像素: 1/2, 1/3, 1/4 resolution, nearest-neighbour, never coarser than 270 lines at 1080p */ var flat = G.paint.on && G.paint.flat && G.mode === 'play', mk = camera.layers.mask, env = scene.environment; if (flat) { camera.layers.mask = 1 | 4; scene.environment = null; } if (G.fx && G.me && G.me.team === 'cat' && G.me.c._fx) G.fx.flush(G.me.c); post.render(scene, camera, G.time); if (G.strokeStats.pending) { var lt = performance.now() - G.strokeStats.pending; G.strokeStats.pending = 0; G.strokeStats.lat = lt; if (lt > G.strokeStats.latMax) G.strokeStats.latMax = lt; } if (flat) { camera.layers.mask = mk; scene.environment = env; } renderPreviews(dt || 0); }
 
   /* ------------------------------------------------------------------ test / capture API */
-  G.step = function (sec, hz) { var n = Math.round(sec * (hz || 60)), dt = 1 / (hz || 60); for (var i = 0; i < n; i++) update(dt); render(); };
+  G.step = function (sec, hz) { var n = Math.round(sec * (hz || 60)), dt = 1 / (hz || 60); for (var i = 0; i < n; i++) update(dt); if (!G.noRender) render(); };
   G.placeU = function (id, x, y, z, yaw) { G.place(id, x * SG.WS, y * SG.WS, z * SG.WS, yaw); }; // plan units
-  G.ent = ent; G.place = function (id, x, y, z, yaw) { var e = ent(id); e.cling = null; e.x = x; e.y = y; e.z = z; if (yaw != null) e.yaw = yaw; e.vy = 0; place(e); e.c.root.updateMatrixWorld(true); };
+  G.ent = ent; G.place = function (id, x, y, z, yaw) { var e = ent(id); e.cling = null; e.ryOff = 0; e.x = x; e.y = y; e.z = z; if (yaw != null) e.yaw = yaw; e.vy = 0; place(e); e.c.root.updateMatrixWorld(true); };
   G.info = function () {
     var m = G.me, st = G.state;
     return { mode: G.mode, side: G.side, phase: st && st.phase, left: st && st.left, winner: st && st.winner, reason: st && st.reason, guide: G.guide, paintOn: G.paint.on,
