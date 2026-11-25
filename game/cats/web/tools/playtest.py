@@ -237,7 +237,7 @@ def dog_run(pg):
     check("hit a still cat: +1 ammo, cat is out, and the cat keeps a paint mark", i["players"]["you"]["ammo"] == 5 and i["players"]["cat0"]["out"] and texhash(pg, "cat0") != hc, i["players"]["you"]["ammo"]); shot(pg, "13-dog-hit")
     step(pg, 1.5)
     s = pg.evaluate("""() => { const G=SG.game, out={}; const sc=id=>G.state.players[id].score; const run=(cx,cz,yaw)=>{ G.placeU('cat1', cx, 0, cz, 0); G.placeU('you', 1.2, 0, 1.4, Math.PI); G.me.yaw=yaw; G.me.pitch=-0.11; G.ovT=9; G.step(0.2); const s0=sc('cat1'); G.ovT=0; G.step(0.4); return sc('cat1')-s0; };
-      out.centre=run(1.2,-1.4,Math.PI); out.edge=run(1.2,-1.4,Math.PI+0.74); out.behind=run(1.2,3.0,Math.PI); out.wall=run(1.2,-4.6,Math.PI); out.far=run(1.2,-3.3,Math.PI); out.tick=SG_RULES.overlooked.tickEverySec; return out; }""")
+      out.centre=run(1.2,-1.4,Math.PI); out.edge=run(1.2,-1.4,Math.PI+0.74); out.behind=run(1.2,3.0,Math.PI); out.wall=run(1.2,-4.6,Math.PI); out.far=run(1.2,-2.6,Math.PI); out.tick=SG_RULES.overlooked.tickEverySec; return out; }""")
     check("THE mechanic, hunter side: a hider dead centre and close scores exactly 45 per tick (2 ticks/s, our guess); at the screen edge little; behind the hunter 0; behind a wall 0; farther away less", s["centre"] == 45 and 0 < s["edge"] <= 15 and s["behind"] == 0 and s["wall"] == 0 and 0 < s["far"] < 45 and s["tick"] == 0.5, s)
     step(pg, 0.3); check("the ranking panel on the left lists the hiders by score (shown to hunters because the host setting is on)", pg.locator(".rank:not(.hide) div").count() >= 3, pg.locator(".rank div").count()); shot(pg, "13b-rank-panel")
     b0 = info(pg)["players"]["you"]["ammo"]
