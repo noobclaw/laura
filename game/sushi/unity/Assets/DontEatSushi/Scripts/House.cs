@@ -48,6 +48,94 @@ namespace DontEatSushi
         readonly Dictionary<int, int> hunterAmmo = new Dictionary<int, int>();
         int MyId { get { return net != null ? net.myId : 0; } }
 
+        // ---------- 單人：電腦食客。沿固定路線巡邏，到點就環顧；靠「畫面裡有你和沒你差多少」判斷有沒有看出來 ----------
+        GameObject ai; Camera aiCam; RenderTexture aiRt; Texture2D aiRead; Color32[] bufA, bufB;
+        int aiWp; float aiScanT, aiPerT, aiSus, aiYaw; bool aiScan;
+        static readonly Vector3[] aiPath =
+        {
+            new Vector3(0f, 0f, -7f), new Vector3(-8.5f, 0f, -5f), new Vector3(-9.5f, 0f, 1.5f), new Vector3(-9f, 0f, 4f), new Vector3(-3f, 0f, 3f),
+            new Vector3(3.5f, 0f, 3f), new Vector3(8.5f, 0f, 6.5f), new Vector3(11f, 0f, 2.5f), new Vector3(4.5f, 0f, -1f), new Vector3(4.5f, 0f, -6f)
+        };
+
+        void SpawnAi()
+        {
+            ai = new GameObject("AiSeeker"); ai.transform.SetParent(root, false); ai.transform.position = aiPath[0];
+            var pt = ai.AddComponent<Paintable>(); pt.Init(SushiShapes.Get(ShapeKind.Stand), SushiKind.Blank, false);
+            pt.Fill(new Color32(150, 34, 30, 255)); pt.Flush();
+            hunterAv[-99] = ai;
+            var eye = new GameObject("Eye"); eye.transform.SetParent(ai.transform, false); eye.transform.localPosition = new Vector3(0f, 1.55f, 0.3f);
+            aiCam = eye.AddComponent<Camera>(); aiCam.enabled = false; aiCam.fieldOfView = 62f; aiCam.nearClipPlane = 0.2f; aiCam.farClipPlane = 40f;
+            aiCam.clearFlags = CameraClearFlags.SolidColor; aiCam.backgroundColor = Color.black;
+            if (aiRt == null) aiRt = new RenderTexture(128, 96, 16, RenderTextureFormat.ARGB32);
+            aiCam.targetTexture = aiRt;
+            if (aiRead == null) { aiRead = new Texture2D(128, 96, TextureFormat.RGBA32, false); bufA = new Color32[128 * 96]; bufB = new Color32[128 * 96]; }
+            aiWp = 1; aiSus = 0f; aiScan = false; aiYaw = 0f; aiPerT = 1f;
+        }
+
+        void AiShot(bool showMe, Color32[] buf)
+        {
+            body.rend.enabled = showMe; aiCam.Render();
+            var prev = RenderTexture.active; RenderTexture.active = aiRt;
+            aiRead.ReadPixels(new Rect(0, 0, 128, 96), 0, 0, false); RenderTexture.active = prev;
+            aiRead.GetPixelData<Color32>(0).CopyTo(buf);
+        }
+
+        float AiPerceive()
+        {
+            Bounds b = body.rend.bounds; float x0 = 9f, x1 = -9f, y0 = 9f, y1 = -9f;
+            for (int i = 0; i < 8; i++)
+            {
+                Vector3 v = aiCam.WorldToViewportPoint(b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1f : 1f, (i & 2) == 0 ? -1f : 1f, (i & 4) == 0 ? -1f : 1f)));
+                if (v.z <= 0f) return -1f;
+                x0 = Mathf.Min(x0, v.x); x1 = Mathf.Max(x1, v.x); y0 = Mathf.Min(y0, v.y); y1 = Mathf.Max(y1, v.y);
+            }
+            if (x1 < 0f || x0 > 1f || y1 < 0f || y0 > 1f) return -1f;
+            int ax = Mathf.Clamp((int)(x0 * 128f) - 1, 0, 127), bx = Mathf.Clamp((int)(x1 * 128f) + 1, 0, 127), ay = Mathf.Clamp((int)(y0 * 96f) - 1, 0, 95), by = Mathf.Clamp((int)(y1 * 96f) + 1, 0, 95);
+            AiShot(true, bufA); AiShot(false, bufB); body.rend.enabled = true;
+            float sum = 0f;
+            for (int y = ay; y <= by; y++) for (int x = ax; x <= bx; x++)
+            {
+                Color32 p = bufA[y * 128 + x], q = bufB[y * 128 + x];
+                float dr = (p.r - q.r) / 255f, dg = (p.g - q.g) / 255f, db = (p.b - q.b) / 255f, d = Mathf.Sqrt(dr * dr * 0.3f + dg * dg * 0.59f + db * db * 0.11f);
+                if (d > 0.05f) sum += d - 0.05f;
+            }
+            return sum;
+        }
+
+        void AiTick(float dt)
+        {
+            if (ai == null || caught) return;
+            Vector3 toMe = me.position - ai.transform.position; toMe.y = 0f;
+            if (!aiScan)
+            {
+                Vector3 d = aiPath[aiWp] - ai.transform.position; d.y = 0f;
+                if (d.magnitude < 0.15f) { aiScan = true; aiScanT = 4.5f; }
+                else { ai.transform.position += d.normalized * Mathf.Min(d.magnitude, 2.4f * dt); aiYaw = Mathf.MoveTowardsAngle(aiYaw, Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg, 240f * dt); }
+            }
+            else
+            {
+                aiScanT -= dt;
+                if (aiSus > 0.35f) aiYaw = Mathf.MoveTowardsAngle(aiYaw, Mathf.Atan2(toMe.x, toMe.z) * Mathf.Rad2Deg, 200f * dt); else aiYaw += 80f * dt;
+                if (aiScanT <= 0f && aiSus < 0.35f) { aiScan = false; aiWp = (aiWp + 1) % aiPath.Length; }
+            }
+            ai.transform.rotation = Quaternion.Euler(0f, aiYaw, 0f);
+            aiPerT -= dt;
+            if (aiPerT > 0f) return;
+            aiPerT = 0.35f;
+            float s = AiPerceive(), gain = s < 0f ? 0f : s / 40f;
+            if (s >= 0f && (Wish(camYaw).sqrMagnitude > 0f || stroke)) gain += 0.5f;
+            aiSus = Mathf.Clamp(aiSus + (Mathf.Min(gain, 0.6f) - 0.06f) * 0.35f, 0f, 1.2f);
+            if (aiSus < 1f) return;
+            Vector3 eye = aiCam.transform.position, aim = me.position + Vector3.up * 0.9f - eye; RaycastHit h;
+            Sfx.Beep(240f, 0.08f, 0.35f);
+            if (Physics.Raycast(eye, aim.normalized, out h, 40f) && h.collider.transform.IsChildOf(me))
+            {
+                body.Dab(h.point, h.normal, 0.3f, (Color32)Color.HSVToRGB(Random.value, 0.9f, 1f)); body.Flush();
+                caught = true; End("電腦食客找到你了。");
+            }
+            else aiSus = 0.5f;
+        }
+
         void Start() { BuildWorld(); SpawnMe(false, new Vector3(0f, 0f, -6f)); SetPaint(paintColor); }
         void OnDestroy() { if (net != null) net.Close(); }
 
@@ -324,7 +412,7 @@ namespace DontEatSushi
             BuildWorld(); SpawnMe(asHunter, new Vector3(0f, 0f, -6.5f));
             hiderIds.Clear(); hunterIds.Clear(); caughtIds.Clear(); found = 0;
             if (asHunter) { SpawnBots(5); ammo = cfgAmmo; ph = Ph.Seek; timer = cfgSeek; whistleT = cfgWhistle; Lock(true); Toast("店裡藏了 5 個飯糰小人。打中加一發醬油，打空扣一發，用完就輸。"); }
-            else { ph = Ph.Hide; timer = 0f; Toast("練習模式：隨便走、隨便塗，按 Esc 回主選單。"); }
+            else { practice = false; ai = null; ph = Ph.Hide; timer = cfgHide; Toast("你有 " + cfgHide + " 秒躲藏和塗色，之後電腦食客會進來找你。按 T 可以提前開始。"); }
             Sfx.Beep(660f, 0.12f, 0.3f);
         }
 
@@ -567,13 +655,15 @@ namespace DontEatSushi
                 if (ph == Ph.Hide && timer <= 0f)
                 {
                     ph = Ph.Seek; timer = cfgSeek; whistleT = cfgWhistle; Sfx.Beep(520f, 0.3f, 0.3f);
-                    if (mode == 2 && !solo) { BecomeSeeker(true); Toast("換你找別人了！大家的身體都留在原地。"); }
+                    if (solo && !hunter) { SpawnAi(); Toast("電腦食客進來了。別動，動了最容易被看出來。"); }
+                    else if (mode == 2 && !solo) { BecomeSeeker(true); Toast("換你找別人了！大家的身體都留在原地。"); }
                     else { if (hunter) Lock(true); Toast(hunter ? "開始找！打中加一發，打空扣一發。" : "食客進來了，別亂動。"); }
                 }
-                else if (ph == Ph.Seek && timer <= 0f) End(solo ? "時間到，還有 " + (others.Count - found) + " 個沒找到。" : (hunter ? "時間到，飯糰獲勝。" : (caught ? "時間到，飯糰隊獲勝（你出局了）。" : "你撐到最後，飯糰獲勝！")));
+                else if (ph == Ph.Seek && timer <= 0f) End(solo && hunter ? "時間到，還有 " + (others.Count - found) + " 個沒找到。" : solo ? "你撐到最後，贏了！" : (hunter ? "時間到，飯糰獲勝。" : (caught ? "時間到，飯糰隊獲勝（你出局了）。" : "你撐到最後，飯糰獲勝！")));
             }
             if (ph == Ph.End) return;
             if (hunter) HunterTick(dt); else if (!caught) HiderTick(dt);
+            if (solo && !hunter && ph == Ph.Seek) AiTick(dt);
             // 單人打電腦時，電腦飯糰也會定時吹口哨
             if (solo && hunter && ph == Ph.Seek)
             {
@@ -649,7 +739,8 @@ namespace DontEatSushi
                     score += (10f * (1f - d / 12f) + 2f) * dt;
                 }
             }
-            if (In.Down(K.R) || In.Down(K.T)) SetPose((pose + 1) % poses.Length);
+            if (In.Down(K.R)) SetPose((pose + 1) % poses.Length);
+            if (solo && ph == Ph.Hide && In.Down(K.T)) timer = 0f;
             if (In.Down(K.Minus)) SetGloss(gloss - 0.1f); if (In.Down(K.Equals)) SetGloss(gloss + 0.1f);
             if (In.Down(K.LeftBracket)) brush = Mathf.Max(0.03f, brush - 0.02f); if (In.Down(K.RightBracket)) brush = Mathf.Min(0.5f, brush + 0.02f);
 
@@ -848,7 +939,7 @@ namespace DontEatSushi
                 Box(new Rect(cx - 330f, 120f, 660f, 470f), panel); Box(new Rect(cx - 330f, 120f, 660f, 3f), gold); Box(new Rect(cx - 330f, 587f, 660f, 3f), gold);
                 var big = new GUIStyle(sB) { fontSize = 44 }; GUI.Label(new Rect(cx - 330f, 135f, 660f, 70f), "別吃壽司", big);
                 GUI.Label(new Rect(cx - 310f, 205f, 620f, 50f), "躲的人把自己塗成店裡的樣子，找的人拿醬油槍把他們找出來。", sL);
-                if (Btn(new Rect(cx - 290f, 270f, 280f, 80f), "練習：當飯糰", new Color(0.80f, 0.30f, 0.20f))) StartSolo(false);
+                if (Btn(new Rect(cx - 290f, 270f, 280f, 80f), "單人：當飯糰躲電腦", new Color(0.80f, 0.30f, 0.20f))) StartSolo(false);
                 if (Btn(new Rect(cx + 10f, 270f, 280f, 80f), "單人：當食客找電腦", new Color(0.18f, 0.28f, 0.52f))) StartSolo(true);
                 GUI.Label(new Rect(cx - 310f, 365f, 620f, 30f), "多人連線：一個人開房間，其他人填他的位址後按加入", sL);
                 if (Btn(new Rect(cx - 290f, 405f, 180f, 56f), "開房間", new Color(0.20f, 0.45f, 0.30f)))
@@ -928,6 +1019,12 @@ namespace DontEatSushi
                 else guide = "食客在找了。現在還能補塗和換位置，但動作會暴露你。";
             }
             if (guide.Length > 0) { Box(new Rect(cx - 420f, 68f, 840f, 34f), new Color(0.10f, 0.20f, 0.30f, 0.9f)); GUI.Label(new Rect(cx - 412f, 68f, 824f, 34f), guide, sL); }
+            if (solo && !hunter && ph == Ph.Seek && ai != null)
+            {
+                Box(new Rect(cx + 240f, 20f, 204f, 16f), panel);
+                Box(new Rect(cx + 242f, 22f, 200f * Mathf.Clamp01(aiSus), 12f), Color.Lerp(new Color(1f, 0.85f, 0.3f), new Color(1f, 0.2f, 0.15f), Mathf.Clamp01(aiSus)));
+                GUI.Label(new Rect(cx + 240f, 36f, 204f, 20f), "食客注意力", sS);
+            }
             if (toastT > 0f && toast.Length > 0) { Box(new Rect(cx - 300f, 108f, 600f, 36f), panel); GUI.Label(new Rect(cx - 300f, 108f, 600f, 36f), toast, sL); }
 
             if (ph == Ph.Hide || ph == Ph.Seek)
