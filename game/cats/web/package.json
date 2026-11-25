@@ -1,0 +1,1 @@
+{ "name": "cats-web", "private": true, "type": "commonjs", "scripts": { "test": "node tests/core.test.js", "rules": "node tools/build-rules.js" } }
