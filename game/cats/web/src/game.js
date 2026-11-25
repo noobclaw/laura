@@ -253,7 +253,7 @@
     bots.forEach(function (e, bi) {
       e.cling = null; var i = Math.floor(rnd() * spots.length), s = spots.splice(i, 1)[0];
       e.x = s[0]; e.z = s[1]; e.yaw = s[2]; e.y = s[4]; e.c.setPose(s[3]); e.c.frozen = true; place(e);
-      if (bi % 3 === 1 && stickSomewhere(e, rnd)) { e.c.setPose(['stand', 'loaf', 'stretch', 'sphinx', 'side'][Math.floor(rnd() * 5)]); place(e); } // a third of the bots hide on walls, pillars and ceilings
+      if (bi % 2 === 1 && stickSomewhere(e, rnd)) { e.c.setPose(['stand', 'loaf', 'stretch', 'sphinx', 'side'][Math.floor(rnd() * 5)]); place(e); } // a third of the bots hide on walls, pillars and ceilings
       for (var k = 0; k < 30; k++) e.c.update(0.05, rnd);
       e.c.root.updateMatrixWorld(true);
     });
@@ -345,13 +345,31 @@
   function overlookTick(d, cam) {
     var st = G.state, pid = d.pid, dbl = st.mode === 'double', areas = visibleAreas(cam);
     cats().forEach(function (c) {
-      if (c.decoyOf || !c.c.root.visible || c.id === pid || (!dbl && c.out)) return; var a = areas[c.id] || 0; if (a <= 0) return;
+      if (c.decoyOf || !c.c.root.visible || c.id === pid || (!dbl && c.out)) return; var a = areas[c.id] || 0; if (a <= 0) return; c.seenT = G.simT;
       var ctr = c.c.center(tmp2), dist = cam.position.distanceTo(ctr); tmp.copy(ctr).project(cam);
       dispatch({ type: 'overlook', cat: c.id, by: pid, area: a, centre: Math.min(1, Math.hypot(tmp.x, tmp.y)), dist: dist, speed: c.speed || 0 });
     });
     return areas;
   }
   G.overlookTick = overlookTick;
+  /* a bot cat that nobody is looking at sometimes gets up, walks a few metres along the walking grid, and hides again */
+  function botRelocate(dt) {
+    var st = G.state; if (!st || st.phase !== 'seek' || st.mode === 'double') return;
+    cats().forEach(function (c) {
+      if (!c.bot || c.out || c.decoyOf) return; var RL = RULES.bot.relocateEverySec;
+      if (c.reloT == null) c.reloT = RL[0] + rnd() * (RL[1] - RL[0]);
+      if (c.walk) { // on the way
+        var pt = c.walk.path[c.walk.i], dx = pt[0] - c.x, dz = pt[1] - c.z, l = Math.hypot(dx, dz), px = c.x, pz = c.z;
+        if (l < 0.25) { c.walk.i++; if (c.walk.i >= c.walk.path.length) { c.walk = null; c.speed = 0; c.c.setPose(['loaf', 'sit', 'curl', 'sphinx'][Math.floor(rnd() * 4)]); if (rnd() < 0.4) stickSomewhere(c, rnd); place(c); for (var k = 0; k < 20; k++) c.c.update(0.05, rnd); c.c.root.updateMatrixWorld(true); camoAllSides(c, c.skill || 0.9); bus.emit('relocated', { id: c.id }); } return; }
+        moveEnt(c, dx / l * RULES.cat.walkSpeed * dt, dz / l * RULES.cat.walkSpeed * dt, dt); c.yaw = turn(c.yaw, Math.atan2(dx, dz), dt * 10); c.speed = Math.hypot(c.x - px, c.z - pz) / dt; if (c.speed < 0.2 && (c.walk.stuck = (c.walk.stuck || 0) + dt) > 1) c.walk.i = c.walk.path.length - 1, c.walk.path[c.walk.i] = [c.x, c.z];
+        return; }
+      c.reloT -= dt; if (c.reloT > 0) return; c.reloT = RL[0] + rnd() * (RL[1] - RL[0]);
+      if (G.simT - (c.seenT || -99) < 6) return; // somebody had it on screen a moment ago: stay put
+      if (dogsOf().some(function (d) { return Math.hypot(d.x - c.x, d.z - c.z) < 7; })) return;
+      if (c.cling) release(c); var a = rnd() * 6.283, r = 2.5 + rnd() * 3.5, path = navPath(c.x, c.z, c.x + Math.cos(a) * r, c.z + Math.sin(a) * r); if (!path || path.length < 4 || path.length > 40) return;
+      c.walk = { path: path, i: 0 }; c.c.frozen = false; c.c.setPose('stand'); bus.emit('relocating', { id: c.id });
+    });
+  }
   function dogCam(d) { areaCam.position.set(d.x, d.y + d.eyeH, d.z); areaCam.lookAt(d.x + Math.sin(d.yaw), d.y + d.eyeH + (d.pitch || 0), d.z + Math.cos(d.yaw)); areaCam.updateMatrixWorld(true); return areaCam; }
 
   /* ------------------------------------------------------------------ shooting */
@@ -475,6 +493,26 @@
     for (var sb = 0; sb < 26; sb++) gunSplat(sb); // the blaster has seen a lot of paint already
   }
 
+  /* ------------------------------------------------------------------ walking grid for bots (ground level: house, engawa, garden, alleys) */
+  var NAV = null;
+  function buildNav() {
+    var b = room.bounds, cs = 0.3, nx = Math.ceil((b.x1 - b.x0) / cs), nz = Math.ceil((b.z1 - b.z0) / cs), g = new Float32Array(nx * nz), ok = new Uint8Array(nx * nz), i, j;
+    for (j = 0; j < nz; j++) for (i = 0; i < nx; i++) { var x = b.x0 + (i + 0.5) * cs, z = b.z0 + (j + 0.5) * cs, y = room.groundAt(x, z, 0.3, 0); g[j * nx + i] = y; ok[j * nx + i] = y < 0.36 && !room.blocked(x, z, y, 0.24, 0.24, 0.62) ? 1 : 0; }
+    NAV = { x0: b.x0, z0: b.z0, cs: cs, nx: nx, nz: nz, g: g, ok: ok, prev: new Int32Array(nx * nz), q: new Int32Array(nx * nz) };
+  }
+  function navCell(x, z, near) { // the cell under a point, or the closest walkable one within about a metre
+    var N = NAV, i = Math.max(0, Math.min(N.nx - 1, Math.floor((x - N.x0) / N.cs))), j = Math.max(0, Math.min(N.nz - 1, Math.floor((z - N.z0) / N.cs))); if (N.ok[j * N.nx + i] || !near) return N.ok[j * N.nx + i] ? j * N.nx + i : -1;
+    for (var r = 1; r <= 4; r++) for (var dj = -r; dj <= r; dj++) for (var di = -r; di <= r; di++) { var a = i + di, b2 = j + dj; if (a >= 0 && b2 >= 0 && a < N.nx && b2 < N.nz && N.ok[b2 * N.nx + a]) return b2 * N.nx + a; } return -1;
+  }
+  function navPath(x0, z0, x1, z1) {
+    if (!NAV) buildNav(); var N = NAV, s = navCell(x0, z0, true), e = navCell(x1, z1, true); if (s < 0 || e < 0) return null; if (s === e) return [[x1, z1]];
+    var prev = N.prev, q = N.q, h = 0, t = 0, nx = N.nx, DI = [1, -1, 0, 0, 1, 1, -1, -1], DJ = [0, 0, 1, -1, 1, -1, 1, -1], k; prev.fill(-1); prev[e] = e; q[t++] = e; // search back from the goal
+    while (h < t && prev[s] < 0) { var c = q[h++], ci = c % nx, cj = (c - ci) / nx;
+      for (k = 0; k < 8; k++) { var ni = ci + DI[k], nj = cj + DJ[k]; if (ni < 0 || nj < 0 || ni >= nx || nj >= N.nz) continue; var n = nj * nx + ni; if (!N.ok[n] || prev[n] >= 0 || Math.abs(N.g[n] - N.g[c]) > 0.26) continue; if (k > 3 && (!N.ok[cj * nx + ni] || !N.ok[nj * nx + ci])) continue; prev[n] = c; q[t++] = n; } }
+    if (prev[s] < 0) return null; var out = [], c2 = prev[s], guard = 0; while (c2 !== e && guard++ < 9000) { out.push([N.x0 + (c2 % nx + 0.5) * N.cs, N.z0 + (Math.floor(c2 / nx) + 0.5) * N.cs]); c2 = prev[c2]; } out.push([N.x0 + (e % nx + 0.5) * N.cs, N.z0 + (Math.floor(e / nx) + 0.5) * N.cs]); return out;
+  }
+  G.navPath = navPath;
+
   /* ------------------------------------------------------------------ bot dog */
   function botDog(d, dt) {
     var ai = d.ai; if (!ai || G.state.phase !== 'seek') { d.speed = 0; return; }
@@ -526,11 +564,15 @@
       return;
     }
     if (ai.heard) { tx = ai.heard[0]; tz = ai.heard[1]; ai.heardT = (ai.heardT || 0) + dt; if (Math.hypot(tx - d.x, tz - d.z) < 1.4 || ai.heardT > 6) { ai.heard = null; ai.heardT = 0; ai.wait = 2.0; } }
-    else { var WPS = room.route, w = WPS[ai.wp % WPS.length]; tx = w[0]; tz = w[1]; if (Math.hypot(tx - d.x, tz - d.z) < 0.3) { if (rnd() < 0.1 && ai.wp > 3) { ai.wp -= 3; bus.emit('say', { id: d.id, text: '再看一次' }); } else ai.wp += 1; ai.wait = rnd() < 0.45 ? 0.8 + rnd() * 1.4 : 0; ai.look = (rnd() - 0.5) * 2.4; } }
+    else { // patrol: the tour gives the goals, the walking grid finds the way round furniture to each of them
+      var WPS = room.route, w = WPS[ai.wp % WPS.length];
+      if (ai.pathWp !== ai.wp || !ai.path) { ai.path = navPath(d.x, d.z, w[0], w[1]); ai.pathWp = ai.wp; ai.pi = 0; if (!ai.path) { ai.wp += 1; ai.path = null; return; } } // nowhere to stand there (upstairs, inside something): next goal
+      var pt = ai.path[Math.min(ai.pi, ai.path.length - 1)]; tx = pt[0]; tz = pt[1];
+      if (Math.hypot(tx - d.x, tz - d.z) < 0.3) { ai.pi++; if (ai.pi >= ai.path.length) { ai.path = null; if (rnd() < 0.04 && ai.wp > 3) { ai.wp -= 2; bus.emit('say', { id: d.id, text: '再看一次' }); } else ai.wp += 1; ai.wait = rnd() < 0.3 ? 0.6 + rnd() * 0.9 : 0; ai.look = (rnd() - 0.5) * 2.4; } } }
     if (ai.wait > 0) { ai.wait -= dt; d.speed = 0; d.yaw += Math.sin(G.simT * 1.4) * dt * 0.9 + ai.look * dt * 0.4; return; }
     var want = Math.atan2(tx - d.x, tz - d.z); d.yaw = turn(d.yaw, want, dt * 5);
-    var sp = RULES.dog.speed * 0.9, px = d.x, pz = d.z; moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
-    d.speed = Math.hypot(d.x - px, d.z - pz) / dt; if (d.speed < 0.2) { ai.stuck = (ai.stuck || 0) + dt; if (ai.stuck > 0.9) { if (ai.heard) ai.heard = null; else ai.wp++; ai.stuck = 0; } } else ai.stuck = 0;
+    var sp = RULES.bot.patrolSpeed, px = d.x, pz = d.z; d.pitch = 0.12 + 0.34 * Math.sin(G.simT * 0.8 + d.x); /* sweeps its gaze up and down while walking: shelves, beams and ceilings get looked at too */ moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
+    d.speed = Math.hypot(d.x - px, d.z - pz) / dt; if (d.speed < 0.2) { ai.stuck = (ai.stuck || 0) + dt; if (ai.stuck > 0.9) { if (ai.heard) ai.heard = null; else if (ai.path && !ai.repath) { ai.path = null; ai.repath = 1; } else { ai.wp++; ai.path = null; ai.repath = 0; } ai.stuck = 0; } } else { ai.stuck = 0; if (d.speed > 1) ai.repath = 0; }
   }
   function turn(a, b, k) { var d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * Math.min(1, k); }
 
@@ -753,7 +795,7 @@
           G.ovT = (G.ovT || 0) - dt; if (G.ovT <= 0 && st.phase === 'seek') { G.ovT = RULES.overlooked.tickEverySec; overlookTick(me, G.third ? dogCam(me) : camera); }
         }
       }
-      G.ents.forEach(function (e) { if (e.bot && e.team === 'dog') botDog(e, dt); });
+      G.ents.forEach(function (e) { if (e.bot && e.team === 'dog') botDog(e, dt); }); botRelocate(dt);
       roundExtras(dt);
     }
     // physics + animation for everyone
@@ -764,7 +806,7 @@
       e.c.speed = e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
-      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = !e.c.frozen || !G.state || G.state.phase === 'reveal' || G.state.phase === 'lobby'; } // a posed cat shows no eyes, nose or whiskers to anyone else
+      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out && !e.walk) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = !e.c.frozen || !G.state || G.state.phase === 'reveal' || G.state.phase === 'lobby'; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
       e.c.update(dt, rnd);
       if (!e.out && (e.speed > 0.05 || e.air)) bumpers.push({ x: e.x, y: e.y, z: e.z, r: e.team === 'dog' ? 0.3 : RULES.cat.bumpRadius, speed: e.speed || 0 });
@@ -987,7 +1029,7 @@
   G.info = function () {
     var m = G.me, st = G.state;
     return { mode: G.mode, side: G.side, phase: st && st.phase, left: st && st.left, winner: st && st.winner, reason: st && st.reason, guide: G.guide, paintOn: G.paint.on,
-      gameMode: st && st.mode, lobby: G.lobby ? { t: G.lobby.t, on: G.lobby.on, n: G.lobby.n } : null, night: !!G.settings.night, splats: splatI, third: !!G.third, viewLock: !!G.viewLock, tags: !!G.tags, seeThrough: !!G.seeThrough,
+      offFloor: cats().filter(function (c) { return c.bot && (c.cling || c.y - room.base(c.x, c.z) > 0.3); }).length, botCats: cats().filter(function (c) { return c.bot; }).length, gameMode: st && st.mode, lobby: G.lobby ? { t: G.lobby.t, on: G.lobby.on, n: G.lobby.n } : null, night: !!G.settings.night, splats: splatI, third: !!G.third, viewLock: !!G.viewLock, tags: !!G.tags, seeThrough: !!G.seeThrough,
       me: m && { id: m.id, team: m.team, x: m.x, y: m.y, z: m.z, yaw: m.yaw, pose: m.c.pose, embed: !!m.embed, exposed: !!m.exposed, out: m.out, speed: m.speed, cling: !!m.cling, clingN: m.cling ? m.cling.n : null, size: m.size, painted: m.team === 'cat' ? m.c.paintedRatio() : 0, sus: m.sus, fly: !!G.fly },
       players: st && st.players, undo: G.paint.undo.length, decoys: G.decoys.length, shots: G.shots.length, room: room.stats, draw: post.sceneCalls, tris: post.sceneTris };
   };

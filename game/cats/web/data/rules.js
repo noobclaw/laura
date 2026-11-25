@@ -117,7 +117,12 @@ window.SG_RULES = {
   "dogSuspicionGain": 2.6,
   "dogSuspicionDecay": 0.35,
   "dogMismatchFloor": 0.045,
-  "catMoveSuspicion": 3
+  "catMoveSuspicion": 3,
+  "patrolSpeed": 2.8,
+  "relocateEverySec": [
+   35,
+   70
+  ]
  },
  "lobby": {
   "lotterySec": 20
