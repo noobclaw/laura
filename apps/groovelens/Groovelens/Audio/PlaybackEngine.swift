@@ -39,7 +39,8 @@ final class PlaybackEngine {
     @ObservationIgnored private var clickHigh: AVAudioPCMBuffer?
     @ObservationIgnored private var clickLow: AVAudioPCMBuffer?
 
-    private(set) var isPlaying = false
+    private(set) var isPlaying = false { didSet { isPlayingForAudioThread = isPlaying } }
+    @ObservationIgnored private var isPlayingForAudioThread = false
     private(set) var isReady = false
     @ObservationIgnored private var startOffset: Double = 0
     @ObservationIgnored private var pausedAt: Double = 0
@@ -54,8 +55,9 @@ final class PlaybackEngine {
 
     var track: PlaybackTrack = .full { didSet { applyVolumes() } }
     var rate: Double = 1 {
-        didSet { timePitch.rate = Float(min(max(rate, 0.25), 2)) }
+        didSet { timePitch.rate = Float(min(max(rate, 0.25), 2)); rateForAudioThread = rate }
     }
+    @ObservationIgnored private var rateForAudioThread: Double = 1
     var clickEnabled = false {
         didSet { if isPlaying { play(from: currentTime) } }
     }
@@ -294,7 +296,7 @@ final class PlaybackEngine {
     // MARK: Microphone onsets
 
     private func process(buffer: AVAudioPCMBuffer, when: AVAudioTime) {
-        guard isPlaying, let data = buffer.floatChannelData?[0] else { return }
+        guard isPlayingForAudioThread, let data = buffer.floatChannelData?[0] else { return }
         let frames = Int(buffer.frameLength)
         let onsets = detector.process(data, count: frames)
         guard !onsets.isEmpty, when.isHostTimeValid else { return }
@@ -305,15 +307,20 @@ final class PlaybackEngine {
             let inputLag = AVAudioTime.hostTime(forSeconds: session.inputLatency)
             let corrected = host > inputLag ? host - inputLag : host
             guard let t = sourceTime(atHostTime: corrected) else { continue }
-            let heard = t - session.outputLatency * rate - userLatencyOffset
+            let heard = t - (session.outputLatency + userLatencyOffset) * rateForAudioThread
             DispatchQueue.main.async { [weak self] in self?.onMicHit?(heard) }
         }
     }
 
+    /// Song time being rendered at `host`. Anchored on the player's last render (which has both a
+    /// sample time and a host time), then extrapolated by wall-clock delta × playback rate.
     private func sourceTime(atHostTime host: UInt64) -> Double? {
         let player = mixFile != nil ? mixPlayer : drumsPlayer
-        guard let pt = player.playerTime(forNodeTime: AVAudioTime(hostTime: host)) else { return nil }
-        return startOffset + Double(pt.sampleTime) / pt.sampleRate
+        guard let anchor = player.lastRenderTime, anchor.isHostTimeValid, anchor.isSampleTimeValid,
+              let pt = player.playerTime(forNodeTime: anchor) else { return nil }
+        let anchorSong = startOffset + Double(pt.sampleTime) / pt.sampleRate
+        let delta = AVAudioTime.seconds(forHostTime: host) - AVAudioTime.seconds(forHostTime: anchor.hostTime)
+        return anchorSong + delta * rateForAudioThread
     }
 
     // MARK: Session events

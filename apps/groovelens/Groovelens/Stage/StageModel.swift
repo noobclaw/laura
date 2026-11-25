@@ -129,6 +129,12 @@ final class StageModel {
     private func frame() {
         guard case .loading = phase else {
             now = engine.audibleTime
+            // Audio stopped underneath us (phone call, headphones unplugged): show the pause menu.
+            switch phase {
+            case .countIn, .playing:
+                if !engine.isPlaying { phase = .paused; return }
+            default: break
+            }
             if case .countIn = phase, now >= rangeStart { phase = .playing }
             if case .playing = phase {
                 judge.sweepMisses(now: now)
