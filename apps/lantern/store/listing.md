@@ -52,3 +52,17 @@ First release.
 ## App Review notes
 
 No account or sign-in is needed. In-app purchases: on the home screen tap "Shop" to see all five consumable items. They can also be reached in a level: the Hint button opens the shop when no hints are left, and when rocks fill the bar the "Keep going" button offers the Keeper's Rescue pack. The game is a local web build shown in a WKWebView; it makes no network requests other than StoreKit.
+
+---
+
+# 1.1.0 (submitted 2026-11-24, build 169)
+
+- **Name** (22/30): Shiba & Lantern Garden
+- **Subtitle** (25/30): Puppy Queens Logic Puzzle
+- **Home screen name**: Shiba Garden
+- **Keywords**: star battle,logic,sudoku,grid,brain,crowns,dog,cute,relax,offline,daily,two not touch,nonogram
+- **Screenshots**: six at 1206×2622 (four Shiba Garden, two Lantern Garden)
+- **Release**: manual, after approval
+- The five in-app purchase products and their store display names are unchanged. The review notes explain that the
+  Shiba Garden shop lists "5 Rock Blasts" as "5 balls" and two packs under neutral names.
+- Description, What's New and review notes are as entered in App Store Connect.
