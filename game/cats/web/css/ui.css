@@ -109,11 +109,11 @@ svg.ic { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.14em; }
 .toast.on { opacity: 1; transform: translate(-50%, -8px); }
 .cross { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 0 3.5px rgba(40, 20, 5, 0.5); } .cross::after { content: ""; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1.5px rgba(40, 20, 5, 0.6); }
 .cross.cd { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35), 0 0 0 3.5px rgba(40, 20, 5, 0.3); transform: scale(1.25); transition: transform 0.2s; }
-.ammo { position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 10px 20px; }
+.ammo { position: absolute; bottom: 14px; left: 14px; display: flex; align-items: center; gap: 10px; padding: 10px 20px; }
 .ammo em { font-style: normal; font-size: 13px; letter-spacing: 0.3em; color: var(--ink2); } .ammo .n { font-size: 30px; color: var(--dog2); min-width: 28px; text-align: center; -webkit-text-stroke: 1px currentColor; }
 .ammo .balls { display: flex; gap: 5px; } .ammo .ball { width: 24px; height: 24px; } .ammo .ball.off { background: #e2d3b2; box-shadow: inset 0 0 0 1.5px #cdb58c; }
 .ammo.low .n { color: var(--red); animation: pulse 0.8s infinite; } .ammo.shake { animation: shake 0.3s; }
-@keyframes shake { 25% { transform: translateX(-50%) translateX(-6px) rotate(-2deg); } 75% { transform: translateX(-50%) translateX(6px) rotate(2deg); } }
+@keyframes shake { 25% { transform: translateX(-6px) rotate(-2deg); } 75% { transform: translateX(6px) rotate(2deg); } }
 .wait { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: radial-gradient(ellipse at 50% 50%, rgba(40, 20, 6, 0.72), rgba(20, 10, 2, 0.94)); color: #fff1d8; pointer-events: auto; }
 .wait h2 { margin: 0; font-weight: 400; font-size: 34px; letter-spacing: 0.3em; } .wait p { margin: 0; font-size: 16px; letter-spacing: 0.18em; opacity: 0.85; } .wait .big { font-size: 64px; color: #ffe9b8; font-variant-numeric: tabular-nums; }
 .tags { position: absolute; inset: 0; }
@@ -124,7 +124,7 @@ svg.ic { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.14em; }
 .result p { margin: 6px 0 10px; font-size: 15px; letter-spacing: 0.14em; color: var(--ink2); }
 .result table { margin: 0 auto 14px; border-collapse: collapse; font-size: 14px; } .result td { padding: 3px 12px; text-align: left; } .result td.n { text-align: right; font-variant-numeric: tabular-nums; }
 .result .row { display: flex; gap: 12px; justify-content: center; }
-.cap { position: absolute; bottom: 8%; left: 0; right: 0; display: flex; justify-content: center; gap: 0; } .cap div { text-align: center; color: #fff6e2; text-shadow: 0 2px 4px rgba(40, 20, 5, 0.9); } .cap b { display: block; font-weight: 400; font-size: 26px; letter-spacing: 0.2em; } .cap small { font-size: 14px; letter-spacing: 0.3em; opacity: 0.9; }
+.cap { position: absolute; bottom: 17%; left: 0; right: 0; height: 0; } .cap div { text-align: center; color: #fff6e2; padding: 6px 20px 8px; border-radius: 16px; background: rgba(58, 30, 12, 0.72); box-shadow: inset 0 0 0 1.5px rgba(246, 220, 154, 0.6), 0 6px 14px rgba(0, 0, 0, 0.3); white-space: nowrap; } .cap b { display: block; font-weight: 400; font-size: 24px; letter-spacing: 0.2em; margin-right: -0.2em; } .cap small { font-size: 14px; letter-spacing: 0.3em; opacity: 0.9; }
 
 /* ---------- paint panel ---------- */
 .pp { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 292px; padding: 12px 14px 12px; display: flex; flex-direction: column; gap: 8px; transition: transform 0.25s, opacity 0.25s; }
@@ -143,7 +143,7 @@ svg.ic { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.14em; }
 .swatches { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; } .swatches i { height: 19px; border-radius: 6px; cursor: pointer; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25), inset 0 0 0 1.5px rgba(255, 255, 255, 0.5); transition: transform 0.1s; } .swatches i:hover { transform: scale(1.18); } .swatches i.empty { background: repeating-linear-gradient(45deg, #e9dcc0 0 4px, #dccba6 4px 8px); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1); cursor: default; } .swatches i.pop { animation: pop 0.3s; }
 @keyframes pop { 50% { transform: scale(1.5); } }
 .tools { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; } .tools button { border: 0; cursor: pointer; padding: 6px 0 4px; border-radius: 10px; font-size: 11px; letter-spacing: 0.1em; color: var(--ink); background: #fffaf0; box-shadow: 0 0 0 1px var(--line), 0 2px 0 #cdb58c; } .tools button svg { display: block; margin: 0 auto 2px; font-size: 19px; } .tools button.on { background: var(--ink); color: #fff6e2; box-shadow: 0 0 0 1px #000, 0 2px 0 #000; } .tools button:active { transform: translateY(2px); }
-.ring { position: absolute; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px rgba(0, 0, 0, 0.55), inset 0 0 0 1.5px rgba(0, 0, 0, 0.3); transform: translate(-50%, -50%); }
+.ring { position: absolute; left: -200px; top: -200px; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px rgba(0, 0, 0, 0.55), inset 0 0 0 1.5px rgba(0, 0, 0, 0.3); transform: translate(-50%, -50%); }
 /* pose wheel */
 .pw { position: absolute; left: 50%; top: 50%; width: 0; height: 0; } .pw button { position: absolute; width: 96px; height: 44px; margin: -22px -48px; border: 0; cursor: pointer; border-radius: 14px; font-size: 15px; letter-spacing: 0.08em; color: var(--ink); background: var(--paper), linear-gradient(180deg, #fffaf0, #ecdfc2); box-shadow: 0 0 0 1.5px var(--line), 0 4px 0 #b99b6c, 0 8px 16px rgba(0, 0, 0, 0.35); } .pw button:hover, .pw button.on { background: var(--cat); color: #fff; box-shadow: 0 0 0 1.5px #b4541a, 0 4px 0 #a34a14, 0 8px 16px rgba(0, 0, 0, 0.35); }
 .pw::before { content: ""; position: absolute; width: 380px; height: 380px; margin: -190px; border-radius: 50%; background: radial-gradient(circle, rgba(40, 20, 6, 0.0) 26%, rgba(40, 20, 6, 0.5) 27%, rgba(40, 20, 6, 0.5) 100%); pointer-events: none; }

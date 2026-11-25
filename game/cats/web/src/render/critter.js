@@ -37,7 +37,7 @@
   var POSES = {
     stand: {},
     sit: { pivot: [-38, 0, 0], chest: [-6, 0, 0], neck: [20, 0, 0], head: [22, 0, 0], sh: [36, 0, 0], el: [6, 0, 0], hp: [-62, 0, -8], kn: [128, 0, 0], t0: [35, 40, 0], t1: [0, 30, 0], t2: [0, 30, 0], t3: [0, 25, 0] },
-    loaf: { sh: [-78, 0, 0], el: [166, 0, 0], hp: [-70, 0, -10], kn: [158, 0, 0], neck: [-8, 0, 0], head: [6, 0, 0], t0: [-28, 62, 0], t1: [0, 48, 0], t2: [0, 46, 0], t3: [0, 40, 0] },
+    loaf: { sh: [72, 0, 0], el: [-158, 0, 0], hp: [-74, 0, -8], kn: [156, 0, 0], chest: [-4, 0, 0], neck: [-6, 0, 0], head: [4, 0, 0], t0: [-30, 64, 0], t1: [0, 50, 0], t2: [0, 48, 0], t3: [0, 42, 0] },
     stretch: { pivot: [24, 0, 0], chest: [10, 0, 0], sh: [-104, 0, 0], el: [0, 0, 0], hp: [-26, 0, 0], kn: [4, 0, 0], neck: [-26, 0, 0], head: [-20, 0, 0], t0: [-30, 0, 0], t1: [-18, 0, 0], t2: [-18, 0, 0] },
     side: { pivot: [0, 0, 86], chest: [0, -8, 0], hip: [0, 8, 0], neck: [0, 0, 0], head: [0, 0, 10], shL: [-52, 0, 10], shR: [-30, 0, 0], elL: [30, 0, 0], elR: [22, 0, 0], hpL: [34, 0, 8], hpR: [16, 0, 0], knL: [-30, 0, 0], knR: [-20, 0, 0], t0: [-20, 0, 0], t1: [-14, 0, 0] },
     curl: { pivot: [0, 0, 62], chest: [0, -58, 0], hip: [0, 58, 0], neck: [10, -50, 0], head: [20, -42, 0], sh: [-70, 0, 0], el: [120, 0, 0], hp: [-70, 0, 0], kn: [130, 0, 0], t0: [-36, 64, 0], t1: [0, 56, 0], t2: [0, 56, 0], t3: [0, 50, 0] },
@@ -403,7 +403,7 @@
   P.fill = function (rgb, rough, metal) {
     if (this._stroke) for (var q = 0; q < this.parts.length; q++) this._save(q);
     var alb = this.alb, orm = this.orm, rb = Math.round(rough * 255), mb = Math.round(metal * 255);
-    for (var i = 0; i < alb.length; i += 4) { alb[i] = rgb[0]; alb[i + 1] = rgb[1]; alb[i + 2] = rgb[2]; orm[i + 1] = rb; orm[i + 2] = mb; }
+    for (var pi = 0; pi < this.parts.length; pi++) { var p = this.parts[pi]; for (var j = 0; j < p.th; j++) { var i = ((p.ry + j) * this.A + p.rx) * 4, e = i + p.tw * 4; for (; i < e; i += 4) { alb[i] = rgb[0]; alb[i + 1] = rgb[1]; alb[i + 2] = rgb[2]; orm[i + 1] = rb; orm[i + 2] = mb; } } }
     this.texA.needsUpdate = true; this.texO.needsUpdate = true;
   };
   P.snapshot = function () { return { a: this.alb.slice(), o: this.orm.slice() }; };

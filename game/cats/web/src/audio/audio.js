@@ -43,7 +43,7 @@
     lose: function (c, o, t) { [4, 3, 1, 0].forEach(function (n, i) { pluck(c, o, t + i * 0.2, YO[n] * 0.5, 0.32, 1.0); }); },
     decoy: function (c, o, t) { osc(c, 'sine', 500, 1000, t, 0.12, o, 0.2); osc(c, 'sine', 750, 1500, t + 0.06, 0.12, o, 0.16); },
     chime: function (c, o, t, p) { var f = 2100 * ((p && p.k) || 1); osc(c, 'sine', f, f, t, 1.6, o, 0.1, 0.002); osc(c, 'sine', f * 2.76, f * 2.76, t, 0.8, o, 0.04, 0.002); osc(c, 'sine', f * 5.4, f * 5.4, t, 0.3, o, 0.02, 0.002); },
-    tick: function (c, o, t) { nz(c, 'bandpass', 3200, 9, t, 0.012, o, 0.09); },
+    tick: function (c, o, t) { nz(c, 'bandpass', 3200, 3, t, 0.018, o, 0.5); osc(c, 'sine', 1800, 1500, t, 0.012, o, 0.05); },
     kettle: function (c, o, t) { nz(c, 'bandpass', 5200, 3, t, 1.4, o, 0.035, 6200); osc(c, 'sine', 2350, 2500, t + 0.2, 1.1, o, 0.018, 0.3); },
     vacuum: function (c, o, t) { nz(c, 'bandpass', 420, 1.2, t, 1.5, o, 0.03); osc(c, 'sawtooth', 96, 98, t, 1.5, o, 0.012, 0.3); }
   };

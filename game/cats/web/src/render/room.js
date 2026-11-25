@@ -35,7 +35,7 @@
     var inv = {}, platforms = [], updaters = [], knock = [], cur = stat, r = SG.rng(20261124);
     function count(type, n) { inv[type] = (inv[type] || 0) + (n || 1); }
     /* begin a prop: a group at (x,y,z) rotated ry; following primitives go into it */
-    function begin(type, x, y, z, ry, isDyn) { var g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry || 0; (isDyn ? dyn : stat).add(g); cur = g; if (type) count(type); return g; }
+    function begin(type, x, y, z, ry, isDyn) { var g = new THREE.Group(); g.name = type || ''; g.position.set(x, y, z); g.rotation.y = ry || 0; (isDyn ? dyn : stat).add(g); cur = g; if (type) count(type); return g; }
     function add(geo, m, x, y, z, rx, ry, rz) { var o = new THREE.Mesh(geo, m); o.position.set(x || 0, y || 0, z || 0); if (rx || ry || rz) o.rotation.set(rx || 0, ry || 0, rz || 0); cur.add(o); return o; }
     function B(w, h, d, m, x, y, z, rad, uvm) { return add(G.rbox(w, h, d, rad == null ? Math.min(w, h, d) * 0.12 : rad, { uvm: uvm, k: 2 }), m, x, (y || 0) + h / 2, z); } // base-centred rounded box
     function C(rt, rb, h, m, x, y, z, seg) { return add(new THREE.CylinderGeometry(rt, rb, h, seg || 20), m, x, (y || 0) + h / 2, z); }

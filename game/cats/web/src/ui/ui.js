@@ -44,10 +44,10 @@
       bus.on('pose', function (d) { markPose(d.pose); show(els.pw, false); });
       bus.on('paintmode', function (d) { els.pp.classList.toggle('off', !d.on); els.bPaint.classList.toggle('act', d.on); show(els.ring, d.on); if (d.on) refreshSug(); });
       bus.on('picked', function (d) { P.setRGB(d.rgb); P.rough.set(d.rough); P.metal.set(d.metal); addRecent(d.rgb); });
-      bus.on('wheel', function (d) { if (G.me && G.me.team === 'cat' && G.state.phase !== 'reveal') show(els.pw, d.open); });
+      bus.on('wheel', function (d) { if (!(G.me && G.me.team === 'cat' && G.state.phase !== 'reveal')) return; if (!d.open && ui.hoverPose && !els.pw.classList.contains('hide')) G.setPose(ui.hoverPose); if (d.open) ui.hoverPose = null; show(els.pw, d.open); });
       bus.on('brush', function (d) { var v = Math.max(RULES.paint.brushMinCm, Math.min(RULES.paint.brushMaxCm, G.paint.size * 100 + d.d * 100)); G.paint.size = v / 100; P.size.set(v); });
       bus.on('tool', function () { markTool(); });
-      bus.on('hit', function (d) { toast(d.dog === 'you' ? '找到了！' + nameOf(d.cat) + ' 出局' : (d.cat === 'you' ? '被找到了…' : nameOf(d.cat) + ' 被找到了')); balls(); });
+      bus.on('hit', function (d) { toast(d.dog === 'you' ? '找到了！' + nameOf(d.cat) + ' 出局' : (d.cat === 'you' ? '被找到了…按 Enter 看結果' : nameOf(d.cat) + ' 被找到了')); balls(); });
       bus.on('miss', function (d) { if (d.dog === 'you') { toast(d.free ? '沒打中（逃跑中的貓不扣球）' : '打空了，少一顆球'); els.ammo.classList.remove('shake'); void els.ammo.offsetWidth; els.ammo.classList.add('shake'); } balls(); });
       bus.on('lowBalls', function (d) { if (d.dog === 'you') toast('只剩最後一顆球！'); });
       bus.on('alert', function (d) { if (d.cat === 'you' || G.decoys.some(function (x) { return x.id === d.cat; })) toast('狗狗盯上你了！'); });
@@ -124,7 +124,6 @@
       if (i === 0) { b.style.left = '0'; b.style.top = '0'; } else { var a2 = (i - 1) / 8 * Math.PI * 2 - Math.PI / 2; b.style.left = Math.cos(a2) * 142 + 'px'; b.style.top = Math.sin(a2) * 132 + 'px'; }
       b.onmouseenter = function () { ui.hoverPose = p[0]; }; b.onclick = function () { G.setPose(p[0]); };
     });
-    window.addEventListener('keyup', function (e) { if (e.key.toLowerCase() === 'r' && ui.hoverPose && !els.pw.classList.contains('hide')) { G.setPose(ui.hoverPose); } ui.hoverPose = null; });
     els.ring = h('div', 'ring hide', '', root);
   }
   function teamIcons() {
@@ -186,10 +185,11 @@
     else if (d.phase === 'seek') { var p = G.state.players.you; els.cross.classList.toggle('cd', G.simT - p.lastShot < RULES.dog.shotIntervalSec); }
   }
   function lineup(d) {
-    var list = d.kind === 'cat' ? SG.CATS : d.kind === 'dog' ? SG.DOGS : null, s = '';
-    if (list) Object.keys(list).forEach(function (k) { s += '<div style="width:' + (d.kind === 'cat' ? 15.5 : 17.5) + 'vw"><b>' + list[k].name + '</b><small>' + list[k].tag + '</small></div>'; });
-    else SG.POSE_LIST.slice(d.row * 3, d.row * 3 + 3).forEach(function (p) { s += '<div style="width:22vw"><b>' + p[1] + '</b></div>'; });
+    var list = d.kind === 'cat' ? SG.CATS : d.kind === 'dog' ? SG.DOGS : null, s = '', keys = list ? Object.keys(list) : SG.POSE_LIST.slice(d.row * 3, d.row * 3 + 3);
+    keys.forEach(function (k) { s += '<div style="position:absolute;transform:translateX(-50%)">' + (list ? '<b>' + list[k].name + '</b><small>' + list[k].tag + '</small>' : '<b>' + k[1] + '</b>') + '</div>'; });
     els.cap.innerHTML = s; show(els.cap, true); show(els.title, false);
+    function posn() { SG.camera.updateMatrixWorld(true); [].forEach.call(els.cap.children, function (c, i) { var e = G.ents[i]; if (e) c.style.left = G.project(e).x + 'px'; }); }
+    setTimeout(posn, 300); setTimeout(posn, 1500);
   }
 
   /* ---------- paint panel ---------- */

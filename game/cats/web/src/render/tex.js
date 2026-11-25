@@ -1,4 +1,4 @@
-/* 別吃壽司 — procedural textures. Everything is drawn to canvases at start-up. */
+/* 貓躲狗找 — procedural textures. Everything is drawn to canvases at start-up. */
 (function () {
   'use strict';
   var SG = (window.SG = window.SG || {});
@@ -344,44 +344,6 @@
   }
   SG.inkText = inkText;
 
-  P.plaque = function (text, price, seed) { // 木札 menu plaque
-    return mk(96, 320, function (g, w, h) {
-      g.drawImage(P.wood({ w: 96, h: 320, base: '#e9cfa0', seed: seed || 5, contrast: 0.08, knots: 0 }), 0, 0);
-      var gr = g.createLinearGradient(0, 0, w, 0);
-      gr.addColorStop(0, 'rgba(90,50,10,0.28)'); gr.addColorStop(0.12, 'rgba(0,0,0,0)'); gr.addColorStop(0.88, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(90,50,10,0.3)');
-      g.fillStyle = gr; g.fillRect(0, 0, w, h);
-      var size = text.length > 3 ? 44 : 52;
-      inkText(g, text, w / 2, 26, size, '#1c1512', true, 4);
-      if (price) {
-        g.fillStyle = PAL.vermilionDeep; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.font = '400 20px ' + FONT;
-        for (var i = 0; i < price.length; i++) g.fillText(price[i], w / 2, h - 22 * (price.length - i) + 2);
-      }
-    });
-  };
-
-  P.menuBoard = function () { // お品書き
-    return mk(1024, 512, function (g, w, h) {
-      g.drawImage(P.wood({ w: 512, h: 512, base: '#3b2416', seed: 9, contrast: 0.2 }), 0, 0, w, h);
-      g.strokeStyle = PAL.gold; g.lineWidth = 6; g.strokeRect(14, 14, w - 28, h - 28);
-      g.strokeStyle = 'rgba(244,216,146,0.4)'; g.lineWidth = 2; g.strokeRect(26, 26, w - 52, h - 52);
-      // heading strip on the right (vertical writing reads right to left)
-      g.fillStyle = PAL.vermilionDeep; g.fillRect(w - 150, 50, 100, h - 100);
-      g.strokeStyle = PAL.goldLight; g.lineWidth = 2; g.strokeRect(w - 144, 56, 88, h - 112);
-      inkText(g, 'お品書き', w - 100, 78, 76, '#fbf1d8', true, 5);
-      var items = [['まぐろ', '三百円'], ['サーモン', '二百円'], ['玉子', '百円'], ['えび', '二百円'], ['いか', '二百円'], ['たこ', '二百円'], ['うに', '五百円'], ['いくら', '四百円'], ['あなご', '三百円']];
-      var paper = P.washi('#f6ecd6', 41);
-      for (var i = 0; i < items.length; i++) {
-        var x = w - 240 - i * 86;
-        g.save(); g.shadowColor = 'rgba(0,0,0,0.5)'; g.shadowBlur = 10; g.shadowOffsetY = 4;
-        g.drawImage(paper, 0, 0, 64, 256, x - 32, 56, 64, h - 112); g.restore();
-        var n = items[i][0];
-        inkText(g, n, x, 74, n.length > 3 ? 44 : 50, '#1c1512', true, 3.5);
-        vtext(g, items[i][1], x, h - 150, 24, PAL.vermilionDeep, 400);
-      }
-    });
-  };
-
   P.noren = function (ch, crest) { // one indigo noren flap
     return mk(256, 512, function (g, w, h) {
       var gr = g.createLinearGradient(0, 0, w, 0);
@@ -538,98 +500,12 @@
     });
   };
 
-  P.sushi = function (kind) {
-    return mk(128, 64, function (g, w, h) {
-      var i, r = rng(kind.length * 13);
-      if (kind === 'salmon') {
-        g.fillStyle = '#f08a4b'; g.fillRect(0, 0, w, h);
-        g.strokeStyle = 'rgba(255,236,214,0.9)'; g.lineWidth = 3.5;
-        for (i = -2; i < 9; i++) { g.beginPath(); g.moveTo(i * 18, 0); g.quadraticCurveTo(i * 18 + 22, h / 2, i * 18 + 8, h); g.stroke(); }
-      } else if (kind === 'tuna') {
-        g.fillStyle = '#b3202e'; g.fillRect(0, 0, w, h);
-        g.strokeStyle = 'rgba(255,170,160,0.35)'; g.lineWidth = 2;
-        for (i = -2; i < 12; i++) { g.beginPath(); g.moveTo(i * 13, 0); g.quadraticCurveTo(i * 13 + 14, h / 2, i * 13 + 4, h); g.stroke(); }
-      } else if (kind === 'tamago') {
-        g.fillStyle = '#f3c84b'; g.fillRect(0, 0, w, h);
-        g.fillStyle = 'rgba(190,120,30,0.35)'; for (i = 0; i < 5; i++) g.fillRect(0, i * 14 + 4, w, 2);
-      } else if (kind === 'ebi') {
-        g.fillStyle = '#fbe9dc'; g.fillRect(0, 0, w, h);
-        g.fillStyle = '#ef6f47'; for (i = 0; i < 8; i++) g.fillRect(i * 17, 0, 8, h);
-        g.fillStyle = 'rgba(255,255,255,0.75)'; g.fillRect(0, h / 2 - 5, w, 10);
-      } else if (kind === 'ika') {
-        g.fillStyle = '#f6f1ea'; g.fillRect(0, 0, w, h);
-        g.strokeStyle = 'rgba(200,190,180,0.6)'; g.lineWidth = 1.5;
-        for (i = 0; i < 12; i++) { g.beginPath(); g.moveTo(i * 12, 0); g.lineTo(i * 12 + 10, h); g.stroke(); }
-      } else if (kind === 'rice') {
-        g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, w, h);
-        for (i = 0; i < 260; i++) {
-          g.fillStyle = r() < 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(190,180,160,0.4)';
-          g.beginPath(); g.ellipse(r() * w, r() * h, 4.5, 2.4, r() * 3, 0, 7); g.fill();
-        }
-      } else if (kind === 'nori') {
-        g.fillStyle = '#16211a'; g.fillRect(0, 0, w, h);
-        for (i = 0; i < 400; i++) { g.fillStyle = 'rgba(' + (r() < 0.5 ? '60,90,60' : '0,0,0') + ',0.35)'; g.fillRect(r() * w, r() * h, 2, 2); }
-      } else if (kind === 'makiEnd') {
-        g.fillStyle = '#16211a'; g.fillRect(0, 0, w, h);
-      }
-    });
-  };
-
-  P.makiEnd = function (fill) {
-    return mk(128, 128, function (g, w, h) {
-      g.fillStyle = '#16211a'; g.fillRect(0, 0, w, h);
-      g.fillStyle = '#f7f3ea'; g.beginPath(); g.arc(64, 64, 56, 0, 7); g.fill();
-      var r = rng(5);
-      for (var i = 0; i < 120; i++) { g.fillStyle = 'rgba(190,180,160,0.4)'; g.beginPath(); g.ellipse(64 + (r() - 0.5) * 100, 64 + (r() - 0.5) * 100, 5, 3, r() * 3, 0, 7); g.fill(); }
-      g.fillStyle = fill; g.beginPath(); g.arc(64, 64, 24, 0, 7); g.fill();
-    });
-  };
-
   P.label = function (text, bg, ink) { // bottle / barrel label
     return mk(256, 256, function (g, w, h) {
       g.fillStyle = bg; g.fillRect(0, 0, w, h);
       fibres(g, w, h, 91, 1);
       g.strokeStyle = ink; g.lineWidth = 8; g.strokeRect(14, 14, w - 28, h - 28);
       inkText(g, text, w / 2, text.length > 1 ? 36 : h / 2 - 80, text.length > 1 ? 86 : 150, ink, true, 8);
-    });
-  };
-
-  P.barrel = function () { // komodaru straw wrapped sake barrel side
-    return mk(1024, 512, function (g, w, h) {
-      g.fillStyle = '#e8d9ae'; g.fillRect(0, 0, w, h);
-      var r = rng(101), i;
-      for (i = 0; i < 2600; i++) {
-        g.strokeStyle = 'rgba(' + (r() < 0.5 ? '140,110,50' : '255,248,215') + ',' + (0.08 + r() * 0.2) + ')'; g.lineWidth = 1;
-        var x = r() * w, y = r() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 6, y + 20 + r() * 50); g.stroke();
-      }
-      for (var k = 0; k < 2; k++) {
-        var cx = w * (0.25 + k * 0.5);
-        g.fillStyle = PAL.vermilion; g.beginPath(); g.arc(cx, h * 0.5, 150, 0, 7); g.fill();
-        g.strokeStyle = '#1c1512'; g.lineWidth = 10; g.beginPath(); g.arc(cx, h * 0.5, 168, 0, 7); g.stroke();
-        inkText(g, '酒', cx, h * 0.5 + 6, 200, '#fbf3df', false, 14);
-        g.fillStyle = PAL.indigo; g.fillRect(cx + 190, 70, 36, h - 140); g.fillRect(cx - 226, 70, 36, h - 140);
-      }
-      // rope bands
-      for (k = 0; k < 2; k++) {
-        var yy = k ? h - 60 : 34;
-        g.fillStyle = '#b89650'; g.fillRect(0, yy, w, 26);
-        g.strokeStyle = 'rgba(80,55,15,0.6)'; g.lineWidth = 3;
-        for (i = 0; i < w; i += 14) { g.beginPath(); g.moveTo(i, yy + 26); g.lineTo(i + 12, yy); g.stroke(); }
-      }
-    });
-  };
-
-  P.signboard = function (text) { // carved shop sign 看板
-    return mk(1024, 256, function (g, w, h) {
-      g.drawImage(P.wood({ w: 512, h: 512, base: '#51301c', seed: 111, contrast: 0.22 }), 0, 0, w, h * 2);
-      g.strokeStyle = PAL.gold; g.lineWidth = 8; g.strokeRect(10, 10, w - 20, h - 20);
-      g.save(); g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 6; g.shadowOffsetY = 4;
-      var gr = g.createLinearGradient(0, 50, 0, 210);
-      gr.addColorStop(0, '#fbe6a8'); gr.addColorStop(0.5, '#e0aa48'); gr.addColorStop(1, '#b07a26');
-      g.fillStyle = gr; g.strokeStyle = gr; g.lineWidth = 9; g.lineJoin = 'round';
-      g.font = '400 150px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle';
-      for (var i = 0; i < text.length; i++) { var x = w / 2 + (i - (text.length - 1) / 2) * 200; g.strokeText(text[i], x, h / 2 + 6); g.fillText(text[i], x, h / 2 + 6); }
-      g.restore();
     });
   };
 

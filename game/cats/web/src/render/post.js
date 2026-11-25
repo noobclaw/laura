@@ -78,7 +78,7 @@
     var R = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true });
     R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFShadowMap;
     R.toneMapping = THREE.NoToneMapping;
-    R.info.autoReset = true;
+    R.info.autoReset = false;
     this.renderer = R;
     var gl = R.getContext();
     var hf = !!gl.getExtension('EXT_color_buffer_float') || !!gl.getExtension('EXT_color_buffer_half_float');
@@ -117,7 +117,8 @@
     };
     function draw(mat, target) { quad.material = mat; R.setRenderTarget(target); R.render(qscene, qcam); }
     this.render = function (scene, camera, time) {
-      R.setRenderTarget(rtScene); R.render(scene, camera);
+      R.info.reset(); R.setRenderTarget(rtScene); R.render(scene, camera);
+      this.sceneCalls = R.info.render.calls; this.sceneTris = R.info.render.triangles;
       // SSAO
       if (!low) {
         mSSAO.uniforms.tDepth.value = rtScene.depthTexture;
