@@ -90,10 +90,20 @@ final class AnalysisCenter {
         let transcriber = self.transcriber
         let songID = song.id
 
-        let bg = UIApplication.shared.beginBackgroundTask(withName: "groovelens.analysis")
+        var bg = UIBackgroundTaskIdentifier.invalid
+        bg = UIApplication.shared.beginBackgroundTask(withName: "groovelens.analysis") {
+            // Out of background time: stop cleanly instead of being killed.
+            self.tasks[songID]?.cancel()
+            UIApplication.shared.endBackgroundTask(bg)
+            bg = .invalid
+        }
+        let bgID = bg
         let task = Task.detached(priority: .userInitiated) { [weak self] in
+            // The user may delete the song mid-analysis; never touch a deleted model.
+            @MainActor func alive() -> Bool { !song.isDeleted && song.modelContext != nil }
             func report(_ stage: AnalysisStage, _ p: Double) async {
                 await MainActor.run {
+                    guard alive() else { return }
                     job.stage = stage
                     job.progress = p
                     song.progress = p
@@ -105,6 +115,9 @@ final class AnalysisCenter {
                     let scoped = videoSource.startAccessingSecurityScopedResource()
                     defer { if scoped { videoSource.stopAccessingSecurityScopedResource() } }
                     try await AudioDecoder.extractAudio(fromVideo: videoSource, to: files.original)
+                    if videoSource.path.hasPrefix(FileManager.default.temporaryDirectory.path) {
+                        try? FileManager.default.removeItem(at: videoSource)
+                    }
                 }
                 await report(.isolating, 0.02)
                 let samples = try await AudioDecoder.decodeMono(url: files.original)
@@ -114,9 +127,10 @@ final class AnalysisCenter {
                 var lastReported = 0.0
                 let hpss = try HPSS.separate(samples, sampleRate: AudioDecoder.analysisRate) { frac in
                     let p = 0.08 + frac * 0.52
+                    if Task.isCancelled { return }
                     if p - lastReported > 0.01 {
                         lastReported = p
-                        Task { @MainActor in job.progress = p; song.progress = p }
+                        Task { @MainActor in job.progress = p; if alive() { song.progress = p } }
                     }
                 }
                 try Task.checkCancellation()
@@ -143,6 +157,7 @@ final class AnalysisCenter {
 
                 let fingerprint = chart.fingerprint()
                 await MainActor.run {
+                    guard alive() else { return }
                     song.duration = duration
                     song.tempo = chart.tempo
                     song.beatsPerBar = chart.beatsPerBar
@@ -156,6 +171,7 @@ final class AnalysisCenter {
                 }
             } catch is CancellationError {
                 await MainActor.run {
+                    guard alive() else { return }
                     song.status = .failed
                     song.errorMessage = String(localized: "Analysis was cancelled.")
                     job.error = song.errorMessage
@@ -163,6 +179,7 @@ final class AnalysisCenter {
                 }
             } catch {
                 await MainActor.run {
+                    guard alive() else { return }
                     song.status = .failed
                     song.errorMessage = error.localizedDescription
                     job.error = error.localizedDescription
@@ -172,7 +189,7 @@ final class AnalysisCenter {
             }
             await MainActor.run {
                 self?.tasks[songID] = nil
-                UIApplication.shared.endBackgroundTask(bg)
+                if bgID != .invalid { UIApplication.shared.endBackgroundTask(bgID) }
             }
         }
         tasks[song.id] = task

@@ -222,6 +222,7 @@ enum HPSS {
                 for i in 0..<n { drumless[offset + i] += outBuf[i] * window[i] * olaGain }
             }
             progress(Double(b1) / Double(frameCount))
+            try Task.checkCancellation()
             b0 = b1
         }
 

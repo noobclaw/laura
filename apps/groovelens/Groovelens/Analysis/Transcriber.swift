@@ -249,23 +249,31 @@ enum BeatTracker {
             cur = back[cur]
         }
         frames.reverse()
-        var times = frames.map { Double($0) / fr }
+        // Sub-frame refinement: a frame is ~23 ms, too coarse for a ±35 ms "Perfect" window.
+        var times = frames.map { f -> Double in
+            guard f > 0 && f < n - 1 else { return Double(f) / fr }
+            let a = Double(env[f - 1]), b = Double(env[f]), c = Double(env[f + 1])
+            let denom = a - 2 * b + c
+            let delta = (b >= a && b >= c && abs(denom) > 1e-9) ? max(-0.5, min(0.5, 0.5 * (a - c) / denom)) : 0
+            return (Double(f) + delta) / fr
+        }
         if times.count < 2 {
             times = stride(from: 0, to: duration, by: 60 / bpm).map { $0 }
         }
-        // Extend the grid to cover the whole song.
-        let p0 = times.count >= 2 ? times[1] - times[0] : 60 / bpm
-        while let first = times.first, first - p0 >= 0 {
-            times.insert(first - p0, at: 0)
+        // Tempo from the tracked span (a median of frame-quantized intervals is biased by up to a frame).
+        let tracked = times
+        let meanPeriod = tracked.count >= 2 ? (tracked[tracked.count - 1] - tracked[0]) / Double(tracked.count - 1) : 60 / bpm
+        let edge = min(8, tracked.count - 1)
+        let headPeriod = edge >= 1 ? (tracked[edge] - tracked[0]) / Double(edge) : meanPeriod
+        let tailPeriod = edge >= 1 ? (tracked[tracked.count - 1] - tracked[tracked.count - 1 - edge]) / Double(edge) : meanPeriod
+        // Extend the grid to cover the whole song, using the local tempo at each end.
+        while let first = times.first, first - headPeriod >= 0 {
+            times.insert(first - headPeriod, at: 0)
         }
-        let n2 = times.count
-        let p1 = n2 >= 2 ? times[n2 - 1] - times[n2 - 2] : 60 / bpm
-        while let lastT = times.last, lastT + p1 < duration + p1 {
-            times.append(lastT + p1)
+        while let lastT = times.last, lastT < duration {
+            times.append(lastT + tailPeriod)
         }
-        let intervals = zip(times.dropFirst(), times).map { $0 - $1 }.sorted()
-        let medianInterval = intervals.isEmpty ? 60 / bpm : intervals[intervals.count / 2]
-        return BeatGrid(beatTimes: times, tempo: 60 / medianInterval)
+        return BeatGrid(beatTimes: times, tempo: 60 / meanPeriod)
     }
 }
 
