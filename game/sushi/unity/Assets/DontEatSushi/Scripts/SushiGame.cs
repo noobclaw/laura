@@ -64,6 +64,9 @@ namespace DontEatSushi
         [System.NonSerialized] public bool playerAttached, playerMoving;
         [System.NonSerialized] public float maxSuspicion, overlook;
         int pose; float curLift, gloss = 0.32f, camSendT;
+        Vector3 fpPos; float fpYaw, fpPitch;
+        GameObject gunVM;
+        readonly Dictionary<int, GameObject> hunterAvatars = new Dictionary<int, GameObject>();
         bool gSlot, gPick, gPaint;
         [System.NonSerialized] public Color bgColor = new Color(0.30f, 0.21f, 0.16f);
 
@@ -175,7 +178,7 @@ namespace DontEatSushi
             {
                 player.gameObject.SetActive(false);
                 ammo = MaxAmmo; found = 0; ammoT = 0f; whistleT = 25f;
-                camTarget = new Vector3(0f, 0.3f, -3f); camDist = 13f; camPitch = 50f; camYaw = 0f;
+                fpPos = new Vector3(0f, 0f, -8.6f); fpYaw = 0f; fpPitch = 12f;
             }
             Toast(role == Role.Hunter ? "你是食客。壽司們有 45 秒躲藏。" : "你是壽司。45 秒內塗好、躲好。");
             Sfx.Beep(660f, 0.12f, 0.3f);
@@ -214,8 +217,32 @@ namespace DontEatSushi
                 }
                 if (phase == Phase.Hunt) return playerMoving ? "別動！移動最容易被發現。" : "黃圈是食客的視線。保持不動，撐到時間結束。";
             }
-            else if (phase == Phase.Hunt) return "找出假壽司：顏色偏掉、花紋糊掉、留白沒塗的就是。左鍵擠醬油打它。";
+            else if (phase == Phase.Hunt) return Cursor.lockState == CursorLockMode.Locked ? "找出假壽司：顏色偏掉、花紋糊掉、留白沒塗的就是。準星對準它按左鍵。" : "先按一下滑鼠左鍵，才能用滑鼠轉視角。";
             return "";
+        }
+
+        // 食客在別人眼中的樣子：一隻橘貓
+        GameObject MakeCat()
+        {
+            var go = new GameObject("HunterCat");
+            go.transform.SetParent(root, false);
+            var fur = Mats.Lit(new Color(0.95f, 0.60f, 0.24f), 0.2f);
+            var white = Mats.Lit(new Color(0.97f, 0.95f, 0.90f), 0.2f);
+            var dark = Mats.Lit(new Color(0.08f, 0.07f, 0.07f), 0.5f);
+            System.Action<PrimitiveType, Vector3, Vector3, Material> add = (t, lp, sc, m) =>
+            {
+                var o = Prim(t, "Part", Vector3.zero, sc, m, false, go.transform);
+                o.transform.localPosition = lp; o.transform.localRotation = Quaternion.identity;
+            };
+            add(PrimitiveType.Sphere, new Vector3(0f, 0.45f, -0.15f), new Vector3(0.75f, 0.7f, 1.1f), fur);
+            add(PrimitiveType.Sphere, new Vector3(0f, 0.38f, -0.1f), new Vector3(0.6f, 0.5f, 0.8f), white);
+            add(PrimitiveType.Sphere, new Vector3(0f, 0.95f, 0.35f), new Vector3(0.62f, 0.56f, 0.56f), fur);
+            add(PrimitiveType.Sphere, new Vector3(-0.2f, 1.25f, 0.33f), new Vector3(0.2f, 0.26f, 0.12f), fur);
+            add(PrimitiveType.Sphere, new Vector3(0.2f, 1.25f, 0.33f), new Vector3(0.2f, 0.26f, 0.12f), fur);
+            add(PrimitiveType.Sphere, new Vector3(-0.13f, 1.0f, 0.6f), new Vector3(0.09f, 0.11f, 0.05f), dark);
+            add(PrimitiveType.Sphere, new Vector3(0.13f, 1.0f, 0.6f), new Vector3(0.09f, 0.11f, 0.05f), dark);
+            add(PrimitiveType.Capsule, new Vector3(0f, 0.75f, -0.75f), new Vector3(0.14f, 0.4f, 0.14f), fur);
+            return go;
         }
 
         Remote GetRemote(int id, int shape)
@@ -253,7 +280,7 @@ namespace DontEatSushi
                 {
                     role = Role.Hunter; hunterIds.Add(net.myId);
                     ammo = MaxAmmo; ammoT = 0f; whistleT = 25f; found = 0;
-                    camDist = 11f; camPitch = 50f;
+                    fpPos = player != null ? new Vector3(player.position.x, 0f, player.position.z) : new Vector3(0f, 0f, -8.6f); fpYaw = 0f; fpPitch = 12f;
                     Toast("你被吃掉了，現在你也變成食客，去抓其他壽司！");
                 }
             }
@@ -322,14 +349,21 @@ namespace DontEatSushi
                 case "hit":
                     if (mp && a.Length >= 2) MarkCaught(int.Parse(a[1]), false);
                     break;
-                case "c":
-                    // 食客的視線落點：離我很近卻沒抓到我，就累積看漏分數
-                    if (mp && role == Role.Hider && !meCaught && phase == Phase.Hunt && a.Length >= 3 && player != null)
+                case "h":
+                {
+                    // 其他人看得到食客走過來；食客正對著我卻沒抓到，就累積看漏分數
+                    if (!mp || a.Length < 5 || root == null) break;
+                    GameObject av;
+                    if (!hunterAvatars.TryGetValue(from, out av) || av == null) { av = MakeCat(); hunterAvatars[from] = av; }
+                    Vector3 hp = new Vector3(P(a[1]), P(a[2]), P(a[3])); float hy = P(a[4]);
+                    av.transform.SetPositionAndRotation(hp, Quaternion.Euler(0f, hy, 0f));
+                    if (role == Role.Hider && !meCaught && phase == Phase.Hunt && player != null)
                     {
-                        float dx = P(a[1]) - player.position.x, dz = P(a[2]) - player.position.z;
-                        if (dx * dx + dz * dz < 3.5f * 3.5f) overlook += 2.5f;
+                        Vector3 to = player.position - hp; to.y = 0f;
+                        if (to.magnitude < 6f && Vector3.Dot(Quaternion.Euler(0f, hy, 0f) * Vector3.forward, to.normalized) > 0.75f) overlook += 1f;
                     }
                     break;
+                }
             }
         }
 
@@ -394,7 +428,7 @@ namespace DontEatSushi
                 diner.gameObject.SetActive(false);   // 玩家自己就是食客，不需要再顯示一個
                 SpawnBots(4);
                 ammo = MaxAmmo; found = 0; ammoT = 0f; whistleT = 22f;
-                camTarget = new Vector3(0f, 0.3f, -3f); camDist = 13f; camPitch = 50f; camYaw = 0f;
+                fpPos = new Vector3(0f, 0f, -8.6f); fpYaw = 0f; fpPitch = 12f;
                 Toast("壽司們正在躲藏，請稍候。");
             }
         }
@@ -449,18 +483,26 @@ namespace DontEatSushi
             if (In.Held(K.S)) mv.z -= 1f;
             if (In.Held(K.D)) mv.x += 1f;
             if (In.Held(K.A)) mv.x -= 1f;
+            // 第一人稱：在桌面上走動，滑鼠轉視角
             if (mv.sqrMagnitude > 0f)
             {
-                camTarget += Quaternion.Euler(0f, camYaw, 0f) * mv.normalized * 8f * dt;
-                camTarget.x = Mathf.Clamp(camTarget.x, -17f, 17f);
-                camTarget.z = Mathf.Clamp(camTarget.z, -10f, 9f);
+                fpPos += Quaternion.Euler(0f, fpYaw, 0f) * mv.normalized * (In.Held(K.Shift) ? 6f : 4f) * dt;
+                fpPos.x = Mathf.Clamp(fpPos.x, -18.5f, 18.5f);
+                fpPos.z = Mathf.Clamp(fpPos.z, -10.3f, 10.3f);
             }
-            if (phase != Phase.Hunt) return;
+            fpPos.y = Mathf.Lerp(fpPos.y, GroundY(fpPos, PlateUnder(fpPos)), Mathf.Min(1f, 14f * dt));
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                Vector2 md = In.MouseDelta;
+                fpYaw += md.x * 0.12f;
+                fpPitch = Mathf.Clamp(fpPitch - md.y * 0.12f, -80f, 80f);
+            }
             if (mp && net != null)
             {
                 camSendT -= dt;
-                if (camSendT <= 0f) { camSendT = 0.25f; net.Send("c|" + F(camTarget.x) + "|" + F(camTarget.z)); }
+                if (camSendT <= 0f) { camSendT = 0.1f; net.Send("h|" + F(fpPos.x) + "|" + F(fpPos.y) + "|" + F(fpPos.z) + "|" + F(fpYaw)); }
             }
+            if (phase != Phase.Hunt) return;
 
             if (ammo < MaxAmmo) { ammoT += dt; if (ammoT >= 7f) { ammoT = 0f; ammo++; } }
             if (hintT > 0f) { hintT -= dt; if (hintT <= 0f && hintRing != null) hintRing.gameObject.SetActive(false); }
@@ -484,16 +526,18 @@ namespace DontEatSushi
                 }
             }
 
-            Vector2 mpos = In.MousePos;
-            bool overHud = mpos.y < 118f * (Screen.height / 720f);
-            if (In.LmbDown && !overHud)
+            if (In.LmbDown && Cursor.lockState != CursorLockMode.Locked)
+            {
+                Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
+            }
+            else if (In.LmbDown)
             {
                 if (ammo < 1) { Toast("醬油用完了，等它補充。"); Sfx.Beep(180f, 0.1f, 0.25f); return; }
                 ammo--;
                 Sfx.Beep(240f, 0.08f, 0.35f);
                 Physics.SyncTransforms();
                 RaycastHit hit;
-                if (!Physics.Raycast(cam.ScreenPointToRay(mpos), out hit, 300f)) return;
+                if (!Physics.Raycast(cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)), out hit, 80f)) return;
                 var stain = Prim(PrimitiveType.Sphere, "Stain", hit.point, new Vector3(0.35f, 0.04f, 0.35f), Mats.Lit(new Color(0.12f, 0.06f, 0.04f), 0.8f), false);
                 if (Application.isPlaying) Destroy(stain, 8f);
                 Bot hitBot = null;
@@ -583,7 +627,7 @@ namespace DontEatSushi
         void Build()
         {
             root = new GameObject("World").transform;
-            plates.Clear(); bots.Clear(); hintRing = null;
+            plates.Clear(); bots.Clear(); hintRing = null; hunterAvatars.Clear();
             attached = null; playerAttached = false; playerMoving = false;
             maxSuspicion = 0f; survived = 0f; stroke = false; overlook = 0f;
             gSlot = false; gPick = false; gPaint = false;
@@ -681,6 +725,16 @@ namespace DontEatSushi
             cg.AddComponent<AudioListener>();
             Sfx.Init(cg);
             Look.Apply(cam, root);
+            // 食客手上的醬油槍（只有第一人稱時顯示）
+            gunVM = new GameObject("Gun");
+            gunVM.transform.SetParent(cg.transform, false);
+            gunVM.transform.localPosition = new Vector3(0.26f, -0.22f, 0.5f);
+            gunVM.transform.localRotation = Quaternion.Euler(-80f, 0f, 8f);
+            var gb = Prim(PrimitiveType.Cylinder, "GunBody", Vector3.zero, new Vector3(0.12f, 0.14f, 0.12f), Mats.Lit(new Color(0.12f, 0.06f, 0.04f), 0.9f), false, gunVM.transform);
+            gb.transform.localPosition = Vector3.zero; gb.transform.localRotation = Quaternion.identity;
+            var gcap = Prim(PrimitiveType.Cylinder, "GunCap", Vector3.zero, new Vector3(0.07f, 0.04f, 0.07f), Mats.Lit(new Color(0.80f, 0.12f, 0.10f), 0.6f), false, gunVM.transform);
+            gcap.transform.localPosition = new Vector3(0f, 0.17f, 0f); gcap.transform.localRotation = Quaternion.identity;
+            gunVM.SetActive(false);
 
             SpawnPlayer(new Vector3(0f, 0f, -7.6f));
             camTarget = player.position;
@@ -825,6 +879,7 @@ namespace DontEatSushi
                 if (phase == Phase.Prep && timer <= 0f)
                 {
                     phase = Phase.Hunt; timer = mp ? huntTime : hunterTime;
+                    Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
                     foreach (var p in plates) foreach (var s in p.slots) if (s.marker != null) s.marker.gameObject.SetActive(false);
                     Toast("開吃！左鍵擠醬油打假壽司，打錯會浪費醬油。");
                 }
@@ -989,6 +1044,16 @@ namespace DontEatSushi
         void LateUpdate()
         {
             if (!In.Ready || cam == null || root == null) return;
+            bool fp = role == Role.Hunter && (phase == Phase.Prep || phase == Phase.Hunt);
+            if (gunVM != null && gunVM.activeSelf != fp) gunVM.SetActive(fp);
+            if (!(role == Role.Hunter && phase == Phase.Hunt) && Cursor.lockState != CursorLockMode.None) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
+            cam.fieldOfView = fp ? 68f : 50f;
+            if (fp)
+            {
+                cam.transform.position = fpPos + Vector3.up * 1.0f;
+                cam.transform.rotation = Quaternion.Euler(fpPitch, fpYaw, 0f);
+                return;
+            }
             if (phase == Phase.Win || phase == Phase.Lose) camYaw += 35f * Time.deltaTime;
             else if (In.RmbHeld)
             {
@@ -1148,7 +1213,10 @@ namespace DontEatSushi
                 for (int i = 0; i < MaxAmmo; i++)
                     Box(new Rect(90f + i * 34f, H - 104f, 26f, 26f), i < ammo ? new Color(0.35f, 0.16f, 0.08f) : new Color(1f, 1f, 1f, 0.15f));
                 GUI.Label(new Rect(320f, H - 106f, 400f, 30f), "已找到 " + found + " / " + (mp ? hiderIds.Count : bots.Count), sLabel);
-                GUI.Label(new Rect(20f, H - 62f, W - 40f, 50f), "WASD 移動視角　右鍵拖曳 轉鏡頭　滾輪 縮放　左鍵 擠醬油\n假壽司的顏色、花紋會有破綻，仔細看。每 25 秒會有一個壽司吹口哨。", sSmall);
+                GUI.Label(new Rect(20f, H - 62f, W - 40f, 50f), "WASD 在桌上走動　Shift 跑　滑鼠 轉視角　左鍵 擠醬油　Esc 放開滑鼠\n假壽司的顏色、花紋會有破綻，走近看。每 25 秒會有一個壽司吹口哨，藍圈就是大概位置。", sSmall);
+                // 準星
+                Box(new Rect(W / 2f - 5f, H / 2f - 5f, 10f, 10f), new Color(0f, 0f, 0f, 0.6f));
+                Box(new Rect(W / 2f - 3f, H / 2f - 3f, 6f, 6f), Color.white);
             }
 
             // 底部：調色盤

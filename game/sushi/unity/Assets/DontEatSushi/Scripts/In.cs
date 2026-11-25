@@ -56,7 +56,8 @@ namespace DontEatSushi
         public static bool Held(K k) { return Input.GetKey(Map(k)); }
         public static bool Down(K k) { return Input.GetKeyDown(Map(k)); }
         public static Vector2 MousePos { get { return Input.mousePosition; } }
-        public static Vector2 MouseDelta { get { return delta; } }
+        // 滑鼠被鎖住時，游標位置不會變，要改讀滑鼠軸
+        public static Vector2 MouseDelta { get { return Cursor.lockState == CursorLockMode.Locked ? new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * 10f : delta; } }
         public static bool LmbHeld { get { return Input.GetMouseButton(0); } }
         public static bool LmbDown { get { return Input.GetMouseButtonDown(0); } }
         public static bool RmbHeld { get { return Input.GetMouseButton(1); } }
