@@ -41,6 +41,7 @@
       root = document.getElementById('ui'); G = SG.game; RULES = SG.RULES; bus = SG.bus;
       buildTitle(); buildHud(); buildPaint(); buildModals();
       bus.on('mode', onMode); bus.on('phase', onPhase); bus.on('frame', onFrame);
+    bus.on('answer', function () { var el = h('div', 'answerbar', '<b>對答案</b><span>紅＝沒被找到　藍＝被找到　' + '<span class="key">G</span> 給最厲害的偽裝按讚　<span class="key">Y</span> 結束　<span class="key">5</span> 自由鏡頭</span>', els.hud); setTimeout(function () { el.classList.add('small'); }, 2600); var rm = function () { el.remove(); }; bus.on('mode', rm); });
       bus.on('guide', function (d) { setGuide(d.step); });
       bus.on('pose', function (d) { markPose(d.pose); show(els.pw, false); });
       bus.on('paintmode', function (d) { if (G.state) hints(ui.role, G.state.phase); if (d.on && document.exitPointerLock) document.exitPointerLock(); els.pp.classList.toggle('off', !d.on); els.bPaint.classList.toggle('act', d.on); show(els.ring, d.on); if (d.on) refreshSug(); });
@@ -75,12 +76,16 @@
         rankT = 0; if (!G.me || d.add <= 0 || d.cat !== G.me.pid || (ui.role !== 'cat' && G.state.mode !== 'double')) return;
         if (G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { ovN = 0; ovSum = 0; } ovLast = G.simT; ovN++; ovSum += d.add;
         els.myScore.lastChild.textContent = d.score;
-        els.ovl.className = 'ovl lv' + Math.min(4, Math.floor(ovN / 4)); els.ovl.innerHTML = '<em>被看見了，卻沒被發現</em><b style="font-size:' + (46 + Math.min(44, ovN * 2.2)) + 'px">+' + ovSum + '</b><i>這一下 +' + d.add + '　累計 ' + d.score + '</i>';
+        els.ovl.className = 'ovl lv' + Math.min(4, Math.floor(ovN / 4)); els.ovl.innerHTML = '<em>被看見了，卻沒被發現</em><b style="font-size:' + (64 + Math.min(72, ovN * 3.2)) + 'px">+' + ovSum + '</b><u>連續 ' + ovN + ' 跳' + (d.add >= 40 ? '　正對著你！' : '') + '</u><i>這一下 +' + d.add + '　累計 ' + d.score + '</i>';
         void els.ovl.offsetWidth; els.ovl.classList.add('tick'); bus.emit('ovltick', { n: ovN, add: d.add });
       });
       bus.on('frame', function () {
-        if (ovN && G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { ovN = 0; els.ovl.className = 'ovl hide'; }
+        if (ovN && G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { // the hunter looked away: the streak is banked and flies over to your row in the ranking
+          var r0 = els.ovl.getBoundingClientRect(), fly = h('div', 'bank', '+' + ovSum, els.hud), r1 = els.rank.getBoundingClientRect(); fly.style.left = (r0.right - 150) + 'px'; fly.style.top = (r0.top + 20) + 'px'; void fly.offsetWidth; fly.style.left = (r1.left + 90) + 'px'; fly.style.top = (r1.top + 30) + 'px'; fly.style.fontSize = '20px'; fly.style.opacity = 0.2;
+          setTimeout(function () { fly.remove(); els.rank.classList.add('flash'); setTimeout(function () { els.rank.classList.remove('flash'); }, 450); }, 720); bus.emit('banked', { sum: ovSum, n: ovN });
+          ovN = 0; els.ovl.className = 'ovl hide'; rankT = 0; }
         rankT -= 1; if (rankT > 0 || !G.state) return; rankT = 20;
+        if (ui.role !== 'cat' && !els.rank.classList.contains('hide') && els.rank.innerHTML && G.simT - (ui.rankAt || -99) < G.settings.boardEvery) return; ui.rankAt = G.simT; // hunters get the ranking only every 30 s (host setting), as in the original
         var on = G.state.phase === 'seek' && (ui.role === 'cat' || G.settings.board); show(els.rank, on); if (!on) return;
         var P = G.state.players, ids = Object.keys(P).filter(function (id) { return P[id].team === 'cat' || P[id].score > 0 || G.state.mode === 'double'; }).sort(function (a, b) { return P[b].score - P[a].score; }).slice(0, 7);
         els.rank.innerHTML = '<h4>眼皮底下排行</h4>' + ids.map(function (id, i) { return '<div class="' + (id === G.me.pid ? 'me' : '') + '"><u>' + (i + 1) + '</u><span>' + nameOf(id) + '</span><b>' + P[id].score + '</b></div>'; }).join('');
@@ -160,7 +165,7 @@
     var cream = { top: [255, 253, 244], bottom: [255, 222, 170], rim: [146, 66, 14] }, ice = { top: [255, 255, 255], bottom: [200, 232, 255], rim: [22, 78, 130] }, ink = { top: [150, 96, 50], bottom: [70, 40, 18], rim: [255, 250, 236] };
     [['貓', cream], ['躲', ink], ['狗', ice], ['找', ink]].forEach(function (gp, k) { logo.children[k].appendChild(glyph(gp[0], gp[1])); logo.children[k].setAttribute('aria-label', gp[0]); });
     h('div', 'tagline', '塗上顏色・藏進日常', t);
-    h('div', 'sub', '日式老家裡的塗裝捉迷藏', t);
+    h('div', 'sub', '老家裡的塗裝捉迷藏', t);
     function card(team, title, label, sub, list) {
       var c = h('div', 'card panel ' + team, '<h4>' + IC.paw + title + '</h4>', t), pvw = h('canvas', 'pv', '', c), P0 = G.pick[team], O = SG.CRITTER_OPTIONS[team];
       function upd() { G.setPreview(team, pvw); }

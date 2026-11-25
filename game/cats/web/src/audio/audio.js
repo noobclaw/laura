@@ -42,8 +42,8 @@
     win: function (c, o, t) { [0, 2, 4, 5, 7].forEach(function (n, i) { pluck(c, o, t + i * 0.12, YO[n], 0.32, 1.1); }); pluck(c, o, t + 0.72, YO[5] * 2, 0.22, 1.4); },
     lose: function (c, o, t) { [4, 3, 1, 0].forEach(function (n, i) { pluck(c, o, t + i * 0.2, YO[n] * 0.5, 0.32, 1.0); }); },
     decoy: function (c, o, t) { osc(c, 'sine', 500, 1000, t, 0.12, o, 0.2); osc(c, 'sine', 750, 1500, t + 0.06, 0.12, o, 0.16); },
-    blast: function (c, o, t) { osc(c, 'sine', 150, 38, t, 0.2, o, 0.6); nz(c, 'lowpass', 5200, 0.8, t, 0.09, o, 0.48, 500); nz(c, 'bandpass', 1400, 1.2, t + 0.01, 0.16, o, 0.2, 300); osc(c, 'square', 320, 110, t, 0.035, o, 0.12); },
-    pump: function (c, o, t) { nz(c, 'bandpass', 1800, 3, t, 0.035, o, 0.4); osc(c, 'triangle', 420, 300, t, 0.03, o, 0.2); nz(c, 'bandpass', 2400, 3, t + 0.16, 0.03, o, 0.45); osc(c, 'triangle', 620, 480, t + 0.16, 0.03, o, 0.2); },
+    blast: function (c, o, t) { osc(c, 'sine', 120, 30, t, 0.32, o, 0.5); osc(c, 'sine', 62, 34, t + 0.02, 0.4, o, 0.3); nz(c, 'lowpass', 4200, 0.8, t, 0.12, o, 0.4, 420); nz(c, 'bandpass', 1500, 1.2, t + 0.015, 0.2, o, 0.16, 280); nz(c, 'highpass', 5200, 0.7, t, 0.03, o, 0.12); osc(c, 'square', 300, 90, t, 0.04, o, 0.09); nz(c, 'lowpass', 900, 0.7, t + 0.09, 0.35, o, 0.07, 200); }, // thump + body + crack + splatter tail
+    pump: function (c, o, t) { nz(c, 'bandpass', 1700, 3, t, 0.04, o, 0.55); osc(c, 'triangle', 400, 280, t, 0.04, o, 0.3); osc(c, 'sine', 150, 110, t, 0.05, o, 0.2); nz(c, 'bandpass', 2400, 3, t + 0.17, 0.035, o, 0.6); osc(c, 'triangle', 620, 470, t + 0.17, 0.035, o, 0.3); osc(c, 'sine', 190, 140, t + 0.17, 0.05, o, 0.2); },
     heart: function (c, o, t, p) { var k = (p && p.v) || 0.5; osc(c, 'sine', 64, 44, t, 0.11, o, 0.35 + k * 0.4); osc(c, 'sine', 58, 40, t + 0.15, 0.1, o, 0.22 + k * 0.3); },
     sneeze: function (c, o, t, p) { var k = (p && p.vol) || 0.5; nz(c, 'bandpass', 2600, 1.5, t, 0.05, o, 0.25 * k, 5200); nz(c, 'highpass', 3000, 0.7, t + 0.06, 0.12, o, 0.4 * k); osc(c, 'sine', 900, 500, t + 0.06, 0.08, o, 0.12 * k); },
     giggle: function (c, o, t) { [0, 0.09, 0.18, 0.27].forEach(function (d, i) { osc(c, 'sine', 980 + i * 60, 760 + i * 40, t + d, 0.06, o, 0.1); }); },
@@ -55,6 +55,7 @@
     kettle: function (c, o, t) { nz(c, 'bandpass', 5200, 3, t, 1.4, o, 0.035, 6200); osc(c, 'sine', 2350, 2500, t + 0.2, 1.1, o, 0.018, 0.3); },
     vacuum: function (c, o, t) { nz(c, 'bandpass', 420, 1.2, t, 1.5, o, 0.03); osc(c, 'sawtooth', 96, 98, t, 1.5, o, 0.012, 0.3); }
   };
+  var AMB = { tick: 1, chime: 1, kettle: 1, vacuum: 1 };
   var A = (SG.audio = {
     volume: 0.7, ctx: null, sounds: S,
     init: function () {
@@ -67,12 +68,19 @@
       bus.on('phase', function (d) { if (d.phase === 'seek') { A.play('seek'); if (SG.game.side === 'cat') setTimeout(function () { A.play('bark'); }, 700); } else if (d.phase === 'prep') A.play('phase'); });
       bus.on('end', function (d) { var won = (SG.game.side === 'cat') === (d.winner === 'cats'); setTimeout(function () { A.play(won ? 'win' : 'lose'); }, 400); });
       document.addEventListener('click', function (e) { A.unlock(); if (e.target.closest && e.target.closest('button')) A.play('click'); }, true);
-      // ambience scheduled from wall-clock: clock tick, wind chime, kettle, vacuum hum
-      setInterval(function () { if (!A.ctx || A.ctx.state !== 'running') return; A.play('tick'); var t = Math.floor(performance.now() / 1000); if (t % 7 === 0) { A.play('chime', { k: 1 }); setTimeout(function () { A.play('chime', { k: 1.19 }); }, 260); } if (t % 40 === 9) A.play('kettle'); if (t % 5 === 0) A.play('vacuum'); }, 1000);
+      // ambience: a quiet clock tick, and one soft wind-chime note about every 80-110 s. The kettle whistle and the vacuum hum are gone (owner: too noisy).
+      var nextChime = 40; setInterval(function () { if (!A.ctx || A.ctx.state !== 'running') return; var t = Math.floor(performance.now() / 1000); if (t % 2 === 0) A.play('tick'); if (t >= nextChime) { nextChime = t + 80 + Math.floor(Math.random() * 30); A.play('chime', { k: 1 }); } }, 1000);
+      // music follows the phase; in the search phase it is off unless the player turns it on (it would mask footsteps and taunts)
+      function mus() { var G = SG.game, M = SG.music; if (!M) return; A.buses(); var st = G.state, ph = G.mode === 'title' ? 'lobby' : !st ? null : st.phase === 'lobby' ? 'lobby' : st.phase === 'prep' ? 'hide' : st.phase === 'seek' ? (G.opts.searchMusic ? 'search' : null) : 'answer'; if (ph) M.play(ph); else M.stop(); }
+      bus.on('mode', mus); bus.on('phase', function (d) { if (d.phase === 'reveal' && SG.music) SG.music.sting(); mus(); }); bus.on('frame', function (d) { if (SG.music) SG.music.level = d.phase === 'seek' ? (d.left < 10 ? 2 : d.left < 60 ? 1 : 0) : 0; });
     },
     unlock: function () { if (!A.ctx) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return; A.ctx = new C(); A.master = A.ctx.createGain(); A.master.gain.value = A.volume; var comp = A.ctx.createDynamicsCompressor(); comp.threshold.value = -12; comp.ratio.value = 6; A.master.connect(comp); comp.connect(A.ctx.destination); } if (A.ctx.state === 'suspended') A.ctx.resume(); },
     setVolume: function (v) { A.volume = v; if (A.master) A.master.gain.value = v; },
-    play: function (name, opt) { if (!A.ctx || A.ctx.state !== 'running' || !S[name]) return; try { S[name](A.ctx, A.master, A.ctx.currentTime + 0.01, opt); } catch (e) { } },
+    levels: { sfx: 1, amb: 0.3, mus: 0.125 }, // music sits about 18 dB under the effects
+    setLevel: function (k, v) { A.levels[k] = v; if (A[k]) A[k].gain.value = v; },
+    buses: function () { if (A.sfx || !A.ctx) return; ['sfx', 'amb', 'mus'].forEach(function (k) { A[k] = A.ctx.createGain(); A[k].gain.value = A.levels[k]; A[k].connect(A.master); });
+      var dl = A.ctx.createDelay(0.5), fb = A.ctx.createGain(), wet = A.ctx.createGain(); dl.delayTime.value = 0.27; fb.gain.value = 0.22; wet.gain.value = 0.18; A.musIn = A.ctx.createGain(); A.musIn.connect(A.mus); A.musIn.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(A.mus); A.mus = Object.assign(A.musIn, { gainNode: A.mus }); },
+    play: function (name, opt) { if (!A.ctx || A.ctx.state !== 'running' || !S[name]) return; A.buses(); try { S[name](A.ctx, AMB[name] ? A.amb : A.sfx, A.ctx.currentTime + 0.01, opt); } catch (e) { } },
     /* render every sound offline and measure it. Nobody has listened to these: this only proves they are audible and do not clip. */
     selfTest: function () {
       var names = Object.keys(S), out = [];
