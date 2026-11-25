@@ -42,7 +42,15 @@
     win: function (c, o, t) { [0, 2, 4, 5, 7].forEach(function (n, i) { pluck(c, o, t + i * 0.12, YO[n], 0.32, 1.1); }); pluck(c, o, t + 0.72, YO[5] * 2, 0.22, 1.4); },
     lose: function (c, o, t) { [4, 3, 1, 0].forEach(function (n, i) { pluck(c, o, t + i * 0.2, YO[n] * 0.5, 0.32, 1.0); }); },
     decoy: function (c, o, t) { osc(c, 'sine', 500, 1000, t, 0.12, o, 0.2); osc(c, 'sine', 750, 1500, t + 0.06, 0.12, o, 0.16); },
+    blast: function (c, o, t) { osc(c, 'sine', 150, 38, t, 0.2, o, 0.6); nz(c, 'lowpass', 5200, 0.8, t, 0.09, o, 0.48, 500); nz(c, 'bandpass', 1400, 1.2, t + 0.01, 0.16, o, 0.2, 300); osc(c, 'square', 320, 110, t, 0.035, o, 0.12); },
+    pump: function (c, o, t) { nz(c, 'bandpass', 1800, 3, t, 0.035, o, 0.4); osc(c, 'triangle', 420, 300, t, 0.03, o, 0.2); nz(c, 'bandpass', 2400, 3, t + 0.16, 0.03, o, 0.45); osc(c, 'triangle', 620, 480, t + 0.16, 0.03, o, 0.2); },
+    heart: function (c, o, t, p) { var k = (p && p.v) || 0.5; osc(c, 'sine', 64, 44, t, 0.11, o, 0.35 + k * 0.4); osc(c, 'sine', 58, 40, t + 0.15, 0.1, o, 0.22 + k * 0.3); },
+    sneeze: function (c, o, t, p) { var k = (p && p.vol) || 0.5; nz(c, 'bandpass', 2600, 1.5, t, 0.05, o, 0.25 * k, 5200); nz(c, 'highpass', 3000, 0.7, t + 0.06, 0.12, o, 0.4 * k); osc(c, 'sine', 900, 500, t + 0.06, 0.08, o, 0.12 * k); },
+    giggle: function (c, o, t) { [0, 0.09, 0.18, 0.27].forEach(function (d, i) { osc(c, 'sine', 980 + i * 60, 760 + i * 40, t + d, 0.06, o, 0.1); }); },
+    like: function (c, o, t) { pluck(c, o, t, 880, 0.2, 0.3); pluck(c, o, t + 0.08, 1175, 0.2, 0.4); },
+    splat: function (c, o, t) { nz(c, 'lowpass', 900, 1, t, 0.07, o, 0.3, 200); osc(c, 'sine', 240, 120, t, 0.06, o, 0.18); },
     chime: function (c, o, t, p) { var f = 2100 * ((p && p.k) || 1); osc(c, 'sine', f, f, t, 1.6, o, 0.1, 0.002); osc(c, 'sine', f * 2.76, f * 2.76, t, 0.8, o, 0.04, 0.002); osc(c, 'sine', f * 5.4, f * 5.4, t, 0.3, o, 0.02, 0.002); },
+    score: function (c, o, t, p) { var f = 520 * Math.pow(1.059, Math.min(26, (p && p.n) || 1)); osc(c, 'triangle', f, f * 1.5, t, 0.09, o, 0.22); osc(c, 'sine', f * 2, f * 2.02, t + 0.03, 0.09, o, 0.1); }, // 見落とし counter: one semitone higher each tick
     tick: function (c, o, t) { nz(c, 'bandpass', 3200, 3, t, 0.018, o, 0.5); osc(c, 'sine', 1800, 1500, t, 0.012, o, 0.05); },
     kettle: function (c, o, t) { nz(c, 'bandpass', 5200, 3, t, 1.4, o, 0.035, 6200); osc(c, 'sine', 2350, 2500, t + 0.2, 1.1, o, 0.018, 0.3); },
     vacuum: function (c, o, t) { nz(c, 'bandpass', 420, 1.2, t, 1.5, o, 0.03); osc(c, 'sawtooth', 96, 98, t, 1.5, o, 0.012, 0.3); }
@@ -50,9 +58,11 @@
   var A = (SG.audio = {
     volume: 0.7, ctx: null, sounds: S,
     init: function () {
-      var bus = SG.bus, map = { meow: 'meow', shot: 'thwop', bounce: 'bounce', miss: 'miss', dryfire: 'dryfire', picked: 'pick', fill: 'fill', undo: 'undo', pose: 'pose', jump: 'jump', land: 'land', paintmode: 'paintmode', alert: 'alert', lowBalls: 'lowBalls', decoy: 'decoy', bump: 'bump' };
+      var bus = SG.bus, map = { meow: 'meow', blast: 'blast', pump: 'pump', giggle: 'giggle', like: 'like', bounce: 'splat', ovltick: 'score', miss: 'miss', dryfire: 'dryfire', picked: 'pick', fill: 'fill', undo: 'undo', pose: 'pose', jump: 'jump', land: 'land', paintmode: 'paintmode', alert: 'alert', lowBalls: 'lowBalls', decoy: 'decoy', bump: 'bump' };
       Object.keys(map).forEach(function (ev) { bus.on(ev, function (d) { A.play(map[ev], d); }); });
       bus.on('hit', function () { A.play('meowHit'); });
+      bus.on('fidget', function (d) { if (d.sneeze && SG.game.me && SG.game.me.team === 'dog' && d.d < 6) A.play('sneeze', { vol: 1 - d.d / 7 }); });
+      var hb = 0; bus.on('danger', function (d) { A.danger = d.v; }); setInterval(function () { if (!A.ctx || !(A.danger > 0.25) || !SG.game.state || SG.game.state.phase !== 'seek') return; var n = performance.now(); if (n - hb > 1150 - 760 * A.danger) { hb = n; A.play('heart', { v: A.danger }); } }, 60);
       bus.on('stroke', function (d) { var n = performance.now(); if (n - (A.lastBrush || 0) > 70) { A.lastBrush = n; A.play('brush', d); } });
       bus.on('phase', function (d) { if (d.phase === 'seek') { A.play('seek'); if (SG.game.side === 'cat') setTimeout(function () { A.play('bark'); }, 700); } else if (d.phase === 'prep') A.play('phase'); });
       bus.on('end', function (d) { var won = (SG.game.side === 'cat') === (d.winner === 'cats'); setTimeout(function () { A.play(won ? 'win' : 'lose'); }, 400); });

@@ -249,7 +249,9 @@
     // boundary fences / hedges + colliders, garden objects' colliders
     add(G.planeM(6.4, 1.7), M.bam, 7.95, 0.55, EN + 3.0, 0, -PI / 2, 0); add(G.planeM(6.4, 1.7), M.bam, -7.95, 0.55, EN + 3.0, 0, PI / 2, 0);
     plat(-8.1, -7.9, 2.4, 8.8, 1.4, -0.3, true); plat(7.9, 8.1, 2.4, 8.8, 1.4, -0.3, true); plat(-8, 8, EN + 6.15, EN + 6.3, 1.4, -0.3, true);
-    plat(-8, -6.7, 2.3, 2.6, H, -0.3, true); plat(4.5, 8, 2.3, 2.6, H, -0.3, true); add(G.boxM(3.5, H + 0.3, 0.12), M.plaster, 6.25, H / 2 - 0.15, 2.45); add(G.boxM(1.3, H + 0.3, 0.12), M.plaster, -7.35, H / 2 - 0.15, 2.45);
+    // garden-side walls of the two wings, each with a doorway (east: engawa -> bath, west: garden gate -> alley)
+    [[-8, -7.8, -0.3], [-7.0, -6.7, -0.3], [-7.8, -7.0, 1.9], [4.5, 5.0, -0.3], [5.9, 8, -0.3], [5.0, 5.9, 1.9]].forEach(function (w) { plat(w[0], w[1], 2.3, 2.6, H, w[2], true); add(G.boxM(w[1] - w[0], H - w[2], 0.12), M.plaster, (w[0] + w[1]) / 2, (H + w[2]) / 2, 2.45); });
+    K.lintel(4.95, 5.95, 2.45, 1.84); K.lintel(-7.85, -6.95, 2.45, 1.84);
     plat(-6.76, -6.64, 2.9, 4.05, H, -0.3, true);
     [[-4.8, EN + 1.45], [-1.6, EN + 1.45], [1.6, EN + 1.45], [4.8, EN + 1.45]].forEach(function (p) { plat(p[0] - 0.07, p[0] + 0.07, p[1] - 0.07, p[1] + 0.07, 2.3, 0, true); });
     plat(-2.72, -2.28, EN + 3.08, EN + 3.52, 0.9, -0.3); plat(3.5, 3.72, EN + 2.5, EN + 2.72, 2.0, -0.3, true);

@@ -22,11 +22,11 @@ window.SG_RULES = {
   }
  ],
  "cat": {
-  "walkSpeed": 2.2,
-  "crouchSpeed": 0.9,
+  "walkSpeed": 1.6,
+  "crouchSpeed": 0.8,
   "jumpHeight": 1.1,
   "jumpHeightShortLeg": 0.8,
-  "clingSpeed": 1,
+  "clingSpeed": 1.3,
   "stillSpeed": 0.05,
   "meowRange": 12,
   "maxDecoys": 2,
@@ -35,19 +35,31 @@ window.SG_RULES = {
   "forcedMeowSec": 45,
   "forcedMeowMinSec": 5,
   "embedRatio": 0.6,
-  "embedSec": 3
+  "embedSec": 3,
+  "runSpeed": 2.5,
+  "sizes": [
+   1,
+   1.4,
+   1.7
+  ]
  },
  "dog": {
-  "speed": 3,
-  "startBalls": 5,
+  "speed": 1.8,
+  "startAmmo": 5,
   "shotIntervalSec": 1.5,
   "missDelta": -1,
   "hitDelta": 1,
   "fleeingSpeed": 1,
-  "ballSpeed": 40,
-  "ballGravity": 2.5,
-  "ballRange": 25,
-  "lowBallWarn": 1,
+  "pelletSpeed": 60,
+  "pelletGravity": 2.5,
+  "range": 25,
+  "lowAmmoWarn": 1,
+  "eyeHeightDefault": 0.62,
+  "crouchEye": 0.55,
+  "crouchSpeed": 0.5,
+  "jumpHeight": 0.55,
+  "pellets": 7,
+  "spreadRad": 0.035,
   "eyeHeight": {
    "shiba": 0.62,
    "corgi": 0.4,
@@ -55,13 +67,20 @@ window.SG_RULES = {
    "poodle": 0.86,
    "dachs": 0.36,
    "husky": 0.72
-  }
+  },
+  "runSpeed": 2.8
  },
  "overlooked": {
-  "checkEverySec": 0.5,
-  "minArea": 0.0005,
-  "coef": 10,
-  "boardEverySec": 30
+  "tickEverySec": 0.5,
+  "minArea": 0.0003,
+  "maxPerTick": 45,
+  "deadZone": 0.1,
+  "edgeFactor": 0.15,
+  "nearM": 5,
+  "farM": 22,
+  "farFactor": 0.25,
+  "boardEverySec": 30,
+  "streakGapSec": 1.2
  },
  "paint": {
   "textureSize": 1024,
@@ -73,6 +92,25 @@ window.SG_RULES = {
   "undoSteps": 24,
   "suggestDistance": 0.6
  },
+ "solo": {
+  "_comment": "defaults when playing alone with bots (ours); multiplayer keeps round.*",
+  "prepSec": 75,
+  "seekSec": 120,
+  "mode": "infection",
+  "botCatsWhenCat": 9,
+  "botDogsWhenCat": 2,
+  "botCatsWhenDog": 10,
+  "botDogsWhenDog": 1
+ },
+ "feel": {
+  "_comment": "feedback only, no points (ours)",
+  "nearMissDogM": 1.3,
+  "nearMissPelletM": 0.6,
+  "stareSecMin": 1,
+  "stareSecMax": 3,
+  "fidgetMinSec": 9,
+  "fidgetMaxSec": 26
+ },
  "bot": {
   "dogViewDistance": 7,
   "dogFovDeg": 70,
@@ -80,5 +118,8 @@ window.SG_RULES = {
   "dogSuspicionDecay": 0.35,
   "dogMismatchFloor": 0.045,
   "catMoveSuspicion": 3
+ },
+ "lobby": {
+  "lotterySec": 20
  }
 };

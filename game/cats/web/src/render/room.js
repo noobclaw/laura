@@ -133,7 +133,8 @@
     add(G.boxM(0.1, H - 2.0, 1.2), plaster, -W - 0.05, 2.0 + (H - 2.0) / 2, 1.3); lintel(0.63, 1.97, -W + 0.02, 1.94, true);
     [-D + 0.03, -1.4, 0.63, 1.97, EN].forEach(function (z) { post(-W + 0.03, z); });
     // east wall (x=W)
-    wallX(W, -D, EN, -1, plasterG);
+    wallX(W, -D, -3.3, -1, plasterG); wallX(W, -2.4, EN, -1, plasterG); // low doorway to the east wing in the corner
+    add(G.boxM(0.1, H - 1.2, 0.9), plasterG, W + 0.05, 1.2 + (H - 1.2) / 2, -2.85); lintel(-3.34, -2.36, W - 0.02, 1.14, true);
     [-D + 0.03, -1.6, 0.4, EN].forEach(function (z) { post(W - 0.03, z); });
     // nageshi rail round the room + ranma strip above the engawa opening
     B(W * 2, 0.07, 0.04, dark, 0, 2.0, -D + 0.07, 0.008, true); B(0.04, 0.07, D + EN, dark, W - 0.07, 2.0, (EN - D) / 2, 0.008, true); B(0.04, 0.07, D + EN, dark, -W + 0.07, 2.0, (EN - D) / 2, 0.008, true);
@@ -545,7 +546,7 @@
     [[W - 0.36, 0.42, -0.3], [-W + 0.6, 0.53, 0.08]].forEach(function (c, i) { knockable('小盆栽', c[0], c[1], c[2], 0.05, function () { L([[0, 0], [0.035, 0], [0.05, 0.07]], col(i ? 0xf29a4a : 0x3f8f8a, 0.5), 0, 0, 0, 12); S(0.05, leafM, 0, 0.1, 0, 1, 0.9, 1); }, 'cup'); });
 
     /* ---- colliders for the living-room shell (walls are platforms flagged `wall`) ---- */
-    [[-W - 0.12, -W, -D, 0.7], [-W - 0.12, -W, 1.9, EN], [W, W + 0.12, -D, EN]].forEach(function (w) { plat(w[0], w[1], w[2], w[3], H, 0, true); });
+    [[-W - 0.12, -W, -D, 0.7], [-W - 0.12, -W, 1.9, EN], [W, W + 0.12, -D, -3.3], [W, W + 0.12, -2.4, EN]].forEach(function (w) { plat(w[0], w[1], w[2], w[3], H, 0, true); }); plat(W, W + 0.12, -3.3, -2.4, H, 1.2, true);
     [[-2.9, -0.55], [0.55, 2.75], [4.35, W]].forEach(function (w) { plat(w[0], w[1], -D - 0.12, -D, H, 0, true); });
     plat(-W, -2.9, -D - 0.72, -D - 0.6, H, 0, true); plat(-2.9, -2.78, -D - 0.6, -D, H, 0, true); // tokonoma recess
     plat(-W - 0.12, -W, 0.7, 1.9, H, 1.94, true); plat(-0.55, 0.55, -D - 0.12, -D, H, 1.94, true); plat(2.75, 4.35, -D - 0.12, -D, H, 1.94, true); // lintels
@@ -557,6 +558,7 @@
       m: { honey: honey, dark: dark, darker: darker, hinoki: hinoki, red: red, engW: engW, ceilW: ceilW, plaster: plaster, plasterG: plasterG, tatami: tatami, washi: washi, iron: iron, brass: brass, white: white, black: black, cream: cream, leafM: leafM, leafD: leafD, stoneM: stoneM, stoneD: stoneD, card: card, heri: heri, paper: paper, mapleM: mapleM, mapleO: mapleO, grass: grass, gravel: gravel, bam: bam, tile: tile },
       plantPot: plantPot, snake: snake, monstera: monstera, bonsai: bonsai, daruma: daruma, kokeshi: kokeshi, book: book, cbox: cbox, bookC: bookC, W: W, D: D, H: H, EN: EN };
     if (SG.buildHouse) SG.buildHouse(K);
+    if (SG.buildAnnex) SG.buildAnnex(K);
     cur = stat; curRoom = '客廳';
 
     /* ================= AO skirts + light shafts + dust ================= */
@@ -656,7 +658,7 @@
     fxBy.forEach(function (list, m) { if (list.length < 2) return; var mm = new THREE.Mesh(G.merge(list.map(function (o) { return [o.geometry, o.matrixWorld.clone()]; })), m); mm.layers.set(1); mm.renderOrder = list[0].renderOrder; list.forEach(function (o) { fx.remove(o); }); fx.add(mm); });
 
     /* ================= world queries ================= */
-    var bounds = { x0: -7.85, x1: 7.85, z0: -7.6, z1: 8.55 };
+    var bounds = { x0: -8.55, x1: 8.55, z0: -8.55, z1: 8.55 };
     function base(x, z) { return (z > EN + 1.5 || (z > EN + 0.4 && Math.abs(x) > 6.0)) ? -0.3 : 0; } // garden is 30 cm below the house floor
     function groundAt(x, z, y, rad) { // highest surface under the footprint that is not above y
       var g = base(x, z); rad = rad || 0;
@@ -707,6 +709,7 @@
       k.tw += along * sp * (k.shape === 'roly' ? 9 : 2.2 / Math.max(0.05, k.h)) * 0.35;
     }
     function addBall(mesh, x, y, z, vx, vy, vz) { var k = initBody({ g: mesh, type: '網球', x: x, y: y, z: z, vx: vx, vy: vy, vz: vz, r: 0.035, shape: 'ball', m: 0.25, home: [x, y, z], shot: true }); wake(k); knock.push(k); return k; }
+    function kick(x, y, z, dx, dz, sp) { for (var i = 0; i < knock.length; i++) { var k = knock[i]; if (Math.abs(k.x - x) < k.r + 0.12 && Math.abs(k.z - z) < k.r + 0.12 && Math.abs(bodyBase(k) + k.h / 2 - y) < k.h / 2 + 0.15) { wake(k); k.vx += dx * sp; k.vz += dz * sp; k.vy += 0.8; tip(k, dx, dz, sp); } } }
     function resetProps() { // new round: balls are removed, props go home
       for (var i = knock.length - 1; i >= 0; i--) { var k = knock[i]; if (k.shot) { knock.splice(i, 1); continue; } k.x = k.home[0]; k.y = k.home[1]; k.z = k.home[2]; k.vx = k.vy = k.vz = 0; k.th = k.tw = 0; k.lying = false; k.sleep = true; k.g.quaternion.copy(k.q0); k.g.position.set(k.x, k.y, k.z); }
       K.triggers.forEach(function (t) { if (t.kind === 'drawer') { t.out = 0.22; t.p.z1 = t.p.z0 + 0.32; } });
@@ -819,12 +822,38 @@
       group: room, batched: batched, dyn: dyn, fx: fx, platforms: platforms, bounds: bounds, knock: knock, inventory: inv,
       stats: { types: types.length, items: total, staticMeshes: statCount, batches: groups.size, dynMeshes: dynMeshes, tris: Math.round(tris), moving: updaters.length, knockables: knock.length },
       sun: sun, steam: steamM, kettle: kettle, vac: vacState, vacGroup: vac,
-      groundAt: groundAt, blocked: blocked, stepProps: stepProps, addBall: addBall, resetProps: resetProps, segWalls: segWalls, stepTriggers: stepTriggers, triggers: K.triggers, route: K.route || [], lights: K.lights, base: base, inventoryByRoom: invRoom, K: K,
+      groundAt: groundAt, blocked: blocked, stepProps: stepProps, addBall: addBall, kick: kick, resetProps: resetProps, segWalls: segWalls, stepTriggers: stepTriggers, triggers: K.triggers, route: K.route || [], lights: K.lights, base: base, inventoryByRoom: invRoom, K: K,
       update: function (t) { uTime.value = t; for (var i = 0; i < updaters.length; i++) updaters[i](t); var boil = (t % 40) / 40; steamM.uniforms.uAmt.value = 0.35 + 0.65 * Math.max(0, Math.sin(boil * Math.PI * 2)); },
       /* places bots know about: [x, z, yaw, pose, surfaceY] */
       spots: [[-W + 0.5, -1.15, Math.PI / 2, 'loaf', 0.36], [KX + 0.0, KZ + 1.12, Math.PI, 'curl', 0.12], [2.9, 0.4, -2.2, 'loaf', 0.012], [-1.35, -D + 0.32, 0, 'sit', 1.35], [W - 0.7, 1.9, -1.9, 'sit', 1.05], [-W + 0.55, 2.15, 1.2, 'loaf', 0.78], [1.3, EN + 0.75, 0.4, 'curl', 0.28], [-2.3, 1.2, 2.0, 'side', 0.03], [-3.7, -D - 0.28, 0, 'hind', 0.12], [W - 0.5, -2.3, -1.2, 'arch', 0.0], [0.3, 2.0, 2.6, 'belly', 0]].concat(K.spots || [])
     };
     ret.setNight = setNight; ret.sunLight = sun;
+    /* ---- world scale: the property is authored in plan units and then enlarged as a whole, so the animals are small in a big house
+       (ceilings H*WS, doors, furniture and distances all grow together). Everything the game talks to is converted here, at the boundary;
+       the prop physics and the triggers keep running in plan units. */
+    var WS = SG.WS = opt.scale || 1.5;
+    room.scale.setScalar(WS); room.updateMatrixWorld(true);
+    [lampL, bounce, kitL, genL].concat(K.lights).forEach(function (l) { if (l.isPointLight) { l.distance *= WS; l.intensity *= Math.pow(WS, l.decay); } });
+    dayL.forEach(function (d) { d[1] = d[0].intensity; });
+    sc.left = -14 * WS; sc.right = 14 * WS; sc.top = 14 * WS; sc.bottom = -14 * WS; sc.far = 44 * WS; sc.updateProjectionMatrix();
+    var PW = [];
+    function sync() { for (var i = 0; i < platforms.length; i++) { var a = platforms[i], b = PW[i] || (PW[i] = {}); b.x0 = a.x0 * WS; b.x1 = a.x1 * WS; b.z0 = a.z0 * WS; b.z1 = a.z1 * WS; b.y0 = a.y0 * WS; b.y1 = a.y1 * WS; b.wall = a.wall; } PW.length = platforms.length; }
+    sync();
+    var up0 = ret.update;
+    ret.raw = { platforms: platforms, groundAt: groundAt, blocked: blocked, stepProps: stepProps, stepTriggers: stepTriggers, kick: kick, vac: vacState, WS: WS };
+    ret.WS = WS; ret.platforms = PW;
+    ret.groundAt = function (x, z, y, rad) { return groundAt(x / WS, z / WS, y / WS, (rad || 0) / WS) * WS; };
+    ret.blocked = function (x, z, y, rad, step, h) { return blocked(x / WS, z / WS, y / WS, rad / WS, step / WS, h / WS); };
+    ret.segWalls = function (a, b, c, d, e, f) { return segWalls(a / WS, b / WS, c / WS, d / WS, e / WS, f / WS); };
+    ret.base = function (x, z) { return base(x / WS, z / WS) * WS; };
+    ret.stepProps = function (dt, bumpers, onBump) { return stepProps(dt, bumpers.map(function (b) { return { x: b.x / WS, y: b.y / WS, z: b.z / WS, r: b.r / WS, speed: b.speed }; }), onBump && function (k, landed) { onBump({ type: k.type, x: k.x * WS, z: k.z * WS, shot: k.shot }, landed); }); };
+    ret.stepTriggers = function (dt, bodies) { return stepTriggers(dt, bodies.map(function (e) { return { x: e.x / WS, y: e.y / WS, z: e.z / WS, speed: e.speed }; })); };
+    ret.kick = function (x, y, z, dx, dz, sp) { return kick(x / WS, y / WS, z / WS, dx, dz, sp); };
+    ret.vac = { get x() { return vacState.x * WS; }, get z() { return vacState.z * WS; }, get top() { return vacState.top * WS; }, r: vacState.r * WS };
+    ret.update = function (t) { up0(t); sync(); };
+    ret.spots = ret.spots.map(function (s) { return [s[0] * WS, s[1] * WS, s[2], s[3], s[4] * WS]; });
+    ret.route = ret.route.map(function (p) { return [p[0] * WS, p[1] * WS]; });
+    ret.bounds = { x0: bounds.x0 * WS, x1: bounds.x1 * WS, z0: bounds.z0 * WS, z1: bounds.z1 * WS };
     return ret;
   };
 })();

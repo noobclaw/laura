@@ -9,6 +9,7 @@
 <body>
 <canvas id="gl"></canvas>
 <div id="ui"></div>
+<div id="boot"><b>貓躲狗找</b><div class="bar"><i></i></div><span>載入中…</span></div>
 <script src="vendor/three.min.js"></script>
 <script src="data/rules.js"></script>
 <script src="src/core/rules.js"></script>
@@ -17,13 +18,16 @@
 <script src="src/render/post.js"></script>
 <script src="src/render/critter.js"></script>
 <script src="src/render/house.js"></script>
+<script src="src/render/annex.js"></script>
 <script src="src/render/room.js"></script>
 <script src="src/audio/audio.js"></script>
 <script src="src/ui/ui.js"></script>
+<script src="src/ui/ui2.js"></script>
 <script src="src/game.js"></script>
 <script>
 (function () {
-  function go() { try { SG.boot(); } catch (e) { console.error(e); window.__error = String(e && e.stack || e); } }
+  var T0 = performance.now(), B = document.getElementById('boot');
+  function go() { try { SG.boot(function (frac, text) { if (!B) return; B.querySelector('i').style.width = Math.round(frac * 100) + '%'; B.querySelector('span').textContent = text; if (frac >= 1) { window.__loadMs = Math.round(performance.now() - T0); B.remove(); B = null; } }); } catch (e) { console.error(e); window.__error = String(e && e.stack || e); } }
   var f = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('40px SushiTC', '貓躲狗找台所'), document.fonts.ready]) : Promise.resolve();
   var t = setTimeout(go, 4000), done = false;
   f.then(function () { if (!done) { done = true; clearTimeout(t); go(); } }, function () { if (!done) { done = true; clearTimeout(t); go(); } });

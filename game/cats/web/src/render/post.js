@@ -53,11 +53,12 @@
     '}'].join('\n');
 
   var FS_FINAL = [
-    'uniform sampler2D tScene, tBloom, tAO; uniform vec2 uAOPx; uniform float uBloom, uExposure, uTime, uVignette, uAO, uSat, uFade; uniform vec3 uTint;',
+    'uniform sampler2D tScene, tBloom, tAO; uniform vec2 uAOPx; uniform float uBloom, uExposure, uTime, uVignette, uAO, uSat, uFade, uMono, uHorror, uMosaic; uniform vec3 uTint;',
     'vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.,1.); }',
     'float hash(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }',
     'void main(){',
-    '  vec3 c=texture(tScene,vUv).rgb;',
+    '  vec2 suv=vUv; if(uMosaic>0.5){ vec2 g=vec2(textureSize(tScene,0))/uMosaic; suv=(floor(vUv*g)+0.5)/g; }', // host filter: mosaic
+    '  vec3 c=texture(tScene,suv).rgb;',
     '  float ao=0.; for(int y=-1;y<=2;y++) for(int x=-1;x<=2;x++) ao+=texture(tAO,vUv+(vec2(float(x),float(y))-0.5)*uAOPx).r; ao/=16.;',
     '  ao=mix(1.,ao,uAO); c*=mix(vec3(0.42,0.30,0.24),vec3(1.),ao);', // warm-tinted occlusion, never pure black
     '  c+=texture(tBloom,vUv).rgb*uBloom;',
@@ -67,6 +68,8 @@
     '  c=mix(c,c*uTint,0.5); c+=vec3(0.012,0.006,0.0)*(1.-l);', // warm toe
     '  c=c*c*(3.-2.*c)*0.35+c*0.65;', // gentle S curve
     '  vec2 q=vUv-0.5; float v=smoothstep(0.85,0.2,dot(q,q)*1.9); c*=mix(1.-uVignette,1.,v);',
+    '  if(uMono>0.5) c=vec3(dot(c,vec3(0.3,0.59,0.11)));', // host filter: monochrome
+    '  if(uHorror>0.5){ c*=vec3(0.30,0.33,0.42); c*=smoothstep(0.62,0.04,dot(q,q)*2.4); }', // host filter: dark, narrow view
     '  c=pow(c,vec3(1./2.2));',
     '  c+=(hash(gl_FragCoord.xy+uTime)-0.5)/200.;',
     '  o=vec4(c*uFade,1.);',
@@ -94,7 +97,7 @@
     var mFinal = pass(FS_FINAL, {
       tScene: { value: null }, tBloom: { value: null }, tAO: { value: null }, uAOPx: { value: new THREE.Vector2() },
       uBloom: { value: 0.5 }, uExposure: { value: 0.92 }, uTime: { value: 0 }, uVignette: { value: 0.38 }, uAO: { value: 1.0 },
-      uSat: { value: 1.04 }, uFade: { value: 1 }, uTint: { value: new THREE.Vector3(1.02, 1.0, 0.97) }
+      uSat: { value: 1.04 }, uFade: { value: 1 }, uMono: { value: 0 }, uHorror: { value: 0 }, uMosaic: { value: 0 }, uTint: { value: new THREE.Vector3(1.02, 1.0, 0.97) }
     });
     this.final = mFinal.uniforms;
     this.ssao = mSSAO.uniforms;

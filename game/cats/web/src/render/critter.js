@@ -372,6 +372,8 @@
       ['hpL', 'hpR'].forEach(function (n) { addRot(J[n], 0.8 * a, 0, 0); });
       addRot(J.t0, -0.5 * a, 0, 0);
     }
+    if (this.tilt) addRot(J.head, 0, 0, this.tilt);
+    if (this.fidget > 0) { this.fidget -= dt; var fq = Math.sin(this.fidget * 26) * 0.35; if (J.earL) addRot(J.earL, fq, 0, 0); addRot(J['t' + (this.tailN - 1)], 0, 0, fq * 1.4); } // a tell: quick ear twitch + tail tip
     // idle life
     if (live) {
       var br = Math.sin(t * 2.2);

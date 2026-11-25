@@ -43,14 +43,16 @@
       bus.on('mode', onMode); bus.on('phase', onPhase); bus.on('frame', onFrame);
       bus.on('guide', function (d) { setGuide(d.step); });
       bus.on('pose', function (d) { markPose(d.pose); show(els.pw, false); });
-      bus.on('paintmode', function (d) { els.pp.classList.toggle('off', !d.on); els.bPaint.classList.toggle('act', d.on); show(els.ring, d.on); if (d.on) refreshSug(); });
+      bus.on('paintmode', function (d) { if (G.state) hints(ui.role, G.state.phase); if (d.on && document.exitPointerLock) document.exitPointerLock(); els.pp.classList.toggle('off', !d.on); els.bPaint.classList.toggle('act', d.on); show(els.ring, d.on); if (d.on) refreshSug(); });
       bus.on('picked', function (d) { P.setRGB(d.rgb); P.rough.set(d.rough); P.metal.set(d.metal); addRecent(d.rgb); });
       bus.on('wheel', function (d) { if (!(G.me && G.me.team === 'cat' && G.state.phase !== 'reveal')) return; if (!d.open && ui.hoverPose && !els.pw.classList.contains('hide')) G.setPose(ui.hoverPose); if (d.open) ui.hoverPose = null; show(els.pw, d.open); });
       bus.on('brush', function (d) { var v = Math.max(RULES.paint.brushMinCm, Math.min(RULES.paint.brushMaxCm, G.paint.size * 100 + d.d * 100)); G.paint.size = v / 100; P.size.set(v); });
       bus.on('tool', function () { markTool(); });
-      bus.on('hit', function (d) { toast(d.dog === 'you' ? '找到了！' + nameOf(d.cat) + ' 出局' : (d.cat === 'you' ? '被找到了…按 Enter 看結果' : nameOf(d.cat) + ' 被找到了')); balls(); });
-      bus.on('miss', function (d) { if (d.dog === 'you') { toast(d.free ? '沒打中（逃跑中的貓不扣球）' : '打空了，少一顆球'); els.ammo.classList.remove('shake'); void els.ammo.offsetWidth; els.ammo.classList.add('shake'); } balls(); });
-      bus.on('lowBalls', function (d) { if (d.dog === 'you') toast('只剩最後一顆球！'); });
+      bus.on('hit', function (d) { if (d.dog === 'you') { var ar = els.ammo.getBoundingClientRect(); pop('+1', ar.right + 4, ar.top, 'am'); }
+        toast(d.dog === 'you' ? '找到了！' + nameOf(d.cat) + ' 出局' : (d.cat === 'you' ? '被找到了…按 Enter 看結果' : nameOf(d.cat) + ' 被找到了')); balls(); });
+      bus.on('miss', function (d) { if (d.dog === 'you' && !d.free && !SG.RULES.dog.unlimited) { var ar = els.ammo.getBoundingClientRect(); pop('−1', ar.right + 4, ar.top, 'am bad'); }
+        if (d.dog === 'you') { toast(d.free ? '沒打中（逃跑中的貓不扣彈藥）' : '打空了，少一發'); els.ammo.classList.remove('shake'); void els.ammo.offsetWidth; els.ammo.classList.add('shake'); } balls(); });
+      bus.on('lowAmmo', function (d) { if (d.dog === 'you') toast('只剩最後一發！'); });
       bus.on('alert', function (d) { if (d.cat === 'you' || G.decoys.some(function (x) { return x.id === d.cat; })) toast('狗狗盯上你了！'); });
       bus.on('suspicion', function (d) { els.susBar.style.width = Math.min(100, d.v * 100) + '%'; els.sus.classList.toggle('seen', d.seen); els.susTx.textContent = d.seen ? '狗狗正看著這邊' : '狗狗沒看到你'; });
       bus.on('end', function (d) { ui.lastEnd = d; });
@@ -58,12 +60,41 @@
       bus.on('mode', function () { ui.spect = false; });
       bus.on('decoy', function (d) { toast(d.n ? '放了一個分身（被打中你也出局）' : '分身收回'); });
       bus.on('denied', function () { toast(G.decoyCd > 0 ? '分身冷卻中 ' + Math.ceil(G.decoyCd) + ' 秒' : '分身已達上限'); });
-      bus.on('cling', function (d) { toast(d.on ? '貼牆中：W/S 上下，Shift 放開' : '放開了'); });
+      bus.on('cling', function (d) { ui.cling = d.on; if (ui.hints) ui.hints(); if (d.on) toast('黏住了：空白 往上、Ctrl 往下、WASD 沿著表面爬、Shift 放開'); });
+      bus.on('blocked', function () { toast('被東西擋住了：按 3 開啟「穿透描繪」就能隔著畫'); });
+      bus.on('shading', function (d) { toast(d.on ? '陰影：開' : '陰影：關（只看顏色）'); });
       bus.on('menu', function () { openModal('help'); });
+      bus.on('say', function (d) { bubble(G.ent(d.id), d.text, 2200); });
+      bus.on('like', function (d) { bubble(G.ent(d.id), '讚！', 1500); });
+      bus.on('chat', function () { show(els.chat, true); els.chat.focus(); if (document.exitPointerLock) document.exitPointerLock(); });
+      bus.on('danger', function (d) { els.vig.style.opacity = Math.max(0, d.v - 0.2) * 0.9; els.vig.classList.toggle('aim', !!d.aim); });
+      bus.on('nearmiss', function (d) { banner(d.kind === 'dog' ? '狗從你旁邊走過！' : '子彈擦過耳朵！'); });
+      // THE mechanic: while a hunter has you on screen without finding you, a counter runs at the bottom right of YOUR screen and grows the longer it lasts
+      var ovN = 0, ovSum = 0, ovLast = -9, rankT = 0;
+      bus.on('score', function (d) {
+        rankT = 0; if (!G.me || d.add <= 0 || d.cat !== G.me.pid || (ui.role !== 'cat' && G.state.mode !== 'double')) return;
+        if (G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { ovN = 0; ovSum = 0; } ovLast = G.simT; ovN++; ovSum += d.add;
+        els.myScore.lastChild.textContent = d.score;
+        els.ovl.className = 'ovl lv' + Math.min(4, Math.floor(ovN / 4)); els.ovl.innerHTML = '<em>被看見了，卻沒被發現</em><b style="font-size:' + (46 + Math.min(44, ovN * 2.2)) + 'px">+' + ovSum + '</b><i>這一下 +' + d.add + '　累計 ' + d.score + '</i>';
+        void els.ovl.offsetWidth; els.ovl.classList.add('tick'); bus.emit('ovltick', { n: ovN, add: d.add });
+      });
+      bus.on('frame', function () {
+        if (ovN && G.simT - ovLast > SG.RULES.overlooked.streakGapSec) { ovN = 0; els.ovl.className = 'ovl hide'; }
+        rankT -= 1; if (rankT > 0 || !G.state) return; rankT = 20;
+        var on = G.state.phase === 'seek' && (ui.role === 'cat' || G.settings.board); show(els.rank, on); if (!on) return;
+        var P = G.state.players, ids = Object.keys(P).filter(function (id) { return P[id].team === 'cat' || P[id].score > 0 || G.state.mode === 'double'; }).sort(function (a, b) { return P[b].score - P[a].score; }).slice(0, 7);
+        els.rank.innerHTML = '<h4>眼皮底下排行</h4>' + ids.map(function (id, i) { return '<div class="' + (id === G.me.pid ? 'me' : '') + '"><u>' + (i + 1) + '</u><span>' + nameOf(id) + '</span><b>' + P[id].score + '</b></div>'; }).join('');
+      });
+      bus.on('blast', function (d) { if (d.me) { els.cross.classList.remove('fire'); void els.cross.offsetWidth; els.cross.classList.add('fire'); } });
+      bus.on('tags', function (d) { toast(d.on ? '名牌：顯示' : '名牌：隱藏'); });
+      bus.on('viewlock', function (d) { toast(d.on ? '視角鎖定：身體不再跟著鏡頭轉' : '視角鎖定解除'); });
+      bus.on('seethrough', function (d) { toast(d.on ? '透視自己：開' : '透視自己：關'); });
+      bus.on('follow', function (d) { toast(d.name ? '跟著 ' + d.name : '自由鏡頭'); });
+      bus.on('ctrlwarn', function () { toast('提醒：在瀏覽器分頁裡 Ctrl+W 會關掉分頁，壓低可以改用 C，或先按 F11 全螢幕'); });
       bus.on('role', function (d) { setRole(d.team); toast(G.state.mode === 'infection' ? '你被找到了，現在你也是狗！' : '換你當狗去找別人'); });
       bus.on('infected', function (d) { if (d.cat !== 'you') toast(nameOf(d.cat) + ' 變成狗了'); teamIcons(); });
       bus.on('out', function () { teamIcons(); });
-      bus.on('board', function (d) { if (!G.settings.board || ui.role !== 'dog') return; els.board.innerHTML = '<h4>眼皮底下排行</h4>' + d.rows.slice(0, 5).map(function (r) { return '<div><span>' + nameOf(r.id) + '</span><b>' + r.score + '</b></div>'; }).join(''); show(els.board, true); });
+      /* (the 30 s board event is superseded by the live ranking panel on the left) */
       bus.on('heard', function (d) { els.heard.style.transform = 'rotate(' + (-d.angle * 180 / Math.PI) + 'deg)'; show(els.heard, true); ui.heardT = 2.2; });
       bus.on('meow', function (d) { if (d.forced && d.me) toast('強制喵叫！'); });
       bus.on('embed', function (d) { toast(d.state === 'warn' ? '埋太深了，再不出來會被看見！' : d.state === 'exposed' ? '你露出來了！狗看得到你' : '好了，出來了'); });
@@ -74,6 +105,11 @@
       window.addEventListener('mousemove', function (e) { if (G.paint.on) { els.ring.style.left = e.clientX + 'px'; els.ring.style.top = e.clientY + 'px'; } });
     }
   });
+  var bubs = [];
+  function bubble(en, text, ms) { if (!en) return; bubs = bubs.filter(function (b) { if (b.en === en) { b.el.remove(); return false; } return true; }); var el = h('div', 'bub', text, els.bubbles); bubs.push({ en: en, el: el, t: (ms || 2200) / 1000 }); }
+  function pop(text, x, y, cls) { var el = h('div', 'pop ' + (cls || ''), text, els.hud); el.style.left = x + 'px'; el.style.top = y + 'px'; setTimeout(function () { el.remove(); }, 900); }
+  function banner(text) { var el = h('div', 'banner', text, els.hud); setTimeout(function () { el.remove(); }, 1900); }
+  ui.bubble = bubble;
   function nameOf(id) { var e = G.ent(id); return e ? e.name : id; }
   var toastT;
   function toast(t) { els.toast.textContent = t; els.toast.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { els.toast.classList.remove('on'); }, 2200); }
@@ -135,7 +171,7 @@
       var b = h('button', 'btn ' + team, IC.paw + ' ' + label + '<small>' + sub + '</small>', c); b.dataset.act = 'start-' + team; b.onclick = function () { G.start(team); };
       upd();
     }
-    card('cat', '貓咪・躲', '當貓咪', '塗色躲起來', SG.CATS); card('dog', '狗狗・找', '當狗狗', '用網球找出來', SG.DOGS);
+    card('cat', '貓咪・躲', '當貓咪', '塗色躲起來', SG.CATS); card('dog', '狗狗・找', '當狗狗', '用漆彈槍找出來', SG.DOGS);
     var m = h('div', 'mid', '', t), ms = h('div', 'modes', '', m), md = h('p', 'mdesc', '', m);
     Object.keys(MODES).forEach(function (k) { var b = h('b', 'hit' + (k === G.settings.mode ? ' on' : ''), MODES[k][0], ms); b.dataset.mode = k; b.onclick = function () { G.settings.mode = k; [].forEach.call(ms.children, function (c) { c.classList.toggle('on', c === b); }); md.textContent = MODES[k][1]; if (SG.audio) SG.audio.play('click'); }; });
     md.textContent = MODES[G.settings.mode][1];
@@ -165,9 +201,12 @@
     els.bMeow = h('button', 'btn', '喵 <span class="key">1</span>', a); els.bMeow.onclick = function () { G.meow(); els.bMeow.blur(); };
     els.bDecoy = h('button', 'btn', '分身 <span class="key">Q</span><span class="cd"></span>', a); els.bDecoy.onclick = function () { G.decoy(); els.bDecoy.blur(); };
     els.cross = h('div', 'cross hide', '', H);
-    els.ammo = h('div', 'ammo panel hide', '<em>網球</em><span class="n"></span><div class="balls"></div>', H);
+    els.ammo = h('div', 'ammo panel hide', '<em>彈藥</em><span class="n"></span><div class="balls"></div>', H);
     els.tags = h('div', 'tags', '', H);
     els.board = h('div', 'board panel hide', '', H);
+    els.vig = h('div', 'vig', '', H); els.bubbles = h('div', 'tags', '', H); els.myScore = h('div', 'myscore hide', '<em>眼皮底下</em><b>0</b>', H); els.modecap = h('div', 'modecap', '', H); els.ovl = h('div', 'ovl hide', '', H); els.rank = h('div', 'rank panel hide', '', H);
+    els.chat = h('input', 'chat hide', '', H); els.chat.maxLength = 40; els.chat.placeholder = '說點什麼…（Enter 送出）';
+    els.chat.addEventListener('keydown', function (e) { e.stopPropagation(); if (e.key === 'Enter') { if (els.chat.value.trim()) bubble(G.me, els.chat.value.trim(), 3500); els.chat.value = ''; show(els.chat, false); els.chat.blur(); } if (e.key === 'Escape') { show(els.chat, false); els.chat.blur(); } });
     els.heard = h('div', 'heard hide', '<i>' + IC.paw + '喵</i>', H);
     els.cap = h('div', 'cap hide', '', root);
     els.toast = h('div', 'toast', '', root);
@@ -185,17 +224,17 @@
   }
   function teamIcons() {
     var st = G.state; if (!st) return;
-    if (st.mode === 'double') { var me2 = st.players.you; els.tCats.innerHTML = '<em>你找到</em> ' + me2.found.length + ' / ' + (st.order.length - 1); els.tDogs.innerHTML = '<em>你的球</em> ' + (SG.RULES.dog.unlimited ? '∞' : me2.balls); return; }
-    var c = '<em>貓</em>', d = '<em>狗的球</em><div class="balls">';
+    if (st.mode === 'double') { var me2 = st.players.you; els.tCats.innerHTML = '<em>你找到</em> ' + me2.found.length + ' / ' + (st.order.length - 1); els.tDogs.innerHTML = '<em>你的彈藥</em> ' + (SG.RULES.dog.unlimited ? '∞' : me2.ammo); return; }
+    var c = '<em>貓</em>', d = '<em>狗的彈藥</em><div class="balls">';
     SGCore.list(st, 'cat').forEach(function (p) { c += IC.paw.replace('class="ic"', 'class="ic' + (p.out ? ' off' : '') + '"'); });
-    var dogs = SGCore.hunters(st), n = 0; dogs.forEach(function (p) { n += p.balls; });
-    if (SG.RULES.dog.unlimited) d += '∞'; else for (var i = 0; i < Math.min(18, Math.max(n, RULES.dog.startBalls)); i++) d += '<i class="ball' + (i < n ? '' : ' off') + '"></i>';
-    els.tCats.innerHTML = c; els.tDogs.innerHTML = d + '</div>';
+    var dogs = SGCore.hunters(st), n = 0; d = '<em>獵人</em>'; dogs.forEach(function (p) { n += p.ammo; d += '<i class="hi' + (p.id === 'you' ? ' me' : '') + '"></i>'; }); // white hiders on the left, red hunters on the right
+    d += '<span class="num">' + (SG.RULES.dog.unlimited ? '∞' : '彈 ' + n) + '</span>';
+    els.tCats.innerHTML = c; els.tDogs.innerHTML = d;
   }
   function balls() {
     teamIcons(); var p = G.state.players.you; if (!p || !p.hunter) return;
-    var s = ''; for (var i = 0; i < Math.max(p.balls, RULES.dog.startBalls); i++) s += '<i class="ball' + (i < p.balls ? '' : ' off') + '"></i>';
-    els.ammo.children[1].textContent = SG.RULES.dog.unlimited ? '∞' : p.balls; els.ammo.children[2].innerHTML = s; els.ammo.classList.toggle('low', p.balls <= RULES.dog.lowBallWarn);
+    var s = ''; for (var i = 0; i < Math.max(p.ammo, RULES.dog.startAmmo); i++) s += '<i class="ball' + (i < p.ammo ? '' : ' off') + '"></i>';
+    els.ammo.children[1].textContent = SG.RULES.dog.unlimited ? '∞' : p.ammo; els.ammo.children[2].innerHTML = s; els.ammo.classList.toggle('low', p.ammo <= RULES.dog.lowAmmoWarn);
   }
   function setGuide(n) {
     var bs = els.guide.firstChild.children; for (var i = 0; i < bs.length; i++) bs[i].className = i < n ? 'done' : i === n ? 'on' : '';
@@ -205,19 +244,21 @@
   function hints(side, phase) {
     var k = function (a, b) { return '<span><span class="key">' + a + '</span> ' + b + '</span>'; };
     els.hints.innerHTML = phase === 'reveal' || ui.spect ? k('WASD', '飛行') + k('空白／C', '升降') + k('拖曳', '轉頭') + k('Enter', phase === 'reveal' ? '回標題' : '看結果') : side === 'cat'
-      ? k('WASD', '移動') + k('空白', '跳') + k('C', '壓低') + k('右鍵拖曳', '視角') + k('Alt+點', '取色') + (phase === 'prep' ? k('Enter', '準備好了') : '') + k('Esc', '說明')
-      : k('WASD', '移動') + k('滑鼠／方向鍵', '看') + k('左鍵／空白', '發射') + k('V', '第三人稱') + k('Esc', '說明');
+      ? (G.paint.on ? k('左鍵', '塗') + k('空白+點', '取色') + k('右鍵拖曳', '筆刷大小') + k('中鍵拖曳', '轉鏡頭') + k('滾輪', '遠近') : k('WASD', '移動') + k('空白', '跳') + k('Ctrl', '壓低') + k('R', '姿勢') + k('F', '塗色') + k('右鍵', '鎖定視角') + k('1', '喵') + k('2', '名牌') + k('3', '透視')) + (phase === 'prep' ? k('Enter', '好了') : '')
+      : k('WASD', '移動') + k('滑鼠', '看') + k('左鍵', '開火') + k('右鍵', '第三人稱') + k('空白', '跳') + k('Ctrl', '蹲') + k('Esc', '說明');
   }
   function setRole(team) { // HUD layout for the side the player is on right now (changes mid-round in infection / double)
     var cat = team === 'cat', ph = G.state ? G.state.phase : 'prep'; ui.role = team;
     show(els.poses, cat && ph !== 'reveal'); show(els.acts, cat && ph !== 'reveal'); show(els.guide, cat && ph === 'prep'); show(els.sus, cat && ph === 'seek');
     show(els.cross, !cat && ph === 'seek'); show(els.ammo, !cat && ph !== 'reveal'); show(els.wait, !cat && ph === 'prep');
     if (!cat) { els.pp.classList.add('off'); show(els.ring, false); show(els.pw, false); balls(); }
-    hints(team, ph);
+    hints(team, ph); show(els.myScore, cat && ph === 'seek'); if (!cat) els.vig.style.opacity = 0;
+    var gm = G.state ? G.state.mode : 'basic'; els.modecap.innerHTML = '<b>' + MODES[gm][0] + '</b>' + MODES[gm][1];
+    var aids = !!G.settings.paintAids; show(els.sug, aids); var pb = els.tools.querySelector('[data-tool=pattern]'); if (pb) show(pb, aids); if (!aids) G.paint.pattern = '';
   }
   function onMode(d) {
     show(els.title, d.mode === 'title'); show(els.hud, d.mode === 'play'); show(els.cap, false); ui.spect = false;
-    els.pp.classList.add('off'); show(els.ring, false); show(els.result, false); els.tags.innerHTML = ''; show(els.board, false); show(els.heard, false);
+    els.pp.classList.add('off'); show(els.ring, false); show(els.result, false); els.tags.innerHTML = ''; show(els.board, false); show(els.heard, false); els.vig.style.opacity = 0; els.myScore.lastChild.textContent = '0'; bubs.forEach(function (b) { b.el.remove(); }); bubs = [];
     if (d.mode === 'play') { markPose('stand'); setGuide(0); teamIcons(); show(els.night, G.settings.night); setRole(d.side); }
   }
   function onPhase(d) {
@@ -225,12 +266,12 @@
     var cat = ui.role === 'cat', dbl = G.state.mode === 'double';
     els.ph.textContent = dbl && d.phase === 'seek' ? '大家找大家' : PHASE[d.phase] || ''; teamIcons(); setRole(ui.role);
     show(els.vote, d.phase === 'prep' || d.phase === 'reveal');
-    if (d.phase === 'seek') toast(dbl ? '換你去找別人了！你的身體留在原地' : cat ? '狗狗進屋了，別動！' : '開始找！' + (SG.RULES.dog.unlimited ? '球不限' : '球只有 ' + RULES.dog.startBalls + ' 顆'));
+    if (d.phase === 'seek') toast(dbl ? '換你去找別人了！你的身體留在原地' : cat ? '狗狗進屋了，別動！' : '開始找！' + (SG.RULES.dog.unlimited ? '彈藥不限' : ' 彈藥只有 ' + RULES.dog.startAmmo + ' 發'));
     if (d.phase === 'reveal') { show(els.poses, false); show(els.acts, false); show(els.pw, false); els.pp.classList.add('off'); show(els.ring, false); show(els.cross, false); show(els.ammo, false); show(els.sus, false); result(); }
   }
   function result() {
     var st = G.state, e = ui.lastEnd || { winner: st.winner, reason: st.reason }, dbl = st.mode === 'double';
-    var why = { time: dbl ? '時間到，找到最多的人贏' : '時間到，還有貓沒被找到', 'all-found': '所有貓都被找到了', 'no-balls': '球用完了', 'double-all': '有人找到了全員' }[e.reason] || '';
+    var why = { time: dbl ? '時間到，找到最多的人贏' : '時間到，還有貓沒被找到', 'all-found': '所有貓都被找到了', 'no-ammo': '彈藥用完了', 'double-all': '有人找到了全員' }[e.reason] || '';
     var mine = st.players.you, title, cls, won;
     if (dbl) { won = e.winner === 'you'; title = nameOf(e.winner) + ' 獲勝'; cls = won ? 'cats' : 'dogs'; }
     else { won = (mine.team === 'cat' && !mine.hunter) === (e.winner === 'cats'); if (st.mode === 'infection' && mine.hunter && G.side === 'cat') won = false; title = e.winner === 'cats' ? '貓隊獲勝' : '狗隊獲勝'; cls = e.winner; }
@@ -249,6 +290,8 @@
     if (d.phase === 'reveal' && ui.tagEls) ui.tagEls.forEach(function (p) { var q = G.project(p[0]); p[1].style.left = q.x + 'px'; p[1].style.top = q.y + 'px'; p[1].style.display = q.vis ? '' : 'none'; });
     if (ui.role === 'cat') { els.bDecoy.lastChild.textContent = G.decoyCd > 0 ? Math.ceil(G.decoyCd) + 's' : ''; if (G.paint.on) { var px = G.paint.size / Math.max(0.5, G.cam.dist * 0.62) / Math.tan(52 * Math.PI / 360) * G.vh; els.ring.style.width = els.ring.style.height = Math.max(6, px) + 'px'; } }
     if (ui.role === 'dog' && d.phase === 'seek') { var p = G.state.players.you; els.cross.classList.toggle('cd', G.simT - p.lastShot < RULES.dog.shotIntervalSec); }
+    bubs = bubs.filter(function (b) { b.t -= 0.016; if (b.t <= 0 || !b.en.c.root.visible) { b.el.remove(); return false; } var q = G.project(b.en); b.el.style.left = q.x + 'px'; b.el.style.top = (q.y - 26) + 'px'; b.el.style.display = q.vis ? '' : 'none'; return true; });
+    if (G.tags && d.phase !== 'reveal') { if (!ui.liveTags) ui.liveTags = {}; G.ents.forEach(function (en) { if (en === G.me || en.fp) return; var t = ui.liveTags[en.id]; if (!t) t = ui.liveTags[en.id] = h('div', 'tag ' + (en.team === 'dog' ? 'dogt' : 'safe'), en.name, els.bubbles); var q = G.project(en); t.style.left = q.x + 'px'; t.style.top = q.y + 'px'; t.style.display = q.vis && en.c.root.visible ? '' : 'none'; }); } else if (ui.liveTags) { Object.keys(ui.liveTags).forEach(function (k) { ui.liveTags[k].remove(); }); ui.liveTags = null; }
     if (ui.heardT > 0) { ui.heardT -= 0.016; if (ui.heardT <= 0) show(els.heard, false); }
   }
   function lineup(d) {
@@ -345,7 +388,7 @@
       '<tr><td>' + K('W') + K('A') + K('S') + K('D') + '</td><td>移動（以鏡頭方向為準）</td></tr><tr><td>' + K('空白') + '</td><td>跳。朝牆跳會貼在牆上，' + K('W') + K('S') + ' 上下、' + K('Shift') + ' 放開</td></tr>' +
       '<tr><td>' + K('R') + '</td><td>按住開姿勢輪，放開選定</td></tr><tr><td>' + K('C') + '</td><td>按住壓低（慢慢走，不算逃跑）</td></tr><tr><td>' + K('F') + '</td><td>開關塗色；左鍵在身上塗，' + K('Alt') + '+點 取畫面上的顏色（加 ' + K('Shift') + ' 取材質本色），滾輪調筆刷，花紋筆跟著筆劃方向</td></tr>' +
       '<tr><td>' + K('Ctrl') + '+' + K('Z') + '</td><td>復原</td></tr><tr><td>' + K('1') + ' ' + K('Q') + ' ' + K('X') + '</td><td>喵叫／放分身／收回分身</td></tr><tr><td>右鍵拖曳</td><td>轉視角</td></tr></table>' +
-      '<h5 class="d">' + IC.paw + ' 狗（找）</h5><table><tr><td>' + K('W') + K('A') + K('S') + K('D') + '</td><td>移動</td></tr><tr><td>滑鼠／方向鍵</td><td>看四周</td></tr><tr><td>左鍵／' + K('空白') + '</td><td>發射網球：打空少一顆、打中多一顆，每 ' + RULES.dog.shotIntervalSec + ' 秒一發</td></tr><tr><td>' + K('V') + '</td><td>第一／第三人稱</td></tr></table><div class="row"></div>';
+      '<h5 class="d">' + IC.paw + ' 狗（找）</h5><table><tr><td>' + K('W') + K('A') + K('S') + K('D') + '</td><td>移動</td></tr><tr><td>滑鼠／方向鍵</td><td>看四周</td></tr><tr><td>左鍵</td><td>漆彈槍開火：打空少一發、打中多一發，每 ' + RULES.dog.shotIntervalSec + ' 秒一發</td></tr><tr><td>右鍵</td><td>第一／第三人稱</td></tr><tr><td>' + K('空白') + ' ' + K('Ctrl') + '</td><td>跳／蹲</td></tr></table><div class="row"></div>';
     else {
       p.innerHTML = '<h3>房主設定</h3><div class="set"></div><div class="row"></div>';
       var b = p.querySelector('.set'), S = G.settings, R0 = window.SG_RULES;
@@ -353,9 +396,12 @@
       function tg(label, key, on) { var r = h('div', 'tgrow', '<span>' + label + '</span><div class="tg hit' + (S[key] ? ' on' : '') + '"><i></i></div>', b), t = r.lastChild; t.dataset.t = key; t.onclick = function () { S[key] = !S[key]; t.classList.toggle('on', S[key]); if (on) on(S[key]); if (SG.audio) SG.audio.play('click'); }; return r; }
       h('h5', '', '回合', b);
       sl('準備時間', 'prep', 30, 300); sl('搜索時間', 'seek', 60, 600); sl('揭曉時間', 'reveal', 10, 60);
-      sl('狗的數量', 'dogs', 1, 3, function (v) { return Math.round(v) + ' 隻'; }); sl('網球數', 'balls', 1, 30, function (v) { return Math.round(v) + ' 顆'; });
-      tg('球不限量', 'unlimited'); tg('強制喵叫', 'forcedMeow'); sl('喵叫間隔', 'meowEvery', R0.cat.forcedMeowMinSec, 120);
-      tg('狗看得到「眼皮底下」排行', 'board'); tg('夜晚模式（關燈，狗有手電筒）', 'night');
+      sl('狗的數量', 'dogs', 0, 3, function (v) { return Math.round(v) ? Math.round(v) + ' 隻' : '自動'; }); sl('彈藥數', 'ammo', 1, 30, function (v) { return Math.round(v) + ' 發'; });
+      tg('彈藥不限量', 'unlimited'); tg('強制喵叫', 'forcedMeow'); sl('喵叫間隔', 'meowEvery', R0.cat.forcedMeowMinSec, 120);
+      tg('狗看得到「眼皮底下」排行', 'board');
+      h('h5', '', '自訂規則（我們自己加的，預設全關）', b);
+      tg('夜晚模式（關燈，狗有手電筒）', 'night'); tg('犬種有不同的視角高度', 'breedEyes'); tg('塗色輔助：環境色建議＋花紋筆', 'paintAids'); tg('撞倒東西的聲音會引來狗', 'knockNoise');
+      h('div', 'note', '聞一聞、嘲諷加分、換位加分：還沒做。', b);
       h('h5', '', '畫面與聲音', b);
       slider(b, '音量', { wide: true, min: 0, max: 100, value: SG.audio ? SG.audio.volume * 100 : 70, on: function (v) { if (SG.audio) SG.audio.setVolume(v / 100); } });
       slider(b, '泛光', { wide: true, min: 0, max: 100, value: SG.post.final.uBloom.value * 100, on: function (v) { SG.post.final.uBloom.value = v / 100; } });
@@ -364,5 +410,5 @@
     h('button', 'btn cat', '知道了', p.lastChild).onclick = function () { show(els.modal, false); };
     show(els.modal, true);
   }
-  ui.openModal = openModal;
+  ui.openModal = openModal; ui.els = els; ui.h = h; ui.show = show; ui.toast = toast; ui.slider = slider; ui.IC = IC;
 })();
