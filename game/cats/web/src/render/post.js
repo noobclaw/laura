@@ -53,11 +53,12 @@
     '}'].join('\n');
 
   var FS_FINAL = [
-    'uniform sampler2D tScene, tBloom, tAO; uniform vec2 uAOPx; uniform float uBloom, uExposure, uTime, uVignette, uAO, uSat, uFade; uniform vec3 uTint;',
+    'uniform sampler2D tScene, tBloom, tAO; uniform vec2 uAOPx; uniform float uBloom, uExposure, uTime, uVignette, uAO, uSat, uFade, uMono, uHorror, uMosaic; uniform vec3 uTint;',
     'vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.,1.); }',
     'float hash(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }',
     'void main(){',
-    '  vec3 c=texture(tScene,vUv).rgb;',
+    '  vec2 suv=vUv; if(uMosaic>0.5){ vec2 g=vec2(textureSize(tScene,0))/uMosaic; suv=(floor(vUv*g)+0.5)/g; }', // host filter: mosaic
+    '  vec3 c=texture(tScene,suv).rgb;',
     '  float ao=0.; for(int y=-1;y<=2;y++) for(int x=-1;x<=2;x++) ao+=texture(tAO,vUv+(vec2(float(x),float(y))-0.5)*uAOPx).r; ao/=16.;',
     '  ao=mix(1.,ao,uAO); c*=mix(vec3(0.42,0.30,0.24),vec3(1.),ao);', // warm-tinted occlusion, never pure black
     '  c+=texture(tBloom,vUv).rgb*uBloom;',
@@ -67,6 +68,8 @@
     '  c=mix(c,c*uTint,0.5); c+=vec3(0.012,0.006,0.0)*(1.-l);', // warm toe
     '  c=c*c*(3.-2.*c)*0.35+c*0.65;', // gentle S curve
     '  vec2 q=vUv-0.5; float v=smoothstep(0.85,0.2,dot(q,q)*1.9); c*=mix(1.-uVignette,1.,v);',
+    '  if(uMono>0.5) c=vec3(dot(c,vec3(0.3,0.59,0.11)));', // host filter: monochrome
+    '  if(uHorror>0.5){ c*=vec3(0.30,0.33,0.42); c*=smoothstep(0.62,0.04,dot(q,q)*2.4); }', // host filter: dark, narrow view
     '  c=pow(c,vec3(1./2.2));',
     '  c+=(hash(gl_FragCoord.xy+uTime)-0.5)/200.;',
     '  o=vec4(c*uFade,1.);',
@@ -94,7 +97,7 @@
     var mFinal = pass(FS_FINAL, {
       tScene: { value: null }, tBloom: { value: null }, tAO: { value: null }, uAOPx: { value: new THREE.Vector2() },
       uBloom: { value: 0.5 }, uExposure: { value: 0.92 }, uTime: { value: 0 }, uVignette: { value: 0.38 }, uAO: { value: 1.0 },
-      uSat: { value: 1.04 }, uFade: { value: 1 }, uTint: { value: new THREE.Vector3(1.02, 1.0, 0.97) }
+      uSat: { value: 1.04 }, uFade: { value: 1 }, uMono: { value: 0 }, uHorror: { value: 0 }, uMosaic: { value: 0 }, uTint: { value: new THREE.Vector3(1.02, 1.0, 0.97) }
     });
     this.final = mFinal.uniforms;
     this.ssao = mSSAO.uniforms;
@@ -152,24 +155,24 @@
     var flat = new THREE.AmbientLight(0xffffff, Math.PI); flat.layers.set(2);
     this.flatLight = flat;
     function lin2srgb(v) { v /= 255; return Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); }
-    this.renderAlbedo = function (scene, camera, w, h, out) {
+    this.renderAlbedo = function (scene, camera, w, h, out, mode) { // mode: undefined = unlit albedo (sRGB bytes), 'raw' = unlit, linear bytes, 'lit' = with the real lights, before any grading
       if (rtPick.width !== w || rtPick.height !== h) rtPick.setSize(w, h);
-      var env = scene.environment, bg = scene.background, mask = camera.layers.mask;
-      scene.environment = null; camera.layers.mask = 1 | 4;
+      var env = scene.environment, bg = scene.background, mask = camera.layers.mask, lit = mode === 'lit';
+      if (!lit) { scene.environment = null; camera.layers.mask = 1 | 4; }
       var sh = R.shadowMap.autoUpdate; R.shadowMap.autoUpdate = false;
       R.setRenderTarget(rtPick); R.setClearColor(0x808080, 1); R.clear(); R.render(scene, camera);
       out = out || new Uint8Array(w * h * 4);
       R.readRenderTargetPixels(rtPick, 0, 0, w, h, out);
       R.setRenderTarget(null);
       scene.environment = env; scene.background = bg; camera.layers.mask = mask; R.shadowMap.autoUpdate = sh;
-      for (var i = 0; i < out.length; i += 4) { out[i] = lin2srgb(out[i]); out[i + 1] = lin2srgb(out[i + 1]); out[i + 2] = lin2srgb(out[i + 2]); }
+      if (mode !== 'raw') for (var i = 0; i < out.length; i += 4) { out[i] = lin2srgb(out[i]); out[i + 1] = lin2srgb(out[i + 1]); out[i + 2] = lin2srgb(out[i + 2]); }
       return out;
     };
     var pickCam = new THREE.PerspectiveCamera(), px = new Uint8Array(4);
-    this.pick = function (scene, camera, nx, ny, viewW, viewH) { // albedo under a screen pixel
+    this.pick = function (scene, camera, nx, ny, viewW, viewH, mode) { // colour under a screen pixel: 'lit' (as rendered, before grading) or unlit surface colour
       pickCam.copy(camera); pickCam.setViewOffset(viewW, viewH, Math.floor(nx), Math.floor(ny), 1, 1); pickCam.updateProjectionMatrix();
       pickCam.matrixWorld.copy(camera.matrixWorld); pickCam.matrixWorldInverse.copy(camera.matrixWorldInverse);
-      this.renderAlbedo(scene, pickCam, 1, 1, px);
+      pickCam.layers.mask = camera.layers.mask; this.renderAlbedo(scene, pickCam, 1, 1, px, mode === 'lit' ? 'lit' : undefined);
       return [px[0], px[1], px[2]];
     };
   };

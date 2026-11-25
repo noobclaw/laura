@@ -505,7 +505,8 @@
       g.fillStyle = bg; g.fillRect(0, 0, w, h);
       fibres(g, w, h, 91, 1);
       g.strokeStyle = ink; g.lineWidth = 8; g.strokeRect(14, 14, w - 28, h - 28);
-      inkText(g, text, w / 2, text.length > 1 ? 36 : h / 2 - 80, text.length > 1 ? 86 : 150, ink, true, 8);
+      var sz = text.length > 1 ? Math.min(86, Math.floor(196 / text.length / 1.1)) : 150;
+      inkText(g, text, w / 2, text.length > 1 ? (h - text.length * sz * 1.1) / 2 : h / 2 - 80, sz, ink, true, sz * 0.09);
     });
   };
 
@@ -528,6 +529,44 @@
       var gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
       gr.addColorStop(0, 'rgba(255,220,160,1)'); gr.addColorStop(0.25, 'rgba(255,190,110,0.5)'); gr.addColorStop(1, 'rgba(255,170,80,0)');
       g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    });
+  };
+
+  P.gingham = function (a, b, s) {
+    s = s || 24;
+    return mk(s * 2, s * 2, function (g, w, h) {
+      g.fillStyle = '#fbf6ec'; g.fillRect(0, 0, w, h); g.fillStyle = rgba(a, 0.55); g.fillRect(0, 0, s, h); g.fillRect(0, 0, w, s); g.fillStyle = b || a; g.fillRect(0, 0, s, s);
+      fibres(g, w, h, 23, 0.8, true);
+    });
+  };
+  P.dots = function (bg, dot, s) {
+    s = s || 32;
+    return mk(s * 2, s * 2, function (g, w, h) {
+      g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = dot;
+      [[s / 2, s / 2], [s * 1.5, s * 1.5]].forEach(function (p) { g.beginPath(); g.arc(p[0], p[1], s * 0.24, 0, 7); g.fill(); });
+      fibres(g, w, h, 24, 0.8, true);
+    });
+  };
+  P.tartan = function (bg, a, b) {
+    return mk(128, 128, function (g, w, h) {
+      g.fillStyle = bg; g.fillRect(0, 0, w, h);
+      [[0, 34, a, 0.55], [50, 10, b, 0.8], [76, 22, a, 0.55], [110, 6, '#f6efdc', 0.8]].forEach(function (t) { g.fillStyle = rgba(t[2], t[3]); g.fillRect(t[0], 0, t[1], h); g.fillRect(0, t[0], w, t[1]); });
+      fibres(g, w, h, 25, 1, true);
+    });
+  };
+  P.uroko = function (a, b, s) {
+    s = s || 32;
+    return mk(s * 2, s * 2, function (g, w, h) {
+      g.fillStyle = a; g.fillRect(0, 0, w, h); g.fillStyle = b;
+      for (var j = 0; j < 2; j++) for (var i = -1; i < 3; i++) { var x = i * s + (j ? s / 2 : 0), y = j * s; g.beginPath(); g.moveTo(x, y + s); g.lineTo(x + s / 2, y); g.lineTo(x + s, y + s); g.closePath(); g.fill(); }
+      fibres(g, w, h, 26, 0.8, true);
+    });
+  };
+  P.patchwork = function (cols) {
+    return mk(192, 192, function (g, w, h) {
+      var r = rng(27);
+      for (var j = 0; j < 4; j++) for (var i = 0; i < 4; i++) { g.fillStyle = cols[Math.floor(r() * cols.length)]; g.fillRect(i * 48, j * 48, 48, 48); g.strokeStyle = 'rgba(255,255,255,0.7)'; g.setLineDash([4, 4]); g.lineWidth = 1.5; g.strokeRect(i * 48 + 3, j * 48 + 3, 42, 42); }
+      fibres(g, w, h, 28, 1, true);
     });
   };
 
