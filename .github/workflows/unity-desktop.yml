@@ -70,3 +70,82 @@ jobs:
           name: DontEatSushi-${{ matrix.target }}
           path: DontEatSushi-${{ matrix.target }}.zip
           retention-days: 14
+
+  # Signs and notarizes the macOS build so Gatekeeper opens it without a warning.
+  # Needs a "Developer ID Application" certificate in the p12; an iOS/Apple Development one cannot do this.
+  sign-mac:
+    needs: build
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: DontEatSushi-StandaloneOSX
+          path: dl
+
+      - name: Unpack
+        run: |
+          mkdir app && cd app && unzip -q ../dl/DontEatSushi-StandaloneOSX.zip
+          ls -la
+          find . -maxdepth 1 -name '*.app' | head -1
+
+      - name: Import certificate and see what kind it is
+        id: cert
+        env:
+          P12_B64: ${{ secrets.IOS_DEV_CERT_P12 }}
+          P12_PASS: ${{ secrets.IOS_CERT_PASSWORD }}
+          MAC_P12_B64: ${{ secrets.MAC_DEVELOPER_ID_P12 }}
+          MAC_P12_PASS: ${{ secrets.MAC_DEVELOPER_ID_PASSWORD }}
+        run: |
+          security create-keychain -p ci build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p ci build.keychain
+          if [ -n "$MAC_P12_B64" ]; then echo "$MAC_P12_B64" | base64 -d > mac.p12 && security import mac.p12 -k build.keychain -P "$MAC_P12_PASS" -A -f pkcs12 || true; fi
+          if [ -n "$P12_B64" ]; then echo "$P12_B64" | base64 -d > dev.p12 && security import dev.p12 -k build.keychain -P "$P12_PASS" -A -f pkcs12 || true; fi
+          security list-keychains -d user -s build.keychain login.keychain
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci build.keychain >/dev/null
+          # print only the certificate kinds, never the owner's name
+          echo "certificate kinds in the keychain:"
+          security find-identity -v -p codesigning build.keychain | sed -nE 's/.*"([^:"]*):.*/  \1/p' | sort | uniq -c
+          IDENT=$(security find-identity -v -p codesigning build.keychain | grep "Developer ID Application" | head -1 | awk '{print $2}')
+          if [ -n "$IDENT" ]; then echo "ident=$IDENT" >> "$GITHUB_OUTPUT"; echo "Developer ID certificate found"; else echo "::warning::No Developer ID Application certificate, the Mac build stays unsigned"; fi
+          rm -f mac.p12 dev.p12
+
+      - name: Sign, notarize and staple
+        if: steps.cert.outputs.ident != ''
+        env:
+          IDENT: ${{ steps.cert.outputs.ident }}
+          ASC_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+        run: |
+          set -e
+          cd app
+          APP=$(find . -maxdepth 1 -name '*.app' | head -1)
+          cat > ../ent.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>com.apple.security.cs.allow-jit</key><true/>
+            <key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/>
+            <key>com.apple.security.cs.disable-library-validation</key><true/>
+            <key>com.apple.security.cs.allow-dyld-environment-variables</key><true/>
+          </dict></plist>
+          PLIST
+          sed -i '' 's/^          //' ../ent.plist
+          find "$APP" -type f \( -name '*.dylib' -o -name '*.bundle' -o -name '*.so' \) -exec codesign --force --options runtime --timestamp -s "$IDENT" {} \;
+          codesign --deep --force --options runtime --timestamp --entitlements ../ent.plist -s "$IDENT" "$APP"
+          codesign --verify --deep --strict "$APP"
+          ditto -c -k --keepParent "$APP" ../notarize.zip
+          printf '%s' "$ASC_KEY_P8" > ../AuthKey.p8
+          xcrun notarytool submit ../notarize.zip --key ../AuthKey.p8 --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" --wait | grep -v -i "team"
+          xcrun stapler staple "$APP"
+          rm -f ../AuthKey.p8
+          ditto -c -k --keepParent "$APP" ../DontEatSushi-mac-signed.zip
+
+      - uses: actions/upload-artifact@v4
+        if: steps.cert.outputs.ident != ''
+        with:
+          name: DontEatSushi-mac-signed
+          path: DontEatSushi-mac-signed.zip
+          retention-days: 14
