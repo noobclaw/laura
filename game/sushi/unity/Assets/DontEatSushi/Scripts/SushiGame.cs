@@ -99,7 +99,80 @@ namespace DontEatSushi
             new Color32(60, 110, 170, 255), new Color32(200, 60, 50, 255)
         };
 
-        void Start() { Build(); phase = Phase.Menu; }
+        void Start() { Build(); phase = Phase.Menu; SetPaint(paintColor); }
+
+        // ---------------- 調色盤：色輪、明度、光澤、筆刷、用過的顏色 ----------------
+
+        Texture2D wheelTex;
+        float pickH, pickS, pickV = 1f;
+        readonly List<Color32> recent = new List<Color32>();
+
+        void SetPaint(Color c)
+        {
+            c.a = 1f; paintColor = c;
+            Color.RGBToHSV(c, out pickH, out pickS, out pickV);
+        }
+
+        Texture2D Wheel()
+        {
+            if (wheelTex != null) return wheelTex;
+            const int N = 160;
+            wheelTex = new Texture2D(N, N, TextureFormat.RGBA32, false);
+            var px = new Color32[N * N];
+            for (int y = 0; y < N; y++)
+            {
+                for (int x = 0; x < N; x++)
+                {
+                    float dx = (x + 0.5f) / N * 2f - 1f, dy = (y + 0.5f) / N * 2f - 1f;
+                    float r = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (r > 1f) { px[y * N + x] = new Color32(0, 0, 0, 0); continue; }
+                    float h = Mathf.Atan2(dy, dx) / (2f * Mathf.PI); if (h < 0f) h += 1f;
+                    Color c = Color.HSVToRGB(h, r, 1f); c.a = Mathf.Clamp01((1f - r) * 40f);
+                    px[y * N + x] = c;
+                }
+            }
+            wheelTex.SetPixels32(px); wheelTex.Apply(false);
+            wheelTex.wrapMode = TextureWrapMode.Clamp;
+            return wheelTex;
+        }
+
+        void PaintPanel(Color panel, Color gold)
+        {
+            Box(new Rect(12f, 180f, 252f, 372f), panel);
+            Box(new Rect(12f, 180f, 252f, 2f), gold);
+            Rect w = new Rect(24f, 194f, 150f, 150f);
+            GUI.DrawTexture(w, Wheel());
+            var e = Event.current;
+            if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0 && w.Contains(e.mousePosition))
+            {
+                float dx = (e.mousePosition.x - w.center.x) / (w.width * 0.5f), dy = -(e.mousePosition.y - w.center.y) / (w.height * 0.5f);
+                float h = Mathf.Atan2(dy, dx) / (2f * Mathf.PI); if (h < 0f) h += 1f;
+                pickH = h; pickS = Mathf.Min(1f, Mathf.Sqrt(dx * dx + dy * dy));
+                paintColor = Color.HSVToRGB(pickH, pickS, pickV);
+                e.Use();
+            }
+            float ang = pickH * 2f * Mathf.PI;
+            Vector2 mk = w.center + new Vector2(Mathf.Cos(ang), -Mathf.Sin(ang)) * pickS * w.width * 0.5f;
+            Box(new Rect(mk.x - 5f, mk.y - 5f, 10f, 10f), Color.black);
+            Box(new Rect(mk.x - 3f, mk.y - 3f, 6f, 6f), Color.white);
+            float nv = GUI.VerticalSlider(new Rect(188f, 194f, 20f, 150f), pickV, 1f, 0f);
+            if (Mathf.Abs(nv - pickV) > 0.001f) { pickV = nv; paintColor = Color.HSVToRGB(pickH, pickS, pickV); }
+            Box(new Rect(216f, 194f, 38f, 150f), paintColor);
+            GUI.Label(new Rect(24f, 350f, 90f, 22f), "光澤 " + Mathf.RoundToInt(gloss * 100f), sSmall);
+            float ng = GUI.HorizontalSlider(new Rect(104f, 357f, 150f, 16f), gloss, 0f, 0.9f);
+            if (Mathf.Abs(ng - gloss) > 0.001f) { gloss = ng; SetSmooth(playerRenderer, gloss); }
+            GUI.Label(new Rect(24f, 376f, 90f, 22f), "筆刷 " + Mathf.RoundToInt(brush * 100f), sSmall);
+            brush = GUI.HorizontalSlider(new Rect(104f, 383f, 150f, 16f), brush, 0.03f, 0.4f);
+            GUI.Label(new Rect(24f, 402f, 230f, 22f), "用過的顏色（點一下取回）", sSmall);
+            for (int i = 0; i < recent.Count; i++)
+            {
+                Rect r = new Rect(24f + (i % 8) * 29f, 428f + (i / 8) * 29f, 25f, 25f);
+                Box(new Rect(r.x - 1f, r.y - 1f, r.width + 2f, r.height + 2f), new Color(0f, 0f, 0f, 0.6f));
+                Box(r, recent[i]);
+                if (GUI.Button(r, GUIContent.none, GUIStyle.none)) SetPaint(recent[i]);
+            }
+            GUI.Label(new Rect(24f, 520f, 230f, 22f), "按 C 可吸取場景裡任何東西的顏色", sSmall);
+        }
         void OnDestroy() { if (net != null) net.Close(); }
 
         // ---------------- 連線對戰 ----------------
@@ -990,7 +1063,8 @@ namespace DontEatSushi
         void PaintControl()
         {
             Vector2 mpos = In.MousePos;
-            bool overHud = mpos.y < 118f * (Screen.height / 720f);
+            float gsc = Screen.height / 720f, gx = mpos.x / gsc, gy = (Screen.height - mpos.y) / gsc;
+            bool overHud = mpos.y < 118f * gsc || (gx < 270f && gy > 175f && gy < 556f);
             if (In.Down(K.LeftBracket)) brush = Mathf.Max(0.03f, brush - 0.02f);
             if (In.Down(K.RightBracket)) brush = Mathf.Min(0.4f, brush + 0.02f);
             if (In.Down(K.Z)) { if (!playerPaint.Undo()) Toast("沒有可以撤銷的了。"); }
@@ -1003,11 +1077,11 @@ namespace DontEatSushi
                 if (Physics.Raycast(cam.ScreenPointToRay(mpos), out hit, 300f))
                 {
                     var pt = hit.collider.GetComponentInParent<Paintable>();
-                    if (pt != null) paintColor = pt.Sample(hit.point);
+                    if (pt != null) SetPaint(pt.Sample(hit.point));
                     else
                     {
                         var r = hit.collider.GetComponent<Renderer>();
-                        if (r != null) { Color c = Mats.GetColor(r.sharedMaterial); c.a = 1f; paintColor = c; }
+                        if (r != null) { SetPaint(Mats.GetColor(r.sharedMaterial)); }
                     }
                     Toast("已取色。"); gPick = true;
                 }
@@ -1017,6 +1091,11 @@ namespace DontEatSushi
             {
                 stroke = true; lastMouse = mpos;
                 Sfx.Beep(700f, 0.03f, 0.12f); gPaint = true;
+                if (recent.Count == 0 || recent[0].r != paintColor.r || recent[0].g != paintColor.g || recent[0].b != paintColor.b)
+                {
+                    recent.Insert(0, paintColor);
+                    if (recent.Count > 24) recent.RemoveAt(24);
+                }
                 playerPaint.PushUndo();
                 Physics.SyncTransforms();
                 DabAt(mpos);
@@ -1233,12 +1312,13 @@ namespace DontEatSushi
                     var r = new Rect(x + i * 44f, y + 8f, 38f, 38f);
                     Box(new Rect(r.x - 1f, r.y - 1f, r.width + 2f, r.height + 2f), new Color(0f, 0f, 0f, 0.6f));
                     Box(r, palette[i]);
-                    if (GUI.Button(r, GUIContent.none, GUIStyle.none)) paintColor = palette[i];
+                    if (GUI.Button(r, GUIContent.none, GUIStyle.none)) SetPaint(palette[i]);
                 }
                 GUI.Label(new Rect(x + palette.Length * 44f + 16f, y + 12f, 260f, 30f), "筆刷 " + Mathf.RoundToInt(brush * 100f) + "　身形 " + (playerShape == ShapeKind.Nigiri ? "握壽司" : "卷"), sLabel);
                 string help = "WASD 移動　Shift 跑　Q/E 轉身　T 換姿勢　右鍵拖曳 轉鏡頭　滾輪 縮放　左鍵 塗色　C 取色　[ ] 筆刷　- = 光澤　F 塗滿　Z 撤銷　G 補位";
                 if (phase == Phase.Prep) help += "　1/2 換身形　空白鍵 提前開始";
                 GUI.Label(new Rect(20f, H - 38f, W - 40f, 30f), help, sSmall);
+                PaintPanel(panel, gold);
             }
 
             // 結算
