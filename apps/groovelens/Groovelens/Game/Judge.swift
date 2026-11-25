@@ -197,7 +197,7 @@ final class Judge {
             let n = notes[nextMissIndex]
             if n.judgement != nil { nextMissIndex += 1; continue }
             if t - n.time > Judgement.goodWindow {
-                _ = record(index: nextMissIndex, offset: Judgement.goodWindow, lane: n.piece.lane)
+                _ = record(index: nextMissIndex, offset: t - n.time, lane: n.piece.lane, forced: .miss)
                 nextMissIndex += 1
             } else {
                 break
@@ -205,8 +205,9 @@ final class Judge {
         }
     }
 
-    private func record(index i: Int, offset: Double, lane: Int?) -> Judgement {
-        let j = Judgement.from(offset: offset)
+    /// `forced` lets the sweeper record a miss; an offset exactly on the Good edge would otherwise grade as Good.
+    private func record(index i: Int, offset: Double, lane: Int?, forced: Judgement? = nil) -> Judgement {
+        let j = forced ?? Judgement.from(offset: offset)
         notes[i].judgement = j
         notes[i].offset = offset
         counts[j, default: 0] += 1

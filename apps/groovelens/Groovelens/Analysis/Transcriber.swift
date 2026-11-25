@@ -324,23 +324,31 @@ enum ChartBuilder {
             let kickContrast = on / max(onN, 1) - off / max(offN, 1)
             return kickContrast + 0.6 * back / max(backN, 1)
         }
+        // Ties (e.g. kick on 1 and 3) go to the earliest phase: a later phase would push the
+        // first beats before bar 0 and drop their hits.
+        func better(_ a: Float, _ b: Float) -> Bool { a > b + max(abs(b), 1e-3) * 0.02 }
         var best4 = (score: -Float.infinity, phase: 0)
-        for p in 0..<4 { let s = score(bpb: 4, phase: p); if s > best4.score { best4 = (s, p) } }
+        for p in 0..<4 { let s = score(bpb: 4, phase: p); if better(s, best4.score) { best4 = (s, p) } }
         var best3 = (score: -Float.infinity, phase: 0)
-        for p in 0..<3 { let s = score(bpb: 3, phase: p); if s > best3.score { best3 = (s, p) } }
+        for p in 0..<3 { let s = score(bpb: 3, phase: p); if better(s, best3.score) { best3 = (s, p) } }
         if best3.score > best4.score * 1.3 && best3.score > 0.1 { return (3, best3.phase) }
         return (4, best4.phase)
     }
 
     static func detectSwing(raw: [RawHit], beats: [Double]) -> Double {
         var fracs: [Double] = []
+        var firstTriplet = 0
         for h in raw where h.piece == .hihat || h.piece == .ride {
             let i = beatIndex(for: h.time, beats: beats)
             guard i + 1 < beats.count else { continue }
             let f = (h.time - beats[i]) / (beats[i + 1] - beats[i])
             if f > 0.4 && f < 0.8 { fracs.append(f) }
+            if f > 0.25 && f < 0.42 { firstTriplet += 1 }
         }
         guard fracs.count >= 16 else { return 0.5 }
+        // Swing has a late off-beat and nothing on the first triplet partial; a full triplet
+        // feel (12/8, shuffle ride) plays both, and must stay triplets.
+        if firstTriplet * 2 >= fracs.count { return 0.5 }
         fracs.sort()
         let m = fracs[fracs.count / 2]
         return m > 0.58 ? m : 0.5
