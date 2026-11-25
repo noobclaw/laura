@@ -84,6 +84,7 @@
     o = o || {};
     var size = o.size || 1, c = new SG.Critter(spec, { seed: G.ents.length + 1, atlas: RULES.paint.textureSize, scale: size });
     scene.add(c.root);
+    if (team === 'cat') c.tailMode = 'tuck';
     var e = { size: size, id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
       rad: team === 'dog' ? 0.22 : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
     if (o.pose) c.setPose(o.pose);
@@ -318,7 +319,8 @@
     camoCam.fov = 2 * Math.atan(0.55 / d) * 180 / Math.PI; camoCam.position.copy(eye); camoCam.lookAt(ctr); camoCam.updateProjectionMatrix(); camoCam.updateMatrixWorld(true);
     var hide = G.ents.filter(function (o) { return o.team === 'dog'; });
     hide.forEach(function (o) { o.c.root.visible = false; });
-    post.renderAlbedo(scene, camoCam, N, N, misA);
+    var fv0 = e.c.faceSkin.visible; if (e.c.pose !== 'stand') e.c.faceSkin.visible = false; // the seeker does not get to see a posed cat's face
+    post.renderAlbedo(scene, camoCam, N, N, misA); e.c.faceSkin.visible = fv0;
     e.c.root.visible = false; post.renderAlbedo(scene, camoCam, N, N, misB); e.c.root.visible = true;
     hide.forEach(function (o) { o.c.root.visible = !o.fp; });
     var sum = 0, cnt = 0;
@@ -330,9 +332,9 @@
   var idMats = [], AW = 96, AH = 54, idPx = new Uint8Array(AW * AH * 4), areaCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.05, 60);
   function visibleAreas(cam) {
     var list = cats().filter(function (c) { return !c.decoyOf && c.c.root.visible; }), saved = [], out = {}, cnt = [], i;
-    list.forEach(function (c, k) { if (!idMats[k]) idMats[k] = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, (8 + 16 * k) / 255, 1) }); saved.push(c.c.skin.material); c.c.skin.material = idMats[k]; c.c.faceSkin.visible = false; cnt.push(0); });
+    list.forEach(function (c, k) { if (!idMats[k]) idMats[k] = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, (8 + 16 * k) / 255, 1) }); saved.push(c.c.skin.material); c.c.skin.material = idMats[k]; c.fv = c.c.faceSkin.visible; c.c.faceSkin.visible = false; cnt.push(0); });
     post.renderAlbedo(scene, cam, AW, AH, idPx, 'raw');
-    list.forEach(function (c, k) { c.c.skin.material = saved[k]; c.c.faceSkin.visible = true; });
+    list.forEach(function (c, k) { c.c.skin.material = saved[k]; c.c.faceSkin.visible = c.fv; });
     for (i = 0; i < idPx.length; i += 4) if (idPx[i] > 250 && idPx[i + 2] > 250 && idPx[i + 1] < 8 + 16 * list.length) { var k2 = Math.round((idPx[i + 1] - 8) / 16); if (k2 >= 0 && k2 < cnt.length) cnt[k2]++; }
     list.forEach(function (c, k) { out[c.id] = cnt[k] / (AW * AH); });
     return out;
@@ -527,7 +529,7 @@
   G.decoy = function () {
     if (!G.me || G.me.team !== 'cat' || G.me.out) return false;
     if (G.decoys.filter(function (d) { return d.c.root.visible; }).length >= RULES.cat.maxDecoys || G.decoyCd > 0) { bus.emit('denied'); return false; }
-    var c = new SG.Critter(G.me.spec, { seed: 9, atlas: RULES.paint.textureSize, scale: G.me.size }); c.copyPaintFrom(G.me.c); c.setPose(G.me.c.pose); c.frozen = true; scene.add(c.root);
+    var c = new SG.Critter(G.me.spec, { seed: 9, atlas: RULES.paint.textureSize, scale: G.me.size }); c.copyPaintFrom(G.me.c); c.tailMode = G.me.c.tailMode; c.earFlat = G.me.c.earFlat; c.setPose(G.me.c.pose); c.frozen = true; c.faceSkin.visible = false; scene.add(c.root);
     var e = { id: 'decoy' + G.decoys.length, c: c, team: 'cat', decoyOf: 'you', x: G.me.x, y: G.me.y, z: G.me.z, yaw: G.me.yaw, sus: 0, speed: 0, out: false };
     c.root.position.copy(G.me.c.root.position); c.root.quaternion.copy(G.me.c.root.quaternion); for (var k = 0; k < 20; k++) c.update(0.05, rnd); // a clone made on a wall stays on the wall
     G.decoys.push(e); G.decoyCd = RULES.cat.decoyCooldownSec; bus.emit('decoy', { n: G.decoys.length }); return true;
@@ -579,6 +581,8 @@
     bus.emit('picked', { rgb: rgb, rough: rough, metal: metal, unlit: !!unlit }); if (G.guide === 3) setGuide(4);
     return rgb;
   };
+  G.setTail = function (m) { if (G.me && G.me.team === 'cat') { G.me.c.tailMode = m; bus.emit('tail', { mode: m }); } };
+  G.setEars = function (flat) { if (G.me && G.me.team === 'cat') { G.me.c.earFlat = !!flat; bus.emit('ears', { flat: !!flat }); } };
   G.setColor = function (rgb) { G.paint.rgb = rgb; if (G.guide === 3) setGuide(4); };
   /* four suggested colours: under, behind, left and right of the cat */
   var sugCam = new THREE.PerspectiveCamera(8, 1, 0.05, 30), sugPx = new Uint8Array(4);
@@ -741,7 +745,7 @@
       e.c.speed = e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
-      if (e.team === 'cat' && e !== me) e.c.frozen = (e.c.pose !== 'stand' && !e.out) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek');
+      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = !e.c.frozen || !G.state || G.state.phase === 'reveal' || G.state.phase === 'lobby'; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
       e.c.update(dt, rnd);
       if (!e.out && (e.speed > 0.05 || e.air)) bumpers.push({ x: e.x, y: e.y, z: e.z, r: e.team === 'dog' ? 0.3 : RULES.cat.bumpRadius, speed: e.speed || 0 });
@@ -811,7 +815,7 @@
     for (var i = 0; i < dirs.length; i++) {
       var a = dirs[i][0], sg = dirs[i][1], q = c.slice(); q[a] += sg * reach; if (a === 1) q[1] += rad * 0.8; // a ceiling or shelf underside just above the head
       var p = solidAt(q[0], q[1], q[2]); if (!p || p === FLOOR) continue;
-      if (a !== 1 && p.y1 - e.y < 0.3) continue; // that is a step, not a wall
+      if (a !== 1 && p.y1 - e.y < 0.3 && e.y - room.groundAt(e.x, e.z, e.y + 0.1, 0) < 0.05) continue; // standing next to something low: that is a step, not a wall
       var n = [0, 0, 0]; n[a] = -sg; c[a] = sg > 0 ? pLo(p, a) : pHi(p, a);
       e.x = c[0]; e.y = c[1]; e.z = c[2]; e.cling = { n: n, f: a === 1 ? [Math.sin(e.yaw), 0, Math.cos(e.yaw)] : [0, 1, 0] }; e.vy = 0; e.air = false; e.speed = 0;
       if (e === G.me) bus.emit('cling', { on: true }); return true;

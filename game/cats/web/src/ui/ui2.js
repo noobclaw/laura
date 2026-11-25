@@ -106,6 +106,9 @@
     mk('stand', '✕ ' + t('cancel'), Math.PI / 2, 'cancel');
     for (var i = 0; i < 8; i++) { var p = WHEEL[page * 8 + i]; mk(p[0], p[1], Math.PI / 2 + (i + 1) * (Math.PI * 2 / 9)); }
     var mb = h('button', 'more', t('more'), w); mb.onclick = function () { page = 1 - page; drawWheel(); };
+    var c = G.me && G.me.c, TM = ['tuck', 'straight', 'curl'], TN = { tuck: '收起', straight: '伸直', curl: '捲起' };
+    var tb = h('button', 'more tailb', '尾巴：' + TN[(c && c.tailMode) || 'tuck'] + '（滾輪）', w); tb.dataset.act = 'tail'; tb.onclick = function () { G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + 1) % 3]); drawWheel(); };
+    var eb = h('button', 'more earb', '耳朵：' + (c && c.earFlat ? '貼平' : '立'), w); eb.dataset.act = 'ears'; eb.onclick = function () { G.setEars(!G.me.c.earFlat); drawWheel(); };
   }
   function pick(pose) { G.setPose(pose); show(els.pw2, false); hover = null; }
 
@@ -132,7 +135,7 @@
       bus.on('mode', function (d) { if (d.mode === 'title') buildMenu(); show(els.pw2, false); lobbyHud(); });
       var n = 0; bus.on('frame', function () { if (G.lobby || !els.lobby.classList.contains('hide')) lobbyHud(); if (++n % 30 === 0) cbar(); });
       bus.on('wheel', function (d) { var ok = G.me && G.me.team === 'cat' && !G.me.out && G.state && G.state.phase !== 'reveal'; if (d.open && ok) { hover = null; drawWheel(); show(els.pw2, true); } else if (!d.open && !els.pw2.classList.contains('hide')) { if (hover) pick(hover); else show(els.pw2, false); } });
-      els.pw2.addEventListener('wheel', function (e) { e.preventDefault(); page = 1 - page; drawWheel(); }, { passive: false });
+      els.pw2.addEventListener('wheel', function (e) { e.preventDefault(); var TM = ['tuck', 'straight', 'curl']; G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + (e.deltaY > 0 ? 1 : 2)) % 3]); drawWheel(); }, { passive: false });
       window.addEventListener('keydown', function (e) { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'Escape') { if (els.hs) { els.hs.remove(); els.hs = null; e.stopImmediatePropagation(); } else if (els.op) { els.op.remove(); els.op = null; e.stopImmediatePropagation(); } } if ((e.key === 'b' || e.key === 'B') && G.lobby) bodyPicker(); }, true);
     }
   };
