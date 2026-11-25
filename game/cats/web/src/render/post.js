@@ -152,24 +152,24 @@
     var flat = new THREE.AmbientLight(0xffffff, Math.PI); flat.layers.set(2);
     this.flatLight = flat;
     function lin2srgb(v) { v /= 255; return Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); }
-    this.renderAlbedo = function (scene, camera, w, h, out) {
+    this.renderAlbedo = function (scene, camera, w, h, out, mode) { // mode: undefined = unlit albedo (sRGB bytes), 'raw' = unlit, linear bytes, 'lit' = with the real lights, before any grading
       if (rtPick.width !== w || rtPick.height !== h) rtPick.setSize(w, h);
-      var env = scene.environment, bg = scene.background, mask = camera.layers.mask;
-      scene.environment = null; camera.layers.mask = 1 | 4;
+      var env = scene.environment, bg = scene.background, mask = camera.layers.mask, lit = mode === 'lit';
+      if (!lit) { scene.environment = null; camera.layers.mask = 1 | 4; }
       var sh = R.shadowMap.autoUpdate; R.shadowMap.autoUpdate = false;
       R.setRenderTarget(rtPick); R.setClearColor(0x808080, 1); R.clear(); R.render(scene, camera);
       out = out || new Uint8Array(w * h * 4);
       R.readRenderTargetPixels(rtPick, 0, 0, w, h, out);
       R.setRenderTarget(null);
       scene.environment = env; scene.background = bg; camera.layers.mask = mask; R.shadowMap.autoUpdate = sh;
-      for (var i = 0; i < out.length; i += 4) { out[i] = lin2srgb(out[i]); out[i + 1] = lin2srgb(out[i + 1]); out[i + 2] = lin2srgb(out[i + 2]); }
+      if (mode !== 'raw') for (var i = 0; i < out.length; i += 4) { out[i] = lin2srgb(out[i]); out[i + 1] = lin2srgb(out[i + 1]); out[i + 2] = lin2srgb(out[i + 2]); }
       return out;
     };
     var pickCam = new THREE.PerspectiveCamera(), px = new Uint8Array(4);
-    this.pick = function (scene, camera, nx, ny, viewW, viewH) { // albedo under a screen pixel
+    this.pick = function (scene, camera, nx, ny, viewW, viewH, mode) { // colour under a screen pixel: 'lit' (as rendered, before grading) or unlit surface colour
       pickCam.copy(camera); pickCam.setViewOffset(viewW, viewH, Math.floor(nx), Math.floor(ny), 1, 1); pickCam.updateProjectionMatrix();
       pickCam.matrixWorld.copy(camera.matrixWorld); pickCam.matrixWorldInverse.copy(camera.matrixWorldInverse);
-      this.renderAlbedo(scene, pickCam, 1, 1, px);
+      pickCam.layers.mask = camera.layers.mask; this.renderAlbedo(scene, pickCam, 1, 1, px, mode === 'lit' ? 'lit' : undefined);
       return [px[0], px[1], px[2]];
     };
   };

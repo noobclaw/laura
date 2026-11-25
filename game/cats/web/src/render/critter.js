@@ -28,10 +28,29 @@
   var DOGS = {
     shiba: { name: '小柴', tag: '柴系', kind: 'dog', len: 0.62, chestR: 0.150, bellyR: 0.135, hipR: 0.135, leg: 0.30, legRad: 0.044, paw: 0.05, headR: 0.135, headSx: 1.06, headSy: 0.94, neck: 0.15, muzzleR: 0.066, muzzleL: 0.095, ear: { type: 'point', h: 0.10, w: 0.058, spread: 0.6, tilt: 12 }, tail: { len: 0.34, r0: 0.05, r1: 0.045, up: 150, curl: 62, bushy: true }, eye: 0.022, coat: 'shiba' },
     corgi: { name: '短短', tag: '柯基系', kind: 'dog', len: 0.70, chestR: 0.150, bellyR: 0.145, hipR: 0.150, leg: 0.115, legRad: 0.046, paw: 0.052, headR: 0.135, headSx: 1.06, headSy: 0.92, neck: 0.13, muzzleR: 0.062, muzzleL: 0.105, ear: { type: 'point', h: 0.15, w: 0.075, spread: 0.62, tilt: 20 }, tail: { len: 0.08, r0: 0.05, r1: 0.045, up: 120, curl: 0, segs: 1 }, eye: 0.022, coat: 'corgi' },
-    bull: { name: '阿虎', tag: '鬥牛系', kind: 'dog', len: 0.56, chestR: 0.190, bellyR: 0.160, hipR: 0.140, leg: 0.19, legRad: 0.056, paw: 0.062, headR: 0.165, headSx: 1.2, headSy: 0.86, neck: 0.08, muzzleR: 0.095, muzzleL: 0.05, ear: { type: 'fold', h: 0.06, w: 0.055, spread: 0.72, tilt: 40 }, tail: { len: 0.07, r0: 0.035, r1: 0.03, up: 110, curl: 0, segs: 1 }, eye: 0.024, coat: 'bull', jowl: true, stance: 1.25 },
+    bull: { name: '阿虎', tag: '鬥牛系', kind: 'dog', len: 0.52, chestR: 0.205, bellyR: 0.165, hipR: 0.128, leg: 0.135, legRad: 0.058, paw: 0.066, headR: 0.172, headSx: 1.28, headSy: 0.84, neck: 0.04, muzzleR: 0.105, muzzleL: 0.012, ear: { type: 'fold', h: 0.055, w: 0.05, spread: 0.78, tilt: 46 }, tail: { len: 0.06, r0: 0.03, r1: 0.026, up: 105, curl: 0, segs: 1 }, eye: 0.024, coat: 'bull', jowl: true, underbite: true, stance: 1.5 },
     poodle: { name: '捲捲', tag: '貴賓系', kind: 'dog', len: 0.50, chestR: 0.125, bellyR: 0.105, hipR: 0.11, leg: 0.36, legRad: 0.03, paw: 0.05, headR: 0.118, headSx: 1.0, headSy: 0.96, neck: 0.17, muzzleR: 0.05, muzzleL: 0.10, ear: { type: 'flop', h: 0.15, w: 0.06, spread: 0.8, tilt: 0 }, tail: { len: 0.20, r0: 0.02, r1: 0.018, up: 160, curl: 0, segs: 2 }, eye: 0.02, coat: 'poodle', pom: true }
   };
+  CATS.azuki = { name: '小豆', tag: '幼貓', kind: 'cat', scale: 0.7, len: 0.36, chestR: 0.125, bellyR: 0.135, hipR: 0.128, leg: 0.13, legRad: 0.04, paw: 0.05, headR: 0.158, headSx: 1.1, headSy: 0.92, neck: 0.04, muzzleR: 0.056, muzzleL: 0.034, ear: { type: 'point', h: 0.1, w: 0.075, spread: 0.6, tilt: 20 }, tail: { len: 0.26, r0: 0.03, r1: 0.02, up: 130, curl: 12 }, eye: 0.036 };
+  CATS.chikuwa = { name: '竹輪', tag: '大耳長腿', kind: 'cat', len: 0.5, chestR: 0.118, bellyR: 0.112, hipR: 0.116, leg: 0.3, legRad: 0.03, paw: 0.038, headR: 0.112, headSx: 1.14, headSy: 0.86, neck: 0.12, muzzleR: 0.046, muzzleL: 0.044, ear: { type: 'point', h: 0.17, w: 0.085, spread: 0.7, tilt: 34 }, tail: { len: 0.1, r0: 0.045, r1: 0.055, up: 125, curl: 8, segs: 2 }, eye: 0.026 };
+  DOGS.dachs = { name: '長長', tag: '臘腸系', kind: 'dog', len: 0.86, chestR: 0.13, bellyR: 0.118, hipR: 0.118, leg: 0.1, legRad: 0.04, paw: 0.046, headR: 0.112, headSx: 1.0, headSy: 0.9, neck: 0.12, muzzleR: 0.05, muzzleL: 0.125, ear: { type: 'flop', h: 0.15, w: 0.065, spread: 0.82, tilt: 0 }, tail: { len: 0.3, r0: 0.024, r1: 0.014, up: 128, curl: 8 }, eye: 0.02, coat: 'dachs' };
+  DOGS.husky = { name: '阿雪', tag: '哈士奇系', kind: 'dog', len: 0.66, chestR: 0.165, bellyR: 0.142, hipR: 0.142, leg: 0.34, legRad: 0.046, paw: 0.054, headR: 0.142, headSx: 1.08, headSy: 0.94, neck: 0.16, muzzleR: 0.066, muzzleL: 0.11, ear: { type: 'point', h: 0.12, w: 0.06, spread: 0.56, tilt: 10 }, tail: { len: 0.4, r0: 0.05, r1: 0.075, up: 140, curl: 40, bushy: true }, eye: 0.021, eyeColor: 0x6fb7e8, coat: 'husky', fluff: true };
   SG.CATS = CATS; SG.DOGS = DOGS;
+  /* ears / tail / collar can be chosen separately from the build */
+  var OPT = (SG.CRITTER_OPTIONS = {
+    cat: { ear: [['', '原本'], ['point', '立耳'], ['fold', '摺耳'], ['big', '大耳'], ['round', '圓耳']], tail: [['', '原本'], ['long', '長尾'], ['bob', '短尾'], ['fluffy', '蓬尾'], ['curl', '捲尾']] },
+    dog: { ear: [['', '原本'], ['point', '立耳'], ['flop', '垂耳'], ['fold', '摺耳']], tail: [['', '原本'], ['curl', '捲尾'], ['nub', '短尾'], ['long', '長尾'], ['pom', '毛球尾']], collar: [['', '無'], ['red', '紅項圈'], ['bell', '鈴鐺'], ['scarf', '領巾']] }
+  });
+  SG.makeSpec = function (base, o) {
+    o = o || {}; var S = {}, k; for (k in base) S[k] = base[k];
+    var HR = S.headR, L = S.len, dog = S.kind === 'dog';
+    var E = { point: { type: 'point', h: HR * (dog ? 0.75 : 0.62), w: HR * 0.44, spread: 0.6, tilt: dog ? 12 : 20 }, fold: { type: 'fold', h: HR * 0.42, w: HR * 0.42, spread: 0.7, tilt: 40 }, big: { type: 'point', h: HR * 1.05, w: HR * 0.56, spread: 0.58, tilt: 18 }, round: { type: 'round', h: HR * 0.5, w: HR * 0.5, spread: 0.64, tilt: 26 }, flop: { type: 'flop', h: HR * 1.15, w: HR * 0.5, spread: 0.82, tilt: 0 } };
+    var T = { long: { len: L * (dog ? 0.55 : 0.9), r0: S.legRad * 0.8, r1: S.legRad * 0.5, up: dog ? 128 : 114, curl: dog ? 8 : 18 }, bob: { len: L * 0.2, r0: S.legRad * 1.1, r1: S.legRad * 1.3, up: 125, curl: 8, segs: 2 }, nub: { len: L * 0.12, r0: S.legRad * 0.9, r1: S.legRad * 0.8, up: 115, curl: 0, segs: 1 }, fluffy: { len: L * 0.9, r0: S.legRad, r1: S.legRad * 1.9, up: 106, curl: 12, bushy: true }, curl: { len: L * (dog ? 0.55 : 0.75), r0: S.legRad * (dog ? 1.1 : 0.8), r1: S.legRad * (dog ? 1.0 : 0.6), up: 150, curl: 58, bushy: dog }, pom: { len: L * 0.36, r0: 0.02, r1: 0.018, up: 160, curl: 0, segs: 2, pom: true } };
+    if (o.ear && E[o.ear]) { S.ear = E[o.ear]; S.earPom = false; }
+    if (o.tail && T[o.tail]) { S.tail = T[o.tail]; S.tailPomOff = !T[o.tail].pom; }
+    if (o.collar) S.collar = o.collar;
+    return S;
+  };
 
   /* ---------- poses: degrees [x,y,z] per joint; sh/el/hp/kn apply to both sides (y,z mirrored) ---------- */
   var POSES = {
@@ -39,14 +58,20 @@
     sit: { pivot: [-38, 0, 0], chest: [-6, 0, 0], neck: [20, 0, 0], head: [22, 0, 0], sh: [36, 0, 0], el: [6, 0, 0], hp: [-62, 0, -8], kn: [128, 0, 0], t0: [35, 40, 0], t1: [0, 30, 0], t2: [0, 30, 0], t3: [0, 25, 0] },
     loaf: { sh: [72, 0, 0], el: [-158, 0, 0], hp: [-74, 0, -8], kn: [156, 0, 0], chest: [-4, 0, 0], neck: [-6, 0, 0], head: [4, 0, 0], t0: [-30, 64, 0], t1: [0, 50, 0], t2: [0, 48, 0], t3: [0, 42, 0] },
     stretch: { pivot: [24, 0, 0], chest: [10, 0, 0], sh: [-104, 0, 0], el: [0, 0, 0], hp: [-26, 0, 0], kn: [4, 0, 0], neck: [-26, 0, 0], head: [-20, 0, 0], t0: [-30, 0, 0], t1: [-18, 0, 0], t2: [-18, 0, 0] },
-    side: { pivot: [0, 0, 86], chest: [0, -8, 0], hip: [0, 8, 0], neck: [0, 0, 0], head: [0, 0, 10], shL: [-52, 0, 10], shR: [-30, 0, 0], elL: [30, 0, 0], elR: [22, 0, 0], hpL: [34, 0, 8], hpR: [16, 0, 0], knL: [-30, 0, 0], knR: [-20, 0, 0], t0: [-20, 0, 0], t1: [-14, 0, 0] },
+    side: { pivot: [0, 0, 88], chest: [0, -6, 0], hip: [0, 6, 0], neck: [6, 0, 0], head: [0, 0, 6], shL: [-34, 0, 0], shR: [-48, 0, -18], elL: [28, 0, 0], elR: [40, 0, 0], hpL: [26, 0, 0], hpR: [38, 0, -18], knL: [-30, 0, 0], knR: [-44, 0, 0], t0: [-22, 0, 0], t1: [-10, 0, 0], t2: [-8, 0, 0] },
     curl: { pivot: [0, 0, 62], chest: [0, -58, 0], hip: [0, 58, 0], neck: [10, -50, 0], head: [20, -42, 0], sh: [-70, 0, 0], el: [120, 0, 0], hp: [-70, 0, 0], kn: [130, 0, 0], t0: [-36, 64, 0], t1: [0, 56, 0], t2: [0, 56, 0], t3: [0, 50, 0] },
     belly: { pivot: [0, 0, 176], chest: [-8, 10, 0], hip: [8, -6, 0], neck: [-30, 16, 0], head: [-34, 20, 0], shL: [-50, 0, -18], shR: [-30, 0, 18], elL: [96, 0, 0], elR: [80, 0, 0], hpL: [40, 0, -26], hpR: [26, 0, 26], knL: [-84, 0, 0], knR: [-60, 0, 0], t0: [-40, 30, 0], t1: [0, 22, 0], t2: [0, 22, 0] },
     hind: { pivot: [-78, 0, 0], chest: [-4, 0, 0], neck: [34, 0, 0], head: [40, 0, 0], shL: [58, 0, -10], shR: [58, 0, 10], el: [-96, 0, 0], hp: [74, 0, 0], kn: [4, 0, 0], t0: [86, 0, 0], t1: [-26, 0, 0], t2: [-26, 0, 0] },
-    arch: { chest: [30, 0, 0], hip: [-30, 0, 0], neck: [26, 0, 0], head: [14, 0, 0], sh: [-22, 0, 0], el: [-6, 0, 0], hp: [26, 0, 0], kn: [0, 0, 0], t0: [-34, 0, 0], t1: [-10, 0, 0], t2: [10, 0, 0], t3: [16, 0, 0] }
+    arch: { chest: [46, 0, 0], hip: [-46, 0, 0], neck: [-30, 0, 0], head: [-10, 0, 0], sh: [-42, 0, 0], el: [0, 0, 0], hp: [42, 0, 0], kn: [0, 0, 0], t0: [-70, 0, 0], t1: [-14, 0, 0], t2: [-6, 0, 0], t3: [14, 0, 0], earL: [30, 0, 0], earR: [30, 0, 0] },
+    crouch: { sh: [-42, 0, 0], el: [84, 0, 0], hp: [-44, 0, 0], kn: [88, 0, 0], neck: [26, 0, 0], head: [-18, 0, 0], t0: [38, 0, 0], t1: [10, 0, 0] },
+    box: { pivot: [-36, 0, 0], chest: [-8, 0, 0], neck: [24, 0, 0], head: [16, 0, 0], sh: [40, 0, 0], el: [2, 0, 0], hp: [-66, 0, -6], kn: [136, 0, 0], t0: [50, 78, 0], t1: [0, 62, 0], t2: [0, 58, 0], t3: [0, 50, 0] },
+    sphinx: { sh: [-84, 0, 0], el: [0, 0, 0], hp: [-72, 0, -10], kn: [156, 0, 0], chest: [-12, 0, 0], neck: [-20, 0, 0], head: [-8, 0, 0], t0: [-20, 20, 0], t1: [0, 16, 0], t2: [0, 16, 0] },
+    hang: { pivot: [26, 0, 0], chest: [26, 0, 0], neck: [34, 0, 0], head: [20, 0, 0], sh: [-36, 0, 0], el: [10, 0, 0], hp: [-70, 0, -12], kn: [150, 0, 0], t0: [-40, 0, 0], t1: [-10, 0, 0] },
+    pawsup: { pivot: [-62, 0, 0], chest: [-10, 0, 0], neck: [30, 0, 0], head: [20, 0, 0], shL: [-70, 0, -8], shR: [-70, 0, 8], el: [-30, 0, 0], hp: [60, 0, 0], kn: [4, 0, 0], t0: [70, 0, 0], t1: [-20, 0, 0], t2: [-20, 0, 0] },
+    roll: { pivot: [0, 0, 176], chest: [-6, 14, 0], hip: [6, -14, 0], neck: [-26, 0, 0], head: [-26, 0, 0], sh: [-40, 0, 0], el: [90, 0, 0], hp: [34, 0, 0], kn: [-74, 0, 0], t0: [-40, 0, 0], emote: true }
   };
   SG.POSES = POSES;
-  SG.POSE_LIST = [['stand', '站立'], ['sit', '坐下'], ['loaf', '母雞蹲'], ['stretch', '伸懶腰'], ['side', '側躺'], ['curl', '蜷成團'], ['belly', '翻肚'], ['hind', '站起來'], ['arch', '拱背']];
+  SG.POSE_LIST = [['stand', '站立'], ['sit', '坐下'], ['loaf', '母雞蹲'], ['stretch', '伸懶腰'], ['side', '側躺'], ['curl', '蜷成團'], ['belly', '翻肚'], ['hind', '站起來'], ['arch', '拱背'], ['box', '箱坐'], ['sphinx', '趴臥'], ['hang', '掛在邊上'], ['pawsup', '搭牆'], ['roll', '打滾']];
 
   var _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _m = new THREE.Matrix4();
 
@@ -89,7 +114,7 @@
     this.cur = {}; this.names = Object.keys(this.joints);
     this.names.forEach(function (n) { self.cur[n] = new THREE.Quaternion(); });
     this.groundY = 0; this.liftY = 0;
-    this.root.scale.setScalar(opt.scale || 1); this.scale = opt.scale || 1;
+    this.scale = (opt.scale || 1) * (S.scale || 1); this.root.scale.setScalar(this.scale);
     this._applyPose(1, 0); this._ground(true);
     if (S.coat) this.applyCoat(COATS[S.coat]);
   }
@@ -174,11 +199,12 @@
     else [-1, 1].forEach(function (s) { // cats: two whisker pads instead of a snout
       self._part('pad' + (s < 0 ? 'L' : 'R'), head, { prof: ell(S.muzzleR * 0.62, S.muzzleR * 0.5), sz: 0.8, pos: [s * S.muzzleR * 0.46, mz[1], mz[2] + S.muzzleL * 0.3], tw: 64, th: 48, su: 14, sv: 8 });
     });
+    if (S.underbite) this._part('jaw', head, { prof: ell(S.muzzleR * 0.86, S.muzzleR * 0.5), sx: 1.15, pos: [0, mz[1] - S.muzzleR * 0.52, mz[2] + S.muzzleL + S.muzzleR * 0.34], tw: 96, th: 64, su: 16, sv: 8 });
     if (S.jowl) [-1, 1].forEach(function (s) {
-      self._part('jowl' + s, head, { prof: ell(S.muzzleR * 0.7, S.muzzleR * 0.72), pos: [s * S.muzzleR * 0.62, mz[1] - S.muzzleR * 0.4, mz[2] + S.muzzleL * 0.5], tw: 64, th: 48, su: 14, sv: 8 });
+      self._part('jowl' + s, head, { prof: ell(S.muzzleR * 0.62, S.muzzleR * 0.8), pos: [s * S.muzzleR * 0.7, mz[1] - S.muzzleR * 0.34, mz[2] + S.muzzleL * 0.5 + S.muzzleR * 0.1], tw: 64, th: 48, su: 14, sv: 8 });
     });
     // face details (not paintable)
-    var dark = new THREE.MeshStandardMaterial({ color: 0x1b1512, roughness: 0.18, metalness: 0.0, envMapIntensity: 1.4 });
+    var dark = new THREE.MeshStandardMaterial({ color: S.eyeColor || 0x1b1512, roughness: 0.18, metalness: 0.0, envMapIntensity: 1.4 });
     var pink = new THREE.MeshStandardMaterial({ color: dog ? 0x241a18 : 0xe79a9a, roughness: dog ? 0.25 : 0.5 });
     this.eyes = [];
     [-1, 1].forEach(function (s) {
@@ -197,6 +223,13 @@
       var wm = new THREE.MeshBasicMaterial({ color: 0xffffff }), wg = new THREE.CylinderGeometry(0.0012, 0.0006, HR * 0.75, 4);
       [-1, 1].forEach(function (s) { for (var w = 0; w < 3; w++) { var m = self._deco(head, wg, wm, s * (S.muzzleR * 0.9 + HR * 0.34), mz[1] + (w - 1) * 0.012, mz[2] + S.muzzleL * 0.2); m.rotation.set(0, 0, s * (Math.PI / 2 + (w - 1) * 0.22)); m.rotation.y = -s * 0.35; self.face.push(m); m.castShadow = false; } });
     }
+    if (S.underbite) { var tm = new THREE.MeshStandardMaterial({ color: 0xfffdf4 }); [-1, 1].forEach(function (s) { var t = self._deco(head, new THREE.ConeGeometry(0.011, 0.03, 6), tm, s * S.muzzleR * 0.42, mz[1] - S.muzzleR * 0.2, mz[2] + S.muzzleL + S.muzzleR * 0.86); }); }
+    if (S.collar) { // dogs only: not paintable
+      var cc = { red: 0xc8452e, bell: 0x2f4b7c, scarf: 0xd9a93a }[S.collar] || 0xc8452e, cm = new THREE.MeshStandardMaterial({ color: cc, roughness: 0.6 }), nr2 = Math.min(S.chestR * 0.66, S.headR * 0.72);
+      var col = self._deco(neck, new THREE.TorusGeometry(nr2 * 1.02, 0.014, 6, 20), cm, 0, nl * 0.35, nl * 0.3); col.rotation.x = Math.PI / 2 - (90 - nUp) * Math.PI / 180 + 1.1;
+      if (S.collar === 'bell') self._deco(neck, new THREE.SphereGeometry(0.024, 10, 8), new THREE.MeshStandardMaterial({ color: 0xd9a93a, roughness: 0.3, metalness: 0.8 }), 0, nl * 0.35 - nr2 * 0.75, nl * 0.3 + nr2 * 0.75);
+      if (S.collar === 'scarf') { var sc = self._deco(neck, new THREE.ConeGeometry(nr2 * 0.9, nr2 * 1.3, 3), cm, 0, nl * 0.35 - nr2 * 0.9, nl * 0.3 + nr2 * 0.8); sc.rotation.set(2.6, 0, 0); sc.scale.z = 0.25; }
+    }
     if (dog) { // tongue for charm
       var tg = this._deco(head, SG.geo.rbox(S.muzzleR * 0.62, 0.012, S.muzzleR * 1.0, 0.005), new THREE.MeshStandardMaterial({ color: 0xe8788a, roughness: 0.45 }), 0, mz[1] - S.muzzleR * 0.62, mz[2] + S.muzzleL * 0.95);
       tg.rotation.x = 0.5; this.tongue = tg; this.face.push(tg);
@@ -206,16 +239,16 @@
     [-1, 1].forEach(function (s) {
       var p = onHead(s * E.spread, E.type === 'flop' ? 0.45 : 0.82, E.type === 'flop' ? 0.0 : -0.05, E.type === 'flop' ? 0.9 : 0.86);
       var ej = J(s < 0 ? 'earL' : 'earR', head, p[0], p[1], p[2], E.type === 'fold' ? 62 : (E.type === 'flop' ? 0 : -6), 0, E.type === 'flop' ? -s * 168 : -s * E.tilt);
-      self._part('ear' + (s < 0 ? 'L' : 'R'), ej, { prof: cone(E.h, E.w, E.type === 'flop' ? 0.45 : 0.8), sz: 0.42, pos: [0, -0.012, 0], tw: 80, th: 64, su: 14, sv: 8 });
+      self._part('ear' + (s < 0 ? 'L' : 'R'), ej, { prof: cone(E.h, E.w, E.type === 'flop' ? 0.45 : E.type === 'round' ? 0.36 : 0.8), sz: 0.42, pos: [0, -0.012, 0], tw: 80, th: 64, su: 14, sv: 8 });
       if (E.type === 'point' && !dog) { // inner ear
         var inn = self._deco(ej, new THREE.ConeGeometry(E.w * 0.58, E.h * 0.72, 10), new THREE.MeshStandardMaterial({ color: 0xf2b6b0, roughness: 0.8 }), 0, E.h * 0.28, E.w * 0.2);
         inn.scale.z = 0.3; self.face.push(inn);
       }
-      if (S.pom) self._part('earPom' + s, ej, { prof: ell(0.07, 0.085), pos: [0, E.h * 0.85, 0], tw: 96, th: 64, su: 14, sv: 8 });
+      if (S.pom && S.earPom !== false) self._part('earPom' + s, ej, { prof: ell(0.07, 0.085), pos: [0, E.h * 0.85, 0], tw: 96, th: 64, su: 14, sv: 8 });
     });
     if (S.pom) this._part('topPom', head, { prof: ell(HR * 0.72, HR * 0.6), pos: [0, hc[1] + Ry * 0.82, hc[2] - HR * 0.1], tw: 128, th: 96, su: 16, sv: 10 });
     if (S.fluff) {
-      [-1, 1].forEach(function (s) {
+      if (!dog) [-1, 1].forEach(function (s) {
         var p = onHead(s * 0.9, -0.42, 0.25, 0.86);
         self._part('cheek' + s, head, { prof: cone(HR * 0.62, HR * 0.5, 0.7), sz: 0.6, pos: p, rot: [0, 0, -s * 112], tw: 96, th: 64, su: 14, sv: 8 });
       });
@@ -247,7 +280,7 @@
       this._part('tail' + i, tj, { prof: cap(sl, ra, rb), tw: 80, th: 64, su: 12, sv: 8 });
       parent = tj;
     }
-    if (S.pom) this._part('tailPom', parent, { prof: ell(0.065, 0.065), pos: [0, -sl, 0], tw: 96, th: 64, su: 14, sv: 8 });
+    if ((S.pom && !S.tailPomOff) || T.pom) this._part('tailPom', parent, { prof: ell(0.065, 0.065), pos: [0, -sl, 0], tw: 96, th: 64, su: 14, sv: 8 });
     this._skin();
   };
 
@@ -302,23 +335,37 @@
     this.t += dt;
     var J = this.joints, t = this.t, live = this.frozen ? 0 : 1, moving = this.speed > 0.05, S = this.spec;
     this._applyPose(1 - Math.exp(-dt * 9), dt);
-    // walk / run cycle
-    if (moving && this.pose === 'stand') {
-      var run = Math.min(1, Math.max(0, (this.speed - 1.6) / 1.4));
-      this.walk += dt * (5.5 + this.speed * 3.2) * Math.max(0.6, 0.2 / Math.max(0.1, S.leg)) * 0.75;
-      var A = (0.42 + run * 0.35), ph = this.walk, off = run > 0.5 ? 0.6 : Math.PI;
-      var legs = [['shL', 'elL', 0, 1], ['hpR', 'knR', run > 0.5 ? Math.PI * 0.8 : 0, -1], ['shR', 'elR', off, 1], ['hpL', 'knL', off + (run > 0.5 ? Math.PI * 0.8 : 0), -1]];
-      for (var i = 0; i < 4; i++) {
-        var s = Math.sin(ph + legs[i][2]), c = Math.cos(ph + legs[i][2]);
-        addRot(J[legs[i][0]], -s * A, 0, 0);
-        addRot(J[legs[i][1]], Math.max(0, c) * A * 1.5 * (legs[i][3] > 0 ? 1 : -0.0) + (legs[i][3] < 0 ? Math.max(0, c) * A * 1.2 : 0), 0, 0);
+    // locomotion: slow = four-beat walk (also the crouched sneak), fast = bounding run; turning on the spot shuffles the feet
+    var loco = moving && (this.pose === 'stand' || this.pose === 'crouch'), turning = !moving && Math.abs(this.turn || 0) > 0.8 && this.pose === 'stand';
+    this.bob = 0;
+    if (loco || turning) {
+      var run = this.pose === 'crouch' || turning ? 0 : Math.min(1, Math.max(0, (this.speed - 1.3) / 0.6));
+      var cad = 1 / Math.sqrt(Math.max(0.45, S.leg / 0.2));
+      this.walk += dt * (turning ? 10 : run > 0.5 ? 12.5 : 6.5 + this.speed * 2.6) * cad;
+      var ph = this.walk, i;
+      if (run > 0.5) { // bound: fore pair reaches, hind pair drives, the spine flexes and the body pitches
+        var fo = [['shL', 'elL', 0.18], ['shR', 'elR', -0.18]], hi = [['hpL', 'knL', 2.3], ['hpR', 'knR', 2.0]];
+        for (i = 0; i < 2; i++) { addRot(J[fo[i][0]], -Math.sin(ph + fo[i][2]) * 0.95 - 0.1, 0, 0); addRot(J[fo[i][1]], Math.max(0, Math.cos(ph + fo[i][2])) * 1.25, 0, 0); }
+        for (i = 0; i < 2; i++) { addRot(J[hi[i][0]], -Math.sin(ph + hi[i][2]) * 0.9 + 0.1, 0, 0); addRot(J[hi[i][1]], Math.max(0, Math.cos(ph + hi[i][2])) * 1.3, 0, 0); }
+        addRot(J.chest, Math.sin(ph + 0.7) * 0.2, 0, 0); addRot(J.hip, -Math.sin(ph + 0.7) * 0.26, 0, 0); addRot(J.body, Math.sin(ph + 1.3) * 0.1, 0, 0);
+        addRot(J.neck, -Math.sin(ph + 0.7) * 0.14 - 0.1, 0, 0); addRot(J.t0, -0.55 + Math.sin(ph) * 0.12, 0, 0);
+        if (J.earL && S.ear.type === 'point') { addRot(J.earL, 0.4, 0, 0); addRot(J.earR, 0.4, 0, 0); }
+        this.bob = (0.5 + 0.5 * Math.sin(ph + 1.0)) * 0.055;
+      } else {
+        var A = turning ? 0.2 : this.pose === 'crouch' ? 0.26 : 0.4, seq = [['hpL', 'knL', 0], ['shL', 'elL', Math.PI / 2], ['hpR', 'knR', Math.PI], ['shR', 'elR', Math.PI * 1.5]];
+        for (i = 0; i < 4; i++) { var sn = Math.sin(ph + seq[i][2]), cs = Math.cos(ph + seq[i][2]); addRot(J[seq[i][0]], -sn * A, 0, 0); addRot(J[seq[i][1]], Math.max(0, cs) * A * 1.4, 0, 0); }
+        addRot(J.body, Math.sin(ph * 2) * 0.015, 0, Math.sin(ph) * 0.03); addRot(J.chest, 0, Math.sin(ph) * 0.06, 0); addRot(J.hip, 0, -Math.sin(ph) * 0.08, 0); addRot(J.head, Math.sin(ph * 2) * 0.03, 0, 0);
+        this.bob = Math.abs(Math.sin(ph)) * 0.007;
       }
-      this.pivot.position.z = 0;
-      addRot(J.body, Math.sin(ph * 2) * 0.02 + run * Math.sin(ph) * 0.1, 0, Math.sin(ph) * 0.03);
-      addRot(J.chest, 0, Math.sin(ph) * 0.07, 0); addRot(J.hip, 0, -Math.sin(ph) * 0.09, 0);
-      addRot(J.head, Math.sin(ph * 2) * 0.03, 0, 0);
-      this.bob = Math.abs(Math.sin(ph)) * (0.008 + run * 0.03);
-    } else this.bob = 0;
+    }
+    // tail lags behind turns (only when not holding a pose)
+    var lagT = this.pose === 'stand' || this.pose === 'crouch' ? Math.max(-0.9, Math.min(0.9, -(this.turn || 0) * 0.13)) : 0;
+    this.lagV = (this.lagV || 0) + ((lagT - (this.lag || 0)) * 60 - (this.lagV || 0) * 7) * dt; this.lag = (this.lag || 0) + this.lagV * dt;
+    if (Math.abs(this.lag) > 0.003) for (var tk = 0; tk < this.tailN; tk++) addRot(J['t' + tk], 0, 0, this.lag * (0.5 + tk * 0.3));
+    // landing squash
+    if (this.squash > 0) { this.squash = Math.max(0, this.squash - dt * 5.5); var sq = Math.sin(this.squash * Math.PI) * 0.22; this.pivot.scale.set(1 + sq * 0.6, 1 - sq, 1 + sq * 0.6); } else if (this.pivot.scale.y !== 1) this.pivot.scale.set(1, 1, 1);
+    // the roll emote rocks from side to side on the back
+    if (this.pose === 'roll' && live) { addRot(this.pivot, 0, 0, Math.sin(t * 3.4) * 0.95); addRot(J.shL, Math.sin(t * 6.8) * 0.3, 0, 0); addRot(J.shR, -Math.sin(t * 6.8) * 0.3, 0, 0); addRot(J.hpL, -Math.sin(t * 6.8) * 0.25, 0, 0); addRot(J.hpR, Math.sin(t * 6.8) * 0.25, 0, 0); }
     if (this.air > 0.02) { // jump: legs reach out
       var a = Math.min(1, this.air * 5);
       ['shL', 'shR'].forEach(function (n) { addRot(J[n], -0.9 * a, 0, 0); });
@@ -375,7 +422,8 @@
     return hits.length ? hits[0] : null;
   };
   /* 3D brush: every texel within `radius` of the world point is painted, on every part — so seams and joints just work */
-  P.paint = function (wp, radius, rgb, rough, metal, hard) {
+  /* pat (optional): { type: 'stripe'|'check'|'wood'|'tatami', dir, perp (world unit vectors: along / across the stroke), rgb2, scale } */
+  P.paint = function (wp, radius, rgb, rough, metal, hard, pat) {
     var A = this.A, alb = this.alb, orm = this.orm, any = false, R = radius / this.scale, R2 = R * R;
     hard = hard == null ? 0.7 : hard;
     var inner = R * hard, span = Math.max(1e-5, R - inner), rb = Math.round(rough * 255), mb = Math.round(metal * 255);
@@ -385,7 +433,10 @@
       _v.copy(wp).applyMatrix4(p.inv);
       if (_v.distanceTo(p.c) > R + p.r) continue;
       if (this._stroke) this._save(pi);
-      var lx = _v.x, ly = _v.y, lz = _v.z, tp = p.tp, tw = p.tw, th = p.th, k = 0;
+      var lx = _v.x, ly = _v.y, lz = _v.z, tp = p.tp, tw = p.tw, th = p.th, k = 0, cr = rgb[0], cg = rgb[1], cb = rgb[2];
+      if (pat) { var E = p.mesh.matrixWorld.elements, D = pat.dir, Q = pat.perp, sc = pat.scale, c2 = pat.rgb2;
+        var dlx = E[0] * D.x + E[1] * D.y + E[2] * D.z, dly = E[4] * D.x + E[5] * D.y + E[6] * D.z, dlz = E[8] * D.x + E[9] * D.y + E[10] * D.z, dof = E[12] * D.x + E[13] * D.y + E[14] * D.z;
+        var plx = E[0] * Q.x + E[1] * Q.y + E[2] * Q.z, ply = E[4] * Q.x + E[5] * Q.y + E[6] * Q.z, plz = E[8] * Q.x + E[9] * Q.y + E[10] * Q.z, pof = E[12] * Q.x + E[13] * Q.y + E[14] * Q.z; }
       for (var j = 0; j < th; j++) {
         var row = ((p.ry + j) * A + p.rx) * 4;
         for (var i = 0; i < tw; i++, k += 3) {
@@ -394,7 +445,15 @@
           var d = Math.sqrt(d2), a = d <= inner ? 1 : 1 - (d - inner) / span;
           a = a * a * (3 - 2 * a);
           var o = row + i * 4;
-          alb[o] += (rgb[0] - alb[o]) * a; alb[o + 1] += (rgb[1] - alb[o + 1]) * a; alb[o + 2] += (rgb[2] - alb[o + 2]) * a;
+          if (pat) { // pattern coordinates are world-space, so the pattern runs unbroken across body parts
+            var sC = tp[k] * dlx + tp[k + 1] * dly + tp[k + 2] * dlz + dof, tC = tp[k] * plx + tp[k + 1] * ply + tp[k + 2] * plz + pof, m = 0, v;
+            if (pat.type === 'stripe') m = Math.floor(tC / sc) & 1;
+            else if (pat.type === 'check') m = (Math.floor(sC / sc) + Math.floor(tC / sc)) & 1;
+            else if (pat.type === 'wood') { v = tC / sc * 2.2 + Math.sin(sC * 11) * 0.22 + Math.sin(sC * 3.1 + tC * 40) * 0.1; var fv = v - Math.floor(v), hv = Math.sin(Math.floor(v) * 127.1) * 43758.5; m = fv < 0.16 ? 1 : (hv - Math.floor(hv)) * 0.4; }
+            else { v = tC / 0.0055; m = (Math.floor(v) & 1) ? 0.4 : 0; var cv = sC / 0.034; if (cv - Math.floor(cv) < 0.09) m = 0.75; }
+            cr = rgb[0] + (c2[0] - rgb[0]) * m; cg = rgb[1] + (c2[1] - rgb[1]) * m; cb = rgb[2] + (c2[2] - rgb[2]) * m;
+          }
+          alb[o] += (cr - alb[o]) * a; alb[o + 1] += (cg - alb[o + 1]) * a; alb[o + 2] += (cb - alb[o + 2]) * a;
           orm[o + 1] += (rb - orm[o + 1]) * a; orm[o + 2] += (mb - orm[o + 2]) * a;
           any = true;
         }
@@ -498,11 +557,23 @@
       var wh = [248, 244, 236], br = [128, 86, 58];
       var n = vnoise(p[0] * 7 + 3.1, p[1] * 7, p[2] * 7 + 1.7);
       var w = (n - 0.52) * 14;
-      if (name === 'muzzle' || name.indexOf('jowl') === 0) w = -2;
+      if (name === 'muzzle' || name.indexOf('jowl') === 0 || name === 'jaw') w = -2;
       if (name === 'head') w = p[0] > S.headR * 0.12 ? 2 : -2;
       if (name === 'earR') w = 2;
       if (name.slice(-1) === 'D') w = -2;
       var c = mix3(wh, br, w), k = vnoise(p[0] * 80, p[1] * 80, p[2] * 80) * 10 - 5; return [c[0] + k, c[1] + k, c[2] + k];
+    },
+    dachs: function (p, h, name, S) {
+      var br = [112, 62, 36], tan = [206, 150, 96];
+      var w = (0.22 - h) * 10; if (name === 'muzzle') w = p[1] < S.headY - S.headR * 0.25 ? 2 : -1; if (name.slice(-1) === 'D') w = 2; if (name === 'chest') w = Math.max(w, (p[2] - S.len * 0.36) * 30);
+      var c = mix3(br, tan, w), n = vnoise(p[0] * 90, p[1] * 90, p[2] * 90) * 10 - 5; return [c[0] + n, c[1] + n, c[2] + n];
+    },
+    husky: function (p, h, name, S) {
+      var gr = [96, 102, 112], wh = [250, 250, 246];
+      var w = (0.42 - h) * 9 + vnoise(p[0] * 20, p[1] * 20, p[2] * 20) * 0.8;
+      if (name === 'muzzle') w = 2; if (name === 'head') w = Math.max((S.headR * 0.5 - Math.abs(p[0])) * 30 - (p[1] - S.headY) * 40 - 1.2, (S.headY - p[1]) * 30); if (name.slice(-1) === 'D' || name === 'ruff') w = 2; if (name.indexOf('ear') === 0) w = -1;
+      if (name.indexOf('tail') === 0) w = p[1] < 0.1 ? 1.5 : -1;
+      var c = mix3(gr, wh, w), n = vnoise(p[0] * 90, p[1] * 90, p[2] * 90) * 12 - 6; return [c[0] + n, c[1] + n, c[2] + n];
     },
     poodle: function (p, h, name, S) {
       var a = [226, 180, 142], b = [196, 146, 108];

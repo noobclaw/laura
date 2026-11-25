@@ -23,6 +23,7 @@ window.SG_RULES = {
  ],
  "cat": {
   "walkSpeed": 2.2,
+  "crouchSpeed": 0.9,
   "jumpHeight": 1.1,
   "jumpHeightShortLeg": 0.8,
   "clingSpeed": 1,
@@ -30,7 +31,11 @@ window.SG_RULES = {
   "meowRange": 12,
   "maxDecoys": 2,
   "decoyCooldownSec": 30,
-  "bumpRadius": 0.28
+  "bumpRadius": 0.28,
+  "forcedMeowSec": 45,
+  "forcedMeowMinSec": 5,
+  "embedRatio": 0.6,
+  "embedSec": 3
  },
  "dog": {
   "speed": 3,
@@ -47,7 +52,9 @@ window.SG_RULES = {
    "shiba": 0.62,
    "corgi": 0.4,
    "bull": 0.5,
-   "poodle": 0.86
+   "poodle": 0.86,
+   "dachs": 0.36,
+   "husky": 0.72
   }
  },
  "overlooked": {

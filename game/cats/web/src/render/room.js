@@ -218,7 +218,8 @@
     var sky = new THREE.Mesh(new THREE.SphereGeometry(60, 24, 12), new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false,
       vertexShader: 'varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-      fragmentShader: 'varying vec3 vP; void main(){ float h=normalize(vP).y; vec3 c=mix(vec3(1.25,1.12,0.92),vec3(0.42,0.68,1.05),smoothstep(-0.02,0.55,h)); c+=vec3(1.2,0.9,0.5)*pow(max(0.,dot(normalize(vP),normalize(vec3(-0.3,0.55,0.8)))),24.); gl_FragColor=vec4(c*1.5,1.); }'
+      uniforms: { uNight: { value: 0 } },
+      fragmentShader: 'uniform float uNight; varying vec3 vP; float hh(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); } void main(){ vec3 d=normalize(vP); float h=d.y; vec3 c=mix(vec3(1.25,1.12,0.92),vec3(0.42,0.68,1.05),smoothstep(-0.02,0.55,h)); c+=vec3(1.2,0.9,0.5)*pow(max(0.,dot(d,normalize(vec3(-0.3,0.55,0.8)))),24.); vec3 n=mix(vec3(0.05,0.07,0.16),vec3(0.01,0.015,0.05),smoothstep(0.,0.6,h)); vec2 g=floor(d.xz/max(0.2,d.y+0.3)*60.); n+=vec3(1.0,0.95,0.8)*step(0.992,hh(g))*step(0.05,h)*0.9; n+=vec3(0.9,0.95,1.0)*smoothstep(0.994,0.999,dot(d,normalize(vec3(-0.3,0.55,0.8))))*3.0; gl_FragColor=vec4(mix(c*1.5,n,uNight),1.); }'
     }));
     room.add(sky);
     // laundry pole with swaying washing
@@ -802,8 +803,19 @@
       }
     }
 
+    /* night mode: house lights off, moonlight through the garden side, TV and fish tank still glow */
+    var dayL = [[sun, sun.intensity, sun.color.getHex()], [hemi, hemi.intensity, hemi.color.getHex()], [lampL, lampL.intensity], [bounce, bounce.intensity], [kitL, kitL.intensity], [genL, genL.intensity]].concat(K.lights.map(function (l) { return [l, l.intensity]; }));
+    var glowMats = Object.keys(mats).map(function (k) { return mats[k]; }).filter(function (m) { return m.emissiveIntensity > 0 && (m.emissive.r + m.emissive.g + m.emissive.b) > 0; }).map(function (m) { return [m, m.emissiveIntensity]; });
+    var fxDay = fx.children.filter(function (o) { return o.isSprite || o.material === shaftM || o === dust || (o.geometry && o.material && o.material.uniforms && o.material === shaftM); });
+    function setNight(on) {
+      dayL.forEach(function (d, i) { d[0].intensity = on ? (i === 0 ? 0.5 : i === 1 ? 0.2 : i === 3 ? 0.15 : 0) : d[1]; if (d[2] != null) d[0].color.setHex(on ? (i === 0 ? 0x93aaff : 0x7f8fc8) : d[2]); });
+      glowMats.forEach(function (g) { g[0].emissiveIntensity = on ? g[1] * 0.06 : g[1]; });
+      fx.children.forEach(function (o) { if (o.isSprite || o === dust || o.material === shaftM) o.visible = !on; });
+      sky.material.uniforms.uNight.value = on ? 1 : 0; ret.night = on;
+    }
+
     var types = Object.keys(inv), total = types.reduce(function (a, k) { return a + inv[k]; }, 0);
-    return {
+    var ret = {
       group: room, batched: batched, dyn: dyn, fx: fx, platforms: platforms, bounds: bounds, knock: knock, inventory: inv,
       stats: { types: types.length, items: total, staticMeshes: statCount, batches: groups.size, dynMeshes: dynMeshes, tris: Math.round(tris), moving: updaters.length, knockables: knock.length },
       sun: sun, steam: steamM, kettle: kettle, vac: vacState, vacGroup: vac,
@@ -812,5 +824,7 @@
       /* places bots know about: [x, z, yaw, pose, surfaceY] */
       spots: [[-W + 0.5, -1.15, Math.PI / 2, 'loaf', 0.36], [KX + 0.0, KZ + 1.12, Math.PI, 'curl', 0.12], [2.9, 0.4, -2.2, 'loaf', 0.012], [-1.35, -D + 0.32, 0, 'sit', 1.35], [W - 0.7, 1.9, -1.9, 'sit', 1.05], [-W + 0.55, 2.15, 1.2, 'loaf', 0.78], [1.3, EN + 0.75, 0.4, 'curl', 0.28], [-2.3, 1.2, 2.0, 'side', 0.03], [-3.7, -D - 0.28, 0, 'hind', 0.12], [W - 0.5, -2.3, -1.2, 'arch', 0.0], [0.3, 2.0, 2.6, 'belly', 0]].concat(K.spots || [])
     };
+    ret.setNight = setNight; ret.sunLight = sun;
+    return ret;
   };
 })();

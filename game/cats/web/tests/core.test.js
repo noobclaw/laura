@@ -65,4 +65,37 @@ t('disconnect: cat counts as out; dog balls stop counting', () => {
   assert.equal(s.phase, 'seek'); const r = run(s, { type: 'disconnect', id: 'd1' }); assert.equal(r.state.winner, 'cats');
 });
 t('numbers come from the json (changing it changes behaviour)', () => { const R2 = JSON.parse(JSON.stringify(R)); R2.dog.startBalls = 2; R2.round.prepSec = 7; let s = core.createState([{ id: 'c', team: 'cat' }, { id: 'd', team: 'dog' }], R2); s = core.apply(s, { type: 'start' }, R2).state; assert.equal(s.left, 7); assert.equal(s.players.d.balls, 2); });
+t('vote to skip: bots always agree, every connected human must vote', () => {
+  let s = core.createState([{ id: 'a', team: 'cat' }, { id: 'b', team: 'cat' }, { id: 'bot', team: 'dog', bot: true }], R); s = run(s, { type: 'start' }).state;
+  let r = run(s, { type: 'vote', id: 'a' }); assert.equal(r.state.phase, 'prep'); assert.deepEqual(r.events[0], { type: 'votes', have: 1, need: 2 });
+  r = run(r.state, { type: 'vote', id: 'b' }); assert.equal(r.state.phase, 'seek'); assert.deepEqual(types(run(r.state, { type: 'vote', id: 'a' })), ['rejected']);
+});
+t('unlimited balls: misses cost nothing and the round cannot end on balls', () => {
+  const R2 = JSON.parse(JSON.stringify(R)); R2.dog.unlimited = true; let s = core.createState([{ id: 'c', team: 'cat' }, { id: 'd', team: 'dog' }], R2); s = core.apply(s, { type: 'start' }, R2).state; s = core.apply(s, { type: 'skip' }, R2).state;
+  for (let i = 0; i < 12; i++) s = core.apply(s, { type: 'shoot', dog: 'd', now: i * 2, hit: null }, R2).state; assert.equal(s.phase, 'seek'); assert.equal(s.players.d.balls, R.dog.startBalls);
+});
+t('infection: a found cat joins the dogs with fresh balls; last cat found ends it', () => {
+  let s = core.createState([{ id: 'c0', team: 'cat' }, { id: 'c1', team: 'cat' }, { id: 'c2', team: 'cat' }, { id: 'd0', team: 'dog' }], R, null, 'infection'); s = run(s, { type: 'start' }).state; s = toSeek(s);
+  let r = run(s, { type: 'shoot', dog: 'd0', now: 1, hit: 'c0' }); assert.ok(types(r).includes('infected')); assert.equal(r.state.players.c0.team, 'dog'); assert.equal(r.state.players.c0.balls, R.dog.startBalls); assert.equal(r.state.phase, 'seek');
+  r = run(r.state, { type: 'shoot', dog: 'c0', now: 5, hit: 'c1' }); assert.equal(r.state.players.c1.team, 'dog'); assert.equal(core.catsAlive(r.state), 1);
+  r = run(r.state, { type: 'shoot', dog: 'c1', now: 9, hit: 'c2' }); assert.equal(r.state.phase, 'reveal'); assert.equal(r.state.winner, 'dogs'); assert.equal(r.state.lastCat, 'c2');
+});
+t('infection: time up with a cat left -> cats win', () => {
+  let s = core.createState([{ id: 'c0', team: 'cat' }, { id: 'c1', team: 'cat' }, { id: 'd0', team: 'dog' }], R, null, 'infection'); s = toSeek(run(s, { type: 'start' }).state);
+  s = run(s, { type: 'shoot', dog: 'd0', now: 1, hit: 'c0' }).state; const r = run(s, { type: 'tick', dt: R.round.seekSec }); assert.equal(r.state.winner, 'cats');
+});
+t('double: everyone hides, then everyone hunts; first to find all the others wins', () => {
+  let s = core.createState([{ id: 'a' }, { id: 'b' }, { id: 'c' }], R, null, 'double'); assert.equal(core.list(s, 'dog').length, 0); s = run(s, { type: 'start' }).state;
+  assert.deepEqual(types(run(s, { type: 'shoot', dog: 'a', now: 0, hit: 'b' })), ['rejected']); s = toSeek(s);
+  assert.equal(core.hunters(s).length, 3); assert.equal(s.players.a.balls, R.dog.startBalls);
+  let r = run(s, { type: 'shoot', dog: 'a', now: 1, hit: 'a' }); assert.ok(types(r).includes('miss')); // own body does not count
+  r = run(r.state, { type: 'shoot', dog: 'a', now: 3, hit: 'b' }); assert.equal(r.state.phase, 'seek'); assert.deepEqual(r.state.players.a.found, ['b']);
+  let r2 = run(r.state, { type: 'shoot', dog: 'a', now: 5, hit: 'b' }); assert.ok(types(r2).includes('miss')); // already found by this hunter
+  r2 = run(r.state, { type: 'shoot', dog: 'b', now: 5, hit: 'a' }); assert.deepEqual(r2.state.players.b.found, ['a']); // a found body can still be found by others
+  r = run(r2.state, { type: 'shoot', dog: 'a', now: 7, hit: 'c' }); assert.equal(r.state.phase, 'reveal'); assert.equal(r.state.winner, 'a'); assert.equal(r.state.reason, 'double-all');
+});
+t('double: time up -> most finds wins', () => {
+  let s = core.createState([{ id: 'a' }, { id: 'b' }, { id: 'c' }], R, null, 'double'); s = toSeek(run(s, { type: 'start' }).state);
+  s = run(s, { type: 'shoot', dog: 'b', now: 1, hit: 'c' }).state; const r = run(s, { type: 'tick', dt: R.round.seekSec }); assert.equal(r.state.winner, 'b'); assert.equal(r.state.reason, 'time');
+});
 console.log(n + ' tests passed');

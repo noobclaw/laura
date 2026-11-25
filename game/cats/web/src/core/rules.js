@@ -11,25 +11,31 @@
     return rules.dogCount[rules.dogCount.length - 1].dogs;
   }
   /* players: [{id, team?}] — teams already set are kept (single-player picks a side); the rest are drawn with rnd */
-  function createState(players, rules, rnd) {
-    rnd = rnd || Math.random;
-    var st = { phase: 'lobby', left: 0, elapsed: 0, seekElapsed: 0, winner: null, reason: null, players: {}, order: [], boardAt: 0 };
+  /* modes: 'basic' (teams fixed), 'infection' (a found cat joins the dogs; the last cat standing is the best hider),
+     'double' (everyone hides and paints, then everyone hunts everyone else; first to find all the others wins) */
+  function createState(players, rules, rnd, mode) {
+    rnd = rnd || Math.random; mode = mode || 'basic';
+    var st = { mode: mode, phase: 'lobby', left: 0, elapsed: 0, seekElapsed: 0, winner: null, reason: null, players: {}, order: [], boardAt: 0, lastCat: null, votes: {} };
+    if (mode === 'double') players = players.map(function (p) { return { id: p.id, team: 'cat', bot: p.bot }; });
     var free = players.filter(function (p) { return !p.team; }), dogs = dogCountFor(players.length, rules) - players.filter(function (p) { return p.team === 'dog'; }).length;
     free = free.slice();
     for (var i = free.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)), t = free[i]; free[i] = free[j]; free[j] = t; }
     players.forEach(function (p) {
       var team = p.team || (free.indexOf(p) < dogs ? 'dog' : 'cat');
-      st.players[p.id] = { id: p.id, team: team, out: false, connected: true, balls: team === 'dog' ? rules.dog.startBalls : 0, lastShot: -1e9, score: 0, hits: 0, misses: 0, decoys: 0 };
+      st.players[p.id] = { id: p.id, team: team, bot: !!p.bot, out: false, connected: true, balls: team === 'dog' ? rules.dog.startBalls : 0, lastShot: -1e9, score: 0, hits: 0, misses: 0, decoys: 0, found: [], hunter: team === 'dog' };
       st.order.push(p.id);
     });
     return st;
   }
   function list(st, team) { return st.order.map(function (id) { return st.players[id]; }).filter(function (p) { return p.team === team; }); }
   function catsAlive(st) { return list(st, 'cat').filter(function (p) { return !p.out && p.connected; }).length; }
-  function dogsWithBalls(st) { return list(st, 'dog').filter(function (p) { return p.connected && p.balls > 0; }).length; }
+  function hunters(st) { return st.order.map(function (id) { return st.players[id]; }).filter(function (p) { return p.hunter && p.connected; }); }
+  function dogsWithBalls(st) { return hunters(st).filter(function (p) { return p.balls > 0; }).length; }
+  function doubleLeader(st) { var best = null; st.order.forEach(function (id) { var p = st.players[id]; if (!best || p.found.length > best.found.length) best = p; }); return best; }
 
   function toPhase(st, phase, rules, ev) {
-    st.phase = phase; st.elapsed = 0;
+    st.phase = phase; st.elapsed = 0; st.votes = {};
+    if (phase === 'seek' && st.mode === 'double') st.order.forEach(function (id) { var p = st.players[id]; p.hunter = true; p.balls = rules.dog.startBalls; });
     st.left = phase === 'prep' ? rules.round.prepSec : phase === 'seek' ? rules.round.seekSec : phase === 'reveal' ? rules.round.revealSec : 0;
     ev.push({ type: 'phase', phase: phase, left: st.left });
   }
@@ -47,6 +53,13 @@
         if (st.order.length < rules.round.minPlayers) { ev.push({ type: 'rejected', why: 'need-players' }); break; }
         st.winner = null; st.reason = null; st.seekElapsed = 0; st.boardAt = 0;
         toPhase(st, 'prep', rules, ev); break;
+      case 'vote': // every connected human has to vote; bots always agree
+        if (st.phase !== 'prep' && st.phase !== 'reveal') { ev.push({ type: 'rejected', why: 'cannot-skip' }); break; }
+        st.votes[action.id] = true;
+        var need = st.order.filter(function (id) { return !st.players[id].bot && st.players[id].connected; }), have = need.filter(function (id) { return st.votes[id]; });
+        ev.push({ type: 'votes', have: have.length, need: need.length });
+        if (have.length >= need.length) { if (st.phase === 'prep') toPhase(st, 'seek', rules, ev); else toPhase(st, 'lobby', rules, ev); }
+        break;
       case 'skip': // unanimous vote to skip prep or reveal
         if (st.phase === 'prep') toPhase(st, 'seek', rules, ev);
         else if (st.phase === 'reveal') toPhase(st, 'lobby', rules, ev);
@@ -65,34 +78,44 @@
         if (st.left <= 0) {
           st.left = 0;
           if (st.phase === 'prep') toPhase(st, 'seek', rules, ev);
-          else if (st.phase === 'seek') end(st, catsAlive(st) > 0 ? 'cats' : 'dogs', 'time', rules, ev);
+          else if (st.phase === 'seek') { if (st.mode === 'double') { var ld = doubleLeader(st); st.lastCat = ld.id; end(st, ld.id, 'time', rules, ev); } else end(st, catsAlive(st) > 0 ? 'cats' : 'dogs', 'time', rules, ev); }
           else if (st.phase === 'reveal') toPhase(st, 'lobby', rules, ev);
         }
         break;
       case 'shoot': // { dog, now, hit: catId|null, fleeing: bool (target speed above dog.fleeingSpeed), decoy: bool }
         p = st.players[action.dog];
-        if (!p || p.team !== 'dog' || st.phase !== 'seek') { ev.push({ type: 'rejected', why: 'cannot-shoot' }); break; }
-        if (p.balls <= 0) { ev.push({ type: 'rejected', why: 'no-balls' }); break; }
+        if (!p || !p.hunter || st.phase !== 'seek') { ev.push({ type: 'rejected', why: 'cannot-shoot' }); break; }
+        if (p.balls <= 0 && !rules.dog.unlimited) { ev.push({ type: 'rejected', why: 'no-balls' }); break; }
         if (action.now - p.lastShot < rules.dog.shotIntervalSec - 1e-9) { ev.push({ type: 'rejected', why: 'cooldown' }); break; }
         p.lastShot = action.now;
         c = action.hit != null ? st.players[action.hit] : null;
         ev.push({ type: 'shot', dog: p.id });
-        if (c && c.team === 'cat' && !c.out) {
-          c.out = true; p.balls += rules.dog.hitDelta; p.hits++;
+        var valid = c && c.id !== p.id && (st.mode === 'double' ? p.found.indexOf(c.id) < 0 : (c.team === 'cat' && !c.out));
+        if (valid) {
+          if (!rules.dog.unlimited) p.balls += rules.dog.hitDelta; p.hits++;
           ev.push({ type: 'hit', dog: p.id, cat: c.id, decoy: !!action.decoy, balls: p.balls });
-          ev.push({ type: 'out', cat: c.id });
-          if (catsAlive(st) === 0) end(st, 'dogs', 'all-found', rules, ev);
+          if (st.mode === 'double') {
+            p.found.push(c.id); c.out = true; ev.push({ type: 'out', cat: c.id, by: p.id });
+            if (p.found.length >= st.order.length - 1) { st.lastCat = p.id; end(st, p.id, 'double-all', rules, ev); }
+          } else if (st.mode === 'infection') {
+            st.lastCat = c.id; c.out = true; ev.push({ type: 'out', cat: c.id });
+            if (catsAlive(st) === 0) end(st, 'dogs', 'all-found', rules, ev);
+            else { c.team = 'dog'; c.hunter = true; c.balls = rules.dog.startBalls; c.lastShot = action.now; ev.push({ type: 'infected', cat: c.id }); }
+          } else {
+            c.out = true; ev.push({ type: 'out', cat: c.id });
+            if (catsAlive(st) === 0) end(st, 'dogs', 'all-found', rules, ev);
+          }
         } else {
           p.misses++;
-          if (!action.fleeing) p.balls += rules.dog.missDelta; // a shot at a running cat that misses costs nothing
+          if (!action.fleeing && !rules.dog.unlimited) p.balls += rules.dog.missDelta; // a shot at a running cat that misses costs nothing
           ev.push({ type: 'miss', dog: p.id, balls: p.balls, free: !!action.fleeing });
-          if (p.balls === rules.dog.lowBallWarn) ev.push({ type: 'lowBalls', dog: p.id });
-          if (dogsWithBalls(st) === 0) end(st, 'cats', 'no-balls', rules, ev);
+          if (p.balls === rules.dog.lowBallWarn && !rules.dog.unlimited) ev.push({ type: 'lowBalls', dog: p.id });
+          if (!rules.dog.unlimited && dogsWithBalls(st) === 0) { if (st.mode === 'double') { var l2 = doubleLeader(st); st.lastCat = l2.id; end(st, l2.id, 'no-balls', rules, ev); } else end(st, 'cats', 'no-balls', rules, ev); }
         }
         break;
       case 'overlook': // sampled every rules.overlooked.checkEverySec: { cat, area (0..1 of the dog's screen), speed }
         c = st.players[action.cat];
-        if (!c || c.out || st.phase !== 'seek') break;
+        if (!c || (c.out && st.mode !== 'double') || st.phase !== 'seek') break;
         if (action.speed < rules.cat.stillSpeed && action.area >= rules.overlooked.minArea) {
           var pts = Math.round(rules.overlooked.coef * Math.sqrt(action.area * 100));
           c.score += pts; ev.push({ type: 'score', cat: c.id, add: pts, score: c.score });
@@ -112,5 +135,5 @@
     return { state: st, events: ev };
   }
 
-  return { apply: apply, createState: createState, dogCountFor: dogCountFor, catsAlive: catsAlive, dogsWithBalls: dogsWithBalls, list: list };
+  return { apply: apply, createState: createState, dogCountFor: dogCountFor, catsAlive: catsAlive, dogsWithBalls: dogsWithBalls, list: list, hunters: hunters };
 });
