@@ -934,7 +934,9 @@ namespace DontEatSushi
         void EnsureStyles()
         {
             if (sLabel != null) return;
-            font = Font.CreateDynamicFontFromOSFont(new[] { "Microsoft JhengHei", "Microsoft YaHei", "PingFang TC", "PingFang SC", "Heiti TC", "Hiragino Sans", "Noto Sans CJK TC", "Arial" }, 18);
+            // 內建一份開放授權的中文字型，不依賴各台電腦裝了什麼字
+            font = Resources.Load<Font>("Font/NotoSansTC-Regular");
+            if (font == null) font = Font.CreateDynamicFontFromOSFont(new[] { "Microsoft JhengHei", "Microsoft YaHei", "PingFang TC", "PingFang SC", "Heiti TC", "Hiragino Sans", "Noto Sans CJK TC", "Arial" }, 18);
             sLabel = new GUIStyle(GUI.skin.label) { font = font, fontSize = 18, richText = true, wordWrap = true };
             sLabel.normal.textColor = Color.white;
             sSmall = new GUIStyle(sLabel) { fontSize = 14 };
@@ -953,6 +955,8 @@ namespace DontEatSushi
         {
             if (root == null) return;
             EnsureStyles();
+            // 離開主選單後，把輸入框的鍵盤焦點清掉，免得它的文字殘留在別的地方
+            if (phase != Phase.Menu && GUIUtility.keyboardControl != 0) GUIUtility.keyboardControl = 0;
             float sc = Screen.height / 720f;
             GUI.matrix = Matrix4x4.Scale(new Vector3(sc, sc, 1f));
             float W = Screen.width / sc, H = 720f;
