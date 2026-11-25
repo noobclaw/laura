@@ -93,12 +93,13 @@
     var kb = function (k, label) { return '<div class="cb">' + key(k) + '<span>' + label + '</span></div>'; }, s = '';
     if (me.team === 'cat' && !G.fly) {
       var n = G.decoys.filter(function (d) { return d.c.root.visible; }).length, mx = SG.RULES.cat.maxDecoys;
-      s += '<div class="slots">' + key('Q'); for (var i = 0; i < mx; i++) s += '<i class="dia' + (i < n ? ' used' : (G.decoyCd > 0 && i === n ? ' cd' : '')) + '"></i>'; s += '<span class="key x">X</span></div><div class="ctx">';
+      s += '<div class="slots">' + key('Q'); G.decoySlots.forEach(function (sl, i) { s += '<i class="dia' + (sl.e ? ' used' : sl.cd > 0 ? ' cd' : '') + '" data-slot="' + i + '" title="' + (sl.cd > 0 ? Math.ceil(sl.cd) + ' s' : '') + '">' + (!sl.e && sl.cd > 0 ? '<u>' + Math.ceil(sl.cd) + '</u>' : '') + '</i>'; }); s += '<span class="key x">X</span></div><div class="ctx">';
       if (G.paint.on) s += kb('空白', t('eyedrop')) + kb('右鍵拖', t('brush')) + kb('V', t('shade')) + kb('中鍵拖', t('camrot')) + kb('滾輪', t('zoom'));
       else if (me.cling) s += kb('Shift', t('rel')) + kb('Ctrl', t('down')) + kb('空白', t('up'));
       else s += kb('空白', '跳／跳向牆面黏住') + kb('Shift', t('k_run')) + kb('左鍵+A/D', '原地轉身');
       s += '</div>';
-    } else if (G.fly) s += '<div class="ctx">' + kb('4', t('watch')) + kb('5', t('free')) + '</div>';
+    } else if (G.fly && G.fly.hide) s += '<div class="ctx">' + kb('4', G.fly.move ? '自由移動：開（WASD 飛）' : '自由移動') + kb('5', '回到身體') + '</div>';
+    else if (G.fly) s += '<div class="ctx">' + kb('4', t('watch')) + kb('5', t('free')) + '</div>';
     c.innerHTML = s;
   }
   /* ------------------------------------------------------------------ radial pose wheel: 8 + cancel, mouse selected; second page with the rest */

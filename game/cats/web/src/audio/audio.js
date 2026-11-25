@@ -27,8 +27,10 @@
     miss: function (c, o, t) { pluck(c, o, t, 392, 0.3, 0.35); pluck(c, o, t + 0.13, 293.66, 0.3, 0.5); },
     dryfire: function (c, o, t) { nz(c, 'bandpass', 2400, 6, t, 0.03, o, 0.25); },
     brush: function (c, o, t, p) { var f = 2600 - Math.min(1, ((p && p.size) || 0.06) / 0.2) * 1800; nz(c, 'bandpass', f, 1.2, t, 0.09, o, 0.13, f * 0.7); },
-    pick: function (c, o, t) { osc(c, 'sine', 1500, 2100, t, 0.06, o, 0.3); osc(c, 'sine', 2800, 2800, t + 0.05, 0.08, o, 0.14); },
-    fill: function (c, o, t) { nz(c, 'bandpass', 500, 1.5, t, 0.4, o, 0.25, 4200); osc(c, 'sine', 400, 1300, t, 0.35, o, 0.14); },
+    pick: function (c, o, t) { osc(c, 'sine', 1900, 620, t, 0.075, o, 0.32, 0.002); osc(c, 'sine', 900, 1500, t + 0.07, 0.07, o, 0.16, 0.004); nz(c, 'bandpass', 3200, 3, t, 0.02, o, 0.1); }, // plip: a drop sucked up
+    squelch: function (c, o, t, p) { var k = 1 - Math.min(1, ((p && p.size) || 0.07) / 0.2) * 0.5; nz(c, 'lowpass', 900 * k, 2.5, t, 0.11, o, 0.3, 240 * k); osc(c, 'sine', 300 * k, 120 * k, t, 0.09, o, 0.2, 0.004); nz(c, 'bandpass', 2600, 2, t + 0.03, 0.05, o, 0.08); }, // the brush touching down wet
+    brushMove: function (c, o, t, p) { var f = 2300 - Math.min(1, ((p && p.size) || 0.07) / 0.2) * 1400; nz(c, 'bandpass', f, 0.9, t, 0.3, o, 0.12, f * 1.25); nz(c, 'lowpass', 500, 0.7, t, 0.3, o, 0.05); }, // (offline check only: what the continuous brush loop sounds like for 0.3 s)
+    fill: function (c, o, t, p) { var k = p && p.part ? 0.6 : 1; nz(c, 'lowpass', 2600, 0.8, t, 0.07, o, 0.4 * k, 500); nz(c, 'bandpass', 700, 1.3, t + 0.03, 0.42 * k, o, 0.26 * k, 3600); osc(c, 'sine', 240, 90, t, 0.12, o, 0.28 * k, 0.004); [0.1, 0.17, 0.26].forEach(function (d, i) { osc(c, 'sine', 1300 + i * 420, 700 + i * 200, t + d, 0.05, o, 0.07 * k, 0.003); }); }, // splash, then a few drips
     undo: function (c, o, t) { osc(c, 'triangle', 640, 420, t, 0.1, o, 0.25); },
     pose: function (c, o, t) { osc(c, 'sine', 190, 110, t, 0.1, o, 0.35); nz(c, 'lowpass', 900, 0.7, t, 0.06, o, 0.15); },
     jump: function (c, o, t) { nz(c, 'bandpass', 700, 1, t, 0.14, o, 0.16, 2400); },
@@ -64,7 +66,13 @@
       bus.on('hit', function () { A.play('meowHit'); });
       bus.on('fidget', function (d) { if (d.sneeze && SG.game.me && SG.game.me.team === 'dog' && d.d < 6) A.play('sneeze', { vol: 1 - d.d / 7 }); });
       var hb = 0; bus.on('danger', function (d) { A.danger = d.v; }); setInterval(function () { if (!A.ctx || !(A.danger > 0.25) || !SG.game.state || SG.game.state.phase !== 'seek') return; var n = performance.now(); if (n - hb > 1150 - 760 * A.danger) { hb = n; A.play('heart', { v: A.danger }); } }, 60);
-      bus.on('stroke', function (d) { var n = performance.now(); if (n - (A.lastBrush || 0) > 70) { A.lastBrush = n; A.play('brush', d); } });
+      // the brush is one continuous wet noise whose loudness and brightness follow the stroke speed and the brush size; it fades as soon as the hand stops
+      bus.on('stroke', function (d) { if (!A.ctx || A.ctx.state !== 'running') return; A.buses(); var c = A.ctx, t = c.currentTime, L = A.bl;
+        if (!L) { L = A.bl = { n: noise(c), f: c.createBiquadFilter(), g: c.createGain(), lo: c.createBiquadFilter(), g2: c.createGain() }; L.f.type = 'bandpass'; L.f.Q.value = 0.9; L.lo.type = 'lowpass'; L.lo.frequency.value = 520; L.g.gain.value = 0; L.g2.gain.value = 0; L.n.connect(L.f); L.f.connect(L.g); L.g.connect(A.sfx); L.n.connect(L.lo); L.lo.connect(L.g2); L.g2.connect(A.sfx); L.n.start(); }
+        var sp = Math.min(1, (d.speed || 0) / 2.2), sz = Math.min(1, (d.size || 0.07) / 0.2), f = (2300 - sz * 1400) * (0.75 + sp * 0.6), v = sp > 0.01 ? 0.03 + sp * 0.12 : 0;
+        [L.g.gain, L.g2.gain, L.f.frequency].forEach(function (pm) { pm.cancelScheduledValues(t); });
+        L.f.frequency.setTargetAtTime(f, t, 0.04); L.g.gain.setTargetAtTime(v, t, 0.03); L.g2.gain.setTargetAtTime(v * (0.25 + sz * 0.5), t, 0.03); L.g.gain.setTargetAtTime(0, t + 0.07, 0.05); L.g2.gain.setTargetAtTime(0, t + 0.07, 0.05); });
+      bus.on('touch', function (d) { A.play('squelch', d); });
       bus.on('phase', function (d) { if (d.phase === 'seek') { A.play('seek'); if (SG.game.side === 'cat') setTimeout(function () { A.play('bark'); }, 700); } else if (d.phase === 'prep') A.play('phase'); });
       bus.on('end', function (d) { var won = (SG.game.side === 'cat') === (d.winner === 'cats'); setTimeout(function () { A.play(won ? 'win' : 'lose'); }, 400); });
       document.addEventListener('click', function (e) { A.unlock(); if (e.target.closest && e.target.closest('button')) A.play('click'); }, true);

@@ -13,7 +13,7 @@
     mode: 'boot', side: null, state: null, ents: [], me: null, time: 0, roundT: 0, simT: 0,
     cam: { yaw: 0.6, pitch: 0.32, dist: 2.6, free: null }, keys: {}, mouse: { x: 0, y: 0, down: [false, false, false] },
     paint: { on: false, rgb: [47, 75, 124], rough: 0.8, metal: 0, size: RULES.paint.brushDefaultCm / 100, hard: true, tool: 'brush', undo: [], last: null },
-    shots: [], marks: [], confetti: [], decoys: [], decoyCd: 0, guide: 0, hitstop: 0, labels: []
+    shots: [], marks: [], confetti: [], decoys: [], decoyCd: 0, decoySlots: [{ cd: 0, e: null }, { cd: 0, e: null }], guide: 0, hitstop: 0, labels: []
   });
   G.opts = { sens: 1, invertY: false, fov: 105, res: 1, shadows: true, post: true, lang: 'zh', sfx: 1, amb: 0.3, music: 0.125, searchMusic: false, fpsCap: 0, showFps: false, quality: Q.get('q') === 'low' ? 'low' : 'high' };
   var V = function (x, y, z) { return new THREE.Vector3(x, y, z); };
@@ -42,6 +42,7 @@
       stage(0.15, '蓋房子…', function () { room = SG.room = SG.buildRoom(scene, { low: low }); T.build = Math.round(performance.now() - T.t0); }),
       stage(0.7, '擺家具、開燈…', function () {
     resize(); window.addEventListener('resize', resize);
+        G.fx = new SG.PaintFX(post.renderer, scene);
         bindInput();
         if (SG.ui) SG.ui.init(); if (SG.ui2) SG.ui2.init();
         if (SG.audio) SG.audio.init();
@@ -173,7 +174,7 @@
   /* the lobby: everyone walks about as a cat; whoever stands on the mat when the countdown ends enters the hunter lottery */
   var lobbyMat = null;
   G.enterLobby = function () {
-    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.third = false; G.paint.on = false; G.paint.undo = []; G.decoyCd = 0; G.viewLock = false; G.side = 'cat'; G.guide = 9;
+    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.third = false; G.paint.on = false; G.paint.undo = []; G.decoyCd = 0; G.decoySlots = [{ cd: 0, e: null }, { cd: 0, e: null }]; G.viewLock = false; G.side = 'cat'; G.guide = 9;
     var WS = SG.WS, n = RULES.solo.botCatsWhenCat + RULES.solo.botDogsWhenCat, players = [{ id: 'you', team: 'cat' }], i;
     G.me = spawn('you', specOf('cat'), 'cat', { x: 0.2 * WS, z: 3.25 * WS, yaw: Math.PI / 2, name: '你', size: G.pick.cat.size || 1 });
     for (i = 0; i < n; i++) { var k = CAT_KEYS[i % CAT_KEYS.length]; spawn('lb' + i, SG.CATS[k], 'cat', { bot: true, x: (-3.4 + (i % 6) * 0.95) * WS, z: (2.95 + (i % 2) * 0.5 + (i > 5 ? 2.9 : 0)) * WS, y: i > 5 ? -0.3 * WS : 0, yaw: i * 1.7, name: SG.CATS[k].name + (i >= CAT_KEYS.length ? '二號' : ''), pose: ['sit', 'loaf', 'stand', 'stretch'][i % 4] }); players.push({ id: 'lb' + i, team: 'cat', bot: true }); }
@@ -191,7 +192,7 @@
   };
   G.start = function (side, breed) {
     G.lobby = null; if (lobbyMat) scene.remove(lobbyMat);
-    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.liked = false; G.seeThrough = true; G.cam.kk = null; G.cam.look = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.embedT = 0;
+    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.liked = false; G.likes = {}; G.seeThrough = true; G.cam.kk = null; G.cam.look = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.decoySlots = [{ cd: 0, e: null }, { cd: 0, e: null }]; G.embedT = 0;
     var WS = SG.WS, S = G.settings, mode = S.mode, players = [], nd = Math.max(1, Math.min(3, S.dogs || (side === 'cat' && mode !== 'double' ? RULES.solo.botDogsWhenCat : RULES.solo.botDogsWhenDog + 1)));
     RULES.round.prepSec = S.prep; RULES.round.seekSec = S.seek; RULES.round.revealSec = S.reveal; RULES.dog.startAmmo = S.ammo; RULES.dog.unlimited = !!S.unlimited;
     if (mode === 'double') side = 'cat';
@@ -206,7 +207,7 @@
       G.me = spawn('you', specOf('dog'), 'dog', { x: -5.6 * WS, z: 1.3 * WS, yaw: Math.PI / 2, name: '你', breed: G.pick.dog.breed }); G.me.pitch = 0; players.push({ id: 'you', team: 'dog' });
       botCats(RULES.solo.botCatsWhenDog); botDogs(nd - 1, 1); buildLauncher();
     }
-    G.side = side; hideBots();
+    G.dogSpawn = [-5.6 * WS, 1.6 * WS]; G.side = side; hideBots();
     if (G.me.team === 'cat') G.ents.forEach(function (e) { if (e !== G.me) e.c.root.visible = false; }); // while hiding you cannot see the others (original rule)
     G.state = Core.createState(players, RULES, rnd, mode);
     room.setNight(!!S.night); G.meowT = S.meowEvery;
@@ -228,6 +229,11 @@
     else { var best = 0, bd = 1e9; room.route.forEach(function (w, i) { var dd = Math.hypot(w[0] - x, w[1] - z); if (dd < bd) { bd = dd; best = i; } }); d.wp0 = best; startAI(d); }
     return d;
   }
+  var VANISH = 0.45;
+  function stepVanish(dt) { // found bodies shrink away in under half a second
+    var L = G.ents.concat(G.decoys); for (var i = 0; i < L.length; i++) { var e = L[i]; if (!(e.vanish > 0)) continue; e.vanish -= dt; var k = Math.max(0, e.vanish / VANISH); e.c.root.scale.setScalar(e.c.scale * (0.12 + 0.88 * k * k));
+      if (e.vanish <= 0) { e.c.root.visible = false; e.c.root.scale.setScalar(e.c.scale); e.gone = true; if (e.shell) e.shell.visible = false; } }
+  }
   function onEvent(ev) {
     var st = G.state, c;
     if (ev.type === 'phase') {
@@ -239,18 +245,21 @@
       if (ev.phase === 'reveal') enterReveal();
       if (ev.phase === 'lobby') { toTitle(); }
     }
-    if (ev.type === 'out') {
+    if (ev.type === 'out') { // the original (patch notes 1.8.0 / 2.3.0): a hider who is shot disappears from the map at once, with all their clones
       c = ent(ev.cat);
       if (c) {
-        c.found = true; burst(c);
+        var bodies = [c].concat(G.decoys.filter(function (dd) { return dd.decoyOf === c.id && dd.c.root.visible; })), hitB = G.lastHit && bodies.indexOf(G.lastHit) >= 0 ? G.lastHit : c;
+        c.found = true; burst(hitB);
+        // Double (single source): the body that was found stays for the other hunters, the player's other bodies go
+        bodies.forEach(function (bd) { if (st.mode === 'double' && bd === hitB) return; bd.vanish = VANISH; });
         if (st.mode !== 'double') {
           if (c === G.me && st.mode === 'basic' && !G.fly) { var cd = V(); camera.getWorldDirection(cd); G.fly = { p: camera.position.clone(), yaw: Math.atan2(cd.x, cd.z), pitch: Math.asin(cd.y) }; G.paint.on = false; bus.emit('paintmode', { on: false }); bus.emit('spectate'); }
-          c.out = true; c.c.setPose('stand'); c.c.frozen = false; c.vy = 3.2; c.y += 0.02;
-          G.decoys.filter(function (dd) { return dd.decoyOf === c.id; }).forEach(function (dd) { dd.c.root.visible = false; });
+          c.out = true; c.speed = 0; // it keeps its pose and paint: the answer check shows it again exactly where it hid
         }
+        bus.emit('found', { cat: c.id, by: ev.by || G.lastShooter || null, name: c.name });
       }
     }
-    if (ev.type === 'infected') { c = ent(ev.cat); if (c) { c.c.root.visible = false; makeHunter(c.id, c.x, room.groundAt(c.x, c.z, c.y + 0.2, 0), c.z, c.yaw); } }
+    if (ev.type === 'infected') { c = ent(ev.cat); if (c) { var hs = G.dogSpawn || [c.x, c.z]; makeHunter(c.id, hs[0] + (rnd() - 0.5) * 0.8, room.groundAt(hs[0], hs[1], 0.4, 0), hs[1] + (rnd() - 0.5) * 0.8, Math.PI / 2); } } // comes back as a hunter at the hunters' entry point
     bus.emit(ev.type, ev);
   }
   /* bots choose a spot, strike a pose and camouflage themselves */
@@ -420,8 +429,7 @@
     if (!best) cats().forEach(function (c) { if (!c.out && c.c.root.visible && c.speed > RULES.dog.fleeingSpeed) { var to = tmp.subVectors(c.c.center(tmp2), origin); if (to.normalize().dot(dir) > 0.96) fleeing = true; } });
     G.shots.push({ o: origin.clone(), d: dir.clone(), dist: best ? origin.distanceTo(best.c.center(tmp)) : wd, t: 0, rgb: rgb });
     bus.emit('blast', { me: dogEnt === G.me, x: dogEnt.x, z: dogEnt.z });
-    dispatch({ type: 'shoot', dog: pid, now: now, hit: target ? target.id : null, fleeing: fleeing, decoy: !!(best && best.decoyOf) });
-    if (best && best.decoyOf) { best.c.root.visible = false; burst(best); }
+    G.lastHit = best; G.lastShooter = pid; dispatch({ type: 'shoot', dog: pid, now: now, hit: target ? target.id : null, fleeing: fleeing, decoy: !!(best && best.decoyOf) }); G.lastHit = null;
     if (target) G.hitstop = 0.11;
     if (G.nearPellet) { G.nearPellet = false; if (!target || target !== G.me) bus.emit('nearmiss', { kind: 'pellet' }); }
     return true;
@@ -595,13 +603,17 @@
   G.meow = function () { if (!G.me || G.me.team !== 'cat' || G.me.out) return; meowFrom(G.me); G.meowT = G.settings.meowEvery; };
   G.decoy = function () {
     if (!G.me || G.me.team !== 'cat' || G.me.out) return false;
-    if (G.decoys.filter(function (d) { return d.c.root.visible; }).length >= RULES.cat.maxDecoys || G.decoyCd > 0) { bus.emit('denied'); return false; }
+    if (G.state && G.state.mode === 'double' && G.state.phase === 'seek') return false;
+    var SL = G.decoySlots, si = -1; for (var q = 0; q < SL.length; q++) if (!SL[q].e && SL[q].cd <= 0) { si = q; break; } // two clones, each with its own 30 s cooldown (left diamond = first, right = second)
+    if (si < 0) { bus.emit('denied'); return false; }
     var c = new SG.Critter(G.me.spec, { seed: 9, atlas: RULES.paint.textureSize, scale: G.me.size }); c.copyPaintFrom(G.me.c); c.tailMode = G.me.c.tailMode; c.earFlat = G.me.c.earFlat; c.setPose(G.me.c.pose); c.frozen = true; c.faceSkin.visible = false; scene.add(c.root);
     var e = { id: 'decoy' + G.decoys.length, c: c, team: 'cat', decoyOf: 'you', x: G.me.x, y: G.me.y, z: G.me.z, yaw: G.me.yaw, sus: 0, speed: 0, out: false };
     c.root.position.copy(G.me.c.root.position); c.root.quaternion.copy(G.me.c.root.quaternion); for (var k = 0; k < 20; k++) c.update(0.05, rnd); // a clone made on a wall stays on the wall
-    G.decoys.push(e); G.decoyCd = RULES.cat.decoyCooldownSec; bus.emit('decoy', { n: G.decoys.length }); return true;
+    e.slot = si; e.rad = G.me.rad; e.size = G.me.size; SL[si].e = e; SL[si].cd = RULES.cat.decoyCooldownSec; G.decoys.push(e);
+    if (embedDepth(e) > e.rad * RULES.cat.embedRatio) { e.embed = true; c.glow.value.setRGB(0.9, 0.08, 0.04); bus.emit('cloneEmbed', {}); } // a clone pushed into the scenery shows a red warning
+    bus.emit('decoy', { n: G.decoys.length }); return true;
   };
-  G.recallDecoys = function () { G.decoys.forEach(function (d) { scene.remove(d.c.root); d.c.dispose(); }); G.decoys = []; bus.emit('decoy', { n: 0 }); };
+  G.recallDecoys = function () { if (G.state && G.state.mode === 'double' && G.state.phase === 'seek') return; /* Double: no clearing clones once you are a hunter */ G.decoySlots.forEach(function (sl) { sl.e = null; }); G.decoys.forEach(function (d) { scene.remove(d.c.root); d.c.dispose(); }); G.decoys = []; bus.emit('decoy', { n: 0 }); };
   G.skip = function () { // vote to skip prep / reveal (bots always agree, so alone it is instant)
     if (G.lobby) { G.lobby.t = Math.min(G.lobby.t, 0.01); return; }
     if (!G.state) return;
@@ -615,7 +627,7 @@
   G.setPaintMode = function (on) { if (!G.me || G.me.team !== 'cat') return; G.paint.on = on; G.stroking = false; if (!Q.get('nolock')) { try { if (on && document.exitPointerLock) document.exitPointerLock(); else if (!on && canvas.requestPointerLock) canvas.requestPointerLock(); } catch (er) { } } /* paint mode: free cursor; leaving it takes the pointer back */ bus.emit('paintmode', { on: on }); if (on && G.guide === 2) setGuide(3); };
   function pointerRay(x, y) { tmp.set(x / G.vw * 2 - 1, -(y / G.vh) * 2 + 1, 0.5); ray.setFromCamera(new THREE.Vector2(tmp.x, tmp.y), camera); ray.far = 60; ray.layers.set(0); return ray; }
   var patDir = V(), patPerp = V(), patOn = false;
-  function paintAt(x, y, first) {
+  function paintPattern(x, y, first) {
     var P = G.paint, c = G.me.c, pr = pointerRay(x, y), hit = c.raycast(pr);
     if (!hit) { P.last = null; return false; }
     if (!G.seeThrough) { // normal brush: whatever stands between the camera and the body blocks the stroke
@@ -636,8 +648,68 @@
     if (G.guide === 4 && c.paintedRatio() > 0.12) setGuide(5);
     return true;
   }
-  G.undo = function () { var s = G.paint.undo.pop(); if (s) { G.me.c.undoStroke(s); bus.emit('undo', { left: G.paint.undo.length }); } return !!s; };
-  G.fillAll = function () { var c = G.me.c; c.beginStroke(); c.fill(G.paint.rgb, G.paint.rough, G.paint.metal); pushUndo(c.endStroke()); bus.emit('fill'); if (G.guide === 4) setGuide(5); };
+  /* the brush. The mouse path is smoothed (corners rounded with a quadratic curve) and resampled: ray hits about one brush
+     radius apart, dabs every quarter radius between them, so a fast stroke is one continuous band and the paint is under the
+     cursor in the same frame. */
+  var SP = { pts: [], last: null, acc: 0, n: 0, dist: 0, touched: false, tPrev: 0, drop: 0 };
+  G.strokeStats = { lat: 0, latMax: 0, evMs: 0, evMax: 0, dabsEv: 0, dabsMaxEv: 0 };
+  function brushHit(x, y) { // the body under a screen point; hit.blocked when something stands in the way and see-through is off
+    var hit = G.me.c.raycast(pointerRay(x, y)); if (!hit) return null;
+    if (!G.seeThrough && segSolid(camera.position, hit.point, 0.03)) hit.blocked = true;
+    return hit;
+  }
+  function dabAt(pt) { var P = G.paint; G.fx.dab(G.me.c, pt, P.size, P.rgb, P.rough, P.metal, P.hard ? RULES.paint.hardnessHard : RULES.paint.hardnessSoft, RULES.paint.opacity == null ? 1 : RULES.paint.opacity); SP.n++; }
+  function strokeSeg(x0, y0, x1, y1) {
+    var P = G.paint, len = Math.hypot(x1 - x0, y1 - y0), depth = SP.last ? SP.last.distanceTo(camera.position) : G.cam.dist, ppm = G.vh / (2 * Math.tan(camera.fov * Math.PI / 360) * Math.max(0.2, depth));
+    var stepPx = Math.max(2, P.size * ppm * 0.8), n = Math.max(1, Math.ceil(len / stepPx)), sp = P.size * 0.25;
+    for (var i = 1; i <= n; i++) {
+      var hit = brushHit(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n);
+      if (!hit || hit.blocked) { SP.last = null; continue; }
+      var h = hit.point;
+      if (SP.last) { var d = SP.last.distanceTo(h);
+        if (d < P.size * 4 && d > 1e-6) { var m = Math.floor((SP.acc + d) / sp); for (var q = 1; q <= m && SP.n < 8000; q++) dabAt(tmp2.lerpVectors(SP.last, h, (q * sp - SP.acc) / d)); SP.acc = SP.acc + d - m * sp; SP.dist += d; }
+        else if (d >= P.size * 4) { dabAt(h); SP.acc = 0; } // jumped across a gap in the silhouette: no paint through the air
+        SP.last.copy(h); }
+      else { SP.last = h.clone(); dabAt(h); SP.acc = 0; if (!SP.touched) { SP.touched = true; bus.emit('touch', { size: P.size }); } }
+      SP.nrm = hit.face && hit.face.normal ? hit.face.normal : null;
+    }
+  }
+  function paintAt(x, y, first) {
+    var P = G.paint, t0 = performance.now(), n0 = SP.n;
+    if (P.pattern) return paintPattern(x, y, first);
+    if (G.me.c._fx && G.me.c._fx.fillJob) G.fx.finishFill(G.me.c);
+    if (first) {
+      SP.pts = [[x, y]]; SP.last = null; SP.acc = 0; SP.n = 0; SP.dist = 0; SP.touched = false; SP.tPrev = t0; SP.drop = 0;
+      var h0 = brushHit(x, y);
+      if (h0 && h0.blocked) bus.emit('blocked');
+      else if (h0) { SP.last = h0.point.clone(); dabAt(h0.point); SP.touched = true; bus.emit('touch', { size: P.size }); bus.emit('stroke', { size: P.size, speed: 0 }); }
+    } else {
+      var pts = SP.pts, a = pts[pts.length - 1]; if (Math.abs(x - a[0]) + Math.abs(y - a[1]) < 0.5) return true;
+      var d0 = SP.dist, done = false;
+      if (pts.length >= 2) { // round the corner at the previous sample
+        var b = pts[pts.length - 2], m0x = (b[0] + a[0]) / 2, m0y = (b[1] + a[1]) / 2, m1x = (a[0] + x) / 2, m1y = (a[1] + y) / 2;
+        var ex = m1x - m0x, ey = m1y - m0y, el = Math.hypot(ex, ey) || 1, dev = Math.abs((a[0] - m0x) * ey - (a[1] - m0y) * ex) / el;
+        if (dev > 1.5) { var K = Math.max(3, Math.min(10, Math.ceil(el / 14))), px = m0x, py = m0y; SP.last = null; SP.acc = 0;
+          for (var i = 1; i <= K; i++) { var t = i / K, u = 1 - t, qx = u * u * m0x + 2 * u * t * a[0] + t * t * m1x, qy = u * u * m0y + 2 * u * t * a[1] + t * t * m1y; if (i === 1) { var hs = brushHit(px, py); if (hs && !hs.blocked) SP.last = hs.point.clone(); } strokeSeg(px, py, qx, qy); px = qx; py = qy; }
+          strokeSeg(m1x, m1y, x, y); done = true; }
+      }
+      if (!done) strokeSeg(a[0], a[1], x, y);
+      pts.push([x, y]); if (pts.length > 4) pts.shift();
+      var dtS = Math.max(0.004, (t0 - SP.tPrev) / 1000), speed = (SP.dist - d0) / dtS; SP.tPrev = t0; SP.speed = speed;
+      if (SP.last) bus.emit('stroke', { size: P.size, speed: speed });
+      // droplets fly off a fast stroke
+      if (SP.last && speed > 1.1) { SP.drop += (SP.dist - d0); while (SP.drop > 0.07) { SP.drop -= 0.07; var c0 = G.me.c.center(tmp), nx = SP.last.x - c0.x, ny = SP.last.y - c0.y, nz = SP.last.z - c0.z, nl = Math.hypot(nx, ny, nz) || 1, k = 0.5 + rnd() * 0.7;
+          G.fx.spray(SP.last, tmp2.set(nx / nl * k + (rnd() - 0.5) * 0.6, ny / nl * k + 0.7 + rnd() * 0.5, nz / nl * k + (rnd() - 0.5) * 0.6), P.rgb, P.size * (0.05 + rnd() * 0.06)); } }
+    }
+    if (G.guide === 4 && SP.n > 12 && G.me.c.paintedRatio() > 0.12) setGuide(5);
+    var ST = G.strokeStats, ms = performance.now() - t0, nd = SP.n - n0; ST.evMs = ms; if (ms > ST.evMax) ST.evMax = ms; ST.dabsEv = nd; if (nd > ST.dabsMaxEv) ST.dabsMaxEv = nd; ST.pending = ST.pending || t0;
+    return true;
+  }
+  G.undo = function () { var c = G.me.c; if (c._fx && c._fx.fillJob) G.fx.finishFill(c); var s = G.paint.undo.pop(); if (s) { c.undoStroke(s); if (c._fx) G.fx.reflag(c, s.parts); bus.emit('undo', { left: G.paint.undo.length }); } return !!s; };
+  /* fill: the colour wipes down over the body (or over one body part: double-click it) */
+  G.fillAll = function (parts) { var c = G.me.c; if (G.stroking) { G.stroking = false; pushUndo(c.endStroke()); } if (c._fx && c._fx.fillJob) G.fx.finishFill(c); c.beginStroke(); bus.emit('fill', { part: !!parts });
+    G.fx.fill(c, G.paint.rgb.slice(), G.paint.rough, G.paint.metal, parts || null, parts ? 0.28 : 0.45, function () { pushUndo(c.endStroke()); bus.emit('strokeEnd', { undo: G.paint.undo.length }); }); if (G.guide === 4) setGuide(5); };
+  G.fillPartAt = function (x, y) { var c = G.me.c, hit = brushHit(x, y); if (!hit || hit.blocked) return false; var pi = -1; c.parts.forEach(function (p, i) { if (p === hit.part || (p.mesh === hit.object && !hit.part)) pi = i; }); if (pi < 0) return false; var ps = {}; ps[pi] = true; G.fillAll(ps); return true; };
   function pushUndo(s) { if (!s) return; G.paint.undo.push(s); if (G.paint.undo.length > RULES.paint.undoSteps) G.paint.undo.shift(); }
   /* eyedropper: unlit surface colour under the cursor (+ the material's roughness / metalness) */
   G.pickAt = function (x, y, unlit) {
@@ -648,6 +720,9 @@
     bus.emit('picked', { rgb: rgb, rough: rough, metal: metal, unlit: !!unlit }); if (G.guide === 3) setGuide(4);
     return rgb;
   };
+  /* magnifier for the eyedropper: the unlit surface colours around the cursor (what Space would pick), n x n pixels, bottom row first */
+  var lpCam = new THREE.PerspectiveCamera(), lpPx = new Uint8Array(11 * 11 * 4);
+  G.loupeAt = function (x, y) { var k = post.width / G.vw, N = 11; lpCam.copy(camera); lpCam.setViewOffset(post.width, post.height, Math.floor(x * k) - 5, Math.floor(y * k) - 5, N, N); lpCam.updateProjectionMatrix(); lpCam.matrixWorld.copy(camera.matrixWorld); lpCam.matrixWorldInverse.copy(camera.matrixWorldInverse); lpCam.layers.mask = camera.layers.mask; post.renderAlbedo(scene, lpCam, N, N, lpPx); return lpPx; };
   G.setTail = function (m) { if (G.me && G.me.team === 'cat') { G.me.c.tailMode = m; bus.emit('tail', { mode: m }); } };
   G.setEars = function (flat) { if (G.me && G.me.team === 'cat') { G.me.c.earFlat = !!flat; bus.emit('ears', { flat: !!flat }); } };
   G.setColor = function (rgb) { G.paint.rgb = rgb; if (G.guide === 3) setGuide(4); };
@@ -678,8 +753,9 @@
       if (k === '2') { G.tags = !G.tags; bus.emit('tags', { on: G.tags }); }
       if (k === 't') { bus.emit('chat'); e.preventDefault(); }
       if (k === 'y') { G.skip(); if (!G.me || G.mode !== 'play') return; }
-      if (k === 'g' && G.state.phase === 'reveal' && !G.liked) { G.liked = true; bus.emit('like', { id: G.me.id }); }
-      if (G.fly) { if (k === '4') { if (G.fly.hide) { G.follow = null; } else spectateNext(); } if (k === '5') { if (G.fly.hide) { G.fly = null; bus.emit('mode2'); bus.emit('viewlock', { on: G.viewLock }); } else { G.follow = null; bus.emit('follow', { name: null }); } } return; }
+      if (k === 'g' && G.state.phase === 'reveal' && !G.liked) { G.liked = true; var lt = null, ld = 1e9; cats().forEach(function (c) { if (c === G.me || c.id === (G.me.pid || G.me.id) || !c.c.root.visible) return; var q = G.project(c), dd = q.vis ? Math.hypot(q.x - G.vw / 2, q.y - G.vh / 2) : 1e8; if (dd < ld) { ld = dd; lt = c; } }); if (lt) giveLike(lt.id, G.me.id); }
+      if (k === 'Tab' && G.state.phase === 'reveal') bus.emit('sidepanel');
+      if (G.fly) { if (k === '4') { if (G.fly.hide) { G.follow = null; G.fly.move = !G.fly.move; bus.emit('spectate', { hide: true, move: G.fly.move }); } else spectateNext(); } /* original: 5 detaches the camera from the body, 4 inside it turns free flight on; X is ignored in here */ if (k === '5') { if (G.fly.hide) { G.fly = null; bus.emit('mode2'); bus.emit('viewlock', { on: G.viewLock }); } else { G.follow = null; bus.emit('follow', { name: null }); } } return; }
       var me = G.me;
       if (me.team === 'cat' && !me.out) {
         if (k === 'f') G.setPaintMode(!G.paint.on);
@@ -709,7 +785,9 @@
         if (G.paint.on && !me.out) {
           if (e.button === 0 && !e.altKey) {
             if (G.keys[' '] || G.paint.tool === 'pick') { G.pickAt(e.clientX, e.clientY, !e.shiftKey); /* the 3D eyedropper takes the surface's base colour + roughness + metallic (the developer's own description); with Shift it takes the screen colour instead */ if (G.paint.tool === 'pick') { G.paint.tool = 'brush'; bus.emit('tool', { tool: 'brush' }); } return; }
-            me.c.beginStroke(); G.paint.last = null; G.stroking = paintAt(e.clientX, e.clientY, true); if (!G.stroking) me.c.endStroke(); // left on the empty world does nothing in paint mode
+            if (e.detail === 2 && !G.paint.pattern && G.fillPartAt(e.clientX, e.clientY)) return; // double-click: fill that body part
+            if (me.c._fx && me.c._fx.fillJob) G.fx.finishFill(me.c);
+            me.c.beginStroke(); G.paint.last = null; G.stroking = paintAt(e.clientX, e.clientY, true); if (!G.stroking) me.c.endStroke(); // a stroke may start beside the body and run onto it
           } else if (e.button === 2 && !e.altKey) G.sizing = true; // right-drag changes the brush size
           else if (e.button === 2) G.zooming = true;                // Alt + right-drag zooms
           else G.orbiting = true;                                  // middle-drag or Alt+drag turns the camera
@@ -775,7 +853,7 @@
       if (G.lobby) { var Lb = G.lobby; Lb.t -= dt; Lb.on = !!me && !me.cling && Math.hypot(me.x - Lb.x, me.z - Lb.z) < Lb.r;
         if (Lb.t <= 0) { var sd = Lb.on ? 'dog' : 'cat'; bus.emit('lottery', { side: sd }); G.start(G.settings.mode === 'double' ? 'cat' : sd); return; } }
       if (st.phase !== 'lobby') dispatch({ type: 'tick', dt: dt });
-      G.decoyCd = Math.max(0, G.decoyCd - dt);
+      var dcd = 0, dfree = false; G.decoySlots.forEach(function (sl) { sl.cd = Math.max(0, sl.cd - dt); if (!sl.e) { dcd = dfree ? Math.min(dcd, sl.cd) : sl.cd; dfree = true; } }); G.decoyCd = dcd; // shortest wait among the empty slots (0 when both clones are out)
       if (me && !me.out && st.phase !== 'reveal' && !G.fly) {
         var f = (k.w || k.ArrowUp && me.team === 'cat' ? 1 : 0) - (k.s || k.ArrowDown && me.team === 'cat' ? 1 : 0), s = (k.d ? 1 : 0) - (k.a ? 1 : 0);
         if (me.team === 'cat') {
@@ -822,8 +900,8 @@
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
       if (e.team === 'cat' && e.c.flatU) { var posedF = e.c.pose !== 'stand' && e.c.pose !== 'crouch', fT = e.cling && posedF ? 0.9 : posedF && !e.air ? 0.45 : 0; e.c.flatU.value += (fT - e.c.flatU.value) * Math.min(1, dt * 6); if (e.cling) e.c.flatN.value.fromArray(e.cling.n); else e.c.flatN.value.set(0, 1, 0); e.c.skin.castShadow = !(e.cling && posedF); }
-      if (e === me && e.team === 'cat') e.c.frozen = e.c.pose !== 'stand' && e.c.pose !== 'crouch' && !e.out; /* your own posed body is perfectly still too */
-      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out && !e.walk) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = false; } // a posed cat shows no eyes, nose or whiskers to anyone else
+      if (e === me && e.team === 'cat') e.c.frozen = (e.c.pose !== 'stand' && e.c.pose !== 'crouch' || (G.paint.on && !(e.speed > 0.05) && !e.air)) || !!e.out; /* and it holds still under the brush */ /* your own posed body is perfectly still too */
+      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.walk) || !!e.out || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = false; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
       e.c.update(dt, rnd);
       if (!e.out && (e.speed > 0.05 || e.air)) bumpers.push({ x: e.x, y: e.y, z: e.z, r: e.team === 'dog' ? 0.3 : RULES.cat.bumpRadius, speed: e.speed || 0 });
@@ -832,10 +910,29 @@
     bumpers.push({ x: room.vac.x, y: 0, z: room.vac.z, r: 0.2, speed: 0.4 });
     room.stepTriggers(dt, G.ents.filter(function (e) { return !e.fp || true; }));
     room.stepProps(dt, bumpers, function (kp, landed) { bus.emit('bump', { type: kp.type, landed: !!landed, x: kp.x, z: kp.z }); if (!landed && !kp.shot && G.settings.knockNoise) dogsOf().forEach(function (d) { if (d.ai && !d.ai.heard && Math.hypot(d.x - kp.x, d.z - kp.z) < 6) { d.ai.heard = [kp.x, kp.z]; d.ai.heardT = 0; } }); });
+    if (G.mode === 'play' && st && st.phase === 'reveal' && G.likeT != null) { G.likeT -= dt; if (G.likeT <= 0) { G.likeT = 1.2 + rnd() * 2.5; var bl = G.ents.filter(function (e) { return e.bot && !e.likedOnce && !e.decoyOf; }), cl = cats().filter(function (c) { return c.c.root.visible; }); if (bl.length && cl.length > 1) { var bb = bl[Math.floor(rnd() * bl.length)], best = cl.filter(function (c) { return c !== bb && c.id !== bb.pid; }).sort(function (a, b2) { return ((st.players[b2.id] || {}).score || 0) - ((st.players[a.id] || {}).score || 0); }); bb.likedOnce = true; if (best.length) giveLike(best[Math.floor(rnd() * Math.min(3, best.length))].id, bb.id); } else G.likeT = null; } }
     if (G.mode === 'play' && st && st.phase === 'reveal') { var fl = 0.5 + 0.5 * Math.sin(G.time * 7); G.ents.forEach(function (e) { if (e.team === 'cat' && e.found != null) e.c.glow.value.setRGB(e.found ? 0.02 : 0.85, e.found ? 0.22 : 0.05, e.found ? 0.95 : 0.03).multiplyScalar(0.25 + 0.75 * fl); }); G.ents.concat(G.decoys).forEach(function (e) { if (e.shell) e.shell.material.opacity = 0.25 + 0.5 * fl; }); }
-    stepBalls(dt); stepConfetti(dt);
+    stepBalls(dt); stepConfetti(dt); stepVanish(dt);
     updateCamera(dt);
+    paintFrame(dt);
     if (G.mode === 'play' && st) bus.emit('frame', { left: st.left, phase: st.phase });
+  }
+  /* per-frame paint feel: brush cursor on the body, droplets, fill wipe, "white left" */
+  function sideBlocked(ctr, d) { var r = 0.34 * (G.me.size || 1), x = ctr.x + d[0] * r, y = ctr.y + d[1] * r, z = ctr.z + d[2] * r; if (y < room.base(x, z) + 0.01) return true; tmp2.set(x, y, z); return !!segSolid(ctr, tmp2, 0) || room.segWalls(ctr.x, ctr.y, ctr.z, x, y, z) < 0.999; }
+  function paintFrame(dt) {
+    var me = G.me, fx = G.fx; if (!fx) return;
+    var on = G.mode === 'play' && me && me.team === 'cat' && G.paint.on && !me.out && !G.fly;
+    fx.update(dt, me && me.team === 'cat' ? me.c : null);
+    fx.hi += ((on && G.keys.h ? 1 : 0) - fx.hi) * Math.min(1, dt * 14);
+    var cu = fx.cur, was = cu.on; cu.on = false; if (!on) { if (G.cur3d) { G.cur3d = false; bus.emit('cursor3d', { on: false }); } return; }
+    if (!me.c._fx) fx.attach(me.c);
+    var P = G.paint;
+    if (G.sizing) cu.on = was; // the ring stays where it was while its size is dragged
+    else if (G.stroking && SP.last) { cu.on = true; cu.pos.copy(SP.last); }
+    else if (!G.orbiting && !G.zooming) { var hit = brushHit(G.mouse.x, G.mouse.y); if (hit && !hit.blocked) { cu.on = true; cu.pos.copy(hit.point); } }
+    cu.c = me.c; cu.cam = camera; cu.r = P.size; cu.hard = P.hard ? RULES.paint.hardnessHard : RULES.paint.hardnessSoft; cu.rgb = P.rgb; cu.dot = !(G.keys[' '] || P.tool === 'pick');
+    if (cu.on !== !!G.cur3d) { G.cur3d = cu.on; bus.emit('cursor3d', { on: cu.on }); }
+    G.wlT = (G.wlT || 0) - dt; if (G.wlT <= 0) { G.wlT = 0.1; var pct = fx.whiteLeft(me.c, sideBlocked); if (pct !== G.whiteLeft) { G.whiteLeft = pct; bus.emit('whiteLeft', { pct: pct }); } }
   }
   /* forced meow, suspicion meter, buried-too-deep warning, torch */
   var torch = null;
@@ -971,6 +1068,7 @@
     else if (G.fly) { // free spectator camera: reveal, and after being caught
       var F = G.fly, k = G.keys, sp = (k.Shift ? 9 : 4) * dt, cdx = Math.sin(F.yaw) * Math.cos(F.pitch), cdy = Math.sin(F.pitch), cdz = Math.cos(F.yaw) * Math.cos(F.pitch);
       var fw = (k.w || k.ArrowUp ? 1 : 0) - (k.s || k.ArrowDown ? 1 : 0), st = (k.d || k.ArrowRight ? 1 : 0) - (k.a || k.ArrowLeft ? 1 : 0), ud = (k[' '] || k.e ? 1 : 0) - (k.c ? 1 : 0);
+      if (F.hide && !F.move) fw = st = ud = 0; // stage one: the camera is only detached (look around); 4 turns flying on
       F.p.x += (cdx * fw - Math.cos(F.yaw) * st) * sp; F.p.z += (cdz * fw + Math.sin(F.yaw) * st) * sp; F.p.y += (cdy * fw + ud) * sp;
       var bd = room.bounds; F.p.x = Math.max(bd.x0, Math.min(bd.x1, F.p.x)); F.p.z = Math.max(bd.z0, Math.min(bd.z1, F.p.z)); F.p.y = Math.max(0.15, Math.min(5.5 * SG.WS, F.p.y));
       if (G.follow && G.follow.c.root.visible) { var fc = G.follow.c.center(tmp); F.p.set(fc.x - cdx * 2.2, fc.y + 0.5 - cdy * 2.2, fc.z - cdz * 2.2); }
@@ -1008,6 +1106,7 @@
     G.paint.on = false; G.cam.free = null; G.third = true; if (G.vm) G.vm.visible = false;
     if (!G.fly) G.fly = { p: V(0.6 * SG.WS, 2.2 * SG.WS, 3.4 * SG.WS), yaw: Math.PI, pitch: -0.42 };
     if (document.exitPointerLock) try { document.exitPointerLock(); } catch (e) { }
+    G.ents.concat(G.decoys).forEach(function (e) { if (e.vanish > 0 || e.gone) { e.vanish = 0; e.gone = false; e.c.root.scale.setScalar(e.c.scale); e.c.root.visible = true; } }); // found hiders and their clones are shown again where they hid
     G.ents.forEach(function (e) {
       e.c.root.visible = true; e.fp = false;
       if (e.team === 'cat' && G.state.players[e.id]) { var found = G.state.players[e.id].out; e.c.root.visible = true; e.c.glow.value.setRGB(found ? 0.02 : 0.85, found ? 0.22 : 0.05, found ? 0.95 : 0.03); e.found = found; }
@@ -1018,10 +1117,23 @@
       if (!e.shell) { e.shell = new THREE.SkinnedMesh(e.c.skin.geometry, new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending })); e.shell.bind(e.c.skin.skeleton, new THREE.Matrix4()); e.shell.frustumCulled = false; e.shell.renderOrder = 60; e.shell.layers.set(1); e.c.root.add(e.shell); }
       e.shell.material.color.setRGB(found ? 0.1 : 1.0, found ? 0.45 : 0.12, found ? 1.0 : 0.08); e.shell.visible = true; e.shellOn = true;
     });
+    answerMarks(); G.likeT = 2 + rnd() * 3;
     bus.emit('answer', { n: cats().length });
   }
+  function giveLike(to, from) { G.likes[to] = (G.likes[to] || 0) + 1; bus.emit('like', { id: to, from: from, n: G.likes[to] }); }
+  /* answer check: a thick outline that shows through walls (solid hull drawn over everything, then the body drawn again on top
+     where nothing hides it), and a line from every clone to its owner */
+  function hullMat(col) { var m = new THREE.MeshBasicMaterial({ color: col, side: THREE.BackSide, depthTest: false, depthWrite: false }); m.onBeforeCompile = function (sh) { sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', 'vec3 transformed = position + normalize(normal) * 0.022;'); }; m.customProgramCacheKey = function () { return 'hull'; }; return m; }
+  function answerMarks() {
+    G.ents.concat(G.decoys).forEach(function (e) {
+      if (e.team !== 'cat' || !e.c.root.visible || !e.c.skin.isSkinnedMesh) return; var owner = e.decoyOf ? ent(e.decoyOf) : e, found = owner ? !!owner.found : false, col = found ? 0x2f8cff : 0xff3a22;
+      if (!e.hull) { e.hull = new THREE.SkinnedMesh(e.c.skin.geometry, hullMat(col)); e.redraw = new THREE.SkinnedMesh(e.c.skin.geometry, e.c.mat); [e.hull, e.redraw].forEach(function (m, i) { m.bind(e.c.skin.skeleton, new THREE.Matrix4()); m.frustumCulled = false; m.renderOrder = 56 + i; m.castShadow = false; m.receiveShadow = true; e.c.root.add(m); }); }
+      e.hull.material.color.setHex(col); e.hull.visible = e.redraw.visible = true;
+      if (e.decoyOf && owner) { var a = e.c.center(V()), b = owner.c.center(V()), L = a.distanceTo(b); if (L > 0.05) { var ln = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 1), new THREE.MeshBasicMaterial({ color: col, depthTest: false, depthWrite: false, transparent: true, opacity: 0.85 })); ln.position.copy(a).add(b).multiplyScalar(0.5); ln.lookAt(b); ln.scale.z = L; ln.renderOrder = 61; ln.layers.set(1); scene.add(ln); G.marks.push(ln); } }
+    });
+  }
   /* screen positions for name tags (reveal) */
-  G.project = function (e) { var p = e.c.center(tmp).clone(); p.y += 0.45; p.project(camera); return { x: (p.x * 0.5 + 0.5) * G.vw, y: (-p.y * 0.5 + 0.5) * G.vh, vis: p.z < 1 }; };
+  G.project = function (e) { var w = e.c.center(tmp).clone(), dist = w.distanceTo(camera.position); w.y += 0.45; var v = w.clone().applyMatrix4(camera.matrixWorldInverse), p = w.project(camera); return { x: (p.x * 0.5 + 0.5) * G.vw, y: (-p.y * 0.5 + 0.5) * G.vh, vis: p.z < 1, dist: dist, vx: v.x, vy: v.y, vz: v.z }; };
 
   /* small turntable previews drawn straight onto the canvas inside the title cards */
   var pv = { scene: new THREE.Scene(), cam: new THREE.PerspectiveCamera(28, 1, 0.05, 30), items: {} };
@@ -1047,7 +1159,7 @@
       pvR.render(pv.scene, pv.cam); var g2 = el.getContext('2d'); g2.clearRect(0, 0, 360, 300); g2.drawImage(pvR.domElement, 0, 0);
     }
   }
-  function render(dt) { var S2 = G.settings, hv = G.mode === 'play' && G.me && G.me.team === 'dog' && G.state && G.state.phase === 'seek' && !G.fly, fu = post.final; fu.uMono.value = hv && S2.fMono ? 1 : 0; fu.uHorror.value = hv ? +S2.fHorror || 0 : 0; fu.uMosaic.value = hv && S2.fMosaic ? (+S2.fMosaic + 1) * Math.max(1, post.height / 1080) : 0; /* 像素: 1/2, 1/3, 1/4 resolution, nearest-neighbour, never coarser than 270 lines at 1080p */ var flat = G.paint.on && G.paint.flat && G.mode === 'play', mk = camera.layers.mask, env = scene.environment; if (flat) { camera.layers.mask = 1 | 4; scene.environment = null; } post.render(scene, camera, G.time); if (flat) { camera.layers.mask = mk; scene.environment = env; } renderPreviews(dt || 0); }
+  function render(dt) { var S2 = G.settings, hv = G.mode === 'play' && G.me && G.me.team === 'dog' && G.state && G.state.phase === 'seek' && !G.fly, fu = post.final; fu.uMono.value = hv && S2.fMono ? 1 : 0; fu.uHorror.value = hv ? +S2.fHorror || 0 : 0; fu.uMosaic.value = hv && S2.fMosaic ? (+S2.fMosaic + 1) * Math.max(1, post.height / 1080) : 0; /* 像素: 1/2, 1/3, 1/4 resolution, nearest-neighbour, never coarser than 270 lines at 1080p */ var flat = G.paint.on && G.paint.flat && G.mode === 'play', mk = camera.layers.mask, env = scene.environment; if (flat) { camera.layers.mask = 1 | 4; scene.environment = null; } if (G.fx && G.me && G.me.team === 'cat' && G.me.c._fx) G.fx.flush(G.me.c); post.render(scene, camera, G.time); if (G.strokeStats.pending) { var lt = performance.now() - G.strokeStats.pending; G.strokeStats.pending = 0; G.strokeStats.lat = lt; if (lt > G.strokeStats.latMax) G.strokeStats.latMax = lt; } if (flat) { camera.layers.mask = mk; scene.environment = env; } renderPreviews(dt || 0); }
 
   /* ------------------------------------------------------------------ test / capture API */
   G.step = function (sec, hz) { var n = Math.round(sec * (hz || 60)), dt = 1 / (hz || 60); for (var i = 0; i < n; i++) update(dt); render(); };
@@ -1074,6 +1186,8 @@
     /* one pose seen from three sides (front-quarter, side, back-quarter) */
     pose3: function () { G.mode = 'view'; var b = Q.get('breed') || 'mochi', p = Q.get('pose') || 'side'; [0.6, -1.57, 2.6].forEach(function (yaw, i) { var e = spawn('p' + i, SG.CATS[b], 'cat', { x: -0.5 + i * 1.05, z: 1.75, yaw: yaw, pose: p }); e.c.frozen = Q.get('live') ? false : true; calico(e.c); }); settle(60); if (Q.get('adv')) G.ents.forEach(function (e) { e.c.frozen = false; e.c.speed = +Q.get('adv'); for (var k = 0; k < +(Q.get('n') || 7); k++) e.c.update(0.03, rnd); }); qcam([0.55, 0.85, 4.1, 0.55, 0.22, 1.75, 40]); bus.emit('lineup', { kind: 'pose3', pose: p }); },
     paint: function () { G.start('cat', Q.get('breed') || 'mochi'); G.place('you', 1.9, 0.012, 0.6, 2.3); G.cam.yaw = 2.5; G.cam.pitch = 0.22; G.cam.dist = 2.3; G.setPose(Q.get('pose') || 'sit'); G.setPaintMode(true); G.step(1.5); camera.updateMatrixWorld(true); autoCamo(G.me, 1, camera.position.clone()); G.me.c.eachTexel(function (x, y, z, n) { return /head|ear|pad|cheek|neck/.test(n) ? [255, 255, 255] : null; }); G.guide = 4; bus.emit('guide', { step: 4 }); if (SG.ui) SG.ui.P.setRGB([47, 75, 124]); },
+    /* a white cat in paint mode, seen from the side: for the brush checks */
+    paintblank: function () { G.start('cat', Q.get('breed') || 'mochi'); G.place('you', 1.9, 0.012, 0.6, 2.3); G.cam.yaw = 2.3 + Math.PI / 2 + (+Q.get('yaw') || 0); G.cam.pitch = Q.get('pitch') ? +Q.get('pitch') : 0.18; G.cam.dist = +Q.get('dist') || 2.0; if (Q.get('pose')) G.setPose(Q.get('pose')); G.setPaintMode(true); G.step(1.5); G.guide = 5; bus.emit('guide', { step: 5 }); },
     painted: function () { G.start('cat', Q.get('breed') || 'mochi'); G.place('you', 2.9, 0.42, 1.25, -2.0); G.setPose(Q.get('pose') || 'loaf'); G.cam.yaw = -2.2; G.cam.pitch = 0.3; G.cam.dist = 2.2; G.step(1.5); camera.updateMatrixWorld(true); autoCamo(G.me, 1, camera.position.clone()); },
     dogfp: function () { G.start('dog', Q.get('breed') || 'shiba'); G.skip(); G.place('you', -1.6, 0, 1.5, 1.9); G.me.pitch = -0.12; G.step(0.3); },
     reveal: function () { G.start('dog', 'shiba'); G.skip(); G.step(0.2); var c0 = ent('cat0'), c = c0.c.center(V()); var o = V(c.x * 0.5, 0.7, c.z * 0.5); fire(G.me, o, V().subVectors(c, o).normalize()); G.step(0.5); dispatch({ type: "tick", dt: 999 }); G.step(1.2); }
