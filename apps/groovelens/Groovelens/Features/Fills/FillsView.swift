@@ -47,7 +47,7 @@ struct FillsView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16).padding(.bottom, 30)
+            .padding(.horizontal, 16).padding(.bottom, 110)
         }
         .scrollIndicators(.hidden)
         .background(NeonBackground())

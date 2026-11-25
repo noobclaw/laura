@@ -60,7 +60,7 @@ struct SettingsView: View {
                     .font(Typo.body(12)).foregroundStyle(Palette.textFaint).padding(.horizontal, 4)
             }
             .tint(Palette.brand)
-            .padding(.horizontal, 16).padding(.bottom, 30)
+            .padding(.horizontal, 16).padding(.bottom, 110)
         }
         .scrollIndicators(.hidden)
         .background(NeonBackground())

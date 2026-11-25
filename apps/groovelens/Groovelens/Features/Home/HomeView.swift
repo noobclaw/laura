@@ -44,7 +44,7 @@ struct HomeView: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
-            .padding(.bottom, 24)
+            .padding(.bottom, 110)
         }
         .scrollIndicators(.hidden)
         .background(NeonBackground())
@@ -131,7 +131,9 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 0) {
             DemoHighway(colors: profile.selectedSkin.laneColors)
                 .frame(height: 230)
-                .mask(LinearGradient(colors: [.clear, .black, .black], startPoint: .top, endPoint: .init(x: 0.5, y: 0.35)))
+                .mask(LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.32),
+                                             .init(color: .black, location: 0.84), .init(color: .clear, location: 1)],
+                                     startPoint: .top, endPoint: .bottom))
                 .padding(.horizontal, -16)
             HStack(spacing: 16) {
                 Menu {
@@ -163,7 +165,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .padding(.top, -6)
+            .padding(.top, 4)
         }
     }
 
