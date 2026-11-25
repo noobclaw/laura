@@ -58,7 +58,7 @@ window.SG_RULES = {
   "pelletGravity": 2.5,
   "range": 25,
   "lowAmmoWarn": 1,
-  "eyeHeightDefault": 0.62,
+  "eyeHeightDefault": 0.2,
   "crouchEye": 0.55,
   "crouchSpeed": 0.5,
   "jumpHeight": 0.55,
@@ -77,7 +77,7 @@ window.SG_RULES = {
  },
  "overlooked": {
   "tickEverySec": 0.5,
-  "minArea": 0.00012,
+  "minArea": 0.00004,
   "maxPerTick": 45,
   "deadZone": 0.1,
   "edgeFactor": 0.15,
@@ -86,6 +86,9 @@ window.SG_RULES = {
   "farFactor": 0.25,
   "boardEverySec": 30,
   "streakGapSec": 1.2
+ },
+ "move": {
+  "stepUp": 0.24
  },
  "paint": {
   "textureSize": 1024,
