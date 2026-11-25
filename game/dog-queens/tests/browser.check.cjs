@@ -47,11 +47,7 @@ await p.click('#back');await p.waitForTimeout(200);await p.click('#lang');await 
 await p.click('#daily');await p.waitForTimeout(600);await shot('11_daily_ar');ok((await st()).n===7,'daily board is 7x7');
 ok(await E(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal overflow in Arabic');
 await p.click('#back');await p.click('#lang');await p.click('button[data-lang="zh-Hant"]');await p.click('#shopChip');await p.waitForTimeout(300);await shot('12_shop_zh');
-// 8b. lantern scene: night palette, lantern pieces and lantern wording; back to the puppy scene afterwards
-await p.click('#shopClose');await p.click('#scene');await p.waitForTimeout(200);ok(await E(()=>document.body.classList.contains('night')&&T.en.r3==='Lanterns never touch'&&T.en.title==='Lantern Garden'),'scene chip switches to the lantern night garden');await shot('13_home_lantern');
-await p.click('#play');await p.waitForTimeout(500);await E(()=>{const S=__lantern,n=S.p.n;for(let y=0;y<3;y++)__lanternApi.setCell(y*n+S.p.sol[y],2)});await p.waitForTimeout(400);
-ok(await E(()=>document.querySelector('.cell img').src.includes('L1_lantern')),'lantern scene uses lantern pieces');await shot('14_board_lantern');
-await p.click('#back');await p.click('#scene');await p.waitForTimeout(200);ok(await E(()=>!document.body.classList.contains('night')&&T.en.r3==='Puppies never touch'),'scene chip switches back to the puppy garden');
+await p.click('#shopClose');
 // 9. every language defines every key the page uses
 ok(await E(()=>{const keys=Object.keys(T.en);return Object.keys(T).every(l=>keys.every(k=>T[l][k]!=null))}),'all eight languages define every key');
 // 10. second load on the same day: no second check-in gift

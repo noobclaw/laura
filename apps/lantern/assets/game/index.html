@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <title>Shiba Garden</title>
-<style>html,body{-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+<style>html,body{overscroll-behavior:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
 
 :root{--ink:#24365E;--soft:#6B7A9C;--mint:#2FBF9B;--mintD:#1E9478;--card:#fff;--bg1:#DDF2FF;--bg2:#F3FBF1;--warn:#F26B4E;--gold:#FFB534;
   --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
@@ -30,7 +30,7 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 [dir=rtl] .flip{transform:scaleX(-1)}
 
 /* home */
-#home h1{margin:3vh 0 2px;font-size:clamp(34px,10vw,46px);font-weight:900;letter-spacing:-.01em;text-align:center}
+#home h1{margin:calc(3vh + 34px) 0 2px;font-size:clamp(34px,10vw,46px);font-weight:900;letter-spacing:-.01em;text-align:center}
 #home .tag{margin:0;color:var(--soft);font-size:15px;text-align:center;max-width:300px}
 #hero{flex:1;min-height:0;width:100%;position:relative;margin:6px 0 10px}
 #hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;animation:breathe 3.2s ease-in-out infinite}
@@ -133,17 +133,6 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 @keyframes fall{to{transform:translate(var(--dx),108vh) rotate(var(--rot))}}
 #oopsArt{position:fixed;left:50%;bottom:calc(var(--sab) + 96px);width:150px;transform:translateX(-50%) translateY(60%) scale(.6);opacity:0;transition:transform .25s cubic-bezier(.3,1.4,.5,1),opacity .2s;z-index:15;pointer-events:none}
 #oopsArt.on{transform:translateX(-50%);opacity:1}
-/* second scene: lantern night garden */
-body.night{background:linear-gradient(#141B45,#3A2A6B);color:#F1F4FF}
-body.night .tag,body.night #msg,body.night .tool,body.night #time{color:#B9C3E6}
-body.night .chip,body.night .pill,body.night .rule,body.night .round,body.night .card,body.night .btn.alt,body.night #ci,body.night #diff{color:var(--ink)}
-body.night #bones{color:#fff}
-body.night .chip,body.night .round,body.night .rule,body.night #ci,body.night .tool span.ic,body.night .pill{box-shadow:0 3px 0 rgba(0,0,0,.35)}
-body.night #board{background:#232B63;box-shadow:0 6px 0 #0E1338,0 14px 30px rgba(0,0,0,.4)}
-body.night .cell img{inset:-9%;width:118%;height:118%}
-body.night .mini i.d{background-image:url(assets/art/L1_lantern.png)}
-body.night #win .card{color:#fff}
-body.night .cell.hint{box-shadow:0 0 0 4px #FFD76A,0 0 0 9px rgba(255,215,106,.3)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
@@ -158,7 +147,7 @@ body.night .cell.hint{box-shadow:0 0 0 4px #FFD76A,0 0 0 9px rgba(255,215,106,.3
   <div id="ci"><b><span id="t-checkin"></span><span id="ciDay"></span></b><div id="ciDots"></div></div>
   <div class="chips">
     <button class="chip" id="lang"></button><button class="chip" id="snd"></button><button class="chip" id="shopChip"></button>
-    <button class="chip" id="scene"></button><button class="chip" id="howChip"></button>
+    <button class="chip" id="howChip"></button>
   </div>
 </div>
 
@@ -230,5 +219,6 @@ body.night .cell.hint{box-shadow:0 0 0 4px #FFD76A,0 0 0 9px rgba(255,215,106,.3
 <script src="i18n.js"></script>
 <script src="strings.js"></script>
 <script src="game.js"></script>
+<script src="scene_switch.js"></script>
 </body>
 </html>

@@ -5,14 +5,13 @@
 const sysLang=(()=>{const l=(navigator.language||"en").toLowerCase(),c=l.split("-")[0];return l.startsWith("zh")?"zh-Hant":LANGS.some(x=>x[0]===c)?c:"en"})();
 const fmtN=(k,n)=>tr(k).replace("{n}",n),fill=(k,o)=>tr(k).replace(/\{(\w)\}/g,(m,c)=>o[c]);
 const S={lang:LANGS.some(x=>x[0]===load("lang",sysLang))?load("lang",sysLang):"en",inv:{hints:load("inv.hints",0),blasts:load("inv.blasts",1)},screen:"home",mode:"levels",level:load("level",1),
-  p:null,cells:[],no:[],undo:[],hints:3,used:0,bones:3,t0:0,tick:0,done:false,failed:false,run:0,combo:0,hintCell:-1,auto:false,scene:load("scene","shiba")==="lantern"?"lantern":"shiba",sound:load("sound",true),music:load("music",true)};
+  p:null,cells:[],no:[],undo:[],hints:3,used:0,bones:3,t0:0,tick:0,done:false,failed:false,run:0,combo:0,hintCell:-1,auto:false,sound:load("sound",true),music:load("music",true)};
 // Ten region colours, picked to stay apart for the common colour-blind types as well (checked by eye on a simulator, not measured).
 const COLORS=["#FF9EBB","#7FDDB4","#8CC4FF","#FFD86B","#BFA2F7","#FFB07C","#5CCBD6","#B9E26A","#D9A38F","#A9B8D6"];
 const ART="assets/art/",board=$("board"),fxl=$("fxl");let els=[];
-// Two scenes share one game: the puppy garden (default) and the lantern night garden. Only the piece, the palette and the wording differ.
 // Four puppies with different coats share a board: which one sits on a tile depends on its row and the level, so it stays put.
 const DOGS=[["C1_token","C2_token_joy"],["K1_token","K2_token"],["S1_token","S2_token"],["G1_token","G2_token"]];
-const piece=(joy,k)=>S.scene==="lantern"?(joy?"L2_lantern_glow":"L1_lantern"):DOGS[k==null||!S.p?0:(Math.floor(k/S.p.n)+S.level)%DOGS.length][joy?1:0];
+const piece=(joy,k)=>DOGS[k==null||!S.p?0:(Math.floor(k/S.p.n)+S.level)%DOGS.length][joy?1:0];
 
 // ---------- small effects (DOM only) ----------
 function pop(x,y,txt,bad){if(calm)return;const d=document.createElement("div");d.className="pop"+(bad?" bad":"");d.textContent=txt;d.style.left=Math.max(70,Math.min(innerWidth-70,x))+"px";d.style.top=Math.max(90,y)+"px";fxl.appendChild(d);d.addEventListener("animationend",()=>d.remove())}
@@ -155,11 +154,10 @@ $("howChip").onclick=()=>{sfx.tap();openTut()};
 
 // ---------- screens and text ----------
 function show(s){S.screen=s;$("home").classList.toggle("on",s==="home");$("game").classList.toggle("on",s==="game");if(s==="game")requestAnimationFrame(fit)}
-function text(){sceneText(S.scene);document.body.classList.toggle("night",S.scene==="lantern");$("countImg").src=ART+piece()+".png";document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";document.title=tr("title");
+function text(){document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";document.title=tr("title");
   for(const k of["title","tag","play","daily","checkin","undo","hint","ball","reset","fail","shop","lang","snd","sfx","mus","tutTitle","tut1","tut2","how"])$("t-"+k).textContent=tr(k);
   $("playSub").textContent=fmtN("levelN",load("level",1));$("dailySub").textContent=tr(load("dailyLast",0)===todayKey()?"doneToday":"newToday");
   $("lang").textContent="🌐 "+LANGS.find(x=>x[0]===S.lang)[1];$("snd").textContent="♪ "+tr("snd");$("shopChip").textContent="＋ "+tr("shop");$("howChip").textContent="? "+tr("tutTitle");
-  $("scene").textContent="✦ "+tr("title");
   $("lvl").textContent=S.mode==="daily"?tr("daily"):fmtN("levelN",S.level);const g=S.p?S.p.grade||1:1,d=$("diff");d.textContent=tr(g<=1?"easy":g<=3?"medium":"tricky");d.className=g<=1?"":g<=3?"g2":"g3";
   $("rules").innerHTML=$("rules3").innerHTML=rulesHtml();$("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("shopClose").textContent=$("sndClose").textContent=tr("close");
   $("tutOk").textContent=$("ciOk").textContent=tr("gotIt");$("sfxT").textContent=tr(S.sound?"on":"off");$("musT").textContent=tr(S.music?"on":"off");$("sfxT").classList.toggle("alt",!S.sound);$("musT").classList.toggle("alt",!S.music);
@@ -179,7 +177,6 @@ $("snd").onclick=()=>{sfx.tap();$("sndSheet").classList.add("on")};
 $("sfxT").onclick=()=>{S.sound=!S.sound;save("sound",S.sound);text();sfx.tap()};
 $("musT").onclick=()=>{S.music=!S.music;save("music",S.music);Music.enable(S.music);text();sfx.tap()};
 $("sndSheet").onclick=e=>{if(e.target===$("sndSheet")||e.target===$("sndClose"))$("sndSheet").classList.remove("on")};
-$("scene").onclick=()=>{S.scene=S.scene==="lantern"?"shiba":"lantern";save("scene",S.scene);sfx.tap();text();if(S.p)S.cells.forEach((v,k)=>sync(k))};
 addEventListener("resize",fit);
 window.__lanternApi={start,setCell,tap,show,checkIn,info:()=>({music:Music.state(),buffers:Object.keys(BUF).length,audio:AC?AC.state:"none"})};
 text();

@@ -29,3 +29,7 @@ flutter:
     - assets/game/
     - assets/game/assets/
     - assets/game/assets/art/
+    - assets/game/lantern/
+    - assets/game/lantern/vendor/
+    - assets/game/lantern/assets/
+    - assets/game/lantern/assets/fx/
