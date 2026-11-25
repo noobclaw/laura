@@ -2,8 +2,8 @@
 window.SG_RULES = {
  "_comment": "All tuning numbers come from design/gdd/*.md. Edit here, then run: node tools/build-rules.js",
  "round": {
-  "prepSec": 90,
-  "seekSec": 240,
+  "prepSec": 60,
+  "seekSec": 300,
   "revealSec": 30,
   "minPlayers": 2
  },
@@ -22,11 +22,11 @@ window.SG_RULES = {
   }
  ],
  "cat": {
-  "walkSpeed": 1.6,
-  "crouchSpeed": 0.8,
+  "walkSpeed": 2.4,
+  "crouchSpeed": 1,
   "jumpHeight": 1.1,
   "jumpHeightShortLeg": 0.8,
-  "clingSpeed": 1.3,
+  "clingSpeed": 1.6,
   "stillSpeed": 0.05,
   "meowRange": 12,
   "maxDecoys": 2,
@@ -36,15 +36,19 @@ window.SG_RULES = {
   "forcedMeowMinSec": 5,
   "embedRatio": 0.6,
   "embedSec": 3,
-  "runSpeed": 2.5,
+  "runSpeed": 5,
   "sizes": [
    1,
    1.4,
    1.7
-  ]
+  ],
+  "accel": 16,
+  "decel": 10,
+  "posedSpeed": 0.8,
+  "nudgeSpeed": 0.15
  },
  "dog": {
-  "speed": 1.8,
+  "speed": 2.6,
   "startAmmo": 5,
   "shotIntervalSec": 1.5,
   "missDelta": -1,
@@ -68,7 +72,8 @@ window.SG_RULES = {
    "dachs": 0.36,
    "husky": 0.72
   },
-  "runSpeed": 2.8
+  "runSpeed": 5.4,
+  "bodyRad": 0.18
  },
  "overlooked": {
   "tickEverySec": 0.5,
@@ -94,11 +99,11 @@ window.SG_RULES = {
  },
  "solo": {
   "_comment": "defaults when playing alone with bots (ours); multiplayer keeps round.*",
-  "prepSec": 90,
-  "seekSec": 240,
+  "prepSec": 60,
+  "seekSec": 300,
   "mode": "infection",
   "botCatsWhenCat": 9,
-  "botDogsWhenCat": 2,
+  "botDogsWhenCat": 1,
   "botCatsWhenDog": 10,
   "botDogsWhenDog": 1
  },

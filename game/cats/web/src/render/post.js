@@ -69,7 +69,7 @@
     '  c=c*c*(3.-2.*c)*0.35+c*0.65;', // gentle S curve
     '  vec2 q=vUv-0.5; float v=smoothstep(0.85,0.2,dot(q,q)*1.9); c*=mix(1.-uVignette,1.,v);',
     '  if(uMono>0.5) c=vec3(dot(c,vec3(0.3,0.59,0.11)));', // host filter: monochrome
-    '  if(uHorror>0.5){ c*=vec3(0.30,0.33,0.42); c*=smoothstep(0.62,0.04,dot(q,q)*2.4); }', // host filter: dark, narrow view
+    '  if(uHorror>0.5){ float hk=uHorror<1.5?0.62:uHorror<2.5?0.46:0.34; float hl=dot(c,vec3(0.3,0.59,0.11)); c=mix(c,vec3(hl),0.25)*hk*vec3(0.92,0.96,1.08); c*=mix(1.,smoothstep(1.05,0.1,dot(q,q)*2.2),0.55); }', // host filter 恐怖: darker, slightly drained, soft vignette; still navigable
     '  c=pow(c,vec3(1./2.2));',
     '  c+=(hash(gl_FragCoord.xy+uTime)-0.5)/200.;',
     '  o=vec4(c*uFade,1.);',

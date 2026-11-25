@@ -15,7 +15,7 @@
     paint: { on: false, rgb: [47, 75, 124], rough: 0.8, metal: 0, size: RULES.paint.brushDefaultCm / 100, hard: true, tool: 'brush', undo: [], last: null },
     shots: [], marks: [], confetti: [], decoys: [], decoyCd: 0, guide: 0, hitstop: 0, labels: []
   });
-  G.opts = { sens: 1, invertY: false, fov: 62, res: 1, shadows: true, post: true, lang: 'zh', sfx: 1, amb: 1, quality: Q.get('q') === 'low' ? 'low' : 'high' };
+  G.opts = { sens: 1, invertY: false, fov: 105, res: 1, shadows: true, post: true, lang: 'zh', sfx: 1, amb: 0.3, music: 0.125, searchMusic: false, fpsCap: 0, showFps: false, quality: Q.get('q') === 'low' ? 'low' : 'high' };
   var V = function (x, y, z) { return new THREE.Vector3(x, y, z); };
   var tmp = V(), tmp2 = V();
 
@@ -49,7 +49,8 @@
         if (shot && SHOTS[shot]) SHOTS[shot](); else toTitle();
         var last = performance.now();
         function frame(now) {
-          var dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now;
+          if (G.opts.fpsCap && now - last < 1000 / G.opts.fpsCap - 1) { requestAnimationFrame(frame); return; }
+          var dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now; G.ft = G.ft == null ? dt : G.ft + (dt - G.ft) * 0.08; G.ftMax = Math.max((G.ftMax || 0) * 0.995, dt);
           if (!G.paused) update(dt);
           render(dt);
           G.frames = (G.frames || 0) + 1;
@@ -84,9 +85,9 @@
     o = o || {};
     var size = o.size || 1, c = new SG.Critter(spec, { seed: G.ents.length + 1, atlas: RULES.paint.textureSize, scale: size });
     scene.add(c.root);
-    if (team === 'cat') c.tailMode = 'tuck';
+    if (team === 'cat') { c.tailMode = 'tuck'; c.faceSkin.visible = false; c.blank = true; } // the hider is a plain canvas: no face details to give it away
     var e = { size: size, id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
-      rad: team === 'dog' ? 0.22 : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
+      rad: team === 'dog' ? RULES.dog.bodyRad : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
     if (o.pose) c.setPose(o.pose);
     place(e); G.ents.push(e); return e;
   }
@@ -159,7 +160,7 @@
   /* ------------------------------------------------------------------ round */
   var CAT_KEYS = Object.keys(SG.CATS), DOG_KEYS = Object.keys(SG.DOGS);
   function shuffled(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  G.settings = { mode: RULES.solo.mode, prep: RULES.solo.prepSec, seek: RULES.solo.seekSec, reveal: RULES.round.revealSec, dogs: 0, ammo: RULES.dog.startAmmo, breedEyes: false, paintAids: false, knockNoise: false, show: true, unlimited: false, forcedMeow: false, meowEvery: RULES.cat.forcedMeowSec, board: true, night: false, map: 'nekoyashiki', fMono: false, fHorror: false, fMosaic: false };
+  G.settings = { mode: RULES.solo.mode, prep: RULES.solo.prepSec, seek: RULES.solo.seekSec, reveal: RULES.round.revealSec, dogs: 1, ammo: RULES.dog.startAmmo, breedEyes: false, paintAids: false, knockNoise: false, show: true, unlimited: true, forcedMeow: false, meowEvery: RULES.cat.forcedMeowSec, board: true, night: false, map: 'home', fMono: false, fHorror: 0, fMosaic: 0 };
   G.pick = { cat: { breed: 'mochi', ear: '', tail: '' }, dog: { breed: 'shiba', ear: '', tail: '', collar: '' } };
   function specOf(team, o) { o = o || G.pick[team]; return SG.makeSpec((team === 'cat' ? SG.CATS : SG.DOGS)[o.breed], o); }
   G.specOf = specOf;
@@ -173,7 +174,7 @@
     for (i = 0; i < n; i++) { var k = CAT_KEYS[i % CAT_KEYS.length]; spawn('lb' + i, SG.CATS[k], 'cat', { bot: true, x: (-3.4 + (i % 6) * 0.95) * WS, z: (2.95 + (i % 2) * 0.5 + (i > 5 ? 2.9 : 0)) * WS, y: i > 5 ? -0.3 * WS : 0, yaw: i * 1.7, name: SG.CATS[k].name + (i >= CAT_KEYS.length ? '二號' : ''), pose: ['sit', 'loaf', 'stand', 'stretch'][i % 4] }); players.push({ id: 'lb' + i, team: 'cat', bot: true }); }
     G.state = Core.createState(players, RULES, rnd, 'basic'); // stays in phase 'lobby' until the lottery is over
     G.lobby = { t: RULES.lobby.lotterySec, x: 3.3 * WS, z: 3.25 * WS, r: 0.62 * WS, n: n + 1, on: false };
-    if (!lobbyMat) { var cv = document.createElement('canvas'); cv.width = cv.height = 512; var g = cv.getContext('2d'); g.fillStyle = '#c8452e'; g.beginPath(); g.arc(256, 256, 250, 0, 7); g.fill(); g.strokeStyle = '#fff3d6'; g.lineWidth = 14; g.beginPath(); g.arc(256, 256, 222, 0, 7); g.stroke(); g.fillStyle = '#fff3d6'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '84px SushiTC, sans-serif'; g.fillText('請站在', 256, 205); g.fillText('這裡', 256, 305);
+    if (!lobbyMat) { var cv = document.createElement('canvas'); cv.width = cv.height = 512; var g = cv.getContext('2d'); g.fillStyle = '#2f6f6a'; g.fillRect(16, 16, 480, 480); g.strokeStyle = '#fff3d6'; g.lineWidth = 14; g.strokeRect(40, 40, 432, 432); g.fillStyle = '#fff3d6'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '84px SushiTC, sans-serif'; g.fillText('請站在', 256, 205); g.fillText('這裡', 256, 305);
       var tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace; lobbyMat = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshStandardMaterial({ map: tx, roughness: 0.9, transparent: true, polygonOffset: true, polygonOffsetFactor: -4 })); lobbyMat.rotation.x = -Math.PI / 2; lobbyMat.rotation.z = Math.PI / 2; }
     lobbyMat.scale.setScalar(G.lobby.r); lobbyMat.position.set(G.lobby.x, room.groundAt(G.lobby.x, G.lobby.z, 1, 0) + 0.012, G.lobby.z); scene.add(lobbyMat);
     room.setNight(false); G.cam.yaw = -Math.PI / 2; G.cam.pitch = 0.3; G.cam.dist = 3.0;
@@ -185,7 +186,7 @@
   };
   G.start = function (side, breed) {
     G.lobby = null; if (lobbyMat) scene.remove(lobbyMat);
-    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.embedT = 0;
+    clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.liked = false; G.seeThrough = true; G.cam.kk = null; G.cam.look = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.embedT = 0;
     var WS = SG.WS, S = G.settings, mode = S.mode, players = [], nd = Math.max(1, Math.min(3, S.dogs || (side === 'cat' && mode !== 'double' ? RULES.solo.botDogsWhenCat : RULES.solo.botDogsWhenDog + 1)));
     RULES.round.prepSec = S.prep; RULES.round.seekSec = S.seek; RULES.round.revealSec = S.reveal; RULES.dog.startAmmo = S.ammo; RULES.dog.unlimited = !!S.unlimited;
     if (mode === 'double') side = 'cat';
@@ -331,10 +332,10 @@
   /* fraction of a seeker's screen each cat actually covers, counted in pixels of an ID render (so furniture in front counts as hidden) */
   var idMats = [], AW = 96, AH = 54, idPx = new Uint8Array(AW * AH * 4), areaCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.05, 60);
   function visibleAreas(cam) {
-    var list = cats().filter(function (c) { return !c.decoyOf && c.c.root.visible; }), saved = [], out = {}, cnt = [], i;
+    var list = cats().concat(G.decoys).filter(function (c) { return c.c.root.visible; }), saved = [], out = {}, cnt = [], i;
     list.forEach(function (c, k) { if (!idMats[k]) idMats[k] = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, (8 + 16 * k) / 255, 1) }); saved.push(c.c.skin.material); c.c.skin.material = idMats[k]; c.fv = c.c.faceSkin.visible; c.c.faceSkin.visible = false; cnt.push(0); });
     post.renderAlbedo(scene, cam, AW, AH, idPx, 'raw');
-    list.forEach(function (c, k) { c.c.skin.material = saved[k]; c.c.faceSkin.visible = c.fv; });
+    list.forEach(function (c, k) { c.c.skin.material = saved[k]; c.c.faceSkin.visible = c.fv && !c.c.blank; });
     for (i = 0; i < idPx.length; i += 4) if (idPx[i] > 250 && idPx[i + 2] > 250 && idPx[i + 1] < 8 + 16 * list.length) { var k2 = Math.round((idPx[i + 1] - 8) / 16); if (k2 >= 0 && k2 < cnt.length) cnt[k2]++; }
     list.forEach(function (c, k) { out[c.id] = cnt[k] / (AW * AH); });
     return out;
@@ -344,10 +345,10 @@
      45 when the hunter looks straight at it from close by, less toward the screen edge and with distance (numbers in rules.json). */
   function overlookTick(d, cam) {
     var st = G.state, pid = d.pid, dbl = st.mode === 'double', areas = visibleAreas(cam);
-    cats().forEach(function (c) {
-      if (c.decoyOf || !c.c.root.visible || c.id === pid || (!dbl && c.out)) return; var a = areas[c.id] || 0; if (a <= 0) return; c.seenT = G.simT;
+    cats().concat(G.decoys).forEach(function (c) { // a clone that goes unnoticed scores for its owner too
+      if (!c.c.root.visible || c.id === pid || c.decoyOf === pid || (!dbl && c.out)) return; var a = areas[c.id] || 0; if (a <= 0) return; c.seenT = G.simT;
       var ctr = c.c.center(tmp2), dist = cam.position.distanceTo(ctr); tmp.copy(ctr).project(cam);
-      dispatch({ type: 'overlook', cat: c.id, by: pid, area: a, centre: Math.min(1, Math.hypot(tmp.x, tmp.y)), dist: dist, speed: c.speed || 0 });
+      dispatch({ type: 'overlook', cat: c.decoyOf || c.id, by: pid, area: a, centre: Math.min(1, Math.hypot(tmp.x, tmp.y)), dist: dist, speed: c.speed || 0 });
     });
     return areas;
   }
@@ -374,7 +375,7 @@
 
   /* ------------------------------------------------------------------ shooting */
   /* paint pellets leave splats that stay (one instanced mesh), and mark the cats they hit */
-  var SPLAT_N = 600, splats = null, splatI = 0, _m4 = new THREE.Matrix4(), _qq = new THREE.Quaternion(), _zz = V(0, 0, 1), _sc = V(), _col = new THREE.Color();
+  var SPLAT_N = 1800, splats = null, splatI = 0, _m4 = new THREE.Matrix4(), _qq = new THREE.Quaternion(), _zz = V(0, 0, 1), _sc = V(), _col = new THREE.Color();
   function splatMesh() {
     if (splats) return splats;
     var g = new THREE.CircleGeometry(1, 11), p = g.attributes.position, r = SG.rng(77);
@@ -406,8 +407,8 @@
       var pd = wd; if (wp) { var den = d.dot(wn); if (den < -0.05) pd = Math.min(wd * 1.6, wp.clone().sub(origin).dot(wn) / den); }
       ray.set(origin, d); var hc = null, hd = pd, hp = null;
       targets.forEach(function (c) { ray.far = hd; var h = c.c.raycast(ray); if (h && h.distance < hd) { hd = h.distance; hc = c; hp = h.point; } });
-      if (hc) { hits[hc.id] = (hits[hc.id] || 0) + 1; if (hits[hc.id] > bestN) { bestN = hits[hc.id]; best = hc; } hc.c.paint(hp, 0.028 + rnd() * 0.02, rgb, 0.3, 0, 0.8); } // paint mark on whoever was hit
-      else if (wp && pd < RULES.dog.range) { addSplat(tmp2.copy(origin).addScaledVector(d, pd), wn, 0.035 + rnd() * 0.05, rgb); if (i < 4) puff(tmp2, wn, rgb); if (i === 0) room.kick(tmp2.x, tmp2.y, tmp2.z, dir.x, dir.z, 2.2); }
+      if (hc) { hits[hc.id] = (hits[hc.id] || 0) + 1; if (hits[hc.id] > bestN) { bestN = hits[hc.id]; best = hc; } hc.c.paint(hp, 0.06 + rnd() * 0.05, rgb, 0.25, 0, 0.85); } // paint mark on whoever was hit
+      else if (wp && pd < RULES.dog.range) { addSplat(tmp2.copy(origin).addScaledVector(d, pd), wn, 0.09 + rnd() * 0.12, rgb); for (var sd = 0; sd < 2; sd++) addSplat(tmp.copy(tmp2).add(V((rnd() - 0.5) * 0.36, (rnd() - 0.75) * 0.4, (rnd() - 0.5) * 0.36)), wn, 0.02 + rnd() * 0.035, rgb); if (i < 5) puff(tmp2, wn, rgb); if (i === 0) room.kick(tmp2.x, tmp2.y, tmp2.z, dir.x, dir.z, 2.2); }
       if (!hc && G.me && G.me.team === 'cat' && !G.me.out && dogEnt !== G.me) { var mc = G.me.c.center(tmp), t0 = Math.max(0, Math.min(pd, mc.clone().sub(origin).dot(d))); if (mc.distanceTo(tmp2.copy(origin).addScaledVector(d, t0)) < RULES.feel.nearMissPelletM) G.nearPellet = true; }
     }
     var target = best ? (best.decoyOf ? ent(best.decoyOf) : best) : null, fleeing = false;
@@ -577,7 +578,7 @@
   function turn(a, b, k) { var d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * Math.min(1, k); }
 
   /* ------------------------------------------------------------------ player actions */
-  G.setPose = function (name) { if (!G.me || G.me.team !== 'cat' || G.me.out) return; G.viewLock = false; G.me.c.setPose(name); bus.emit('pose', { pose: name }); if (name !== 'stand' && G.guide === 1) setGuide(2); };
+  G.setPose = function (name) { if (!G.me || G.me.team !== 'cat' || G.me.out) return; if (G.paint.on && name !== 'stand') G.setPaintMode(false); G.viewLock = false; G.me.c.setPose(name); bus.emit('pose', { pose: name }); if (name !== 'stand' && G.guide === 1) setGuide(2); };
   function meowFrom(e, forced) {
     bus.emit('meow', { x: e.x, z: e.z, id: e.id, forced: !!forced, me: e === G.me });
     dogsOf().forEach(function (d) {
@@ -606,16 +607,16 @@
   function setGuide(n) { if (G.guide !== n) { G.guide = n; bus.emit('guide', { step: n }); } }
 
   /* painting */
-  G.setPaintMode = function (on) { if (!G.me || G.me.team !== 'cat') return; G.paint.on = on; bus.emit('paintmode', { on: on }); if (on && G.guide === 2) setGuide(3); };
+  G.setPaintMode = function (on) { if (!G.me || G.me.team !== 'cat') return; G.paint.on = on; G.stroking = false; if (!Q.get('nolock')) { try { if (on && document.exitPointerLock) document.exitPointerLock(); else if (!on && canvas.requestPointerLock) canvas.requestPointerLock(); } catch (er) { } } /* paint mode: free cursor; leaving it takes the pointer back */ bus.emit('paintmode', { on: on }); if (on && G.guide === 2) setGuide(3); };
   function pointerRay(x, y) { tmp.set(x / G.vw * 2 - 1, -(y / G.vh) * 2 + 1, 0.5); ray.setFromCamera(new THREE.Vector2(tmp.x, tmp.y), camera); ray.far = 60; ray.layers.set(0); return ray; }
   var patDir = V(), patPerp = V(), patOn = false;
   function paintAt(x, y, first) {
     var P = G.paint, c = G.me.c, pr = pointerRay(x, y), hit = c.raycast(pr);
     if (!hit) { P.last = null; return false; }
     if (!G.seeThrough) { // normal brush: whatever stands between the camera and the body blocks the stroke
-      var blk = segSolid(pr.ray.origin, hit.point, 0.03); // against the collision boxes: cheap enough to do on every mouse move
+      var blk = segSolid(camera.position, hit.point, 0.03); // against the collision boxes: cheap enough to do on every mouse move
       if (blk) { P.last = null; if (first) bus.emit('blocked'); return false; } }
-    var thru = G.seeThrough ? pr.ray.direction.clone() : null; // see-through brush: a cylinder along the view ray, so front and back are painted in one pass
+    var thru = null; // (the through-the-body brush was our guess at key 3; the original's key 3 is camera pass-through, so it is gone)
     var hard = P.hard ? RULES.paint.hardnessHard : RULES.paint.hardnessSoft, pat = null;
     if (P.pattern) { // the pattern follows the direction of the stroke, fixed once the stroke has moved a little
       if (first) { patOn = false; P.last = (P.last || V()).copy(hit.point); P.first = hit.point.clone(); return true; }
@@ -623,7 +624,7 @@
       var dk = P.pattern === 'wood' || P.pattern === 'tatami';
       pat = { type: P.pattern, dir: patDir, perp: patPerp, scale: Math.max(0.012, P.size * 0.5), rgb2: dk ? [P.rgb[0] * 0.62, P.rgb[1] * 0.6, P.rgb[2] * 0.55] : (P.rgb2 || [245, 241, 232]) };
     }
-    if (P.last && !first) { var d = P.last.distanceTo(hit.point), n = Math.min(24, Math.ceil(d / (P.size * 0.35))); for (var i = 1; i < n; i++) c.paint(tmp2.lerpVectors(P.last, hit.point, i / n), P.size, P.rgb, P.rough, P.metal, hard, pat); }
+    if (P.last && !first) { var d = P.last.distanceTo(hit.point), n = Math.min(40, Math.ceil(d / (P.size * 0.25))); for (var i = 1; i < n; i++) c.paint(tmp2.lerpVectors(P.last, hit.point, i / n), P.size, P.rgb, P.rough, P.metal, hard, pat); }
     c.paint(hit.point, P.size, P.rgb, P.rough, P.metal, hard, pat);
     if (thru) for (var ti = 1, tn = Math.ceil(0.7 * G.me.size / (P.size * 0.6)); ti <= tn; ti++) c.paint(tmp2.copy(hit.point).addScaledVector(thru, ti * P.size * 0.6), P.size, P.rgb, P.rough, P.metal, hard, pat);
     P.last = (P.last || V()).copy(hit.point); bus.emit('stroke', { size: P.size });
@@ -671,22 +672,24 @@
       if (k === 'Escape') bus.emit('menu');
       if (k === '2') { G.tags = !G.tags; bus.emit('tags', { on: G.tags }); }
       if (k === 't') { bus.emit('chat'); e.preventDefault(); }
-      if (G.fly) { if (k === '4') spectateNext(); if (k === '5') { G.follow = null; bus.emit('follow', { name: null }); } return; }
+      if (k === 'y') { G.skip(); if (!G.me || G.mode !== 'play') return; }
+      if (k === 'g' && G.state.phase === 'reveal' && !G.liked) { G.liked = true; bus.emit('like', { id: G.me.id }); }
+      if (G.fly) { if (k === '4') { if (G.fly.hide) { G.follow = null; } else spectateNext(); } if (k === '5') { if (G.fly.hide) { G.fly = null; bus.emit('mode2'); bus.emit('viewlock', { on: G.viewLock }); } else { G.follow = null; bus.emit('follow', { name: null }); } } return; }
       var me = G.me;
       if (me.team === 'cat' && !me.out) {
         if (k === 'f') G.setPaintMode(!G.paint.on);
         if (k === 'r') bus.emit('wheel', { open: true });
         if (k === '1') G.meow();
         if (k === '3') G.setSeeThrough(!G.seeThrough);
-        if (k === 'g') bus.emit('like', { id: me.id });
         if (k === 'q') G.decoy();
         if (k === 'x') G.recallDecoys();
         if (k === 'z' && (e.ctrlKey || e.metaKey || G.paint.on)) { G.undo(); e.preventDefault(); }
         if (k === '[') bus.emit('brush', { d: -0.01 }); if (k === ']') bus.emit('brush', { d: 0.01 });
-        if (k === ' ' && !G.paint.on && !me.cling) { var hd = G.keys.w || G.keys.a || G.keys.s || G.keys.d ? G.cam.yaw + Math.PI : me.yaw; if (!tryAttach(me, Math.sin(hd), Math.cos(hd))) jump(); } // Space next to anything climbs it, otherwise jumps (in paint mode Space is the 3D eyedropper)
+        if (k === ' ' && !G.paint.on && !me.cling) jump(); // jump INTO a wall or an object to stick to it (in paint mode Space is the 3D eyedropper)
+        if (k === '5') { G.fly = { p: camera.position.clone(), yaw: G.cam.yaw + Math.PI, pitch: -G.cam.pitch, hide: true }; bus.emit('spectate', { hide: true }); return; } // free camera while hiding: the body stays where it is
         if (k === 'Shift' && me.cling) release(me);
         if (k === 'v' && G.paint.on) { G.paint.flat = !G.paint.flat; bus.emit('shading', { on: !G.paint.flat }); }
-      } else if (me.team === 'dog') { if (k === ' ') jump(); }
+      } else if (me.team === 'dog') { if (k === ' ' && !me.cling) jump(); if (k === 'Shift' && me.cling) release(me); }
     });
     window.addEventListener('keyup', function (e) { var k = e.key.length === 1 ? e.key.toLowerCase() : e.key; G.keys[k] = false; if (k === 'r') bus.emit('wheel', { open: false }); });
     window.addEventListener('blur', function () { G.keys = {}; });
@@ -701,23 +704,23 @@
         if (G.paint.on && !me.out) {
           if (e.button === 0 && !e.altKey) {
             if (G.keys[' '] || G.paint.tool === 'pick') { G.pickAt(e.clientX, e.clientY, e.shiftKey); if (G.paint.tool === 'pick') { G.paint.tool = 'brush'; bus.emit('tool', { tool: 'brush' }); } return; }
-            me.c.beginStroke(); G.paint.last = null; G.stroking = paintAt(e.clientX, e.clientY, true); if (!G.stroking) { me.c.endStroke(); G.orbiting = true; }
+            me.c.beginStroke(); G.paint.last = null; G.stroking = paintAt(e.clientX, e.clientY, true); if (!G.stroking) me.c.endStroke(); // left on the empty world does nothing in paint mode
           } else if (e.button === 2 && !e.altKey) G.sizing = true; // right-drag changes the brush size
           else if (e.button === 2) G.zooming = true;                // Alt + right-drag zooms
           else G.orbiting = true;                                  // middle-drag or Alt+drag turns the camera
         } else {
-          if (e.button === 0) lock();
-          if (e.button === 2) G.rmb = [e.clientX, e.clientY]; G.orbiting = true; // right click = rotation lock (旋轉鎖定), right drag = look around
+          if (e.button === 0) { if (!Q.get('nolock') && document.pointerLockElement !== canvas) { lock(); return; } G.orbitDrag = false; } // the click that takes the pointer is swallowed
+          if (e.button === 2 && !me.out) { G.rmb = [e.clientX, e.clientY]; G.viewLock = true; bus.emit('viewlock', { on: true }); } G.orbiting = true; G.orbitDrag = false; // HOLD right mouse = the body's facing is locked while you move and look
         }
       } else if (me.team === 'dog' && G.state.phase === 'seek') {
-        if (e.button === 0) { lock(); shootPlayer(); }
+        if (e.button === 0) { if (!Q.get('nolock') && document.pointerLockElement !== canvas) { lock(); return; } shootPlayer(); }
         if (e.button === 2) G.third = !G.third;
       } else G.orbiting = true;
     });
     window.addEventListener('mouseup', function (e) {
       G.mouse.down[e.button] = false;
       if (G.stroking) { G.stroking = false; pushUndo(G.me.c.endStroke()); bus.emit('strokeEnd', { undo: G.paint.undo.length }); }
-      if (e.button === 2 && G.rmb) { if (Math.hypot(e.clientX - G.rmb[0], e.clientY - G.rmb[1]) < 5 && G.me && G.me.team === 'cat' && !G.me.out && G.mode === 'play') { G.viewLock = !G.viewLock; bus.emit('viewlock', { on: G.viewLock }); } G.rmb = null; }
+      if (e.button === 2 && G.rmb) { G.rmb = null; if (G.viewLock) { G.viewLock = false; bus.emit('viewlock', { on: false }); } }
       G.orbiting = false; G.sizing = false; G.zooming = false;
     });
     window.addEventListener('mousemove', function (e) {
@@ -738,7 +741,7 @@
   function jump() {
     var m = G.me; if (m.cling || m.air || G.state.phase === 'reveal') return;
     var h = m.team === 'dog' ? RULES.dog.jumpHeight : m.spec.leg < 0.1 ? RULES.cat.jumpHeightShortLeg : RULES.cat.jumpHeight;
-    m.vy = Math.sqrt(2 * 9.8 * h); m.y += 0.01; m.air = true; if (m.team === 'cat' && m.c.pose !== 'stand') G.setPose('stand'); bus.emit('jump');
+    m.vy = Math.sqrt(2 * 9.8 * h); m.y += 0.01; m.air = true; if (m.team === 'cat' && m.c.pose === 'crouch') G.setPose('stand'); bus.emit('jump'); /* a pose survives jumping and climbing */
   }
   function shootPlayer() {
     var m = G.me; if (!m || m.team !== 'dog' || G.state.phase !== 'seek') return;
@@ -768,20 +771,26 @@
         if (Lb.t <= 0) { var sd = Lb.on ? 'dog' : 'cat'; bus.emit('lottery', { side: sd }); G.start(G.settings.mode === 'double' ? 'cat' : sd); return; } }
       if (st.phase !== 'lobby') dispatch({ type: 'tick', dt: dt });
       G.decoyCd = Math.max(0, G.decoyCd - dt);
-      if (me && !me.out && st.phase !== 'reveal') {
+      if (me && !me.out && st.phase !== 'reveal' && !G.fly) {
         var f = (k.w || k.ArrowUp && me.team === 'cat' ? 1 : 0) - (k.s || k.ArrowDown && me.team === 'cat' ? 1 : 0), s = (k.d ? 1 : 0) - (k.a ? 1 : 0);
         if (me.team === 'cat') {
           var cy = G.cam.yaw, mvx = -Math.sin(cy) * f + Math.cos(cy) * s, mvz = -Math.cos(cy) * f - Math.sin(cy) * s, l = Math.hypot(mvx, mvz), px = me.x, pz = me.z;
           if (!me.cling && l <= 0.01 && (me.c.pose === 'crouch') !== !!(k.c || k.Control) && (me.c.pose === 'crouch' || me.c.pose === 'stand')) me.c.setPose(me.c.pose === 'crouch' ? 'stand' : 'crouch');
-          if (!me.cling && l <= 0.01 && me.c.pose !== 'stand' && me.c.pose !== 'crouch' && !G.viewLock && !G.paint.on && G.looked) me.yaw = turn(me.yaw, G.cam.yaw + Math.PI, dt * 10);
+          if (!me.cling && l <= 0.01 && me.c.pose !== 'stand' && me.c.pose !== 'crouch' && !G.viewLock && !G.paint.on && G.looked && G.mouse.down[0]) me.yaw = turn(me.yaw, G.cam.yaw + Math.PI, dt * 10); /* drag with the left button to fine-tune a posed body's facing */
           G.looked = false;
           if (me.cling) { clingMove(me, f, s, dt);
             if (me.cling && !me.speed && G.looked && !G.viewLock && !G.paint.on) { // idle on a surface: the head follows where the camera looks, right mouse locks it
               var cn = me.cling.n, cp = G.cam.pitch, fx = -Math.sin(cy) * Math.cos(cp), fy = -Math.sin(cp), fz = -Math.cos(cy) * Math.cos(cp), dn = fx * cn[0] + fy * cn[1] + fz * cn[2]; fx -= cn[0] * dn; fy -= cn[1] * dn; fz -= cn[2] * dn; var fl = Math.hypot(fx, fy, fz); if (fl > 0.3) me.cling.f = [fx / fl, fy / fl, fz / fl]; } }
-          else if (l > 0.01) {
-            mvx /= l; mvz /= l; var crouch = k.c || k.Control, sp = crouch ? RULES.cat.crouchSpeed : k.Shift ? RULES.cat.runSpeed : RULES.cat.walkSpeed;
-            if (me.c.pose !== (crouch ? 'crouch' : 'stand')) { me.c.setPose(crouch ? 'crouch' : 'stand'); bus.emit('pose', { pose: 'stand' }); }
-            me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; moveEnt(me, mvx * sp * dt, mvz * sp * dt, dt); if (!G.viewLock) me.yaw = turn(me.yaw, Math.atan2(mvx, mvz), dt * 12);
+          else if (G.mouse.down[0] && !G.paint.on && !G.orbitDrag && (k.a || k.d) && !f) { me.yaw += ((k.a ? 1 : 0) - (k.d ? 1 : 0)) * dt * 3.2; me.velx = me.velz = 0; } // hold left mouse + A/D: turn the body on the spot
+          else if (l > 0.01 || Math.hypot(me.velx || 0, me.velz || 0) > 0.05) {
+            if (l > 0.01) { mvx /= l; mvz /= l; } else { mvx = mvz = 0; }
+            var posed = me.c.pose !== 'stand' && me.c.pose !== 'crouch', crouch = !posed && (k.c || k.Control), sp = posed ? (k.Alt ? RULES.cat.nudgeSpeed : RULES.cat.posedSpeed) : crouch ? RULES.cat.crouchSpeed : k.Shift ? RULES.cat.runSpeed : RULES.cat.walkSpeed;
+            // velocity eases toward the wanted velocity: quick start, a short skid when you let go
+            var ka = 1 - Math.exp(-dt * (l > 0.01 ? RULES.cat.accel : RULES.cat.decel)); me.velx = (me.velx || 0) + (mvx * sp - (me.velx || 0)) * ka; me.velz = (me.velz || 0) + (mvz * sp - (me.velz || 0)) * ka;
+            var vl = Math.hypot(me.velx, me.velz); if (l <= 0.01 && vl < 0.25) { me.velx = me.velz = 0; vl = 0; } sp = vl; if (vl > 1e-4) { mvx = me.velx / vl; mvz = me.velz / vl; }
+            G.runK = (G.runK || 0) + ((k.Shift && l > 0.01 ? 1 : 0) - (G.runK || 0)) * Math.min(1, dt * 5);
+            if (l > 0.01 && !posed && me.c.pose !== (crouch ? 'crouch' : 'stand')) { me.c.setPose(crouch ? 'crouch' : 'stand'); bus.emit('pose', { pose: 'stand' }); }
+            me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; moveEnt(me, mvx * sp * dt, mvz * sp * dt, dt); if (me.hitWallX) me.velx = 0; if (me.hitWallZ) me.velz = 0; if (!posed && !G.viewLock && !G.mouse.down[2] && l > 0.01) me.yaw = turn(me.yaw, Math.atan2(mvx, mvz), dt * 14); if (me.air && me.vy > 0 && !me.cling) tryAttach(me, 0, 0, [[1, 1]]); /* jumping up into a ceiling or the underside of a shelf sticks too */
             if (me.air && me.hitPlat && me.hitPlat !== true && me.y - room.groundAt(me.x, me.z, me.y + 0.1, 0) > 0.2) tryAttach(me, me.hitWallX || 0, me.hitWallX ? 0 : me.hitWallZ, [[me.hitWallX ? 0 : 2, (me.hitWallX || me.hitWallZ) > 0 ? 1 : -1]]); // jumping at anything tall sticks to it
             if (G.guide === 0 && (G.moved = (G.moved || 0) + sp * dt) > 1.5) setGuide(1);
           }
@@ -790,7 +799,8 @@
         } else {
           var yw = me.yaw; if (k.ArrowLeft) me.yaw += dt * 1.9; if (k.ArrowRight) me.yaw -= dt * 1.9; if (k.ArrowUp) me.pitch = Math.min(1.2, me.pitch + dt * 1.2); if (k.ArrowDown) me.pitch = Math.max(-1.2, me.pitch - dt * 1.2);
           var dcr = k.Control || k.c; me.crouch = !!dcr; me.eyeH += ((dcr ? RULES.dog.crouchEye : 1) * me.eyeH0 - me.eyeH) * Math.min(1, dt * 12);
-          if (st.phase === 'seek') { var sp2 = (k.Shift ? RULES.dog.runSpeed : RULES.dog.speed) * (dcr ? RULES.dog.crouchSpeed : 1), mx = Math.sin(yw) * f - Math.cos(yw) * s, mz = Math.cos(yw) * f + Math.sin(yw) * s, pl = Math.hypot(mx, mz), qx = me.x, qz = me.z; if (pl > 0.01) moveEnt(me, mx / pl * sp2 * dt, mz / pl * sp2 * dt, dt); me.speed = Math.hypot(me.x - qx, me.z - qz) / Math.max(dt, 1e-4); }
+          if (me.cling) { var cy0 = G.cam.yaw; G.cam.yaw = me.yaw + Math.PI; clingMove(me, f, s, dt); G.cam.yaw = cy0; }
+          else if (st.phase === 'seek') { me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; var sp2 = (k.Shift ? RULES.dog.runSpeed : RULES.dog.speed) * (dcr ? RULES.dog.crouchSpeed : 1), mx = Math.sin(yw) * f - Math.cos(yw) * s, mz = Math.cos(yw) * f + Math.sin(yw) * s, pl = Math.hypot(mx, mz), qx = me.x, qz = me.z; if (pl > 0.01) moveEnt(me, mx / pl * sp2 * dt, mz / pl * sp2 * dt, dt); me.speed = Math.hypot(me.x - qx, me.z - qz) / Math.max(dt, 1e-4); if (me.air && me.hitPlat && me.hitPlat !== true && me.y - room.groundAt(me.x, me.z, me.y + 0.1, 0) > 0.2) tryAttach(me, me.hitWallX || 0, me.hitWallX ? 0 : me.hitWallZ, [[me.hitWallX ? 0 : 2, (me.hitWallX || me.hitWallZ) > 0 ? 1 : -1]]); if (me.air && me.vy > 0 && !me.cling) tryAttach(me, 0, 0, [[1, 1]]); }
           // the player dog also feeds the 見落とし score: pixels of each cat actually visible on this dog's screen
           G.ovT = (G.ovT || 0) - dt; if (G.ovT <= 0 && st.phase === 'seek') { G.ovT = RULES.overlooked.tickEverySec; overlookTick(me, G.third ? dogCam(me) : camera); }
         }
@@ -803,10 +813,10 @@
     for (var i = 0; i < G.ents.length; i++) {
       var e = G.ents[i];
       if (G.mode === 'play') physEnt(e, dt);
-      e.c.speed = e.speed || 0; e.c.air = e.air ? 1 : 0;
+      e.c.speed = e.team === 'cat' && e.c.pose !== 'stand' && e.c.pose !== 'crouch' ? 0 : e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
-      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out && !e.walk) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = !e.c.frozen || !G.state || G.state.phase === 'reveal' || G.state.phase === 'lobby'; } // a posed cat shows no eyes, nose or whiskers to anyone else
+      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out && !e.walk) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = false; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
       e.c.update(dt, rnd);
       if (!e.out && (e.speed > 0.05 || e.air)) bumpers.push({ x: e.x, y: e.y, z: e.z, r: e.team === 'dog' ? 0.3 : RULES.cat.bumpRadius, speed: e.speed || 0 });
@@ -815,7 +825,7 @@
     bumpers.push({ x: room.vac.x, y: 0, z: room.vac.z, r: 0.2, speed: 0.4 });
     room.stepTriggers(dt, G.ents.filter(function (e) { return !e.fp || true; }));
     room.stepProps(dt, bumpers, function (kp, landed) { bus.emit('bump', { type: kp.type, landed: !!landed, x: kp.x, z: kp.z }); if (!landed && !kp.shot && G.settings.knockNoise) dogsOf().forEach(function (d) { if (d.ai && !d.ai.heard && Math.hypot(d.x - kp.x, d.z - kp.z) < 6) { d.ai.heard = [kp.x, kp.z]; d.ai.heardT = 0; } }); });
-    if (G.mode === 'play' && st && st.phase === 'reveal') { var fl = 0.5 + 0.5 * Math.sin(G.time * 7); G.ents.forEach(function (e) { if (e.team === 'cat' && e.found != null) e.c.glow.value.setRGB(e.found ? 0.02 : 0.85, e.found ? 0.22 : 0.05, e.found ? 0.95 : 0.03).multiplyScalar(0.25 + 0.75 * fl); }); }
+    if (G.mode === 'play' && st && st.phase === 'reveal') { var fl = 0.5 + 0.5 * Math.sin(G.time * 7); G.ents.forEach(function (e) { if (e.team === 'cat' && e.found != null) e.c.glow.value.setRGB(e.found ? 0.02 : 0.85, e.found ? 0.22 : 0.05, e.found ? 0.95 : 0.03).multiplyScalar(0.25 + 0.75 * fl); }); G.ents.concat(G.decoys).forEach(function (e) { if (e.shell) e.shell.material.opacity = 0.25 + 0.5 * fl; }); }
     stepBalls(dt); stepConfetti(dt);
     updateCamera(dt);
     if (G.mode === 'play' && st) bus.emit('frame', { left: st.left, phase: st.phase });
@@ -880,7 +890,7 @@
   function pHi(p, a) { return a === 0 ? p.x1 : a === 1 ? p.y1 : p.z1; }
   G.solidAt = solidAt;
   function tryAttach(e, dx, dz, only) {
-    if (e.cling || e.team !== 'cat') return false;
+    if (e.cling || e.bot && e.team === 'dog') return false; // hunters climb too (original); bot dogs stay on the floor
     var rad = e.rad, c = [e.x, e.y + rad, e.z], reach = rad + 0.16, ax = Math.abs(dx) >= Math.abs(dz) ? 0 : 2;
     var dirs = only || [[ax, (ax ? dz : dx) >= 0 ? 1 : -1], [2 - ax, (ax ? dx : dz) >= 0 ? 1 : -1], [1, 1]];
     for (var i = 0; i < dirs.length; i++) {
@@ -964,9 +974,13 @@
       if (me.cling) { // stuck to a wall or ceiling: aim a little off the surface and keep the camera on the room side of it, so it never ends up inside the wall or above the ceiling
         var cn = me.cling.n, dn = ox * cn[0] + oy * cn[1] + oz * cn[2], need = dist * 0.3; ty = ctr.y + cn[1] * 0.14; ctr.x += cn[0] * 0.14; ctr.z += cn[2] * 0.14;
         if (dn < need) { ox += cn[0] * (need - dn); oy += cn[1] * (need - dn); oz += cn[2] * (need - dn); } }
-      var tw = room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
+      var thru = G.paint.on && G.seeThrough !== false; // camera pass-through: in paint mode the camera goes through things and whatever is between it and you is cut away
+      var tw = thru ? 1 : room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
+      cm.kk = cm.kk == null ? kk : cm.kk + (kk - cm.kk) * (1 - Math.exp(-dt * (kk < cm.kk ? 40 : 3.5))); kk = cm.kk; // pull in fast when something is in the way, ease back out slowly: no ping-pong
+      camera.near = thru ? Math.max(0.06, dist * kk - 0.42 * (me.size || 1)) : 0.06;
       var px = ctr.x + ox * kk, py = Math.max(room.base(ctr.x, ctr.z) + 0.1, ty + oy * kk), pz = ctr.z + oz * kk;
-      camera.fov = 52; camera.position.lerp(tmp2.set(px, py, pz), 1 - Math.exp(-dt * 14)); camera.lookAt(ctr.x, ty, ctr.z);
+      camera.fov = 52 + (G.runK || 0) * 7; cm.look = (cm.look || V(ctr.x, ty, ctr.z)); cm.look.lerp(tmp2.set(ctr.x, ty, ctr.z), 1 - Math.exp(-dt * 22)); // the look-at point is damped too, so body bounce never shakes the picture
+      camera.position.lerp(tmp2.set(px + cm.look.x - ctr.x, py + cm.look.y - ty, pz + cm.look.z - ctr.z), 1 - Math.exp(-dt * 18)); camera.lookAt(cm.look);
     } else if (me && me.team === 'dog') {
       var eh = me.eyeH, fp = !G.third;
       me.fp = fp; me.c.root.visible = !fp; if (G.vm) G.vm.visible = fp;
@@ -992,6 +1006,12 @@
       if (e.team === 'cat' && G.state.players[e.id]) { var found = G.state.players[e.id].out; e.c.root.visible = true; e.c.glow.value.setRGB(found ? 0.02 : 0.85, found ? 0.22 : 0.05, found ? 0.95 : 0.03); e.found = found; }
     });
     G.decoys.forEach(function (d) { d.c.glow.value.setRGB(0.5, 0.28, 0.05); });
+    G.ents.concat(G.decoys).forEach(function (e) {
+      if (e.team !== 'cat' || !e.c.root.visible) return; var owner = e.decoyOf ? ent(e.decoyOf) : e, found = owner ? !!owner.found : false;
+      if (!e.shell) { e.shell = new THREE.SkinnedMesh(e.c.skin.geometry, new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending })); e.shell.bind(e.c.skin.skeleton, new THREE.Matrix4()); e.shell.frustumCulled = false; e.shell.renderOrder = 60; e.shell.layers.set(1); e.c.root.add(e.shell); }
+      e.shell.material.color.setRGB(found ? 0.1 : 1.0, found ? 0.45 : 0.12, found ? 1.0 : 0.08); e.shell.visible = true; e.shellOn = true;
+    });
+    bus.emit('answer', { n: cats().length });
   }
   /* screen positions for name tags (reveal) */
   G.project = function (e) { var p = e.c.center(tmp).clone(); p.y += 0.45; p.project(camera); return { x: (p.x * 0.5 + 0.5) * G.vw, y: (-p.y * 0.5 + 0.5) * G.vh, vis: p.z < 1 }; };
@@ -1020,7 +1040,7 @@
       pvR.render(pv.scene, pv.cam); var g2 = el.getContext('2d'); g2.clearRect(0, 0, 360, 300); g2.drawImage(pvR.domElement, 0, 0);
     }
   }
-  function render(dt) { var S2 = G.settings, hv = G.mode === 'play' && G.me && G.me.team === 'dog' && G.state && G.state.phase === 'seek' && !G.fly, fu = post.final; fu.uMono.value = hv && S2.fMono ? 1 : 0; fu.uHorror.value = hv && S2.fHorror ? 1 : 0; fu.uMosaic.value = hv && S2.fMosaic ? Math.max(6, Math.round(post.height / 90)) : 0; var flat = G.paint.on && G.paint.flat && G.mode === 'play', mk = camera.layers.mask, env = scene.environment; if (flat) { camera.layers.mask = 1 | 4; scene.environment = null; } post.render(scene, camera, G.time); if (flat) { camera.layers.mask = mk; scene.environment = env; } renderPreviews(dt || 0); }
+  function render(dt) { var S2 = G.settings, hv = G.mode === 'play' && G.me && G.me.team === 'dog' && G.state && G.state.phase === 'seek' && !G.fly, fu = post.final; fu.uMono.value = hv && S2.fMono ? 1 : 0; fu.uHorror.value = hv ? +S2.fHorror || 0 : 0; fu.uMosaic.value = hv && S2.fMosaic ? (+S2.fMosaic + 1) * Math.max(1, post.height / 1080) : 0; /* 像素: 1/2, 1/3, 1/4 resolution, nearest-neighbour, never coarser than 270 lines at 1080p */ var flat = G.paint.on && G.paint.flat && G.mode === 'play', mk = camera.layers.mask, env = scene.environment; if (flat) { camera.layers.mask = 1 | 4; scene.environment = null; } post.render(scene, camera, G.time); if (flat) { camera.layers.mask = mk; scene.environment = env; } renderPreviews(dt || 0); }
 
   /* ------------------------------------------------------------------ test / capture API */
   G.step = function (sec, hz) { var n = Math.round(sec * (hz || 60)), dt = 1 / (hz || 60); for (var i = 0; i < n; i++) update(dt); render(); };

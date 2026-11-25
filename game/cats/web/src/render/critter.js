@@ -335,6 +335,7 @@
   function addRot(j, x, y, z) { _e.set(x, y, z); _q.setFromEuler(_e); j.quaternion.multiply(_q); }
 
   P.update = function (dt, r) {
+    if (this.blank && this.faceSkin.visible) this.faceSkin.visible = false; // hiders are a blank canvas: no eyes, nose or whiskers
     r = r || Math.random;
     this.t += dt;
     var J = this.joints, t = this.t, live = this.frozen ? 0 : 1, moving = this.speed > 0.05, S = this.spec;

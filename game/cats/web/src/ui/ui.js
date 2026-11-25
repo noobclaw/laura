@@ -41,6 +41,7 @@
       root = document.getElementById('ui'); G = SG.game; RULES = SG.RULES; bus = SG.bus;
       buildTitle(); buildHud(); buildPaint(); buildModals();
       bus.on('mode', onMode); bus.on('phase', onPhase); bus.on('frame', onFrame);
+    bus.on('answer', function () { var el = h('div', 'answerbar', '<b>對答案</b><span>紅＝沒被找到　藍＝被找到　' + '<span class="key">G</span> 給最厲害的偽裝按讚　<span class="key">Y</span> 結束　<span class="key">5</span> 自由鏡頭</span>', els.hud); setTimeout(function () { el.classList.add('small'); }, 2600); var rm = function () { el.remove(); }; bus.on('mode', rm); });
       bus.on('guide', function (d) { setGuide(d.step); });
       bus.on('pose', function (d) { markPose(d.pose); show(els.pw, false); });
       bus.on('paintmode', function (d) { if (G.state) hints(ui.role, G.state.phase); if (d.on && document.exitPointerLock) document.exitPointerLock(); els.pp.classList.toggle('off', !d.on); els.bPaint.classList.toggle('act', d.on); show(els.ring, d.on); if (d.on) refreshSug(); });
@@ -163,7 +164,7 @@
     var cream = { top: [255, 253, 244], bottom: [255, 222, 170], rim: [146, 66, 14] }, ice = { top: [255, 255, 255], bottom: [200, 232, 255], rim: [22, 78, 130] }, ink = { top: [150, 96, 50], bottom: [70, 40, 18], rim: [255, 250, 236] };
     [['貓', cream], ['躲', ink], ['狗', ice], ['找', ink]].forEach(function (gp, k) { logo.children[k].appendChild(glyph(gp[0], gp[1])); logo.children[k].setAttribute('aria-label', gp[0]); });
     h('div', 'tagline', '塗上顏色・藏進日常', t);
-    h('div', 'sub', '日式老家裡的塗裝捉迷藏', t);
+    h('div', 'sub', '老家裡的塗裝捉迷藏', t);
     function card(team, title, label, sub, list) {
       var c = h('div', 'card panel ' + team, '<h4>' + IC.paw + title + '</h4>', t), pvw = h('canvas', 'pv', '', c), P0 = G.pick[team], O = SG.CRITTER_OPTIONS[team];
       function upd() { G.setPreview(team, pvw); }

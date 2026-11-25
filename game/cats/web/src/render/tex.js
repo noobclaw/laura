@@ -444,7 +444,7 @@
         for (j = 0; j < 5; j++) { g.beginPath(); g.ellipse(cx + (j - 2) * 46, cy + Math.sin(j * 1.7) * 10, 50, 17, 0, 0, 7); g.fill(); }
       }
       // red sun on panel 2
-      if (panel === 2) { g.fillStyle = PAL.vermilion; g.beginPath(); g.arc(w * 0.5, 170, 78, 0, 7); g.fill(); }
+      if (panel === 2) { g.fillStyle = '#5d7f8a'; g.beginPath(); g.moveTo(40, 300); g.lineTo(150, 150); g.lineTo(210, 215); g.lineTo(270, 120); g.lineTo(350, 300); g.closePath(); g.fill(); g.fillStyle = '#f3ead2'; g.beginPath(); g.moveTo(250, 150); g.lineTo(270, 120); g.lineTo(292, 152); g.lineTo(272, 144); g.closePath(); g.fill(); } // distant mountains on panel 2
       // pine on panels 0-1
       if (panel < 2) {
         g.strokeStyle = '#3a2416'; g.lineWidth = 20; g.lineCap = 'round';
@@ -478,10 +478,11 @@
       g.strokeStyle = PAL.goldLight; g.lineWidth = 8; g.strokeRect(64, 64, w - 128, h - 128);
       g.strokeStyle = PAL.gold; g.lineWidth = 6; g.strokeRect(8, 8, w - 16, h - 16);
       // centre medallion
-      g.fillStyle = PAL.vermilion; g.beginPath(); g.arc(w / 2, h / 2, 150, 0, 7); g.fill();
-      g.save(); g.beginPath(); g.arc(w / 2, h / 2, 138, 0, 7); g.clip();
-      g.fillStyle = g.createPattern(P.seigaiha('#c9392a', '#f6dfb0', 28), 'repeat'); g.fillRect(0, 0, w, h); g.restore();
-      g.strokeStyle = PAL.goldLight; g.lineWidth = 8; g.beginPath(); g.arc(w / 2, h / 2, 150, 0, 7); g.stroke();
+      function dia(r0) { g.beginPath(); g.moveTo(w / 2, h / 2 - r0); g.lineTo(w / 2 + r0 * 1.25, h / 2); g.lineTo(w / 2, h / 2 + r0); g.lineTo(w / 2 - r0 * 1.25, h / 2); g.closePath(); } // a diamond of waves, not a disc
+      g.fillStyle = '#2f6f6a'; dia(150); g.fill();
+      g.save(); dia(138); g.clip();
+      g.fillStyle = g.createPattern(P.seigaiha('#3f8f8a', '#f6dfb0', 28), 'repeat'); g.fillRect(0, 0, w, h); g.restore();
+      g.strokeStyle = PAL.goldLight; g.lineWidth = 8; dia(150); g.stroke();
       fibres(g, w, h, 71, 1.5, true);
     });
   };

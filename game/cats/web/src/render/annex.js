@@ -138,7 +138,8 @@
     var HUES = [0xc8452e, 0xe8782a, 0xe2b53c, 0xf2d24a, 0xa8c64a, 0x5d8a57, 0x2e7a5a, 0x3f8f8a, 0x4aa3e0, 0x2f4b7c, 0x5e4a7a, 0x9a6bb0, 0xe7a0a8, 0xd8507a, 0x8a5a3a, 0xc9a56a, 0xf1e7d2, 0x8c9296, 0x3a3a40, 0x6fb7a8, 0xf29a4a, 0x7a9a54];
     function hue(i, rough) { return col(HUES[((i % HUES.length) + HUES.length) % HUES.length], rough == null ? 0.6 : rough); }
     function hx(c) { return '#' + ('000000' + c.toString(16)).slice(-6); } function dk(c, k) { return ((Math.round(((c >> 16) & 255) * k) << 16) | (Math.round(((c >> 8) & 255) * k) << 8) | Math.round((c & 255) * k)); }
-    function hueW(i) { var c = HUES[((i % HUES.length) + HUES.length) % HUES.length]; return tx('pw' + c, function () { return P.wood({ base: hx(c), seed: c % 23, contrast: 0.16, planks: 3 }); }, 0.9, 0.82); } // painted wood: the grain shows through, edges read as planks
+    function hueW(i) { var c = [0xc8452e, 0x3f8f8a, 0xe2b53c][((i % 3) + 3) % 3]; // three painted-wood colours (each textured material is its own draw call)
+      return tx('pw' + c, function () { return P.wood({ base: hx(c), seed: c % 23, contrast: 0.16, planks: 3 }); }, 0.9, 0.82); } // painted wood: the grain shows through, edges read as planks
     function tin(x, y, z, i, s) { s = s || 1; begin('罐頭', x, y, z); C(0.07 * s, 0.07 * s, 0.16 * s, hue(i, 0.35), 0, 0, 0, 14); C(0.072 * s, 0.072 * s, 0.07 * s, hue(i + 7, 0.6), 0, 0.045 * s, 0, 14); C(0.073 * s, 0.073 * s, 0.012 * s, steel, 0, 0.16 * s, 0, 14); }
     function bigCrate(x, y, z, w, h, d, i, open) { crate('彩色木箱', x, y, z, w, h, d, hueW(i), open); }
     function poster(x, y, z, ry, i, w, h) { begin('海報', x, y, z, ry); add(G.boxM(w || 0.6, h || 0.8, 0.012), hue(i, 0.8), 0, 0, 0); add(G.boxM((w || 0.6) * 0.7, (h || 0.8) * 0.28, 0.014), hue(i + 9, 0.8), 0, (h || 0.8) * 0.2, 0.002); add(new THREE.CircleGeometry((w || 0.6) * 0.2, 18), hue(i + 4, 0.8), 0, -(h || 0.8) * 0.16, 0.009); }
