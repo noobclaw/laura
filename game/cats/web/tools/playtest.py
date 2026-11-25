@@ -356,6 +356,27 @@ def world_run(pg):
     (OUT / "audio.json").write_text(json.dumps(au, indent=1, ensure_ascii=False))
     mu = pg.evaluate("SG.music.selfTest()"); (OUT / "music.json").write_text(json.dumps(mu, indent=1, ensure_ascii=False)); results.append(("MUSIC", True, [{k: m[k] for k in ("name", "key", "bpm", "bars", "loopSec", "rmsDb", "peak", "above4kHz", "seamJump")} for m in mu]))
     check("music: 4 composed loops rendered offline (NOT heard by a human): no clipping, no DC, little energy above 4 kHz, no click at the loop seam", len(mu) == 4 and all(m["peak"] < 0.9 and abs(m["dc"]) < 0.001 and m["above4kHz"] < 0.05 and m["seamJump"] <= max(0.02, m["typicalJumpP99"] * 2) for m in mu), [(m["name"], m["rmsDb"], m["peak"], m["above4kHz"], m["seamJump"]) for m in mu])
+    fl = pg.evaluate(r"""(() => { const G=SG.game, W=SG.WS, post=SG.post, out=[]; G.settings.mode='basic'; SG.RULES.solo.botCatsWhenCat=1; G.start('cat','mochi'); const m=G.me;
+ const spots=[{n:'study west wall, plain plaster above the sofa (indoor lamp)', p:[4.78,1.65,-1.05], dir:[0,-1]}, {n:'kitchen outer wall in the north alley (outdoor shade)', p:[-0.3,1.4,-6.4], dir:[2,1]}, {n:'bath partition wall, plain plaster (indoor lamp, window side)', p:[7.4,1.5,-0.35], dir:[2,-1]}];
+ const cam=new THREE.PerspectiveCamera(40,1,0.05,60), N=96;
+ const shot=(mode)=>post.renderAlbedo(SG.scene, cam, N, N, new Uint8Array(N*N*4), mode).slice();
+ for (const s of spots) { const e=m; e.cling=null; e.x=s.p[0]*W; e.y=s.p[1]*W; e.z=s.p[2]*W; const ok=G.tryAttach(e,0,0,[s.dir]); if (!e.cling) { out.push({spot:s.n, err:'could not attach'}); continue; }
+   e.c.frozen=false; e.c.setPose('sphinx'); for (let k=0;k<40;k++){ G.step(0.05); }
+   const ctr=e.c.center(); const res={spot:s.n, normal:e.cling.n.join(',')};
+   // 3D eyedropper on the wall right beside the cat: base colour + roughness + metallic, then fill
+   const n=e.cling.n, side=new THREE.Vector3(0, 0.5, 0), pw=ctr.clone().add(side); cam.position.copy(pw).add(new THREE.Vector3(n[0],n[1],n[2]).multiplyScalar(1.0)); cam.lookAt(pw); cam.updateMatrixWorld(true);
+   const a=post.renderAlbedo(SG.scene, cam, 8, 8, new Uint8Array(256)); const rgb=[a[4*36],a[4*36+1],a[4*36+2]]; const ray=new THREE.Raycaster(cam.position.clone(), pw.clone().sub(cam.position).normalize()); const h=ray.intersectObjects([SG.room.batched, SG.room.dyn], true)[0]; const rough=h&&h.object.material.roughness!=null?h.object.material.roughness:0.9, metal=h&&h.object.material.metalness||0;
+   e.c.fill(rgb, rough, metal); res.picked={rgb, rough:+rough.toFixed(2), metal};
+   res.views=[]; for (const ang of [0, 0.6, -0.6]) { const nn=new THREE.Vector3(n[0],n[1],n[2]), t=new THREE.Vector3(n[2],0,-n[0]); const eye=ctr.clone().add(nn.multiplyScalar(3*Math.cos(ang))).add(t.multiplyScalar(3*Math.sin(ang))); eye.y=0.62; cam.position.copy(eye); cam.lookAt(ctr); cam.fov=14; cam.updateProjectionMatrix(); cam.updateMatrixWorld(true);
+     e.c.root.visible=true; const withCat=shot('lit'); const id0=e.c.skin.material; e.c.root.visible=false; const noCat=shot('lit'); e.c.root.visible=true;
+     // mask = pixels the cat covers (albedo render with / without a magenta fill would be exact; here: any pixel that changes when the cat is replaced by a flat magenta body)
+     const save=e.c.alb.slice(); e.c.fill([255,0,255],1,0); const mag=shot(undefined); e.c.alb.set(save); e.c.texA.needsUpdate=true; if (e.c.texO) e.c.texO.needsUpdate=true; e.c.fill(rgb, rough, metal);
+     let cnt=0, sum=0, mx=0; for (let i=0;i<N*N*4;i+=4){ if (mag[i]>200&&mag[i+1]<90&&mag[i+2]>200){ const d=(Math.abs(withCat[i]-noCat[i])+Math.abs(withCat[i+1]-noCat[i+1])+Math.abs(withCat[i+2]-noCat[i+2]))/3; sum+=d; cnt++; if(d>mx)mx=d; } }
+     res.views.push({angleDeg:Math.round(ang*57.3), catPixels:cnt, meanAbsDiff8bit:cnt?+(sum/cnt).toFixed(1):null, maxDiff:Math.round(mx)}); }
+   out.push(res); }
+ return out; })()""")
+    vals = [v["meanAbsDiff8bit"] for r in fl for v in r.get("views", []) if v["catPixels"] > 300]; results.append(("FLUSH", True, [(r["spot"], [(v["angleDeg"], v["meanAbsDiff8bit"], v["maxDiff"]) for v in r.get("views", []) if v["catPixels"] > 300]) for r in fl]))
+    check("camouflage works: a cat filled with the eyedropped base colour + roughness and stuck flat on a plain wall differs from the wall by at most 4 of 255 (mean per channel, hunter's lit view from 3 m) at 3 lighting spots, front and oblique", len(vals) >= 6 and max(vals) <= 4.0, [(r["spot"][:24], [(v["angleDeg"], v["meanAbsDiff8bit"]) for v in r.get("views", []) if v["catPixels"] > 300]) for r in fl])
     nv = pg.evaluate("""() => { const G=SG.game, W=SG.WS, R=SG.room; G.toTitle(); G.settings.mode='infection'; SG.RULES.solo.botCatsWhenCat=9; G.start('cat'); const bad=R.route.map((p,i)=>G.navPath(0.4*W,1.6*W,p[0],p[1])?-1:i).filter(i=>i>=0); const L=(a,b)=>{ const p=G.navPath(a[0]*W,a[1]*W,b[0]*W,b[1]*W); let l=0; for (let k=1;p&&k<p.length;k++) l+=Math.hypot(p[k][0]-p[k-1][0],p[k][1]-p[k-1][1]); return p?+l.toFixed(1):null; }; const i=G.info(); return {unreachable:bad, n:R.route.length, crossM:L([-5.6,1.3],[7.85,-8.15]), study:L([0.4,1.6],[6.2,-2.3]), store:L([0.4,1.6],[-4.6,-5]), off:i.offFloor, bots:i.botCats}; }""")
     check("bot navigation: every ground-level patrol goal is reachable on the walking grid (only the loft goals are not); study and storehouse can be entered", len(nv["unreachable"]) <= 4 and nv["study"] and nv["store"] and nv["crossM"], nv); results.append(("NAV", True, nv))
     check("at least a third of the bot cats hide off the floor (on walls, ceilings, shelves, furniture)", nv["off"] * 3 >= nv["bots"], (nv["off"], nv["bots"]))
@@ -373,7 +394,7 @@ def main():
             check(w + ": no uncaught page errors", len(errs) == 0, errs[:3]); print("(%.0f s)" % (time.time() - t0)); pg.close()
         b.close()
     bad = [r for r in results if not r[1]]
-    print("\n%d checks, %d failed" % (len([r for r in results if r[0] not in ("DRAW", "STROKE_MS", "SIZE", "LOAD_MS", "MUSIC", "NAV")]), len(bad)))
+    print("\n%d checks, %d failed" % (len([r for r in results if r[0] not in ("DRAW", "STROKE_MS", "SIZE", "LOAD_MS", "MUSIC", "NAV", "FLUSH")]), len(bad)))
     (OUT / "results.json").write_text(json.dumps(results, indent=1, ensure_ascii=False))
     sys.exit(1 if bad else 0)
 main()

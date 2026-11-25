@@ -86,7 +86,11 @@
     var size = o.size || 1, c = new SG.Critter(spec, { seed: G.ents.length + 1, atlas: RULES.paint.textureSize, scale: size });
     scene.add(c.root);
     if (team === 'cat') { c.tailMode = 'tuck'; c.faceSkin.visible = false; c.blank = true; c.rim.value = 0; c.mat.envMapIntensity = 1; } /* same shading as the scenery: no fur sheen, no extra reflection, so equal base colour + roughness looks equal */
-    void 0; // the hider is a plain canvas: no face details to give it away
+    if (team === 'cat') { // OURS (labelled): a cat that lies flat against a surface is shaded with that surface's normal, so the same base colour gives the same lit colour as the wall
+      c.flatU = { value: 0 }; c.flatN = { value: new THREE.Vector3(0, 1, 0) }; var obc = c.mat.onBeforeCompile;
+      c.mat.onBeforeCompile = function (sh, r) { if (obc) obc.call(this, sh, r); sh.uniforms.uFlat = c.flatU; sh.uniforms.uFlatN = c.flatN;
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uFlat; uniform vec3 uFlatN;').replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n normal = normalize(mix(normal, normalize((viewMatrix * vec4(uFlatN, 0.0)).xyz), uFlat));'); };
+      c.mat.customProgramCacheKey = function () { return 'catflat'; }; }
     var e = { size: size, id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
       rad: team === 'dog' ? RULES.dog.bodyRad : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
     if (o.pose) c.setPose(o.pose);
@@ -817,6 +821,7 @@
       e.c.speed = e.team === 'cat' && e.c.pose !== 'stand' && e.c.pose !== 'crouch' ? 0 : e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
+      if (e.team === 'cat' && e.c.flatU) { var posedF = e.c.pose !== 'stand' && e.c.pose !== 'crouch', fT = e.cling && posedF ? 0.9 : posedF && !e.air ? 0.45 : 0; e.c.flatU.value += (fT - e.c.flatU.value) * Math.min(1, dt * 6); if (e.cling) e.c.flatN.value.fromArray(e.cling.n); else e.c.flatN.value.set(0, 1, 0); e.c.skin.castShadow = !(e.cling && posedF); }
       if (e === me && e.team === 'cat') e.c.frozen = e.c.pose !== 'stand' && e.c.pose !== 'crouch' && !e.out; /* your own posed body is perfectly still too */
       if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out && !e.walk) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = false; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
