@@ -12,7 +12,7 @@ en:{title:"Shiba Garden",tag:"One puppy in every row, column and colour.",r1:"On
  hStarve:"A puppy here would leave another row, column or colour with no free tile. So this tile stays empty.",hGroup:"A few colours fit only in the same few rows or columns and fill them. This tile is not one of them, so it stays empty.",
  hBadMark:"This tile is crossed out, but a puppy belongs here. Clear the cross.",hGive:"No simple step found. A puppy sits on this tile.",
  fail:"Out of bones!",failInfo:"Three wrong seats on this board. Start it again, or keep going with a ball.",ball:"Ball",
- packS:"Puppy Pack",packM:"Rescue Pack",packL:"Treat Chest",packInfo:"{h} hints + {b} balls",invLine:"Hints: {h} · Balls: {b}",
+ packS:"Garden Pack",packM:"Rescue Pack",packL:"Treasure Chest",packInfo:"{h} hints + {b} balls",invLine:"Hints: {h} · Balls: {b}",
  revive:"Keep going · use 1 ball",reviveBuy:"Keep going · {p}",reviveInfo:"Refills your bones and adds {h} hints + {b} balls",
  buyBlasts:"5 balls",buyBlastsInfo:"A ball seats one puppy for you, or refills your bones.",
  easy:"Easy",medium:"Medium",tricky:"Tricky",oops:"Not here!",statFast:"{n}s faster than your average",statClean:"{n} boards in a row without a mistake",
