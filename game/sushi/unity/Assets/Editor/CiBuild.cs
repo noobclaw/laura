@@ -89,10 +89,12 @@ public static class CiBuild
     static void Shots()
     {
         Debug.Log("CiBuild: shots on " + SystemInfo.graphicsDeviceType + " / " + SystemInfo.graphicsDeviceName);
-        var rt = new RenderTexture(1600, 900, 24, RenderTextureFormat.ARGB32);
         for (int pass = 0; pass < 2; pass++)
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // opening a scene destroys loose objects, so the target is made after it and kept out of scene cleanup
+            var rt = new RenderTexture(1600, 900, 24, RenderTextureFormat.ARGB32);
+            rt.hideFlags = HideFlags.HideAndDontSave;
             var g = new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();
             var cam = g.EditorSetup(pass == 1);
             string tag = pass == 0 ? "hider" : "hunter";
