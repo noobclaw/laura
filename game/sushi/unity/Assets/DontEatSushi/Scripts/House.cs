@@ -1423,7 +1423,7 @@ namespace DontEatSushi
             if (toastT > 0f) toastT -= dt;
             NetTick(dt);
             if (root == null || ph == Ph.Menu || ph == Ph.Lobby) return;
-            if (Input.GetKeyDown(KeyCode.Escape) && (solo || ph == Ph.End)) { ToMenu(); return; }
+            if (In.Down(K.Esc) && (solo || ph == Ph.End)) { ToMenu(); return; }
             if (ph == Ph.End) return;
             for (int i = 0; i < 2; i++) if (cloneCd[i] > 0f) cloneCd[i] -= dt;
             if (ph == Ph.Reveal) { timer -= dt; if (timer <= 0f) ph = Ph.End; return; }
@@ -1786,7 +1786,7 @@ namespace DontEatSushi
             Box(new Rect(cx - 230f, 10f, 460f, 50f), panel); Box(new Rect(cx - 230f, 58f, 460f, 2f), gold);
             string title = practice ? "練習模式" : ph == Ph.Hide ? "躲藏時間" : ph == Ph.Seek ? "搜索中" : ph == Ph.Reveal ? "對答案" : "結束";
             int tt = Mathf.Max(0, Mathf.CeilToInt(timer));
-            string counts = practice ? "" : "　飯糰 " + (solo ? others.Count - found : hiderIds.Count - caughtIds.Count) + "　食客 " + (solo ? 1 : hunterIds.Count);
+            string counts = practice || (solo && !hunter) ? "" : "　飯糰 " + (solo ? others.Count - found : hiderIds.Count - caughtIds.Count) + "　食客 " + (solo ? 1 : hunterIds.Count);
             GUI.Label(new Rect(cx - 230f, 10f, 460f, 48f), title + (practice ? "" : "　" + (tt / 60) + ":" + (tt % 60).ToString("00")) + counts, sB);
 
             string guide = "";
