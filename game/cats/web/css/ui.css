@@ -230,3 +230,5 @@ svg.ic { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.14em; }
 .result { left: auto !important; right: 14px !important; top: 130px !important; transform: none !important; max-width: 340px; max-height: 70%; overflow: auto; }
 .fps { position: absolute; left: 8px; bottom: 6px; font: 12px monospace; color: #b9f27a; background: rgba(0, 0, 0, 0.55); padding: 2px 8px; border-radius: 6px; z-index: 40; pointer-events: none; }
 .ehint { position: absolute; left: 14px; top: 362px; color: #fff3d6; font-size: 13px; background: rgba(50, 28, 12, 0.62); padding: 4px 10px; border-radius: 99px; }
+.mm { top: 42vh !important; gap: 1.6vh !important; } .mm .btn { font-size: clamp(14px, 2.9vh, 21px) !important; padding: 1.4vh 18px !important; min-width: clamp(150px, 16vw, 210px) !important; } .mm .maps { min-width: clamp(150px, 16vw, 210px) !important; }
+.langs { left: auto !important; right: 3% !important; bottom: 3% !important; }

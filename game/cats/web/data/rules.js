@@ -77,7 +77,7 @@ window.SG_RULES = {
  },
  "overlooked": {
   "tickEverySec": 0.5,
-  "minArea": 0.0003,
+  "minArea": 0.00012,
   "maxPerTick": 45,
   "deadZone": 0.1,
   "edgeFactor": 0.15,

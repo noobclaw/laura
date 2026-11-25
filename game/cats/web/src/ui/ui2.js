@@ -49,7 +49,7 @@
     cyc(L, '', MODES, function () { return S.mode; }, function (v) { S.mode = v; drawCap(); }, function (v) { return t(v); }).dataset.k = 'mode';
     num(L, t('prep'), 'prep', 5, 999999); num(L, t('seek'), 'seek', 10, 999999); num(L, t('reveal'), 'reveal', 5, 999999);
     if (!S.forcedMeow) S.meowEvery0 = 0; var mi = num(L, t('meow'), 'meowEvery', 0, 600); if (!S.forcedMeow) mi.lastChild.value = 0; mi.lastChild.onchange = function () { var v = Math.max(0, Math.min(600, Math.round(+mi.lastChild.value || 0))); if (v > 0 && v < SG.RULES.cat.forcedMeowMinSec) v = SG.RULES.cat.forcedMeowMinSec; S.forcedMeow = v > 0; if (v > 0) S.meowEvery = v; mi.lastChild.value = v; };
-    tog(L, t('board'), 'board').dataset.k = 'board';
+    tog(L, t('board'), 'board').dataset.k = 'board'; num(L, '排行榜更新間隔（秒，給獵人看的）', 'boardEvery', 1, 600);
     var d = h('details', 'custom', '<summary>' + t('custom') + '</summary>', L);
     ['night', 'breedEyes', 'paintAids', 'knockNoise'].forEach(function (k) { tog(d, t(k), k).dataset.k = k; });
     num(L, '獵人數量', 'dogs', 1, 3);

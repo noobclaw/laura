@@ -85,6 +85,7 @@
           setTimeout(function () { fly.remove(); els.rank.classList.add('flash'); setTimeout(function () { els.rank.classList.remove('flash'); }, 450); }, 720); bus.emit('banked', { sum: ovSum, n: ovN });
           ovN = 0; els.ovl.className = 'ovl hide'; rankT = 0; }
         rankT -= 1; if (rankT > 0 || !G.state) return; rankT = 20;
+        if (ui.role !== 'cat' && !els.rank.classList.contains('hide') && els.rank.innerHTML && G.simT - (ui.rankAt || -99) < G.settings.boardEvery) return; ui.rankAt = G.simT; // hunters get the ranking only every 30 s (host setting), as in the original
         var on = G.state.phase === 'seek' && (ui.role === 'cat' || G.settings.board); show(els.rank, on); if (!on) return;
         var P = G.state.players, ids = Object.keys(P).filter(function (id) { return P[id].team === 'cat' || P[id].score > 0 || G.state.mode === 'double'; }).sort(function (a, b) { return P[b].score - P[a].score; }).slice(0, 7);
         els.rank.innerHTML = '<h4>眼皮底下排行</h4>' + ids.map(function (id, i) { return '<div class="' + (id === G.me.pid ? 'me' : '') + '"><u>' + (i + 1) + '</u><span>' + nameOf(id) + '</span><b>' + P[id].score + '</b></div>'; }).join('');

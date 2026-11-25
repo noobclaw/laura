@@ -160,7 +160,7 @@
   /* ------------------------------------------------------------------ round */
   var CAT_KEYS = Object.keys(SG.CATS), DOG_KEYS = Object.keys(SG.DOGS);
   function shuffled(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  G.settings = { mode: RULES.solo.mode, prep: RULES.solo.prepSec, seek: RULES.solo.seekSec, reveal: RULES.round.revealSec, dogs: 1, ammo: RULES.dog.startAmmo, breedEyes: false, paintAids: false, knockNoise: false, show: true, unlimited: true, forcedMeow: false, meowEvery: RULES.cat.forcedMeowSec, board: true, night: false, map: 'home', fMono: false, fHorror: 0, fMosaic: 0 };
+  G.settings = { mode: RULES.solo.mode, prep: RULES.solo.prepSec, seek: RULES.solo.seekSec, reveal: RULES.round.revealSec, dogs: 1, ammo: RULES.dog.startAmmo, breedEyes: false, paintAids: false, knockNoise: false, show: true, unlimited: true, forcedMeow: false, meowEvery: RULES.cat.forcedMeowSec, board: true, boardEvery: 30, night: false, map: 'home', fMono: false, fHorror: 0, fMosaic: 0 };
   G.pick = { cat: { breed: 'mochi', ear: '', tail: '' }, dog: { breed: 'shiba', ear: '', tail: '', collar: '' } };
   function specOf(team, o) { o = o || G.pick[team]; return SG.makeSpec((team === 'cat' ? SG.CATS : SG.DOGS)[o.breed], o); }
   G.specOf = specOf;
@@ -330,7 +330,7 @@
   }
   G.mismatch = mismatch;
   /* fraction of a seeker's screen each cat actually covers, counted in pixels of an ID render (so furniture in front counts as hidden) */
-  var idMats = [], AW = 96, AH = 54, idPx = new Uint8Array(AW * AH * 4), areaCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.05, 60);
+  var idMats = [], AW = 192, AH = 108, idPx = new Uint8Array(AW * AH * 4), areaCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.05, 60);
   function visibleAreas(cam) {
     var list = cats().concat(G.decoys).filter(function (c) { return c.c.root.visible; }), saved = [], out = {}, cnt = [], i;
     list.forEach(function (c, k) { if (!idMats[k]) idMats[k] = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, (8 + 16 * k) / 255, 1) }); saved.push(c.c.skin.material); c.c.skin.material = idMats[k]; c.fv = c.c.faceSkin.visible; c.c.faceSkin.visible = false; cnt.push(0); });
@@ -572,7 +572,7 @@
       if (Math.hypot(tx - d.x, tz - d.z) < 0.36) { ai.pi++; if (ai.pi >= ai.path.length) { ai.path = null; if (rnd() < 0.04 && ai.wp > 3) { ai.wp -= 2; bus.emit('say', { id: d.id, text: '再看一次' }); } else ai.wp += 1; ai.wait = rnd() < 0.3 ? 0.6 + rnd() * 0.9 : 0; ai.look = (rnd() - 0.5) * 2.4; } } }
     if (ai.wait > 0) { ai.wait -= dt; d.speed = 0; d.yaw += Math.sin(G.simT * 1.4) * dt * 0.9 + ai.look * dt * 0.4; return; }
     var want = Math.atan2(tx - d.x, tz - d.z); d.yaw = turn(d.yaw, want, dt * 9); var dA = want - d.yaw; while (dA > Math.PI) dA -= 2 * Math.PI; while (dA < -Math.PI) dA += 2 * Math.PI;
-    var sp = RULES.bot.patrolSpeed * Math.max(0.15, Math.cos(dA)), px = d.x, pz = d.z; /* slows down to turn, so it never circles a point it cannot hit */ d.pitch = 0.12 + 0.34 * Math.sin(G.simT * 0.8 + d.x); /* sweeps its gaze up and down while walking: shelves, beams and ceilings get looked at too */ moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
+    var sp = RULES.bot.patrolSpeed * Math.max(0.15, Math.cos(dA)), px = d.x, pz = d.z; /* slows down to turn, so it never circles a point it cannot hit */ var gz = Math.max(0, Math.sin(G.simT * 0.55 + d.id.length)); d.pitch = 0.02 + 0.55 * gz * gz * gz; /* looks level most of the time and glances up now and then: shelves, beams and ceilings get checked too */ moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
     d.speed = Math.hypot(d.x - px, d.z - pz) / dt; if (d.speed < 0.12) { ai.stuck = (ai.stuck || 0) + dt; if (ai.stuck > 0.9) { if (ai.heard) ai.heard = null; else if (ai.path && !ai.repath) { ai.path = null; ai.repath = 1; } else { ai.wp++; ai.path = null; ai.repath = 0; } ai.stuck = 0; } } else { ai.stuck = 0; if (d.speed > 1) ai.repath = 0; }
   }
   function turn(a, b, k) { var d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * Math.min(1, k); }
@@ -703,7 +703,7 @@
       if (me.team === 'cat') {
         if (G.paint.on && !me.out) {
           if (e.button === 0 && !e.altKey) {
-            if (G.keys[' '] || G.paint.tool === 'pick') { G.pickAt(e.clientX, e.clientY, e.shiftKey); if (G.paint.tool === 'pick') { G.paint.tool = 'brush'; bus.emit('tool', { tool: 'brush' }); } return; }
+            if (G.keys[' '] || G.paint.tool === 'pick') { G.pickAt(e.clientX, e.clientY, !e.shiftKey); /* the 3D eyedropper takes the surface's base colour + roughness + metallic (the developer's own description); with Shift it takes the screen colour instead */ if (G.paint.tool === 'pick') { G.paint.tool = 'brush'; bus.emit('tool', { tool: 'brush' }); } return; }
             me.c.beginStroke(); G.paint.last = null; G.stroking = paintAt(e.clientX, e.clientY, true); if (!G.stroking) me.c.endStroke(); // left on the empty world does nothing in paint mode
           } else if (e.button === 2 && !e.altKey) G.sizing = true; // right-drag changes the brush size
           else if (e.button === 2) G.zooming = true;                // Alt + right-drag zooms
@@ -816,6 +816,7 @@
       e.c.speed = e.team === 'cat' && e.c.pose !== 'stand' && e.c.pose !== 'crouch' ? 0 : e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
+      if (e === me && e.team === 'cat') e.c.frozen = e.c.pose !== 'stand' && e.c.pose !== 'crouch' && !e.out; /* your own posed body is perfectly still too */
       if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out && !e.walk) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = false; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
       e.c.update(dt, rnd);
