@@ -13,41 +13,41 @@ return out;
 """
 
 LINEUP = r"""
-var keys = Object.keys(SG.CATS), S = PV.size(), w = S[0] / keys.length, h = S[1] / 3, st = [];
-var views = [[[0.0, 0.32, 3.3], 'front'], [[3.3, 0.3, 0.0], 'side'], [[0.0, 3.5, 0.01], 'top']];
-keys.forEach(function (k, i) { PV.clear(); var c = PV.spawn(k, {}), m = c.measure(), q = SG.critterStats(SG.CATS[k], 1024);
-  st.push({ key: k, name: SG.CATS[k].name, scale: c.scale, shoulder_m: +(c.bp.D.shoulder * c.scale).toFixed(3), top_of_head_m: +(c.bp.D.top * c.scale).toFixed(3), width_m: +(SG.CATS[k].hw * 2 * c.scale).toFixed(3), length_m: +((c.bp.D.zF - c.bp.D.zR) * c.scale).toFixed(3), tris: q.tris, verts: q.verts });
-  views.forEach(function (v, j) { PV.look(v[0], [0, 0.27, 0.04], 16); PV.view(i * w, j * h, w, h); }); });
-keys.forEach(function (k, i) { PV.label(i * w + 6, 6, SG.CATS[k].name + ' ' + SG.CATS[k].tag + ' (' + k + ')'); });
-['front', 'side', 'top'].forEach(function (t, j) { PV.label(6, j * h + 30, t); });
+var T = SG[__SET__], keys = Object.keys(T), S = PV.size(), w = S[0] / keys.length, h = S[1] / 3, st = [];
+var views = [[[1.3, 1.0, 2.3], '3/4'], [[3.3, 0.22, 0.0], 'side'], [[0.0, 3.5, 0.01], 'top']];
+keys.forEach(function (k, i) { PV.clear(); var c = PV.spawn(k, {}), q = SG.critterStats(T[k], 1024), row = { key: k, name: T[k].name, tag: T[k].tag, tris: q.tris, verts: q.verts, by_scale: {} };
+  (T[k].kind === 'cat' ? [1, 1.4, 1.7] : [1]).forEach(function (sc) { var d = PV.spawn(k, { scale: sc, x: 50 }), m = d.measure(), e = d.anchor('eye'); d.rearUp = 1; d.settle(); var e2 = d.anchor('eye');
+    row.by_scale[sc] = { effective_scale: d.scale, length_m: +m.size[2].toFixed(3), width_m: +m.size[0].toFixed(3), top_of_back_m: +(d.bp.D.shoulder * d.scale).toFixed(3), top_of_head_m: +(d.bp.D.top * d.scale).toFixed(3), slab_thickness_m: +(d.bp.D.hh * 2 * d.scale).toFixed(3), belly_clearance_m: +(d.bp.D.leg * d.scale).toFixed(3), eye_height_m: +e.y.toFixed(3), eye_height_rearUp_m: +e2.y.toFixed(3), game_collision_radius_m: +(Math.max(0.12, T[k].bellyR * 0.95 * (T[k].scale || 1)) * sc).toFixed(3) }; });
+  st.push(row);
+  views.forEach(function (v, j) { PV.look(v[0], [0, 0.09, 0.04], 16); PV.view(i * w, j * h, w, h); }); });
+keys.forEach(function (k, i) { PV.label(i * w + 6, 6, T[k].name + ' ' + T[k].tag + ' (' + k + ')'); });
+['3/4', 'side', 'top'].forEach(function (t, j) { PV.label(6, j * h + 30, t); });
 return st;
 """
 
 SIZES = r"""
-var S = PV.size(), out = [], xs = [-1.5, -0.75, 0.15, 1.3], sc = [0.7, 1, 1.4, 1.7];
+var S = PV.size(), out = [], xs = [-1.6, -0.9, 0.0, 1.15], sc = [0.7, 1, 1.4, 1.7];
 PV.clear();
-sc.forEach(function (s, i) { var c = PV.spawn('mochi', { x: xs[i], scale: s, yaw: 0.5, tail: 'up', ears: 'up' }), m = c.measure(); out.push({ scale: s, shoulder_m: +(c.bp.D.shoulder * c.scale).toFixed(3), top_of_head_m: +(c.bp.D.top * c.scale).toFixed(3), body_width_m: +(0.27 * s).toFixed(3), length_nose_to_rump_m: +((c.bp.D.zF - c.bp.D.zR) * s).toFixed(3), game_collision_radius_m: +(Math.max(0.12, c.spec.bellyR * 0.95) * s).toFixed(3) }); });
-var k = PV.spawn('azuki', { x: -2.2, yaw: 0.5, tail: 'up', ears: 'up' }); out.push({ build: 'azuki (kitten, spec.scale 0.7)', shoulder_m: +(k.bp.D.shoulder * k.scale).toFixed(3) });
-var d = PV.spawn('shiba', { x: 2.6, yaw: 0.5 });
-// a 0.45 m bar and a 0.62 m bar (dog eye height) for scale
-var mk = function (hh, x, col) { var b = new THREE.Mesh(new THREE.BoxGeometry(0.02, hh, 0.02), new THREE.MeshBasicMaterial({ color: col })); b.position.set(x, hh / 2, 0.5); PV.scene.add(b); return b; };
-var b1 = mk(0.45, -0.3, 0xd03030), b2 = mk(0.62, 2.1, 0x3050d0);
-PV.look([0.4, 0.7, 7.0], [0.3, 0.45, 0], 22); PV.full();
-PV.label(20, 20, 'scale 0.7 / 1.0 / 1.4 / 1.7 (same build), kitten build far left, a dog on the right. Red bar = 0.45 m, blue bar = 0.62 m (dog eye height)');
+sc.forEach(function (s, i) { var c = PV.spawn('mochi', { x: xs[i], scale: s, yaw: 0.5 }), m = c.measure(); out.push({ scale: s, length_m: +m.size[2].toFixed(3), width_m: +m.size[0].toFixed(3), top_of_back_m: +(c.bp.D.shoulder * c.scale).toFixed(3), top_of_head_m: +(c.bp.D.top * c.scale).toFixed(3) }); });
+var k = PV.spawn('azuki', { x: -2.2, yaw: 0.5 }); var d = PV.spawn('shiba', { x: 2.5, yaw: 0.5 });
+var mk = function (hh, x, col) { var b = new THREE.Mesh(new THREE.BoxGeometry(0.02, hh, 0.02), new THREE.MeshBasicMaterial({ color: col })); b.position.set(x, hh / 2, 0.6); PV.scene.add(b); return b; };
+var b1 = mk(0.16, -0.45, 0xd03030), b2 = mk(0.6, 1.9, 0x3050d0);
+PV.look([0.4, 1.3, 6.5], [0.3, 0.2, 0], 20); PV.full();
+PV.label(20, 20, 'same build at scale 0.7 / 1.0 / 1.4 / 1.7, the mini build far left, a dog on the right. Red bar = 0.16 m, blue bar = 0.6 m');
 PV.scene.remove(b1); PV.scene.remove(b2);
 return out;
 """
 
 STRIPES = r"""
 var S = PV.size(), w = S[0] / 4, h = S[1] / 3, i = 0, LAB = [];
-function cell(n, cam, lab, carried, breed) { PV.clear(); var c = PV.spawn(breed || 'mochi', { pose: carried ? 'stand' : n, tail: 'straight', ears: 'up' });
-  PV.stripes(c, 5, [200, 40, 40], 0.012, 2); PV.stripes(c, 1, [40, 70, 200], 0.012, 0);
+function cell(n, cam, lab, carried, breed, tgt) { PV.clear(); var c = PV.spawn(breed || 'mochi', { pose: carried ? 'stand' : n, tail: 'straight', ears: 'up' });
+  PV.stripes(c, 5, [200, 40, 40], 0.01, 2); PV.stripes(c, 1, [40, 70, 200], 0.01, 0);
   if (carried) { c.setPose(n); c.settle(); }
-  PV.look(cam, [0, 0.2, 0], 22); PV.view((i % 4) * w, Math.floor(i / 4) * h, w, h); LAB.push([(i % 4) * w + 6, Math.floor(i / 4) * h + 6, lab]); i++; }
-var A = [1.7, 1.0, 1.7], T = [1.3, 1.6, 1.2];
-cell('stand', A, 'stand: 5 stripes across flank + back, 1 along the spine'); cell('loaf', A, 'loaf (painted in this pose)'); cell('pancake', T, 'pancake (painted in this pose)'); cell('ball', A, 'ball (painted in this pose)');
-cell('bolster', A, 'bolster (painted in this pose)'); cell('tall', [1.9, 0.9, 1.9], 'tall (painted in this pose)'); cell('arch', [2.3, 0.6, 1.0], 'arch (painted in this pose)'); cell('lsit', [2.3, 0.7, 1.2], 'L-sit (painted in this pose)');
-cell('loaf', A, 'painted standing, then loaf', 1); cell('pancake', T, 'painted standing, then pancake', 1); cell('sit', A, 'painted standing, then sit', 1); cell('stand', A, 'cube build, stand', 0, 'tofu');
+  PV.look(cam, tgt || [0, 0.1, 0], 20); PV.view((i % 4) * w, Math.floor(i / 4) * h, w, h); LAB.push([(i % 4) * w + 6, Math.floor(i / 4) * h + 6, lab]); i++; }
+var A = [1.1, 1.3, 1.5], T = [0.9, 1.7, 1.0];
+cell('stand', A, 'walking body: 5 stripes across, 1 along (3D brush planes)'); cell('pancake', T, 'pancake (painted in this pose)'); cell('loaf', A, 'loaf (painted in this pose)'); cell('bolster', A, 'roll (painted in this pose)');
+cell('ball', A, 'ball (painted in this pose)'); cell('arch', [1.9, 0.7, 1.0], 'arch (painted in this pose)'); cell('lsit', [1.9, 0.8, 1.1], 'corner fold (painted in this pose)'); cell('tall', [1.6, 0.8, 1.9], 'upright (painted in this pose)', 0, 'mochi', [0, 0.25, 0]);
+cell('loaf', A, 'painted walking, then loaf', 1); cell('arch', [1.9, 0.7, 1.0], 'painted walking, then arch', 1); cell('curl', T, 'painted walking, then crescent', 1); cell('stand', A, 'square-tile build', 0, 'tofu');
 LAB.forEach(function (l) { PV.label(l[0], l[1], l[2]); });
 """
 
@@ -55,9 +55,9 @@ CHECKER = r"""
 PV.clear(); var S = PV.size(), w = S[0] / 4, h = S[1], c = PV.spawn('mochi', { tail: 'up', ears: 'up' }), A = c.A;
 for (var y = 0; y < A; y++) for (var x = 0; x < A; x++) { var o = (y * A + x) * 4, k = ((x >> 4) + (y >> 4)) & 1; c.alb[o] = k ? 235 : 60; c.alb[o + 1] = k ? 235 : 90; c.alb[o + 2] = k ? 235 : 160; }
 c.texA.needsUpdate = true;
-PV.look([1.4, 0.7, 1.9], [0, 0.25, 0.03], 19); PV.view(0, 0, w, h); PV.look([-1.6, 0.6, -1.6], [0, 0.25, 0], 19); PV.view(w, 0, w, h); PV.look([0.01, 2.9, 0.1], [0, 0.2, 0.03], 19); PV.view(2 * w, 0, w, h);
-c.setPose('loaf'); c.settle(); PV.look([1.4, 0.8, 1.9], [0, 0.15, 0.03], 19); PV.view(3 * w, 0, w, h);
-PV.label(6, 6, 'the atlas filled with a 16-texel checker: squares on the body = undistorted, even texel density');
+PV.look([1.0, 0.9, 1.5], [0, 0.08, 0.03], 19); PV.view(0, 0, w, h); PV.look([-1.2, 0.5, -1.4], [0, 0.08, 0], 19); PV.view(w, 0, w, h); PV.look([0.01, 2.2, 0.1], [0, 0.1, 0.03], 19); PV.view(2 * w, 0, w, h);
+c.setPose('belly'); c.settle(); PV.look([1.0, 0.9, 1.5], [0, 0.08, 0.03], 19); PV.view(3 * w, 0, w, h);
+PV.label(6, 6, 'the atlas filled with a 16-texel checker (3/4, rear, top, underside): even squares = undistorted; the underside is given about half the density of the top on purpose');
 var st = SG.critterStats(SG.CATS.mochi, 1024); return st;
 """
 
@@ -68,7 +68,7 @@ function run(frozen, pose) {
   PV.stripes(c, 5, [200, 40, 40], 0.012, 2);
   for (var i = 0; i < 240; i++) PV.step(1, 1 / 60);            // let the pose arrive
   c.frozen = d.frozen = frozen; for (i = 0; i < 120; i++) PV.step(1, 1 / 60);
-  PV.look([1.6, 0.8, 2.4], [0.4, 0.25, 0], 22); var ref = null, maxDiff = 0, changed = 0, buf = new Uint8Array(W * H * 4);
+  PV.look([1.4, 1.0, 2.0], [0.4, 0.12, 0], 22); var ref = null, maxDiff = 0, changed = 0, buf = new Uint8Array(W * H * 4);
   for (var f = 0; f < 30; f++) { PV.step(1, 1 / 60); PV.full(); gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, buf); if (!ref) ref = buf.slice(); else { var n = 0; for (var q = 0; q < buf.length; q += 4) if (buf[q] !== ref[q] || buf[q + 1] !== ref[q + 1] || buf[q + 2] !== ref[q + 2]) n++; changed += n; if (n > maxDiff) maxDiff = n; } }
   return { frames: 30, pixels_changed_total: changed, max_changed_in_one_frame: maxDiff };
 }
@@ -90,12 +90,12 @@ MOVES = r"""
 // jump (take-off pop, rise, fall, landing squash), stop from a run (skid), a hard turn while running, turning on the spot
 var S = PV.size(), w = S[0] / 8, h = S[1] / 4, LAB = [];
 function row(ri, lab, drive, cam, tgt, fov) { PV.clear(); var c = PV.spawn('mochi', { live: 1 }), t = 0, dt = 1 / 120; c.speed = 0;
-  for (var f = 0; f < 8; f++) { for (var q = 0; q < drive.step; q++) { drive.fn(c, t, dt); c.update(dt); t += dt; } c.root.updateMatrixWorld(true); PV.look(cam || [3.6, 0.5, 0.0], tgt || [0, 0.35, 0], fov || 15); PV.view(f * w, ri * h, w, h); }
+  for (var f = 0; f < 8; f++) { for (var q = 0; q < drive.step; q++) { drive.fn(c, t, dt); c.update(dt); t += dt; } c.root.updateMatrixWorld(true); PV.look(cam || [3.0, 0.35, 0.0], tgt || [0, 0.14, 0], fov || 15); PV.view(f * w, ri * h, w, h); }
   LAB.push([6, ri * h + 6, lab]); }
-row(0, 'jump 1.1 m: stand -> take-off pop -> stretch up -> apex -> reach down -> land (squash) -> settle   (frames 0.14 s apart)', { step: 17, fn: function (c, t, dt) { var T0 = 0.1, vy0 = 4.6, tt = t - T0, y = tt > 0 ? Math.max(0, vy0 * tt - 4.9 * tt * tt) : 0, was = c.air; c.air = y > 0 ? 1 : 0; if (was && !c.air) c.squash = 1; c.root.position.y = y; } }, [7.5, 0.8, 0.0], [0, 0.8, 0], 17);
-row(1, 'running at 5 m/s, then stop (decel 10 m/s2 from frame 2): skid on braced front legs, sit back, spring up   (frames 0.1 s apart)', { step: 12, fn: function (c, t, dt) { if (t === 0) { c.speed = 5; for (var i = 0; i < 60; i++) c.update(1 / 60); } c.speed = t < 0.15 ? 5 : Math.max(0, 5 - (t - 0.15) * 10); } });
-row(2, 'running, hard turn (4 rad/s between frames 2 and 6): leans into the turn, spine bends, tail lags', { step: 9, fn: function (c, t, dt) { c.speed = 5; c.turn = t > 0.1 && t < 0.5 ? 4 : 0; if (t === 0) for (var i = 0; i < 60; i++) c.update(1 / 60); } }, [0.5, 0.6, 3.6]);
-row(3, 'turning on the spot (3 rad/s): quick shuffle', { step: 5, fn: function (c, t, dt) { c.speed = 0; c.turn = 3; } }, [2.4, 0.9, 2.6]);
+row(0, 'jump 1.1 m: the mat is tossed like a pancake, flips once in the air, lands with a splat and settles   (frames 0.14 s apart)', { step: 17, fn: function (c, t, dt) { var T0 = 0.1, vy0 = 4.6, tt = t - T0, y = tt > 0 ? Math.max(0, vy0 * tt - 4.9 * tt * tt) : 0, was = c.air; c.air = y > 0 ? 1 : 0; if (was && !c.air) c.squash = 1; c.root.position.y = y; } }, [7.5, 0.8, 0.0], [0, 0.8, 0], 17);
+row(1, 'running at 5 m/s, then stop (decel 10 m/s2 from frame 2): skid, tip back, spring flat   (frames 0.1 s apart)', { step: 12, fn: function (c, t, dt) { if (t === 0) { c.speed = 5; for (var i = 0; i < 60; i++) c.update(1 / 60); } c.speed = t < 0.15 ? 5 : Math.max(0, 5 - (t - 0.15) * 10); } });
+row(2, 'running, hard turn (4 rad/s between frames 2 and 6): leans into the turn, spine bends, tail lags', { step: 9, fn: function (c, t, dt) { c.speed = 5; c.turn = t > 0.1 && t < 0.5 ? 4 : 0; if (t === 0) for (var i = 0; i < 60; i++) c.update(1 / 60); } }, [0.5, 1.0, 3.0]);
+row(3, 'turning on the spot (3 rad/s): quick shuffle', { step: 5, fn: function (c, t, dt) { c.speed = 0; c.turn = 3; } }, [1.6, 1.2, 2.0]);
 LAB.forEach(function (l) { PV.label(l[0], l[1], l[2]); });
 """
 
@@ -114,7 +114,7 @@ PANCAKE = r"""
 var S = PV.size(), out = {}, AMT = %s, PAINT = %s;
 PV.clear(); PV.bg(0x8d939b);
 var wallZ = -2.2, camZ = 0.8, q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0)));  // body up = out of the wall, head up
-var f = PV.spawn('mochi', { pose: 'pancake', amount: AMT, x: -0.75, z: -2.0, yaw: 0.5 }), wl = PV.spawn('mochi', { pose: 'pancake', amount: AMT, x: 0.75, y: 0.55, z: wallZ, quat: q.toArray() }), st = PV.spawn('mochi', { x: 0.0, z: -1.7, yaw: 2.2, tail: 'up', ears: 'up' });
+var f = PV.spawn('mochi', { pose: 'pancake', amount: AMT, x: -0.75, z: -2.0, yaw: 0.5 }), wl = PV.spawn('mochi', { pose: 'pancake', amount: AMT, x: 0.75, y: 0.55, z: wallZ, quat: q.toArray() }), st = PV.spawn('mochi', { x: 0.0, z: -1.7, yaw: 2.2 }), wk = PV.spawn('mochi', { x: -0.3, y: 1.5, z: wallZ, quat: q.toArray() }), cl = PV.spawn('mochi', { x: -1.6, y: 1.3, z: wallZ, quat: q.toArray(), pose: 'pancake', amount: AMT });
 if (PAINT) { f.fill([156, 138, 116], 0.85, 0); wl.fill([183, 178, 168], 0.85, 0); }
 var mf = f.measure(), mw = wl.measure();
 out.floor = { amount: AMT, thickness_m: +mf.size[1].toFixed(4), footprint_m: [+mf.size[0].toFixed(3), +mf.size[2].toFixed(3)] };
@@ -124,11 +124,11 @@ var d = Math.hypot(0.75, camZ + 2.0), look = Math.atan2(0.6, d), app = mf.size[1
 out.floor.apparent_height_m = +app.toFixed(3); out.floor.apparent_deg = +(ang * 180 / Math.PI).toFixed(2); out.floor.pixels_at_1080p_fov52 = Math.round(ang / (52 * Math.PI / 180) * 1080);
 var st0 = st.measure(); out.standing_cat_pixels_at_1080p_fov52 = Math.round(2 * Math.atan(st0.size[1] / 2 / 2.5) / (52 * Math.PI / 180) * 1080);
 var h2 = S[1] / 2, w3 = S[0] / 3;
-PV.look([0.0, 0.6, camZ], [0.0, 0.42, wallZ], 52); PV.view(0, 0, S[0], h2);
+PV.look([0.0, 0.6, camZ], [0.0, 0.6, wallZ], 62); PV.view(0, 0, S[0], h2);
 PV.look([0.0, 0.6, camZ], [-0.75, 0.03, -2.0], 9); PV.view(0, h2, w3, h2);
 PV.look([0.75 + 3.0, 0.6, wallZ + 0.35], [0.75, 0.55, wallZ + 0.02], 9); PV.view(w3, h2, w3, h2);
 PV.look([0.0, 0.6, camZ], [0.75, 0.55, wallZ], 12); PV.view(2 * w3, h2, w3, h2);
-PV.label(6, 6, 'camera at dog eye height 0.6 m, field of view 52: pancake on the floor (left, 3 m away), pancake on the wall (right, 3 m), a standing cat for scale' + (PAINT ? ' - both filled with the base colour of what they are on' : ' - plain white'));
+PV.label(6, 6, 'camera at dog eye height 0.6 m, field of view 62: pancake on the floor (left, 3 m away), pancakes on the wall, a walking cat on the floor and one walking up the wall (top)' + (PAINT ? ' - both filled with the base colour of what they are on' : ' - plain white'));
 PV.label(6, h2 + 6, 'floor, zoomed from the same spot: ' + (out.floor.thickness_m * 100).toFixed(1) + ' cm thick, about ' + out.floor.pixels_at_1080p_fov52 + ' px tall at 1080p'); PV.label(w3 + 6, h2 + 6, 'wall, seen along the wall from 3 m: sticks out ' + (out.wall.sticks_out_m * 100).toFixed(1) + ' cm'); PV.label(2 * w3 + 6, h2 + 6, 'wall, zoomed from the same spot');
 return out;
 """
@@ -148,7 +148,7 @@ def run(p, Studio, which, out):
     def studio(w, h, old=False): return Studio(p, w, h, old)
 
     if want("lineup"):
-        st = studio(1890, 1000); res["builds"] = st.js(LINEUP); st.shot(out / "lineup-builds.png"); st.close()
+        st = studio(1890, 1000); res["cat_builds"] = st.js(LINEUP.replace("__SET__", "'CATS'")); st.shot(out / "lineup-builds.png"); res["dog_builds"] = st.js(LINEUP.replace("__SET__", "'DOGS'")); st.shot(out / "lineup-dogs.png"); st.close()
     if want("sizes"):
         st = studio(1600, 620); res["sizes"] = st.js(SIZES); st.shot(out / "sizes.png"); st.close()
     if want("poses1") or want("poses"):
@@ -170,40 +170,40 @@ def run(p, Studio, which, out):
     if want("frozen"):
         st = studio(800, 500); res["frozen"] = st.js(FROZEN); st.shot(out / "frozen.png"); st.close()
     if want("gait"):
-        rows = "var ROWS=[{k:'mochi',sp:2.4,per:0.207,lab:'NEW cat, walk 2.4 m/s: quick trot, 8 frames of one cycle'},{k:'mochi',sp:5,per:0.267,lab:'NEW cat, run 5 m/s: bounding gallop, 8 frames of one cycle'},{k:'mochi',sp:2.4,per:0.207,lab:'walk, 3/4',cam:[2.0,0.8,2.6],fov:14},{k:'mochi',sp:5,per:0.267,lab:'run, 3/4',cam:[2.0,0.8,2.6],fov:14}];"
+        rows = "var ROWS=[{k:'mochi',sp:2.4,per:0.139,lab:'NEW flat cat, walk 2.4 m/s: paddling scuttle, the mat wobbles and ripples (8 frames of one cycle)',cam:[2.6,0.25,0],ty:0.1,fov:15},{k:'mochi',sp:5,per:0.238,lab:'NEW flat cat, run 5 m/s: inch-worm bound - humps up, slaps down long and flat',cam:[2.6,0.25,0],ty:0.1,fov:15},{k:'mochi',sp:2.4,per:0.139,lab:'walk, from above',cam:[1.2,1.6,1.6],ty:0.05,fov:17},{k:'mochi',sp:5,per:0.238,lab:'run, 3/4',cam:[1.6,1.0,1.9],ty:0.08,fov:17}];"
         st = studio(1600, 1000); st.js(rows + GAIT); st.shot(out / "gait-new.png"); st.close()
         rows_old = "var ROWS=[{k:'mochi',sp:2.4,per:0.2,lab:'OLD cat, walk 2.4 m/s (was already the run gait)'},{k:'mochi',sp:5,per:0.22,lab:'OLD cat, run 5 m/s'}];"
         st = studio(1600, 500, True); st.js(rows_old + GAIT); st.shot(out / "gait-old.png"); st.close()
         a = Image.open(out / "gait-new.png").crop((0, 0, 1600, 500)); b = Image.open(out / "gait-old.png")
         im = Image.new("RGB", (1600, 1000)); im.paste(b, (0, 0)); im.paste(a, (0, 500)); im.save(out / "gait-old-vs-new.png")
-        rows_dog = "var ROWS=[{k:'shiba',sp:2.6,per:0.25,lab:'dog walk 2.6 m/s',cam:[4.2,0.45,0],ty:0.35,fov:14},{k:'shiba',sp:5.4,per:0.27,lab:'dog run 5.4 m/s: ears back',cam:[4.2,0.45,0],ty:0.35,fov:14},{k:'dachs',sp:5.4,per:0.25,lab:'dachshund run: ears and tongue fly',cam:[2.6,0.8,3.0],ty:0.3,fov:15},{k:'poodle',sp:5.4,per:0.28,lab:'poodle run',cam:[2.6,0.8,3.0],ty:0.4,fov:17}];"
+        rows_dog = "var ROWS=[{k:'shiba',sp:2.6,per:0.133,lab:'flat dog walk 2.6 m/s',cam:[3.2,0.3,0],ty:0.14,fov:15},{k:'shiba',sp:5.4,per:0.238,lab:'flat dog run 5.4 m/s: ears back, tongue out',cam:[3.2,0.3,0],ty:0.14,fov:15},{k:'dachs',sp:5.4,per:0.238,lab:'long dog run, 3/4',cam:[2.2,1.0,2.6],ty:0.1,fov:17},{k:'poodle',sp:5.4,per:0.238,lab:'ear-flap dog run, 3/4',cam:[1.8,0.9,2.2],ty:0.1,fov:17}];"
         st = studio(1600, 1000); st.js(rows_dog + GAIT); st.shot(out / "gait-dogs.png"); st.close()
     if want("moves"):
         st = studio(1600, 1000); st.js(MOVES); st.shot(out / "moves-jump-skid-turn.png"); st.close()
     if want("icons"):
         st = studio(1200, 720); res["icons"] = st.js(ICONS); st.shot(out / "pose-icons.png"); st.close()
     if want("oldnew"):
-        js = "PV.clear(); ['mochi','soba','wata','dango','azuki','chikuwa'].forEach(function(k,i){ PV.spawn(k,{x:-2.0+i*0.8,yaw:0.5,tail:'up',ears:'up',face:1}); }); PV.look([0.2,0.75,6.2],[0,0.3,0],17); PV.full();"
+        js = "PV.clear(); ['mochi','soba','wata','dango','azuki','chikuwa'].forEach(function(k,i){ PV.spawn(k,{x:-2.0+i*0.8,yaw:0.5,face:1}); }); PV.look([0.2,1.2,6.0],[0,0.2,0],17); PV.full();"
         st = studio(1600, 420, True); st.js(js); st.shot(out / "_old.png"); st.close()
         st = studio(1600, 420); st.js(js); st.shot(out / "_new.png"); st.close()
         im = Image.new("RGB", (1600, 840)); im.paste(Image.open(out / "_old.png"), (0, 0)); im.paste(Image.open(out / "_new.png"), (0, 420))
-        label(im, (8, 8), "OLD: ball-jointed parts, dark eyes, pink nose and ears, whiskers, fur sheen"); label(im, (8, 428), "NEW: one continuous white skin, nothing dark, everything paintable"); im.save(out / "cats-old-vs-new.png")
-        js = "PV.clear(); Object.keys(SG.DOGS).forEach(function(k,i){ PV.spawn(k,{x:-2.3+i*0.92,yaw:0.6}); }); PV.look([0.2,0.85,7.0],[0,0.4,0],17); PV.full();"
+        label(im, (8, 8), "OLD: ball-jointed parts, dark eyes, pink nose and ears, whiskers, fur sheen"); label(im, (8, 428), "NEW: flat ground-hugging mats - one continuous white skin, nothing dark, the top is one big canvas"); im.save(out / "cats-old-vs-new.png")
+        js = "PV.clear(); Object.keys(SG.DOGS).forEach(function(k,i){ PV.spawn(k,{x:-2.3+i*0.92,yaw:0.6}); }); PV.look([0.2,1.3,6.8],[0,0.25,0],17); PV.full();"
         st = studio(1600, 420, True); st.js(js); st.shot(out / "_old.png"); st.close()
         st = studio(1600, 420); st.js(js); st.shot(out / "_new.png"); st.close()
         im = Image.new("RGB", (1600, 840)); im.paste(Image.open(out / "_old.png"), (0, 0)); im.paste(Image.open(out / "_new.png"), (0, 420))
-        label(im, (8, 8), "dogs, OLD critter.js"); label(im, (8, 428), "dogs, NEW critter.js (same look, new pipeline and gaits)"); im.save(out / "dogs-old-vs-new.png")
+        label(im, (8, 8), "dogs, OLD critter.js"); label(im, (8, 428), "dogs, NEW: the same flat family - snout, ear flaps, small eyes and nose, blaster on the back"); im.save(out / "dogs-old-vs-new.png")
         (out / "_old.png").unlink(); (out / "_new.png").unlink()
     if want("compare"):
         ref = pathlib.Path("/mnt/user-data/uploads/325a7dc6-image.png")
         st = studio(1230, 520)
-        st.js("PV.clear(); PV.bg(0x30343a); PV.spawn('mochi',{x:-1.5,yaw:0.6,tail:'up',ears:'up'}); PV.spawn('mochi',{x:-0.6,pose:'sit',yaw:0.6}); PV.spawn('mochi',{x:0.25,pose:'loaf',yaw:0.6}); PV.spawn('mochi',{x:1.05,pose:'tall',yaw:0.6}); PV.spawn('mochi',{x:1.9,pose:'pancake',yaw:0.6}); PV.look([0.3,0.9,6.0],[0.2,0.3,0],17); PV.full();")
+        st.js("PV.clear(); PV.bg(0x30343a); PV.spawn('mochi',{x:-1.5,yaw:0.6}); PV.spawn('mochi',{x:-0.75,pose:'pancake',yaw:0.6}); PV.spawn('mochi',{x:0.0,pose:'loaf',yaw:0.6}); PV.spawn('mochi',{x:0.7,pose:'tall',yaw:0.9}); PV.spawn('mochi',{x:1.4,pose:'arch',yaw:1.2}); PV.spawn('mochi',{x:2.1,pose:'ball',yaw:0.6}); PV.look([0.3,1.6,6.6],[0.3,0.12,0],17); PV.full();")
         st.shot(out / "_new.png"); st.close()
         new = Image.open(out / "_new.png").convert("RGB")
         if ref.exists():
             r = Image.open(ref).convert("RGB"); r = r.crop((210, 170, 850, 800)); r = r.resize((int(r.width * 520 / r.height), 520))
             im = Image.new("RGB", (r.width + new.width, 520)); im.paste(r, (0, 0)); im.paste(new, (r.width, 0))
-            label(im, (8, 8), "the original game's figure (owner's screenshot, for reference only)"); label(im, (r.width + 8, 8), "our cat: stand, sit, loaf, tall, pancake - plain, smooth, flat faces")
+            label(im, (8, 490), "the original game's figure (owner's screenshot, reference only)"); label(im, (r.width + 8, 8), "ours: walking mat, pancake, loaf, upright, arch, ball - plain white, all flat canvas")
         else: im = new
         im.save(out / "canvas-vs-original.png"); (out / "_new.png").unlink()
     if res:
