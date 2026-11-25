@@ -95,8 +95,9 @@
     if (team === 'cat') { // OURS (labelled): a cat that lies flat against a surface is shaded with that surface's normal, so the same base colour gives the same lit colour as the wall
       c.flatU = { value: 0 }; c.flatN = { value: new THREE.Vector3(0, 1, 0) }; var obc = c.mat.onBeforeCompile;
       c.mat.onBeforeCompile = function (sh, r) { if (obc) obc.call(this, sh, r); sh.uniforms.uFlat = c.flatU; sh.uniforms.uFlatN = c.flatN;
-        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uFlat; uniform vec3 uFlatN;').replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n normal = normalize(mix(normal, normalize((viewMatrix * vec4(uFlatN, 0.0)).xyz), uFlat));'); };
-      c.mat.customProgramCacheKey = function () { return 'catflat'; }; }
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uFlat; uniform vec3 uFlatN;').replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n normal = normalize(mix(normal, normalize((viewMatrix * vec4(uFlatN, 0.0)).xyz), uFlat)); // SG_AFTER_FLAT\n'); };
+      c.mat.customProgramCacheKey = function () { return 'catflat'; };
+      if (SG.surfaceDetail) SG.surfaceDetail(c.mat, 'cat', { flat: true }); } // a flush body shows the same grain and dirt as the surface it lies on
     var e = { size: size, id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
       rad: team === 'dog' ? RULES.dog.bodyRad : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
     if (o.pose) c.setPose(o.pose);

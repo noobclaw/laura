@@ -158,13 +158,14 @@
     this.renderAlbedo = function (scene, camera, w, h, out, mode) { // mode: undefined = unlit albedo (sRGB bytes), 'raw' = unlit, linear bytes, 'lit' = with the real lights, before any grading
       if (rtPick.width !== w || rtPick.height !== h) rtPick.setSize(w, h);
       var env = scene.environment, bg = scene.background, mask = camera.layers.mask, lit = mode === 'lit';
+      var det = window.SG && SG.detailU ? SG.detailU.value : 1; if (!lit && window.SG && SG.detailU) SG.detailU.value = 0; // base colour only: no dirt, no grain
       if (!lit) { scene.environment = null; camera.layers.mask = 1 | 4; }
       var sh = R.shadowMap.autoUpdate; R.shadowMap.autoUpdate = false;
       R.setRenderTarget(rtPick); R.setClearColor(0x808080, 1); R.clear(); R.render(scene, camera);
       out = out || new Uint8Array(w * h * 4);
       R.readRenderTargetPixels(rtPick, 0, 0, w, h, out);
       R.setRenderTarget(null);
-      scene.environment = env; scene.background = bg; camera.layers.mask = mask; R.shadowMap.autoUpdate = sh;
+      scene.environment = env; scene.background = bg; camera.layers.mask = mask; R.shadowMap.autoUpdate = sh; if (window.SG && SG.detailU) SG.detailU.value = det;
       if (mode !== 'raw') for (var i = 0; i < out.length; i += 4) { out[i] = lin2srgb(out[i]); out[i + 1] = lin2srgb(out[i + 1]); out[i + 2] = lin2srgb(out[i + 2]); }
       return out;
     };
