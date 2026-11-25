@@ -5,7 +5,17 @@ using UnityEngine;
 
 namespace DontEatSushi
 {
-    public enum Phase { Menu, Prep, Hunt, Win, Lose }
+    public enum Phase { Menu, Lobby, Prep, Hunt, Win, Lose }
+
+    public class Remote
+    {
+        public GameObject go;
+        public Paintable paint;
+        public int shape = -1, plate = -1, slot;
+        public Vector3 pos;
+        public float yaw;
+        public bool caught;
+    }
     public enum Role { Hider, Hunter }
 
     public class Bot
@@ -84,6 +94,213 @@ namespace DontEatSushi
         };
 
         void Start() { Build(); phase = Phase.Menu; }
+        void OnDestroy() { if (net != null) net.Close(); }
+
+        // ---------------- 連線對戰 ----------------
+
+        Net net;
+        bool mp, meCaught, texDirty;
+        int hunterId = -1;
+        float sendT, texT;
+        string ipField = "127.0.0.1", netMsg = "";
+        readonly Dictionary<int, Remote> remotes = new Dictionary<int, Remote>();
+        readonly List<int> lobbyIds = new List<int>();
+        readonly List<int> hiderIds = new List<int>();
+        readonly HashSet<int> caughtIds = new HashSet<int>();
+
+        static string F(float v) { return v.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture); }
+        static float P(string v) { return float.Parse(v, System.Globalization.CultureInfo.InvariantCulture); }
+
+        void OpenRoom()
+        {
+            net = new Net();
+            if (!net.Host()) { netMsg = "開房失敗：" + net.error; net = null; return; }
+            lobbyIds.Clear(); lobbyIds.Add(0);
+            phase = Phase.Lobby;
+            netMsg = "房間已開。把這個位址告訴朋友：" + Net.LocalIP();
+        }
+
+        void JoinRoom()
+        {
+            net = new Net();
+            if (!net.Join(ipField.Trim())) { netMsg = "加入失敗：" + net.error; net = null; return; }
+            phase = Phase.Lobby;
+            netMsg = "已加入，等房主按開始。";
+        }
+
+        void LeaveNet()
+        {
+            if (net != null) net.Close();
+            net = null; mp = false; meCaught = false;
+            remotes.Clear();
+            Restart();
+        }
+
+        void HostStart()
+        {
+            if (lobbyIds.Count < 2) { netMsg = "至少要兩個人才能開始。"; return; }
+            int hid = lobbyIds[Random.Range(0, lobbyIds.Count)];
+            var ids = new List<int>(lobbyIds);
+            net.Send("start|" + hid + "|" + string.Join(",", ids));
+            StartMp(hid, ids);
+        }
+
+        void StartMp(int hid, List<int> ids)
+        {
+            hunterId = hid;
+            hiderIds.Clear();
+            foreach (var id in ids) if (id != hid) hiderIds.Add(id);
+            caughtIds.Clear(); meCaught = false;
+            if (root != null) Kill(root.gameObject);
+            player = null; remotes.Clear();
+            mp = true;
+            role = net.myId == hid ? Role.Hunter : Role.Hider;
+            Build();
+            diner.gameObject.SetActive(false);
+            timer = 45f; sendT = 0f; texT = 0f; texDirty = true;
+            if (role == Role.Hunter)
+            {
+                player.gameObject.SetActive(false);
+                ammo = MaxAmmo; found = 0; ammoT = 0f; whistleT = 25f;
+                camTarget = new Vector3(0f, 0.3f, -3f); camDist = 13f; camPitch = 50f; camYaw = 0f;
+            }
+            Toast(role == Role.Hunter ? "你是食客。壽司們有 45 秒躲藏。" : "你是壽司。45 秒內塗好、躲好。");
+            Sfx.Beep(660f, 0.12f, 0.3f);
+        }
+
+        Remote GetRemote(int id, int shape)
+        {
+            Remote r;
+            if (!remotes.TryGetValue(id, out r)) { r = new Remote(); remotes[id] = r; }
+            if (r.caught) return r;
+            if (r.shape != shape || r.go == null)
+            {
+                if (r.go != null) Kill(r.go);
+                var go = new GameObject("Remote" + id);
+                go.transform.SetParent(root, false);
+                r.paint = go.AddComponent<Paintable>();
+                r.paint.Init(SushiShapes.Get((ShapeKind)Mathf.Clamp(shape, 0, 1)), SushiKind.Blank, false);
+                r.go = go; r.shape = shape;
+            }
+            return r;
+        }
+
+        void MarkCaught(int id, bool left)
+        {
+            if (!hiderIds.Contains(id) || caughtIds.Contains(id))
+            {
+                if (left && id == hunterId && (phase == Phase.Prep || phase == Phase.Hunt)) { phase = role == Role.Hider && !meCaught ? Phase.Win : Phase.Lose; Toast("食客離開了。"); }
+                return;
+            }
+            caughtIds.Add(id);
+            if (net != null && id == net.myId)
+            {
+                meCaught = true; Detach();
+                if (player != null) player.gameObject.SetActive(false);
+                Toast("你被吃掉了！可以繼續看其他人。");
+                Sfx.Beep(200f, 0.5f, 0.3f);
+            }
+            else
+            {
+                Remote r;
+                if (remotes.TryGetValue(id, out r)) { r.caught = true; if (r.go != null) Kill(r.go); r.go = null; }
+                Sfx.Beep(880f, 0.12f, 0.3f);
+                Toast(left ? "有壽司離開了。" : "有一個壽司被吃掉了！還剩 " + (hiderIds.Count - caughtIds.Count) + " 個。");
+            }
+            if (caughtIds.Count >= hiderIds.Count && (phase == Phase.Prep || phase == Phase.Hunt))
+                phase = role == Role.Hunter ? Phase.Win : Phase.Lose;
+        }
+
+        void HandleNet(string m)
+        {
+            int bar = m.IndexOf('|');
+            int from;
+            if (bar < 0 || !int.TryParse(m.Substring(0, bar), out from)) return;
+            string body = m.Substring(bar + 1);
+            string[] a = body.Split('|');
+            switch (a[0])
+            {
+                case "join":
+                    if (net.isHost && !lobbyIds.Contains(from)) lobbyIds.Add(from);
+                    break;
+                case "leave":
+                    lobbyIds.Remove(from);
+                    if (mp) MarkCaught(from, true);
+                    break;
+                case "closed":
+                    LeaveNet();
+                    netMsg = "和房主的連線斷了。";
+                    break;
+                case "start":
+                {
+                    if (a.Length < 3) break;
+                    var ids = new List<int>();
+                    foreach (var t in a[2].Split(',')) ids.Add(int.Parse(t));
+                    StartMp(int.Parse(a[1]), ids);
+                    break;
+                }
+                case "s":
+                {
+                    if (!mp || a.Length < 8) break;
+                    Remote r = GetRemote(from, int.Parse(a[5]));
+                    r.pos = new Vector3(P(a[1]), P(a[2]), P(a[3])); r.yaw = P(a[4]);
+                    r.plate = int.Parse(a[6]); r.slot = Mathf.Clamp(int.Parse(a[7]), 0, 1);
+                    break;
+                }
+                case "tx":
+                {
+                    Remote r;
+                    if (!mp || !remotes.TryGetValue(from, out r) || r.paint == null) break;
+                    try { r.paint.tex.LoadImage(System.Convert.FromBase64String(body.Substring(3))); r.paint.px = r.paint.tex.GetPixels32(); }
+                    catch (System.Exception) { }
+                    break;
+                }
+                case "hit":
+                    if (mp && a.Length >= 2) MarkCaught(int.Parse(a[1]), false);
+                    break;
+            }
+        }
+
+        void NetTick(float dt)
+        {
+            if (net == null) return;
+            string m;
+            while (net != null && net.inbox.TryDequeue(out m)) HandleNet(m);
+            if (net == null || !mp || root == null) return;
+            foreach (var kv in remotes)
+            {
+                var r = kv.Value;
+                if (r.go == null || r.caught) continue;
+                if (r.plate >= 0 && r.plate < plates.Count)
+                {
+                    var st = plates[r.plate].slots[r.slot].tr;
+                    r.go.transform.SetPositionAndRotation(st.position, st.rotation);
+                }
+                else
+                {
+                    r.go.transform.position = Vector3.Lerp(r.go.transform.position, r.pos, Mathf.Min(1f, 12f * dt));
+                    r.go.transform.rotation = Quaternion.Euler(0f, r.yaw, 0f);
+                }
+            }
+            if (role == Role.Hider && !meCaught && player != null && (phase == Phase.Prep || phase == Phase.Hunt))
+            {
+                sendT -= dt;
+                if (sendT <= 0f)
+                {
+                    sendT = 0.1f;
+                    int pi = -1, si = 0;
+                    if (attached != null) { pi = plates.IndexOf(attached.plate); si = System.Array.IndexOf(attached.plate.slots, attached); }
+                    Vector3 p = player.position;
+                    net.Send("s|" + F(p.x) + "|" + F(p.y) + "|" + F(p.z) + "|" + F(playerYaw) + "|" + (int)playerShape + "|" + pi + "|" + si);
+                }
+                texT -= dt;
+                if (texDirty && texT <= 0f)
+                {
+                    texT = 0.8f; texDirty = false;
+                    net.Send("tx|" + System.Convert.ToBase64String(playerPaint.tex.EncodeToPNG()));
+                }
+            }
+        }
 
         static void Kill(Object o)
         {
@@ -174,13 +391,15 @@ namespace DontEatSushi
             if (whistleT <= 0f)
             {
                 whistleT = 25f;
-                var alive = bots.FindAll(x => !x.caught && x.go != null);
+                var alive = new List<Vector3>();
+                foreach (var x in bots) if (!x.caught && x.go != null) alive.Add(x.go.transform.position);
+                foreach (var kv in remotes) if (!kv.Value.caught && kv.Value.go != null) alive.Add(kv.Value.go.transform.position);
                 if (alive.Count > 0)
                 {
-                    var b = alive[Random.Range(0, alive.Count)];
+                    Vector3 wp = alive[Random.Range(0, alive.Count)];
                     if (hintRing == null) hintRing = Ring(root, 3.5f, 0.09f, new Color(0.3f, 0.9f, 1f));
                     Vector2 off = Random.insideUnitCircle * 2.5f;
-                    hintRing.transform.position = new Vector3(b.go.transform.position.x + off.x, 0.6f, b.go.transform.position.z + off.y);
+                    hintRing.transform.position = new Vector3(wp.x + off.x, 0.6f, wp.z + off.y);
                     hintRing.gameObject.SetActive(true);
                     hintT = 3.5f;
                     Sfx.Beep(1320f, 0.25f, 0.25f);
@@ -188,8 +407,8 @@ namespace DontEatSushi
                 }
             }
 
-            Vector2 mp = In.MousePos;
-            bool overHud = mp.y < 118f * (Screen.height / 720f);
+            Vector2 mpos = In.MousePos;
+            bool overHud = mpos.y < 118f * (Screen.height / 720f);
             if (In.LmbDown && !overHud)
             {
                 if (ammo < 1) { Toast("醬油用完了，等它補充。"); Sfx.Beep(180f, 0.1f, 0.25f); return; }
@@ -197,11 +416,17 @@ namespace DontEatSushi
                 Sfx.Beep(240f, 0.08f, 0.35f);
                 Physics.SyncTransforms();
                 RaycastHit hit;
-                if (!Physics.Raycast(cam.ScreenPointToRay(mp), out hit, 300f)) return;
+                if (!Physics.Raycast(cam.ScreenPointToRay(mpos), out hit, 300f)) return;
                 var stain = Prim(PrimitiveType.Sphere, "Stain", hit.point, new Vector3(0.35f, 0.04f, 0.35f), Mats.Lit(new Color(0.12f, 0.06f, 0.04f), 0.8f), false);
                 if (Application.isPlaying) Destroy(stain, 8f);
                 Bot hitBot = null;
                 foreach (var b in bots) if (!b.caught && b.go != null && hit.collider.gameObject == b.go) hitBot = b;
+                if (mp)
+                {
+                    int hitId = -1;
+                    foreach (var kv in remotes) if (!kv.Value.caught && kv.Value.go != null && hit.collider.gameObject == kv.Value.go) hitId = kv.Key;
+                    if (hitId >= 0) { net.Send("hit|" + hitId); found++; MarkCaught(hitId, false); return; }
+                }
                 if (hitBot != null)
                 {
                     hitBot.caught = true; found++;
@@ -209,7 +434,7 @@ namespace DontEatSushi
                     Kill(hitBot.go);
                     Sfx.Beep(880f, 0.1f, 0.35f); Sfx.Beep(1320f, 0.18f, 0.3f);
                     Toast("抓到一個假壽司！還剩 " + (bots.Count - found) + " 個。");
-                    if (found >= bots.Count) { phase = Phase.Win; Sfx.Beep(1040f, 0.4f, 0.35f); }
+                    if (!mp && found >= bots.Count) { phase = Phase.Win; Sfx.Beep(1040f, 0.4f, 0.35f); }
                 }
                 else if (hit.collider.GetComponent<Paintable>() != null) Toast("那是真壽司，浪費了一發。");
                 else Toast("沒打中。");
@@ -399,6 +624,7 @@ namespace DontEatSushi
             playerPaint = go.AddComponent<Paintable>();
             playerPaint.Init(SushiShapes.Get(playerShape), SushiKind.Blank, true);
             playerRenderer = playerPaint.rend;
+            texDirty = true;
             player = go.transform;
         }
 
@@ -502,8 +728,11 @@ namespace DontEatSushi
             if (toastT > 0f) toastT -= dt;
             if (In.Down(K.F1)) debugView = !debugView;
 
+            NetTick(dt);
+            if (root == null) return;
             MovePlates(dt);
 
+            if (phase == Phase.Lobby) return;
             if (phase == Phase.Menu)
             {
                 if (In.Down(K.Digit1)) StartRound(Role.Hider);
@@ -517,7 +746,7 @@ namespace DontEatSushi
                 HunterControl(dt);
                 if (phase == Phase.Prep && timer <= 0f)
                 {
-                    phase = Phase.Hunt; timer = hunterTime;
+                    phase = Phase.Hunt; timer = mp ? huntTime : hunterTime;
                     foreach (var p in plates) foreach (var s in p.slots) if (s.marker != null) s.marker.gameObject.SetActive(false);
                     Toast("開吃！左鍵擠醬油打假壽司，打錯會浪費醬油。");
                 }
@@ -528,10 +757,9 @@ namespace DontEatSushi
             if (phase == Phase.Prep || phase == Phase.Hunt)
             {
                 timer -= dt;
-                if (phase == Phase.Hunt) survived += dt;
-                PlayerControl(dt);
-                PaintControl();
-                if (phase == Phase.Prep && (timer <= 0f || In.Down(K.Space)))
+                if (phase == Phase.Hunt && !meCaught) survived += dt;
+                if (!meCaught) { PlayerControl(dt); PaintControl(); }
+                if (phase == Phase.Prep && (timer <= 0f || (!mp && In.Down(K.Space))))
                 {
                     phase = Phase.Hunt; timer = huntTime; Sfx.Beep(520f, 0.3f, 0.3f);
                     foreach (var p in plates) foreach (var s in p.slots) if (s.marker != null) s.marker.gameObject.SetActive(false);
@@ -539,13 +767,13 @@ namespace DontEatSushi
                 }
                 else if (phase == Phase.Hunt && timer <= 0f)
                 {
-                    phase = Phase.Win; Sfx.Beep(1040f, 0.4f, 0.35f);
+                    phase = meCaught ? Phase.Lose : Phase.Win; Sfx.Beep(1040f, 0.4f, 0.35f);
                     Toast("");
                 }
             }
             else if (In.Down(K.R))
             {
-                Restart();
+                if (net != null) LeaveNet(); else Restart();
             }
         }
 
@@ -619,8 +847,8 @@ namespace DontEatSushi
 
         void PaintControl()
         {
-            Vector2 mp = In.MousePos;
-            bool overHud = mp.y < 118f * (Screen.height / 720f);
+            Vector2 mpos = In.MousePos;
+            bool overHud = mpos.y < 118f * (Screen.height / 720f);
             if (In.Down(K.LeftBracket)) brush = Mathf.Max(0.03f, brush - 0.02f);
             if (In.Down(K.RightBracket)) brush = Mathf.Min(0.4f, brush + 0.02f);
             if (In.Down(K.Z)) { if (!playerPaint.Undo()) Toast("沒有可以撤銷的了。"); }
@@ -630,7 +858,7 @@ namespace DontEatSushi
             {
                 Physics.SyncTransforms();
                 RaycastHit hit;
-                if (Physics.Raycast(cam.ScreenPointToRay(mp), out hit, 300f))
+                if (Physics.Raycast(cam.ScreenPointToRay(mpos), out hit, 300f))
                 {
                     var pt = hit.collider.GetComponentInParent<Paintable>();
                     if (pt != null) paintColor = pt.Sample(hit.point);
@@ -645,20 +873,21 @@ namespace DontEatSushi
 
             if (In.LmbDown && !overHud)
             {
-                stroke = true; lastMouse = mp;
+                stroke = true; lastMouse = mpos;
                 Sfx.Beep(700f, 0.03f, 0.12f);
                 playerPaint.PushUndo();
                 Physics.SyncTransforms();
-                DabAt(mp);
+                DabAt(mpos);
             }
             else if (stroke && In.LmbHeld)
             {
                 Physics.SyncTransforms();
-                float dist = (mp - lastMouse).magnitude;
+                float dist = (mpos - lastMouse).magnitude;
                 int steps = Mathf.Clamp(Mathf.CeilToInt(dist / 6f), 1, 24);
-                for (int i = 1; i <= steps; i++) DabAt(Vector2.Lerp(lastMouse, mp, i / (float)steps));
-                lastMouse = mp;
+                for (int i = 1; i <= steps; i++) DabAt(Vector2.Lerp(lastMouse, mpos, i / (float)steps));
+                lastMouse = mpos;
             }
+            if (stroke || In.Down(K.F) || In.Down(K.Z)) texDirty = true;
             if (!In.LmbHeld) stroke = false;
             playerPaint.Flush();
         }
@@ -732,9 +961,9 @@ namespace DontEatSushi
 
             if (phase == Phase.Menu)
             {
-                Box(new Rect(W / 2f - 320f, H / 2f - 190f, 640f, 380f), panel);
+                Box(new Rect(W / 2f - 320f, H / 2f - 190f, 640f, 390f), panel);
                 Box(new Rect(W / 2f - 320f, H / 2f - 190f, 640f, 3f), gold);
-                Box(new Rect(W / 2f - 320f, H / 2f + 187f, 640f, 3f), gold);
+                Box(new Rect(W / 2f - 320f, H / 2f + 197f, 640f, 3f), gold);
                 GUI.Label(new Rect(W / 2f - 320f, H / 2f - 170f, 640f, 70f), "別吃壽司", sBig);
                 var mc = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 22 };
                 var ms2 = new GUIStyle(sSmall) { alignment = TextAnchor.MiddleCenter };
@@ -746,7 +975,30 @@ namespace DontEatSushi
                 GUI.Label(new Rect(r2.x + 10f, r2.y + 70f, r2.width - 20f, 70f), "找出混在裡面的假壽司，擠醬油打它（按 2）", ms2);
                 if (GUI.Button(r1, GUIContent.none, GUIStyle.none)) StartRound(Role.Hider);
                 if (GUI.Button(r2, GUIContent.none, GUIStyle.none)) StartRound(Role.Hunter);
-                GUI.Label(new Rect(W / 2f - 320f, H / 2f + 120f, 640f, 40f), "單人練習版：對手由電腦控制", ms2);
+                GUI.Label(new Rect(W / 2f - 320f, H / 2f + 86f, 640f, 26f), "上面兩個是單人練習（對手是電腦）。下面是多人連線：", ms2);
+                Rect r3 = new Rect(W / 2f - 270f, H / 2f + 118f, 150f, 40f), r4 = new Rect(W / 2f + 120f, H / 2f + 118f, 150f, 40f);
+                Box(r3, new Color(0.20f, 0.45f, 0.30f, 0.95f)); Box(r4, new Color(0.45f, 0.30f, 0.55f, 0.95f));
+                GUI.Label(r3, "開房間", mc); GUI.Label(r4, "加入", mc);
+                var tf = new GUIStyle(GUI.skin.textField) { font = font, fontSize = 18, alignment = TextAnchor.MiddleCenter };
+                ipField = GUI.TextField(new Rect(W / 2f - 105f, H / 2f + 120f, 210f, 36f), ipField, 40, tf);
+                if (GUI.Button(r3, GUIContent.none, GUIStyle.none)) OpenRoom();
+                if (GUI.Button(r4, GUIContent.none, GUIStyle.none)) JoinRoom();
+                GUI.Label(new Rect(W / 2f - 320f, H / 2f + 162f, 640f, 26f), netMsg, ms2);
+                return;
+            }
+            if (phase == Phase.Lobby)
+            {
+                Box(new Rect(W / 2f - 300f, H / 2f - 150f, 600f, 300f), panel);
+                Box(new Rect(W / 2f - 300f, H / 2f - 150f, 600f, 3f), gold);
+                GUI.Label(new Rect(W / 2f - 300f, H / 2f - 140f, 600f, 60f), "房間", sBig);
+                var lc = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter };
+                GUI.Label(new Rect(W / 2f - 290f, H / 2f - 60f, 580f, 50f), netMsg, lc);
+                bool host = net != null && net.isHost;
+                if (host) GUI.Label(new Rect(W / 2f - 290f, H / 2f - 10f, 580f, 30f), "目前 " + lobbyIds.Count + " 人（含你）。系統會隨機選一個人當食客。", lc);
+                Rect b1 = new Rect(W / 2f - 220f, H / 2f + 60f, 200f, 50f), b2 = new Rect(W / 2f + 20f, H / 2f + 60f, 200f, 50f);
+                if (host) { Box(b1, new Color(0.80f, 0.30f, 0.20f, 0.95f)); GUI.Label(b1, "開始遊戲", lc); if (GUI.Button(b1, GUIContent.none, GUIStyle.none)) HostStart(); }
+                Box(b2, new Color(0.3f, 0.3f, 0.3f, 0.95f)); GUI.Label(b2, "離開", lc);
+                if (GUI.Button(b2, GUIContent.none, GUIStyle.none)) LeaveNet();
                 return;
             }
             if (role == Role.Hunter && phase == Phase.Prep)
@@ -788,7 +1040,7 @@ namespace DontEatSushi
                 GUI.Label(new Rect(20f, H - 106f, 120f, 30f), "醬油", sLabel);
                 for (int i = 0; i < MaxAmmo; i++)
                     Box(new Rect(90f + i * 34f, H - 104f, 26f, 26f), i < ammo ? new Color(0.35f, 0.16f, 0.08f) : new Color(1f, 1f, 1f, 0.15f));
-                GUI.Label(new Rect(320f, H - 106f, 400f, 30f), "已找到 " + found + " / " + bots.Count, sLabel);
+                GUI.Label(new Rect(320f, H - 106f, 400f, 30f), "已找到 " + found + " / " + (mp ? hiderIds.Count : bots.Count), sLabel);
                 GUI.Label(new Rect(20f, H - 62f, W - 40f, 50f), "WASD 移動視角　右鍵拖曳 轉鏡頭　滾輪 縮放　左鍵 擠醬油\n假壽司的顏色、花紋會有破綻，仔細看。每 25 秒會有一個壽司吹口哨。", sSmall);
             }
 
@@ -829,7 +1081,7 @@ namespace DontEatSushi
                     GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "存活 " + Mathf.FloorToInt(survived) + " 秒　得分 " + score, c);
                     GUI.Label(new Rect(W / 2f - 280f, H / 2f + 6f, 560f, 34f), "最危險的一刻：食客注意力 " + Mathf.RoundToInt(Mathf.Clamp01(maxSuspicion) * 100f) + "%", c);
                 }
-                else GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "找到 " + found + " / " + bots.Count + "　用時 " + Mathf.FloorToInt(survived) + " 秒", c);
+                else GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "找到 " + found + " / " + (mp ? hiderIds.Count : bots.Count) + "　用時 " + Mathf.FloorToInt(survived) + " 秒", c);
                 GUI.Label(new Rect(W / 2f - 280f, H / 2f + 60f, 560f, 34f), "按 R 回到選單", c);
             }
 

@@ -108,9 +108,34 @@ public static class CiBuild
         }
     }
 
+    // Host and client in one process over loopback: proves the framing and relay work before anyone plays.
+    static void NetTest()
+    {
+        var h = new DontEatSushi.Net(); var c = new DontEatSushi.Net();
+        try
+        {
+            if (!h.Host()) throw new Exception("host: " + h.error);
+            if (!c.Join("127.0.0.1")) throw new Exception("join: " + c.error);
+            System.Threading.Thread.Sleep(400);
+            c.Send("ping|1"); h.Send("pong|2");
+            bool gotJoin = false, gotPing = false, gotPong = false; string m;
+            var end = DateTime.Now.AddSeconds(4);
+            while (DateTime.Now < end && !(gotPing && gotPong))
+            {
+                while (h.inbox.TryDequeue(out m)) { if (m.EndsWith("|join")) gotJoin = true; if (m.EndsWith("|ping|1")) gotPing = true; }
+                while (c.inbox.TryDequeue(out m)) if (m == "0|pong|2") gotPong = true;
+                System.Threading.Thread.Sleep(20);
+            }
+            Debug.Log("CiBuild: net test " + (gotJoin && gotPing && gotPong ? "ok" : "FAILED") + " join=" + gotJoin + " ping=" + gotPing + " pong=" + gotPong + " clientId=" + c.myId);
+        }
+        catch (Exception e) { Debug.LogWarning("CiBuild: net test FAILED: " + e.Message); }
+        finally { c.Close(); h.Close(); }
+    }
+
     public static void Desktop()
     {
         Setup();
+        NetTest();
         if (Arg("-customBuildTarget", EditorUserBuildSettings.activeBuildTarget.ToString()).Contains("Windows"))
         {
             try { Shots(); } catch (Exception e) { Debug.LogWarning("CiBuild: Shots failed: " + e); }
