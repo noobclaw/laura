@@ -552,7 +552,7 @@
     var P = G.paint, c = G.me.c, pr = pointerRay(x, y), hit = c.raycast(pr);
     if (!hit) { P.last = null; return false; }
     if (!G.seeThrough) { // normal brush: whatever stands between the camera and the body blocks the stroke
-      var far0 = pr.far; pr.far = hit.distance - 0.03; var blk = pr.intersectObjects([room.batched, room.dyn], true)[0]; pr.far = far0;
+      var blk = segSolid(pr.ray.origin, hit.point, 0.03); // against the collision boxes: cheap enough to do on every mouse move
       if (blk) { P.last = null; if (first) bus.emit('blocked'); return false; } }
     var thru = G.seeThrough ? pr.ray.direction.clone() : null; // see-through brush: a cylinder along the view ray, so front and back are painted in one pass
     var hard = P.hard ? RULES.paint.hardnessHard : RULES.paint.hardnessSoft, pat = null;
@@ -805,6 +805,16 @@
      Nothing moves unless a key is held: no stamina, no sliding. */
   var FLOOR = { floor: true };
   function solidAt(x, y, z) { if (y < room.base(x, z)) return FLOOR; var P = room.platforms; for (var i = 0; i < P.length; i++) { var p = P[i]; if (x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1 && y > p.y0 && y < p.y1) return p; } return null; }
+  /* does the segment a -> b (stopping `back` short of b) pass through any solid box? */
+  function segSolid(a, b, back) {
+    var dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, L = Math.sqrt(dx * dx + dy * dy + dz * dz), tmax = Math.max(0, 1 - back / Math.max(L, 1e-6)), P = room.platforms;
+    for (var i = 0; i < P.length; i++) { var p = P[i], t0 = 0, t1 = tmax, lo, hi, o, d, k, ok = true;
+      for (k = 0; k < 3 && ok; k++) { o = k === 0 ? a.x : k === 1 ? a.y : a.z; d = k === 0 ? dx : k === 1 ? dy : dz; lo = pLo(p, k); hi = pHi(p, k);
+        if (Math.abs(d) < 1e-9) { if (o < lo || o > hi) ok = false; } else { var u0 = (lo - o) / d, u1 = (hi - o) / d; if (u0 > u1) { var sw = u0; u0 = u1; u1 = sw; } if (u0 > t0) t0 = u0; if (u1 < t1) t1 = u1; if (t0 > t1) ok = false; } }
+      if (ok) return p; }
+    return null;
+  }
+  G.segSolid = segSolid;
   function pLo(p, a) { return a === 0 ? p.x0 : a === 1 ? p.y0 : p.z0; }
   function pHi(p, a) { return a === 0 ? p.x1 : a === 1 ? p.y1 : p.z1; }
   G.solidAt = solidAt;
@@ -890,6 +900,9 @@
     } else if (me && me.team === 'cat') {
       var ctr = me.c.center(tmp); var ty = ctr.y + 0.12, dist = cm.dist * (G.paint.on ? 0.62 : 1);
       var ox = Math.sin(cm.yaw) * Math.cos(cm.pitch) * dist, oy = Math.sin(cm.pitch) * dist, oz = Math.cos(cm.yaw) * Math.cos(cm.pitch) * dist;
+      if (me.cling) { // stuck to a wall or ceiling: aim a little off the surface and keep the camera on the room side of it, so it never ends up inside the wall or above the ceiling
+        var cn = me.cling.n, dn = ox * cn[0] + oy * cn[1] + oz * cn[2], need = dist * 0.3; ty = ctr.y + cn[1] * 0.14; ctr.x += cn[0] * 0.14; ctr.z += cn[2] * 0.14;
+        if (dn < need) { ox += cn[0] * (need - dn); oy += cn[1] * (need - dn); oz += cn[2] * (need - dn); } }
       var tw = room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
       var px = ctr.x + ox * kk, py = Math.max(room.base(ctr.x, ctr.z) + 0.1, ty + oy * kk), pz = ctr.z + oz * kk;
       camera.fov = 52; camera.position.lerp(tmp2.set(px, py, pz), 1 - Math.exp(-dt * 14)); camera.lookAt(ctr.x, ty, ctr.z);
