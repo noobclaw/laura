@@ -1,0 +1,2 @@
+# The repository root ignores every data/ folder (tool pipeline snapshots). The game needs its own.
+!data/
