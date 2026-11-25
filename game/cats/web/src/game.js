@@ -84,6 +84,7 @@
     o = o || {};
     var size = o.size || 1, c = new SG.Critter(spec, { seed: G.ents.length + 1, atlas: RULES.paint.textureSize, scale: size });
     scene.add(c.root);
+    if (team === 'cat') c.tailMode = 'tuck';
     var e = { size: size, id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
       rad: team === 'dog' ? 0.22 : Math.max(0.12, spec.bellyR * 0.95 * (spec.scale || 1)) * size, step: 0.16 * SG.WS, sus: 0, decoyOf: o.decoyOf || null, pid: o.pid || id, breed: o.breed, eyeH0: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault, eyeH: (team === 'dog' && G.settings.breedEyes && RULES.dog.eyeHeight[o.breed]) || RULES.dog.eyeHeightDefault };
     if (o.pose) c.setPose(o.pose);
@@ -318,7 +319,8 @@
     camoCam.fov = 2 * Math.atan(0.55 / d) * 180 / Math.PI; camoCam.position.copy(eye); camoCam.lookAt(ctr); camoCam.updateProjectionMatrix(); camoCam.updateMatrixWorld(true);
     var hide = G.ents.filter(function (o) { return o.team === 'dog'; });
     hide.forEach(function (o) { o.c.root.visible = false; });
-    post.renderAlbedo(scene, camoCam, N, N, misA);
+    var fv0 = e.c.faceSkin.visible; if (e.c.pose !== 'stand') e.c.faceSkin.visible = false; // the seeker does not get to see a posed cat's face
+    post.renderAlbedo(scene, camoCam, N, N, misA); e.c.faceSkin.visible = fv0;
     e.c.root.visible = false; post.renderAlbedo(scene, camoCam, N, N, misB); e.c.root.visible = true;
     hide.forEach(function (o) { o.c.root.visible = !o.fp; });
     var sum = 0, cnt = 0;
@@ -330,9 +332,9 @@
   var idMats = [], AW = 96, AH = 54, idPx = new Uint8Array(AW * AH * 4), areaCam = new THREE.PerspectiveCamera(50, 16 / 9, 0.05, 60);
   function visibleAreas(cam) {
     var list = cats().filter(function (c) { return !c.decoyOf && c.c.root.visible; }), saved = [], out = {}, cnt = [], i;
-    list.forEach(function (c, k) { if (!idMats[k]) idMats[k] = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, (8 + 16 * k) / 255, 1) }); saved.push(c.c.skin.material); c.c.skin.material = idMats[k]; c.c.faceSkin.visible = false; cnt.push(0); });
+    list.forEach(function (c, k) { if (!idMats[k]) idMats[k] = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, (8 + 16 * k) / 255, 1) }); saved.push(c.c.skin.material); c.c.skin.material = idMats[k]; c.fv = c.c.faceSkin.visible; c.c.faceSkin.visible = false; cnt.push(0); });
     post.renderAlbedo(scene, cam, AW, AH, idPx, 'raw');
-    list.forEach(function (c, k) { c.c.skin.material = saved[k]; c.c.faceSkin.visible = true; });
+    list.forEach(function (c, k) { c.c.skin.material = saved[k]; c.c.faceSkin.visible = c.fv; });
     for (i = 0; i < idPx.length; i += 4) if (idPx[i] > 250 && idPx[i + 2] > 250 && idPx[i + 1] < 8 + 16 * list.length) { var k2 = Math.round((idPx[i + 1] - 8) / 16); if (k2 >= 0 && k2 < cnt.length) cnt[k2]++; }
     list.forEach(function (c, k) { out[c.id] = cnt[k] / (AW * AH); });
     return out;
@@ -527,7 +529,7 @@
   G.decoy = function () {
     if (!G.me || G.me.team !== 'cat' || G.me.out) return false;
     if (G.decoys.filter(function (d) { return d.c.root.visible; }).length >= RULES.cat.maxDecoys || G.decoyCd > 0) { bus.emit('denied'); return false; }
-    var c = new SG.Critter(G.me.spec, { seed: 9, atlas: RULES.paint.textureSize, scale: G.me.size }); c.copyPaintFrom(G.me.c); c.setPose(G.me.c.pose); c.frozen = true; scene.add(c.root);
+    var c = new SG.Critter(G.me.spec, { seed: 9, atlas: RULES.paint.textureSize, scale: G.me.size }); c.copyPaintFrom(G.me.c); c.tailMode = G.me.c.tailMode; c.earFlat = G.me.c.earFlat; c.setPose(G.me.c.pose); c.frozen = true; c.faceSkin.visible = false; scene.add(c.root);
     var e = { id: 'decoy' + G.decoys.length, c: c, team: 'cat', decoyOf: 'you', x: G.me.x, y: G.me.y, z: G.me.z, yaw: G.me.yaw, sus: 0, speed: 0, out: false };
     c.root.position.copy(G.me.c.root.position); c.root.quaternion.copy(G.me.c.root.quaternion); for (var k = 0; k < 20; k++) c.update(0.05, rnd); // a clone made on a wall stays on the wall
     G.decoys.push(e); G.decoyCd = RULES.cat.decoyCooldownSec; bus.emit('decoy', { n: G.decoys.length }); return true;
@@ -550,7 +552,7 @@
     var P = G.paint, c = G.me.c, pr = pointerRay(x, y), hit = c.raycast(pr);
     if (!hit) { P.last = null; return false; }
     if (!G.seeThrough) { // normal brush: whatever stands between the camera and the body blocks the stroke
-      var far0 = pr.far; pr.far = hit.distance - 0.03; var blk = pr.intersectObjects([room.batched, room.dyn], true)[0]; pr.far = far0;
+      var blk = segSolid(pr.ray.origin, hit.point, 0.03); // against the collision boxes: cheap enough to do on every mouse move
       if (blk) { P.last = null; if (first) bus.emit('blocked'); return false; } }
     var thru = G.seeThrough ? pr.ray.direction.clone() : null; // see-through brush: a cylinder along the view ray, so front and back are painted in one pass
     var hard = P.hard ? RULES.paint.hardnessHard : RULES.paint.hardnessSoft, pat = null;
@@ -579,6 +581,8 @@
     bus.emit('picked', { rgb: rgb, rough: rough, metal: metal, unlit: !!unlit }); if (G.guide === 3) setGuide(4);
     return rgb;
   };
+  G.setTail = function (m) { if (G.me && G.me.team === 'cat') { G.me.c.tailMode = m; bus.emit('tail', { mode: m }); } };
+  G.setEars = function (flat) { if (G.me && G.me.team === 'cat') { G.me.c.earFlat = !!flat; bus.emit('ears', { flat: !!flat }); } };
   G.setColor = function (rgb) { G.paint.rgb = rgb; if (G.guide === 3) setGuide(4); };
   /* four suggested colours: under, behind, left and right of the cat */
   var sugCam = new THREE.PerspectiveCamera(8, 1, 0.05, 30), sugPx = new Uint8Array(4);
@@ -741,7 +745,7 @@
       e.c.speed = e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
-      if (e.team === 'cat' && e !== me) e.c.frozen = (e.c.pose !== 'stand' && !e.out) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek');
+      if (e.team === 'cat' && e !== me) { e.c.frozen = (e.c.pose !== 'stand' && !e.out) || (G.state && G.state.mode === 'double' && G.state.phase === 'seek'); e.c.faceSkin.visible = !e.c.frozen || !G.state || G.state.phase === 'reveal' || G.state.phase === 'lobby'; } // a posed cat shows no eyes, nose or whiskers to anyone else
       place(e);
       e.c.update(dt, rnd);
       if (!e.out && (e.speed > 0.05 || e.air)) bumpers.push({ x: e.x, y: e.y, z: e.z, r: e.team === 'dog' ? 0.3 : RULES.cat.bumpRadius, speed: e.speed || 0 });
@@ -801,6 +805,16 @@
      Nothing moves unless a key is held: no stamina, no sliding. */
   var FLOOR = { floor: true };
   function solidAt(x, y, z) { if (y < room.base(x, z)) return FLOOR; var P = room.platforms; for (var i = 0; i < P.length; i++) { var p = P[i]; if (x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1 && y > p.y0 && y < p.y1) return p; } return null; }
+  /* does the segment a -> b (stopping `back` short of b) pass through any solid box? */
+  function segSolid(a, b, back) {
+    var dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, L = Math.sqrt(dx * dx + dy * dy + dz * dz), tmax = Math.max(0, 1 - back / Math.max(L, 1e-6)), P = room.platforms;
+    for (var i = 0; i < P.length; i++) { var p = P[i], t0 = 0, t1 = tmax, lo, hi, o, d, k, ok = true;
+      for (k = 0; k < 3 && ok; k++) { o = k === 0 ? a.x : k === 1 ? a.y : a.z; d = k === 0 ? dx : k === 1 ? dy : dz; lo = pLo(p, k); hi = pHi(p, k);
+        if (Math.abs(d) < 1e-9) { if (o < lo || o > hi) ok = false; } else { var u0 = (lo - o) / d, u1 = (hi - o) / d; if (u0 > u1) { var sw = u0; u0 = u1; u1 = sw; } if (u0 > t0) t0 = u0; if (u1 < t1) t1 = u1; if (t0 > t1) ok = false; } }
+      if (ok) return p; }
+    return null;
+  }
+  G.segSolid = segSolid;
   function pLo(p, a) { return a === 0 ? p.x0 : a === 1 ? p.y0 : p.z0; }
   function pHi(p, a) { return a === 0 ? p.x1 : a === 1 ? p.y1 : p.z1; }
   G.solidAt = solidAt;
@@ -811,7 +825,7 @@
     for (var i = 0; i < dirs.length; i++) {
       var a = dirs[i][0], sg = dirs[i][1], q = c.slice(); q[a] += sg * reach; if (a === 1) q[1] += rad * 0.8; // a ceiling or shelf underside just above the head
       var p = solidAt(q[0], q[1], q[2]); if (!p || p === FLOOR) continue;
-      if (a !== 1 && p.y1 - e.y < 0.3) continue; // that is a step, not a wall
+      if (a !== 1 && p.y1 - e.y < 0.3 && e.y - room.groundAt(e.x, e.z, e.y + 0.1, 0) < 0.05) continue; // standing next to something low: that is a step, not a wall
       var n = [0, 0, 0]; n[a] = -sg; c[a] = sg > 0 ? pLo(p, a) : pHi(p, a);
       e.x = c[0]; e.y = c[1]; e.z = c[2]; e.cling = { n: n, f: a === 1 ? [Math.sin(e.yaw), 0, Math.cos(e.yaw)] : [0, 1, 0] }; e.vy = 0; e.air = false; e.speed = 0;
       if (e === G.me) bus.emit('cling', { on: true }); return true;
@@ -886,6 +900,9 @@
     } else if (me && me.team === 'cat') {
       var ctr = me.c.center(tmp); var ty = ctr.y + 0.12, dist = cm.dist * (G.paint.on ? 0.62 : 1);
       var ox = Math.sin(cm.yaw) * Math.cos(cm.pitch) * dist, oy = Math.sin(cm.pitch) * dist, oz = Math.cos(cm.yaw) * Math.cos(cm.pitch) * dist;
+      if (me.cling) { // stuck to a wall or ceiling: aim a little off the surface and keep the camera on the room side of it, so it never ends up inside the wall or above the ceiling
+        var cn = me.cling.n, dn = ox * cn[0] + oy * cn[1] + oz * cn[2], need = dist * 0.3; ty = ctr.y + cn[1] * 0.14; ctr.x += cn[0] * 0.14; ctr.z += cn[2] * 0.14;
+        if (dn < need) { ox += cn[0] * (need - dn); oy += cn[1] * (need - dn); oz += cn[2] * (need - dn); } }
       var tw = room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
       var px = ctr.x + ox * kk, py = Math.max(room.base(ctr.x, ctr.z) + 0.1, ty + oy * kk), pz = ctr.z + oz * kk;
       camera.fov = 52; camera.position.lerp(tmp2.set(px, py, pz), 1 - Math.exp(-dt * 14)); camera.lookAt(ctr.x, ty, ctr.z);

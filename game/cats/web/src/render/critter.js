@@ -313,11 +313,15 @@
   }
   P.setPose = function (name) { if (POSES[name]) this.pose = name; };
 
+  var TUCK = [[-30, 64, 0], [0, 50, 0], [0, 48, 0], [0, 42, 0]], ZERO3 = [0, 0, 0], CURL3 = [-40, 0, 0], EARF = [68, 0, 0];
   P._applyPose = function (k, dt) {
     var P0 = POSES[this.pose] || POSES.stand, J = this.joints, n, i;
     for (i = 0; i < this.names.length; i++) {
       n = this.names[i];
       var v = poseEuler(P0, n);
+      // nothing sticks out of a posed animal unless the player wants it to: tail tucked against the body by default, ears can be laid flat
+      if (this.tailMode && this.pose !== 'stand' && this.pose !== 'crouch' && n.length === 2 && n.charAt(0) === 't') v = this.tailMode === 'tuck' ? TUCK[Math.min(3, +n.charAt(1))] : this.tailMode === 'straight' ? ZERO3 : CURL3;
+      if (this.earFlat && (n === 'earL' || n === 'earR')) v = EARF;
       if (v) { _e.set(v[0] * D2R, v[1] * D2R, v[2] * D2R, 'YXZ'); _q.setFromEuler(_e); } else _q.identity();
       this.cur[n].slerp(_q, k);
       J[n].quaternion.copy(J[n].userData.q0).multiply(this.cur[n]);
