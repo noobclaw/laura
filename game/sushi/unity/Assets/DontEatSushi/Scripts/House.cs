@@ -544,7 +544,8 @@ namespace DontEatSushi
         void Poster(bool alongX, float along, float y, float face, float inw, float w, float h, Material pic, Material frame)
         {
             WA(alongX, along, y, face + inw * 0.02f, w + 0.1f, h + 0.1f, 0.04f, frame, false);
-            WA(alongX, along, y, face + inw * 0.035f, w, h, 0.04f, pic);
+            var p = WA(alongX, along, y, face + inw * 0.035f, w, h, 0.04f, pic);
+            if (alongX && inw < 0f) Tilt(p, 0f, 0f, 180f);   // 方塊朝 -z 那面的貼圖是倒的，轉半圈擺正
         }
         void Pendant(float x, float y, float z, Material shade, Material bulb, Material cord)
         {
@@ -555,14 +556,12 @@ namespace DontEatSushi
         void Chochin(float x, float y, float z, float dia, float h, Material glow, Material cap, bool solid = false)
         {
             Soft(Sp(x, y, z, dia, h, dia, glow, solid));
-            Soft(Cy(x, y + h * 0.44f, z, dia * 0.55f, h * 0.1f, cap, false));
-            Soft(Cy(x, y - h * 0.54f, z, dia * 0.55f, h * 0.1f, cap, false));
+            Soft(Cy(x, y + h * 0.44f, z, dia * 0.5f, h * 0.1f, cap, false));
         }
         void Andon(float x, float y0, float z, Material glow, Material wood)
         {
             Bx(x, y0, z, 0.32f, 0.12f, 0.32f, wood);
             Soft(Bx(x, y0 + 0.12f, z, 0.28f, 0.6f, 0.28f, glow));
-            Bx(x, y0 + 0.72f, z, 0.34f, 0.04f, 0.34f, wood, false);
         }
         // 椅子：dx、dz 指椅背朝哪一邊
         void Chair(float x, float z, float dx, float dz, Material seat, Material wood)
@@ -574,9 +573,8 @@ namespace DontEatSushi
         void Plant(float x, float y0, float z, Material pot, Material leaf)
         {
             Cy(x, y0, z, 0.5f, 0.45f, pot);
-            Sp(x, y0 + 1.0f, z, 0.8f, 0.9f, 0.8f, leaf);
-            Sp(x + 0.2f, y0 + 1.45f, z - 0.1f, 0.6f, 0.6f, 0.6f, leaf, false);
-            Sp(x - 0.22f, y0 + 1.3f, z + 0.15f, 0.55f, 0.6f, 0.55f, leaf, false);
+            Sp(x, y0 + 0.95f, z, 0.85f, 1.0f, 0.8f, leaf);
+            Sp(x + 0.12f, y0 + 1.5f, z - 0.08f, 0.62f, 0.7f, 0.58f, leaf, false);
         }
         void Bottle(float x, float y0, float z, float h, Material body, Material neck)
         {
@@ -589,11 +587,11 @@ namespace DontEatSushi
             Cy(x, y0 + 0.8f, z, 0.8f, 0.03f, lid, false);
         }
         // 門上的短暖簾：一根桿子加幾片布
-        void Noren(bool alongX, float from, float to, float yTop, float h, float across, Material[] cloth, int first, Material rod)
+        void Noren(bool alongX, float from, float to, float yTop, float h, float across, Material[] cloth, int first, Material rod, bool flip = false, float panel = 0.8f)
         {
-            float len = to - from; int n = Mathf.Max(1, Mathf.RoundToInt(len / 0.8f)); float w = len / n;
+            float len = to - from; int n = Mathf.Max(1, Mathf.RoundToInt(len / panel)); float w = len / n;
             WA(alongX, (from + to) * 0.5f, yTop + 0.03f, across, len + 0.2f, 0.05f, 0.05f, rod, false);
-            for (int i = 0; i < n; i++) WA(alongX, from + (i + 0.5f) * w, yTop - h * 0.5f, across, w - 0.03f, h, 0.025f, cloth[(first + i) % cloth.Length]);
+            for (int i = 0; i < n; i++) { var g = WA(alongX, from + (i + 0.5f) * w, yTop - h * 0.5f, across, w - 0.03f, h, 0.025f, cloth[(first + i) % cloth.Length]); if (flip) Tilt(g, 0f, 0f, 180f); }
         }
 
         void BuildWorld()
@@ -627,7 +625,7 @@ namespace DontEatSushi
             var tGrainM = Pattern(1, Rgb(0.42f, 0.22f, 0.11f), Rgb(0.62f, 0.37f, 0.19f));
             var tPlanksD = Pattern(9, Rgb(0.36f, 0.22f, 0.13f), Rgb(0.10f, 0.06f, 0.04f), default(Color), 1);
             var tPlanksL = Pattern(9, Rgb(0.82f, 0.66f, 0.44f), Rgb(0.42f, 0.28f, 0.16f), default(Color), 2);
-            var tFloor = Pattern(9, Rgb(0.64f, 0.43f, 0.25f), Rgb(0.26f, 0.15f, 0.08f), default(Color), 3);
+            var tFloor = Pattern(9, Rgb(0.60f, 0.45f, 0.27f), Rgb(0.24f, 0.15f, 0.08f), default(Color), 3);
             var tSteel = Pattern(37, Rgb(0.60f, 0.62f, 0.66f), Rgb(0.84f, 0.86f, 0.89f));
             var tPlaster = Pattern(0, cream, Rgb(0.78f, 0.70f, 0.56f));
             var tPlasterO = Pattern(0, Rgb(0.80f, 0.60f, 0.32f), Rgb(0.64f, 0.46f, 0.24f));
@@ -686,11 +684,10 @@ namespace DontEatSushi
             var tScrollB = Pattern(25, paperC, ink, Rgb(0.50f, 0.18f, 0.14f), 5);
             var tScrollC = Pattern(25, Rgb(0.92f, 0.84f, 0.62f), Rgb(0.45f, 0.10f, 0.08f), Rgb(0.26f, 0.36f, 0.22f), 8);
             var tBanner = Pattern(25, red, white, Rgb(0.95f, 0.80f, 0.30f), 9);
-            var tBannerI = Pattern(25, indigo, white, Rgb(0.95f, 0.94f, 0.9f), 0);
             var tKomoR = Pattern(27, Rgb(0.86f, 0.74f, 0.46f), Rgb(0.52f, 0.38f, 0.18f), red, 1);
             var tKomoK = Pattern(27, Rgb(0.84f, 0.72f, 0.44f), Rgb(0.52f, 0.38f, 0.18f), ink, 4);
             var tKomoB = Pattern(27, Rgb(0.88f, 0.78f, 0.52f), Rgb(0.52f, 0.38f, 0.18f), indigo, 8);
-            var tCrateA = Pattern(28, Rgb(0.78f, 0.62f, 0.40f), Rgb(0.20f, 0.12f, 0.08f), default(Color), 9);
+            var tCrateA = Pattern(28, Rgb(0.78f, 0.62f, 0.40f), Rgb(0.20f, 0.12f, 0.08f), default(Color), 8);
             var tCrateB = Pattern(28, Rgb(0.60f, 0.42f, 0.24f), Rgb(0.12f, 0.08f, 0.06f), default(Color), 0);
             var tCrateY = Pattern(28, Rgb(0.92f, 0.72f, 0.16f), Rgb(0.60f, 0.10f, 0.08f), default(Color), 3);
             var tCrateR = Pattern(28, Rgb(0.74f, 0.16f, 0.14f), Rgb(0.96f, 0.92f, 0.84f), default(Color), 6);
@@ -717,11 +714,11 @@ namespace DontEatSushi
             var blackM = Mats.Lit(Rgb(0.08f, 0.08f, 0.09f), 0.6f); var whiteM = Mats.Lit(white, 0.6f); var redM = Mats.Lit(red, 0.5f); var goldM = Mats.Lit(gold, 0.7f);
             var ceramic = Mt(tSeig, 3f, 1f, 0.8f);
             var potM = Mats.Lit(Rgb(0.50f, 0.28f, 0.18f), 0.3f);
-            var leafM = Pat(7, Rgb(0.16f, 0.38f, 0.17f), Rgb(0.34f, 0.60f, 0.26f), 5f, 4f, 0.15f);
+            var leafM = Mt(Pattern(18, Rgb(0.10f, 0.26f, 0.12f), Rgb(0.30f, 0.52f, 0.22f), default(Color), 7), 5f, 3f, 0.2f);
             var bulbM = Mats.Unlit(new Color(2.6f, 1.9f, 1.0f));
             var lanternRed = Glow(new Color(2.0f, 0.42f, 0.20f), tLantern, 1f, 1f);
             var lanternWhite = Glow(new Color(1.7f, 1.38f, 0.92f), tLanternB, 1f, 1f);
-            var shojiGlow = Glow(new Color(1.28f, 1.08f, 0.78f), tShoji, 1f, 1f);
+            var shojiGlow = Glow(new Color(1.25f, 1.08f, 0.80f), tShoji, 1f, 1f);
             Material[] cloth = new Material[tCrest.Length];
             for (int i = 0; i < cloth.Length; i++) cloth[i] = Mt(tCrest[i], 1f, 1f, 0.05f);
             Material[] fabric =
@@ -747,15 +744,15 @@ namespace DontEatSushi
             var wainsX = Mt(tPlanksD, 32.5f, 1f, 0.3f); var wainsZ = Mt(tPlanksD, 22.5f, 1f, 0.3f);
             var friezeX = Mt(tPlaster, 12f, 0.4f, 0.05f); var friezeZ = Mt(tPlaster, 8f, 0.4f, 0.05f);
             float[] cutN = { -13f, -10.4f, -7.8f, -5.2f, -2.6f, 0f, 2.6f, 5.2f, 7.8f, 10.4f, 13f };
-            var brickP = Wp(tBrick, 2.6f, 1.1f, 0.1f); var tileP = Wp(tTileW, 2.6f, 0.6f, 0.7f);
+            var brickP = Wp(tBrick, 2.6f, 1.1f, 0.1f); var tileP = Wp(tTileW, 2.6f, 0.6f, 0.4f);
             WallRun(true, 9f, -1f, cutN, new[] { brickP, brickP, tileP, tileP, tileP, tileP, tileP, tileP, Wp(tSeig, 2.6f, 0.9f), Wp(tSeig, 2.6f, 0.9f) }, wainsX, friezeX, darkWood, darkPost);
             Bx(-10.4f, 0f, 8.95f, 5.2f, 1f, 0.1f, Mt(tBrick, 5.2f / 1.1f, 1f / 1.1f, 0.1f));
-            Bx(0f, 0f, 8.95f, 15.4f, 1f, 0.1f, Mt(tTileG, 15.4f / 0.6f, 1f / 0.6f, 0.7f));
+            Bx(0f, 0f, 8.95f, 15.4f, 1f, 0.1f, Mt(tTileG, 15.4f / 0.6f, 1f / 0.6f, 0.45f));
             float[] cutS = { -13f, -10.4f, -7.8f, -5.2f, -2.6f, 0f, 2.6f, 6f, 8.33f, 10.67f, 13f };
             WallRun(true, -9f, 1f, cutS, new[] { Wp(tAsaG, 2.6f, 1.0f), Wp(tAsaG, 2.6f, 1.0f), Wp(tYaga, 2.6f, 0.8f), Wp(tYaga, 2.6f, 0.8f), Wp(tPlaster, 2.6f, 2.2f), Wp(tPlaster, 2.6f, 2.2f),
                 Wp(tKikO, 3.4f, 0.9f), Wp(tKumo, 2.33f, 2.2f), Wp(tSakura, 2.33f, 1.1f), Wp(tKumo, 2.33f, 2.2f) }, wainsX, friezeX, darkWood, darkPost);
             float[] cutE = { -9f, -5.4f, -3.6f, 0f, 3f, 5f, 7f, 9f };
-            WallRun(false, 13f, -1f, cutE, new[] { Glow(new Color(1.28f, 1.08f, 0.78f), tShoji, 4f, 2f), Wp(tPlasterO, 1.8f, 2.2f), Glow(new Color(1.28f, 1.08f, 0.78f), tShoji, 4f, 2f),
+            WallRun(false, 13f, -1f, cutE, new[] { Glow(new Color(1.08f, 0.98f, 0.80f), tShoji, 4f, 2f), Wp(tPlasterO, 1.8f, 2.2f), Glow(new Color(1.08f, 0.98f, 0.80f), tShoji, 4f, 2f),
                 Wp(tNami, 3f, 1.0f), Wp(tShippo, 2f, 0.9f), Wp(tUroko, 2f, 0.8f), Wp(tPlaid, 2f, 1.0f) }, wainsZ, friezeZ, darkWood, darkPost);
             float[] cutW = { -9f, -6.4f, -3.8f, -1.2f, 1.4f, 4f, 5f, 9f };
             WallRun(false, -13f, 1f, cutW, new[] { Wp(tSakura, 2.6f, 1.1f), Wp(tDotsI, 2.6f, 1.0f), Wp(tStripe, 2.6f, 0.9f), Wp(tAsaI, 2.6f, 1.0f), Wp(tKikG, 2.6f, 0.9f), Wp(tPlaster, 1f, 2.2f),
@@ -765,14 +762,10 @@ namespace DontEatSushi
             // ---------- 樑、椽、獨立柱（沒有天花板，樑不投影，免得地上一條條） ----------
             for (int i = -2; i <= 2; i++) Soft(W(new Vector3(i * 5.2f, 4.15f, 0f), new Vector3(0.3f, 0.3f, 18f), darkWood, false));
             foreach (float bz in new[] { -4.5f, 0f, 5f }) Soft(W(new Vector3(0f, 3.85f, bz), new Vector3(26f, 0.26f, 0.26f), darkWood, false));
-            for (int i = 0; i < 12; i++) Soft(W(new Vector3(0f, 4.36f, -8.25f + i * 1.5f), new Vector3(26f, 0.12f, 0.1f), darkWood, false));
+            for (int i = 0; i < 8; i++) Soft(W(new Vector3(0f, 4.36f, -7.9f + i * 2.25f), new Vector3(26f, 0.12f, 0.1f), darkWood, false));
             foreach (var cp in new[] { new Vector2(-7f, 5f), new Vector2(7f, 5f), new Vector2(6f, 0f), new Vector2(1.3f, 0f), new Vector2(-7.15f, -4.35f) }) Bx(cp.x, 0f, cp.y, 0.3f, 4f, 0.3f, darkPost);
             // 兩串祭典小燈籠
-            for (int i = 0; i < 9; i++)
-            {
-                Soft(Sp(-10.4f + i * 2.6f, 3.46f, -4.5f, 0.32f, 0.42f, 0.32f, i % 2 == 0 ? lanternRed : lanternWhite, false));
-                Soft(Sp(-10.4f + i * 2.6f, 3.46f, 5f, 0.32f, 0.42f, 0.32f, i % 2 == 0 ? lanternWhite : lanternRed, false));
-            }
+            for (int i = 0; i < 9; i++) Soft(Sp(-10.4f + i * 2.6f, 3.46f, -4.5f, 0.32f, 0.42f, 0.32f, i % 2 == 0 ? lanternRed : lanternWhite, false));
 
             // ---------- 壽司吧台 ----------
             W(new Vector3(-3f, 0.55f, 0f), new Vector3(8f, 1.1f, 1.2f), Mt(tPlanksL, 10f, 1f, 0.3f));
@@ -783,7 +776,7 @@ namespace DontEatSushi
             for (int i = 0; i < 6; i++)
             {
                 float sx = -5f + i * 1.1f;
-                Cy(sx, 0f, -1.3f, 0.1f, 0.68f, steel); Cy(sx, 0f, -1.3f, 0.4f, 0.03f, steel, false);
+                Cy(sx, 0f, -1.3f, 0.1f, 0.68f, steel);
                 Cy(sx, 0.68f, -1.3f, 0.42f, 0.08f, fabric[i % 3]);
             }
             SushiKind[] kinds = { SushiKind.Salmon, SushiKind.Tuna, SushiKind.Tamago, SushiKind.Shrimp, SushiKind.CucumberRoll };
@@ -797,15 +790,12 @@ namespace DontEatSushi
                     su.transform.position = pp + new Vector3(k * 0.1f, 0.014f, 0f); su.transform.localScale = Vector3.one * 0.2f; su.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
                     su.AddComponent<Paintable>().Init(SushiShapes.Get(SushiShapes.ShapeOf(kinds[i])), kinds[i], false);
                 }
-                Cy(pp.x + 0.42f, 1.16f, -0.5f, 0.08f, 0.09f, bowl[i % 4], false);
             }
             Bx(-2.6f, 1.16f, 0.4f, 4.6f, 0.26f, 0.36f, Mt(tFish, 7f, 1f, 0.92f));                           // 玻璃魚料櫃
-            Bx(-2.6f, 1.42f, 0.4f, 4.7f, 0.03f, 0.42f, darkWood, false);
-            for (int i = 0; i < 3; i++) { Cy(-5.75f + i * 2.6f, 1.16f, -0.5f, 0.07f, 0.14f, blackM, false); Cy(-5.75f + i * 2.6f, 1.3f, -0.5f, 0.045f, 0.03f, redM, false); }
+            for (int i = 0; i < 3; i++) Cy(-5.75f + i * 2.6f, 1.16f, -0.5f, 0.07f, 0.15f, blackM, false);
             var shadeM = Mt(tSudare, 3f, 1f, 0.1f);
             for (int i = 0; i < 4; i++) Pendant(-5.4f + i * 1.6f, 2.15f, -0.25f, shadeM, bulbM, blackM);
-            Noren(true, -7f, 1f, 2.62f, 0.56f, 0.15f, cloth, 0, darkWood);
-            Soft(Bx(-6.6f, 2.66f, 0.15f, 0.04f, 1.1f, 0.04f, darkWood, false)); Soft(Bx(0.6f, 2.66f, 0.15f, 0.04f, 1.1f, 0.04f, darkWood, false));
+            Noren(true, -7f, 1f, 2.62f, 0.56f, 0.15f, cloth, 0, darkWood, true, 1f);
             Bx(-2.75f, 0f, 2.4f, 6.5f, 0.03f, 2.6f, Mt(tSunoko, 8f, 1f, 0.2f));                             // 師傅腳下的木踏板
             // 吧台內側的備料櫃和酒架
             Bx(-2.75f, 0f, 4.55f, 6.5f, 0.95f, 0.6f, Mt(tDrawer, 5f, 1f, 0.35f));
@@ -823,8 +813,8 @@ namespace DontEatSushi
                 if (i % 3 == 2) Bottle(bx, 1.6f, 4.72f, 0.36f, bottles[(i + 1) % 4], bottles[(i + 1) % 4]);
                 else Cy(bx, 1.6f, 4.72f, 0.26f, 0.1f + (i % 2) * 0.08f, bowl[i % 4], false);
             }
-            for (int i = 0; i < 10; i++) Bottle(-5.7f + i * 0.64f, 2.1f, 4.72f, 0.4f, bottles[i % 4], bottles[(i + 2) % 4]);
-            Sp(-4.6f, 2.76f, 4.72f, 0.3f, 0.3f, 0.3f, redM, false); Bx(-2.6f, 2.61f, 4.72f, 0.5f, 0.3f, 0.3f, crate[2], false); Sp(-0.6f, 2.74f, 4.72f, 0.26f, 0.26f, 0.26f, redM, false);
+            for (int i = 0; i < 7; i++) Bottle(-5.6f + i * 0.92f, 2.1f, 4.72f, 0.4f, bottles[i % 4], bottles[(i + 2) % 4]);
+            Sp(-4.6f, 2.76f, 4.72f, 0.3f, 0.3f, 0.3f, redM, false); Bx(-2.6f, 2.61f, 4.72f, 0.5f, 0.3f, 0.3f, crate[2], false);
             // 短吧台上：收銀機、招財貓、菜單立牌
             Bx(-6.4f, 1.16f, -3.4f, 0.5f, 0.28f, 0.45f, Mats.Lit(Rgb(0.20f, 0.20f, 0.22f), 0.6f)); Tilt(Bx(-6.4f, 1.44f, -3.5f, 0.4f, 0.26f, 0.03f, Mats.Unlit(new Color(0.5f, 0.9f, 1.1f)), false), -20f, 0f, 0f);
             Sp(-6.4f, 1.34f, -1.5f, 0.32f, 0.36f, 0.3f, whiteM); Sp(-6.4f, 1.6f, -1.5f, 0.27f, 0.25f, 0.25f, whiteM, false);
@@ -837,13 +827,12 @@ namespace DontEatSushi
             Bx(0f, 1.2f, 5f, 14.1f, 0.05f, 0.36f, midWood);
             W(new Vector3(0f, 2.72f, 5f), new Vector3(14f, 0.16f, 0.18f), darkWood);
             Material[] passCloth = { Mt(tYagaI, 3f, 1f, 0.05f), cloth[1], Mt(tSeig, 3f, 1f, 0.05f), cloth[5], Mt(tStripe, 2f, 1f, 0.05f), cloth[3], Mt(tDotsI, 4f, 1.2f, 0.05f) };
-            for (int i = 0; i < 7; i++) Bx(-6f + i * 2f, 2.06f, 5f, 1.9f, 0.58f, 0.025f, passCloth[i]);
+            for (int i = 0; i < 7; i++) Tilt(Bx(-6f + i * 2f, 2.06f, 5f, 1.9f, 0.58f, 0.025f, passCloth[i]), 0f, 0f, 180f);
             for (int i = 0; i < 3; i++)
             {
                 float gx = -4.5f + i * 3.6f;
                 Bx(gx, 1.25f, 5f, 0.42f, 0.05f, 0.22f, lightWood, false);
-                Bx(gx - 0.09f, 1.3f, 5f, 0.1f, 0.06f, 0.06f, Mats.Lit(i == 1 ? Rgb(0.95f, 0.82f, 0.30f) : Rgb(0.93f, 0.42f, 0.28f), 0.6f), false);
-                Bx(gx + 0.09f, 1.3f, 5f, 0.1f, 0.06f, 0.06f, Mats.Lit(i == 2 ? Rgb(0.70f, 0.12f, 0.14f) : Rgb(0.95f, 0.60f, 0.45f), 0.6f), false);
+                Bx(gx, 1.3f, 5f, 0.24f, 0.06f, 0.07f, Mats.Lit(i == 1 ? Rgb(0.95f, 0.82f, 0.30f) : i == 2 ? Rgb(0.70f, 0.12f, 0.14f) : Rgb(0.93f, 0.42f, 0.28f), 0.6f), false);
             }
             W(new Vector3(-1f, 0.5f, 8.3f), new Vector3(9f, 1f, 1f), Mt(tSteel, 4f, 1f, 0.75f));
             Bx(-1.6f, 1f, 8.3f, 2.6f, 0.05f, 0.8f, blackM);
@@ -851,7 +840,7 @@ namespace DontEatSushi
             {
                 float px0 = -2.5f + i * 0.9f;
                 Cy(px0, 1.05f, 8.3f, 0.5f, 0.24f + i * 0.06f, i == 1 ? Mt(tSteel, 2f, 1f, 0.8f) : Mats.Lit(Rgb(0.2f, 0.2f, 0.22f), 0.7f));
-                Cy(px0, 1.29f + i * 0.06f, 8.3f, 0.52f, 0.025f, steel, false); Sp(px0, 1.34f + i * 0.06f, 8.3f, 0.08f, 0.06f, 0.08f, blackM, false);
+                Cy(px0, 1.29f + i * 0.06f, 8.3f, 0.52f, 0.025f, steel, false);
             }
             Cy(-4.7f, 1f, 8.3f, 0.5f, 0.36f, whiteM); Cy(-4.7f, 1.36f, 8.3f, 0.46f, 0.05f, Mats.Lit(Rgb(0.75f, 0.2f, 0.18f), 0.6f), false);
             Cy(-3.75f, 1f, 8.3f, 0.3f, 0.24f, bowl[0], false);
@@ -859,16 +848,16 @@ namespace DontEatSushi
             Bx(2.4f, 1f, 8.3f, 1.3f, 0.015f, 0.7f, Mats.Lit(Rgb(0.30f, 0.32f, 0.35f), 0.8f), false); Cy(2.4f, 1f, 8.68f, 0.05f, 0.36f, steel, false);
             Bx(-1.6f, 2.3f, 8.45f, 3f, 0.45f, 0.9f, steel); Bx(-1.6f, 2.75f, 8.6f, 0.6f, 1.25f, 0.5f, steel, false);
             Bx(-5.2f, 1.9f, 8.72f, 3.2f, 0.05f, 0.36f, darkWood); Bx(-5.2f, 2.45f, 8.72f, 3.2f, 0.05f, 0.36f, darkWood); Bx(2.4f, 1.95f, 8.72f, 4.2f, 0.05f, 0.36f, darkWood);
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 3; i++)
             {
-                Cy(-6.5f + i * 0.62f, 1.95f, 8.72f, 0.28f, 0.1f + (i % 3) * 0.06f, bowl[(i + 1) % 4], false);
-                Cy(-6.4f + i * 0.62f, 2.5f, 8.72f, 0.22f, 0.3f, i % 2 == 0 ? potM : ceramic, false);
+                Cy(-6.3f + i * 1.05f, 1.95f, 8.72f, 0.28f, 0.1f + (i % 3) * 0.06f, bowl[(i + 1) % 4], false);
+                Cy(-6.2f + i * 1.05f, 2.5f, 8.72f, 0.22f, 0.3f, i % 2 == 0 ? potM : ceramic, false);
             }
-            for (int i = 0; i < 7; i++) Bottle(0.6f + i * 0.58f, 2f, 8.72f, 0.34f + (i % 2) * 0.06f, bottles[(i + 1) % 4], bottles[i % 4]);
+            for (int i = 0; i < 5; i++) Bottle(0.7f + i * 0.85f, 2f, 8.72f, 0.34f + (i % 2) * 0.06f, bottles[(i + 1) % 4], bottles[i % 4]);
             Bx(2.4f, 1.6f, 8.86f, 3.6f, 0.03f, 0.03f, steel, false);
-            for (int i = 0; i < 5; i++) { Bx(0.9f + i * 0.75f, 1.3f, 8.86f, 0.03f, 0.3f, 0.02f, steel, false); Cy(0.9f + i * 0.75f, 1.2f, 8.84f, 0.16f + (i % 2) * 0.1f, 0.03f, i % 2 == 0 ? steel : blackM, false); }
+            for (int i = 0; i < 3; i++) { Bx(1.2f + i * 1.2f, 1.3f, 8.86f, 0.03f, 0.3f, 0.02f, steel, false); Cy(1.2f + i * 1.2f, 1.2f, 8.84f, 0.16f + (i % 2) * 0.1f, 0.03f, i % 2 == 0 ? steel : blackM, false); }
             W(new Vector3(5.6f, 1.1f, 8.3f), new Vector3(1.6f, 2.2f, 1.2f), Mt(tSteel, 1f, 2f, 0.7f));
-            Bx(5.6f, 0.1f, 7.69f, 0.02f, 2f, 0.02f, blackM, false); Bx(5.48f, 0.9f, 7.67f, 0.03f, 0.5f, 0.05f, steel, false); Bx(5.72f, 0.9f, 7.67f, 0.03f, 0.5f, 0.05f, steel, false);
+            Bx(5.6f, 0.1f, 7.69f, 0.02f, 2f, 0.02f, blackM, false);
             Bx(5.35f, 2.2f, 8.3f, 0.6f, 0.4f, 0.5f, crate[2], false); Bx(6f, 2.2f, 8.35f, 0.5f, 0.3f, 0.5f, crate[0], false);
             Cy(4.2f, 0f, 5.5f, 0.46f, 0.62f, Mats.Lit(Rgb(0.16f, 0.36f, 0.62f), 0.5f));
             for (int i = 0; i < 2; i++)
@@ -893,7 +882,7 @@ namespace DontEatSushi
             Bx(-11.3f, 0f, 5f, 3.4f, 1f, 0.2f, Mt(tPlanksD, 4.25f, 1f, 0.3f)); Bx(-11.3f, 1f, 5f, 3.4f, 2.3f, 0.14f, Mt(tPlaster, 1.5f, 1f, 0.05f));
             Bx(-9.6f, 0f, 5f, 0.16f, 3.3f, 0.22f, darkPost);
             W(new Vector3(-8.35f, 2.42f, 5f), new Vector3(2.6f, 0.16f, 0.16f), darkWood); Bx(-8.35f, 2.5f, 5f, 2.4f, 0.8f, 0.05f, Mt(tAsaW, 3f, 1f, 0.1f));
-            Noren(true, -9.5f, -7.2f, 2.34f, 0.56f, 5f, cloth, 2, darkWood);
+            Noren(true, -9.5f, -7.2f, 2.34f, 0.56f, 5f, cloth, 2, darkWood, true);
             Poster(true, -11.3f, 2.1f, 4.93f, -1f, 1.2f, 0.9f, Mt(tMenuW, 1f, 1f, 0.2f), darkWood);
             foreach (float rx in new[] { -12.7f, -9.9f }) { Bx(rx, 0f, 8.3f, 0.06f, 2.2f, 0.06f, steel); Bx(rx, 0f, 8.8f, 0.06f, 2.2f, 0.06f, steel); }
             for (int i = 0; i < 3; i++) Bx(-11.3f, 0.2f + i * 0.75f, 8.55f, 2.9f, 0.04f, 0.56f, lightWood);
@@ -906,15 +895,15 @@ namespace DontEatSushi
             }
             var sack = Mt(tSack, 1f, 1f, 0.05f); var sackB = Mt(tSackB, 1f, 1f, 0.05f);
             Vector3[] sacks = { new Vector3(-12.4f, 0.21f, 5.6f), new Vector3(-12.4f, 0.21f, 6.3f), new Vector3(-12.4f, 0.21f, 7f), new Vector3(-11.55f, 0.21f, 5.75f), new Vector3(-11.55f, 0.21f, 6.5f),
-                new Vector3(-12.35f, 0.58f, 5.95f), new Vector3(-12.35f, 0.58f, 6.65f), new Vector3(-11.7f, 0.55f, 6.1f), new Vector3(-12.3f, 0.93f, 6.3f) };
+                new Vector3(-12.35f, 0.58f, 5.95f), new Vector3(-12.35f, 0.58f, 6.65f) };
             for (int i = 0; i < sacks.Length; i++) Sp(sacks[i].x, sacks[i].y, sacks[i].z, 0.95f, 0.44f, 0.64f, i % 3 == 1 ? sackB : sack);
             var komo = new[] { Mt(tKomoR, 1f, 1f, 0.1f), Mt(tKomoK, 1f, 1f, 0.1f), Mt(tKomoB, 1f, 1f, 0.1f) };
             var lidM = Mt(tGrainL, 1f, 1f, 0.3f);
             Barrel(-9.3f, 0f, 8.35f, komo[0], lidM); Barrel(-8.35f, 0f, 8.35f, komo[1], lidM); Barrel(-8.82f, 0.83f, 8.35f, komo[2], lidM);
             var crateY = Mt(tCrateY, 1f, 1f, 0.4f); var crateR = Mt(tCrateR, 1f, 1f, 0.4f);
-            for (int i = 0; i < 6; i++) Bx(-10.35f + (i % 2) * 0.56f, (i / 2) * 0.33f, 5.4f, 0.52f, 0.32f, 0.38f, (i + i / 2) % 2 == 0 ? crateY : crateR);
+            for (int i = 0; i < 5; i++) Bx(-10.35f + (i % 2) * 0.56f, (i / 2) * 0.33f, 5.4f, 0.52f, 0.32f, 0.38f, (i + i / 2) % 2 == 0 ? crateY : crateR);
             Tilt(Bx(-12.6f, 0f, 7.55f, 0.05f, 2.6f, 0.05f, lightWood, false), 0f, 0f, 12f); Tilt(Bx(-12.6f, 0f, 7.95f, 0.05f, 2.6f, 0.05f, lightWood, false), 0f, 0f, 12f);
-            for (int i = 0; i < 5; i++) Bx(-12.33f - (0.4f + i * 0.45f) * 0.2126f - 0.02f, 0.4f + i * 0.45f, 7.75f, 0.04f, 0.04f, 0.4f, lightWood, false);
+            for (int i = 0; i < 4; i++) Bx(-12.33f - (0.4f + i * 0.55f) * 0.2126f - 0.02f, 0.4f + i * 0.55f, 7.75f, 0.04f, 0.04f, 0.4f, lightWood, false);
             Pendant(-10.2f, 2.5f, 6.9f, Mats.Lit(Rgb(0.16f, 0.30f, 0.26f), 0.6f), bulbM, blackM);
 
             // ---------- 西牆卡座、魚缸、冷藏櫃 ----------
@@ -929,16 +918,14 @@ namespace DontEatSushi
                     Bx(-11.95f, 0f, z0 + s * 1.08f, 1.7f, 1.25f, 0.1f, Mt(tKoshi, 2f, 1f, 0.3f));
                 }
                 Cy(-12.55f, 0.75f, z0, 0.07f, 0.14f, blackM, false); Tilt(Bx(-12.3f, 0.75f, z0, 0.04f, 0.3f, 0.24f, Mt(bi == 0 ? tMenuY : tMenuP, 1f, 1f, 0.2f), false), 0f, 0f, 12f);
-                Cy(-11.6f, 0.75f, z0 + 0.1f, 0.24f, 0.02f, bowl[bi], false);
                 Chochin(-11.95f, 2.25f, z0, 0.5f, 0.5f, lanternWhite, blackM);
-                Soft(Bx(-11.95f, 2.5f, z0, 0.02f, 1.3f, 0.02f, blackM, false));
             }
             Bx(-12f, 0f, -3.84f, 2f, 1.9f, 0.08f, Mt(tKoshi, 2.5f, 1f, 0.3f)); Bx(-12f, 0f, 1.5f, 2f, 1.9f, 0.08f, Mt(tKoshi, 2.5f, 1f, 0.3f));
             Bx(-12.4f, 0f, -5.2f, 0.9f, 0.8f, 2.4f, Mt(tDrawer, 3f, 0.5f, 0.35f));
-            Soft(Bx(-12.4f, 0.8f, -5.2f, 0.8f, 0.9f, 2.3f, Glow(new Color(0.85f, 1.12f, 1.22f), tFish, 3f, 1f)));
+            Soft(Bx(-12.4f, 0.8f, -5.2f, 0.8f, 0.9f, 2.3f, Glow(new Color(0.66f, 0.92f, 1.02f), tFish, 3f, 1f)));
             Bx(-12.4f, 1.7f, -5.2f, 0.9f, 0.08f, 2.4f, darkWood);
             Bx(-12.55f, 0f, 4.5f, 0.8f, 1.95f, 0.86f, Mats.Lit(Rgb(0.18f, 0.20f, 0.24f), 0.6f));
-            Soft(Bx(-12.13f, 0.3f, 4.5f, 0.04f, 1.5f, 0.7f, Glow(new Color(1.15f, 1.25f, 1.3f), Pattern(7, Rgb(0.84f, 0.92f, 0.95f), Rgb(0.80f, 0.20f, 0.18f)), 1f, 2f)));
+            Soft(Bx(-12.13f, 0.3f, 4.5f, 0.04f, 1.5f, 0.7f, Glow(new Color(1.05f, 1.12f, 1.15f), Pattern(13, Rgb(0.92f, 0.96f, 1f), Rgb(0.22f, 0.52f, 0.34f)), 1.5f, 3f)));
             Poster(false, -5.1f, 2.2f, -12.92f, 1f, 0.8f, 1.1f, Mt(tFishP, 1f, 1f, 0.1f), darkWood);
             Poster(false, -2.5f, 2.3f, -12.92f, 1f, 0.9f, 0.7f, Mt(tMenuY, 1f, 1f, 0.1f), blackM);
             Poster(false, 0.1f, 2.3f, -12.92f, 1f, 0.55f, 1.3f, Mt(tScrollB, 1f, 1f, 0.1f), darkWood);
@@ -947,7 +934,7 @@ namespace DontEatSushi
 
             // ---------- 門口 ----------
             Bx(-1.34f, 0f, -8.9f, 0.14f, 2.25f, 0.16f, darkPost); Bx(1.34f, 0f, -8.9f, 0.14f, 2.25f, 0.16f, darkPost); Bx(0f, 2.2f, -8.9f, 2.9f, 0.14f, 0.18f, darkWood);
-            var doorGlow = Glow(new Color(1.3f, 1.1f, 0.8f), tShojiDoor, 1f, 1f);
+            var doorGlow = Glow(new Color(1.12f, 1.0f, 0.80f), tShojiDoor, 1f, 1f);
             Soft(Bx(-0.63f, 0.02f, -8.93f, 1.24f, 2.16f, 0.05f, doorGlow)); Soft(Bx(0.63f, 0.02f, -8.9f, 1.24f, 2.16f, 0.05f, doorGlow));
             Noren(true, -1.45f, 1.45f, 2.62f, 0.76f, -8.55f, new[] { cloth[0], cloth[1] }, 0, darkWood);
             Chochin(-1.95f, 2.3f, -8.5f, 0.6f, 0.8f, lanternRed, blackM); Chochin(1.95f, 2.3f, -8.5f, 0.6f, 0.8f, lanternRed, blackM);
@@ -956,10 +943,10 @@ namespace DontEatSushi
             Cy(4.05f, 1.04f, -8.66f, 0.26f, 0.12f, ceramic, false); Sp(4.05f, 1.38f, -8.66f, 0.42f, 0.34f, 0.36f, leafM, false);
             Andon(4.75f, 1.04f, -8.66f, shojiGlow, darkWood);
             Cy(2.3f, 0f, -8.6f, 0.36f, 0.5f, ceramic);
-            Tilt(Cy(2.26f, 0.1f, -8.6f, 0.05f, 0.95f, redM, false), 6f, 0f, 8f); Tilt(Cy(2.36f, 0.1f, -8.56f, 0.05f, 0.9f, Mats.Lit(indigo, 0.4f), false), -7f, 0f, -6f); Tilt(Cy(2.3f, 0.1f, -8.66f, 0.05f, 0.85f, Mats.Lit(moss, 0.4f), false), 9f, 0f, -3f);
+            Tilt(Cy(2.26f, 0.1f, -8.6f, 0.05f, 0.95f, redM, false), 6f, 0f, 8f); Tilt(Cy(2.36f, 0.1f, -8.56f, 0.05f, 0.9f, Mats.Lit(indigo, 0.4f), false), -7f, 0f, -6f);
             Bx(-4f, 0.38f, -8.6f, 1.8f, 0.07f, 0.45f, midWood); Bx(-4.7f, 0f, -8.6f, 0.1f, 0.38f, 0.4f, darkWood); Bx(-3.3f, 0f, -8.6f, 0.1f, 0.38f, 0.4f, darkWood);
             Bx(-4.42f, 0.45f, -8.6f, 0.6f, 0.07f, 0.42f, fabric[8]); Bx(-3.58f, 0.45f, -8.6f, 0.6f, 0.07f, 0.42f, fabric[9]);
-            Tilt(Bx(-2.75f, 0f, -7.55f, 0.7f, 1.15f, 0.04f, Mt(tMenuW, 1f, 1f, 0.2f)), 14f, 0f, 0f); Tilt(Bx(-2.75f, 0f, -7.25f, 0.7f, 1.15f, 0.04f, Mt(tMenuP, 1f, 1f, 0.2f)), -14f, 0f, 0f);
+            Tilt(Bx(-2.75f, 0f, -7.55f, 0.7f, 1.15f, 0.04f, Mt(tMenuW, 1f, 1f, 0.2f)), 14f, 0f, 180f); Tilt(Bx(-2.75f, 0f, -7.25f, 0.7f, 1.15f, 0.04f, Mt(tMenuP, 1f, 1f, 0.2f)), -14f, 0f, 0f);
             // 掛在牆上的法被（短外套）
             Bx(-6.4f, 1.86f, -8.8f, 2.4f, 0.04f, 0.04f, darkWood, false);
             for (int i = 0; i < 3; i++)
@@ -976,7 +963,6 @@ namespace DontEatSushi
             Plant(5.5f, 0f, -8.45f, ceramic, leafM);
             // 立旗
             Cy(-9.6f, 0f, -8.5f, 0.05f, 2.9f, darkWood, false); Bx(-9.6f, 0.7f, -8.3f, 0.03f, 2.1f, 0.5f, Mt(tBanner, 1f, 1f, 0.05f));
-            Cy(-8.9f, 0f, -8.5f, 0.05f, 2.9f, darkWood, false); Bx(-8.9f, 0.7f, -8.3f, 0.03f, 2.1f, 0.5f, Mt(tBannerI, 1f, 1f, 0.05f));
 
             // ---------- 中央散座 ----------
             for (int ti = 0; ti < 2; ti++)
@@ -987,17 +973,27 @@ namespace DontEatSushi
                 Bx(3.8f, 0.75f, tz, 0.97f, 0.012f, 0.34f, fabric[ti == 0 ? 10 : 5], false);
                 Chair(2.98f, tz, -1f, 0f, fabric[ti * 4], darkWood); Chair(4.62f, tz, 1f, 0f, fabric[ti * 4 + 1], darkWood);
                 Chair(3.8f, tz - 0.82f, 0f, -1f, fabric[ti * 4 + 2], darkWood); Chair(3.8f, tz + 0.82f, 0f, 1f, fabric[ti * 4 + 3], darkWood);
-                Cy(3.8f, 0.762f, tz, 0.07f, 0.14f, blackM, false); Cy(3.55f, 0.75f, tz + 0.3f, 0.22f, 0.02f, bowl[0], false); Cy(4.05f, 0.75f, tz - 0.3f, 0.22f, 0.02f, bowl[1], false);
+                Cy(3.8f, 0.762f, tz, 0.07f, 0.14f, blackM, false);
                 Pendant(3.8f, 2.2f, tz, shadeM, bulbM, blackM);
             }
             Bx(3.6f, 0.12f, -5.4f, 2.2f, 1.55f, 0.07f, Mt(tFuji, 1f, 1f, 0.25f)); Bx(3.6f, 1.67f, -5.4f, 2.3f, 0.07f, 0.1f, darkWood);
             Bx(2.65f, 0f, -5.4f, 0.1f, 0.12f, 0.5f, darkWood); Bx(4.55f, 0f, -5.4f, 0.1f, 0.12f, 0.5f, darkWood);
 
+            // 大廳中央：石燈籠小景和紅地毯
+            Bx(0f, 0.012f, -5.9f, 1.3f, 0.012f, 2.2f, Mt(tShippo, 2f, 3.4f, 0.05f));
+            var stoneM = Mt(tConcrete, 1f, 1f, 0.15f);
+            Cy(0.6f, 0f, -3.6f, 1.7f, 0.22f, Mt(tStone, 2f, 2f, 0.3f));
+            Cy(0.6f, 0.22f, -3.6f, 0.2f, 0.7f, stoneM); Bx(0.6f, 0.92f, -3.6f, 0.46f, 0.07f, 0.46f, stoneM);
+            Soft(Bx(0.6f, 0.99f, -3.6f, 0.32f, 0.3f, 0.32f, shojiGlow)); Bx(0.6f, 1.29f, -3.6f, 0.62f, 0.1f, 0.62f, stoneM);
+            Sp(0.6f, 1.42f, -3.6f, 0.16f, 0.16f, 0.16f, stoneM, false);
+            Sp(0.05f, 0.42f, -3.3f, 0.6f, 0.5f, 0.55f, leafM); Sp(1.1f, 0.4f, -3.95f, 0.5f, 0.44f, 0.5f, leafM);
+            Sp(1.0f, 0.3f, -3.1f, 0.34f, 0.24f, 0.3f, stoneM, false);
+
             // ---------- 榻榻米包廂 ----------
             W(new Vector3(9.5f, 0.135f, -4.5f), new Vector3(7f, 0.27f, 9f), darkWood);
             Bx(9.52f, 0.27f, -4.52f, 6.92f, 0.03f, 8.92f, Mt(tTatami, 8f, 5f, 0.1f));
             Bx(5.6f, 0f, -3.2f, 0.7f, 0.15f, 1.4f, Mt(tStone, 0.5f, 1f, 0.3f));
-            var shojiM = Mt(tShojiDoor, 1f, 1f, 0.05f);
+            var shojiM = Glow(new Color(0.92f, 0.82f, 0.62f), tShojiDoor, 1f, 1f);   // 包廂裡亮著燈，紙門從外面看是透亮的
             foreach (float pz in new[] { -8.3f, -7.1f, -5.9f, -4.7f }) Bx(6f, 0.3f, pz, 0.06f, 2.06f, 1.2f, shojiM);
             foreach (float pz in new[] { -1.75f, -0.65f }) Bx(6f, 0.3f, pz, 0.06f, 2.06f, 1.1f, shojiM);
             W(new Vector3(6f, 2.43f, -4.5f), new Vector3(0.16f, 0.14f, 9f), darkWood); W(new Vector3(6f, 3.27f, -4.5f), new Vector3(0.16f, 0.14f, 9f), darkWood);
@@ -1012,9 +1008,9 @@ namespace DontEatSushi
                 float z = t == 0 ? -2.4f : -6.5f;
                 Bx(9.3f, 0.6f, z, 2.4f, 0.07f, 1.1f, lacquer); Bx(9.3f, 0.3f, z, 2f, 0.3f, 0.7f, darkWood);
                 for (int i = 0; i < 4; i++) Bx(9.3f + (i % 2 == 0 ? -0.75f : 0.75f), 0.3f, z + (i / 2 == 0 ? -0.95f : 0.95f), 0.7f, 0.09f, 0.7f, fabric[(i + t * 6) % 12]);
-                Sp(9.3f, 0.77f, z, 0.22f, 0.2f, 0.22f, t == 0 ? potM : blackM, false); Cy(8.9f, 0.67f, z + 0.2f, 0.08f, 0.08f, bowl[0], false); Cy(9.7f, 0.67f, z - 0.2f, 0.08f, 0.08f, bowl[0], false);
+                Sp(9.3f, 0.77f, z, 0.22f, 0.2f, 0.22f, t == 0 ? potM : blackM, false);
                 Bx(8.6f, 0.67f, z - 0.2f, 0.4f, 0.05f, 0.22f, lightWood, false); Bx(10f, 0.67f, z + 0.25f, 0.4f, 0.05f, 0.22f, lightWood, false);
-                Chochin(9.3f, 2.5f, z, 0.6f, 0.6f, lanternWhite, blackM); Soft(Bx(9.3f, 2.8f, z, 0.02f, 1f, 0.02f, blackM, false));
+                Chochin(9.3f, 2.5f, z, 0.6f, 0.6f, lanternWhite, blackM);
             }
             // 床之間
             Bx(12.45f, 0.3f, -4.5f, 0.9f, 0.14f, 1.76f, lacquer);
@@ -1028,8 +1024,8 @@ namespace DontEatSushi
             Cy(9f, 0.9f, -8.58f, 0.24f, 0.34f, ceramic); Sp(8f, 1.66f, -8.58f, 0.3f, 0.32f, 0.28f, redM); Bx(7f, 2.1f, -8.58f, 0.5f, 0.24f, 0.36f, crate[0]);
             Material[] futon = { Mt(tWeaveB, 4f, 3f, 0.05f), Mt(tWeaveW, 4f, 3f, 0.05f), Mt(tAsaP, 3f, 2f, 0.05f), Mt(tPlaidB, 3f, 2f, 0.05f), Mt(tDotsY, 3f, 2f, 0.05f) };
             for (int i = 0; i < 5; i++) Bx(12.1f - (i % 2) * 0.05f, 0.3f + i * 0.17f, -8.2f + (i % 3) * 0.03f, 1.5f, 0.16f, 1.2f, futon[i]);
-            Bx(11.8f, 1.15f, -8.2f, 0.5f, 0.12f, 0.3f, futon[1], false); Bx(12.4f, 1.15f, -8.15f, 0.5f, 0.12f, 0.3f, futon[0], false);
-            for (int i = 0; i < 6; i++) Tilt(Bx(10.1f, 0.3f + i * 0.095f, -8.5f, 0.62f, 0.09f, 0.62f, fabric[(i * 5 + 1) % 12]), 0f, i * 7f - 14f, 0f);
+            Bx(12.1f, 1.15f, -8.2f, 0.6f, 0.12f, 0.34f, futon[1], false);
+            for (int i = 0; i < 5; i++) Tilt(Bx(10.1f, 0.3f + i * 0.095f, -8.5f, 0.62f, 0.09f, 0.62f, fabric[(i * 5 + 1) % 12]), 0f, i * 7f - 14f, 0f);
             Andon(12.4f, 0.3f, -6.3f, shojiGlow, darkWood); Andon(6.6f, 0.3f, -0.7f, shojiGlow, darkWood); Andon(12.4f, 0.3f, -2.7f, shojiGlow, darkWood);
             Bx(11.6f, 0.3f, -1.7f, 0.5f, 0.26f, 0.5f, Mt(tGrid, 1f, 1f, 0.4f)); Cy(11.15f, 0.3f, -1.5f, 0.2f, 0.12f, blackM, false); Cy(12.05f, 0.3f, -1.9f, 0.2f, 0.12f, potM, false);
 
@@ -1037,7 +1033,7 @@ namespace DontEatSushi
             Bx(11.3f, 0f, 5f, 3.4f, 1f, 0.2f, Mt(tPlanksD, 4.25f, 1f, 0.3f)); Bx(11.3f, 1f, 5f, 3.4f, 2.3f, 0.14f, Mt(tPlaidR, 3f, 2f, 0.05f));
             Bx(9.6f, 0f, 5f, 0.16f, 3.3f, 0.22f, darkPost);
             W(new Vector3(8.35f, 2.42f, 5f), new Vector3(2.6f, 0.16f, 0.16f), darkWood); Bx(8.35f, 2.5f, 5f, 2.4f, 0.8f, 0.05f, Mt(tAsaW, 3f, 1f, 0.1f));
-            Noren(true, 7.2f, 9.5f, 2.34f, 0.56f, 5f, cloth, 3, darkWood);
+            Noren(true, 7.2f, 9.5f, 2.34f, 0.56f, 5f, cloth, 3, darkWood, true);
             Poster(true, 11.3f, 2.1f, 4.93f, -1f, 2.2f, 1.0f, Mt(tMenuW, 2f, 1f, 0.2f), darkWood);
             Bx(10.2f, 0.7f, 2.4f, 3f, 0.06f, 0.9f, lightWood); Bx(9.1f, 0f, 2.4f, 0.12f, 0.7f, 0.7f, darkWood); Bx(11.3f, 0f, 2.4f, 0.12f, 0.7f, 0.7f, darkWood);
             Bx(10.2f, 0.76f, 2.4f, 3f, 0.012f, 0.3f, fabric[11], false);
@@ -1047,15 +1043,15 @@ namespace DontEatSushi
                 Bx(10.2f, 0.38f, bz, 2.8f, 0.06f, 0.36f, midWood); Bx(9.1f, 0f, bz, 0.1f, 0.38f, 0.3f, darkWood); Bx(11.3f, 0f, bz, 0.1f, 0.38f, 0.3f, darkWood);
                 for (int i = 0; i < 3; i++) Bx(9.3f + i * 0.9f, 0.44f, bz, 0.5f, 0.06f, 0.34f, fabric[(i * 3 + (s + 1) * 2 + 6) % 12]);
             }
-            Bottle(9.6f, 0.77f, 2.4f, 0.3f, bottles[3], bottles[3]); Bottle(10.9f, 0.77f, 2.45f, 0.3f, bottles[0], bottles[0]);
+            Bottle(9.6f, 0.77f, 2.4f, 0.3f, bottles[3], bottles[3]);
             Cy(10.25f, 0.77f, 2.4f, 0.4f, 0.14f, potM, false); Cy(10.25f, 0.91f, 2.4f, 0.42f, 0.04f, blackM, false);
-            for (int i = 0; i < 4; i++) Cy(9.4f + i * 0.55f, 0.76f, 2.4f + (i % 2 == 0 ? -0.3f : 0.3f), 0.2f, 0.02f, bowl[i % 4], false);
+            for (int i = 0; i < 2; i++) Cy(9.6f + i * 1.3f, 0.76f, 2.4f + (i % 2 == 0 ? -0.3f : 0.3f), 0.2f, 0.02f, bowl[i % 4], false);
             Pendant(9.5f, 2.2f, 2.4f, shadeM, bulbM, blackM); Pendant(10.9f, 2.2f, 2.4f, shadeM, bulbM, blackM);
             Bx(12.8f, 1.6f, 2.4f, 0.3f, 0.04f, 2.4f, darkWood);
             for (int i = 0; i < 5; i++)
             {
                 if (i % 2 == 0) Sp(12.8f, 1.64f + 0.12f + i * 0.01f, 1.4f + i * 0.5f, 0.24f + i * 0.02f, 0.26f + i * 0.02f, 0.24f, redM, false);
-                else Bottle(12.8f, 1.64f, 1.4f + i * 0.5f, 0.36f, bottles[i], bottles[i]);
+                else Cy(12.8f, 1.64f, 1.4f + i * 0.5f, 0.2f, 0.24f, i == 1 ? ceramic : potM, false);
             }
             Poster(false, 1.5f, 2.6f, 12.92f, -1f, 0.7f, 0.7f, Mt(tFishI, 1f, 1f, 0.1f), goldM);
             Poster(false, 4f, 2.2f, 12.92f, -1f, 0.55f, 1.3f, Mt(tScrollB, 1f, 1f, 0.1f), darkWood);
@@ -1065,13 +1061,13 @@ namespace DontEatSushi
             for (int i = 0; i < 3; i++) { Cy(12.4f, 0.1f, 6f + i * 0.9f, 0.84f, 0.8f, komo[i]); Barrel(12.4f, 0.92f, 6f + i * 0.9f, komo[(i + 1) % 3], lidM); }
             Bx(9.6f, 0f, 8.8f, 2.9f, 2.3f, 0.1f, Mt(tPlanksD, 3.6f, 1f, 0.3f)); Bx(8.2f, 0f, 8.6f, 0.06f, 2.3f, 0.44f, darkWood); Bx(11f, 0f, 8.6f, 0.06f, 2.3f, 0.44f, darkWood);
             for (int i = 0; i < 4; i++) Bx(9.6f, 0.5f + i * 0.6f, 8.6f, 2.8f, 0.04f, 0.42f, darkWood);
-            for (int i = 0; i < 5; i++) Bx(8.5f + i * 0.55f, 0.54f, 8.6f, 0.42f, 0.34f, 0.34f, i % 2 == 0 ? crate[2] : Mt(tCrest[(i + 3) % 6], 1f, 1f, 0.2f));
-            for (int i = 0; i < 6; i++) { Bottle(8.45f + i * 0.46f, 1.14f, 8.6f, 0.42f, bottles[i % 4], bottles[(i + 1) % 4]); Bottle(8.5f + i * 0.44f, 1.74f, 8.6f, 0.4f, bottles[(i + 2) % 4], bottles[(i + 2) % 4]); }
+            for (int i = 0; i < 4; i++) Bx(8.6f + i * 0.68f, 0.54f, 8.6f, 0.42f, 0.34f, 0.34f, i % 2 == 0 ? crate[2] : Mt(tCrest[(i + 3) % 6], 1f, 1f, 0.2f));
+            for (int i = 0; i < 4; i++) { Bottle(8.55f + i * 0.7f, 1.14f, 8.6f, 0.42f, bottles[i % 4], bottles[(i + 1) % 4]); Bottle(8.7f + i * 0.62f, 1.74f, 8.6f, 0.4f, bottles[(i + 2) % 4], bottles[(i + 2) % 4]); }
             Cy(9f, 0f, 6.6f, 0.8f, 0.9f, komo[1]); Cy(9f, 0.9f, 6.6f, 1f, 0.04f, lidM);
             Cy(8.2f, 0f, 6.3f, 0.36f, 0.5f, Mt(tRope, 2f, 1f, 0.1f)); Cy(9.7f, 0f, 7.1f, 0.36f, 0.5f, Mt(tRope, 2f, 1f, 0.1f));
-            Bottle(9f, 0.94f, 6.6f, 0.36f, bottles[2], bottles[2]); Cy(8.8f, 0.94f, 6.8f, 0.09f, 0.06f, bowl[0], false);
-            for (int i = 0; i < 4; i++) Bx(7.65f, (i / 2) * 0.33f, 8.2f + (i % 2) * 0.42f, 0.52f, 0.32f, 0.38f, i % 3 == 0 ? crateR : crateY);
-            Chochin(10.2f, 2.6f, 7f, 0.7f, 0.9f, lanternRed, blackM); Soft(Bx(10.2f, 3.05f, 7f, 0.02f, 0.8f, 0.02f, blackM, false));
+            Bottle(9f, 0.94f, 6.6f, 0.36f, bottles[2], bottles[2]);
+            for (int i = 0; i < 3; i++) Bx(7.65f, (i / 2) * 0.33f, 8.2f + (i % 2) * 0.42f, 0.52f, 0.32f, 0.38f, i % 3 == 0 ? crateR : crateY);
+            Chochin(10.2f, 2.6f, 7f, 0.7f, 0.9f, lanternRed, blackM);
             Poster(true, 11.7f, 2.2f, 8.92f, -1f, 0.8f, 1.1f, Mt(tFuji, 1f, 1f, 0.2f), darkWood);
             Cy(7.9f, 0f, 0.9f, 0.05f, 2.9f, darkWood, false); Bx(7.9f, 0.7f, 1.1f, 0.03f, 2.1f, 0.5f, Mt(tBanner, 1f, 1f, 0.05f));
 

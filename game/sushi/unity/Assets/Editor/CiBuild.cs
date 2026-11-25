@@ -108,7 +108,7 @@ public static class CiBuild
             g.EditorCam(new Vector3(-1f, 1.2f, 7.2f), -80f, 5f, 6.8f); Snap(cam, rt, tag + "_5_kitchen");
             g.EditorCam(new Vector3(-2f, 1.0f, -4f), 200f, 12f, 3.5f); Snap(cam, rt, tag + "_6_player");
             g.EditorCam(new Vector3(-11.5f, 1.0f, -0.8f), -75f, 8f, 5f); Snap(cam, rt, tag + "_7_booths");
-            g.EditorCam(new Vector3(0f, 1.2f, -8f), 180f, 6f, 5.5f); Snap(cam, rt, tag + "_8_entrance");
+            g.EditorCam(new Vector3(0f, 1.2f, -8f), 170f, 6f, 4.2f); Snap(cam, rt, tag + "_8_entrance");
             g.EditorCam(new Vector3(10.5f, 1.0f, 4f), 55f, 10f, 6f); Snap(cam, rt, tag + "_9_sake");
         }
     }
