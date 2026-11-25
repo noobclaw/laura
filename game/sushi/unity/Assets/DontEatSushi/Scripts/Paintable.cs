@@ -95,6 +95,14 @@ namespace DontEatSushi
         public Color32[] px;
         public MeshRenderer rend;
         public MeshCollider meshCol;
+        MeshFilter mf;
+
+        /// 換姿勢：換網格和對照表，貼圖保留。
+        public void SetShape(SushiShape sh)
+        {
+            shape = sh; mf.sharedMesh = sh.mesh;
+            if (meshCol != null) meshCol.sharedMesh = sh.mesh;
+        }
 
         bool dirty;
         readonly List<Color32[]> undo = new List<Color32[]>();
@@ -102,7 +110,7 @@ namespace DontEatSushi
         public void Init(SushiShape sh, SushiKind kind, bool withMeshCollider)
         {
             shape = sh;
-            var mf = gameObject.AddComponent<MeshFilter>();
+            mf = gameObject.AddComponent<MeshFilter>();
             mf.sharedMesh = sh.mesh;
             rend = gameObject.AddComponent<MeshRenderer>();
             tex = new Texture2D(SushiShape.T, SushiShape.T, TextureFormat.RGBA32, false);
@@ -200,14 +208,26 @@ namespace DontEatSushi
             float lr = wr / Mathf.Max(0.0001f, transform.lossyScale.x);
             float rr = lr * lr;
             var pos = shape.texPos; var nrm = shape.texNrm; var part = shape.texPart;
-            for (int i = 0; i < px.Length; i++)
+            const int T = SushiShape.T;
+            for (int ch = 0; ch < shape.cRad.Length; ch++)
             {
-                if (part[i] == 255) continue;
-                float dx = pos[i].x - lp.x, dy = pos[i].y - lp.y, dz = pos[i].z - lp.z;
-                if (dx * dx + dy * dy + dz * dz > rr) continue;
-                if (nrm[i].x * ln.x + nrm[i].y * ln.y + nrm[i].z * ln.z <= 0f) continue;
-                px[i] = c;
-                dirty = true;
+                float reach = shape.cRad[ch] + lr;
+                if ((shape.cCenter[ch] - lp).sqrMagnitude > reach * reach) continue;
+                int x0 = shape.cRect[ch * 4], y0 = shape.cRect[ch * 4 + 1], x1 = shape.cRect[ch * 4 + 2], y1 = shape.cRect[ch * 4 + 3];
+                for (int y = y0; y <= y1; y++)
+                {
+                    int row = y * T;
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        int i = row + x;
+                        if (part[i] == 255) continue;
+                        float dx = pos[i].x - lp.x, dy = pos[i].y - lp.y, dz = pos[i].z - lp.z;
+                        if (dx * dx + dy * dy + dz * dz > rr) continue;
+                        if (nrm[i].x * ln.x + nrm[i].y * ln.y + nrm[i].z * ln.z <= 0f) continue;
+                        px[i] = c;
+                        dirty = true;
+                    }
+                }
             }
         }
 

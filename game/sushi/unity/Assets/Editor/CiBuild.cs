@@ -95,16 +95,18 @@ public static class CiBuild
             // opening a scene destroys loose objects, so the target is made after it and kept out of scene cleanup
             var rt = new RenderTexture(1600, 900, 24, RenderTextureFormat.ARGB32);
             rt.hideFlags = HideFlags.HideAndDontSave;
-            var g = new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();
+            var g = new GameObject("SushiGame").AddComponent<DontEatSushi.HouseGame>();
             var cam = g.EditorSetup(pass == 1);
             string tag = pass == 0 ? "hider" : "hunter";
             // the first frames after a scene is built come out unlit, so render a few before keeping any
-            g.EditorCam(new Vector3(0f, 0.3f, 0f), 32f, 34f, 30f);
+            g.EditorCam(new Vector3(0f, 0.5f, 0f), 30f, 40f, 30f);
             cam.targetTexture = rt; for (int w = 0; w < 3; w++) cam.Render();
             Snap(cam, rt, tag + "_1_wide");
-            g.EditorCam(new Vector3(-4f, 0.3f, -4.5f), 20f, 32f, 8f); Snap(cam, rt, tag + "_2_belt");
-            g.EditorCam(new Vector3(0f, 0.3f, -7.6f), 0f, 30f, 5f); Snap(cam, rt, tag + "_3_close");
-            g.EditorCam(new Vector3(2f, 1.5f, 2f), -25f, 18f, 13f); Snap(cam, rt, tag + "_4_low");
+            g.EditorCam(new Vector3(-3f, 1.2f, -1f), 15f, 14f, 8f); Snap(cam, rt, tag + "_2_bar");
+            g.EditorCam(new Vector3(9.5f, 1.2f, -4.5f), 60f, 16f, 7f); Snap(cam, rt, tag + "_3_tatami");
+            g.EditorCam(new Vector3(-10f, 1.2f, 6.5f), -40f, 14f, 6f); Snap(cam, rt, tag + "_4_storage");
+            g.EditorCam(new Vector3(0f, 1.3f, 6f), 0f, 12f, 7f); Snap(cam, rt, tag + "_5_kitchen");
+            g.EditorCam(new Vector3(-2f, 1.0f, -4f), 200f, 12f, 3.5f); Snap(cam, rt, tag + "_6_player");
         }
     }
 
@@ -142,7 +144,7 @@ public static class CiBuild
         }
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-        new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();
+        new GameObject("SushiGame").AddComponent<DontEatSushi.HouseGame>();
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Sushi.unity");
 
         PlayerSettings.companyName = "noobclaw";

@@ -11,7 +11,7 @@ public static class SushiMenu
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         var go = new GameObject("SushiGame");
-        go.AddComponent<DontEatSushi.SushiGame>();
+        go.AddComponent<DontEatSushi.HouseGame>();
         System.IO.Directory.CreateDirectory("Assets/DontEatSushi/Scenes");
         EditorSceneManager.SaveScene(scene, "Assets/DontEatSushi/Scenes/Sushi.unity");
         Debug.Log("別吃壽司：場景已建立，按上方的播放鍵開始。");

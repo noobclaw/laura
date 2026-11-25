@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace DontEatSushi
 {
-    public enum ShapeKind { Nigiri, Maki }
+    public enum ShapeKind { Nigiri, Maki, Stand, Sit, Prone, Side, Star }
     public enum SushiKind { Blank, Salmon, Tuna, Tamago, Shrimp, CucumberRoll, TunaRoll }
 
     /// 一種身形：網格，加上「貼圖上每個像素對應物體表面哪一點」的對照表。
     public class SushiShape
     {
-        public const int T = 256;
+        public const int T = 512;
         public ShapeKind kind;
         public Mesh mesh;
         public Vector3[] texPos;   // 每個像素在物體空間的位置
@@ -18,6 +18,10 @@ namespace DontEatSushi
         public byte[] texPart;     // 部位編號，255 表示沒用到
         public Bounds bounds;
         public SushiKind[] references;
+        // 每塊展開區的像素範圍和包圍球，塗色時用來跳過離筆刷很遠的區塊
+        public int[] cRect;
+        public Vector3[] cCenter;
+        public float[] cRad;
     }
 
     public static class SushiShapes
@@ -59,6 +63,22 @@ namespace DontEatSushi
                 AddBox(charts, new Vector3(0f, 0.2f, 0f), new Vector3(0.5f, 0.2f, 0.28f), 0.17f, 0, 0, 4, 3);
                 AddBox(charts, new Vector3(0f, 0.43f, 0f), new Vector3(0.58f, 0.075f, 0.31f), 0.06f, 1, 6, 4, 3);
                 shape.references = new[] { SushiKind.Salmon, SushiKind.Tuna, SushiKind.Tamago, SushiKind.Shrimp };
+            }
+            else if (kind >= ShapeKind.Stand)
+            {
+                // 小人：身體、頭、雙手、雙腳六個圓角方塊。姿勢只是把各部位繞關節轉一下，貼圖位置不變，所以換姿勢顏色還在。
+                Quaternion root = Quaternion.identity, armL = Quaternion.identity, armR = Quaternion.identity, legL = Quaternion.identity, legR = Quaternion.identity;
+                if (kind == ShapeKind.Sit) { legL = legR = Quaternion.Euler(-90f, 0f, 0f); armL = armR = Quaternion.Euler(-35f, 0f, 0f); }
+                else if (kind == ShapeKind.Prone) { root = Quaternion.Euler(90f, 0f, 0f); armL = armR = Quaternion.Euler(180f, 0f, 0f); }
+                else if (kind == ShapeKind.Side) { root = Quaternion.Euler(0f, 0f, 90f); armL = Quaternion.Euler(-40f, 0f, 0f); legR = Quaternion.Euler(-30f, 0f, 0f); }
+                else if (kind == ShapeKind.Star) { armL = Quaternion.Euler(0f, 0f, -115f); armR = Quaternion.Euler(0f, 0f, 115f); legL = Quaternion.Euler(0f, 0f, -28f); legR = Quaternion.Euler(0f, 0f, 28f); }
+                AddBox(charts, new Vector3(0f, 1.02f, 0f), new Vector3(0.30f, 0.36f, 0.22f), 0.2f, 0, 0, 6, 6, root, Vector3.zero);
+                AddBox(charts, new Vector3(0f, 1.62f, 0f), new Vector3(0.25f, 0.25f, 0.25f), 0.23f, 1, 6, 6, 6, root, Vector3.zero);
+                AddLimb(charts, root, armL, new Vector3(-0.40f, 1.30f, 0f), new Vector3(0.09f, 0.30f, 0.09f), 0.085f, 2, 12);
+                AddLimb(charts, root, armR, new Vector3(0.40f, 1.30f, 0f), new Vector3(0.09f, 0.30f, 0.09f), 0.085f, 3, 18);
+                AddLimb(charts, root, legL, new Vector3(-0.16f, 0.68f, 0f), new Vector3(0.115f, 0.34f, 0.115f), 0.1f, 4, 24);
+                AddLimb(charts, root, legR, new Vector3(0.16f, 0.68f, 0f), new Vector3(0.115f, 0.34f, 0.115f), 0.1f, 5, 30);
+                shape.references = new SushiKind[0];
             }
             else
             {
@@ -108,8 +128,13 @@ namespace DontEatSushi
             for (int i = 0; i < shape.texPart.Length; i++) shape.texPart[i] = 255;
 
             const float pad = 3f / T;
+            shape.cRect = new int[charts.Count * 4];
+            shape.cCenter = new Vector3[charts.Count];
+            shape.cRad = new float[charts.Count];
+            int ci = -1;
             foreach (var c in charts)
             {
+                ci++;
                 var uvRect = new Rect(c.cell.x + pad, c.cell.y + pad, c.cell.width - 2f * pad, c.cell.height - 2f * pad);
                 int baseIdx = verts.Count;
                 for (int j = 0; j <= c.nt; j++)
@@ -157,6 +182,21 @@ namespace DontEatSushi
                         shape.texPos[k] = p; shape.texNrm[k] = n; shape.texPart[k] = c.part;
                     }
                 }
+                shape.cRect[ci * 4] = x0; shape.cRect[ci * 4 + 1] = y0; shape.cRect[ci * 4 + 2] = x1; shape.cRect[ci * 4 + 3] = y1;
+                Vector3 pc, nc; c.f(0.5f, 0.5f, out pc, out nc);
+                float rad = 0f;
+                for (int q = 0; q < 4; q++) { Vector3 pe, ne; c.f(q % 2, q / 2, out pe, out ne); rad = Mathf.Max(rad, (pe - pc).magnitude); }
+                shape.cCenter[ci] = pc; shape.cRad[ci] = rad * 1.05f + 0.01f;
+            }
+            if (kind >= ShapeKind.Stand)
+            {
+                // 讓最低點剛好踩在地面上
+                float minY = float.MaxValue;
+                foreach (var v in verts) minY = Mathf.Min(minY, v.y);
+                Vector3 lift = new Vector3(0f, -minY, 0f);
+                for (int i = 0; i < verts.Count; i++) verts[i] += lift;
+                for (int i = 0; i < shape.texPos.Length; i++) if (shape.texPart[i] != 255) shape.texPos[i] += lift;
+                for (int i = 0; i < shape.cCenter.Length; i++) shape.cCenter[i] += lift;
             }
 
             var mesh = new Mesh();
@@ -171,7 +211,18 @@ namespace DontEatSushi
             return shape;
         }
 
+        // 手或腳：方塊掛在關節下方，繞關節轉
+        static void AddLimb(List<Chart> charts, Quaternion root, Quaternion joint, Vector3 pivot, Vector3 half, float r, byte part, int startCell)
+        {
+            AddBox(charts, new Vector3(0f, -half.y, 0f), half, r, part, startCell, 6, 6, root * joint, root * pivot);
+        }
+
         static void AddBox(List<Chart> charts, Vector3 center, Vector3 half, float r, byte part, int startCell, int cols, int rows)
+        {
+            AddBox(charts, center, half, r, part, startCell, cols, rows, Quaternion.identity, Vector3.zero);
+        }
+
+        static void AddBox(List<Chart> charts, Vector3 center, Vector3 half, float r, byte part, int startCell, int cols, int rows, Quaternion rot, Vector3 pivot)
         {
             for (int face = 0; face < 6; face++)
             {
@@ -194,7 +245,8 @@ namespace DontEatSushi
                         Vector3 d = q - inner;
                         if (d.sqrMagnitude < 1e-10f) { d = Vector3.zero; d[axis] = sign; }
                         n = d.normalized;
-                        p = center + inner + n * r;
+                        p = pivot + rot * (center + inner + n * r);
+                        n = rot * n;
                     }
                 });
             }
@@ -223,7 +275,7 @@ namespace DontEatSushi
 
         static Color Shade(ShapeKind shape, SushiKind kind, byte part, Vector3 p)
         {
-            if (kind == SushiKind.Blank) return Rice(p);
+            if (kind == SushiKind.Blank || shape >= ShapeKind.Stand) return Rice(p);
             if (shape == ShapeKind.Nigiri)
             {
                 if (kind == SushiKind.Tamago && Mathf.Abs(p.x) < 0.11f) return Nori(p);
