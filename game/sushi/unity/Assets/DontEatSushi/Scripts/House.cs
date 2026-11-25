@@ -146,55 +146,361 @@ namespace DontEatSushi
 
         // ================= 場景 =================
 
-        Texture2D Pattern(int type, Color a, Color b)
+        static Color Rgb(float r, float g, float b) { return new Color(r, g, b, 1f); }
+        static float Fr(float x) { return x - Mathf.Floor(x); }
+        static float Hash(float x, float y) { return Fr(Mathf.Sin(x * 127.1f + y * 311.7f + 1.7f) * 43758.5453f); }
+
+        // 可以無縫重複的雜訊：四個角落的 Perlin 混在一起
+        static float TNoise(float u, float v, float fx, float fy)
         {
-            const int N = 128;
+            u = Fr(u); v = Fr(v);
+            float n00 = Mathf.PerlinNoise(u * fx + 200f, v * fy + 200f), n10 = Mathf.PerlinNoise((u - 1f) * fx + 200f, v * fy + 200f);
+            float n01 = Mathf.PerlinNoise(u * fx + 200f, (v - 1f) * fy + 200f), n11 = Mathf.PerlinNoise((u - 1f) * fx + 200f, (v - 1f) * fy + 200f);
+            return Mathf.Lerp(Mathf.Lerp(n00, n10, u), Mathf.Lerp(n01, n11, u), v);
+        }
+
+        static float Seg(float px, float py, float ax, float ay, float bx, float by)
+        {
+            float dx = bx - ax, dy = by - ay, t = Mathf.Clamp01(((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy + 0.000001f));
+            float ex = px - ax - dx * t, ey = py - ay - dy * t;
+            return Mathf.Sqrt(ex * ex + ey * ey);
+        }
+        static float St(float d, float x, float y, float ax, float ay, float bx, float by) { return Mathf.Min(d, Seg(x, y, ax, ay, bx, by)); }
+        static float GBox(float d, float x, float y, float x0, float y0, float x1, float y1)
+        {
+            d = St(d, x, y, x0, y0, x1, y0); d = St(d, x, y, x1, y0, x1, y1); d = St(d, x, y, x1, y1, x0, y1); d = St(d, x, y, x0, y1, x0, y0);
+            return d;
+        }
+
+        // 幾個筆畫簡單的字（米大山日本上中田王司），回傳到最近筆畫的距離。x、y 在 0..1，y 朝上
+        static float Glyph(int id, float x, float y)
+        {
+            float d = 9f;
+            if (x < -0.15f || x > 1.15f || y < -0.15f || y > 1.15f) return d;
+            switch (((id % 10) + 10) % 10)
+            {
+                case 0:
+                    d = St(d, x, y, 0.1f, 0.5f, 0.9f, 0.5f); d = St(d, x, y, 0.5f, 0.92f, 0.5f, 0.08f); d = St(d, x, y, 0.24f, 0.86f, 0.38f, 0.64f);
+                    d = St(d, x, y, 0.76f, 0.86f, 0.62f, 0.64f); d = St(d, x, y, 0.5f, 0.5f, 0.14f, 0.12f); d = St(d, x, y, 0.5f, 0.5f, 0.86f, 0.12f); break;
+                case 1:
+                    d = St(d, x, y, 0.1f, 0.64f, 0.9f, 0.64f); d = St(d, x, y, 0.5f, 0.92f, 0.5f, 0.62f); d = St(d, x, y, 0.5f, 0.62f, 0.14f, 0.1f); d = St(d, x, y, 0.5f, 0.62f, 0.86f, 0.1f); break;
+                case 2:
+                    d = St(d, x, y, 0.5f, 0.9f, 0.5f, 0.14f); d = St(d, x, y, 0.14f, 0.6f, 0.14f, 0.14f); d = St(d, x, y, 0.86f, 0.6f, 0.86f, 0.14f); d = St(d, x, y, 0.14f, 0.14f, 0.86f, 0.14f); break;
+                case 3:
+                    d = GBox(d, x, y, 0.26f, 0.1f, 0.74f, 0.9f); d = St(d, x, y, 0.26f, 0.5f, 0.74f, 0.5f); break;
+                case 4:
+                    d = St(d, x, y, 0.1f, 0.66f, 0.9f, 0.66f); d = St(d, x, y, 0.5f, 0.92f, 0.5f, 0.08f); d = St(d, x, y, 0.5f, 0.66f, 0.12f, 0.22f);
+                    d = St(d, x, y, 0.5f, 0.66f, 0.88f, 0.22f); d = St(d, x, y, 0.34f, 0.3f, 0.66f, 0.3f); break;
+                case 5:
+                    d = St(d, x, y, 0.46f, 0.9f, 0.46f, 0.12f); d = St(d, x, y, 0.46f, 0.56f, 0.82f, 0.56f); d = St(d, x, y, 0.1f, 0.12f, 0.9f, 0.12f); break;
+                case 6:
+                    d = GBox(d, x, y, 0.16f, 0.36f, 0.84f, 0.72f); d = St(d, x, y, 0.5f, 0.95f, 0.5f, 0.05f); break;
+                case 7:
+                    d = GBox(d, x, y, 0.14f, 0.14f, 0.86f, 0.86f); d = St(d, x, y, 0.5f, 0.86f, 0.5f, 0.14f); d = St(d, x, y, 0.14f, 0.5f, 0.86f, 0.5f); break;
+                case 8:
+                    d = St(d, x, y, 0.16f, 0.86f, 0.84f, 0.86f); d = St(d, x, y, 0.22f, 0.5f, 0.78f, 0.5f); d = St(d, x, y, 0.1f, 0.12f, 0.9f, 0.12f); d = St(d, x, y, 0.5f, 0.86f, 0.5f, 0.12f); break;
+                default:
+                    d = St(d, x, y, 0.2f, 0.86f, 0.8f, 0.86f); d = St(d, x, y, 0.8f, 0.86f, 0.8f, 0.12f); d = St(d, x, y, 0.8f, 0.12f, 0.66f, 0.2f);
+                    d = St(d, x, y, 0.2f, 0.66f, 0.62f, 0.66f); d = GBox(d, x, y, 0.22f, 0.2f, 0.6f, 0.48f); break;
+            }
+            return d;
+        }
+        static bool Ink(int id, float u, float v, float x0, float y0, float w, float h, float thick) { return Glyph(id, (u - x0) / w, (v - y0) / h) < thick; }
+
+        // 麻葉：正三角格，每個三角形從中心連到三個頂點
+        static float Asa(float x, float y)
+        {
+            const float s = 1.732f; float Y = y * s, d = 9f, h = s * 0.5f;
+            d = St(d, x, Y, 0f, 0f, 1f, 0f); d = St(d, x, Y, 0f, s, 1f, s); d = St(d, x, Y, 0f, h, 1f, h);
+            d = St(d, x, Y, 0f, 0f, 0.5f, h); d = St(d, x, Y, 1f, 0f, 0.5f, h); d = St(d, x, Y, 0f, s, 0.5f, h); d = St(d, x, Y, 1f, s, 0.5f, h);
+            d = St(d, x, Y, 0.5f, s / 6f, 0f, 0f); d = St(d, x, Y, 0.5f, s / 6f, 1f, 0f); d = St(d, x, Y, 0.5f, s / 6f, 0.5f, h);
+            d = St(d, x, Y, 0.5f, s * 5f / 6f, 0f, s); d = St(d, x, Y, 0.5f, s * 5f / 6f, 1f, s); d = St(d, x, Y, 0.5f, s * 5f / 6f, 0.5f, h);
+            d = St(d, x, Y, 0f, s / 3f, 0f, 0f); d = St(d, x, Y, 0f, s / 3f, 0.5f, h); d = St(d, x, Y, 1f, s / 3f, 1f, 0f); d = St(d, x, Y, 1f, s / 3f, 0.5f, h);
+            d = St(d, x, Y, 0f, s * 2f / 3f, 0f, s); d = St(d, x, Y, 0f, s * 2f / 3f, 0.5f, h); d = St(d, x, Y, 1f, s * 2f / 3f, 1f, s); d = St(d, x, Y, 1f, s * 2f / 3f, 0.5f, h);
+            return d;
+        }
+
+        // 一個像素的顏色。a 是底色、b 是花紋色、c3 是第三色（落款、邊、標籤字）
+        static Color Px(int type, float u, float v, int x, int y, Color a, Color b, Color c3, int seed)
+        {
+            float k = 0f; Color c = a; bool direct = false; float grain = 0.05f;
+            Color red = Rgb(0.78f, 0.13f, 0.10f), paperC = Rgb(0.95f, 0.92f, 0.82f);
+            switch (type)
+            {
+                case 0: k = TNoise(u, v, 6f, 6f) * 0.6f + TNoise(u, v, 23f, 23f) * 0.4f; grain = 0.07f; break;                 // 灰泥
+                case 1: k = TNoise(u, v, 2f, 26f) * 0.7f + TNoise(u, v, 9f, 60f) * 0.3f; break;                                 // 木紋（橫）
+                case 38: k = TNoise(u, v, 26f, 2f) * 0.7f + TNoise(u, v, 60f, 9f) * 0.3f; break;                                // 木紋（直）
+                case 2: k = ((int)(u * 4f) + (int)(v * 4f)) % 2; break;                                                         // 市松
+                case 3:                                                                                                         // 青海波
+                {
+                    const float r = 0.25f, h = 0.125f;
+                    int j0 = Mathf.FloorToInt((v - r) / h);
+                    for (int j = j0; j <= j0 + 6; j++)
+                    {
+                        float cy = j * h, off = (((j % 2) + 2) % 2 == 0) ? 0f : 0.25f;
+                        float dx = (Fr((u - off) * 2f + 0.5f) - 0.5f) * 0.5f, dy = v - cy;
+                        float d = Mathf.Sqrt(dx * dx + dy * dy);
+                        if (d >= r) continue;
+                        float ring = d / r;
+                        k = (ring > 0.86f || (ring > 0.56f && ring < 0.70f) || (ring > 0.28f && ring < 0.42f) || ring < 0.12f) ? 1f : 0f;
+                        break;
+                    }
+                    break;
+                }
+                case 4: k = Asa(Fr(u * 4f), Fr(v * 2f)) < 0.05f ? 1f : 0f; break;                                               // 麻葉
+                case 5:                                                                                                         // 榻榻米
+                {
+                    k = (Fr(v * 48f) < 0.35f ? 0.3f : 0f) + TNoise(u, v, 5f, 5f) * 0.25f;
+                    if (u < 0.05f || u > 0.95f) { direct = true; c = Color.Lerp(c3, b, (Fr(u * 80f) < 0.5f) == (Fr(v * 40f) < 0.5f) ? 0.25f : 0f); }
+                    else if (v < 0.008f || v > 0.992f) k = 1f;
+                    break;
+                }
+                case 6: k = Fr(u * 6f) < 0.5f ? 1f : 0f; break;                                                                 // 直條
+                case 7: { float du = Fr(u * 5f) - 0.5f, dv = Fr(v * 5f) - 0.5f; k = du * du + dv * dv < 0.07f ? 1f : 0f; break; } // 圓點
+                case 8:                                                                                                         // 障子格
+                {
+                    bool bar = Mathf.Abs(Fr(u * 2f + 0.5f) - 0.5f) < 0.03f || Mathf.Abs(Fr(v * 3f + 0.5f) - 0.5f) < 0.04f;
+                    k = bar ? 1f : TNoise(u, v, 30f, 30f) * 0.07f; grain = 0.03f; break;
+                }
+                case 9:                                                                                                         // 直木板
+                {
+                    float pu = u * 4f, f = Fr(pu);
+                    k = (f < 0.03f || f > 0.97f) ? 1f : Hash(Mathf.Floor(pu), seed) * 0.18f + TNoise(u, v, 40f, 3f) * 0.22f; break;
+                }
+                case 10:                                                                                                        // 矢絣
+                {
+                    float f = Fr(u * 4f); int col = (int)(u * 4f);
+                    float s = Fr(v * 4f + (col % 2 == 0 ? 1f : -1f) * Mathf.Abs(f - 0.5f) * 1.6f);
+                    k = s < 0.5f ? 1f : 0f; if (Mathf.Abs(f - 0.5f) < 0.03f) k = 0.5f; break;
+                }
+                case 11:                                                                                                        // 龜甲
+                {
+                    float X = u * 3f, Yn = v * 2f;
+                    float ax = Fr(X) - 0.5f, ay = (Fr(Yn) - 0.5f) * 1.732f, bx = Fr(X + 0.5f) - 0.5f, by = (Fr(Yn + 0.5f) - 0.5f) * 1.732f;
+                    float hx = ax, hy = ay; if (bx * bx + by * by < ax * ax + ay * ay) { hx = bx; hy = by; }
+                    hx = Mathf.Abs(hx); hy = Mathf.Abs(hy);
+                    float hd = Mathf.Max(hx, hx * 0.5f + hy * 0.866f);
+                    k = (hd > 0.45f || (hd > 0.22f && hd < 0.29f) || hd < 0.07f) ? 1f : 0f; break;
+                }
+                case 12:                                                                                                        // 磚
+                {
+                    int row = (int)(v * 8f); float fu = u * 4f + (row % 2) * 0.5f, f = Fr(fu), fv = Fr(v * 8f);
+                    k = (f < 0.04f || fv < 0.1f) ? 0f : 0.55f + 0.45f * Hash(Mathf.Floor(fu) % 4f, row); grain = 0.09f; break;
+                }
+                case 13:                                                                                                        // 磁磚
+                {
+                    float f = Fr(u * 4f), g = Fr(v * 4f);
+                    k = (f < 0.045f || g < 0.045f) ? 0f : ((f > 0.9f || g < 0.11f) ? 0.84f : 1f) * (0.9f + 0.1f * Hash(Mathf.Floor(u * 4f), Mathf.Floor(v * 4f))); grain = 0.02f; break;
+                }
+                case 14: k = (((int)(u * 40f) + (int)(v * 40f)) % 2) * 0.22f; grain = 0.08f; break;                           // 布紋
+                case 15:                                                                                                        // 竹簾
+                {
+                    float s = Fr(v * 20f);
+                    k = s < 0.16f ? 0.75f : Mathf.Abs(s - 0.58f) * 0.4f;
+                    if (Mathf.Abs(Fr(u * 3f + 0.5f) - 0.5f) < 0.025f) k = 1f; break;
+                }
+                case 16:                                                                                                        // 七寶
+                {
+                    float fx = Fr(u * 3f), fy = Fr(v * 3f);
+                    float d0 = Mathf.Sqrt(fx * fx + fy * fy), d1 = Mathf.Sqrt((fx - 1f) * (fx - 1f) + fy * fy), d2 = Mathf.Sqrt(fx * fx + (fy - 1f) * (fy - 1f));
+                    float d3 = Mathf.Sqrt((fx - 1f) * (fx - 1f) + (fy - 1f) * (fy - 1f)), d4 = Mathf.Sqrt((fx - 0.5f) * (fx - 0.5f) + (fy - 0.5f) * (fy - 0.5f));
+                    const float w = 0.035f;
+                    k = (Mathf.Abs(d0 - 0.5f) < w || Mathf.Abs(d1 - 0.5f) < w || Mathf.Abs(d2 - 0.5f) < w || Mathf.Abs(d3 - 0.5f) < w || Mathf.Abs(d4 - 0.5f) < w || d4 < 0.07f || d0 < 0.07f || d1 < 0.07f || d2 < 0.07f || d3 < 0.07f) ? 1f : 0f;
+                    break;
+                }
+                case 17:                                                                                                        // 鱗
+                {
+                    int row = (int)(v * 6f); float fx = Fr(u * 6f + (row % 2) * 0.5f), fy = Fr(v * 6f);
+                    k = fy < 1f - 2f * Mathf.Abs(fx - 0.5f) ? 1f : 0f; break;
+                }
+                case 18:                                                                                                        // 櫻花
+                {
+                    float cx = Mathf.Floor(u * 3f), cy = Mathf.Floor(v * 3f);
+                    float dx = Fr(u * 3f) - 0.5f - (Hash(cx, cy + seed) - 0.5f) * 0.3f, dy = Fr(v * 3f) - 0.5f - (Hash(cy + 5f, cx + seed) - 0.5f) * 0.3f;
+                    float r = Mathf.Sqrt(dx * dx + dy * dy), th = Mathf.Atan2(dy, dx) + Hash(cx + 9f, cy) * 6f;
+                    float R = 0.31f * (0.5f + 0.5f * Mathf.Abs(Mathf.Cos(2.5f * th)));
+                    k = r < 0.05f ? 0.35f : r < R ? 1f : 0f; break;
+                }
+                case 19: k = Fr(v * 6f + 0.2f * Mathf.Sin(u * 12.566f)) < 0.5f ? 1f : 0f; break;                                // 波紋
+                case 20:                                                                                                        // 金地雲
+                {
+                    float n = TNoise(u, v, 3f, 9f);
+                    k = n > 0.56f ? 0.9f : n > 0.53f ? 0.45f : TNoise(u, v, 40f, 40f) * 0.18f;
+                    if (Fr(u * 4f) < 0.012f || Fr(v * 4f) < 0.012f) k += 0.12f; break;
+                }
+                case 21:                                                                                                        // 木格柵
+                {
+                    float f = Fr(u * 8f);
+                    k = f < 0.6f ? TNoise(u, v, 50f, 3f) * 0.25f : 1f;
+                    if (Mathf.Abs(v - 0.5f) < 0.03f || v < 0.03f || v > 0.97f) k = 0.12f; break;
+                }
+                case 22: k = Fr(u * 12f + v * 3f) < 0.5f ? 0.15f : 0.75f; break;                                                // 繩
+                case 23:                                                                                                        // 石板
+                {
+                    float gx = u * 4f, gy = v * 4f, f1 = 9f, f2 = 9f, id = 0f;
+                    int ix = Mathf.FloorToInt(gx), iy = Mathf.FloorToInt(gy);
+                    for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++)
+                    {
+                        int qx = ((ix + i) % 4 + 4) % 4, qy = ((iy + j) % 4 + 4) % 4;
+                        float sx = ix + i + 0.2f + 0.6f * Hash(qx, qy + 3f), sy = iy + j + 0.2f + 0.6f * Hash(qy + 7f, qx);
+                        float d = Mathf.Sqrt((gx - sx) * (gx - sx) + (gy - sy) * (gy - sy));
+                        if (d < f1) { f2 = f1; f1 = d; id = qx * 4f + qy; } else if (d < f2) f2 = d;
+                    }
+                    k = f2 - f1 < 0.07f ? 0f : 0.55f + 0.45f * Hash(id, 2f); grain = 0.08f; break;
+                }
+                case 24:                                                                                                        // 暖簾（圓紋加字）
+                {
+                    float d = Mathf.Sqrt((u - 0.5f) * (u - 0.5f) + (v - 0.54f) * (v - 0.54f));
+                    k = (Mathf.Abs(d - 0.3f) < 0.03f || Ink(seed, u, v, 0.31f, 0.35f, 0.38f, 0.38f, 0.085f) || v > 0.93f) ? 1f : (((int)(u * 40f) + (int)(v * 40f)) % 2) * 0.08f;
+                    grain = 0.07f; break;
+                }
+                case 25:                                                                                                        // 掛軸
+                {
+                    direct = true;
+                    if (u < 0.14f || u > 0.86f || v < 0.08f || v > 0.9f) c = Color.Lerp(c3, paperC, (Fr(u * 10f) < 0.5f) == (Fr(v * 26f) < 0.5f) ? 0.22f : 0f);
+                    else
+                    {
+                        c = a;
+                        float gv = (v - 0.15f) / 0.24f; int gi = Mathf.FloorToInt(gv);
+                        if (gi >= 0 && gi < 3 && Ink(seed + (2 - gi) * 3, u, Fr(gv), 0.27f, 0.08f, 0.46f, 0.84f, 0.1f)) c = b;
+                        if (u > 0.68f && u < 0.78f && v > 0.105f && v < 0.14f) c = red;
+                    }
+                    break;
+                }
+                case 26:                                                                                                        // 菜單
+                {
+                    direct = true; c = a;
+                    float cu = u * 5f, gx = Fr(cu), gv = (v - 0.06f) / 0.21f; int ci = (int)cu, ri = Mathf.FloorToInt(gv);
+                    if (v > 0.92f) c = red;
+                    else if (gx < 0.035f) c = Color.Lerp(a, b, 0.5f);
+                    else if (ri >= 0 && ri < 4 && Ink(seed + ci * 7 + ri * 3, gx, Fr(gv), 0.16f, 0.08f, 0.7f, 0.84f, 0.11f)) c = b;
+                    break;
+                }
+                case 27:                                                                                                        // 菰樽（稻草包的酒樽）
+                {
+                    direct = true;
+                    c = Color.Lerp(a, a * 0.78f, (((int)(u * 72f) + (int)(v * 20f)) % 2) * 0.5f + TNoise(u, v, 8f, 8f) * 0.4f);
+                    float lu = Fr(u * 3f);
+                    if ((v > 0.08f && v < 0.17f) || (v > 0.83f && v < 0.92f)) c = Color.Lerp(b * 0.55f, b, Fr(u * 30f + v * 8f) < 0.5f ? 1f : 0f);
+                    else if (lu > 0.1f && lu < 0.9f && v > 0.24f && v < 0.76f)
+                    {
+                        c = paperC;
+                        if (lu < 0.13f || lu > 0.87f || v < 0.265f || v > 0.735f) c = c3;
+                        else if (Ink(seed + (int)(u * 3f), lu, v, 0.24f, 0.3f, 0.52f, 0.4f, 0.1f)) c = c3;
+                    }
+                    break;
+                }
+                case 28:                                                                                                        // 木箱
+                {
+                    float fv = Fr(v * 4f);
+                    k = fv < 0.05f ? 0.8f : TNoise(u, v, 3f, 40f) * 0.25f + Hash(Mathf.Floor(v * 4f), seed) * 0.12f;
+                    if (u < 0.09f || u > 0.91f) k = Mathf.Max(k, 0.38f);
+                    float d = Mathf.Sqrt((u - 0.5f) * (u - 0.5f) + (v - 0.5f) * (v - 0.5f));
+                    if (Mathf.Abs(d - 0.27f) < 0.022f || Ink(seed, u, v, 0.34f, 0.34f, 0.32f, 0.32f, 0.1f)) k = 1f;
+                    break;
+                }
+                case 29:                                                                                                        // 提燈
+                {
+                    direct = true; c = Fr(v * 16f) < 0.14f ? a * 0.8f : a;
+                    float lu = Fr(u * 2f);
+                    if (v < 0.1f || v > 0.9f) c = b;
+                    else if (Ink(seed, lu, v, 0.3f, 0.3f, 0.4f, 0.4f, 0.1f)) c = b;
+                    grain = 0.02f; break;
+                }
+                case 30:                                                                                                        // 富士山畫
+                {
+                    direct = true; c = Color.Lerp(paperC, a, Mathf.Clamp01(v * 1.1f - 0.1f));
+                    float ds = Mathf.Sqrt((u - 0.72f) * (u - 0.72f) + (v - 0.74f) * (v - 0.74f));
+                    if (ds < 0.11f) c = red;
+                    float top = 0.66f - Mathf.Abs(u - 0.42f) * 1.05f;
+                    if (v < top && v > 0.2f) c = v > 0.5f + 0.03f * Mathf.Sin(u * 70f) ? Color.white : b;
+                    if (v <= 0.24f) c = Fr(v * 34f + Mathf.Sin(u * 25.13f) * 0.3f) < 0.3f ? paperC : Color.Lerp(b, a, 0.25f);
+                    if (u < 0.04f || u > 0.96f || v < 0.03f || v > 0.97f) c = c3;
+                    break;
+                }
+                case 31:                                                                                                        // 米袋
+                {
+                    direct = true;
+                    c = Color.Lerp(a, a * 0.8f, (((int)(u * 64f) + (int)(v * 40f)) % 2) * 0.5f);
+                    float lu = Fr(u * 2f), d = Mathf.Sqrt((lu - 0.5f) * (lu - 0.5f) + (v - 0.5f) * (v - 0.5f));
+                    if (Mathf.Abs(v - 0.24f) < 0.018f || Mathf.Abs(v - 0.76f) < 0.018f) c = b;
+                    if (Mathf.Abs(d - 0.2f) < 0.022f || Ink(seed, lu, v, 0.37f, 0.37f, 0.26f, 0.26f, 0.1f)) c = c3;
+                    grain = 0.08f; break;
+                }
+                case 32:                                                                                                        // 魚
+                {
+                    float bx = (u - 0.45f) / 0.27f, by = (v - 0.55f) / 0.16f;
+                    bool bodyIn = bx * bx + by * by < 1f, tail = u > 0.66f && u < 0.9f && Mathf.Abs(v - 0.55f) < (u - 0.64f) * 0.75f;
+                    if (bodyIn) k = (u > 0.36f && Fr(u * 16f + Mathf.Abs(v - 0.55f) * 6f) < 0.25f) ? 0.7f : 1f;
+                    else if (tail) k = 1f;
+                    else if (v < 0.24f) k = Fr(v * 22f + Mathf.Sin(u * 12.566f) * 0.3f) < 0.35f ? 0.55f : 0f;
+                    if ((u - 0.29f) * (u - 0.29f) + (v - 0.58f) * (v - 0.58f) < 0.0006f) k = 0f;
+                    break;
+                }
+                case 33:                                                                                                        // 抽屜櫃
+                {
+                    float fx = Fr(u * 2f), fy = Fr(v * 4f);
+                    float d = Mathf.Sqrt((fx - 0.5f) * (fx - 0.5f) * 4f + (fy - 0.5f) * (fy - 0.5f));
+                    k = (fx < 0.03f || fx > 0.97f || fy < 0.06f || fy > 0.94f) ? 1f : TNoise(u, v, 4f, 30f) * 0.3f;
+                    if (Mathf.Abs(d - 0.2f) < 0.05f) k = 0.9f; break;
+                }
+                case 35:                                                                                                        // 格子布
+                {
+                    float bu = Fr(u * 3f), bv = Fr(v * 3f);
+                    k = (bu < 0.35f ? 0.4f : 0f) + (bv < 0.35f ? 0.4f : 0f);
+                    if (Mathf.Abs(bu - 0.68f) < 0.03f || Mathf.Abs(bv - 0.68f) < 0.03f) k = 1f; grain = 0.07f; break;
+                }
+                case 37: k = Hash(3f, y) * 0.4f + TNoise(u, v, 3f, 3f) * 0.3f; grain = 0.03f; break;                           // 髮絲紋不鏽鋼
+                case 39:                                                                                                        // 障子門（一扇）
+                {
+                    if (u < 0.06f || u > 0.94f || v > 0.965f || v < 0.03f) k = 1f;
+                    else if (v < 0.22f) k = 0.72f + TNoise(u, v, 30f, 3f) * 0.2f;
+                    else if (v < 0.245f) k = 1f;
+                    else k = (Mathf.Abs(Fr(u * 3f + 0.5f) - 0.5f) < 0.035f || Mathf.Abs(Fr((v - 0.245f) / 0.72f * 5f + 0.5f) - 0.5f) < 0.045f) ? 1f : TNoise(u, v, 30f, 30f) * 0.06f;
+                    grain = 0.03f; break;
+                }
+                case 44:                                                                                                        // 酒瓶
+                {
+                    direct = true; c = a;
+                    float lu = Fr(u * 2f);
+                    if (v > 0.9f) c = c3;
+                    else if (v > 0.22f && v < 0.66f && lu > 0.1f && lu < 0.9f) c = Ink(seed, lu, v, 0.28f, 0.27f, 0.44f, 0.34f, 0.11f) ? b : paperC;
+                    grain = 0.02f; break;
+                }
+                default: k = (Fr(u * 8f) < 0.06f || Fr(v * 8f) < 0.06f) ? 1f : 0f; break;                                       // 格線
+            }
+            if (!direct) c = Color.Lerp(a, b, Mathf.Clamp01(k));
+            float gr = 1f + (Hash(x, y + seed * 13f) - 0.5f) * 2f * grain;
+            c.r = Mathf.Clamp01(c.r * gr); c.g = Mathf.Clamp01(c.g * gr); c.b = Mathf.Clamp01(c.b * gr); c.a = 1f;
+            return c;
+        }
+
+        Texture2D Pattern(int type, Color a, Color b, Color c3 = default(Color), int seed = 0, int N = 128)
+        {
             var t = new Texture2D(N, N, TextureFormat.RGBA32, true);
             var px = new Color32[N * N];
             for (int y = 0; y < N; y++)
-            {
                 for (int x = 0; x < N; x++)
-                {
-                    float u = (x + 0.5f) / N, v = (y + 0.5f) / N, k = 0f;
-                    switch (type)
-                    {
-                        case 0: k = Mathf.PerlinNoise(u * 9f, v * 9f) * 0.5f; break;                                              // 灰泥
-                        case 1: k = Mathf.PerlinNoise(u * 2f, v * 30f) * 0.8f + Mathf.PerlinNoise(u * 40f, v * 90f) * 0.2f; break; // 木紋
-                        case 2: k = ((int)(u * 4f) + (int)(v * 4f)) % 2; break;                                                    // 棋盤
-                        case 3:                                                                                                    // 青海波
-                        {
-                            float best = 9f;
-                            for (int j = -1; j <= 2; j++) for (int i = -1; i <= 2; i++)
-                            {
-                                float cx = (i + (j % 2 == 0 ? 0f : 0.5f)) * 0.5f, cy = j * 0.25f;
-                                float d = Mathf.Sqrt((u - cx) * (u - cx) + (v - cy) * (v - cy));
-                                if (v >= cy && d < 0.27f) best = Mathf.Min(best, cy * 100f + 0f) == best ? best : best;
-                                if (v >= cy && d < 0.27f && cy > -1f) { float ring = Mathf.Repeat(d * 16f, 1f); k = ring < 0.35f ? 1f : 0f; }
-                            }
-                            break;
-                        }
-                        case 4:                                                                                                    // 麻葉（菱格）
-                        {
-                            float p = Mathf.Abs(Mathf.Repeat((u + v) * 4f, 1f) - 0.5f), q = Mathf.Abs(Mathf.Repeat((u - v) * 4f, 1f) - 0.5f), h = Mathf.Abs(Mathf.Repeat(v * 8f, 1f) - 0.5f);
-                            k = (p < 0.06f || q < 0.06f || h < 0.05f) ? 1f : 0f; break;
-                        }
-                        case 5: k = Mathf.Repeat(v * 40f, 1f) < 0.3f ? 0.6f : 0f; if (u < 0.04f || u > 0.96f) k = 1f; break;       // 榻榻米
-                        case 6: k = Mathf.Repeat(u * 6f, 1f) < 0.5f ? 1f : 0f; break;                                               // 直條
-                        case 7: { float du = Mathf.Repeat(u * 5f, 1f) - 0.5f, dv = Mathf.Repeat(v * 5f, 1f) - 0.5f; k = du * du + dv * dv < 0.07f ? 1f : 0f; break; } // 圓點
-                        default: k = (Mathf.Repeat(u * 4f, 1f) < 0.06f || Mathf.Repeat(v * 4f, 1f) < 0.06f) ? 1f : 0f; break;      // 格線
-                    }
-                    Color c = Color.Lerp(a, b, k); c.a = 1f;
-                    px[y * N + x] = c;
-                }
-            }
-            t.SetPixels32(px); t.Apply(true); t.wrapMode = TextureWrapMode.Repeat;
+                    px[y * N + x] = Px(type, (x + 0.5f) / N, (y + 0.5f) / N, x, y, a, b, c3, seed);
+            t.SetPixels32(px); t.Apply(true); t.wrapMode = TextureWrapMode.Repeat; t.anisoLevel = 4;
             return t;
         }
 
         Material Pat(int type, Color a, Color b, float tx, float ty, float smooth = 0.2f)
         {
-            var m = Mats.Lit(Color.white, smooth, Pattern(type, a, b));
+            return Mt(Pattern(type, a, b), tx, ty, smooth);
+        }
+        Material Mt(Texture2D tex, float tx, float ty, float smooth = 0.15f)
+        {
+            var m = Mats.Lit(Color.white, smooth, tex);
             if (m.HasProperty("_BaseMap")) m.SetTextureScale("_BaseMap", new Vector2(tx, ty));
+            return m;
+        }
+        // 自己發光的材質（燈籠、紙門），顏色超過 1 會被泛光暈開
+        Material Glow(Color c, Texture2D tex, float tx, float ty)
+        {
+            var m = Mats.Unlit(c);
+            if (tex != null && m.HasProperty("_BaseMap")) { m.SetTexture("_BaseMap", tex); m.SetTextureScale("_BaseMap", new Vector2(tx, ty)); }
             return m;
         }
 
@@ -210,108 +516,576 @@ namespace DontEatSushi
             return go;
         }
         GameObject W(Vector3 c, Vector3 size, Material m, bool solid = true) { return Obj(PrimitiveType.Cube, c, size, m, solid); }
+        // 底面在 y0 的方塊、圓柱，和球
+        GameObject Bx(float x, float y0, float z, float sx, float h, float sz, Material m, bool solid = true) { return W(new Vector3(x, y0 + h * 0.5f, z), new Vector3(sx, h, sz), m, solid); }
+        GameObject Cy(float x, float y0, float z, float dia, float h, Material m, bool solid = true) { return Obj(PrimitiveType.Cylinder, new Vector3(x, y0 + h * 0.5f, z), new Vector3(dia, h * 0.5f, dia), m, solid); }
+        GameObject Sp(float x, float y, float z, float sx, float sy, float sz, Material m, bool solid = true) { return Obj(PrimitiveType.Sphere, new Vector3(x, y, z), new Vector3(sx, sy, sz), m, solid); }
+        GameObject Tilt(GameObject g, float rx, float ry, float rz) { g.transform.rotation = Quaternion.Euler(rx, ry, rz); return g; }
+        GameObject Soft(GameObject g) { g.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; return g; }
+        // 沿牆的一塊板：alongX 表示牆沿 x 方向延伸
+        GameObject WA(bool alongX, float along, float y, float across, float len, float h, float thick, Material m, bool solid = true)
+        {
+            return alongX ? W(new Vector3(along, y, across), new Vector3(len, h, thick), m, solid) : W(new Vector3(across, y, along), new Vector3(thick, h, len), m, solid);
+        }
+        // 一面牆：腰板、橫木、每格不同的壁紙、上方小壁、柱子
+        void WallRun(bool alongX, float fix, float inw, float[] cuts, Material[] papers, Material wains, Material frieze, Material rail, Material post)
+        {
+            float a = cuts[0], b = cuts[cuts.Length - 1], len = b - a, mid = (a + b) * 0.5f;
+            WA(alongX, mid, 0.5f, fix + inw * 0.04f, len, 1f, 0.08f, wains);
+            WA(alongX, mid, 1.04f, fix + inw * 0.06f, len, 0.08f, 0.12f, rail);
+            WA(alongX, mid, 3.32f, fix + inw * 0.07f, len, 0.14f, 0.14f, rail);
+            WA(alongX, mid, 3.695f, fix + inw * 0.02f, len, 0.61f, 0.04f, frieze);
+            for (int i = 0; i < papers.Length && i < cuts.Length - 1; i++)
+                if (papers[i] != null) WA(alongX, (cuts[i] + cuts[i + 1]) * 0.5f, 2.16f, fix + inw * 0.02f, cuts[i + 1] - cuts[i], 2.2f, 0.04f, papers[i]);
+            for (int i = 0; i < cuts.Length; i++) WA(alongX, cuts[i], 2f, fix + inw * 0.08f, 0.2f, 4f, 0.16f, post);
+        }
+        Material Wp(Texture2D t, float w, float tile, float smooth = 0.08f) { return Mt(t, w / tile, 2.2f / tile, smooth); }
+        // 牆上的畫：外框加畫心
+        void Poster(bool alongX, float along, float y, float face, float inw, float w, float h, Material pic, Material frame)
+        {
+            WA(alongX, along, y, face + inw * 0.02f, w + 0.1f, h + 0.1f, 0.04f, frame, false);
+            WA(alongX, along, y, face + inw * 0.035f, w, h, 0.04f, pic);
+        }
+        void Pendant(float x, float y, float z, Material shade, Material bulb, Material cord)
+        {
+            Soft(Bx(x, y + 0.22f, z, 0.025f, 3.8f - y, 0.025f, cord, false));
+            Soft(Cy(x, y, z, 0.46f, 0.24f, shade, false));
+            Soft(Sp(x, y + 0.02f, z, 0.3f, 0.3f, 0.3f, bulb, false));
+        }
+        void Chochin(float x, float y, float z, float dia, float h, Material glow, Material cap, bool solid = false)
+        {
+            Soft(Sp(x, y, z, dia, h, dia, glow, solid));
+            Soft(Cy(x, y + h * 0.44f, z, dia * 0.55f, h * 0.1f, cap, false));
+            Soft(Cy(x, y - h * 0.54f, z, dia * 0.55f, h * 0.1f, cap, false));
+        }
+        void Andon(float x, float y0, float z, Material glow, Material wood)
+        {
+            Bx(x, y0, z, 0.32f, 0.12f, 0.32f, wood);
+            Soft(Bx(x, y0 + 0.12f, z, 0.28f, 0.6f, 0.28f, glow));
+            Bx(x, y0 + 0.72f, z, 0.34f, 0.04f, 0.34f, wood, false);
+        }
+        // 椅子：dx、dz 指椅背朝哪一邊
+        void Chair(float x, float z, float dx, float dz, Material seat, Material wood)
+        {
+            Bx(x, 0f, z, 0.38f, 0.42f, 0.38f, wood);
+            Bx(x, 0.42f, z, 0.44f, 0.06f, 0.44f, seat);
+            Bx(x + dx * 0.2f, 0.48f, z + dz * 0.2f, dx != 0f ? 0.05f : 0.44f, 0.5f, dz != 0f ? 0.05f : 0.44f, wood);
+        }
+        void Plant(float x, float y0, float z, Material pot, Material leaf)
+        {
+            Cy(x, y0, z, 0.5f, 0.45f, pot);
+            Sp(x, y0 + 1.0f, z, 0.8f, 0.9f, 0.8f, leaf);
+            Sp(x + 0.2f, y0 + 1.45f, z - 0.1f, 0.6f, 0.6f, 0.6f, leaf, false);
+            Sp(x - 0.22f, y0 + 1.3f, z + 0.15f, 0.55f, 0.6f, 0.55f, leaf, false);
+        }
+        void Bottle(float x, float y0, float z, float h, Material body, Material neck)
+        {
+            Cy(x, y0, z, h * 0.3f, h * 0.7f, body, false);
+            Cy(x, y0 + h * 0.7f, z, h * 0.11f, h * 0.3f, neck, false);
+        }
+        void Barrel(float x, float y0, float z, Material side, Material lid)
+        {
+            Cy(x, y0, z, 0.84f, 0.8f, side);
+            Cy(x, y0 + 0.8f, z, 0.8f, 0.03f, lid, false);
+        }
+        // 門上的短暖簾：一根桿子加幾片布
+        void Noren(bool alongX, float from, float to, float yTop, float h, float across, Material[] cloth, int first, Material rod)
+        {
+            float len = to - from; int n = Mathf.Max(1, Mathf.RoundToInt(len / 0.8f)); float w = len / n;
+            WA(alongX, (from + to) * 0.5f, yTop + 0.03f, across, len + 0.2f, 0.05f, 0.05f, rod, false);
+            for (int i = 0; i < n; i++) WA(alongX, from + (i + 0.5f) * w, yTop - h * 0.5f, across, w - 0.03f, h, 0.025f, cloth[(first + i) % cloth.Length]);
+        }
 
         void BuildWorld()
         {
-            if (root != null) Kill(root.gameObject);
+            if (root != null)
+            {
+                // 上一個場景的花紋貼圖和材質一起清掉，不然每重建一次就多佔一份記憶體
+                var oldM = new HashSet<Material>(); var oldT = new HashSet<Texture>();
+                foreach (var r in root.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (r.GetComponentInParent<Paintable>() != null) continue;
+                    var m = r.sharedMaterial; if (m == null || !oldM.Add(m)) continue;
+                    var tx = m.HasProperty("_BaseMap") ? m.GetTexture("_BaseMap") : null;
+                    if (tx != null) oldT.Add(tx);
+                }
+                foreach (var tx in oldT) Kill(tx);
+                foreach (var m in oldM) Kill(m);
+                Kill(root.gameObject);
+            }
             root = new GameObject("World").transform;
             others.Clear(); hunterAv.Clear(); clones.Clear(); hunterAmmo.Clear();
             myClones = 0; cloneCd[0] = 0f; cloneCd[1] = 0f; cling = false; freeCam = false; score = 0f; fireT = 0f;
-            Color cream = new Color(0.93f, 0.87f, 0.74f), dark = new Color(0.24f, 0.14f, 0.09f), indigo = new Color(0.13f, 0.20f, 0.45f), white = new Color(0.95f, 0.94f, 0.9f);
-            var woodFloor = Pat(1, new Color(0.55f, 0.36f, 0.20f), new Color(0.78f, 0.58f, 0.36f), 6f, 4f, 0.4f);
-            var lightWood = Pat(1, new Color(0.80f, 0.64f, 0.42f), new Color(0.92f, 0.80f, 0.60f), 2f, 1f, 0.35f);
-            var darkWood = Pat(1, new Color(0.20f, 0.11f, 0.07f), new Color(0.34f, 0.20f, 0.12f), 2f, 1f, 0.35f);
-            var steel = Mats.Lit(new Color(0.75f, 0.77f, 0.80f), 0.8f);
-            var paper = Pat(8, new Color(0.97f, 0.94f, 0.84f), dark, 2f, 3f, 0.05f);
 
-            // 地板、牆
-            W(new Vector3(0f, -0.1f, 0f), new Vector3(26f, 0.2f, 18f), woodFloor);
-            W(new Vector3(0f, -0.09f, 7f), new Vector3(14f, 0.2f, 4f), Pat(2, new Color(0.92f, 0.92f, 0.9f), new Color(0.12f, 0.12f, 0.13f), 7f, 2f, 0.6f));
-            W(new Vector3(9.5f, 0.15f, -4.5f), new Vector3(7f, 0.3f, 9f), Pat(5, new Color(0.72f, 0.74f, 0.44f), new Color(0.30f, 0.34f, 0.16f), 3f, 2f, 0.1f));
-            W(new Vector3(0f, 2f, 9.1f), new Vector3(26.4f, 4f, 0.2f), Pat(3, new Color(0.90f, 0.93f, 0.96f), new Color(0.18f, 0.36f, 0.62f), 10f, 3f, 0.05f));
-            W(new Vector3(0f, 2f, -9.1f), new Vector3(26.4f, 4f, 0.2f), Pat(0, cream, new Color(0.80f, 0.72f, 0.58f), 6f, 2f, 0.05f));
-            W(new Vector3(-13.1f, 2f, 0f), new Vector3(0.2f, 4f, 18f), Pat(6, new Color(0.46f, 0.30f, 0.18f), new Color(0.56f, 0.38f, 0.22f), 9f, 1f, 0.3f));
-            W(new Vector3(13.1f, 2f, 0f), new Vector3(0.2f, 4f, 18f), Pat(4, new Color(0.30f, 0.50f, 0.28f), new Color(0.66f, 0.80f, 0.46f), 8f, 2f, 0.05f));
-            for (int i = -2; i <= 2; i++) W(new Vector3(i * 5.2f, 4.15f, 0f), new Vector3(0.3f, 0.3f, 18f), darkWood, false);
+            Color cream = Rgb(0.93f, 0.87f, 0.74f), dark = Rgb(0.24f, 0.14f, 0.09f), indigo = Rgb(0.13f, 0.20f, 0.45f), white = Rgb(0.95f, 0.94f, 0.9f);
+            Color red = Rgb(0.72f, 0.14f, 0.12f), gold = Rgb(0.80f, 0.62f, 0.24f), moss = Rgb(0.30f, 0.42f, 0.22f), ink = Rgb(0.10f, 0.08f, 0.07f), paperC = Rgb(0.95f, 0.91f, 0.80f);
 
-            // 壽司吧台和高腳凳
-            W(new Vector3(-3f, 0.55f, 0f), new Vector3(8f, 1.1f, 1.2f), lightWood);
-            W(new Vector3(-6.4f, 0.55f, -2f), new Vector3(1.2f, 1.1f, 4f), lightWood);
-            W(new Vector3(-3f, 1.12f, 0f), new Vector3(8.2f, 0.06f, 1.4f), darkWood, false);
+            // ---------- 花紋貼圖 ----------
+            var tGrainD = Pattern(1, Rgb(0.20f, 0.11f, 0.07f), Rgb(0.36f, 0.21f, 0.12f));
+            var tGrainDV = Pattern(38, Rgb(0.20f, 0.11f, 0.07f), Rgb(0.36f, 0.21f, 0.12f));
+            var tGrainL = Pattern(1, Rgb(0.74f, 0.57f, 0.36f), Rgb(0.90f, 0.76f, 0.54f));
+            var tGrainM = Pattern(1, Rgb(0.42f, 0.22f, 0.11f), Rgb(0.62f, 0.37f, 0.19f));
+            var tPlanksD = Pattern(9, Rgb(0.36f, 0.22f, 0.13f), Rgb(0.10f, 0.06f, 0.04f), default(Color), 1);
+            var tPlanksL = Pattern(9, Rgb(0.82f, 0.66f, 0.44f), Rgb(0.42f, 0.28f, 0.16f), default(Color), 2);
+            var tFloor = Pattern(9, Rgb(0.64f, 0.43f, 0.25f), Rgb(0.26f, 0.15f, 0.08f), default(Color), 3);
+            var tSteel = Pattern(37, Rgb(0.60f, 0.62f, 0.66f), Rgb(0.84f, 0.86f, 0.89f));
+            var tPlaster = Pattern(0, cream, Rgb(0.78f, 0.70f, 0.56f));
+            var tPlasterO = Pattern(0, Rgb(0.80f, 0.60f, 0.32f), Rgb(0.64f, 0.46f, 0.24f));
+            var tConcrete = Pattern(0, Rgb(0.62f, 0.61f, 0.58f), Rgb(0.44f, 0.43f, 0.41f));
+            var tBrick = Pattern(12, Rgb(0.74f, 0.70f, 0.64f), Rgb(0.62f, 0.27f, 0.18f));
+            var tTileW = Pattern(13, Rgb(0.50f, 0.54f, 0.56f), Rgb(0.92f, 0.94f, 0.92f));
+            var tTileG = Pattern(13, Rgb(0.78f, 0.80f, 0.78f), Rgb(0.16f, 0.42f, 0.46f));
+            var tChecker = Pattern(2, Rgb(0.92f, 0.92f, 0.9f), Rgb(0.12f, 0.12f, 0.13f));
+            var tStone = Pattern(23, Rgb(0.30f, 0.29f, 0.28f), Rgb(0.62f, 0.60f, 0.56f));
+            var tSeig = Pattern(3, Rgb(0.93f, 0.90f, 0.80f), Rgb(0.16f, 0.28f, 0.55f));
+            var tSeigR = Pattern(3, Rgb(0.95f, 0.93f, 0.88f), Rgb(0.70f, 0.20f, 0.16f));
+            var tAsaG = Pattern(4, moss, Rgb(0.88f, 0.86f, 0.60f));
+            var tAsaI = Pattern(4, indigo, Rgb(0.82f, 0.86f, 0.92f));
+            var tAsaW = Pattern(4, Rgb(0.90f, 0.84f, 0.66f), Rgb(0.34f, 0.20f, 0.11f));
+            var tAsaP = Pattern(4, Rgb(0.86f, 0.42f, 0.50f), white);
+            var tYaga = Pattern(10, Rgb(0.93f, 0.88f, 0.80f), Rgb(0.52f, 0.16f, 0.30f));
+            var tYagaI = Pattern(10, white, indigo);
+            var tKikO = Pattern(11, Rgb(0.82f, 0.64f, 0.30f), Rgb(0.34f, 0.19f, 0.10f));
+            var tKikG = Pattern(11, Rgb(0.22f, 0.36f, 0.30f), Rgb(0.80f, 0.76f, 0.48f));
+            var tKumo = Pattern(20, gold, Rgb(0.97f, 0.88f, 0.58f));
+            var tSakura = Pattern(18, Rgb(0.95f, 0.90f, 0.84f), Rgb(0.88f, 0.46f, 0.56f), default(Color), 1);
+            var tSakuraN = Pattern(18, Rgb(0.15f, 0.14f, 0.32f), Rgb(0.96f, 0.74f, 0.80f), default(Color), 4);
+            var tNami = Pattern(19, Rgb(0.84f, 0.90f, 0.92f), Rgb(0.24f, 0.42f, 0.60f));
+            var tShippo = Pattern(16, red, Rgb(0.96f, 0.86f, 0.60f));
+            var tShippoG = Pattern(16, Rgb(0.90f, 0.86f, 0.70f), Rgb(0.26f, 0.44f, 0.36f));
+            var tUroko = Pattern(17, Rgb(0.94f, 0.88f, 0.72f), Rgb(0.82f, 0.56f, 0.20f));
+            var tUrokoR = Pattern(17, Rgb(0.90f, 0.84f, 0.70f), red);
+            var tStripe = Pattern(6, Rgb(0.93f, 0.88f, 0.76f), Rgb(0.64f, 0.16f, 0.14f));
+            var tStripeI = Pattern(6, white, indigo);
+            var tDotsI = Pattern(7, indigo, white);
+            var tDotsR = Pattern(7, red, Rgb(0.96f, 0.88f, 0.72f));
+            var tDotsY = Pattern(7, Rgb(0.90f, 0.72f, 0.22f), Rgb(0.36f, 0.20f, 0.10f));
+            var tPlaid = Pattern(35, Rgb(0.90f, 0.86f, 0.72f), Rgb(0.20f, 0.38f, 0.30f));
+            var tPlaidR = Pattern(35, Rgb(0.94f, 0.90f, 0.82f), red);
+            var tPlaidB = Pattern(35, Rgb(0.84f, 0.88f, 0.92f), indigo);
+            var tWeaveB = Pattern(14, Rgb(0.20f, 0.30f, 0.62f), Rgb(0.08f, 0.10f, 0.30f));
+            var tWeaveW = Pattern(14, Rgb(0.94f, 0.93f, 0.90f), Rgb(0.60f, 0.60f, 0.62f));
+            var tShoji = Pattern(8, Rgb(0.97f, 0.94f, 0.84f), dark);
+            var tShojiDoor = Pattern(39, Rgb(0.97f, 0.94f, 0.84f), dark);
+            var tKoshi = Pattern(21, Rgb(0.46f, 0.28f, 0.15f), Rgb(0.08f, 0.05f, 0.04f));
+            var tSunoko = Pattern(21, Rgb(0.80f, 0.64f, 0.42f), Rgb(0.20f, 0.13f, 0.08f));
+            var tSudare = Pattern(15, Rgb(0.80f, 0.66f, 0.38f), Rgb(0.34f, 0.22f, 0.10f));
+            var tRope = Pattern(22, Rgb(0.86f, 0.74f, 0.46f), Rgb(0.50f, 0.36f, 0.16f));
+            var tTatami = Pattern(5, Rgb(0.74f, 0.74f, 0.44f), Rgb(0.42f, 0.44f, 0.20f), Rgb(0.10f, 0.14f, 0.12f));
+            var tDrawer = Pattern(33, Rgb(0.50f, 0.28f, 0.14f), Rgb(0.10f, 0.07f, 0.05f));
+            var tDrawerL = Pattern(33, Rgb(0.84f, 0.70f, 0.48f), Rgb(0.30f, 0.19f, 0.10f));
+            var tGrid = Pattern(99, Rgb(0.86f, 0.70f, 0.42f), ink);
+            var tFish = Pattern(32, Rgb(0.40f, 0.78f, 0.86f), Rgb(0.95f, 0.45f, 0.12f));
+            var tFishP = Pattern(32, paperC, red);
+            var tFishI = Pattern(32, indigo, white);
+            var tFuji = Pattern(30, Rgb(0.36f, 0.58f, 0.80f), Rgb(0.14f, 0.22f, 0.46f), dark, 0, 256);
+            var tMenuP = Pattern(26, paperC, ink, default(Color), 1);
+            var tMenuW = Pattern(26, Rgb(0.20f, 0.12f, 0.08f), Rgb(0.95f, 0.88f, 0.66f), default(Color), 4);
+            var tMenuY = Pattern(26, Rgb(0.95f, 0.80f, 0.30f), ink, default(Color), 6);
+            var tScrollA = Pattern(25, paperC, ink, Rgb(0.20f, 0.30f, 0.42f), 1);
+            var tScrollB = Pattern(25, paperC, ink, Rgb(0.50f, 0.18f, 0.14f), 5);
+            var tScrollC = Pattern(25, Rgb(0.92f, 0.84f, 0.62f), Rgb(0.45f, 0.10f, 0.08f), Rgb(0.26f, 0.36f, 0.22f), 8);
+            var tBanner = Pattern(25, red, white, Rgb(0.95f, 0.80f, 0.30f), 9);
+            var tBannerI = Pattern(25, indigo, white, Rgb(0.95f, 0.94f, 0.9f), 0);
+            var tKomoR = Pattern(27, Rgb(0.86f, 0.74f, 0.46f), Rgb(0.52f, 0.38f, 0.18f), red, 1);
+            var tKomoK = Pattern(27, Rgb(0.84f, 0.72f, 0.44f), Rgb(0.52f, 0.38f, 0.18f), ink, 4);
+            var tKomoB = Pattern(27, Rgb(0.88f, 0.78f, 0.52f), Rgb(0.52f, 0.38f, 0.18f), indigo, 8);
+            var tCrateA = Pattern(28, Rgb(0.78f, 0.62f, 0.40f), Rgb(0.20f, 0.12f, 0.08f), default(Color), 9);
+            var tCrateB = Pattern(28, Rgb(0.60f, 0.42f, 0.24f), Rgb(0.12f, 0.08f, 0.06f), default(Color), 0);
+            var tCrateY = Pattern(28, Rgb(0.92f, 0.72f, 0.16f), Rgb(0.60f, 0.10f, 0.08f), default(Color), 3);
+            var tCrateR = Pattern(28, Rgb(0.74f, 0.16f, 0.14f), Rgb(0.96f, 0.92f, 0.84f), default(Color), 6);
+            var tCarton = Pattern(28, Rgb(0.72f, 0.56f, 0.36f), Rgb(0.30f, 0.20f, 0.12f), default(Color), 7);
+            var tSack = Pattern(31, Rgb(0.86f, 0.80f, 0.64f), Rgb(0.18f, 0.28f, 0.58f), red, 0);
+            var tSackB = Pattern(31, Rgb(0.74f, 0.64f, 0.44f), red, ink, 1);
+            var tLantern = Pattern(29, Color.white, Rgb(0.12f, 0.04f, 0.03f), default(Color), 9);
+            var tLanternB = Pattern(29, Color.white, Rgb(0.12f, 0.04f, 0.03f), default(Color), 0);
+            var tBotG = Pattern(44, Rgb(0.14f, 0.32f, 0.20f), ink, gold, 1);
+            var tBotB = Pattern(44, Rgb(0.42f, 0.22f, 0.10f), red, white, 2);
+            var tBotI = Pattern(44, Rgb(0.12f, 0.18f, 0.40f), ink, red, 4);
+            var tBotW = Pattern(44, Rgb(0.90f, 0.92f, 0.90f), indigo, indigo, 8);
+            Texture2D[] tCrest =
+            {
+                Pattern(24, indigo, white, default(Color), 9), Pattern(24, red, Rgb(0.96f, 0.90f, 0.76f), default(Color), 0), Pattern(24, white, indigo, default(Color), 2),
+                Pattern(24, moss, Rgb(0.94f, 0.90f, 0.70f), default(Color), 1), Pattern(24, Rgb(0.12f, 0.10f, 0.14f), gold, default(Color), 4), Pattern(24, Rgb(0.90f, 0.62f, 0.16f), ink, default(Color), 6)
+            };
+
+            // ---------- 常用材質 ----------
+            var darkWood = Mt(tGrainD, 2f, 1f, 0.35f); var darkPost = Mt(tGrainDV, 1f, 3f, 0.3f);
+            var lightWood = Mt(tGrainL, 2f, 1f, 0.35f); var midWood = Mt(tGrainM, 2f, 1f, 0.55f);
+            var steel = Mt(tSteel, 2f, 1f, 0.75f);
+            var plaster = Mt(tPlaster, 6f, 1f, 0.05f);
+            var blackM = Mats.Lit(Rgb(0.08f, 0.08f, 0.09f), 0.6f); var whiteM = Mats.Lit(white, 0.6f); var redM = Mats.Lit(red, 0.5f); var goldM = Mats.Lit(gold, 0.7f);
+            var ceramic = Mt(tSeig, 3f, 1f, 0.8f);
+            var potM = Mats.Lit(Rgb(0.50f, 0.28f, 0.18f), 0.3f);
+            var leafM = Pat(7, Rgb(0.16f, 0.38f, 0.17f), Rgb(0.34f, 0.60f, 0.26f), 5f, 4f, 0.15f);
+            var bulbM = Mats.Unlit(new Color(2.6f, 1.9f, 1.0f));
+            var lanternRed = Glow(new Color(2.0f, 0.42f, 0.20f), tLantern, 1f, 1f);
+            var lanternWhite = Glow(new Color(1.7f, 1.38f, 0.92f), tLanternB, 1f, 1f);
+            var shojiGlow = Glow(new Color(1.28f, 1.08f, 0.78f), tShoji, 1f, 1f);
+            Material[] cloth = new Material[tCrest.Length];
+            for (int i = 0; i < cloth.Length; i++) cloth[i] = Mt(tCrest[i], 1f, 1f, 0.05f);
+            Material[] fabric =
+            {
+                Mt(tDotsR, 2f, 2f, 0.05f), Mt(tAsaI, 2f, 2f, 0.05f), Mt(tKikG, 2f, 2f, 0.05f), Mt(tYaga, 2f, 2f, 0.05f), Mt(tPlaidR, 2f, 2f, 0.05f), Mt(tSeigR, 3f, 3f, 0.05f),
+                Mt(tSakuraN, 2f, 2f, 0.05f), Mt(tUroko, 2f, 2f, 0.05f), Mt(tPlaidB, 2f, 2f, 0.05f), Mt(tShippo, 2f, 2f, 0.05f), Mt(tStripeI, 2f, 1f, 0.05f), Mt(tAsaP, 2f, 2f, 0.05f)
+            };
+            Material[] bottles = { Mt(tBotG, 1f, 1f, 0.85f), Mt(tBotB, 1f, 1f, 0.85f), Mt(tBotI, 1f, 1f, 0.85f), Mt(tBotW, 1f, 1f, 0.85f) };
+            Material[] crate = { Mt(tCrateA, 1f, 1f, 0.15f), Mt(tCrateB, 1f, 1f, 0.15f), Mt(tCarton, 1f, 1f, 0.1f) };
+            Material[] bowl = { Mt(tSeig, 4f, 1f, 0.8f), Mats.Lit(Rgb(0.60f, 0.12f, 0.10f), 0.85f), Mats.Lit(Rgb(0.10f, 0.09f, 0.09f), 0.85f), Mt(tTileG, 4f, 1f, 0.8f) };
+
+            // ---------- 地板 ----------
+            W(new Vector3(0f, -0.1f, 0f), new Vector3(26f, 0.2f, 18f), Mt(tFloor, 32.5f, 6f, 0.45f));
+            Bx(0f, 0f, 7f, 14f, 0.012f, 4f, Mt(tChecker, 7f, 2f, 0.6f));                                   // 廚房市松地磚
+            Bx(-10.1f, 0f, 7.05f, 5.7f, 0.012f, 3.9f, Mt(tConcrete, 3f, 2f, 0.1f));                        // 倉庫水泥地
+            Bx(0f, 0f, -7.9f, 5f, 0.012f, 2.2f, Mt(tStone, 2.5f, 1.1f, 0.3f));                             // 玄關石板
+            Bx(0f, 0.012f, -7.6f, 1.8f, 0.02f, 0.9f, Mt(tUrokoR, 2f, 1f, 0.05f));                          // 踏墊
+
+            // ---------- 外牆和內裝 ----------
+            var shell = Mt(tPlanksD, 30f, 1f, 0.2f); var shellZ = Mt(tPlanksD, 20f, 1f, 0.2f);
+            W(new Vector3(0f, 2f, 9.1f), new Vector3(26.4f, 4f, 0.2f), shell); W(new Vector3(0f, 2f, -9.1f), new Vector3(26.4f, 4f, 0.2f), shell);
+            W(new Vector3(-13.1f, 2f, 0f), new Vector3(0.2f, 4f, 18f), shellZ); W(new Vector3(13.1f, 2f, 0f), new Vector3(0.2f, 4f, 18f), shellZ);
+            var wainsX = Mt(tPlanksD, 32.5f, 1f, 0.3f); var wainsZ = Mt(tPlanksD, 22.5f, 1f, 0.3f);
+            var friezeX = Mt(tPlaster, 12f, 0.4f, 0.05f); var friezeZ = Mt(tPlaster, 8f, 0.4f, 0.05f);
+            float[] cutN = { -13f, -10.4f, -7.8f, -5.2f, -2.6f, 0f, 2.6f, 5.2f, 7.8f, 10.4f, 13f };
+            var brickP = Wp(tBrick, 2.6f, 1.1f, 0.1f); var tileP = Wp(tTileW, 2.6f, 0.6f, 0.7f);
+            WallRun(true, 9f, -1f, cutN, new[] { brickP, brickP, tileP, tileP, tileP, tileP, tileP, tileP, Wp(tSeig, 2.6f, 0.9f), Wp(tSeig, 2.6f, 0.9f) }, wainsX, friezeX, darkWood, darkPost);
+            Bx(-10.4f, 0f, 8.95f, 5.2f, 1f, 0.1f, Mt(tBrick, 5.2f / 1.1f, 1f / 1.1f, 0.1f));
+            Bx(0f, 0f, 8.95f, 15.4f, 1f, 0.1f, Mt(tTileG, 15.4f / 0.6f, 1f / 0.6f, 0.7f));
+            float[] cutS = { -13f, -10.4f, -7.8f, -5.2f, -2.6f, 0f, 2.6f, 6f, 8.33f, 10.67f, 13f };
+            WallRun(true, -9f, 1f, cutS, new[] { Wp(tAsaG, 2.6f, 1.0f), Wp(tAsaG, 2.6f, 1.0f), Wp(tYaga, 2.6f, 0.8f), Wp(tYaga, 2.6f, 0.8f), Wp(tPlaster, 2.6f, 2.2f), Wp(tPlaster, 2.6f, 2.2f),
+                Wp(tKikO, 3.4f, 0.9f), Wp(tKumo, 2.33f, 2.2f), Wp(tSakura, 2.33f, 1.1f), Wp(tKumo, 2.33f, 2.2f) }, wainsX, friezeX, darkWood, darkPost);
+            float[] cutE = { -9f, -5.4f, -3.6f, 0f, 3f, 5f, 7f, 9f };
+            WallRun(false, 13f, -1f, cutE, new[] { Glow(new Color(1.28f, 1.08f, 0.78f), tShoji, 4f, 2f), Wp(tPlasterO, 1.8f, 2.2f), Glow(new Color(1.28f, 1.08f, 0.78f), tShoji, 4f, 2f),
+                Wp(tNami, 3f, 1.0f), Wp(tShippo, 2f, 0.9f), Wp(tUroko, 2f, 0.8f), Wp(tPlaid, 2f, 1.0f) }, wainsZ, friezeZ, darkWood, darkPost);
+            float[] cutW = { -9f, -6.4f, -3.8f, -1.2f, 1.4f, 4f, 5f, 9f };
+            WallRun(false, -13f, 1f, cutW, new[] { Wp(tSakura, 2.6f, 1.1f), Wp(tDotsI, 2.6f, 1.0f), Wp(tStripe, 2.6f, 0.9f), Wp(tAsaI, 2.6f, 1.0f), Wp(tKikG, 2.6f, 0.9f), Wp(tPlaster, 1f, 2.2f),
+                Wp(tBrick, 4f, 1.1f, 0.1f) }, wainsZ, friezeZ, darkWood, darkPost);
+            Bx(-12.95f, 0f, 7f, 0.1f, 1f, 4f, Mt(tBrick, 4f / 1.1f, 1f / 1.1f, 0.1f));
+
+            // ---------- 樑、椽、獨立柱（沒有天花板，樑不投影，免得地上一條條） ----------
+            for (int i = -2; i <= 2; i++) Soft(W(new Vector3(i * 5.2f, 4.15f, 0f), new Vector3(0.3f, 0.3f, 18f), darkWood, false));
+            foreach (float bz in new[] { -4.5f, 0f, 5f }) Soft(W(new Vector3(0f, 3.85f, bz), new Vector3(26f, 0.26f, 0.26f), darkWood, false));
+            for (int i = 0; i < 12; i++) Soft(W(new Vector3(0f, 4.36f, -8.25f + i * 1.5f), new Vector3(26f, 0.12f, 0.1f), darkWood, false));
+            foreach (var cp in new[] { new Vector2(-7f, 5f), new Vector2(7f, 5f), new Vector2(6f, 0f), new Vector2(1.3f, 0f), new Vector2(-7.15f, -4.35f) }) Bx(cp.x, 0f, cp.y, 0.3f, 4f, 0.3f, darkPost);
+            // 兩串祭典小燈籠
+            for (int i = 0; i < 9; i++)
+            {
+                Soft(Sp(-10.4f + i * 2.6f, 3.46f, -4.5f, 0.32f, 0.42f, 0.32f, i % 2 == 0 ? lanternRed : lanternWhite, false));
+                Soft(Sp(-10.4f + i * 2.6f, 3.46f, 5f, 0.32f, 0.42f, 0.32f, i % 2 == 0 ? lanternWhite : lanternRed, false));
+            }
+
+            // ---------- 壽司吧台 ----------
+            W(new Vector3(-3f, 0.55f, 0f), new Vector3(8f, 1.1f, 1.2f), Mt(tPlanksL, 10f, 1f, 0.3f));
+            W(new Vector3(-6.4f, 0.55f, -2.3f), new Vector3(1.2f, 1.1f, 3.4f), Mt(tPlanksL, 4.25f, 1f, 0.3f));
+            var counterTop = Mt(tGrainM, 4f, 1f, 0.65f);
+            W(new Vector3(-3f, 1.13f, 0f), new Vector3(8.2f, 0.06f, 1.4f), counterTop);
+            W(new Vector3(-6.4f, 1.13f, -2.4f), new Vector3(1.4f, 0.06f, 3.4f), counterTop);
             for (int i = 0; i < 6; i++)
             {
-                Obj(PrimitiveType.Cylinder, new Vector3(-6f + i * 1.2f, 0.35f, -1.3f), new Vector3(0.12f, 0.35f, 0.12f), steel);
-                Obj(PrimitiveType.Cylinder, new Vector3(-6f + i * 1.2f, 0.74f, -1.3f), new Vector3(0.5f, 0.05f, 0.5f), Mats.Lit(new Color(0.75f, 0.14f, 0.12f), 0.4f));
+                float sx = -5f + i * 1.1f;
+                Cy(sx, 0f, -1.3f, 0.1f, 0.68f, steel); Cy(sx, 0f, -1.3f, 0.4f, 0.03f, steel, false);
+                Cy(sx, 0.68f, -1.3f, 0.42f, 0.08f, fabric[i % 3]);
             }
             SushiKind[] kinds = { SushiKind.Salmon, SushiKind.Tuna, SushiKind.Tamago, SushiKind.Shrimp, SushiKind.CucumberRoll };
             for (int i = 0; i < 5; i++)
             {
-                Vector3 pp = new Vector3(-6f + i * 1.5f, 1.16f, 0.1f);
-                Obj(PrimitiveType.Cylinder, pp, new Vector3(0.5f, 0.015f, 0.5f), Mats.Lit(Color.Lerp(white, i % 2 == 0 ? new Color(0.8f, 0.3f, 0.25f) : indigo, 0.25f), 0.7f), false);
+                Vector3 pp = new Vector3(-5.2f + i * 1.3f, 1.168f, -0.2f);
+                Obj(PrimitiveType.Cylinder, pp, new Vector3(0.44f, 0.012f, 0.44f), Mats.Lit(Color.Lerp(white, i % 2 == 0 ? Rgb(0.8f, 0.3f, 0.25f) : indigo, 0.25f), 0.7f), false);
                 for (int k = -1; k <= 1; k += 2)
                 {
                     var su = new GameObject("Sushi"); su.transform.SetParent(root, false);
-                    su.transform.position = pp + new Vector3(k * 0.1f, 0.016f, 0f); su.transform.localScale = Vector3.one * 0.2f; su.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+                    su.transform.position = pp + new Vector3(k * 0.1f, 0.014f, 0f); su.transform.localScale = Vector3.one * 0.2f; su.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
                     su.AddComponent<Paintable>().Init(SushiShapes.Get(SushiShapes.ShapeOf(kinds[i])), kinds[i], false);
                 }
+                Cy(pp.x + 0.42f, 1.16f, -0.5f, 0.08f, 0.09f, bowl[i % 4], false);
             }
-
-            // 廚房
-            W(new Vector3(0f, 0.6f, 5f), new Vector3(14f, 1.2f, 0.2f), darkWood);
-            W(new Vector3(-7f, 2f, 5f), new Vector3(0.3f, 4f, 0.3f), darkWood); W(new Vector3(7f, 2f, 5f), new Vector3(0.3f, 4f, 0.3f), darkWood);
-            W(new Vector3(-1f, 0.5f, 8.3f), new Vector3(9f, 1f, 1f), steel);
-            W(new Vector3(5.6f, 1.1f, 8.3f), new Vector3(1.6f, 2.2f, 1.2f), Mats.Lit(new Color(0.86f, 0.88f, 0.9f), 0.7f));
-            W(new Vector3(-1f, 2.3f, 8.8f), new Vector3(9f, 0.08f, 0.5f), darkWood, false);
-            Color[] bottle = { new Color(0.16f, 0.36f, 0.24f), new Color(0.50f, 0.26f, 0.12f), white, indigo, new Color(0.62f, 0.14f, 0.14f) };
-            for (int i = 0; i < 12; i++) Obj(PrimitiveType.Cylinder, new Vector3(-5f + i * 0.7f, 2.34f + 0.22f, 8.8f), new Vector3(0.18f, 0.22f, 0.18f), Mats.Lit(bottle[i % 5], 0.85f), false);
-            for (int i = 0; i < 3; i++) Obj(PrimitiveType.Cylinder, new Vector3(-3f + i * 1.4f, 1.18f, 8.3f), new Vector3(0.6f, 0.18f, 0.6f), Mats.Lit(new Color(0.2f, 0.2f, 0.22f), 0.7f));
-
-            // 倉庫角落：木箱、米袋、酒樽
-            Vector3[] crates = { new Vector3(-11.8f, 0.5f, 8f), new Vector3(-10.7f, 0.5f, 8.1f), new Vector3(-11.3f, 1.5f, 8f), new Vector3(-12f, 0.4f, 6.6f), new Vector3(-9.4f, 0.35f, 8.2f) };
-            for (int i = 0; i < crates.Length; i++) { float s = crates[i].y * 2f; W(crates[i], new Vector3(s, s, s), i % 2 == 0 ? lightWood : Pat(8, new Color(0.62f, 0.44f, 0.26f), dark, 2f, 2f)); }
-            var sack = Pat(0, new Color(0.86f, 0.80f, 0.66f), new Color(0.70f, 0.62f, 0.46f), 2f, 2f, 0.05f);
-            for (int i = 0; i < 5; i++) Obj(PrimitiveType.Sphere, new Vector3(-12f + (i % 3) * 0.9f, 0.3f + (i / 3) * 0.5f, 5.2f + (i % 2) * 0.3f), new Vector3(1f, 0.6f, 0.7f), sack);
-            var barrel = Pat(7, new Color(0.82f, 0.70f, 0.42f), new Color(0.70f, 0.16f, 0.14f), 3f, 1f, 0.1f);
-            for (int i = 0; i < 3; i++) Obj(PrimitiveType.Cylinder, new Vector3(-8.6f + i * 1.1f, 0.6f, 6.2f), new Vector3(1f, 0.6f, 1f), barrel);
-
-            // 榻榻米包廂：矮桌、坐墊、障子
-            Color[] cush = { new Color(0.75f, 0.16f, 0.14f), indigo, new Color(0.30f, 0.50f, 0.28f), new Color(0.86f, 0.66f, 0.20f) };
-            for (int t = 0; t < 2; t++)
+            Bx(-2.6f, 1.16f, 0.4f, 4.6f, 0.26f, 0.36f, Mt(tFish, 7f, 1f, 0.92f));                           // 玻璃魚料櫃
+            Bx(-2.6f, 1.42f, 0.4f, 4.7f, 0.03f, 0.42f, darkWood, false);
+            for (int i = 0; i < 3; i++) { Cy(-5.75f + i * 2.6f, 1.16f, -0.5f, 0.07f, 0.14f, blackM, false); Cy(-5.75f + i * 2.6f, 1.3f, -0.5f, 0.045f, 0.03f, redM, false); }
+            var shadeM = Mt(tSudare, 3f, 1f, 0.1f);
+            for (int i = 0; i < 4; i++) Pendant(-5.4f + i * 1.6f, 2.15f, -0.25f, shadeM, bulbM, blackM);
+            Noren(true, -7f, 1f, 2.62f, 0.56f, 0.15f, cloth, 0, darkWood);
+            Soft(Bx(-6.6f, 2.66f, 0.15f, 0.04f, 1.1f, 0.04f, darkWood, false)); Soft(Bx(0.6f, 2.66f, 0.15f, 0.04f, 1.1f, 0.04f, darkWood, false));
+            Bx(-2.75f, 0f, 2.4f, 6.5f, 0.03f, 2.6f, Mt(tSunoko, 8f, 1f, 0.2f));                             // 師傅腳下的木踏板
+            // 吧台內側的備料櫃和酒架
+            Bx(-2.75f, 0f, 4.55f, 6.5f, 0.95f, 0.6f, Mt(tDrawer, 5f, 1f, 0.35f));
+            Bx(-2.75f, 0.95f, 4.55f, 6.6f, 0.05f, 0.66f, midWood);
+            for (int i = 0; i < 4; i++) Bx(-6f + i * 2.167f, 1f, 4.78f, 0.08f, 1.55f, 0.22f, darkWood);
+            Bx(-2.75f, 1.55f, 4.72f, 6.58f, 0.05f, 0.34f, darkWood); Bx(-2.75f, 2.05f, 4.72f, 6.58f, 0.05f, 0.34f, darkWood); Bx(-2.75f, 2.55f, 4.72f, 6.7f, 0.06f, 0.4f, darkWood);
+            Cy(-5.2f, 1f, 4.5f, 0.6f, 0.2f, lightWood); Cy(-5.2f, 1.19f, 4.5f, 0.52f, 0.025f, whiteM, false);
+            Bx(-4.1f, 1f, 4.45f, 0.6f, 0.04f, 0.35f, lightWood, false); Bx(-4.05f, 1.04f, 4.45f, 0.3f, 0.05f, 0.1f, Mats.Lit(Rgb(0.92f, 0.45f, 0.30f), 0.6f), false);
+            Cy(-3.1f, 1f, 4.5f, 0.3f, 0.2f, bowl[0], false); Cy(-2.6f, 1f, 4.5f, 0.26f, 0.14f, bowl[1], false);
+            Cy(-1.6f, 1f, 4.5f, 0.3f, 0.42f, steel); Sp(-1.6f, 1.44f, 4.5f, 0.2f, 0.12f, 0.2f, blackM, false);
+            for (int i = 0; i < 3; i++) Bottle(-0.7f + i * 0.32f, 1f, 4.5f, 0.42f, bottles[i], bottles[i]);
+            for (int i = 0; i < 9; i++)
             {
-                float z = -2.3f - t * 4.2f;
-                W(new Vector3(9.5f, 0.62f, z), new Vector3(2.6f, 0.1f, 1.3f), darkWood);
-                W(new Vector3(9.5f, 0.45f, z), new Vector3(2.2f, 0.3f, 0.9f), darkWood, false);
-                for (int i = 0; i < 4; i++) W(new Vector3(8.6f + (i % 2) * 1.8f, 0.36f, z + (i / 2 == 0 ? -1.1f : 1.1f)), new Vector3(0.8f, 0.12f, 0.8f), Pat(i % 2 == 0 ? 7 : 6, cush[(i + t) % 4], Color.Lerp(cush[(i + t) % 4], white, 0.5f), 2f, 2f, 0.1f));
+                float bx = -5.6f + i * 0.7f;
+                if (i % 3 == 2) Bottle(bx, 1.6f, 4.72f, 0.36f, bottles[(i + 1) % 4], bottles[(i + 1) % 4]);
+                else Cy(bx, 1.6f, 4.72f, 0.26f, 0.1f + (i % 2) * 0.08f, bowl[i % 4], false);
             }
-            W(new Vector3(6f, 1.6f, -6.5f), new Vector3(0.08f, 2.6f, 4.8f), paper);
-            W(new Vector3(6f, 1.6f, -1.2f), new Vector3(0.08f, 2.6f, 2.2f), paper);
+            for (int i = 0; i < 10; i++) Bottle(-5.7f + i * 0.64f, 2.1f, 4.72f, 0.4f, bottles[i % 4], bottles[(i + 2) % 4]);
+            Sp(-4.6f, 2.76f, 4.72f, 0.3f, 0.3f, 0.3f, redM, false); Bx(-2.6f, 2.61f, 4.72f, 0.5f, 0.3f, 0.3f, crate[2], false); Sp(-0.6f, 2.74f, 4.72f, 0.26f, 0.26f, 0.26f, redM, false);
+            // 短吧台上：收銀機、招財貓、菜單立牌
+            Bx(-6.4f, 1.16f, -3.4f, 0.5f, 0.28f, 0.45f, Mats.Lit(Rgb(0.20f, 0.20f, 0.22f), 0.6f)); Tilt(Bx(-6.4f, 1.44f, -3.5f, 0.4f, 0.26f, 0.03f, Mats.Unlit(new Color(0.5f, 0.9f, 1.1f)), false), -20f, 0f, 0f);
+            Sp(-6.4f, 1.34f, -1.5f, 0.32f, 0.36f, 0.3f, whiteM); Sp(-6.4f, 1.6f, -1.5f, 0.27f, 0.25f, 0.25f, whiteM, false);
+            Sp(-6.5f, 1.72f, -1.5f, 0.09f, 0.11f, 0.06f, whiteM, false); Sp(-6.3f, 1.72f, -1.5f, 0.09f, 0.11f, 0.06f, whiteM, false);
+            Sp(-6.22f, 1.62f, -1.56f, 0.09f, 0.24f, 0.09f, whiteM, false); Cy(-6.4f, 1.47f, -1.5f, 0.22f, 0.03f, redM, false); Sp(-6.4f, 1.36f, -1.66f, 0.1f, 0.12f, 0.03f, goldM, false);
+            Tilt(Bx(-6.4f, 1.16f, -2.4f, 0.04f, 0.4f, 0.32f, Mt(tMenuP, 1f, 1f, 0.2f), false), 0f, 0f, 12f);
 
-            // 門口：暖簾、燈籠、踏墊
-            for (int i = -2; i <= 2; i++) W(new Vector3(i * 1.05f, 3.1f, -8.9f), new Vector3(1f, 1.5f, 0.05f), Pat(i % 2 == 0 ? 7 : 6, indigo, white, 2f, 2f, 0.05f), false);
-            W(new Vector3(0f, 0.02f, -7.8f), new Vector3(2.4f, 0.04f, 1.2f), Pat(2, new Color(0.60f, 0.20f, 0.16f), new Color(0.86f, 0.74f, 0.50f), 3f, 1.5f, 0.05f), false);
-            var lantern = Mats.Unlit(new Color(2.2f, 0.7f, 0.28f));
-            for (int i = -2; i <= 2; i++) Obj(PrimitiveType.Sphere, new Vector3(i * 5.2f, 3.4f, -3f + (i % 2) * 5f), new Vector3(0.6f, 0.8f, 0.6f), lantern, false);
-
-            // 擺設：魚缸、盆栽、菜單木牌、掛軸
-            W(new Vector3(-11.4f, 0.5f, -6f), new Vector3(2.4f, 1f, 1f), darkWood);
-            W(new Vector3(-11.4f, 1.55f, -6f), new Vector3(2.4f, 1.1f, 1f), Mats.Lit(new Color(0.25f, 0.62f, 0.82f), 0.9f));
+            // ---------- 廚房 ----------
+            W(new Vector3(0f, 0.6f, 5f), new Vector3(14f, 1.2f, 0.2f), Mt(tPlanksD, 17.5f, 1f, 0.3f));
+            Bx(0f, 1.2f, 5f, 14.1f, 0.05f, 0.36f, midWood);
+            W(new Vector3(0f, 2.72f, 5f), new Vector3(14f, 0.16f, 0.18f), darkWood);
+            Material[] passCloth = { Mt(tYagaI, 3f, 1f, 0.05f), cloth[1], Mt(tSeig, 3f, 1f, 0.05f), cloth[5], Mt(tStripe, 2f, 1f, 0.05f), cloth[3], Mt(tDotsI, 4f, 1.2f, 0.05f) };
+            for (int i = 0; i < 7; i++) Bx(-6f + i * 2f, 2.06f, 5f, 1.9f, 0.58f, 0.025f, passCloth[i]);
             for (int i = 0; i < 3; i++)
             {
-                Vector3 pp = new Vector3(i == 0 ? -12f : i == 1 ? 4.6f : 12f, 0.3f, i == 0 ? -1.5f : i == 1 ? -8f : 2f);
-                Obj(PrimitiveType.Cylinder, pp, new Vector3(0.6f, 0.3f, 0.6f), Mats.Lit(new Color(0.55f, 0.30f, 0.20f), 0.3f));
-                Obj(PrimitiveType.Sphere, pp + Vector3.up * 0.9f, new Vector3(1.1f, 1.3f, 1.1f), Pat(7, new Color(0.20f, 0.46f, 0.20f), new Color(0.36f, 0.62f, 0.28f), 4f, 4f, 0.1f));
+                float gx = -4.5f + i * 3.6f;
+                Bx(gx, 1.25f, 5f, 0.42f, 0.05f, 0.22f, lightWood, false);
+                Bx(gx - 0.09f, 1.3f, 5f, 0.1f, 0.06f, 0.06f, Mats.Lit(i == 1 ? Rgb(0.95f, 0.82f, 0.30f) : Rgb(0.93f, 0.42f, 0.28f), 0.6f), false);
+                Bx(gx + 0.09f, 1.3f, 5f, 0.1f, 0.06f, 0.06f, Mats.Lit(i == 2 ? Rgb(0.70f, 0.12f, 0.14f) : Rgb(0.95f, 0.60f, 0.45f), 0.6f), false);
             }
-            for (int i = 0; i < 7; i++) W(new Vector3(-9f + i * 1.3f, 3.1f, 8.95f), new Vector3(0.9f, 0.4f, 0.06f), i % 3 == 0 ? darkWood : lightWood, false);
-            W(new Vector3(12.95f, 2.1f, 5f), new Vector3(0.05f, 2.2f, 1f), Pat(6, white, new Color(0.75f, 0.16f, 0.14f), 1f, 1f, 0.05f), false);
-            W(new Vector3(-12.95f, 2.2f, 2f), new Vector3(0.05f, 1.4f, 2f), Pat(3, new Color(0.96f, 0.90f, 0.72f), new Color(0.78f, 0.36f, 0.20f), 4f, 3f, 0.05f), false);
+            W(new Vector3(-1f, 0.5f, 8.3f), new Vector3(9f, 1f, 1f), Mt(tSteel, 4f, 1f, 0.75f));
+            Bx(-1.6f, 1f, 8.3f, 2.6f, 0.05f, 0.8f, blackM);
+            for (int i = 0; i < 3; i++)
+            {
+                float px0 = -2.5f + i * 0.9f;
+                Cy(px0, 1.05f, 8.3f, 0.5f, 0.24f + i * 0.06f, i == 1 ? Mt(tSteel, 2f, 1f, 0.8f) : Mats.Lit(Rgb(0.2f, 0.2f, 0.22f), 0.7f));
+                Cy(px0, 1.29f + i * 0.06f, 8.3f, 0.52f, 0.025f, steel, false); Sp(px0, 1.34f + i * 0.06f, 8.3f, 0.08f, 0.06f, 0.08f, blackM, false);
+            }
+            Cy(-4.7f, 1f, 8.3f, 0.5f, 0.36f, whiteM); Cy(-4.7f, 1.36f, 8.3f, 0.46f, 0.05f, Mats.Lit(Rgb(0.75f, 0.2f, 0.18f), 0.6f), false);
+            Cy(-3.75f, 1f, 8.3f, 0.3f, 0.24f, bowl[0], false);
+            Bx(0.6f, 1f, 8.25f, 0.7f, 0.04f, 0.42f, lightWood, false); Bx(0.6f, 1.04f, 8.25f, 0.4f, 0.07f, 0.14f, Mats.Lit(Rgb(0.90f, 0.36f, 0.26f), 0.6f), false);
+            Bx(2.4f, 1f, 8.3f, 1.3f, 0.015f, 0.7f, Mats.Lit(Rgb(0.30f, 0.32f, 0.35f), 0.8f), false); Cy(2.4f, 1f, 8.68f, 0.05f, 0.36f, steel, false);
+            Bx(-1.6f, 2.3f, 8.45f, 3f, 0.45f, 0.9f, steel); Bx(-1.6f, 2.75f, 8.6f, 0.6f, 1.25f, 0.5f, steel, false);
+            Bx(-5.2f, 1.9f, 8.72f, 3.2f, 0.05f, 0.36f, darkWood); Bx(-5.2f, 2.45f, 8.72f, 3.2f, 0.05f, 0.36f, darkWood); Bx(2.4f, 1.95f, 8.72f, 4.2f, 0.05f, 0.36f, darkWood);
+            for (int i = 0; i < 5; i++)
+            {
+                Cy(-6.5f + i * 0.62f, 1.95f, 8.72f, 0.28f, 0.1f + (i % 3) * 0.06f, bowl[(i + 1) % 4], false);
+                Cy(-6.4f + i * 0.62f, 2.5f, 8.72f, 0.22f, 0.3f, i % 2 == 0 ? potM : ceramic, false);
+            }
+            for (int i = 0; i < 7; i++) Bottle(0.6f + i * 0.58f, 2f, 8.72f, 0.34f + (i % 2) * 0.06f, bottles[(i + 1) % 4], bottles[i % 4]);
+            Bx(2.4f, 1.6f, 8.86f, 3.6f, 0.03f, 0.03f, steel, false);
+            for (int i = 0; i < 5; i++) { Bx(0.9f + i * 0.75f, 1.3f, 8.86f, 0.03f, 0.3f, 0.02f, steel, false); Cy(0.9f + i * 0.75f, 1.2f, 8.84f, 0.16f + (i % 2) * 0.1f, 0.03f, i % 2 == 0 ? steel : blackM, false); }
+            W(new Vector3(5.6f, 1.1f, 8.3f), new Vector3(1.6f, 2.2f, 1.2f), Mt(tSteel, 1f, 2f, 0.7f));
+            Bx(5.6f, 0.1f, 7.69f, 0.02f, 2f, 0.02f, blackM, false); Bx(5.48f, 0.9f, 7.67f, 0.03f, 0.5f, 0.05f, steel, false); Bx(5.72f, 0.9f, 7.67f, 0.03f, 0.5f, 0.05f, steel, false);
+            Bx(5.35f, 2.2f, 8.3f, 0.6f, 0.4f, 0.5f, crate[2], false); Bx(6f, 2.2f, 8.35f, 0.5f, 0.3f, 0.5f, crate[0], false);
+            Cy(4.2f, 0f, 5.5f, 0.46f, 0.62f, Mats.Lit(Rgb(0.16f, 0.36f, 0.62f), 0.5f));
+            for (int i = 0; i < 2; i++)
+            {
+                float vx = -5.9f + i * 0.8f;
+                Bx(vx, 0f, 5.55f, 0.62f, 0.34f, 0.44f, crate[i]);
+                Sp(vx - 0.14f, 0.44f, 5.55f, 0.26f, 0.24f, 0.26f, Mats.Lit(i == 0 ? Rgb(0.55f, 0.74f, 0.36f) : Rgb(0.92f, 0.90f, 0.84f), 0.3f), false);
+                Sp(vx + 0.15f, 0.43f, 5.6f, 0.24f, 0.22f, 0.24f, Mats.Lit(i == 0 ? Rgb(0.48f, 0.70f, 0.32f) : Rgb(0.86f, 0.38f, 0.16f), 0.3f), false);
+            }
+            // 廚房和倉庫之間的鐵架
+            foreach (float rz in new[] { 6.15f, 8.85f }) { Bx(-7.42f, 0f, rz, 0.05f, 2.1f, 0.05f, steel); Bx(-6.98f, 0f, rz, 0.05f, 2.1f, 0.05f, steel); }
+            for (int i = 0; i < 4; i++) Bx(-7.2f, 0.15f + i * 0.63f, 7.5f, 0.5f, 0.04f, 2.76f, steel);
+            for (int i = 0; i < 4; i++)
+            {
+                Bx(-7.2f, 0.19f, 6.5f + i * 0.66f, 0.46f, 0.4f, 0.5f, crate[i % 3]);
+                if (i % 2 == 0) Cy(-7.2f, 0.82f, 6.45f + i * 0.66f, 0.36f, 0.42f, i == 0 ? potM : ceramic); else Bx(-7.2f, 0.82f, 6.45f + i * 0.66f, 0.44f, 0.3f, 0.5f, crate[2]);
+                Bx(-7.2f, 1.45f, 6.5f + i * 0.66f, 0.44f, 0.26f + (i % 2) * 0.14f, 0.52f, crate[(i + 2) % 3]);
+            }
+            Sp(-7.2f, 2.26f, 6.8f, 0.46f, 0.3f, 0.7f, Mt(tSackB, 1f, 1f, 0.05f)); Bx(-7.2f, 2.08f, 8.2f, 0.46f, 0.3f, 0.6f, crate[0]);
 
-            // 光
+            // ---------- 倉庫 ----------
+            Bx(-11.3f, 0f, 5f, 3.4f, 1f, 0.2f, Mt(tPlanksD, 4.25f, 1f, 0.3f)); Bx(-11.3f, 1f, 5f, 3.4f, 2.3f, 0.14f, Mt(tPlaster, 1.5f, 1f, 0.05f));
+            Bx(-9.6f, 0f, 5f, 0.16f, 3.3f, 0.22f, darkPost);
+            W(new Vector3(-8.35f, 2.42f, 5f), new Vector3(2.6f, 0.16f, 0.16f), darkWood); Bx(-8.35f, 2.5f, 5f, 2.4f, 0.8f, 0.05f, Mt(tAsaW, 3f, 1f, 0.1f));
+            Noren(true, -9.5f, -7.2f, 2.34f, 0.56f, 5f, cloth, 2, darkWood);
+            Poster(true, -11.3f, 2.1f, 4.93f, -1f, 1.2f, 0.9f, Mt(tMenuW, 1f, 1f, 0.2f), darkWood);
+            foreach (float rx in new[] { -12.7f, -9.9f }) { Bx(rx, 0f, 8.3f, 0.06f, 2.2f, 0.06f, steel); Bx(rx, 0f, 8.8f, 0.06f, 2.2f, 0.06f, steel); }
+            for (int i = 0; i < 3; i++) Bx(-11.3f, 0.2f + i * 0.75f, 8.55f, 2.9f, 0.04f, 0.56f, lightWood);
+            for (int i = 0; i < 4; i++)
+            {
+                float rx = -12.3f + i * 0.68f;
+                Bx(rx, 0.24f, 8.55f, 0.56f, 0.5f, 0.5f, crate[i % 2]);
+                if (i % 2 == 0) Cy(rx, 0.99f, 8.55f, 0.34f, 0.44f, i == 0 ? ceramic : potM); else Bx(rx, 0.99f, 8.55f, 0.5f, 0.34f, 0.44f, crate[2]);
+                Bx(rx, 1.74f, 8.55f, 0.52f, 0.3f + (i % 2) * 0.12f, 0.46f, crate[(i + 1) % 3]);
+            }
+            var sack = Mt(tSack, 1f, 1f, 0.05f); var sackB = Mt(tSackB, 1f, 1f, 0.05f);
+            Vector3[] sacks = { new Vector3(-12.4f, 0.21f, 5.6f), new Vector3(-12.4f, 0.21f, 6.3f), new Vector3(-12.4f, 0.21f, 7f), new Vector3(-11.55f, 0.21f, 5.75f), new Vector3(-11.55f, 0.21f, 6.5f),
+                new Vector3(-12.35f, 0.58f, 5.95f), new Vector3(-12.35f, 0.58f, 6.65f), new Vector3(-11.7f, 0.55f, 6.1f), new Vector3(-12.3f, 0.93f, 6.3f) };
+            for (int i = 0; i < sacks.Length; i++) Sp(sacks[i].x, sacks[i].y, sacks[i].z, 0.95f, 0.44f, 0.64f, i % 3 == 1 ? sackB : sack);
+            var komo = new[] { Mt(tKomoR, 1f, 1f, 0.1f), Mt(tKomoK, 1f, 1f, 0.1f), Mt(tKomoB, 1f, 1f, 0.1f) };
+            var lidM = Mt(tGrainL, 1f, 1f, 0.3f);
+            Barrel(-9.3f, 0f, 8.35f, komo[0], lidM); Barrel(-8.35f, 0f, 8.35f, komo[1], lidM); Barrel(-8.82f, 0.83f, 8.35f, komo[2], lidM);
+            var crateY = Mt(tCrateY, 1f, 1f, 0.4f); var crateR = Mt(tCrateR, 1f, 1f, 0.4f);
+            for (int i = 0; i < 6; i++) Bx(-10.35f + (i % 2) * 0.56f, (i / 2) * 0.33f, 5.4f, 0.52f, 0.32f, 0.38f, (i + i / 2) % 2 == 0 ? crateY : crateR);
+            Tilt(Bx(-12.6f, 0f, 7.55f, 0.05f, 2.6f, 0.05f, lightWood, false), 0f, 0f, 12f); Tilt(Bx(-12.6f, 0f, 7.95f, 0.05f, 2.6f, 0.05f, lightWood, false), 0f, 0f, 12f);
+            for (int i = 0; i < 5; i++) Bx(-12.33f - (0.4f + i * 0.45f) * 0.2126f - 0.02f, 0.4f + i * 0.45f, 7.75f, 0.04f, 0.04f, 0.4f, lightWood, false);
+            Pendant(-10.2f, 2.5f, 6.9f, Mats.Lit(Rgb(0.16f, 0.30f, 0.26f), 0.6f), bulbM, blackM);
+
+            // ---------- 西牆卡座、魚缸、冷藏櫃 ----------
+            for (int bi = 0; bi < 2; bi++)
+            {
+                float z0 = -2.5f + bi * 2.6f;
+                Bx(-11.95f, 0.7f, z0, 1.7f, 0.05f, 0.8f, midWood); Bx(-11.95f, 0f, z0, 0.5f, 0.7f, 0.3f, darkWood);
+                for (int s = -1; s <= 1; s += 2)
+                {
+                    Bx(-11.95f, 0f, z0 + s * 0.78f, 1.7f, 0.42f, 0.5f, Mt(tPlanksD, 2f, 1f, 0.3f));
+                    Bx(-11.95f, 0.42f, z0 + s * 0.78f, 1.6f, 0.07f, 0.44f, fabric[3 + bi * 2 + (s + 1) / 2]);
+                    Bx(-11.95f, 0f, z0 + s * 1.08f, 1.7f, 1.25f, 0.1f, Mt(tKoshi, 2f, 1f, 0.3f));
+                }
+                Cy(-12.55f, 0.75f, z0, 0.07f, 0.14f, blackM, false); Tilt(Bx(-12.3f, 0.75f, z0, 0.04f, 0.3f, 0.24f, Mt(bi == 0 ? tMenuY : tMenuP, 1f, 1f, 0.2f), false), 0f, 0f, 12f);
+                Cy(-11.6f, 0.75f, z0 + 0.1f, 0.24f, 0.02f, bowl[bi], false);
+                Chochin(-11.95f, 2.25f, z0, 0.5f, 0.5f, lanternWhite, blackM);
+                Soft(Bx(-11.95f, 2.5f, z0, 0.02f, 1.3f, 0.02f, blackM, false));
+            }
+            Bx(-12f, 0f, -3.84f, 2f, 1.9f, 0.08f, Mt(tKoshi, 2.5f, 1f, 0.3f)); Bx(-12f, 0f, 1.5f, 2f, 1.9f, 0.08f, Mt(tKoshi, 2.5f, 1f, 0.3f));
+            Bx(-12.4f, 0f, -5.2f, 0.9f, 0.8f, 2.4f, Mt(tDrawer, 3f, 0.5f, 0.35f));
+            Soft(Bx(-12.4f, 0.8f, -5.2f, 0.8f, 0.9f, 2.3f, Glow(new Color(0.85f, 1.12f, 1.22f), tFish, 3f, 1f)));
+            Bx(-12.4f, 1.7f, -5.2f, 0.9f, 0.08f, 2.4f, darkWood);
+            Bx(-12.55f, 0f, 4.5f, 0.8f, 1.95f, 0.86f, Mats.Lit(Rgb(0.18f, 0.20f, 0.24f), 0.6f));
+            Soft(Bx(-12.13f, 0.3f, 4.5f, 0.04f, 1.5f, 0.7f, Glow(new Color(1.15f, 1.25f, 1.3f), Pattern(7, Rgb(0.84f, 0.92f, 0.95f), Rgb(0.80f, 0.20f, 0.18f)), 1f, 2f)));
+            Poster(false, -5.1f, 2.2f, -12.92f, 1f, 0.8f, 1.1f, Mt(tFishP, 1f, 1f, 0.1f), darkWood);
+            Poster(false, -2.5f, 2.3f, -12.92f, 1f, 0.9f, 0.7f, Mt(tMenuY, 1f, 1f, 0.1f), blackM);
+            Poster(false, 0.1f, 2.3f, -12.92f, 1f, 0.55f, 1.3f, Mt(tScrollB, 1f, 1f, 0.1f), darkWood);
+            Poster(false, 2.7f, 2.2f, -12.92f, 1f, 1.5f, 1.0f, Mt(tFuji, 1f, 1f, 0.2f), goldM);
+            Plant(-12.3f, 0f, -8.3f, potM, leafM); Plant(-10.05f, 0f, 4.45f, ceramic, leafM);
+
+            // ---------- 門口 ----------
+            Bx(-1.34f, 0f, -8.9f, 0.14f, 2.25f, 0.16f, darkPost); Bx(1.34f, 0f, -8.9f, 0.14f, 2.25f, 0.16f, darkPost); Bx(0f, 2.2f, -8.9f, 2.9f, 0.14f, 0.18f, darkWood);
+            var doorGlow = Glow(new Color(1.3f, 1.1f, 0.8f), tShojiDoor, 1f, 1f);
+            Soft(Bx(-0.63f, 0.02f, -8.93f, 1.24f, 2.16f, 0.05f, doorGlow)); Soft(Bx(0.63f, 0.02f, -8.9f, 1.24f, 2.16f, 0.05f, doorGlow));
+            Noren(true, -1.45f, 1.45f, 2.62f, 0.76f, -8.55f, new[] { cloth[0], cloth[1] }, 0, darkWood);
+            Chochin(-1.95f, 2.3f, -8.5f, 0.6f, 0.8f, lanternRed, blackM); Chochin(1.95f, 2.3f, -8.5f, 0.6f, 0.8f, lanternRed, blackM);
+            Bx(4f, 0f, -8.66f, 2.2f, 1f, 0.5f, Mt(tDrawerL, 3f, 1f, 0.3f)); Bx(4f, 1f, -8.66f, 2.3f, 0.04f, 0.56f, darkWood, false);
+            Sp(3.3f, 1.2f, -8.66f, 0.34f, 0.36f, 0.32f, redM); Sp(3.3f, 1.24f, -8.52f, 0.2f, 0.16f, 0.08f, whiteM, false);
+            Cy(4.05f, 1.04f, -8.66f, 0.26f, 0.12f, ceramic, false); Sp(4.05f, 1.38f, -8.66f, 0.42f, 0.34f, 0.36f, leafM, false);
+            Andon(4.75f, 1.04f, -8.66f, shojiGlow, darkWood);
+            Cy(2.3f, 0f, -8.6f, 0.36f, 0.5f, ceramic);
+            Tilt(Cy(2.26f, 0.1f, -8.6f, 0.05f, 0.95f, redM, false), 6f, 0f, 8f); Tilt(Cy(2.36f, 0.1f, -8.56f, 0.05f, 0.9f, Mats.Lit(indigo, 0.4f), false), -7f, 0f, -6f); Tilt(Cy(2.3f, 0.1f, -8.66f, 0.05f, 0.85f, Mats.Lit(moss, 0.4f), false), 9f, 0f, -3f);
+            Bx(-4f, 0.38f, -8.6f, 1.8f, 0.07f, 0.45f, midWood); Bx(-4.7f, 0f, -8.6f, 0.1f, 0.38f, 0.4f, darkWood); Bx(-3.3f, 0f, -8.6f, 0.1f, 0.38f, 0.4f, darkWood);
+            Bx(-4.42f, 0.45f, -8.6f, 0.6f, 0.07f, 0.42f, fabric[8]); Bx(-3.58f, 0.45f, -8.6f, 0.6f, 0.07f, 0.42f, fabric[9]);
+            Tilt(Bx(-2.75f, 0f, -7.55f, 0.7f, 1.15f, 0.04f, Mt(tMenuW, 1f, 1f, 0.2f)), 14f, 0f, 0f); Tilt(Bx(-2.75f, 0f, -7.25f, 0.7f, 1.15f, 0.04f, Mt(tMenuP, 1f, 1f, 0.2f)), -14f, 0f, 0f);
+            // 掛在牆上的法被（短外套）
+            Bx(-6.4f, 1.86f, -8.8f, 2.4f, 0.04f, 0.04f, darkWood, false);
+            for (int i = 0; i < 3; i++)
+            {
+                float hx = -7.2f + i * 0.8f; var hm = i == 0 ? Mt(tCrest[0], 1f, 1f, 0.05f) : i == 1 ? Mt(tYagaI, 2f, 2f, 0.05f) : Mt(tCrest[1], 1f, 1f, 0.05f);
+                Bx(hx, 1.0f, -8.8f, 0.5f, 0.84f, 0.1f, hm); Bx(hx, 1.56f, -8.8f + (i % 2) * 0.03f, 0.78f, 0.28f, 0.08f, hm, false);
+            }
+            Poster(true, 3.3f, 2.2f, -8.92f, 1f, 0.8f, 1.1f, Mt(tFuji, 1f, 1f, 0.2f), darkWood);
+            Poster(true, 4.4f, 2.1f, -8.92f, 1f, 0.7f, 0.7f, Mt(tFishP, 1f, 1f, 0.1f), blackM);
+            Poster(true, 5.3f, 2.2f, -8.92f, 1f, 0.5f, 1.2f, Mt(tScrollA, 1f, 1f, 0.1f), darkWood);
+            Poster(true, -3.9f, 2.2f, -8.92f, 1f, 0.55f, 1.3f, Mt(tScrollC, 1f, 1f, 0.1f), darkWood);
+            Poster(true, -9.1f, 2.2f, -8.92f, 1f, 1.2f, 0.9f, Mt(tMenuP, 1f, 1f, 0.1f), darkWood);
+            Poster(true, -11.6f, 2.2f, -8.92f, 1f, 0.55f, 1.3f, Mt(tScrollA, 1f, 1f, 0.1f), goldM);
+            Plant(5.5f, 0f, -8.45f, ceramic, leafM);
+            // 立旗
+            Cy(-9.6f, 0f, -8.5f, 0.05f, 2.9f, darkWood, false); Bx(-9.6f, 0.7f, -8.3f, 0.03f, 2.1f, 0.5f, Mt(tBanner, 1f, 1f, 0.05f));
+            Cy(-8.9f, 0f, -8.5f, 0.05f, 2.9f, darkWood, false); Bx(-8.9f, 0.7f, -8.3f, 0.03f, 2.1f, 0.5f, Mt(tBannerI, 1f, 1f, 0.05f));
+
+            // ---------- 中央散座 ----------
+            for (int ti = 0; ti < 2; ti++)
+            {
+                float tz = ti == 0 ? -2.6f : 2.4f;
+                Bx(3.8f, 0f, tz, 2.9f, 0.015f, 2.5f, ti == 0 ? Mt(tShippoG, 4f, 3.5f, 0.05f) : Mt(tKikO, 3f, 3f, 0.05f));
+                Bx(3.8f, 0.7f, tz, 0.95f, 0.05f, 0.95f, lightWood); Bx(3.8f, 0f, tz, 0.4f, 0.7f, 0.4f, darkWood);
+                Bx(3.8f, 0.75f, tz, 0.97f, 0.012f, 0.34f, fabric[ti == 0 ? 10 : 5], false);
+                Chair(2.98f, tz, -1f, 0f, fabric[ti * 4], darkWood); Chair(4.62f, tz, 1f, 0f, fabric[ti * 4 + 1], darkWood);
+                Chair(3.8f, tz - 0.82f, 0f, -1f, fabric[ti * 4 + 2], darkWood); Chair(3.8f, tz + 0.82f, 0f, 1f, fabric[ti * 4 + 3], darkWood);
+                Cy(3.8f, 0.762f, tz, 0.07f, 0.14f, blackM, false); Cy(3.55f, 0.75f, tz + 0.3f, 0.22f, 0.02f, bowl[0], false); Cy(4.05f, 0.75f, tz - 0.3f, 0.22f, 0.02f, bowl[1], false);
+                Pendant(3.8f, 2.2f, tz, shadeM, bulbM, blackM);
+            }
+            Bx(3.6f, 0.12f, -5.4f, 2.2f, 1.55f, 0.07f, Mt(tFuji, 1f, 1f, 0.25f)); Bx(3.6f, 1.67f, -5.4f, 2.3f, 0.07f, 0.1f, darkWood);
+            Bx(2.65f, 0f, -5.4f, 0.1f, 0.12f, 0.5f, darkWood); Bx(4.55f, 0f, -5.4f, 0.1f, 0.12f, 0.5f, darkWood);
+
+            // ---------- 榻榻米包廂 ----------
+            W(new Vector3(9.5f, 0.135f, -4.5f), new Vector3(7f, 0.27f, 9f), darkWood);
+            Bx(9.52f, 0.27f, -4.52f, 6.92f, 0.03f, 8.92f, Mt(tTatami, 8f, 5f, 0.1f));
+            Bx(5.6f, 0f, -3.2f, 0.7f, 0.15f, 1.4f, Mt(tStone, 0.5f, 1f, 0.3f));
+            var shojiM = Mt(tShojiDoor, 1f, 1f, 0.05f);
+            foreach (float pz in new[] { -8.3f, -7.1f, -5.9f, -4.7f }) Bx(6f, 0.3f, pz, 0.06f, 2.06f, 1.2f, shojiM);
+            foreach (float pz in new[] { -1.75f, -0.65f }) Bx(6f, 0.3f, pz, 0.06f, 2.06f, 1.1f, shojiM);
+            W(new Vector3(6f, 2.43f, -4.5f), new Vector3(0.16f, 0.14f, 9f), darkWood); W(new Vector3(6f, 3.27f, -4.5f), new Vector3(0.16f, 0.14f, 9f), darkWood);
+            W(new Vector3(6f, 2.85f, -4.5f), new Vector3(0.05f, 0.7f, 9f), Mt(tAsaW, 7.5f, 1f, 0.1f));
+            foreach (float pz in new[] { -8.9f, -4.08f, -2.32f }) Bx(6f, 0f, pz, 0.16f, 3.3f, 0.16f, darkPost);
+            W(new Vector3(9.6f, 2.95f, 0f), new Vector3(7f, 0.14f, 0.16f), darkWood);
+            for (int i = 0; i < 3; i++) Bx(7.4f + i * 2.2f, 2.06f, 0f, 2f, 0.84f, 0.03f, Mt(tSudare, 3f, 2f, 0.1f));
+            for (int i = 0; i < 4; i++) Tilt(Bx(8.3f + i * 0.78f, 0.3f, -0.55f, 0.86f, 1.6f, 0.04f, Mt(i % 2 == 0 ? tKumo : tSakuraN, 1f, 2f, 0.3f)), 0f, i % 2 == 0 ? 25f : -25f, 0f);
+            var lacquer = Mt(tGrainD, 2f, 1f, 0.75f);
+            for (int t = 0; t < 2; t++)
+            {
+                float z = t == 0 ? -2.4f : -6.5f;
+                Bx(9.3f, 0.6f, z, 2.4f, 0.07f, 1.1f, lacquer); Bx(9.3f, 0.3f, z, 2f, 0.3f, 0.7f, darkWood);
+                for (int i = 0; i < 4; i++) Bx(9.3f + (i % 2 == 0 ? -0.75f : 0.75f), 0.3f, z + (i / 2 == 0 ? -0.95f : 0.95f), 0.7f, 0.09f, 0.7f, fabric[(i + t * 6) % 12]);
+                Sp(9.3f, 0.77f, z, 0.22f, 0.2f, 0.22f, t == 0 ? potM : blackM, false); Cy(8.9f, 0.67f, z + 0.2f, 0.08f, 0.08f, bowl[0], false); Cy(9.7f, 0.67f, z - 0.2f, 0.08f, 0.08f, bowl[0], false);
+                Bx(8.6f, 0.67f, z - 0.2f, 0.4f, 0.05f, 0.22f, lightWood, false); Bx(10f, 0.67f, z + 0.25f, 0.4f, 0.05f, 0.22f, lightWood, false);
+                Chochin(9.3f, 2.5f, z, 0.6f, 0.6f, lanternWhite, blackM); Soft(Bx(9.3f, 2.8f, z, 0.02f, 1f, 0.02f, blackM, false));
+            }
+            // 床之間
+            Bx(12.45f, 0.3f, -4.5f, 0.9f, 0.14f, 1.76f, lacquer);
+            Cy(12.02f, 0.3f, -5.36f, 0.14f, 3f, Mt(tGrainL, 1f, 3f, 0.3f)); Cy(12.02f, 0.3f, -3.64f, 0.14f, 3f, Mt(tGrainL, 1f, 3f, 0.3f));
+            Bx(12.88f, 1.2f, -4.5f, 0.03f, 1.8f, 0.64f, Mt(tScrollA, 1f, 1f, 0.05f));
+            Cy(12.45f, 0.44f, -4f, 0.22f, 0.4f, ceramic); Tilt(Cy(12.45f, 0.8f, -4f, 0.03f, 0.8f, darkWood, false), 14f, 0f, 10f);
+            Sp(12.35f, 1.45f, -3.85f, 0.2f, 0.18f, 0.2f, Mats.Lit(Rgb(0.95f, 0.62f, 0.70f), 0.2f), false); Sp(12.5f, 1.2f, -3.95f, 0.18f, 0.16f, 0.18f, Mats.Lit(Rgb(0.96f, 0.74f, 0.80f), 0.2f), false);
+            Sp(12.45f, 0.62f, -5f, 0.3f, 0.32f, 0.28f, redM); Sp(12.33f, 0.66f, -5f, 0.08f, 0.16f, 0.2f, whiteM, false);
+            // 階梯櫃、被褥、坐墊堆、行燈、棋盤
+            Bx(7f, 0.3f, -8.58f, 1f, 1.8f, 0.7f, Mt(tDrawer, 1f, 1.5f, 0.35f)); Bx(8f, 0.3f, -8.58f, 1f, 1.2f, 0.7f, Mt(tDrawer, 1f, 1f, 0.35f)); Bx(9f, 0.3f, -8.58f, 1f, 0.6f, 0.7f, Mt(tDrawer, 1f, 0.5f, 0.35f));
+            Cy(9f, 0.9f, -8.58f, 0.24f, 0.34f, ceramic); Sp(8f, 1.66f, -8.58f, 0.3f, 0.32f, 0.28f, redM); Bx(7f, 2.1f, -8.58f, 0.5f, 0.24f, 0.36f, crate[0]);
+            Material[] futon = { Mt(tWeaveB, 4f, 3f, 0.05f), Mt(tWeaveW, 4f, 3f, 0.05f), Mt(tAsaP, 3f, 2f, 0.05f), Mt(tPlaidB, 3f, 2f, 0.05f), Mt(tDotsY, 3f, 2f, 0.05f) };
+            for (int i = 0; i < 5; i++) Bx(12.1f - (i % 2) * 0.05f, 0.3f + i * 0.17f, -8.2f + (i % 3) * 0.03f, 1.5f, 0.16f, 1.2f, futon[i]);
+            Bx(11.8f, 1.15f, -8.2f, 0.5f, 0.12f, 0.3f, futon[1], false); Bx(12.4f, 1.15f, -8.15f, 0.5f, 0.12f, 0.3f, futon[0], false);
+            for (int i = 0; i < 6; i++) Tilt(Bx(10.1f, 0.3f + i * 0.095f, -8.5f, 0.62f, 0.09f, 0.62f, fabric[(i * 5 + 1) % 12]), 0f, i * 7f - 14f, 0f);
+            Andon(12.4f, 0.3f, -6.3f, shojiGlow, darkWood); Andon(6.6f, 0.3f, -0.7f, shojiGlow, darkWood); Andon(12.4f, 0.3f, -2.7f, shojiGlow, darkWood);
+            Bx(11.6f, 0.3f, -1.7f, 0.5f, 0.26f, 0.5f, Mt(tGrid, 1f, 1f, 0.4f)); Cy(11.15f, 0.3f, -1.5f, 0.2f, 0.12f, blackM, false); Cy(12.05f, 0.3f, -1.9f, 0.2f, 0.12f, potM, false);
+
+            // ---------- 東北：大桌和酒藏 ----------
+            Bx(11.3f, 0f, 5f, 3.4f, 1f, 0.2f, Mt(tPlanksD, 4.25f, 1f, 0.3f)); Bx(11.3f, 1f, 5f, 3.4f, 2.3f, 0.14f, Mt(tPlaidR, 3f, 2f, 0.05f));
+            Bx(9.6f, 0f, 5f, 0.16f, 3.3f, 0.22f, darkPost);
+            W(new Vector3(8.35f, 2.42f, 5f), new Vector3(2.6f, 0.16f, 0.16f), darkWood); Bx(8.35f, 2.5f, 5f, 2.4f, 0.8f, 0.05f, Mt(tAsaW, 3f, 1f, 0.1f));
+            Noren(true, 7.2f, 9.5f, 2.34f, 0.56f, 5f, cloth, 3, darkWood);
+            Poster(true, 11.3f, 2.1f, 4.93f, -1f, 2.2f, 1.0f, Mt(tMenuW, 2f, 1f, 0.2f), darkWood);
+            Bx(10.2f, 0.7f, 2.4f, 3f, 0.06f, 0.9f, lightWood); Bx(9.1f, 0f, 2.4f, 0.12f, 0.7f, 0.7f, darkWood); Bx(11.3f, 0f, 2.4f, 0.12f, 0.7f, 0.7f, darkWood);
+            Bx(10.2f, 0.76f, 2.4f, 3f, 0.012f, 0.3f, fabric[11], false);
+            for (int s = -1; s <= 1; s += 2)
+            {
+                float bz = 2.4f + s * 0.8f;
+                Bx(10.2f, 0.38f, bz, 2.8f, 0.06f, 0.36f, midWood); Bx(9.1f, 0f, bz, 0.1f, 0.38f, 0.3f, darkWood); Bx(11.3f, 0f, bz, 0.1f, 0.38f, 0.3f, darkWood);
+                for (int i = 0; i < 3; i++) Bx(9.3f + i * 0.9f, 0.44f, bz, 0.5f, 0.06f, 0.34f, fabric[(i * 3 + (s + 1) * 2 + 6) % 12]);
+            }
+            Bottle(9.6f, 0.77f, 2.4f, 0.3f, bottles[3], bottles[3]); Bottle(10.9f, 0.77f, 2.45f, 0.3f, bottles[0], bottles[0]);
+            Cy(10.25f, 0.77f, 2.4f, 0.4f, 0.14f, potM, false); Cy(10.25f, 0.91f, 2.4f, 0.42f, 0.04f, blackM, false);
+            for (int i = 0; i < 4; i++) Cy(9.4f + i * 0.55f, 0.76f, 2.4f + (i % 2 == 0 ? -0.3f : 0.3f), 0.2f, 0.02f, bowl[i % 4], false);
+            Pendant(9.5f, 2.2f, 2.4f, shadeM, bulbM, blackM); Pendant(10.9f, 2.2f, 2.4f, shadeM, bulbM, blackM);
+            Bx(12.8f, 1.6f, 2.4f, 0.3f, 0.04f, 2.4f, darkWood);
+            for (int i = 0; i < 5; i++)
+            {
+                if (i % 2 == 0) Sp(12.8f, 1.64f + 0.12f + i * 0.01f, 1.4f + i * 0.5f, 0.24f + i * 0.02f, 0.26f + i * 0.02f, 0.24f, redM, false);
+                else Bottle(12.8f, 1.64f, 1.4f + i * 0.5f, 0.36f, bottles[i], bottles[i]);
+            }
+            Poster(false, 1.5f, 2.6f, 12.92f, -1f, 0.7f, 0.7f, Mt(tFishI, 1f, 1f, 0.1f), goldM);
+            Poster(false, 4f, 2.2f, 12.92f, -1f, 0.55f, 1.3f, Mt(tScrollB, 1f, 1f, 0.1f), darkWood);
+            Plant(12.3f, 0f, 0.7f, potM, leafM);
+            // 酒藏
+            Bx(12.4f, 0f, 6.9f, 0.95f, 0.1f, 2.9f, darkWood);
+            for (int i = 0; i < 3; i++) { Cy(12.4f, 0.1f, 6f + i * 0.9f, 0.84f, 0.8f, komo[i]); Barrel(12.4f, 0.92f, 6f + i * 0.9f, komo[(i + 1) % 3], lidM); }
+            Bx(9.6f, 0f, 8.8f, 2.9f, 2.3f, 0.1f, Mt(tPlanksD, 3.6f, 1f, 0.3f)); Bx(8.2f, 0f, 8.6f, 0.06f, 2.3f, 0.44f, darkWood); Bx(11f, 0f, 8.6f, 0.06f, 2.3f, 0.44f, darkWood);
+            for (int i = 0; i < 4; i++) Bx(9.6f, 0.5f + i * 0.6f, 8.6f, 2.8f, 0.04f, 0.42f, darkWood);
+            for (int i = 0; i < 5; i++) Bx(8.5f + i * 0.55f, 0.54f, 8.6f, 0.42f, 0.34f, 0.34f, i % 2 == 0 ? crate[2] : Mt(tCrest[(i + 3) % 6], 1f, 1f, 0.2f));
+            for (int i = 0; i < 6; i++) { Bottle(8.45f + i * 0.46f, 1.14f, 8.6f, 0.42f, bottles[i % 4], bottles[(i + 1) % 4]); Bottle(8.5f + i * 0.44f, 1.74f, 8.6f, 0.4f, bottles[(i + 2) % 4], bottles[(i + 2) % 4]); }
+            Cy(9f, 0f, 6.6f, 0.8f, 0.9f, komo[1]); Cy(9f, 0.9f, 6.6f, 1f, 0.04f, lidM);
+            Cy(8.2f, 0f, 6.3f, 0.36f, 0.5f, Mt(tRope, 2f, 1f, 0.1f)); Cy(9.7f, 0f, 7.1f, 0.36f, 0.5f, Mt(tRope, 2f, 1f, 0.1f));
+            Bottle(9f, 0.94f, 6.6f, 0.36f, bottles[2], bottles[2]); Cy(8.8f, 0.94f, 6.8f, 0.09f, 0.06f, bowl[0], false);
+            for (int i = 0; i < 4; i++) Bx(7.65f, (i / 2) * 0.33f, 8.2f + (i % 2) * 0.42f, 0.52f, 0.32f, 0.38f, i % 3 == 0 ? crateR : crateY);
+            Chochin(10.2f, 2.6f, 7f, 0.7f, 0.9f, lanternRed, blackM); Soft(Bx(10.2f, 3.05f, 7f, 0.02f, 0.8f, 0.02f, blackM, false));
+            Poster(true, 11.7f, 2.2f, 8.92f, -1f, 0.8f, 1.1f, Mt(tFuji, 1f, 1f, 0.2f), darkWood);
+            Cy(7.9f, 0f, 0.9f, 0.05f, 2.9f, darkWood, false); Bx(7.9f, 0.7f, 1.1f, 0.03f, 2.1f, 0.5f, Mt(tBanner, 1f, 1f, 0.05f));
+
+            // ---------- 光 ----------
             var sun = new GameObject("KeyLight"); sun.transform.SetParent(root, false);
-            sun.transform.rotation = Quaternion.Euler(58f, -32f, 0f);
-            var sl = sun.AddComponent<Light>(); sl.type = LightType.Directional; sl.color = new Color(1f, 0.93f, 0.82f); sl.intensity = 1.05f; sl.shadows = LightShadows.Soft; sl.shadowStrength = 0.6f;
+            sun.transform.rotation = Quaternion.Euler(66f, -28f, 0f);
+            var sl = sun.AddComponent<Light>(); sl.type = LightType.Directional; sl.color = new Color(1f, 0.90f, 0.76f); sl.intensity = 0.72f; sl.shadows = LightShadows.Soft; sl.shadowStrength = 0.72f;
+            PointLamp(new Vector3(-2.8f, 3.3f, -0.6f), new Color(1f, 0.74f, 0.46f), 5.5f, 11f);
+            PointLamp(new Vector3(9.5f, 3.2f, -4.5f), new Color(1f, 0.80f, 0.56f), 5f, 10f);
+            PointLamp(new Vector3(0f, 3.3f, 7f), new Color(1f, 0.93f, 0.82f), 5f, 10f);
+            PointLamp(new Vector3(10f, 3.2f, 4.4f), new Color(1f, 0.70f, 0.44f), 5f, 11f);
 
             var cg = new GameObject("MainCamera"); cg.tag = "MainCamera"; cg.transform.SetParent(root, false);
-            cam = cg.AddComponent<Camera>(); cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.20f, 0.14f, 0.11f);
+            cam = cg.AddComponent<Camera>(); cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.085f, 0.06f, 0.05f);
             cam.nearClipPlane = 0.05f; cam.farClipPlane = 120f; cg.AddComponent<AudioListener>();
             Sfx.Init(cg); Look.Apply(cam, root);
             gun = new GameObject("Gun"); gun.transform.SetParent(cg.transform, false);
@@ -321,6 +1095,13 @@ namespace DontEatSushi
             var g2 = Obj(PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.06f, 0.04f, 0.06f), Mats.Lit(new Color(0.8f, 0.12f, 0.1f), 0.6f), false);
             g2.transform.SetParent(gun.transform, false); g2.transform.localPosition = new Vector3(0f, 0.16f, 0f); g2.transform.localRotation = Quaternion.identity;
             gun.SetActive(false);
+            Debug.Log("World objects: " + root.GetComponentsInChildren<Renderer>(true).Length);
+        }
+
+        void PointLamp(Vector3 p, Color c, float intensity, float range)
+        {
+            var go = new GameObject("Lamp"); go.transform.SetParent(root, false); go.transform.position = p;
+            var l = go.AddComponent<Light>(); l.type = LightType.Point; l.color = c; l.intensity = intensity; l.range = range; l.shadows = LightShadows.None;
         }
 
         // 讀取被射線打到的表面顏色：有貼圖讀貼圖，沒有就讀材質顏色
@@ -373,9 +1154,9 @@ namespace DontEatSushi
         {
             float[][] spots =
             {
-                new[] { -12.4f, 0f, -3.5f, 90f, 0f }, new[] { 12.4f, 0f, 6.5f, 270f, 0f }, new[] { 3f, 0f, 8.6f, 180f, 0f }, new[] { -9.9f, 0f, 7.2f, 0f, 1f },
-                new[] { 9.5f, 0.3f, -4.4f, 0f, 2f }, new[] { 11.8f, 0.3f, -8.2f, 300f, 1f }, new[] { -2f, 0f, 1.2f, 0f, 3f }, new[] { 0f, 0f, -8.6f, 0f, 4f },
-                new[] { -7.6f, 0f, -4.2f, 90f, 0f }, new[] { 6.6f, 0f, 2f, 200f, 2f }, new[] { -12.3f, 0f, 3.2f, 90f, 4f }, new[] { 4f, 0f, 5.6f, 0f, 1f }
+                new[] { -12.5f, 0f, -7.4f, 90f, 0f }, new[] { 12.5f, 0f, 4.3f, 270f, 0f }, new[] { 4.15f, 0f, 8.5f, 180f, 0f }, new[] { -10.5f, 0f, 6.6f, 0f, 1f },
+                new[] { 9.3f, 0.3f, -4.45f, 0f, 2f }, new[] { 10.88f, 0.3f, -8.45f, 0f, 1f }, new[] { -2f, 0f, 1.3f, 0f, 3f }, new[] { -1.95f, 0f, -8.6f, 0f, 4f },
+                new[] { -7.9f, 0f, -4.3f, 90f, 0f }, new[] { 6.6f, 0f, 2.4f, 200f, 2f }, new[] { -12.45f, 0f, 2.7f, 90f, 4f }, new[] { 7.6f, 0f, 7f, 90f, 1f }
             };
             var idx = new List<int>(); for (int i = 0; i < spots.Length; i++) idx.Add(i);
             Physics.SyncTransforms();

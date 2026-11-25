@@ -102,11 +102,14 @@ public static class CiBuild
             g.EditorCam(new Vector3(0f, 0.5f, 0f), 30f, 40f, 30f);
             cam.targetTexture = rt; for (int w = 0; w < 3; w++) cam.Render();
             Snap(cam, rt, tag + "_1_wide");
-            g.EditorCam(new Vector3(-3f, 1.2f, -1f), 15f, 14f, 8f); Snap(cam, rt, tag + "_2_bar");
-            g.EditorCam(new Vector3(9.5f, 1.2f, -4.5f), 60f, 16f, 7f); Snap(cam, rt, tag + "_3_tatami");
-            g.EditorCam(new Vector3(-10f, 1.2f, 6.5f), -40f, 14f, 6f); Snap(cam, rt, tag + "_4_storage");
-            g.EditorCam(new Vector3(0f, 1.3f, 6f), 0f, 12f, 7f); Snap(cam, rt, tag + "_5_kitchen");
+            g.EditorCam(new Vector3(-3f, 1.2f, 0f), -15f, 8f, 7f); Snap(cam, rt, tag + "_2_bar");
+            g.EditorCam(new Vector3(10f, 1.0f, -4.2f), 100f, 10f, 6f); Snap(cam, rt, tag + "_3_tatami");
+            g.EditorCam(new Vector3(-10.5f, 1.1f, 7.2f), -50f, 4f, 5f); Snap(cam, rt, tag + "_4_storage");
+            g.EditorCam(new Vector3(-1f, 1.2f, 7.2f), -80f, 5f, 6.8f); Snap(cam, rt, tag + "_5_kitchen");
             g.EditorCam(new Vector3(-2f, 1.0f, -4f), 200f, 12f, 3.5f); Snap(cam, rt, tag + "_6_player");
+            g.EditorCam(new Vector3(-11.5f, 1.0f, -0.8f), -75f, 8f, 5f); Snap(cam, rt, tag + "_7_booths");
+            g.EditorCam(new Vector3(0f, 1.2f, -8f), 180f, 6f, 5.5f); Snap(cam, rt, tag + "_8_entrance");
+            g.EditorCam(new Vector3(10.5f, 1.0f, 4f), 55f, 10f, 6f); Snap(cam, rt, tag + "_9_sake");
         }
     }
 
