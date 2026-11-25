@@ -16,6 +16,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -42,6 +44,17 @@ jobs:
           buildMethod: CiBuild.Desktop
           allowDirtyBuild: true
           customParameters: -buildNumber ${{ github.run_number }}
+
+      - name: Publish screenshots to the ci-shots-sushi branch
+        if: always() && matrix.target == 'StandaloneWindows64'
+        run: |
+          mkdir -p shots && sudo chown -R "$(id -u)" shots
+          cd shots
+          git init -q && git checkout -q -b ci-shots-sushi
+          git config user.name ci && git config user.email ci@users.noreply.github.com
+          echo "${{ github.sha }}" > commit.txt
+          git add -A && git commit -qm "shots for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-shots-sushi
 
       # upload-artifact drops the executable bit, so the game is zipped first
       - name: Zip the build

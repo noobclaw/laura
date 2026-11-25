@@ -73,9 +73,43 @@ public static class CiBuild
         AssetDatabase.SaveAssets(); AssetDatabase.Refresh();
     }
 
+    // Builds the scene without entering play mode and saves pictures, so the look can be reviewed without a machine.
+    static void Snap(Camera cam, RenderTexture rt, string name)
+    {
+        cam.targetTexture = rt; cam.Render();
+        RenderTexture.active = rt;
+        var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); tex.Apply();
+        RenderTexture.active = null;
+        Directory.CreateDirectory("../../../shots");
+        File.WriteAllBytes("../../../shots/" + name + ".png", tex.EncodeToPNG());
+        Debug.Log("CiBuild: wrote shot " + name);
+    }
+
+    static void Shots()
+    {
+        Debug.Log("CiBuild: shots on " + SystemInfo.graphicsDeviceType + " / " + SystemInfo.graphicsDeviceName);
+        var rt = new RenderTexture(1600, 900, 24, RenderTextureFormat.ARGB32);
+        for (int pass = 0; pass < 2; pass++)
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var g = new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();
+            var cam = g.EditorSetup(pass == 1);
+            string tag = pass == 0 ? "hider" : "hunter";
+            g.EditorCam(new Vector3(0f, 0.3f, -3f), 0f, 48f, 26f); Snap(cam, rt, tag + "_1_wide");
+            g.EditorCam(new Vector3(-4f, 0.3f, -4.5f), 20f, 35f, 8f); Snap(cam, rt, tag + "_2_belt");
+            g.EditorCam(new Vector3(0f, 0.3f, -7.6f), 0f, 38f, 4.5f); Snap(cam, rt, tag + "_3_close");
+            g.EditorCam(new Vector3(0f, 4f, 0f), 180f, 12f, 30f); Snap(cam, rt, tag + "_4_from_back");
+        }
+    }
+
     public static void Desktop()
     {
         Setup();
+        if (Arg("-customBuildTarget", EditorUserBuildSettings.activeBuildTarget.ToString()).Contains("Windows"))
+        {
+            try { Shots(); } catch (Exception e) { Debug.LogWarning("CiBuild: Shots failed: " + e); }
+        }
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         new GameObject("SushiGame").AddComponent<DontEatSushi.SushiGame>();

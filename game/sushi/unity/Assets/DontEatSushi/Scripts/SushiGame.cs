@@ -5,7 +5,15 @@ using UnityEngine;
 
 namespace DontEatSushi
 {
-    public enum Phase { Prep, Hunt, Win, Lose }
+    public enum Phase { Menu, Prep, Hunt, Win, Lose }
+    public enum Role { Hider, Hunter }
+
+    public class Bot
+    {
+        public GameObject go;
+        public Slot slot;
+        public bool caught;
+    }
 
     public class Slot
     {
@@ -31,6 +39,13 @@ namespace DontEatSushi
         public float prepTime = 60f, huntTime = 150f;
 
         [System.NonSerialized] public Phase phase;
+        [System.NonSerialized] public Role role = Role.Hider;
+        [System.NonSerialized] public List<Bot> bots = new List<Bot>();
+        int ammo, found;
+        float ammoT, whistleT, hintT;
+        LineRenderer hintRing;
+        public const int MaxAmmo = 6;
+        public float hunterTime = 120f;
         [System.NonSerialized] public List<Plate> plates = new List<Plate>();
         [System.NonSerialized] public Transform player;
         [System.NonSerialized] public Paintable playerPaint;
@@ -68,7 +83,138 @@ namespace DontEatSushi
             new Color32(60, 110, 170, 255), new Color32(200, 60, 50, 255)
         };
 
-        void Start() { Build(); }
+        void Start() { Build(); phase = Phase.Menu; }
+
+        static void Kill(Object o)
+        {
+            if (o == null) return;
+            if (Application.isPlaying) Destroy(o); else DestroyImmediate(o);
+        }
+
+        void StartRound(Role r)
+        {
+            if (root != null) Kill(root.gameObject);
+            player = null;
+            role = r;
+            Build();
+            Sfx.Beep(660f, 0.12f, 0.3f);
+            if (r == Role.Hunter)
+            {
+                timer = 8f;
+                player.gameObject.SetActive(false);
+                diner.enabled = false;
+                SpawnBots(4);
+                ammo = MaxAmmo; found = 0; ammoT = 0f; whistleT = 22f;
+                camTarget = new Vector3(0f, 0.3f, -3f); camDist = 13f; camPitch = 50f; camYaw = 0f;
+                Toast("壽司們正在躲藏，請稍候。");
+            }
+        }
+
+        // ---------------- 電腦壽司（玩家當食客時） ----------------
+
+        void SpawnBots(int count)
+        {
+            bots.Clear();
+            var empty = new List<Slot>();
+            foreach (var p in plates) foreach (var s in p.slots) if (s.sushi == null) empty.Add(s);
+            for (int i = 0; i < count; i++)
+            {
+                var b = new Bot();
+                int skill = Random.Range(0, 3);
+                bool onPlate = i < count - 1 && empty.Count > 0;
+                if (onPlate)
+                {
+                    int k = Random.Range(0, empty.Count);
+                    var slot = empty[k]; empty.RemoveAt(k);
+                    var go = new GameObject("Bot");
+                    go.transform.SetParent(slot.tr, false);
+                    var pt = go.AddComponent<Paintable>();
+                    pt.Init(SushiShapes.Get(SushiShapes.ShapeOf(slot.plate.kind)), slot.plate.kind, false);
+                    pt.Degrade(skill == 0 ? 0.75f : skill == 1 ? 0.45f : 0.2f, skill == 0 ? 0.14f : skill == 1 ? 0.08f : 0.04f, skill == 0 ? 0.2f : skill == 1 ? 0.11f : 0f);
+                    slot.sushi = go;
+                    if (slot.marker != null) slot.marker.gameObject.SetActive(false);
+                    b.go = go; b.slot = slot;
+                }
+                else
+                {
+                    bool island = Random.value < 0.4f;
+                    Vector3 pos = island ? new Vector3(Random.Range(-7f, 7f), 0.5f, Random.Range(-1.5f, 1.5f)) : new Vector3(Random.Range(-15f, 15f), 0f, Random.Range(-9.6f, -7.2f));
+                    Color col = island ? new Color(0.90f, 0.86f, 0.78f) : new Color(0.74f, 0.54f, 0.32f);
+                    var go = new GameObject("Bot");
+                    go.transform.SetParent(root, false);
+                    go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
+                    var pt = go.AddComponent<Paintable>();
+                    pt.Init(SushiShapes.Get(Random.value < 0.5f ? ShapeKind.Nigiri : ShapeKind.Maki), SushiKind.Blank, false);
+                    pt.FillNoisy(col, 0.05f);
+                    pt.Degrade(0f, 0.03f, skill == 0 ? 0.16f : 0f);
+                    b.go = go;
+                }
+                bots.Add(b);
+            }
+        }
+
+        void HunterControl(float dt)
+        {
+            Vector3 mv = Vector3.zero;
+            if (In.Held(K.W)) mv.z += 1f;
+            if (In.Held(K.S)) mv.z -= 1f;
+            if (In.Held(K.D)) mv.x += 1f;
+            if (In.Held(K.A)) mv.x -= 1f;
+            if (mv.sqrMagnitude > 0f)
+            {
+                camTarget += Quaternion.Euler(0f, camYaw, 0f) * mv.normalized * 8f * dt;
+                camTarget.x = Mathf.Clamp(camTarget.x, -17f, 17f);
+                camTarget.z = Mathf.Clamp(camTarget.z, -10f, 9f);
+            }
+            if (phase != Phase.Hunt) return;
+
+            if (ammo < MaxAmmo) { ammoT += dt; if (ammoT >= 7f) { ammoT = 0f; ammo++; } }
+            if (hintT > 0f) { hintT -= dt; if (hintT <= 0f && hintRing != null) hintRing.gameObject.SetActive(false); }
+            whistleT -= dt;
+            if (whistleT <= 0f)
+            {
+                whistleT = 25f;
+                var alive = bots.FindAll(x => !x.caught && x.go != null);
+                if (alive.Count > 0)
+                {
+                    var b = alive[Random.Range(0, alive.Count)];
+                    if (hintRing == null) hintRing = Ring(root, 3.5f, 0.09f, new Color(0.3f, 0.9f, 1f));
+                    Vector2 off = Random.insideUnitCircle * 2.5f;
+                    hintRing.transform.position = new Vector3(b.go.transform.position.x + off.x, 0.6f, b.go.transform.position.z + off.y);
+                    hintRing.gameObject.SetActive(true);
+                    hintT = 3.5f;
+                    Sfx.Beep(1320f, 0.25f, 0.25f);
+                    Toast("有壽司吹口哨了，就在藍圈裡。");
+                }
+            }
+
+            Vector2 mp = In.MousePos;
+            bool overHud = mp.y < 118f * (Screen.height / 720f);
+            if (In.LmbDown && !overHud)
+            {
+                if (ammo < 1) { Toast("醬油用完了，等它補充。"); Sfx.Beep(180f, 0.1f, 0.25f); return; }
+                ammo--;
+                Sfx.Beep(240f, 0.08f, 0.35f);
+                Physics.SyncTransforms();
+                RaycastHit hit;
+                if (!Physics.Raycast(cam.ScreenPointToRay(mp), out hit, 300f)) return;
+                var stain = Prim(PrimitiveType.Sphere, "Stain", hit.point, new Vector3(0.35f, 0.04f, 0.35f), Mats.Lit(new Color(0.12f, 0.06f, 0.04f), 0.8f), false);
+                if (Application.isPlaying) Destroy(stain, 8f);
+                Bot hitBot = null;
+                foreach (var b in bots) if (!b.caught && b.go != null && hit.collider.gameObject == b.go) hitBot = b;
+                if (hitBot != null)
+                {
+                    hitBot.caught = true; found++;
+                    if (hitBot.slot != null) hitBot.slot.sushi = null;
+                    Kill(hitBot.go);
+                    Sfx.Beep(880f, 0.1f, 0.35f); Sfx.Beep(1320f, 0.18f, 0.3f);
+                    Toast("抓到一個假壽司！還剩 " + (bots.Count - found) + " 個。");
+                    if (found >= bots.Count) { phase = Phase.Win; Sfx.Beep(1040f, 0.4f, 0.35f); }
+                }
+                else if (hit.collider.GetComponent<Paintable>() != null) Toast("那是真壽司，浪費了一發。");
+                else Toast("沒打中。");
+            }
+        }
 
         // ---------------- 搭場景 ----------------
 
@@ -83,8 +229,8 @@ namespace DontEatSushi
             var col = go.GetComponent<Collider>();
             if (col != null)
             {
-                if (!keepCollider) Destroy(col);
-                else if (type == PrimitiveType.Cylinder) { Destroy(col); go.AddComponent<BoxCollider>(); }
+                if (!keepCollider) Kill(col);
+                else if (type == PrimitiveType.Cylinder) { Kill(col); go.AddComponent<BoxCollider>(); }
             }
             return go;
         }
@@ -103,7 +249,7 @@ namespace DontEatSushi
                 lr.SetPosition(i, new Vector3(Mathf.Cos(a) * radius, 0f, Mathf.Sin(a) * radius));
             }
             lr.startWidth = width; lr.endWidth = width;
-            lr.material = Mats.Unlit(c);
+            lr.sharedMaterial = Mats.Unlit(c);
             lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             lr.receiveShadows = false;
             return lr;
@@ -135,7 +281,7 @@ namespace DontEatSushi
         void Build()
         {
             root = new GameObject("World").transform;
-            plates.Clear();
+            plates.Clear(); bots.Clear(); hintRing = null;
             attached = null; playerAttached = false; playerMoving = false;
             maxSuspicion = 0f; survived = 0f; stroke = false;
             phase = Phase.Prep; timer = prepTime;
@@ -261,6 +407,7 @@ namespace DontEatSushi
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 200f;
             cg.AddComponent<AudioListener>();
+            Sfx.Init(cg);
 
             SpawnPlayer(new Vector3(0f, 0f, -7.6f));
             camTarget = player.position;
@@ -275,7 +422,7 @@ namespace DontEatSushi
 
         void SpawnPlayer(Vector3 pos)
         {
-            if (player != null) Destroy(player.gameObject);
+            if (player != null) Kill(player.gameObject);
             var go = new GameObject("Player");
             go.transform.SetParent(root, false);
             go.transform.position = pos;
@@ -287,9 +434,28 @@ namespace DontEatSushi
 
         void Restart()
         {
-            if (root != null) Destroy(root.gameObject);
+            if (root != null) Kill(root.gameObject);
             player = null;
+            role = Role.Hider;
             Build();
+            phase = Phase.Menu;
+        }
+
+        // 給雲端截圖用：不進播放模式也能把場景搭出來
+        public Camera EditorSetup(bool hunterView)
+        {
+            Build();
+            phase = Phase.Hunt;
+            if (hunterView) { role = Role.Hunter; player.gameObject.SetActive(false); SpawnBots(4); }
+            for (int i = 0; i < 160; i++) MovePlates(0.05f);
+            return cam;
+        }
+
+        public void EditorCam(Vector3 target, float yaw, float pitch, float dist)
+        {
+            Quaternion rot = Quaternion.Euler(pitch, yaw, 0f);
+            cam.transform.position = target + rot * new Vector3(0f, 0f, -dist);
+            cam.transform.rotation = rot;
         }
 
         // ---------------- 傳送帶 ----------------
@@ -368,6 +534,27 @@ namespace DontEatSushi
 
             MovePlates(dt);
 
+            if (phase == Phase.Menu)
+            {
+                if (In.Down(K.Digit1)) StartRound(Role.Hider);
+                else if (In.Down(K.Digit2)) StartRound(Role.Hunter);
+                return;
+            }
+            if (role == Role.Hunter && (phase == Phase.Prep || phase == Phase.Hunt))
+            {
+                timer -= dt;
+                if (phase == Phase.Hunt) survived += dt;
+                HunterControl(dt);
+                if (phase == Phase.Prep && timer <= 0f)
+                {
+                    phase = Phase.Hunt; timer = hunterTime;
+                    foreach (var p in plates) foreach (var s in p.slots) if (s.marker != null) s.marker.gameObject.SetActive(false);
+                    Toast("開吃！左鍵擠醬油打假壽司，打錯會浪費醬油。");
+                }
+                else if (phase == Phase.Hunt && timer <= 0f) { phase = Phase.Lose; Sfx.Beep(200f, 0.5f, 0.3f); }
+                return;
+            }
+
             if (phase == Phase.Prep || phase == Phase.Hunt)
             {
                 timer -= dt;
@@ -376,13 +563,13 @@ namespace DontEatSushi
                 PaintControl();
                 if (phase == Phase.Prep && (timer <= 0f || In.Down(K.Space)))
                 {
-                    phase = Phase.Hunt; timer = huntTime;
+                    phase = Phase.Hunt; timer = huntTime; Sfx.Beep(520f, 0.3f, 0.3f);
                     foreach (var p in plates) foreach (var s in p.slots) if (s.marker != null) s.marker.gameObject.SetActive(false);
                     Toast("食客入座了！黃圈是他正在看的地方。");
                 }
                 else if (phase == Phase.Hunt && timer <= 0f)
                 {
-                    phase = Phase.Win;
+                    phase = Phase.Win; Sfx.Beep(1040f, 0.4f, 0.35f);
                     Toast("");
                 }
             }
@@ -489,6 +676,7 @@ namespace DontEatSushi
             if (In.LmbDown && !overHud)
             {
                 stroke = true; lastMouse = mp;
+                Sfx.Beep(700f, 0.03f, 0.12f);
                 playerPaint.PushUndo();
                 Physics.SyncTransforms();
                 DabAt(mp);
@@ -524,7 +712,7 @@ namespace DontEatSushi
             }
             float sc = In.Scroll;
             if (Mathf.Abs(sc) > 0.01f) camDist = Mathf.Clamp(camDist - Mathf.Sign(sc) * 0.7f, 1.6f, 16f);
-            if (player != null && player.gameObject.activeSelf) camTarget = player.position + Vector3.up * 0.3f;
+            if (role == Role.Hider && player != null && player.gameObject.activeSelf) camTarget = player.position + Vector3.up * 0.3f;
             Quaternion rot = Quaternion.Euler(camPitch, camYaw, 0f);
             cam.transform.position = camTarget + rot * new Vector3(0f, 0f, -camDist);
             cam.transform.rotation = rot;
@@ -537,7 +725,7 @@ namespace DontEatSushi
         public void Caught()
         {
             if (phase != Phase.Hunt) return;
-            phase = Phase.Lose;
+            phase = Phase.Lose; Sfx.Beep(200f, 0.5f, 0.3f);
             if (player != null) player.gameObject.SetActive(false);
             Toast("");
         }
@@ -572,6 +760,34 @@ namespace DontEatSushi
             Color panel = new Color(0.13f, 0.08f, 0.06f, 0.88f);
             Color gold = new Color(0.92f, 0.74f, 0.36f);
 
+            if (phase == Phase.Menu)
+            {
+                Box(new Rect(W / 2f - 320f, H / 2f - 190f, 640f, 380f), panel);
+                Box(new Rect(W / 2f - 320f, H / 2f - 190f, 640f, 3f), gold);
+                Box(new Rect(W / 2f - 320f, H / 2f + 187f, 640f, 3f), gold);
+                GUI.Label(new Rect(W / 2f - 320f, H / 2f - 170f, 640f, 70f), "別吃壽司", sBig);
+                var mc = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 22 };
+                var ms2 = new GUIStyle(sSmall) { alignment = TextAnchor.MiddleCenter };
+                Rect r1 = new Rect(W / 2f - 270f, H / 2f - 70f, 250f, 150f), r2 = new Rect(W / 2f + 20f, H / 2f - 70f, 250f, 150f);
+                Box(r1, new Color(0.80f, 0.30f, 0.20f, 0.95f)); Box(r2, new Color(0.18f, 0.28f, 0.52f, 0.95f));
+                GUI.Label(new Rect(r1.x, r1.y + 20f, r1.width, 50f), "當壽司", mc);
+                GUI.Label(new Rect(r1.x + 10f, r1.y + 70f, r1.width - 20f, 70f), "把自己塗成周圍的樣子，別被食客發現（按 1）", ms2);
+                GUI.Label(new Rect(r2.x, r2.y + 20f, r2.width, 50f), "當食客", mc);
+                GUI.Label(new Rect(r2.x + 10f, r2.y + 70f, r2.width - 20f, 70f), "找出混在裡面的假壽司，擠醬油打它（按 2）", ms2);
+                if (GUI.Button(r1, GUIContent.none, GUIStyle.none)) StartRound(Role.Hider);
+                if (GUI.Button(r2, GUIContent.none, GUIStyle.none)) StartRound(Role.Hunter);
+                GUI.Label(new Rect(W / 2f - 320f, H / 2f + 120f, 640f, 40f), "單人練習版：對手由電腦控制", ms2);
+                return;
+            }
+            if (role == Role.Hunter && phase == Phase.Prep)
+            {
+                Box(new Rect(0f, 0f, W, H), new Color(0.05f, 0.03f, 0.02f, 0.97f));
+                GUI.Label(new Rect(0f, H / 2f - 60f, W, 70f), "壽司們正在躲藏…", sBig);
+                var pc = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 26 };
+                GUI.Label(new Rect(0f, H / 2f + 20f, W, 40f), Mathf.Max(0, Mathf.CeilToInt(timer)).ToString(), pc);
+                return;
+            }
+
             // 頂部
             Box(new Rect(W / 2f - 190f, 10f, 380f, 46f), panel);
             Box(new Rect(W / 2f - 190f, 54f, 380f, 2f), gold);
@@ -580,7 +796,7 @@ namespace DontEatSushi
             var mid = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 22 };
             GUI.Label(new Rect(W / 2f - 190f, 10f, 380f, 44f), title + "　" + (t / 60) + ":" + (t % 60).ToString("00"), mid);
 
-            if (phase == Phase.Hunt && diner != null)
+            if (phase == Phase.Hunt && diner != null && role == Role.Hider)
             {
                 float s = Mathf.Clamp01(diner.suspicion);
                 Box(new Rect(W / 2f - 150f, 64f, 300f, 14f), panel);
@@ -595,8 +811,19 @@ namespace DontEatSushi
                 GUI.Label(new Rect(W / 2f - 330f, 92f, 660f, 40f), toast, c);
             }
 
+            if (role == Role.Hunter && phase == Phase.Hunt)
+            {
+                Box(new Rect(0f, H - 118f, W, 118f), panel);
+                Box(new Rect(0f, H - 118f, W, 2f), gold);
+                GUI.Label(new Rect(20f, H - 106f, 120f, 30f), "醬油", sLabel);
+                for (int i = 0; i < MaxAmmo; i++)
+                    Box(new Rect(90f + i * 34f, H - 104f, 26f, 26f), i < ammo ? new Color(0.35f, 0.16f, 0.08f) : new Color(1f, 1f, 1f, 0.15f));
+                GUI.Label(new Rect(320f, H - 106f, 400f, 30f), "已找到 " + found + " / " + bots.Count, sLabel);
+                GUI.Label(new Rect(20f, H - 62f, W - 40f, 50f), "WASD 移動視角　右鍵拖曳 轉鏡頭　滾輪 縮放　左鍵 擠醬油\n假壽司的顏色、花紋會有破綻，仔細看。每 25 秒會有一個壽司吹口哨。", sSmall);
+            }
+
             // 底部：調色盤
-            if (phase == Phase.Prep || phase == Phase.Hunt)
+            if (role == Role.Hider && (phase == Phase.Prep || phase == Phase.Hunt))
             {
                 Box(new Rect(0f, H - 118f, W, 118f), panel);
                 Box(new Rect(0f, H - 118f, W, 2f), gold);
@@ -623,12 +850,17 @@ namespace DontEatSushi
                 Box(new Rect(W / 2f - 280f, H / 2f - 130f, 560f, 260f), panel);
                 Box(new Rect(W / 2f - 280f, H / 2f - 130f, 560f, 3f), gold);
                 Box(new Rect(W / 2f - 280f, H / 2f + 127f, 560f, 3f), gold);
-                GUI.Label(new Rect(W / 2f - 280f, H / 2f - 115f, 560f, 70f), phase == Phase.Win ? "你活下來了！" : "被吃掉了…", sBig);
+                string endTitle = role == Role.Hider ? (phase == Phase.Win ? "你活下來了！" : "被吃掉了…") : (phase == Phase.Win ? "全部找到了！" : "時間到，壽司贏了");
+                GUI.Label(new Rect(W / 2f - 280f, H / 2f - 115f, 560f, 70f), endTitle, sBig);
                 var c = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 20 };
                 int score = Mathf.RoundToInt(survived * 10f);
-                GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "存活 " + Mathf.FloorToInt(survived) + " 秒　得分 " + score, c);
-                GUI.Label(new Rect(W / 2f - 280f, H / 2f + 6f, 560f, 34f), "最危險的一刻：食客注意力 " + Mathf.RoundToInt(Mathf.Clamp01(maxSuspicion) * 100f) + "%", c);
-                GUI.Label(new Rect(W / 2f - 280f, H / 2f + 60f, 560f, 34f), "按 R 再來一局", c);
+                if (role == Role.Hider)
+                {
+                    GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "存活 " + Mathf.FloorToInt(survived) + " 秒　得分 " + score, c);
+                    GUI.Label(new Rect(W / 2f - 280f, H / 2f + 6f, 560f, 34f), "最危險的一刻：食客注意力 " + Mathf.RoundToInt(Mathf.Clamp01(maxSuspicion) * 100f) + "%", c);
+                }
+                else GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "找到 " + found + " / " + bots.Count + "　用時 " + Mathf.FloorToInt(survived) + " 秒", c);
+                GUI.Label(new Rect(W / 2f - 280f, H / 2f + 60f, 560f, 34f), "按 R 回到選單", c);
             }
 
             if (debugView && diner != null && diner.rt != null)

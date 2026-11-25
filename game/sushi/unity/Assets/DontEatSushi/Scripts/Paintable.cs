@@ -59,6 +59,35 @@ namespace DontEatSushi
         }
     }
 
+    /// 用程式產生的簡單提示音，之後換成正式音效。
+    public static class Sfx
+    {
+        static AudioSource src;
+        static readonly Dictionary<int, AudioClip> clips = new Dictionary<int, AudioClip>();
+        public static void Init(GameObject host) { src = host.AddComponent<AudioSource>(); src.playOnAwake = false; }
+        public static void Beep(float freq, float dur, float vol)
+        {
+            if (src == null || !Application.isPlaying) return;
+            int key = Mathf.RoundToInt(freq) * 1000 + Mathf.RoundToInt(dur * 100f);
+            AudioClip clip;
+            if (!clips.TryGetValue(key, out clip) || clip == null)
+            {
+                const int rate = 44100;
+                int n = Mathf.Max(1, (int)(rate * dur));
+                var data = new float[n];
+                for (int i = 0; i < n; i++)
+                {
+                    float x = i / (float)rate, env = Mathf.Exp(-x / (dur * 0.35f)) * Mathf.Min(1f, i / 200f);
+                    data[i] = (Mathf.Sin(x * freq * 6.2832f) + 0.35f * Mathf.Sin(x * freq * 12.566f)) * env * 0.6f;
+                }
+                clip = AudioClip.Create("beep" + key, n, 1, rate, false);
+                clip.SetData(data, 0);
+                clips[key] = clip;
+            }
+            src.PlayOneShot(clip, vol);
+        }
+    }
+
     public class Paintable : MonoBehaviour
     {
         public SushiShape shape;
@@ -116,6 +145,51 @@ namespace DontEatSushi
         {
             for (int i = 0; i < px.Length; i++) px[i] = c;
             dirty = true;
+        }
+
+        /// 用帶一點雜色的單一顏色塗滿（電腦壽司偽裝成桌面時用）。
+        public void FillNoisy(Color c, float noise)
+        {
+            var pos = shape.texPos;
+            for (int i = 0; i < px.Length; i++)
+            {
+                float g = Mathf.PerlinNoise(pos[i].x * 9f + 3f, pos[i].z * 30f + pos[i].y * 11f) - 0.5f;
+                Color k = c * (1f + g * 2f * noise); k.a = 1f;
+                px[i] = k;
+            }
+            dirty = true; Flush();
+        }
+
+        /// 把貼圖弄得「不夠像」：flat 讓花紋變糊，tint 讓顏色偏掉，miss 留一塊沒塗的白。
+        public void Degrade(float flat, float tint, float miss)
+        {
+            var pos = shape.texPos; var part = shape.texPart;
+            var sum = new Vector3[4]; var cnt = new int[4];
+            for (int i = 0; i < px.Length; i++)
+            {
+                int q = part[i]; if (q > 3) continue;
+                sum[q] += new Vector3(px[i].r, px[i].g, px[i].b); cnt[q]++;
+            }
+            Vector3 t = new Vector3(1f + Random.Range(-tint, tint), 1f + Random.Range(-tint, tint), 1f + Random.Range(-tint, tint));
+            Vector3 hole = Vector3.zero; bool hasHole = miss > 0f;
+            if (hasHole)
+            {
+                for (int tries = 0; tries < 200; tries++)
+                {
+                    int k = Random.Range(0, px.Length);
+                    if (part[k] != 255 && shape.texNrm[k].y > 0.3f) { hole = pos[k]; break; }
+                }
+            }
+            for (int i = 0; i < px.Length; i++)
+            {
+                int q = part[i]; if (q > 3) continue;
+                Vector3 c = new Vector3(px[i].r, px[i].g, px[i].b);
+                if (cnt[q] > 0) c = Vector3.Lerp(c, sum[q] / cnt[q], flat);
+                c = Vector3.Scale(c, t);
+                if (hasHole && (pos[i] - hole).sqrMagnitude < miss * miss) c = new Vector3(244f, 242f, 234f);
+                px[i] = new Color32((byte)Mathf.Clamp(c.x, 0f, 255f), (byte)Mathf.Clamp(c.y, 0f, 255f), (byte)Mathf.Clamp(c.z, 0f, 255f), 255);
+            }
+            dirty = true; Flush();
         }
 
         /// 在世界座標 wp 處畫一個半徑 wr 的點。wn 是命中處的法線，背對它的表面不上色。

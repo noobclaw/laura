@@ -174,7 +174,7 @@ namespace DontEatSushi
             aiCam.transform.LookAt(gazePoint);
             ring.transform.position = gazePoint;
             Color rc = suspicion >= 1f ? new Color(1f, 0.15f, 0.1f) : suspicion >= 0.35f ? new Color(1f, 0.55f, 0.1f) : new Color(1f, 0.9f, 0.3f);
-            Mats.SetColor(ring.material, rc);
+            Mats.SetColor(ring.sharedMaterial, rc);
 
             if (grace <= 0f && (state == St.Scan || state == St.Investigate))
             {
