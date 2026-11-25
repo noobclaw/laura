@@ -63,14 +63,14 @@
     var c = new SG.Critter(spec, { seed: G.ents.length + 1, atlas: RULES.paint.textureSize });
     scene.add(c.root);
     var e = { id: id, c: c, spec: spec, team: team, bot: !!o.bot, x: o.x || 0, y: o.y || 0, z: o.z || 0, yaw: o.yaw || 0, vy: 0, vx: 0, vz: 0, speed: 0, air: false, out: false, name: o.name || spec.name,
-      rad: team === 'dog' ? 0.22 : Math.max(0.13, spec.bellyR * 0.95), step: 0.14, sus: 0, decoyOf: o.decoyOf || null };
+      rad: team === 'dog' ? 0.22 : Math.max(0.13, spec.bellyR * 0.95), step: 0.16, sus: 0, decoyOf: o.decoyOf || null };
     if (o.pose) c.setPose(o.pose);
     place(e); G.ents.push(e); return e;
   }
   function place(e) { e.c.root.position.set(e.x, e.y, e.z); if (e.cling) e.c.root.rotation.set(-1.25, Math.atan2(-e.cling.nx, -e.cling.nz), 0, 'YXZ'); else e.c.root.rotation.set(0, e.yaw, 0, 'YXZ'); }
   function clearEnts() {
     G.ents.forEach(function (e) { scene.remove(e.c.root); e.c.dispose(); }); G.ents = []; G.decoys = [];
-    G.balls.forEach(function (b) { scene.remove(b.m); }); G.balls = []; G.marks.forEach(function (m) { scene.remove(m); }); G.marks = [];
+    G.balls.forEach(function (b) { scene.remove(b.m); }); G.balls = []; room.resetProps(); G.marks.forEach(function (m) { scene.remove(m); }); G.marks = [];
     G.confetti.forEach(function (p) { scene.remove(p.m); }); G.confetti = [];
     G.me = null; if (G.vm) { camera.remove(G.vm); scene.remove(camera); G.vm = null; }
   }
@@ -78,9 +78,9 @@
   function cats() { return G.ents.filter(function (e) { return e.team === 'cat'; }); }
 
   function moveEnt(e, dx, dz, dt) {
-    var h = e.team === 'dog' ? 0.5 : 0.3;
-    if (dx && !room.blocked(e.x + dx, e.z, e.y, e.rad, e.step, h)) e.x += dx; else if (dx) e.hitWallX = dx;
-    if (dz && !room.blocked(e.x, e.z + dz, e.y, e.rad, e.step, h)) e.z += dz; else if (dz) e.hitWallZ = dz;
+    var h = e.team === 'dog' ? 0.5 : 0.3, hit;
+    if (dx) { hit = room.blocked(e.x + dx, e.z, e.y, e.rad, e.step, h); if (!hit) e.x += dx; else { e.hitWallX = dx; e.hitPlat = hit; } }
+    if (dz) { hit = room.blocked(e.x, e.z + dz, e.y, e.rad, e.step, h); if (!hit) e.z += dz; else { e.hitWallZ = dz; e.hitPlat = hit; } }
   }
   function physEnt(e, dt) {
     if (e.cling) return;
@@ -94,7 +94,7 @@
 
   /* ------------------------------------------------------------------ title */
   function toTitle() {
-    clearEnts(); G.mode = 'title'; G.side = null; G.state = null;
+    clearEnts(); G.mode = 'title'; G.side = null; G.state = null; G.fly = null;
     var C = SG.CATS, Dg = SG.DOGS;
     spawn('t1', C.mochi, 'cat', { x: -0.55, z: -0.25, y: 0.38, yaw: 0.35, pose: 'loaf' });
     var b = spawn('t2', C.soba, 'cat', { x: -1.8, z: 1.3, yaw: 0.7, pose: 'sit' });
@@ -130,7 +130,7 @@
   /* ------------------------------------------------------------------ round */
   var CAT_KEYS = ['mochi', 'soba', 'wata', 'dango'], DOG_KEYS = ['shiba', 'corgi', 'bull', 'poodle'];
   G.start = function (side, breed) {
-    clearEnts(); G.side = side; G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0;
+    clearEnts(); G.side = side; G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0;
     var players = [];
     if (side === 'cat') {
       breed = breed || 'mochi';
@@ -139,11 +139,11 @@
       var others = CAT_KEYS.filter(function (k) { return k !== breed; });
       others.forEach(function (k, i) { spawn('cat' + i, SG.CATS[k], 'cat', { bot: true }); players.push({ id: 'cat' + i, team: 'cat' }); });
       var dk = DOG_KEYS[Math.floor(rnd() * 4)];
-      var d = spawn('dog0', SG.DOGS[dk], 'dog', { bot: true, x: -6.0, z: 1.3, yaw: Math.PI / 2 }); d.breed = dk; players.push({ id: 'dog0', team: 'dog' });
+      var d = spawn('dog0', SG.DOGS[dk], 'dog', { bot: true, x: -5.6, z: 2.0, yaw: Math.PI }); d.breed = dk; players.push({ id: 'dog0', team: 'dog' });
       G.cam.yaw = 0; G.cam.pitch = 0.3; G.cam.dist = 2.4;
     } else {
       breed = breed || 'shiba';
-      G.me = spawn('you', SG.DOGS[breed], 'dog', { x: -3.7, z: 1.3, yaw: Math.PI / 2, name: '你' }); G.me.breed = breed;
+      G.me = spawn('you', SG.DOGS[breed], 'dog', { x: -5.6, z: 1.3, yaw: Math.PI / 2, name: '你' }); G.me.breed = breed;
       G.me.pitch = 0; players.push({ id: 'you', team: 'dog' });
       CAT_KEYS.forEach(function (k, i) { spawn('cat' + i, SG.CATS[k], 'cat', { bot: true }); players.push({ id: 'cat' + i, team: 'cat' }); });
       buildLauncher();
@@ -165,7 +165,7 @@
       if (ev.phase === 'reveal') enterReveal();
       if (ev.phase === 'lobby') { toTitle(); }
     }
-    if (ev.type === 'out') { var c = ent(ev.cat); if (c) { c.out = true; c.c.setPose('stand'); c.c.frozen = false; c.vy = 3.2; c.y += 0.02; burst(c); G.decoys.filter(function (dd) { return dd.decoyOf === c.id; }).forEach(function (dd) { dd.c.root.visible = false; }); } }
+    if (ev.type === 'out') { var c = ent(ev.cat); if (c && c === G.me && !G.fly) { var cd = V(); camera.getWorldDirection(cd); G.fly = { p: camera.position.clone(), yaw: Math.atan2(cd.x, cd.z), pitch: Math.asin(cd.y) }; G.paint.on = false; bus.emit('paintmode', { on: false }); bus.emit('spectate'); } if (c) { c.out = true; c.c.setPose('stand'); c.c.frozen = false; c.vy = 3.2; c.y += 0.02; burst(c); G.decoys.filter(function (dd) { return dd.decoyOf === c.id; }).forEach(function (dd) { dd.c.root.visible = false; }); } }
     bus.emit(ev.type, ev);
   }
   /* bots choose a spot, strike a pose and camouflage themselves against what a seeker would see behind them */
@@ -237,7 +237,7 @@
     var best = null, bd = wd;
     cats().concat(G.decoys).forEach(function (c) { // exact test against the cat's own meshes
       if (c.out || !c.c.root.visible) return;
-      ray.far = bd; var h = ray.intersectObjects(c.c.meshes, false)[0];
+      ray.far = bd; var h = c.c.raycast(ray);
       if (h && h.distance < bd) { bd = h.distance; best = c; }
     });
     var target = best ? (best.decoyOf ? ent(best.decoyOf) : best) : null;
@@ -258,18 +258,13 @@
       if (b.state === 'fly') {
         b.t += dt; var d = b.t * RULES.dog.ballSpeed;
         if (d >= b.hitD) {
-          d = b.hitD; b.state = 'roll'; b.m.position.copy(b.o).addScaledVector(b.d, d - 0.04);
-          b.v.copy(b.d).reflect(b.n).multiplyScalar(b.hitCat ? 2.2 : 3.5); b.v.y += 1.2;
+          d = b.hitD; b.m.position.copy(b.o).addScaledVector(b.d, d - 0.05);
+          b.v.copy(b.d).reflect(b.n).multiplyScalar(b.hitCat ? 2.5 : 5.5); b.v.y += 1.2;
           if (b.mark) { var mk = new THREE.Mesh(new THREE.CircleGeometry(0.045, 14), new THREE.MeshBasicMaterial({ color: 0xcfe04a, transparent: true, opacity: 0.7, depthWrite: false })); mk.position.copy(b.o).addScaledVector(b.d, b.hitD).addScaledVector(b.n, 0.006); mk.lookAt(tmp.copy(mk.position).add(b.n)); mk.layers.set(1); scene.add(mk); G.marks.push(mk); }
+          // from here on the ball is an ordinary physics body: it bounces off props and pushes them, and stays where it stops (the reveal shows the misses)
+          b.state = 'body'; b.body = room.addBall(b.m, b.m.position.x, b.m.position.y, b.m.position.z, b.v.x, b.v.y, b.v.z);
           bus.emit('bounce', { hit: !!b.hitCat });
         } else { b.m.position.copy(b.o).addScaledVector(b.d, d); b.m.position.y -= 0.5 * RULES.dog.ballGravity * b.t * b.t; }
-      } else if (b.state === 'roll') {
-        b.v.y -= 9.8 * dt; var p = b.m.position; p.addScaledVector(b.v, dt);
-        var g = room.groundAt(p.x, p.z, p.y + 0.1, 0) + 0.035;
-        if (p.y < g) { p.y = g; if (b.v.y < -0.8) b.v.y *= -0.45; else b.v.y = 0; b.v.x *= 0.985; b.v.z *= 0.985; }
-        var bn = room.bounds; if (p.x < bn.x0 || p.x > bn.x1) { b.v.x *= -0.5; p.x = Math.max(bn.x0, Math.min(bn.x1, p.x)); } if (p.z < bn.z0 || p.z > bn.z1 + 3) { b.v.z *= -0.5; p.z = Math.max(bn.z0, Math.min(bn.z1 + 3, p.z)); }
-        var sp = Math.hypot(b.v.x, b.v.z); b.v.x *= Math.exp(-dt * 0.9); b.v.z *= Math.exp(-dt * 0.9); b.m.rotation.x += sp * dt / 0.035; b.m.rotation.z += sp * dt * 6;
-        if (sp < 0.03 && Math.abs(b.v.y) < 0.05 && p.y <= g + 0.001) b.state = 'rest'; // balls stay where they land: the reveal shows where the dog guessed wrong
       }
     }
   }
@@ -306,7 +301,6 @@
   }
 
   /* ------------------------------------------------------------------ bot dog */
-  var WPS = [[-3.6, 1.3], [-2.2, 1.7], [-0.4, 2.0], [1.6, 2.1], [3.1, 1.2], [3.2, -0.6], [2.6, -2.3], [0.9, -2.5], [-1.0, -2.3], [-2.9, -2.2], [-3.3, -0.3], [-2.3, 0.9], [0.9, 0.9], [1.0, -1.4]];
   function botDog(d, dt) {
     var ai = d.ai; if (!ai || G.state.phase !== 'seek') { d.speed = 0; return; }
     var eyeH = RULES.dog.eyeHeight[d.breed] || 0.6, eye = V(d.x, d.y + eyeH, d.z), p = G.state.players[d.id];
@@ -345,11 +339,11 @@
       return;
     }
     if (ai.heard) { tx = ai.heard[0]; tz = ai.heard[1]; if (Math.hypot(tx - d.x, tz - d.z) < 1.4) { ai.heard = null; ai.wait = 2.2; } }
-    else { var w = WPS[ai.wp % WPS.length]; tx = w[0]; tz = w[1]; if (Math.hypot(tx - d.x, tz - d.z) < 0.25) { ai.wp += 1 + Math.floor(rnd() * 2); ai.wait = 1.2 + rnd() * 1.6; ai.look = (rnd() - 0.5) * 2.4; } }
+    else { var WPS = room.route, w = WPS[ai.wp % WPS.length]; tx = w[0]; tz = w[1]; if (Math.hypot(tx - d.x, tz - d.z) < 0.3) { ai.wp += 1; ai.wait = rnd() < 0.45 ? 0.8 + rnd() * 1.4 : 0; ai.look = (rnd() - 0.5) * 2.4; } }
     if (ai.wait > 0) { ai.wait -= dt; d.speed = 0; d.yaw += Math.sin(G.simT * 1.4) * dt * 0.9 + ai.look * dt * 0.4; return; }
     var want = Math.atan2(tx - d.x, tz - d.z); d.yaw = turn(d.yaw, want, dt * 4);
     var sp = RULES.dog.speed * 0.55, px = d.x, pz = d.z; moveEnt(d, Math.sin(d.yaw) * sp * dt, Math.cos(d.yaw) * sp * dt, dt);
-    if (ai.mode === 'enter' && d.x < -4.3) { d.x += sp * dt; d.z += (1.3 - d.z) * dt * 3; if (d.x > -4.3) ai.mode = 'patrol'; }
+    if (ai.mode === 'enter') ai.mode = 'patrol';
     d.speed = Math.hypot(d.x - px, d.z - pz) / dt; if (d.speed < 0.2 && ai.mode !== 'enter') { ai.stuck = (ai.stuck || 0) + dt; if (ai.stuck > 0.8) { ai.wp++; ai.stuck = 0; ai.heard = null; } } else ai.stuck = 0;
   }
   function turn(a, b, k) { var d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * Math.min(1, k); }
@@ -464,6 +458,7 @@
       var dx = e.movementX || (e.clientX - G.mouse.x), dy = e.movementY || (e.clientY - G.mouse.y); G.mouse.x = e.clientX; G.mouse.y = e.clientY;
       if (G.mode === 'play' && G.me && G.me.team === 'dog' && G.state.phase !== 'reveal') { if (document.pointerLockElement === canvas || G.mouse.down[0] || G.mouse.down[2]) { G.me.yaw -= dx * 0.0032; G.me.pitch = Math.max(-1.2, Math.min(1.2, (G.me.pitch || 0) - dy * 0.0032)); } return; }
       if (G.stroking) paintAt(e.clientX, e.clientY, false);
+      else if (G.fly && (G.orbiting || G.mouse.down[0] || G.mouse.down[2])) { G.fly.yaw -= dx * 0.004; G.fly.pitch = Math.max(-1.4, Math.min(1.4, G.fly.pitch - dy * 0.004)); }
       else if (G.orbiting) { G.cam.yaw -= dx * 0.006; G.cam.pitch = Math.max(-0.25, Math.min(1.35, G.cam.pitch + dy * 0.005)); }
     });
     canvas.addEventListener('wheel', function (e) {
@@ -503,8 +498,9 @@
           else if (l > 0.01) {
             mvx /= l; mvz /= l; var sp = RULES.cat.walkSpeed * (me.c.pose === 'stand' ? 1 : 0.0);
             if (me.c.pose !== 'stand') G.setPose('stand');
-            me.hitWallX = me.hitWallZ = 0; moveEnt(me, mvx * sp * dt, mvz * sp * dt, dt); me.yaw = turn(me.yaw, Math.atan2(mvx, mvz), dt * 12);
-            if (me.air && (me.hitWallX || me.hitWallZ) && me.y > 0.25 && atWall(me)) { me.cling = { nx: me.hitWallX ? -Math.sign(me.hitWallX) : 0, nz: me.hitWallZ ? -Math.sign(me.hitWallZ) : 0 }; me.vy = 0; me.air = false; bus.emit('cling', { on: true }); }
+            me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; moveEnt(me, mvx * sp * dt, mvz * sp * dt, dt); me.yaw = turn(me.yaw, Math.atan2(mvx, mvz), dt * 12);
+            var hp = me.hitPlat; // jumping at any wall of the house (not furniture) clings to it
+            if (me.air && hp && hp !== true && hp.wall && hp.y1 - hp.y0 > 1.0 && me.y - room.groundAt(me.x, me.z, me.y + 0.1, 0) > 0.2 && me.y < hp.y1 - 0.5) { me.cling = { nx: me.hitWallX ? -Math.sign(me.hitWallX) : 0, nz: me.hitWallX ? 0 : -Math.sign(me.hitWallZ), p: hp }; me.vy = 0; me.air = false; bus.emit('cling', { on: true }); }
             if (G.guide === 0 && (G.moved = (G.moved || 0) + sp * dt) > 1.5) setGuide(1);
           }
           me.speed = Math.hypot(me.x - px, me.z - pz) / Math.max(dt, 1e-4);
@@ -532,17 +528,18 @@
     }
     G.decoys.forEach(function (d) { if (d.c.root.visible) d.c.update(dt, rnd); });
     bumpers.push({ x: room.vac.x, y: 0, z: room.vac.z, r: 0.2, speed: 0.4 });
-    G.balls.forEach(function (b) { if (b.state === 'roll') bumpers.push({ x: b.m.position.x, y: b.m.position.y - 0.03, z: b.m.position.z, r: 0.06, speed: b.v.length() * 0.4 }); });
+    room.stepTriggers(dt, G.ents.filter(function (e) { return !e.fp || true; }));
     room.stepProps(dt, bumpers, function (kp, landed) { bus.emit('bump', { type: kp.type, landed: !!landed, x: kp.x, z: kp.z }); var d = ent('dog0'); if (d && d.ai && !landed) d.ai.heard = d.ai.heard || [kp.x, kp.z]; });
     stepBalls(dt); stepConfetti(dt);
     updateCamera(dt);
     if (G.mode === 'play' && st) bus.emit('frame', { left: st.left, phase: st.phase });
   }
-  function atWall(e) { var b = room.bounds; return e.x < b.x0 + e.rad + 0.05 || e.x > b.x1 - e.rad - 0.05 || e.z < b.z0 + e.rad + 0.05; }
   function clingMove(e, f, s, dt) {
-    var k = G.keys, up = (k[' '] || f > 0 ? 1 : 0) - (f < 0 ? 1 : 0), sp = RULES.cat.clingSpeed; // no Ctrl here: Ctrl+W would close the browser tab
-    e.y = Math.max(0.15, Math.min(SG.ROOM.H - 0.5, e.y + up * sp * dt));
-    var ax = e.cling.nz, az = -e.cling.nx; if (s) { var nx = e.x + ax * s * sp * dt, nz = e.z + az * s * sp * dt; if (!room.blocked(nx, nz, e.y, e.rad * 0.5, 0.05, 0.2)) { e.x = nx; e.z = nz; } }
+    var k = G.keys, up = (k[' '] || f > 0 ? 1 : 0) - (f < 0 ? 1 : 0), sp = RULES.cat.clingSpeed, p = e.cling.p; // no Ctrl here: Ctrl+W would close the browser tab
+    var lo = Math.max(p.y0, room.groundAt(e.x, e.z, e.y, 0)) + 0.12;
+    e.y = Math.max(lo, Math.min(p.y1 - 0.5, e.y + up * sp * dt));
+    var ax = e.cling.nz, az = -e.cling.nx;
+    if (s) { var nx = e.x + ax * s * sp * dt, nz = e.z + az * s * sp * dt, pad = e.rad + 0.12; if (!room.blocked(nx, nz, e.y, e.rad * 0.5, 0.05, 0.2) && nx > p.x0 - pad && nx < p.x1 + pad && nz > p.z0 - pad && nz < p.z1 + pad) { e.x = nx; e.z = nz; } }
     e.speed = Math.abs(up) + Math.abs(s) > 0 ? sp : 0;
   }
 
@@ -553,14 +550,17 @@
       var a = G.time * 0.06; cm.free.p.set(Math.sin(a) * 0.7, 0.95 + Math.sin(a * 0.7) * 0.05, 4.3 + Math.cos(a) * 0.12);
       camera.fov = 46; camera.position.copy(cm.free.p); camera.lookAt(cm.free.t);
     } else if (cm.free) { camera.position.copy(cm.free.p); camera.lookAt(cm.free.t); if (cm.free.fov) camera.fov = cm.free.fov; }
-    else if (G.state && G.state.phase === 'reveal') {
-      if (!G.orbiting) cm.yaw += dt * 0.1;
-      camera.fov = 70; camera.position.set(Math.sin(cm.yaw) * 3.9, 1.95, Math.cos(cm.yaw) * 2.9 - 0.2); camera.lookAt(Math.sin(cm.yaw) * -1.0, 0.25, Math.cos(cm.yaw) * -0.8 - 0.2);
+    else if (G.fly) { // free spectator camera: reveal, and after being caught
+      var F = G.fly, k = G.keys, sp = (k.Shift ? 9 : 4) * dt, cdx = Math.sin(F.yaw) * Math.cos(F.pitch), cdy = Math.sin(F.pitch), cdz = Math.cos(F.yaw) * Math.cos(F.pitch);
+      var fw = (k.w || k.ArrowUp ? 1 : 0) - (k.s || k.ArrowDown ? 1 : 0), st = (k.d || k.ArrowRight ? 1 : 0) - (k.a || k.ArrowLeft ? 1 : 0), ud = (k[' '] || k.e ? 1 : 0) - (k.c ? 1 : 0);
+      F.p.x += (cdx * fw - Math.cos(F.yaw) * st) * sp; F.p.z += (cdz * fw + Math.sin(F.yaw) * st) * sp; F.p.y += (cdy * fw + ud) * sp;
+      F.p.x = Math.max(-7.7, Math.min(7.7, F.p.x)); F.p.z = Math.max(-7.4, Math.min(8.4, F.p.z)); F.p.y = Math.max(0.15, Math.min(5.5, F.p.y));
+      camera.fov = 62; camera.position.copy(F.p); camera.lookAt(F.p.x + cdx, F.p.y + cdy, F.p.z + cdz);
     } else if (me && me.team === 'cat') {
       var ctr = me.c.center(tmp); var ty = ctr.y + 0.12, dist = cm.dist * (G.paint.on ? 0.62 : 1);
-      var px = ctr.x + Math.sin(cm.yaw) * Math.cos(cm.pitch) * dist, py = ty + Math.sin(cm.pitch) * dist, pz = ctr.z + Math.cos(cm.yaw) * Math.cos(cm.pitch) * dist;
-      var W = SG.ROOM.W - 0.2, D = SG.ROOM.D - 0.2;
-      px = Math.max(-W, Math.min(W, px)); pz = Math.max(-D, Math.min(SG.ROOM.EN + 1.3, pz)); py = Math.max(0.12, Math.min(SG.ROOM.H - 0.25, py));
+      var ox = Math.sin(cm.yaw) * Math.cos(cm.pitch) * dist, oy = Math.sin(cm.pitch) * dist, oz = Math.cos(cm.yaw) * Math.cos(cm.pitch) * dist;
+      var tw = room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
+      var px = ctr.x + ox * kk, py = Math.max(room.base(ctr.x, ctr.z) + 0.1, ty + oy * kk), pz = ctr.z + oz * kk;
       camera.fov = 52; camera.position.lerp(tmp2.set(px, py, pz), 1 - Math.exp(-dt * 14)); camera.lookAt(ctr.x, ty, ctr.z);
     } else if (me && me.team === 'dog') {
       var eh = RULES.dog.eyeHeight[me.breed] || 0.6, fp = !G.third;
@@ -568,13 +568,14 @@
       var dx = Math.sin(me.yaw) * Math.cos(me.pitch), dy = Math.sin(me.pitch), dz = Math.cos(me.yaw) * Math.cos(me.pitch);
       camera.fov = 62;
       if (fp) { var bob = me.speed > 0.2 ? Math.sin(G.simT * 11) * 0.012 : 0; camera.position.set(me.x + Math.sin(me.yaw) * 0.12, me.y + eh + bob, me.z + Math.cos(me.yaw) * 0.12); camera.lookAt(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
-      else { camera.position.set(me.x - dx * 2.0, me.y + eh + 0.5 - dy * 1.2, me.z - dz * 2.0); camera.position.x = Math.max(-4.3, Math.min(4.3, camera.position.x)); camera.position.z = Math.max(-3.3, Math.min(3.8, camera.position.z)); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
+      else { var t3 = Math.max(0.15, room.segWalls(me.x, me.y + eh, me.z, me.x - dx * 2.2, me.y + eh + 0.55 - dy * 1.3, me.z - dz * 2.2) - 0.06); camera.position.set(me.x - dx * 2.0 * t3, me.y + eh + (0.5 - dy * 1.2) * t3, me.z - dz * 2.0 * t3); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
       if (G.vm) { G.recoil = Math.max(0, G.recoil - dt * 3.2); var rc = G.recoil * G.recoil; G.vm.position.set(0.21, -0.185 - Math.abs(Math.sin(G.simT * 5.5)) * (me.speed > 0.2 ? 0.008 : 0), -0.42 + rc * 0.09); G.vm.rotation.x = 0.02 + rc * 0.35; var p = G.state.players.you; G.vmBall.visible = p.balls > 0 && G.simT - p.lastShot > RULES.dog.shotIntervalSec * 0.6; }
     }
     camera.updateProjectionMatrix(); camera.updateMatrixWorld(true);
   }
   function enterReveal() {
-    G.paint.on = false; G.cam.free = null; G.cam.pitch = 0.5; G.third = true; if (G.vm) G.vm.visible = false;
+    G.paint.on = false; G.cam.free = null; G.third = true; if (G.vm) G.vm.visible = false;
+    if (!G.fly) G.fly = { p: V(0.6, 2.2, 3.4), yaw: Math.PI, pitch: -0.42 };
     if (document.exitPointerLock) try { document.exitPointerLock(); } catch (e) { }
     G.ents.forEach(function (e) {
       e.c.root.visible = true; e.fp = false;

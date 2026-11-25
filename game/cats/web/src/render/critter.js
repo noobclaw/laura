@@ -84,7 +84,7 @@
     };
     this._shelf = { x: 0, y: 0, h: 0 };
     this._build();
-    this.root.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    this.skin.castShadow = true; this.skin.receiveShadow = true; this.faceSkin.receiveShadow = true;
     // pose state
     this.cur = {}; this.names = Object.keys(this.joints);
     this.names.forEach(function (n) { self.cur[n] = new THREE.Quaternion(); });
@@ -134,7 +134,7 @@
     geo.setAttribute('normal', new THREE.Float32BufferAttribute(N3, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(UV, 2));
     geo.setIndex(IX); geo.computeBoundingSphere();
-    var mesh = new THREE.Mesh(geo, this.mat);
+    var mesh = new THREE.Mesh(geo, this.mat); mesh.layers.set(3); // not drawn: the merged skinned mesh is; kept for raycasts and as a bone
     if (o.pos) mesh.position.set(o.pos[0], o.pos[1], o.pos[2]);
     if (o.rot) mesh.rotation.set(o.rot[0] * D2R, o.rot[1] * D2R, o.rot[2] * D2R);
     joint.add(mesh);
@@ -149,7 +149,7 @@
     return part;
   };
 
-  P._deco = function (joint, geo, mat, x, y, z) { var m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); joint.add(m); return m; };
+  P._deco = function (joint, geo, mat, x, y, z) { var m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.layers.set(3); joint.add(m); (this.decos = this.decos || []).push(m); return m; };
 
   P._build = function () {
     var S = this.spec, L = S.len, J = this._joint.bind(this), self = this, dog = S.kind === 'dog';
@@ -186,7 +186,7 @@
       var eg = new THREE.Group(); eg.position.set(p[0], p[1], p[2]); eg.lookAt(p[0] * 2 - hc[0], p[1] * 2 - hc[1] + 0.0, p[2] * 2 - hc[2]); head.add(eg);
       var e = new THREE.Mesh(new THREE.SphereGeometry(S.eye, 16, 12), dark); e.scale.set(0.9, 1.12, 0.42); eg.add(e);
       var hl = new THREE.Mesh(new THREE.SphereGeometry(S.eye * 0.26, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      hl.position.set(-S.eye * 0.28, S.eye * 0.42, S.eye * 0.36); e.add(hl); hl.scale.set(1.1, 0.9, 2.2);
+      hl.position.set(-S.eye * 0.28, S.eye * 0.42, S.eye * 0.36); e.add(hl); hl.scale.set(1.1, 0.9, 2.2); hl.layers.set(3); e.layers.set(3); self.decos = self.decos || []; self.decos.push(e, hl);
       self.eyes.push(eg);
     });
     var noseP = [0, mz[1] + S.muzzleR * (dog ? 0.3 : 0.36), mz[2] + (dog ? S.muzzleL * 1.38 + S.muzzleR * 0.3 : S.muzzleL * 0.3 + S.muzzleR * 0.42)];
@@ -248,7 +248,24 @@
       parent = tj;
     }
     if (S.pom) this._part('tailPom', parent, { prof: ell(0.065, 0.065), pos: [0, -sl, 0], tw: 96, th: 64, su: 14, sv: 8 });
-    this.baseQ = {};
+    this._skin();
+  };
+
+  /* one skinned mesh for the body (bones = the rigid parts) and one for the face details: 2 draw calls per animal */
+  P._skin = function () {
+    var ident = new THREE.Matrix4(), self = this;
+    function build(objs, mat, colored) {
+      var items = objs.map(function (o) { return [o.geometry, null, colored ? o.material.color : null]; });
+      var g = SG.geo.merge(items), n = g.attributes.position.count, si = new Uint16Array(n * 4), sw = new Float32Array(n * 4), k = 0;
+      objs.forEach(function (o, b) { var c = o.geometry.attributes.position.count; for (var i = 0; i < c; i++, k++) { si[k * 4] = b; sw[k * 4] = 1; } });
+      g.setAttribute('skinIndex', new THREE.BufferAttribute(si, 4)); g.setAttribute('skinWeight', new THREE.BufferAttribute(sw, 4));
+      var sk = new THREE.SkinnedMesh(g, mat); sk.frustumCulled = false;
+      sk.bind(new THREE.Skeleton(objs, objs.map(function () { return ident.clone(); })), ident);
+      self.root.add(sk); return sk;
+    }
+    this.skin = build(this.meshes, this.mat, false);
+    this.faceMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.28, envMapIntensity: 1.2 });
+    this.faceSkin = build(this.decos || [], this.faceMat, true); this.faceSkin.userData.noShadow = true;
   };
 
   /* ---------- pose + animation ---------- */
@@ -332,8 +349,7 @@
     } else {
       J.chest.scale.setScalar(1); J.body.scale.setScalar(1);
     }
-    var show = this.eyesOpen > 0.5;
-    if (this.face[0].visible !== show) this.face.forEach(function (o) { o.visible = show; });
+    this.faceSkin.visible = this.eyesOpen > 0.5;
     this._ground();
   };
 
@@ -353,8 +369,9 @@
   };
 
   /* ---------- painting ---------- */
-  P.raycast = function (raycaster) {
-    var hits = raycaster.intersectObjects(this.meshes, false);
+  P.raycast = function (raycaster) { // the part meshes live on layer 3
+    var m = raycaster.layers.mask; raycaster.layers.set(3);
+    var hits = raycaster.intersectObjects(this.meshes, false); raycaster.layers.mask = m;
     return hits.length ? hits[0] : null;
   };
   /* 3D brush: every texel within `radius` of the world point is painted, on every part — so seams and joints just work */
@@ -509,7 +526,7 @@
       return [Math.max(0, Math.min(255, c[0])), Math.max(0, Math.min(255, c[1])), Math.max(0, Math.min(255, c[2]))];
     });
   };
-  P.dispose = function () { this.texA.dispose(); this.texO.dispose(); this.mat.dispose(); this.meshes.forEach(function (m) { m.geometry.dispose(); }); };
+  P.dispose = function () { this.texA.dispose(); this.texO.dispose(); this.mat.dispose(); this.faceMat.dispose(); this.skin.geometry.dispose(); this.faceSkin.geometry.dispose(); this.skin.skeleton.dispose(); this.faceSkin.skeleton.dispose(); this.meshes.forEach(function (m) { m.geometry.dispose(); }); };
 
   SG.Critter = Critter;
 })();

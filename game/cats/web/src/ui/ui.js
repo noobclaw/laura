@@ -53,6 +53,8 @@
       bus.on('alert', function (d) { if (d.cat === 'you' || G.decoys.some(function (x) { return x.id === d.cat; })) toast('狗狗盯上你了！'); });
       bus.on('suspicion', function (d) { els.susBar.style.width = Math.min(100, d.v * 100) + '%'; els.sus.classList.toggle('seen', d.seen); els.susTx.textContent = d.seen ? '狗狗正看著這邊' : '狗狗沒看到你'; });
       bus.on('end', function (d) { ui.lastEnd = d; });
+      bus.on('spectate', function () { ui.spect = true; hints(G.side, G.state.phase); show(els.poses, false); show(els.acts, false); });
+      bus.on('mode', function () { ui.spect = false; });
       bus.on('decoy', function (d) { toast(d.n ? '放了一個分身（被打中你也出局）' : '分身收回'); });
       bus.on('denied', function () { toast(G.decoyCd > 0 ? '分身冷卻中 ' + Math.ceil(G.decoyCd) + ' 秒' : '分身已達上限'); });
       bus.on('cling', function (d) { toast(d.on ? '貼牆中：W/S 上下，Shift 放開' : '放開了'); });
@@ -146,7 +148,7 @@
   function markPose(p) { [].forEach.call(els.poses.querySelectorAll('button'), function (b) { b.classList.toggle('on', b.dataset.pose === p); }); }
   function hints(side, phase) {
     var k = function (a, b) { return '<span><span class="key">' + a + '</span> ' + b + '</span>'; };
-    els.hints.innerHTML = phase === 'reveal' ? k('拖曳', '轉動視角') + k('Enter', '回標題') : side === 'cat'
+    els.hints.innerHTML = phase === 'reveal' || ui.spect ? k('WASD', '飛行') + k('空白／C', '升降') + k('拖曳', '轉頭') + k('Enter', phase === 'reveal' ? '回標題' : '看結果') : side === 'cat'
       ? k('WASD', '移動') + k('空白', '跳') + k('右鍵拖曳', '視角') + k('Alt+點', '取色') + (phase === 'prep' ? k('Enter', '準備好了') : '') + k('Esc', '說明')
       : k('WASD', '移動') + k('滑鼠／方向鍵', '看') + k('左鍵／空白', '發射') + k('V', '第三人稱') + k('Esc', '說明');
   }

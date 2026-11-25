@@ -33,7 +33,8 @@
     var room = new THREE.Group(); scene.add(room);
     var stat = new THREE.Group(), dyn = new THREE.Group(); room.add(stat, dyn);
     var inv = {}, platforms = [], updaters = [], knock = [], cur = stat, r = SG.rng(20261124);
-    function count(type, n) { inv[type] = (inv[type] || 0) + (n || 1); }
+    var curRoom = '客廳', invRoom = {};
+    function count(type, n) { inv[type] = (inv[type] || 0) + (n || 1); var ir = invRoom[curRoom] = invRoom[curRoom] || {}; ir[type] = (ir[type] || 0) + (n || 1); }
     /* begin a prop: a group at (x,y,z) rotated ry; following primitives go into it */
     function begin(type, x, y, z, ry, isDyn) { var g = new THREE.Group(); g.name = type || ''; g.position.set(x, y, z); g.rotation.y = ry || 0; (isDyn ? dyn : stat).add(g); cur = g; if (type) count(type); return g; }
     function add(geo, m, x, y, z, rx, ry, rz) { var o = new THREE.Mesh(geo, m); o.position.set(x || 0, y || 0, z || 0); if (rx || ry || rz) o.rotation.set(rx || 0, ry || 0, rz || 0); cur.add(o); return o; }
@@ -42,7 +43,7 @@
     function L(pts, m, x, y, z, seg) { return add(G.latheS(pts, seg || 20), m, x, y, z); }
     function S(rad, m, x, y, z, sx, sy, sz) { var o = add(new THREE.SphereGeometry(rad, 18, 14), m, x, y, z); if (sx) o.scale.set(sx, sy, sz); return o; }
     function PL(w, h, m, x, y, z, rx, ry, rz, uvm) { return add(uvm ? G.planeM(w, h) : new THREE.PlaneGeometry(w, h), m, x, y, z, rx, ry, rz); }
-    function plat(x0, x1, z0, z1, top, bottom) { platforms.push({ x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1), y1: top, y0: bottom || 0 }); }
+    function plat(x0, x1, z0, z1, top, bottom, wall) { var p = { x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1), y1: top, y0: bottom || 0, wall: !!wall }; platforms.push(p); return p; }
     /* platform from the current prop group (axis aligned props only) */
     function platG(g, w, d, top, bottom) { var c = Math.abs(Math.cos(g.rotation.y)), s = Math.abs(Math.sin(g.rotation.y)), hw = (w * c + d * s) / 2, hd = (w * s + d * c) / 2; plat(g.position.x - hw, g.position.x + hw, g.position.z - hd, g.position.z + hd, g.position.y + top, bottom == null ? 0 : g.position.y + bottom); }
     var fxMat = function (t, op) { return new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, opacity: op == null ? 1 : op, toneMapped: false }); };
@@ -123,9 +124,10 @@
     function post(x, z, h) { B(0.13, h || H, 0.13, darker, x, 0, z, 0.012, true); }
     function lintel(x0, x1, z, y, alongZ) { if (alongZ) B(0.14, 0.12, x1 - x0, darker, z, y, (x0 + x1) / 2, 0.012, true); else B(x1 - x0, 0.12, 0.14, darker, (x0 + x1) / 2, y, z, 0.012, true); }
     // north wall (z=-D): tokonoma recess x[-4.5,-2.9], doorway to kitchen x[-0.55,0.55]
-    wallZ(-D, -2.9, -0.55, 1); wallZ(-D, 0.55, W, 1);
+    wallZ(-D, -2.9, -0.55, 1); wallZ(-D, 0.55, 2.75, 1); wallZ(-D, 4.35, W, 1);
+    add(G.boxM(1.6, H - 2.0, 0.1), plaster, 3.55, 2.0 + (H - 2.0) / 2, -D - 0.05); lintel(2.68, 4.42, -D + 0.02, 1.94);
     add(G.boxM(1.1, H - 2.0, 0.1), plaster, 0, 2.0 + (H - 2.0) / 2, -D - 0.05); lintel(-0.62, 0.62, -D + 0.02, 1.94);
-    [-2.9, -0.62, 0.62, 2.35].forEach(function (x) { post(x, -D + 0.03); });
+    [-2.9, -0.62, 0.62, 2.68, 4.42].forEach(function (x) { post(x, -D + 0.03); });
     // west wall (x=-W): doorway to genkan z[0.7,1.9]
     wallX(-W, -D, 0.7, 1); wallX(-W, 1.9, EN, 1);
     add(G.boxM(0.1, H - 2.0, 1.2), plaster, -W - 0.05, 2.0 + (H - 2.0) / 2, 1.3); lintel(0.63, 1.97, -W + 0.02, 1.94, true);
@@ -158,6 +160,7 @@
     cur = stat;
 
     /* ================= GARDEN (beyond the engawa) ================= */
+    curRoom = '庭院';
     var grass = tx('moss', function () { return P.plaster('#7f9a55', 51); }, 1.0, 1), gravel = tx('gravel', function () { return P.plaster('#cfc6b4', 52); }, 0.6, 1);
     add(G.planeM(26, 9), grass, 0, -0.3, EN + 5.5, -Math.PI / 2);
     add(new THREE.CircleGeometry(2.6, 28), gravel, -0.6, -0.29, EN + 3.2, -Math.PI / 2).scale.set(1.5, 1, 1);
@@ -183,7 +186,7 @@
     [[0xf06a2a, 0xffffff], [0xf5f0e6, 0xd9432b], [0xe9b23a, 0xf5f0e6], [0xf06a2a, 0x1e1a18], [0xffffff, 0xf06a2a]].forEach(function (c, i) {
       var g = begin('錦鯉', 0, -0.25, 0, 0, true);
       S(0.1, col(c[0], 0.4), 0, 0, 0, 0.42, 0.3, 1.5); S(0.05, col(c[1], 0.4), 0, 0.012, 0.02, 0.7, 0.3, 1.2);
-      var tl = add(new THREE.ConeGeometry(0.05, 0.12, 6), col(c[0], 0.4), 0, 0, -0.19, Math.PI / 2, 0, 0); tl.scale.x = 0.25;
+      var tl = add(new THREE.ConeGeometry(0.05, 0.12, 6), col(c[0], 0.4), 0, 0, -0.19, Math.PI / 2, 0, 0); tl.scale.x = 0.25; tl.userData.keep = true;
       koi.push({ g: g, tl: tl, ph: i * 1.3, rad: 0.5 + (i % 3) * 0.28, sp: 0.35 + i * 0.05 });
     });
     updaters.push(function (t) { koi.forEach(function (k) { var a = t * k.sp + k.ph, x = 0.6 + Math.cos(a) * k.rad * 1.35, z = EN + 3.5 + Math.sin(a * 1.0) * k.rad * 0.9; k.g.position.x = x; k.g.position.z = z; k.g.rotation.y = -a + Math.sin(t * 5 + k.ph) * 0.16; k.tl.rotation.y = Math.sin(t * 7 + k.ph) * 0.6; }); });
@@ -229,6 +232,7 @@
 
     /* ================= ROOMS BEYOND THE DOORWAYS ================= */
     // kitchen (north): tiled floor, counter, fridge, shelf, kettle with steam
+    curRoom = '廚房';
     cur = stat;
     var tile = tx('tile', function () { return P.ichimatsu('#e9e2d0', '#9fb7b0', 64); }, 0.6, 0.35);
     add(G.planeM(5, 2.6), tile, 0, 0.001, -D - 1.3, -Math.PI / 2);
@@ -248,7 +252,7 @@
     var bowlC = [0x2f4b7c, 0xf5f1e8, 0xc8452e, 0x7a9a54, 0xd9a93a, 0x3f8f8a];
     for (var bi = 0; bi < 9; bi++) { begin(bi % 3 === 2 ? '湯碗' : '盤子', -1.25 + bi * 0.27, 1.54, -D - 2.5); if (bi % 3 === 2) L([[0, 0], [0.04, 0], [0.085, 0.07], [0.09, 0.075]], col(bowlC[bi % 6], 0.3)); else for (var pk = 0; pk < 3; pk++) C(0.1, 0.07, 0.016, col(bowlC[(bi + pk) % 6], 0.3), 0, pk * 0.018, 0); }
     for (bi = 0; bi < 6; bi++) { begin('調味罐', -1.0 + bi * 0.13, 0.87, -D - 2.42); C(0.035, 0.04, 0.12 + (bi % 3) * 0.03, col([0x7a4a2a, 0xe9dfc8, 0x3a2a1e, 0xb5462a, 0xd9c27a, 0x35502e][bi], 0.3), 0, 0, 0, 10); C(0.03, 0.03, 0.02, bi & 1 ? black : col(0xc8452e, 0.4), 0, 0.12 + (bi % 3) * 0.03, 0, 10); }
-    begin('廚房窗', -0.2, 1.75, -D - 2.54); PL(1.5, 0.8, mat('winGlow', { color: 0xdff0ff, emissive: 0xcfe8ff, emissiveIntensity: 2.4 }), 0, 0.2, 0); B(1.6, 0.06, 0.06, hinoki, 0, 0.6, 0); B(1.6, 0.06, 0.06, hinoki, 0, -0.26, 0); B(0.05, 0.86, 0.05, hinoki, 0, -0.23, 0);
+    begin('廚房窗', -0.2, 1.75, -D - 2.54); PL(1.5, 0.8, mat('winGlow', { color: 0xdff0ff, emissive: 0xcfe8ff, emissiveIntensity: 1.3 }), 0, 0.2, 0); B(1.6, 0.06, 0.06, hinoki, 0, 0.6, 0); B(1.6, 0.06, 0.06, hinoki, 0, -0.26, 0); B(0.05, 0.86, 0.05, hinoki, 0, -0.23, 0);
     // steam (shader billboards)
     var steamM = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false, side: THREE.DoubleSide, uniforms: { uTime: uTime, uAmt: { value: 1 } },
@@ -260,6 +264,7 @@
         '  float a=smoothstep(1.,0.2,d)*smoothstep(0.,0.12,p.y)*smoothstep(1.,0.45,p.y)*(0.45+0.55*n(vec2(p.x*5.,p.y*5.-uTime*1.6)));',
         '  gl_FragColor=vec4(vec3(1.6,1.55,1.5),a*0.5*uAmt); }'].join('\n')
     });
+    SG.steamProto = steamM;
     var steam = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.75), steamM); steam.position.set(0.5, 1.5, -D - 2.2); steam.layers.set(1); dyn.add(steam);
     count('蒸氣');
     // kitchen noren in the doorway (sways)
@@ -270,9 +275,10 @@
       add(new THREE.PlaneGeometry(0.355, 0.62, 4, 8), m, -0.365 + i * 0.365, 1.55, 0);
     });
     // genkan (west): step-down stone floor, shoe cabinet, shoes, umbrella stand
+    curRoom = '玄關';
     cur = stat;
     add(G.planeM(2.2, 3.2), tx('genkanFloor', function () { return P.plaster('#b9b2a4', 35); }, 0.7, 0.8), -W - 1.1, 0.001, 1.3, -Math.PI / 2);
-    add(G.boxM(0.1, H, 3.2), plaster, -W - 2.2, H / 2, 1.3); add(G.boxM(2.2, H, 0.1), plaster, -W - 1.1, H / 2, -0.3); add(G.boxM(2.2, H, 0.1), plaster, -W - 1.1, H / 2, 2.9); add(G.boxM(2.2, 0.08, 3.2), ceilW, -W - 1.1, H + 0.04, 1.3);
+    add(G.boxM(0.1, H, 3.2), plaster, -W - 2.2, H / 2, 1.3); add(G.boxM(2.2, 0.08, 3.2), ceilW, -W - 1.1, H + 0.04, 1.3);
     begin('鞋櫃', -W - 1.85, 0, 1.3, Math.PI / 2); B(1.5, 0.9, 0.42, hinoki, 0, 0, 0, 0.02, true); for (var sd = 0; sd < 3; sd++) { B(0.46, 0.76, 0.02, honey, -0.5 + sd * 0.5, 0.07, 0.215, 0.012); S(0.015, iron, -0.5 + sd * 0.5 + 0.17, 0.5, 0.235); }
     begin('招財貓', -W - 1.85, 0.9, 1.0, Math.PI / 2); L([[0, 0], [0.1, 0], [0.12, 0.08], [0.09, 0.19], [0, 0.2]], white); S(0.085, white, 0, 0.26, 0.01, 1.1, 0.95, 1);
     add(new THREE.ConeGeometry(0.03, 0.05, 4), white, -0.055, 0.34, 0); add(new THREE.ConeGeometry(0.03, 0.05, 4), white, 0.055, 0.34, 0); add(new THREE.TorusGeometry(0.075, 0.012, 6, 16), col(0xc8452e, 0.5), 0, 0.2, 0, Math.PI / 2); S(0.02, brass, 0, 0.185, 0.085);
@@ -290,6 +296,7 @@
     begin('玄關掛畫', -W - 2.14, 1.5, 1.3, Math.PI / 2); B(0.7, 0.5, 0.03, darker, 0, 0, 0, 0.01); PL(0.6, 0.4, tx('pSeig', function () { return P.seigaiha('#f1e7d2', '#2f4b7c', 32); }, null), 0, 0.25, 0.02);
 
     /* ================= NORTH WALL: tokonoma, step tansu, bookshelf, closet ================= */
+    curRoom = '客廳';
     // tokonoma
     cur = stat;
     add(G.boxM(1.6, H, 0.1), tx('plasterT', function () { return P.plaster('#d9c9a0', 36); }, 1.2, 0.95), -3.7, H / 2, -D - 0.6); add(G.boxM(0.1, H, 0.6), plaster, -2.85, H / 2, -D - 0.3);
@@ -327,7 +334,7 @@
     for (sv = 0; sv < 5; sv++) {
       var bx = -0.7, yy = sv * 0.372 + 0.04, kind = sv;
       while (bx < 0.66) {
-        var th = 0.028 + r() * 0.035, hg = 0.22 + r() * 0.1;
+        var th = 0.045 + r() * 0.05, hg = 0.22 + r() * 0.1;
         if (kind === 1 && bx > -0.1 && bx < 0.3) { bx += 0.4; continue; } // gap for the radio
         if (kind === 3 && bx > 0.25) { bx = 1; continue; }                // gap for the plant
         if (r() < 0.08) { bx += 0.05; continue; }
@@ -346,17 +353,6 @@
     plantPot(2.05, 1.156, -D + 0.24, 0.7, 0xf5f1e8, '虎尾蘭', snake);
     plantPot(1.05, 1.9, -D + 0.24, 0.9, 0x2f4b7c, '盆栽松', bonsai);
     begin('紙箱', 1.75, 1.9, -D + 0.24, 0.1); B(0.42, 0.24, 0.3, tx('card', function () { return P.plaster('#c9a36c', 37); }, 0.5, 0.9), 0, 0, 0, 0.008); B(0.44, 0.02, 0.06, cream, 0, 0.23, 0, 0.004);
-    // closet with fusuma (one door ajar) and a futon stack inside
-    cur = stat;
-    add(G.boxM(2.1, H, 0.1), plaster, 3.42, H / 2, -D - 0.85); add(G.boxM(0.1, H, 0.9), plaster, 2.36, H / 2, -D - 0.4); add(G.boxM(2.1, 0.06, 0.86), hinoki, 3.42, 0.95, -D - 0.42);
-    var fusT = SG.tex('fusuma', function () { var c = P.byobu(0); return c; });
-    function fusuma(x, z, n) { begin('襖', x, 0, z); B(0.98, 1.92, 0.035, black, 0, 0.02, 0, 0.006); PL(0.9, 1.84, mat('fus' + n, { map: SG.tex('fus' + n, function () { return P.byobu(n); }), roughness: 0.7 }), 0, 0.98, 0.019); C(0.03, 0.03, 0.01, iron, n ? 0.36 : -0.36, 0.95, 0.022, 12).rotation.x = Math.PI / 2; }
-    fusuma(3.95, -D + 0.02, 2); fusuma(3.3, -D - 0.03, 1); lintel(2.36, W, -D + 0.02, 1.94);
-    var futC = ['sakura', 'seigaiha', 'cream', 'asanoha'];
-    for (var fu = 0; fu < 4; fu++) { begin('棉被', 2.85, 0.02 + fu * 0.2, -D - 0.42); B(0.8, 0.19, 0.74, cloth[futC[fu]], 0, 0, 0, 0.07, true); }
-    begin('枕頭', 2.85, 0.98, -D - 0.42); B(0.5, 0.14, 0.32, cloth.ichiRed, 0, 0, 0, 0.06, true); begin('枕頭', 3.5, 0.98, -D - 0.45, 0.2); B(0.5, 0.14, 0.32, cloth.stripe, 0, 0, 0, 0.06, true);
-    plat(2.4, 3.3, -D - 0.8, -D, 0.82);
-
     /* ================= CENTRE: kotatsu on the tatami ================= */
     var KX = TX, KZ = TZ;
     begin('暖桌', KX, 0.03, KZ);
@@ -378,7 +374,7 @@
     var shade = mat('lampShade', { map: SG.tex('washi2', function () { return P.lantern('', '#f7ecd2', '#000', 26); }), emissive: 0xffc070, emissiveIntensity: 1.5, roughness: 0.9, side: THREE.DoubleSide });
     add(G.latheS([[0.07, 0], [0.26, -0.1], [0.3, -0.2], [0.24, -0.3], [0.12, -0.34]], 24), shade, 0, -0.6, 0); add(new THREE.TorusGeometry(0.12, 0.012, 6, 20), darker, 0, -0.94, 0, Math.PI / 2); add(new THREE.CylinderGeometry(0.075, 0.075, 0.03, 12), darker, 0, -0.6, 0);
     S(0.05, mat('bulb', { color: 0xfff0d0, emissive: 0xffd9a0, emissiveIntensity: 6 }), 0, -0.82, 0);
-    var cord = add(new THREE.CylinderGeometry(0.002, 0.002, 0.3, 4), black, 0.1, -1.08, 0); var knob = S(0.015, col(0xc8452e), 0.1, -1.24, 0);
+    var cord = add(new THREE.CylinderGeometry(0.002, 0.002, 0.3, 4), black, 0.1, -1.08, 0); var knob = S(0.015, col(0xc8452e), 0.1, -1.24, 0); cord.userData.keep = knob.userData.keep = true;
     glow(KX, H - 0.9, KZ, 1.5, 0xffc880, 0.5);
     updaters.push(function (t) { lamp.rotation.z = Math.sin(t * 1.1) * 0.012; lamp.rotation.x = Math.cos(t * 0.9) * 0.01; cord.rotation.z = knob.position.x = 0; knob.position.x = 0.1 + Math.sin(t * 2.1) * 0.02; cord.position.x = 0.1 + Math.sin(t * 2.1) * 0.01; });
 
@@ -448,7 +444,7 @@
     var fish = [];
     [0xf06a2a, 0xe9b23a, 0xf5f0e6, 0xd9432b, 0x4aa3e0, 0xf29a4a].forEach(function (c, i) {
       var g = new THREE.Group(); tank.add(g); cur = g; count('金魚');
-      S(0.03, col(c, 0.35), 0, 0, 0, 0.6, 0.85, 1.3); var tl = add(new THREE.ConeGeometry(0.025, 0.045, 5), col(c, 0.35), 0, 0, -0.05, Math.PI / 2, 0, 0); tl.scale.x = 0.2; S(0.005, black, 0.012, 0.006, 0.03);
+      S(0.03, col(c, 0.35), 0, 0, 0, 0.6, 0.85, 1.3); var tl = add(new THREE.ConeGeometry(0.025, 0.045, 5), col(c, 0.35), 0, 0, -0.05, Math.PI / 2, 0, 0); tl.scale.x = 0.2; tl.userData.keep = true; S(0.005, black, 0.012, 0.006, 0.03);
       fish.push({ g: g, tl: tl, ph: i * 1.7, y: 0.14 + (i % 3) * 0.1, sp: 0.5 + (i % 4) * 0.12 });
     });
     var bubbles = []; for (var bb = 0; bb < 8; bb++) { cur = tank; bubbles.push(S(0.006 + (bb % 3) * 0.003, mat('bubble', { color: 0xffffff, emissive: 0xbfefff, emissiveIntensity: 1.2, transparent: true, opacity: 0.7 }), -0.3, 0.1, 0.1)); }
@@ -519,7 +515,7 @@
     updaters.push(function (t) { var w = Math.sin(t * 1.3) * 0.5 + Math.sin(t * 0.37) * 0.5; chime.rotation.z = w * 0.07; tanzaku.rotation.z = w * 0.5; tanzaku.rotation.y = t * 0.8 + Math.sin(t * 2.1); });
     // robot vacuum (roams a fixed loop, deterministic in round time)
     var vac = begin('掃地機器人', 0, 0, 0, 0, true); C(0.17, 0.17, 0.07, col(0xf5f1e8, 0.35), 0, 0.01, 0, 28); C(0.1, 0.1, 0.012, col(0x4aa3e0, 0.3), 0, 0.08, 0, 20); C(0.02, 0.02, 0.006, mat('vacLed', { color: 0x9fe870, emissive: 0x7fff60, emissiveIntensity: 3 }), 0, 0.092, 0.11, 8);
-    var vblob = blob(0, 0, 0.5, 0.5);
+    var vblob = blob(0, 0, 0.5, 0.5); vblob.userData.keep = true;
     var vPath = [[1.5, -2.6], [3.6, -2.4], [3.4, -0.2], [1.6, -0.6], [1.5, 1.9], [-0.3, 2.1], [-3.2, 1.6], [-3.4, -0.3], [-2.7, -2.4], [0.2, -2.7]], vLen = [], vTot = 0;
     vPath.forEach(function (p, i) { var q = vPath[(i + 1) % vPath.length], l = Math.hypot(q[0] - p[0], q[1] - p[1]); vLen.push(l); vTot += l; });
     var vacState = { x: 0, z: 0, r: 0.17, top: 0.09 };
@@ -534,8 +530,7 @@
     /* ================= KNOCKABLE SMALL PROPS (simple physics) ================= */
     function knockable(type, x, y, z, rad, build, shape) {
       var g = begin(type, x, y, z, r() * 6, true); build();
-      g.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-      knock.push({ g: g, type: type, x: x, y: y, z: z, vx: 0, vy: 0, vz: 0, r: rad, shape: shape || 'ball', tip: 0, tipDir: 0, home: [x, y, z] });
+      knock.push({ g: g, type: type, x: x, y: y, z: z, vx: 0, vy: 0, vz: 0, r: rad, shape: shape || 'ball', home: [x, y, z] });
     }
     var mk = col(0xf29a3a, 0.55);
     [[0, 0], [0.06, 0.03], [-0.05, 0.04], [0.01, -0.06], [0.02, 0.01]].forEach(function (m, i) { knockable('蜜柑', KX + 0.05 + m[0], 0.38 + 0.045 + (i === 4 ? 0.07 : 0.02), KZ - 0.05 + m[1], 0.042, function () { S(0.042, mk, 0, 0, 0, 1, 0.85, 1); S(0.006, leafD, 0, 0.034, 0); }); });
@@ -547,6 +542,21 @@
     [[-3.0, 2.25], [0.2, -2.9], [-2.2, -1.9]].forEach(function (c) { knockable('紙團', c[0], 0.04, c[1], 0.04, function () { add(new THREE.IcosahedronGeometry(0.04, 0), white, 0, 0, 0); }); });
     [[1.15, -2.5, 0x4aa3e0], [-3.9, 1.2, 0xc8452e]].forEach(function (c) { knockable('空罐', c[0], 0, c[1], 0.035, function () { C(0.033, 0.033, 0.12, col(c[2], 0.25, { metalness: 0.7 }), 0, 0, 0, 14); C(0.03, 0.03, 0.004, col(0xd8d6d0, 0.2, { metalness: 0.9 }), 0, 0.12, 0, 12); }, 'cup'); });
     [[W - 0.36, 0.42, -0.3], [-W + 0.6, 0.53, 0.08]].forEach(function (c, i) { knockable('小盆栽', c[0], c[1], c[2], 0.05, function () { L([[0, 0], [0.035, 0], [0.05, 0.07]], col(i ? 0xf29a4a : 0x3f8f8a, 0.5), 0, 0, 0, 12); S(0.05, leafM, 0, 0.1, 0, 1, 0.9, 1); }, 'cup'); });
+
+    /* ---- colliders for the living-room shell (walls are platforms flagged `wall`) ---- */
+    [[-W - 0.12, -W, -D, 0.7], [-W - 0.12, -W, 1.9, EN], [W, W + 0.12, -D, EN]].forEach(function (w) { plat(w[0], w[1], w[2], w[3], H, 0, true); });
+    [[-2.9, -0.55], [0.55, 2.75], [4.35, W]].forEach(function (w) { plat(w[0], w[1], -D - 0.12, -D, H, 0, true); });
+    plat(-W, -2.9, -D - 0.72, -D - 0.6, H, 0, true); plat(-2.9, -2.78, -D - 0.6, -D, H, 0, true); // tokonoma recess
+    plat(-W - 0.12, -W, 0.7, 1.9, H, 1.94, true); plat(-0.55, 0.55, -D - 0.12, -D, H, 1.94, true); plat(2.75, 4.35, -D - 0.12, -D, H, 1.94, true); // lintels
+    plat(-W, W, -D, EN, H + 0.12, H, true); // ceiling
+    /* ---- the rest of the house lives in house.js ---- */
+    var K = { scene: scene, room: room, stat: stat, dyn: dyn, fx: fx, begin: begin, add: add, B: B, C: C, L: L, S: S, PL: PL, plat: plat, platG: platG, blob: blob, glow: glow, fxMat: fxMat, aoM: aoM,
+      mat: mat, col: col, tx: tx, sway: sway, cloth: cloth, count: count, knockable: knockable, knock: knock, updaters: updaters, r: r, lintel: lintel, post: post, shoji: shoji, shojiM: shojiM,
+      setRoom: function (n) { curRoom = n; cur = stat; }, platforms: platforms, lights: [], triggers: [], spots: [], opt: opt,
+      m: { honey: honey, dark: dark, darker: darker, hinoki: hinoki, red: red, engW: engW, ceilW: ceilW, plaster: plaster, plasterG: plasterG, tatami: tatami, washi: washi, iron: iron, brass: brass, white: white, black: black, cream: cream, leafM: leafM, leafD: leafD, stoneM: stoneM, stoneD: stoneD, card: card, heri: heri, paper: paper, mapleM: mapleM, mapleO: mapleO, grass: grass, gravel: gravel, bam: bam, tile: tile },
+      plantPot: plantPot, snake: snake, monstera: monstera, bonsai: bonsai, daruma: daruma, kokeshi: kokeshi, book: book, cbox: cbox, bookC: bookC, W: W, D: D, H: H, EN: EN };
+    if (SG.buildHouse) SG.buildHouse(K);
+    cur = stat; curRoom = '客廳';
 
     /* ================= AO skirts + light shafts + dust ================= */
     function skirt(x, z, len, ry, h) { var o = new THREE.Mesh(new THREE.PlaneGeometry(len, h || 0.5), aoM); o.position.set(x, (h || 0.5) / 2, z); o.rotation.y = ry; o.layers.set(1); o.renderOrder = 1; fx.add(o); }
@@ -579,7 +589,7 @@
     /* ================= LIGHTS ================= */
     var sun = new THREE.DirectionalLight(0xffe6c4, 4.0); sun.position.copy(sunDir).multiplyScalar(14).add(new THREE.Vector3(0, 0, 1.5)); sun.target.position.set(0, 0, 1.5);
     sun.castShadow = true; sun.shadow.mapSize.set(opt.low ? 1024 : 2048, opt.low ? 1024 : 2048);
-    var sc = sun.shadow.camera; sc.left = -8.5; sc.right = 8.5; sc.top = 8; sc.bottom = -8; sc.near = 1; sc.far = 30; sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03; sun.shadow.radius = 5;
+    var sc = sun.shadow.camera; sc.left = -11; sc.right = 11; sc.top = 11; sc.bottom = -12; sc.near = 1; sc.far = 40; sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03; sun.shadow.radius = 5;
     var hemi = new THREE.HemisphereLight(0xfff4e6, 0xa89078, 1.2);
     var lampL = new THREE.PointLight(0xffc27a, 9, 8, 1.7); lampL.position.set(KX, H - 0.95, KZ);
     var bounce = new THREE.PointLight(0xffd7a0, 3.2, 8, 1.4); bounce.position.set(0.2, 1.25, 1.2); // sunlight bouncing off the floor
@@ -588,72 +598,219 @@
     [sun, sun.target, hemi, lampL, bounce, kitL, genL].forEach(function (l) { l.layers.set(1); room.add(l); });
     scene.add(SG.post ? SG.post.flatLight : new THREE.Group());
 
-    /* ================= static batching: one mesh per material ================= */
+    /* ================= static batching =================
+       flat-colour materials collapse into three vertex-coloured batches; textured ones get one batch each;
+       a single invisible proxy casts all static shadows. Moving props are baked per group. */
+    var flat = {
+      R: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82 }),
+      G: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.32 }),
+      M: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.38, metalness: 0.8 })
+    };
+    flat.D = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5 }); flat.D.name = 'flatDyn';
+    flat.R.name = 'flatRough'; flat.G.name = 'flatGloss'; flat.M.name = 'flatMetal';
+    function bucket(m) {
+      if (!m.isMeshStandardMaterial || m.map || m.transparent || m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile || m.side !== THREE.FrontSide) return null;
+      if (m.emissiveIntensity > 0 && (m.emissive.r + m.emissive.g + m.emissive.b) > 0) return null;
+      return m.metalness > 0.5 ? 'M' : m.roughness >= 0.6 ? 'R' : 'G';
+    }
     stat.updateMatrixWorld(true);
-    var groups = new Map(), tris = 0, statCount = 0;
-    stat.traverse(function (o) { if (o.isMesh) { statCount++; var k = o.material; if (!groups.has(k)) groups.set(k, []); groups.get(k).push([o.geometry, o.matrixWorld.clone()]); } });
+    var groups = new Map(), tris = 0, statCount = 0, casters = [];
+    stat.traverse(function (o) {
+      if (!o.isMesh) return; statCount++;
+      var bk = bucket(o.material), k = bk ? flat[bk] : o.material;
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push([o.geometry, o.matrixWorld.clone(), bk ? o.material.color : null]);
+      if (!o.material.transparent && !o.material.isShaderMaterial && !o.userData.noShadow) casters.push([o.geometry, o.matrixWorld]);
+    });
     var batched = new THREE.Group(); room.add(batched);
     groups.forEach(function (items, m) {
       var g = G.merge(items), mesh = new THREE.Mesh(g, m);
-      var noShadow = m.transparent || m.isShaderMaterial; mesh.castShadow = !noShadow; mesh.receiveShadow = !m.isShaderMaterial;
+      mesh.castShadow = false; mesh.receiveShadow = !m.isShaderMaterial;
       tris += g.index.count / 3; batched.add(mesh);
     });
+    var proxy = new THREE.Mesh(G.merge(casters), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthFunc: THREE.NeverDepth }));
+    proxy.castShadow = true; proxy.name = 'shadowProxy'; room.add(proxy);
     room.remove(stat);
-    dyn.traverse(function (o) { if (o.isMesh && !o.material.transparent && !o.material.isShaderMaterial) { o.castShadow = true; o.receiveShadow = true; } });
+    // moving props: merge the plain meshes directly under each group (sub-groups keep animating)
+    var dynMeshes = 0;
+    function bakeGroup(g) {
+      var kids = g.children.slice(), by = {};
+      kids.forEach(function (o) {
+        if (o.isGroup) { bakeGroup(o); return; }
+        if (!o.isMesh || o.userData.keep) return;
+        var bk = bucket(o.material); if (!bk) return; if (bk !== 'M') bk = 'D'; // moving props: one plain batch each
+        o.updateMatrix(); (by[bk] = by[bk] || []).push([o.geometry, o.matrix.clone(), o.material.color]); g.remove(o);
+      });
+      Object.keys(by).forEach(function (bk) { var m = new THREE.Mesh(G.merge(by[bk]), flat[bk]); m.userData.baked = true; g.add(m); });
+    }
+    dyn.children.forEach(function (g) { if (g.isGroup) bakeGroup(g); });
+    dyn.traverse(function (o) {
+      if (!o.isMesh) return; dynMeshes++;
+      var ok = !o.material.transparent && !o.material.isShaderMaterial;
+      if (ok) { o.receiveShadow = true; if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); o.castShadow = o.geometry.boundingSphere.radius > 0.075 && !o.userData.noShadow; }
+    });
+    // fx planes that share a material become one mesh
+    var fxBy = new Map(); fx.updateMatrixWorld(true);
+    fx.children.slice().forEach(function (o) { if (!o.isMesh || o.userData.keep) return; if (!fxBy.has(o.material)) fxBy.set(o.material, []); fxBy.get(o.material).push(o); });
+    fxBy.forEach(function (list, m) { if (list.length < 2) return; var mm = new THREE.Mesh(G.merge(list.map(function (o) { return [o.geometry, o.matrixWorld.clone()]; })), m); mm.layers.set(1); mm.renderOrder = list[0].renderOrder; list.forEach(function (o) { fx.remove(o); }); fx.add(mm); });
 
     /* ================= world queries ================= */
-    var bounds = { x0: -W + 0.12, x1: W - 0.12, z0: -D + 0.12, z1: EN + 1.4 };
-    function groundAt(x, z, y, rad) { // highest surface under the footprint that is not above y + step
-      var g = 0; rad = rad || 0;
+    var bounds = { x0: -7.85, x1: 7.85, z0: -7.6, z1: 8.55 };
+    function base(x, z) { return (z > EN + 1.5 || (z > EN + 0.4 && Math.abs(x) > 6.0)) ? -0.3 : 0; } // garden is 30 cm below the house floor
+    function groundAt(x, z, y, rad) { // highest surface under the footprint that is not above y
+      var g = base(x, z); rad = rad || 0;
       for (var i = 0; i < platforms.length; i++) { var p = platforms[i]; if (x > p.x0 - rad && x < p.x1 + rad && z > p.z0 - rad && z < p.z1 + rad && p.y1 <= y + 0.001 && p.y1 > g) g = p.y1; }
       var dx = x - vacState.x, dz = z - vacState.z; if (dx * dx + dz * dz < 0.2 * 0.2 && vacState.top <= y + 0.001 && vacState.top > g) g = vacState.top;
       return g;
     }
-    function blocked(x, z, y, rad, step, height) { // would a body of radius rad standing at height y collide?
+    /* would a body of radius rad standing at height y collide? returns the blocking platform, or true for the outer bounds / water */
+    function blocked(x, z, y, rad, step, height) {
       if (x < bounds.x0 + rad || x > bounds.x1 - rad || z < bounds.z0 + rad || z > bounds.z1 - rad) return true;
-      for (var i = 0; i < platforms.length; i++) { var p = platforms[i]; if (p.y1 <= y + step) continue; if (p.y0 >= y + (height || 0.3)) continue; if (x > p.x0 - rad && x < p.x1 + rad && z > p.z0 - rad && z < p.z1 + rad) return true; }
+      var px = (x - 0.6) / 1.5, pz = (z - (EN + 3.5)) / 1.1; if (px * px + pz * pz < 1 && y < 0.2) return true; // the pond
+      if (base(x, z) > y + step) return true;
+      for (var i = 0; i < platforms.length; i++) { var p = platforms[i]; if (p.y1 <= y + step) continue; if (p.y0 >= y + (height || 0.3)) continue; if (x > p.x0 - rad && x < p.x1 + rad && z > p.z0 - rad && z < p.z1 + rad) return p; }
       return false;
     }
+    /* first wall between two points (third-person camera): returns 0..1 along a->b */
+    function segWalls(ax, ay, az, bx, by, bz) {
+      var best = 1, dx = bx - ax, dy = by - ay, dz = bz - az;
+      for (var i = 0; i < platforms.length; i++) {
+        var p = platforms[i]; if (!p.wall) continue;
+        var t0 = 0, t1 = best, lo, hi, a, d, k, t;
+        for (k = 0; k < 3; k++) {
+          a = k === 0 ? ax : k === 1 ? ay : az; d = k === 0 ? dx : k === 1 ? dy : dz; lo = k === 0 ? p.x0 : k === 1 ? p.y0 : p.z0; hi = k === 0 ? p.x1 : k === 1 ? p.y1 : p.z1;
+          if (Math.abs(d) < 1e-9) { if (a < lo || a > hi) { t0 = 2; break; } } else { var ta = (lo - a) / d, tb = (hi - a) / d; if (ta > tb) { t = ta; ta = tb; tb = t; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) { t0 = 2; break; } }
+        }
+        if (t0 <= 1 && t0 < best) best = t0;
+      }
+      return best;
+    }
 
-    /* knockable physics: bump from critters, gravity, rolling, wall bounce */
+    /* ---- small rigid-body sim for the knockable props and the tennis balls ----
+       bodies are discs with a height: they collide with each other and with the room, rest on each other (stacks),
+       upright ones rock about their base edge and topple past the critical angle, lying cylinders roll across their axis. */
+    var GRAV = 9.8, _ax = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
+    knock.forEach(initBody);
+    function initBody(k) {
+      k.ball = k.shape === 'ball'; k.h = k.h || (k.ball ? k.r * 2 : k.shape === 'block' ? 0.075 : k.shape === 'roly' ? 0.2 : Math.max(0.07, k.r * 2.4));
+      k.hw = k.shape === 'block' ? 0.0375 : k.r * 0.8; k.m = k.m || Math.max(0.03, k.r * k.r * k.h * 900);
+      k.th = 0; k.tw = 0; k.dir = 0; k.lying = false; k.sleep = true; k.q0 = k.g.quaternion.clone(); k.cool = 0;
+      if (k.ball) k.y -= 0; return k;
+    }
+    function bodyBase(k) { return k.ball ? k.y - k.r : k.y; }
+    function wake(k) { k.sleep = false; k.still = 0; }
+    function tip(k, nx, nz, sp) { // horizontal impulse at mid height -> rocking
+      if (k.ball || k.lying) return;
+      if (Math.abs(k.th) < 0.05) k.dir = Math.atan2(nx, nz);
+      var along = Math.cos(k.dir) * nz + Math.sin(k.dir) * nx;
+      k.tw += along * sp * (k.shape === 'roly' ? 9 : 2.2 / Math.max(0.05, k.h)) * 0.35;
+    }
+    function addBall(mesh, x, y, z, vx, vy, vz) { var k = initBody({ g: mesh, type: '網球', x: x, y: y, z: z, vx: vx, vy: vy, vz: vz, r: 0.035, shape: 'ball', m: 0.25, home: [x, y, z], shot: true }); wake(k); knock.push(k); return k; }
+    function resetProps() { // new round: balls are removed, props go home
+      for (var i = knock.length - 1; i >= 0; i--) { var k = knock[i]; if (k.shot) { knock.splice(i, 1); continue; } k.x = k.home[0]; k.y = k.home[1]; k.z = k.home[2]; k.vx = k.vy = k.vz = 0; k.th = k.tw = 0; k.lying = false; k.sleep = true; k.g.quaternion.copy(k.q0); k.g.position.set(k.x, k.y, k.z); }
+      K.triggers.forEach(function (t) { if (t.kind === 'drawer') { t.out = 0.22; t.p.z1 = t.p.z0 + 0.32; } });
+    }
     function stepProps(dt, bumpers, onBump) {
-      for (var i = 0; i < knock.length; i++) {
-        var k = knock[i];
-        for (var b = 0; b < bumpers.length; b++) {
-          var c = bumpers[b], dx = k.x - c.x, dz = k.z - c.z, d = Math.hypot(dx, dz), rr = c.r + k.r;
-          if (d < rr && Math.abs(k.y - c.y) < 0.35) {
-            var nx = d > 1e-4 ? dx / d : 1, nz = d > 1e-4 ? dz / d : 0, push = Math.max(c.speed, 0.6) * 1.25;
-            k.x = c.x + nx * rr; k.z = c.z + nz * rr; k.vx = nx * push + (c.vx || 0) * 0.5; k.vz = nz * push + (c.vz || 0) * 0.5;
-            if (k.shape !== 'ball' && k.tip < 0.01) { k.tip = 0.01; k.tipDir = Math.atan2(nx, nz); }
-            if (onBump && (!k.cool || k.cool <= 0)) { onBump(k); k.cool = 0.4; }
+      var n = knock.length, i, j, k, o;
+      for (i = 0; i < n; i++) {
+        k = knock[i]; if (k.cool > 0) k.cool -= dt;
+        // critters, vacuum
+        for (j = 0; j < bumpers.length; j++) {
+          var c = bumpers[j], dx = k.x - c.x, dz = k.z - c.z, d = Math.hypot(dx, dz), rr = c.r + k.r;
+          if (d < rr && bodyBase(k) < c.y + 0.4 && bodyBase(k) + k.h > c.y - 0.02) {
+            var nx = d > 1e-4 ? dx / d : 1, nz = d > 1e-4 ? dz / d : 0, push = Math.max(c.speed, 0.5);
+            k.x = c.x + nx * rr; k.z = c.z + nz * rr; wake(k);
+            if (k.ball || k.lying) { k.vx = nx * push * 1.25; k.vz = nz * push * 1.25; } else { k.vx += nx * push * 0.5; k.vz += nz * push * 0.5; tip(k, nx, nz, push); }
+            if (onBump && k.cool <= 0) { onBump(k); k.cool = 0.4; }
           }
         }
-        if (k.cool > 0) k.cool -= dt;
-        var sp = Math.hypot(k.vx, k.vz);
-        var gy = groundAt(k.x, k.z, k.y + 0.02, 0);
-        var base = k.shape === 'ball' ? k.r : 0;
-        if (k.y - base > gy + 0.002 || k.vy > 0) { k.vy -= 9.8 * dt; k.y += k.vy * dt; if (k.y - base <= gy) { k.y = gy + base; if (k.vy < -1.2) { k.vy = -k.vy * 0.35; if (onBump) onBump(k, true); } else k.vy = 0; } }
-        if (sp > 0.001) {
-          var nxp = k.x + k.vx * dt, nzp = k.z + k.vz * dt;
-          if (nxp < bounds.x0 + k.r || nxp > bounds.x1 - k.r) { k.vx *= -0.5; nxp = k.x; } if (nzp < bounds.z0 + k.r || nzp > bounds.z1 - k.r) { k.vz *= -0.5; nzp = k.z; }
-          if (blocked(nxp, nzp, k.y - base, k.r * 0.6, 0.02, 0.1)) { k.vx *= -0.4; k.vz *= -0.4; } else { k.x = nxp; k.z = nzp; }
-          var fr = Math.exp(-dt * (k.shape === 'ball' ? 1.1 : 3.5)); k.vx *= fr; k.vz *= fr;
-          if (k.shape === 'ball') { k.g.rotateOnWorldAxis(new THREE.Vector3(k.vz, 0, -k.vx).normalize(), sp * dt / k.r); }
+      }
+      // body against body
+      for (i = 0; i < n; i++) {
+        k = knock[i];
+        for (j = i + 1; j < n; j++) {
+          o = knock[j]; if (k.sleep && o.sleep) continue;
+          var ex = o.x - k.x, ez = o.z - k.z, rs = k.r + o.r; if (Math.abs(ex) > rs || Math.abs(ez) > rs) continue;
+          var dd = Math.hypot(ex, ez); if (dd >= rs) continue;
+          var kb = bodyBase(k), ob = bodyBase(o);
+          if (ob >= kb + k.h - 0.012 || kb >= ob + o.h - 0.012) continue; // one rests on the other: handled as support
+          var ux = dd > 1e-4 ? ex / dd : 1, uz = dd > 1e-4 ? ez / dd : 0, im = 1 / k.m, om = 1 / o.m, pen = rs - dd;
+          k.x -= ux * pen * im / (im + om); k.z -= uz * pen * im / (im + om); o.x += ux * pen * om / (im + om); o.z += uz * pen * om / (im + om);
+          var vn = (o.vx - k.vx) * ux + (o.vz - k.vz) * uz;
+          if (vn < 0) { var J = -(1.5) * vn / (im + om); k.vx -= J * im * ux; k.vz -= J * im * uz; o.vx += J * om * ux; o.vz += J * om * uz; tip(k, -ux, -uz, J * im); tip(o, ux, uz, J * om); if (onBump && -vn > 0.5 && k.cool <= 0) { onBump(k, false, o); k.cool = 0.25; } }
+          wake(k); wake(o);
         }
-        if (k.tip > 0 && k.tip < 1) { k.tip = Math.min(1, k.tip + dt * 5); k.g.rotation.set(0, 0, 0); k.g.rotateOnWorldAxis(new THREE.Vector3(Math.cos(k.tipDir), 0, -Math.sin(k.tipDir)), k.tip * Math.PI / 2); }
-        k.g.position.set(k.x, k.y + (k.shape !== 'ball' && k.tip > 0 ? k.tip * k.r * 0.9 : 0), k.z);
+      }
+      for (i = 0; i < n; i++) {
+        k = knock[i]; if (k.sleep) continue;
+        var base = bodyBase(k), g = groundAt(k.x, k.z, base + 0.03, 0);
+        for (j = 0; j < n; j++) { // resting on another prop
+          o = knock[j]; if (o === k) continue; var top = bodyBase(o) + (o.lying ? o.hw * 2 : o.h);
+          if (top > g && top <= base + 0.03 && Math.hypot(o.x - k.x, o.z - k.z) < (k.hw + o.hw) * 0.9) g = top;
+        }
+        if (base > g + 0.002 || k.vy > 0) {
+          k.vy -= GRAV * dt; k.y += k.vy * dt;
+          if (bodyBase(k) <= g && k.vy <= 0) { k.y += g - bodyBase(k); if (k.vy < -1.0) { if (onBump) onBump(k, true); k.vy = -k.vy * (k.ball ? 0.5 : 0.25); if (!k.ball && !k.lying) k.tw += (k.vx * Math.sin(k.dir) + k.vz * Math.cos(k.dir)) * 2 + 0.8; } else k.vy = 0; }
+        } else { k.y += g - base; k.vy = 0; }
+        var sp = Math.hypot(k.vx, k.vz);
+        if (sp > 1e-3) {
+          var hx = k.x + k.vx * dt, hz = k.z + k.vz * dt, bb = bodyBase(k);
+          if (blocked(hx, k.z, bb, k.r * 0.8, 0.02, k.h)) { k.vx *= -0.45; hx = k.x; if (onBump && sp > 1.5 && k.cool <= 0) { onBump(k, true); k.cool = 0.2; } }
+          if (blocked(k.x, hz, bb, k.r * 0.8, 0.02, k.h)) { k.vz *= -0.45; hz = k.z; if (onBump && sp > 1.5 && k.cool <= 0) { onBump(k, true); k.cool = 0.2; } }
+          k.x = hx; k.z = hz;
+          var grounded = bodyBase(k) <= g + 0.004;
+          if (k.ball) { if (grounded) { var f = Math.exp(-dt * 0.9); k.vx *= f; k.vz *= f; } _ax.set(k.vz, 0, -k.vx).normalize(); k.g.rotateOnWorldAxis(_ax, sp * dt / k.r); }
+          else if (k.lying && k.shape !== 'block') { // rolls across its axis, scrapes along it
+            var axx = Math.cos(k.dir), axz = -Math.sin(k.dir), al = k.vx * axx + k.vz * axz, acx = k.vx - al * axx, acz = k.vz - al * axz, fa = Math.exp(-dt * 6), fr = Math.exp(-dt * 1.1);
+            if (grounded) { k.vx = acx * fr + al * fa * axx; k.vz = acz * fr + al * fa * axz; } k.roll = (k.roll || 0) + (acx * Math.sin(k.dir) + acz * Math.cos(k.dir)) * dt / k.hw;
+          } else if (grounded) { var fs = Math.exp(-dt * 5); k.vx *= fs; k.vz *= fs; }
+        }
+        // rocking / toppling about the base edge
+        if (!k.ball && !k.lying) {
+          if (k.shape === 'roly') { k.tw += (-k.th * 55 - k.tw * 1.6) * dt; k.th += k.tw * dt; }
+          else {
+            var thc = Math.atan2(k.hw, k.h / 2), R = Math.hypot(k.hw, k.h / 2), sgn = k.th >= 0 ? 1 : -1, a = Math.abs(k.th);
+            k.tw += (a < thc ? -sgn * (0.75 * GRAV / R) * Math.sin(thc - a) * (a > 0.002 ? 1 : 0) : sgn * (0.75 * GRAV / R) * Math.sin(a - thc)) * dt;
+            var prev = k.th; k.th += k.tw * dt;
+            if (prev * k.th < 0 || (Math.abs(k.th) < 0.004 && Math.abs(k.tw) < 0.5)) { k.tw *= -0.35; k.th = 0; if (Math.abs(k.tw) < 0.25) k.tw = 0; else if (onBump && k.cool <= 0) { onBump(k, true); k.cool = 0.15; } } // base slaps back down
+            if (Math.abs(k.th) >= Math.PI / 2) { k.th = sgn * Math.PI / 2; k.tw = 0; k.lying = true; k.vx += Math.sin(k.dir) * sgn * 0.5; k.vz += Math.cos(k.dir) * sgn * 0.5; if (onBump) onBump(k, true); }
+          }
+        }
+        // pose the mesh
+        if (!k.ball) {
+          _ax.set(Math.cos(k.dir), 0, -Math.sin(k.dir)); _q.setFromAxisAngle(_ax, k.th); k.g.quaternion.copy(_q).multiply(k.q0);
+          if (k.lying && k.roll) { _ax.set(Math.sin(k.dir), 0, Math.cos(k.dir)); _q2.setFromAxisAngle(_ax, k.roll * 0); }
+        }
+        var lift = k.ball ? 0 : (k.shape === 'roly' ? 0 : Math.sin(Math.min(Math.abs(k.th), Math.PI / 2)) * k.hw);
+        k.g.position.set(k.x - (k.ball ? 0 : Math.sin(k.dir) * Math.sin(k.th) * 0), k.y + lift, k.z);
+        // wake what sits on top of a moving body; fall asleep when still
+        var moving = sp > 0.02 || Math.abs(k.vy) > 0.02 || Math.abs(k.tw) > 0.02 || (!k.lying && Math.abs(k.th) > 0.002);
+        if (moving) { k.still = 0; for (j = 0; j < n; j++) { o = knock[j]; if (o.sleep && Math.abs(o.x - k.x) < k.r + o.r + 0.03 && Math.abs(o.z - k.z) < k.r + o.r + 0.03 && bodyBase(o) > base - 0.02 && bodyBase(o) < base + k.h + 0.3) wake(o); } }
+        else { k.still = (k.still || 0) + dt; if (k.still > 0.6) { k.sleep = true; k.vx = k.vz = k.vy = 0; } }
+      }
+    }
+
+    /* things that react to whoever passes: sliding fusuma, cat flap, a drawer left ajar, rocking chair / horse */
+    function stepTriggers(dt, bodies) {
+      for (var i = 0; i < K.triggers.length; i++) {
+        var t = K.triggers[i], near = 9, nb = null, j;
+        for (j = 0; j < bodies.length; j++) { var b = bodies[j], d = Math.hypot(b.x - t.x, b.z - t.z); if (t.y != null && Math.abs(b.y - t.y) > 1.2) continue; if (d < near) { near = d; nb = b; } }
+        if (t.kind === 'slide') { t.open += ((near < 1.5 ? 1 : 0) - t.open) * Math.min(1, dt * 5); t.a.position.x = 3.15 - t.open * 0.42; t.b.position.x = 3.95 + t.open * 0.42; }
+        else if (t.kind === 'flap') { if (near < 0.42 && nb) t.v += (nb.z > t.z ? -1 : 1) * dt * 40; t.v += (-t.a * 30 - t.v * 2.2) * dt; t.a += t.v * dt; t.a = Math.max(-1.4, Math.min(1.4, t.a)); t.g.rotation.x = t.a; }
+        else if (t.kind === 'drawer') { if (t.out > 0 && near < 0.42 && nb && nb.z > t.z - 0.1) { t.out = Math.max(0, t.out - dt * 0.9); if (t.out === 0) { t.p.z1 = t.p.z0; t.shut = true; } } t.g.position.z = -D + 0.6 - 0.22 + t.out; }
+        else if (t.kind === 'rock') { if (near < t.rad && nb && nb.speed > 0.3) t.v += dt * 9 * Math.min(1.5, nb.speed); t.v += (-t.a * 14 - t.v * 0.9) * dt; t.a += t.v * dt; if (t.axis === 'x') t.g.rotation.x = t.a * 0.5; else t.g.rotation.z = t.a * 0.5; }
       }
     }
 
     var types = Object.keys(inv), total = types.reduce(function (a, k) { return a + inv[k]; }, 0);
     return {
       group: room, batched: batched, dyn: dyn, fx: fx, platforms: platforms, bounds: bounds, knock: knock, inventory: inv,
-      stats: { types: types.length, items: total, staticMeshes: statCount, batches: groups.size, tris: Math.round(tris), moving: updaters.length, knockables: knock.length },
+      stats: { types: types.length, items: total, staticMeshes: statCount, batches: groups.size, dynMeshes: dynMeshes, tris: Math.round(tris), moving: updaters.length, knockables: knock.length },
       sun: sun, steam: steamM, kettle: kettle, vac: vacState, vacGroup: vac,
-      groundAt: groundAt, blocked: blocked, stepProps: stepProps,
+      groundAt: groundAt, blocked: blocked, stepProps: stepProps, addBall: addBall, resetProps: resetProps, segWalls: segWalls, stepTriggers: stepTriggers, triggers: K.triggers, route: K.route || [], lights: K.lights, base: base, inventoryByRoom: invRoom, K: K,
       update: function (t) { uTime.value = t; for (var i = 0; i < updaters.length; i++) updaters[i](t); var boil = (t % 40) / 40; steamM.uniforms.uAmt.value = 0.35 + 0.65 * Math.max(0, Math.sin(boil * Math.PI * 2)); },
       /* places bots know about: [x, z, yaw, pose, surfaceY] */
-      spots: [[-W + 0.5, -1.15, Math.PI / 2, 'loaf', 0.36], [KX + 0.0, KZ + 1.12, Math.PI, 'curl', 0.12], [2.9, 0.4, -2.2, 'loaf', 0.012], [-1.35, -D + 0.32, 0, 'sit', 1.35], [W - 0.7, 1.9, -1.9, 'sit', 1.05], [-W + 0.55, 2.15, 1.2, 'loaf', 0.78], [1.3, EN + 0.75, 0.4, 'curl', 0.28], [-2.3, 1.2, 2.0, 'side', 0.03], [3.3, -D - 0.45 + 0.0, 0.3, 'loaf', 0.82], [-3.7, -D - 0.28, 0, 'hind', 0.12], [W - 0.5, -2.3, -1.2, 'arch', 0.0], [0.3, 2.0, 2.6, 'belly', 0]]
+      spots: [[-W + 0.5, -1.15, Math.PI / 2, 'loaf', 0.36], [KX + 0.0, KZ + 1.12, Math.PI, 'curl', 0.12], [2.9, 0.4, -2.2, 'loaf', 0.012], [-1.35, -D + 0.32, 0, 'sit', 1.35], [W - 0.7, 1.9, -1.9, 'sit', 1.05], [-W + 0.55, 2.15, 1.2, 'loaf', 0.78], [1.3, EN + 0.75, 0.4, 'curl', 0.28], [-2.3, 1.2, 2.0, 'side', 0.03], [-3.7, -D - 0.28, 0, 'hind', 0.12], [W - 0.5, -2.3, -1.2, 'arch', 0.0], [0.3, 2.0, 2.6, 'belly', 0]].concat(K.spots || [])
     };
   };
 })();

@@ -69,16 +69,17 @@
 
   /* merge geometries (position/normal/uv, indexed or not). items: [geometry, Matrix4?] */
   var _m3 = new THREE.Matrix3(), _v = new THREE.Vector3();
-  G.merge = function (items) {
-    var pos = [], nor = [], uv = [], idx = [], base = 0;
+  G.merge = function (items) { // items: [geometry, Matrix4?, Color?] — a colour on any item adds a vertex-colour attribute
+    var pos = [], nor = [], uv = [], col = [], idx = [], base = 0, useCol = items.some(function (it) { return it[2]; });
     items.forEach(function (it) {
-      var g = it[0] || it, m = it[1];
+      var g = it[0] || it, m = it[1], c = it[2];
       var p = g.attributes.position, n = g.attributes.normal, u = g.attributes.uv, i;
       if (m) _m3.getNormalMatrix(m);
       for (i = 0; i < p.count; i++) {
         _v.fromBufferAttribute(p, i); if (m) _v.applyMatrix4(m); pos.push(_v.x, _v.y, _v.z);
-        _v.fromBufferAttribute(n, i); if (m) _v.applyMatrix3(_m3).normalize(); nor.push(_v.x, _v.y, _v.z);
+        if (n) { _v.fromBufferAttribute(n, i); if (m) _v.applyMatrix3(_m3).normalize(); nor.push(_v.x, _v.y, _v.z); } else nor.push(0, 1, 0);
         if (u) uv.push(u.getX(i), u.getY(i)); else uv.push(0, 0);
+        if (useCol) { if (c) col.push(c.r, c.g, c.b); else col.push(1, 1, 1); }
       }
       if (g.index) for (i = 0; i < g.index.count; i++) idx.push(g.index.getX(i) + base);
       else for (i = 0; i < p.count; i++) idx.push(i + base);
@@ -88,6 +89,7 @@
     out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
     out.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    if (useCol) out.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
     out.setIndex(idx);
     return out;
   };
