@@ -232,3 +232,35 @@ svg.ic { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.14em; }
 .ehint { position: absolute; left: 14px; top: 362px; color: #fff3d6; font-size: 13px; background: rgba(50, 28, 12, 0.62); padding: 4px 10px; border-radius: 99px; }
 .mm { top: 42vh !important; gap: 1.6vh !important; } .mm .btn { font-size: clamp(14px, 2.9vh, 21px) !important; padding: 1.4vh 18px !important; min-width: clamp(150px, 16vw, 210px) !important; } .mm .maps { min-width: clamp(150px, 16vw, 210px) !important; }
 .langs { left: auto !important; right: 3% !important; bottom: 3% !important; }
+
+/* paint feel: eyedropper magnifier, white-left meter */
+.loupe { position: absolute; width: 132px; height: 132px; margin: -150px 0 0 18px; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6), 0 6px 18px rgba(0, 0, 0, 0.35); overflow: hidden; pointer-events: none; z-index: 40; }
+.loupe canvas { display: block; width: 132px; height: 132px; image-rendering: pixelated; }
+.loupe b { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font: 600 12px/1 ui-monospace, Menlo, monospace; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+.wl { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 8px; margin-top: 8px; font-size: 12px; color: #5a4a36; }
+.wl i { height: 8px; border-radius: 4px; background: #d9c9a8; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(90, 74, 54, 0.25); }
+.wl u { display: block; height: 100%; width: 100%; background: #fff; transition: width 0.25s; }
+.wl span { font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+.wl em { grid-column: 1 / 4; font-style: normal; font-size: 11px; opacity: 0.75; }
+.wl em .key { font-size: 10px; padding: 0 5px; }
+.wl.done u { background: #7fb069; }
+
+.slots .dia { position: relative; } .slots .dia u { position: absolute; left: -6px; right: -6px; top: 15px; text-align: center; text-decoration: none; font: 600 10px/1 system-ui, sans-serif; color: #fff; text-shadow: 0 0 3px #000; transform: rotate(-45deg); }
+.toast.red { background: #b3261e !important; color: #fff !important; }
+.pw2 .seg.hov { background: #2f7de1 !important; color: #fff !important; box-shadow: 0 0 0 3px rgba(47, 125, 225, 0.35), 0 4px 14px rgba(0, 0, 0, 0.35) !important; }
+
+/* answer check: richer name tags, edge markers, collapsible result panel */
+.tag b { font-weight: 400; } .tag small { display: flex; gap: 8px; justify-content: center; font-size: 11.5px; letter-spacing: 0.04em; opacity: 0.95; margin-top: 1px; } .tag small span:empty { display: none; }
+.tag:has(small) { border-radius: 14px; text-align: center; padding: 4px 12px 5px; }
+.tag .arr { display: none; font-style: normal; margin-right: 6px; } .tag.edge { transform: translate(-50%, -50%); opacity: 0.92; } .tag.edge .arr { display: inline-block; }
+.result .tabhint { position: absolute; right: 10px; top: 8px; font-size: 11px; opacity: 0.7; } .result.mini { min-width: 0 !important; padding: 10px 70px 10px 16px; } .result.mini p, .result.mini table, .result.mini .row { display: none; } .result.mini h2 { font-size: 20px; }
+
+/* pose wheel with silhouette icons and the amount bar */
+.pw2::before { left: -235px !important; top: -235px !important; width: 470px !important; height: 470px !important; }
+.pw2 .seg { width: 96px !important; height: 86px !important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 2px; font-size: 13.5px !important; }
+.pw2 .seg img { width: 58px; height: 58px; object-fit: contain; pointer-events: none; } .pw2 .seg.cancel { height: 44px !important; } .pw2 .seg.cur { box-shadow: 0 0 0 3px #e2b53c; }
+.pw2 .seg.hov img { filter: brightness(1.15); }
+.pw2 .hub .amt { width: 96px; height: 7px; margin: 6px auto 3px; border-radius: 4px; background: rgba(255, 243, 214, 0.28); overflow: hidden; } .pw2 .hub .amt i { display: block; height: 100%; background: #2f7de1; } .pw2 .hub small { display: block; font-size: 11px; opacity: 0.9; white-space: nowrap; }
+.pw2 .tailb { top: 44px !important; left: -52px; } .pw2 .earb { top: 44px !important; left: 52px; }
+.pw2 .hub { width: 150px; height: 150px; border-radius: 50%; background: rgba(40, 24, 12, 0.86); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 0 2px rgba(255, 243, 214, 0.35); }
+.pw2 .tailb { top: 80px !important; } .pw2 .earb { top: 80px !important; }

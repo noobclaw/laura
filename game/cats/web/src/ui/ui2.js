@@ -85,7 +85,7 @@
     var row = function (k, label, on, dim) { return '<div class="kc' + (on ? ' on' : '') + (dim ? ' dim' : '') + '">' + key(k) + '<span>' + label + '</span></div>'; }, s = row('T', t('k_chat'));
     if (G.fly) s += G.fly.hide ? row('5', '回到身體') + row('WASD', '飛行') : row('4', t('watch')) + row('5', t('free')) + row('左鍵', t('next'));
     else if (me.team === 'cat') s += row('1', t('k_taunt')) + row('R', t('k_pose')) + row('F', t('k_paint'), G.paint.on) + row('右鍵', t('k_lock'), G.viewLock) + row('2', t('k_tags'), G.tags) + row('3', t('k_thru'), G.seeThrough !== false) + row('5', t('free')) + row('Y', '夠了（跳過）');
-    else s += row('左鍵', t('k_fire')) + row('右鍵', t('k_third'), G.third) + row('空白', t('k_jump')) + row('Ctrl', t('k_crouch')) + row('Shift', t('k_run')) + row('2', t('k_tags'), G.tags);
+    else s += row('左鍵', t('k_fire')) + row('右鍵', t('k_third'), G.third) + row('空白', t('k_jump')) + row('C', '按住：抬頭看高處', !!(G.me && G.me.rearT)) + row('Ctrl', t('k_crouch')) + row('Shift', t('k_run')) + row('2', t('k_tags'), G.tags);
     s += row('V', t('k_mic'), false, true) + row('B', t('k_ear'), false, true); c.innerHTML = s;
   }
   function cbar() {
@@ -93,27 +93,38 @@
     var kb = function (k, label) { return '<div class="cb">' + key(k) + '<span>' + label + '</span></div>'; }, s = '';
     if (me.team === 'cat' && !G.fly) {
       var n = G.decoys.filter(function (d) { return d.c.root.visible; }).length, mx = SG.RULES.cat.maxDecoys;
-      s += '<div class="slots">' + key('Q'); for (var i = 0; i < mx; i++) s += '<i class="dia' + (i < n ? ' used' : (G.decoyCd > 0 && i === n ? ' cd' : '')) + '"></i>'; s += '<span class="key x">X</span></div><div class="ctx">';
-      if (G.paint.on) s += kb('空白', t('eyedrop')) + kb('右鍵拖', t('brush')) + kb('V', t('shade')) + kb('中鍵拖', t('camrot')) + kb('滾輪', t('zoom'));
+      s += '<div class="slots">' + key('Q'); G.decoySlots.forEach(function (sl, i) { s += '<i class="dia' + (sl.e ? ' used' : sl.cd > 0 ? ' cd' : '') + '" data-slot="' + i + '" title="' + (sl.cd > 0 ? Math.ceil(sl.cd) + ' s' : '') + '">' + (!sl.e && sl.cd > 0 ? '<u>' + Math.ceil(sl.cd) + '</u>' : '') + '</i>'; }); s += '<span class="key x">X</span></div><div class="ctx">';
+      if (G.paint.on) s += kb('空白', t('eyedrop')) + kb('右鍵拖', t('brush')) + kb('雙擊', '填滿這一塊') + kb('H', '顯示沒塗到的') + kb('V', t('shade')) + kb('中鍵拖', t('camrot')) + kb('滾輪', t('zoom'));
       else if (me.cling) s += kb('Shift', t('rel')) + kb('Ctrl', t('down')) + kb('空白', t('up'));
       else s += kb('空白', '跳／跳向牆面黏住') + kb('Shift', t('k_run')) + kb('左鍵+A/D', '原地轉身');
       s += '</div>';
-    } else if (G.fly) s += '<div class="ctx">' + kb('4', t('watch')) + kb('5', t('free')) + '</div>';
+    } else if (G.fly && G.fly.hide) s += '<div class="ctx">' + kb('4', G.fly.move ? '自由移動：開（WASD 飛）' : '自由移動') + kb('5', '回到身體') + '</div>';
+    else if (G.fly) s += '<div class="ctx">' + kb('4', t('watch')) + kb('5', t('free')) + '</div>';
     c.innerHTML = s;
   }
   /* ------------------------------------------------------------------ radial pose wheel: 8 + cancel, mouse selected; second page with the rest */
-  var page = 0, hover = null;
+  var page = 0, hover = null, amtPose = null;
+  function poseIcon(pose) { try { return SG.poseIconURL ? SG.poseIconURL(pose, { size: 64 }) : ''; } catch (e) { return ''; } }
   function drawWheel() {
-    var w = els.pw2; w.innerHTML = '<div class="hub"><b>' + t('k_pose') + '</b><small>' + (page + 1) + ' / 2</small></div>';
-    var mk = function (pose, label, ang, cls) { var b = h('button', 'seg ' + (cls || ''), label, w); b.dataset.pose = pose; b.style.left = Math.cos(ang) * 150 + 'px'; b.style.top = Math.sin(ang) * 150 + 'px'; b.onmouseenter = function () { hover = pose; w.querySelectorAll('.seg').forEach(function (x) { x.classList.toggle('hov', x === b); }); }; b.onclick = function () { pick(pose); }; return b; };
+    var w = els.pw2, PG = SG.POSE_PAGES || [WHEEL.slice(0, 8).map(function (p) { return p[0]; }), WHEEL.slice(8).map(function (p) { return p[0]; })], INFO = SG.POSE_INFO || {}, cur = G.me && G.me.c;
+    w.innerHTML = '<div class="hub"><b>' + t('k_pose') + '</b><small>' + (page + 1) + ' / ' + PG.length + '　點一下換頁</small><div class="amt"><i></i></div><small class="amtl"></small></div>';
+    var mk = function (pose, label, ang, cls) { var ic = pose === 'stand' ? '' : poseIcon(pose), b = h('button', 'seg ' + (cls || '') + (cur && cur.pose === pose ? ' cur' : ''), (ic ? '<img src="' + ic + '" alt="">' : '') + '<span>' + label + '</span>', w); b.dataset.pose = pose; b.style.left = Math.cos(ang) * 158 + 'px'; b.style.top = Math.sin(ang) * 158 + 'px'; b.onmouseenter = function () { setHover(b); }; b.onclick = function () { pick(pose); }; return b; };
     mk('stand', '✕ ' + t('cancel'), Math.PI / 2, 'cancel');
-    for (var i = 0; i < 8; i++) { var p = WHEEL[page * 8 + i]; mk(p[0], p[1], Math.PI / 2 + (i + 1) * (Math.PI * 2 / 9)); }
-    var mb = h('button', 'more', t('more'), w); mb.onclick = function () { page = 1 - page; drawWheel(); };
+    for (var i = 0; i < 8; i++) { var p = PG[page][i]; if (p) mk(p, (INFO[p] && INFO[p].label) || p, Math.PI / 2 + (i + 1) * (Math.PI * 2 / 9)); }
     var c = G.me && G.me.c, TM = ['tuck', 'straight', 'curl'], TN = { tuck: '收起', straight: '伸直', curl: '捲起' };
-    var tb = h('button', 'more tailb', '尾巴：' + TN[(c && c.tailMode) || 'tuck'] + '（滾輪）', w); tb.dataset.act = 'tail'; tb.onclick = function () { G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + 1) % 3]); drawWheel(); };
-    var eb = h('button', 'more earb', '耳朵：' + (c && c.earFlat ? '貼平' : '立'), w); eb.dataset.act = 'ears'; eb.onclick = function () { G.setEars(!G.me.c.earFlat); drawWheel(); };
+    var tb = h('button', 'more tailb', '尾巴：' + TN[(c && c.tailMode) || 'tuck'], w); tb.dataset.act = 'tail'; tb.onclick = function (e) { e.stopPropagation(); G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + 1) % 3]); drawWheel(); };
+    var eb = h('button', 'more earb', '耳朵：' + (c && c.earFlat ? '貼平' : '立'), w); eb.dataset.act = 'ears'; eb.onclick = function (e) { e.stopPropagation(); G.setEars(!G.me.c.earFlat); drawWheel(); };
+    amount();
   }
-  function pick(pose) { G.setPose(pose); show(els.pw2, false); hover = null; }
+  function setHover(b) { hover = b ? b.dataset.pose : null; els.pw2.querySelectorAll('.seg').forEach(function (x) { x.classList.toggle('hov', x === b); }); amount(); }
+  /* the bar in the hub: how far the hovered (or current) pose goes; the mouse wheel changes it while R is held */
+  function amount() { var c = G.me && G.me.c, hub = els.pw2.querySelector('.amt'); if (!hub || !c) return; var pose = hover && hover !== 'stand' ? hover : c.pose, INFO = (SG.POSE_INFO || {})[pose], a = pose === c.pose ? c.poseAmount : (amtPose && amtPose[0] === pose ? amtPose[1] : INFO ? INFO.amount : 0.5);
+    hub.firstChild.style.width = Math.round((a == null ? 0.5 : a) * 100) + '%'; hub.style.visibility = pose === 'stand' || pose === 'crouch' ? 'hidden' : ''; els.pw2.querySelector('.amtl').textContent = pose === 'stand' || pose === 'crouch' ? '' : '滾輪：' + ((INFO && INFO.hint) || '程度') + '　' + Math.round((a == null ? 0.5 : a) * 100) + '%'; }
+  function scrollAmount(dir) { var c = G.me && G.me.c; if (!c) return; var pose = hover && hover !== 'stand' ? hover : c.pose; if (pose === 'stand' || pose === 'crouch') return; var INFO = (SG.POSE_INFO || {})[pose];
+    if (pose === c.pose) G.setPoseAmount(c.poseAmount + dir * 0.1); // the pose you are in changes live
+    else { var a0 = amtPose && amtPose[0] === pose ? amtPose[1] : INFO ? INFO.amount : 0.5; amtPose = [pose, Math.max(0, Math.min(1, a0 + dir * 0.1))]; }
+    amount(); }
+  function pick(pose) { G.setPose(pose); if (amtPose && amtPose[0] === pose) G.setPoseAmount(amtPose[1]); amtPose = null; show(els.pw2, false); hover = null; }
 
   /* ------------------------------------------------------------------ lobby HUD + body picker */
   function lobbyHud() {
@@ -139,10 +150,10 @@
       bus.on('mode', function (d) { if (d.mode === 'title') buildMenu(); show(els.pw2, false); lobbyHud(); });
       var n = 0; bus.on('frame', function () { if (G.lobby || !els.lobby.classList.contains('hide')) lobbyHud(); if (++n % 30 === 0) cbar(); });
       bus.on('wheel', function (d) { var ok = G.me && G.me.team === 'cat' && !G.me.out && G.state && G.state.phase !== 'reveal'; if (d.open && ok) { hover = null; drawWheel(); show(els.pw2, true); } else if (!d.open && !els.pw2.classList.contains('hide')) { if (hover) pick(hover); else show(els.pw2, false); } });
-      var vx = 0, vy = 0; window.addEventListener('mousemove', function (e) { if (els.pw2.classList.contains('hide') || !(e.movementX || e.movementY)) return; if (document.pointerLockElement == null && !e.buttons && e.target && e.target.closest && e.target.closest('.pw2')) return; vx = Math.max(-160, Math.min(160, vx + e.movementX)); vy = Math.max(-160, Math.min(160, vy + e.movementY)); if (Math.hypot(vx, vy) < 45) return; var a = Math.atan2(vy, vx), best = null, bd = 9; els.pw2.querySelectorAll('.seg').forEach(function (b) { var ba = Math.atan2(parseFloat(b.style.top), parseFloat(b.style.left)), dd = Math.abs(Math.atan2(Math.sin(a - ba), Math.cos(a - ba))); if (dd < bd) { bd = dd; best = b; } }); if (best) { hover = best.dataset.pose; els.pw2.querySelectorAll('.seg').forEach(function (x) { x.classList.toggle('hov', x === best); }); } });
+      var vx = 0, vy = 0; window.addEventListener('mousemove', function (e) { if (els.pw2.classList.contains('hide') || !(e.movementX || e.movementY)) return; if (document.pointerLockElement == null && !e.buttons && e.target && e.target.closest && e.target.closest('.pw2')) return; vx = Math.max(-160, Math.min(160, vx + e.movementX)); vy = Math.max(-160, Math.min(160, vy + e.movementY)); if (Math.hypot(vx, vy) < 45) return; var a = Math.atan2(vy, vx), best = null, bd = 9; els.pw2.querySelectorAll('.seg').forEach(function (b) { var ba = Math.atan2(parseFloat(b.style.top), parseFloat(b.style.left)), dd = Math.abs(Math.atan2(Math.sin(a - ba), Math.cos(a - ba))); if (dd < bd) { bd = dd; best = b; } }); if (best && best.dataset.pose !== hover) setHover(best); });
       bus.on('wheel', function (d) { if (d.open) { vx = vy = 0; } });
-      window.addEventListener('mousedown', function (e) { if (els.pw2.classList.contains('hide') || (e.target.closest && e.target.closest('.pw2 button'))) return; page = 1 - page; drawWheel(); e.stopPropagation(); }, true);
-      els.pw2.addEventListener('wheel', function (e) { e.preventDefault(); var TM = ['tuck', 'straight', 'curl']; G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + (e.deltaY > 0 ? 1 : 2)) % 3]); drawWheel(); }, { passive: false });
+      window.addEventListener('mousedown', function (e) { if (els.pw2.classList.contains('hide') || (e.target.closest && e.target.closest('.pw2 button'))) return; page = (page + 1) % (SG.POSE_PAGES ? SG.POSE_PAGES.length : 2); hover = null; drawWheel(); e.stopPropagation(); }, true);
+      window.addEventListener('wheel', function (e) { if (els.pw2.classList.contains('hide')) return; e.preventDefault(); e.stopPropagation(); scrollAmount(e.deltaY < 0 ? 1 : -1); }, { passive: false, capture: true }); // hold R + scroll: how far the pose goes
       window.addEventListener('keydown', function (e) { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'Escape') { if (els.hs) { els.hs.remove(); els.hs = null; e.stopImmediatePropagation(); } else if (els.op) { els.op.remove(); els.op = null; e.stopImmediatePropagation(); } } if ((e.key === 'b' || e.key === 'B') && G.lobby) bodyPicker(); if ((e.key === 'e' || e.key === 'E') && G.lobby && !els.hs) openHost(); if (e.key === 'F3') { e.preventDefault(); G.opts.showFps = !G.opts.showFps; } }, true);
       els.fps = h('div', 'fps hide', '', root); setInterval(function () { show(els.fps, !!G.opts.showFps); if (G.opts.showFps && G.ft) els.fps.textContent = Math.round(1 / G.ft) + ' fps　' + (G.ft * 1000).toFixed(1) + ' ms（最慢 ' + ((G.ftMax || 0) * 1000).toFixed(0) + ' ms）　' + (SG.post.sceneCalls || 0) + ' draw'; }, 250);
     }

@@ -559,6 +559,7 @@
       plantPot: plantPot, snake: snake, monstera: monstera, bonsai: bonsai, daruma: daruma, kokeshi: kokeshi, book: book, cbox: cbox, bookC: bookC, W: W, D: D, H: H, EN: EN };
     if (SG.buildHouse) SG.buildHouse(K);
     if (SG.buildAnnex) SG.buildAnnex(K);
+    if (SG.buildDecor) SG.buildDecor(K);
     cur = stat; curRoom = '客廳';
 
     /* ================= AO skirts + light shafts + dust ================= */
@@ -590,10 +591,10 @@
     dust.layers.set(1); dust.frustumCulled = false; fx.add(dust); count('光中的灰塵');
 
     /* ================= LIGHTS ================= */
-    var sun = new THREE.DirectionalLight(0xffe6c4, 4.0); sun.position.copy(sunDir).multiplyScalar(14).add(new THREE.Vector3(0, 0, 1.5)); sun.target.position.set(0, 0, 1.5);
+    var sun = new THREE.DirectionalLight(0xffdfb4, 4.2); sun.position.copy(sunDir).multiplyScalar(14).add(new THREE.Vector3(0, 0, 1.5)); sun.target.position.set(0, 0, 1.5);
     sun.castShadow = true; sun.shadow.mapSize.set(opt.low ? 1024 : 2048, opt.low ? 1024 : 2048);
     var sc = sun.shadow.camera; sc.left = -11; sc.right = 11; sc.top = 11; sc.bottom = -12; sc.near = 1; sc.far = 40; sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03; sun.shadow.radius = 5;
-    var hemi = new THREE.HemisphereLight(0xfff4e6, 0xa89078, 1.2);
+    var hemi = new THREE.HemisphereLight(0xd6e4ff, 0xb39a7a, 1.25); // cool sky from above, warm bounce from the floors
     var lampL = new THREE.PointLight(0xffc27a, 9, 8, 1.7); lampL.position.set(KX, H - 0.95, KZ);
     var bounce = new THREE.PointLight(0xffd7a0, 3.2, 8, 1.4); bounce.position.set(0.2, 1.25, 1.2); // sunlight bouncing off the floor
     var kitL = new THREE.PointLight(0xfff2dc, 5, 6, 1.8); kitL.position.set(0, 2.0, -D - 1.3);
@@ -611,6 +612,7 @@
     };
     flat.D = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5 }); flat.D.name = 'flatDyn';
     flat.R.name = 'flatRough'; flat.G.name = 'flatGloss'; flat.M.name = 'flatMetal';
+    if (SG.surfaceDetail) [flat.R, flat.G, flat.D].forEach(function (m, i) { SG.surfaceDetail(m, 'flat' + i); });
     function bucket(m) {
       if (!m.isMeshStandardMaterial || m.map || m.transparent || m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile || m.side !== THREE.FrontSide) return null;
       if (m.emissiveIntensity > 0 && (m.emissive.r + m.emissive.g + m.emissive.b) > 0) return null;

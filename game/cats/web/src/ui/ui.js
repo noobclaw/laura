@@ -60,13 +60,24 @@
       bus.on('spectate', function () { ui.spect = true; hints(G.side, G.state.phase); show(els.poses, false); show(els.acts, false); });
       bus.on('mode', function () { ui.spect = false; });
       bus.on('decoy', function (d) { toast(d.n ? '放了一個分身（被打中你也出局）' : '分身收回'); });
+      bus.on('cloneEmbed', function () { toast('⚠ 分身卡進物體裡了'); els.toast.classList.add('red'); setTimeout(function () { els.toast.classList.remove('red'); }, 2300); });
       bus.on('denied', function () { toast(G.decoyCd > 0 ? '分身冷卻中 ' + Math.ceil(G.decoyCd) + ' 秒' : '分身已達上限'); });
       bus.on('cling', function (d) { ui.cling = d.on; if (ui.hints) ui.hints(); if (d.on) toast('黏住了：空白 往上、Ctrl 往下、WASD 沿著表面爬、Shift 放開'); });
+      bus.on('cursor3d', function (d) { els.ring.style.opacity = d.on ? 0 : 1; }); // on the body the brush is drawn on the body itself
+      bus.on('whiteLeft', function (d) { if (!els.wl) return; els.wl.querySelector('u').style.width = d.pct + '%'; els.wl.querySelector('span').textContent = d.pct + '%'; els.wl.classList.toggle('done', d.pct <= 2); });
+      var lpN = 0; bus.on('frame', function () { // eyedropper magnifier while Space is held (or the pick tool is armed)
+        var on = G.paint.on && G.me && G.me.team === 'cat' && (G.keys[' '] || G.paint.tool === 'pick'); show(els.loupe, !!on); if (!on) return;
+        els.loupe.style.left = G.mouse.x + 'px'; els.loupe.style.top = G.mouse.y + 'px'; if (lpN++ % 2) return;
+        var px = G.loupeAt(G.mouse.x, G.mouse.y), cv = els.loupe.firstChild, x = cv.getContext('2d'), N = 11, c = 12;
+        for (var j = 0; j < N; j++) for (var i = 0; i < N; i++) { var o = ((N - 1 - j) * N + i) * 4; x.fillStyle = 'rgb(' + px[o] + ',' + px[o + 1] + ',' + px[o + 2] + ')'; x.fillRect(i * c, j * c, c, c); }
+        var m = (5 * N + 5) * 4, col = 'rgb(' + px[m] + ',' + px[m + 1] + ',' + px[m + 2] + ')'; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeRect(5 * c - 0.5, 5 * c - 0.5, c + 1, c + 1); x.strokeStyle = '#fff'; x.lineWidth = 1.5; x.strokeRect(5 * c - 0.5, 5 * c - 0.5, c + 1, c + 1);
+        els.loupe.style.borderColor = col; els.loupe.lastChild.textContent = '#' + [px[m], px[m + 1], px[m + 2]].map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join('').toUpperCase(); });
       bus.on('blocked', function () { toast('被東西擋住了：按 3 開啟「穿透描繪」就能隔著畫'); });
       bus.on('shading', function (d) { toast(d.on ? '陰影：開' : '陰影：關（只看顏色）'); });
       bus.on('menu', function () { openModal('help'); });
       bus.on('say', function (d) { bubble(G.ent(d.id), d.text, 2200); });
-      bus.on('like', function (d) { bubble(G.ent(d.id), '讚！', 1500); });
+      bus.on('like', function (d) { bubble(G.ent(d.id), '👍 +1', 1500); (ui.tagEls || []).forEach(function (p) { if (p[0].id === d.id) { var u = p[1].querySelector('.lk'); if (u) u.textContent = '👍 ' + d.n; } }); });
+      bus.on('sidepanel', function () { els.result.classList.toggle('mini'); });
       bus.on('chat', function () { show(els.chat, true); els.chat.focus(); if (document.exitPointerLock) document.exitPointerLock(); });
       bus.on('danger', function (d) { els.vig.style.opacity = Math.max(0, d.v - 0.2) * 0.9; els.vig.classList.toggle('aim', !!d.aim); });
       bus.on('nearmiss', function (d) { banner(d.kind === 'dog' ? '狗從你旁邊走過！' : '子彈擦過耳朵！'); });
@@ -99,6 +110,7 @@
       bus.on('role', function (d) { setRole(d.team); toast(G.state.mode === 'infection' ? '你被找到了，現在你也是狗！' : '換你當狗去找別人'); });
       bus.on('infected', function (d) { if (d.cat !== 'you') toast(nameOf(d.cat) + ' 變成狗了'); teamIcons(); });
       bus.on('out', function () { teamIcons(); });
+      bus.on('found', function (d) { teamIcons(); if (!G.me || G.me.team !== 'dog') return; var me = G.me.pid || G.me.id; banner(d.by === me ? '找到 ' + d.name + ' 了！' : (d.by ? nameOf(d.by) + ' 找到了 ' + d.name : d.name + ' 被找到了')); });
       /* (the 30 s board event is superseded by the live ranking panel on the left) */
       bus.on('heard', function (d) { els.heard.style.transform = 'rotate(' + (-d.angle * 180 / Math.PI) + 'deg)'; show(els.heard, true); ui.heardT = 2.2; });
       bus.on('meow', function (d) { if (d.forced && d.me) toast('強制喵叫！'); });
@@ -226,6 +238,7 @@
       b.onmouseenter = function () { ui.hoverPose = p[0]; }; b.onclick = function () { G.setPose(p[0]); };
     });
     els.ring = h('div', 'ring hide', '', root);
+    els.loupe = h('div', 'loupe hide', '<canvas width="132" height="132"></canvas><b></b>', root);
   }
   function teamIcons() {
     var st = G.state; if (!st) return;
@@ -287,12 +300,20 @@
     var r = els.result.lastChild; h('button', 'btn ' + (G.side === 'cat' ? 'cat' : 'dog'), '再來一局', r).onclick = function () { G.start(G.side); }; h('button', 'btn', '回標題', r).onclick = function () { G.toTitle(); };
     show(els.result, true);
     els.tags.innerHTML = ''; ui.tagEls = [];
-    G.ents.forEach(function (en) { if (!en.c.root.visible) return; var t = h('div', 'tag ' + (en.team === 'dog' ? 'dogt' : en.found ? 'found' : 'safe'), (en.team === 'dog' ? '狗 ' : en.found ? '✕ ' : '○ ') + en.name, els.tags); ui.tagEls.push([en, t]); });
+    els.result.classList.remove('mini'); if (!els.result.querySelector('.tabhint')) h('div', 'tabhint', '<span class="key">Tab</span> 收合', els.result);
+    // name tags: name, 眼皮底下 score, 👍 count; for the hunters also how far away and, off screen, which way
+    G.ents.forEach(function (en) { if (!en.c.root.visible) return; var pl = st.players[en.id] || st.players[en.pid] || {}, dogT = en.team === 'dog';
+      var t = h('div', 'tag ' + (dogT ? 'dogt' : en.found ? 'found' : 'safe'), '<i class="arr">➤</i><b>' + (dogT ? '狗 ' : en.found ? '✕ ' : '○ ') + en.name + '</b>' + (dogT ? '' : '<small><span class="sc">' + (pl.score || 0) + ' 分</span><span class="lk">👍 ' + ((G.likes || {})[en.id] || 0) + '</span><span class="ds"></span></small>'), els.tags); ui.tagEls.push([en, t]); });
   }
   var lastSec = -1;
   function onFrame(d) {
     var s = Math.max(0, Math.ceil(d.left)); if (s !== lastSec) { lastSec = s; els.tm.textContent = Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); els.tm.classList.toggle('warn', s <= 10 && d.phase !== 'reveal'); if (!els.wait.classList.contains('hide')) els.wait.querySelector('.big').textContent = s; }
-    if (d.phase === 'reveal' && ui.tagEls) ui.tagEls.forEach(function (p) { var q = G.project(p[0]); p[1].style.left = q.x + 'px'; p[1].style.top = q.y + 'px'; p[1].style.display = q.vis ? '' : 'none'; });
+    if (d.phase === 'reveal' && ui.tagEls) { var hunter = G.side === 'dog' || (G.me && G.me.team === 'dog'), W = G.vw, Hh = G.vh;
+      ui.tagEls.forEach(function (p) { var q = G.project(p[0]), el = p[1], on = q.vis && q.x > 40 && q.x < W - 40 && q.y > 70 && q.y < Hh - 30, cat = p[0].team === 'cat';
+        if (on || !hunter || !cat) { el.classList.remove('edge'); el.style.left = q.x + 'px'; el.style.top = q.y + 'px'; el.style.display = q.vis ? '' : 'none'; }
+        else { var dx = q.vx, dy = -q.vy; if (q.vz > 0 && Math.abs(dx) < 1e-3) dx = 1e-3; var l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, k = Math.min((W / 2 - 70) / Math.max(1e-3, Math.abs(ux)), (Hh / 2 - 60) / Math.max(1e-3, Math.abs(uy))); // pinned to the screen edge, arrow pointing at the hider
+          el.classList.add('edge'); el.style.display = ''; el.style.left = (W / 2 + ux * k) + 'px'; el.style.top = (Hh / 2 + uy * k + 20) + 'px'; el.firstChild.style.transform = 'rotate(' + Math.atan2(uy, ux) + 'rad)'; }
+        if (hunter && cat) { var ds = el.querySelector('.ds'); if (ds) ds.textContent = Math.round(q.dist) + ' m'; } }); }
     if (ui.role === 'cat') { els.bDecoy.lastChild.textContent = G.decoyCd > 0 ? Math.ceil(G.decoyCd) + 's' : ''; if (G.paint.on) { var px = G.paint.size / Math.max(0.5, G.cam.dist * 0.62) / Math.tan(52 * Math.PI / 360) * G.vh; els.ring.style.width = els.ring.style.height = Math.max(6, px) + 'px'; } }
     if (ui.role === 'dog' && d.phase === 'seek') { var p = G.state.players.you; els.cross.classList.toggle('cd', G.simT - p.lastShot < RULES.dog.shotIntervalSec); }
     bubs = bubs.filter(function (b) { b.t -= 0.016; if (b.t <= 0 || !b.en.c.root.visible) { b.el.remove(); return false; } var q = G.project(b.en); b.el.style.left = q.x + 'px'; b.el.style.top = (q.y - 26) + 'px'; b.el.style.display = q.vis ? '' : 'none'; return true; });
@@ -368,6 +389,7 @@
       var b = h('button', '', t[2] + t[1], tl); b.dataset.tool = t[0];
       b.onclick = function () { if (t[0] === 'pattern') { var ix = 0; PATS.forEach(function (q, k) { if (q[0] === (G.paint.pattern || '')) ix = k; }); var nx = PATS[(ix + 1) % PATS.length]; G.paint.pattern = nx[0]; b.lastChild.textContent = nx[1]; b.dataset.pat = nx[0]; G.paint.tool = 'brush'; } else if (t[0] === 'fill') G.fillAll(); else if (t[0] === 'undo') G.undo(); else if (t[0] === 'hard') { G.paint.hard = !G.paint.hard; b.lastChild.textContent = G.paint.hard ? '硬邊' : '軟邊'; } else G.paint.tool = t[0]; markTool(); b.blur(); };
     });
+    els.wl = h('div', 'wl', '<b>白色剩餘</b><i><u></u></i><span>100%</span><em><span class="key">H</span> 按住顯示還沒塗到的地方</em>', pp);
     markTool(); sync();
   }
   function markTool() { [].forEach.call(els.tools.children, function (b) { var t = b.dataset.tool; b.classList.toggle('on', t === G.paint.tool || (t === 'hard' && G.paint.hard) || (t === 'pattern' && !!G.paint.pattern)); }); }

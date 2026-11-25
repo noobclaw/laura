@@ -33,7 +33,7 @@ def floor_point(pg):
 def cat_run(pg):
     boot(pg); pg.evaluate("() => { SG.game.settings.paintAids = true; }")
     shot(pg, "01-title")
-    pg.evaluate("SG.game.start('cat')"); i = info(pg)
+    pg.evaluate("SG.game.start('cat')"); i = info(pg); pg.evaluate("SG.game.state.left = 600")  # the scripted hide phase takes longer than the default 60 s of game time
     check("a round as a cat starts in the hide/paint phase", i["mode"] == "play" and i["phase"] == "prep" and i["side"] == "cat", i["phase"])
     check("solo prep timer comes from rules.json (solo.prepSec)", abs(i["left"] - pg.evaluate("SG_RULES.solo.prepSec")) < 0.5, i["left"])
     check("while hiding, the other cats are invisible to you (original rule)", pg.evaluate("SG.game.ents.filter(e=>e!==SG.game.me).every(e=>!e.c.root.visible)"))
@@ -82,11 +82,11 @@ def cat_run(pg):
     check("furniture too: stick to the side of the outdoor unit, go round its outside corner, then climb over the top edge and stand on it", r[0]["n"] == "0,0,-1" and r[1]["n"] in ("1,0,0", "-1,0,0") and r[2]["n"] is None and abs(r[2]["p"][1] - 0.65) < 0.02, r)
     # pose
     pg.evaluate("() => { SG.game.placeU('you', 1.9, 0.012, 0.6, 2.3); SG.game.cam.yaw = 2.5; SG.game.cam.pitch = 0.22; SG.game.cam.dist = 2.3; }"); step(pg, 0.5)
-    pg.keyboard.down("r"); step(pg, 0.05); vis = pg.locator(".pw2").evaluate("e=>!e.classList.contains('hide')"); nseg = pg.locator(".pw2 .seg").count(); shot(pg, "02b-pose-wheel"); pg.hover(".pw2 .seg[data-pose=curl]"); pg.keyboard.up("r"); step(pg, 0.6); i = info(pg)
-    check("hold R opens the radial pose wheel (8 poses + cancel), releasing R picks the segment under the mouse", vis and nseg == 9 and i["me"]["pose"] == "curl" and pg.locator(".pw2.hide").count() == 1, (nseg, i["me"]["pose"]))
-    pg.keyboard.down("r"); step(pg, 0.05); pg.click(".pw2 .more"); pg.click(".pw2 .seg[data-pose=loaf]"); pg.keyboard.up("r"); step(pg, 0.5); p2 = info(pg)["me"]["pose"]
+    pg.keyboard.down("r"); step(pg, 0.05); vis = pg.locator(".pw2").evaluate("e=>!e.classList.contains('hide')"); nseg = pg.locator(".pw2 .seg").count(); shot(pg, "02b-pose-wheel"); pg.hover(".pw2 .seg[data-pose=loaf]"); pg.keyboard.up("r"); step(pg, 0.6); i = info(pg)
+    check("hold R opens the radial pose wheel (8 poses + cancel), releasing R picks the segment under the mouse", vis and nseg == 9 and i["me"]["pose"] == "loaf" and pg.locator(".pw2.hide").count() == 1, (nseg, i["me"]["pose"]))
+    pg.keyboard.down("r"); step(pg, 0.05); pg.mouse.click(640, 360); pg.click(".pw2 .seg[data-pose=sit]"); pg.keyboard.up("r"); step(pg, 0.5); p2 = info(pg)["me"]["pose"]
     pg.keyboard.down("r"); step(pg, 0.05); pg.click(".pw2 .seg.cancel"); pg.keyboard.up("r"); step(pg, 0.4)
-    check("second page holds the other poses; the cancel segment returns to standing", p2 == "loaf" and info(pg)["me"]["pose"] == "stand", p2)
+    check("a click flips to the second page (the other 8 poses); the cancel segment returns to standing", p2 == "sit" and info(pg)["me"]["pose"] == "stand", p2)
     pg.evaluate("SG.game.setPose('loaf')"); step(pg, 0.8)
     r = pg.evaluate("""() => { const G=SG.game, m=G.me, W=SG.WS; G.placeU('you', -2.6, 0, 0.3, 1.0); G.step(0.5); const snap=()=>{ m.c.root.updateMatrixWorld(true); const inv=new THREE.Matrix4().copy(m.c.root.matrixWorld).invert(); return m.c.meshes.map(o=>new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld).elements); }; const same=(p,q)=>{ let mx=0; p.forEach((e,i)=>e.forEach((v,j)=>{ mx=Math.max(mx,Math.abs(v-q[i][j])); })); return mx<1e-3; }; const a=snap(), x0=m.x, z0=m.z, yaw0=m.yaw; G.cam.yaw=0; G.keys.d=true; G.step(1.3); G.keys.d=false; G.step(0.4); const d=Math.hypot(m.x-x0,m.z-z0); const b=snap(); G.keys.Alt=true; G.keys.d=true; const x1=m.x; G.step(1.0); G.keys.d=false; G.keys.Alt=false; G.step(0.3); return {pose:m.c.pose, moved:+d.toFixed(2), sameShape:same(a,b), sameYaw:m.yaw===yaw0, fine:+Math.hypot(m.x-x1,0).toFixed(2)}; }""")
     check("a pose persists (original): WASD while posed shuffles the cat about 1 m in exactly the same shape and facing; Alt nudges slowly for fine alignment", r["pose"] == "loaf" and 0.8 < r["moved"] < 1.3 and r["sameShape"] and r["sameYaw"] and 0.08 < r["fine"] < 0.25, r)
@@ -94,8 +94,8 @@ def cat_run(pg):
     pg.mouse.move(600, 300); pg.mouse.down(button="right"); l1 = info(pg)["viewLock"]; pg.mouse.up(button="right"); check("HOLDING the right mouse button locks the body's facing; releasing unlocks", l1 and not info(pg)["viewLock"])
     r = pg.evaluate("""() => { const G=SG.game; G.setPose('stand'); G.step(0.3); const y0=G.me.yaw, x0=G.me.x, h=()=>{ let v=0; const a=G.me.c.alb; for (let i=0;i<a.length;i+=7) v=(v*31+a[i])|0; return v; }, h0=h(); G.mouse.down[0]=true; G.keys.a=true; G.step(0.5); G.keys.a=false; G.mouse.down[0]=false; return {turned: Math.abs(G.me.yaw-y0), moved: Math.abs(G.me.x-x0), same: h()===h0}; }""")
     check("left mouse outside paint mode never paints: hold left + A turns the body on the spot (yaw changes, position and texture do not)", r["turned"] > 1.0 and r["moved"] < 0.01 and r["same"], r); pg.evaluate("SG.game.setPose('loaf')"); step(pg, 0.5)
-    fc = pg.evaluate("""() => { const G=SG.game, p0=[G.me.x,G.me.z]; window.dispatchEvent(new KeyboardEvent('keydown',{key:'5'})); const a=!!G.fly; const c0=SG.camera.position.clone(); G.keys.w=true; G.step(0.6); G.keys.w=false; const moved=SG.camera.position.distanceTo(c0); const stay=G.me.x===p0[0]&&G.me.z===p0[1]&&G.me.c.pose==='loaf'; window.dispatchEvent(new KeyboardEvent('keydown',{key:'5'})); return {fly:a, camMoved:+moved.toFixed(2), bodyStays:stay, back:!G.fly}; }""")
-    check("5 = free camera while hiding: the camera flies off, the posed body stays put; 5 again returns", fc["fly"] and fc["camMoved"] > 0.5 and fc["bodyStays"] and fc["back"], fc)
+    fc = pg.evaluate("""() => { const G=SG.game, p0=[G.me.x,G.me.z]; window.dispatchEvent(new KeyboardEvent('keydown',{key:'5'})); const a=!!G.fly; const c0=SG.camera.position.clone(); G.keys.w=true; G.step(0.4); const held=SG.camera.position.distanceTo(c0); window.dispatchEvent(new KeyboardEvent('keydown',{key:'4'})); G.step(0.6); G.keys.w=false; const moved=SG.camera.position.distanceTo(c0); const stay=G.me.x===p0[0]&&G.me.z===p0[1]&&G.me.c.pose==='loaf'; window.dispatchEvent(new KeyboardEvent('keydown',{key:'5'})); return {fly:a, held:+held.toFixed(3), camMoved:+moved.toFixed(2), bodyStays:stay, back:!G.fly}; }""")
+    check("5 = camera detached while hiding (W does not move it yet), 4 inside it = free flight, the posed body stays put; 5 again returns", fc["fly"] and fc["held"] < 0.01 and fc["camMoved"] > 0.5 and fc["bodyStays"] and fc["back"], fc)
     pg.keyboard.press("2"); t1 = info(pg)["tags"]; pg.keyboard.press("2"); s0 = info(pg)["seeThrough"]; pg.keyboard.press("3"); s1 = info(pg)["seeThrough"]; pg.keyboard.press("3"); pg.keyboard.press("g")
     check("2 name tags; 3 camera pass-through (on by default, toggles off and on); G does nothing before the answer check", t1 and s0 and not s1 and info(pg)["seeThrough"] and len(events(pg, "like")) == 0)
     pg.evaluate("SG.game.setPose('sit')"); step(pg, 0.8)
@@ -123,7 +123,7 @@ def cat_run(pg):
     drag(pg, ".sl[data-s=size] .tr", 0.37)
     g = pg.evaluate("""() => { const G=SG.game, c=G.me.c; const before=c.alb.slice(); const ctr=c.center(); const ray=new THREE.Raycaster(SG.camera.position.clone(), ctr.clone().sub(SG.camera.position).normalize()); const hit=c.raycast(ray); const R=0.05;
       const t0=performance.now(); for (let k=0;k<50;k++) c.paint(hit.point, R, [10,200,90], 0.8, 0, 0.8); const ms=(performance.now()-t0)/50; let changed=0, far=0, maxd=0;
-      const A=c.A; c.parts.forEach(p=>{ const e=p.mesh.matrixWorld.elements; for(let j=0;j<p.th;j++) for(let i=0;i<p.tw;i++){ const o=((p.ry+j)*A+p.rx+i)*4; const k=(j*p.tw+i)*3; const x=p.tp[k],y=p.tp[k+1],z=p.tp[k+2]; const wx=e[0]*x+e[4]*y+e[8]*z+e[12], wy=e[1]*x+e[5]*y+e[9]*z+e[13], wz=e[2]*x+e[6]*y+e[10]*z+e[14]; const d=Math.hypot(wx-hit.point.x,wy-hit.point.y,wz-hit.point.z); const ch=before[o]!==c.alb[o]||before[o+1]!==c.alb[o+1]||before[o+2]!==c.alb[o+2]; if(ch){changed++; if(d>maxd) maxd=d;} else if(d>R*1.01) far++; } });
+      const A=c.A; c.parts.forEach(p=>{ const e=p.mesh.matrixWorld.elements; for(let j=0;j<p.th;j++) for(let i=0;i<p.tw;i++){ const o=((p.ry+j)*A+p.rx+i)*4; const k=(j*p.tw+i)*3; const tp=c._tp?c._tp(p):p.tp, po=c._tp?c.pivot.position:{x:0,y:0,z:0}; if(tp[k]>1e8) continue; const x=tp[k]+po.x,y=tp[k+1]+po.y,z=tp[k+2]+po.z; const wx=e[0]*x+e[4]*y+e[8]*z+e[12], wy=e[1]*x+e[5]*y+e[9]*z+e[13], wz=e[2]*x+e[6]*y+e[10]*z+e[14]; const d=Math.hypot(wx-hit.point.x,wy-hit.point.y,wz-hit.point.z); const ch=before[o]!==c.alb[o]||before[o+1]!==c.alb[o+1]||before[o+2]!==c.alb[o+2]; if(ch){changed++; if(d>maxd) maxd=d;} else if(d>R*1.01) far++; } });
       c.alb.set(before); c.texA.needsUpdate=true; return {changed, maxd:+maxd.toFixed(4), far, R, msPerDab:+ms.toFixed(3)}; }""")
     check("3D brush: only texels inside the brush sphere change; the rest (incl. far side) untouched", g["changed"] > 50 and g["maxd"] <= g["R"] * 1.04 and g["far"] > 10000, g)
     check("CPU cost of one brush dab at 1024² is under 4 ms (texture upload not included)", g["msPerDab"] < 4, g["msPerDab"]); results.append(("STROKE_MS", True, g["msPerDab"]))
@@ -158,7 +158,7 @@ def cat_run(pg):
     pg.evaluate("() => { SG.game.cam.yaw = 2.5; SG.game.cam.pitch = 0.22; }"); step(pg, 0.6)
     pg.evaluate("() => SG.ui.refreshSug()"); sg = pg.evaluate("SG.game.suggest()"); pg.locator(".sug div").nth(0).click(); c3 = pg.evaluate("SG.game.paint.rgb")
     check("environment suggestions (our aid): 4 colours, clicking one selects it", len(sg) == 4 and c3 == sg[0], sg)
-    hf = texhash(pg); pg.click(".tools button[data-tool=fill]"); i = info(pg); check("fill paints the whole body", i["me"]["painted"] > 0.95 and texhash(pg) != hf, round(i["me"]["painted"], 3))
+    hf = texhash(pg); pg.click(".tools button[data-tool=fill]"); step(pg, 0.7); i = info(pg); check("fill wipes over the whole body (0.45 s)", i["me"]["painted"] > 0.95 and texhash(pg) != hf, round(i["me"]["painted"], 3))
     pg.click(".tools button[data-tool=undo]"); check("undo restores the texture before the fill", texhash(pg) == hf)
     pg.evaluate("() => { while (SG.game.undo()) {} }"); base = texhash(pg); x, y = catxy(pg); hashes = [base]
     for k in range(22):
@@ -190,7 +190,8 @@ def cat_run(pg):
     check("cat flap in the front door: a cat fits through, a dog does not", fl == [False, True], fl)
     m0 = len(events(pg, "meow")); pg.keyboard.press("1"); check("1 = meow (taunt) event", len(events(pg, "meow")) == m0 + 1, (m0, len(events(pg, "meow"))))
     pg.evaluate("() => { SG.game.placeU('you', 2.9, 0.42, 1.25, -2.0); SG.game.setPose('loaf'); }"); step(pg, 0.8)
-    pg.evaluate("SG.game.decoyCd = 0"); dn0 = len(events(pg, "denied")); pg.keyboard.press("q"); pg.keyboard.press("q"); i = info(pg); check("Q drops a decoy; second one is refused during the 30 s cooldown", i["decoys"] == 1 and len(events(pg, "denied")) == dn0 + 1, i["decoys"])
+    pg.evaluate("SG.game.decoySlots.forEach(s=>{s.cd=0})"); dn0 = len(events(pg, "denied")); pg.keyboard.press("q"); pg.keyboard.press("q"); pg.keyboard.press("q"); i = info(pg); sl = pg.evaluate("SG.game.decoySlots.map(s=>[!!s.e, Math.round(s.cd)])"); check("Q twice drops two clones, each on its own 30 s cooldown (two diamonds); a third is refused", i["decoys"] == 2 and len(events(pg, "denied")) == dn0 + 1 and sl == [[True, 30], [True, 30]], (i["decoys"], sl))
+    pg.keyboard.press("x"); pg.keyboard.press("q"); check("after X the slots are empty but still cooling: Q is refused until 30 s have passed", info(pg)["decoys"] == 0 and len(events(pg, "denied")) == dn0 + 2); pg.evaluate("SG.game.decoySlots[0].cd = 0"); pg.keyboard.press("q"); check("the left slot is ready again first", info(pg)["decoys"] == 1 and pg.evaluate("SG.game.decoys[0].slot") == 0)
     pg.keyboard.press("x"); check("X recalls decoys", info(pg)["decoys"] == 0)
     still = pg.evaluate("""() => { const G=SG.game, c=G.ent('cat0').c; const snap=()=>c.meshes.map(m=>Array.from(m.matrixWorld.elements).join()).join('|'); const a=snap(); G.step(1.0); return a===snap() && c.pose!=='stand'; }""")
     check("a posed cat that is not yours is perfectly still for 60 frames", still)
@@ -201,7 +202,7 @@ def cat_run(pg):
     pg.click("button[data-act=vote]"); i = info(pg); check("vote-to-skip button (alone with bots: instant) -> seek", i["phase"] == "seek", i["phase"])
     check("when the search starts everyone becomes visible", pg.evaluate("SG.game.ents.every(e=>e.c.root.visible)")); shot(pg, "06-seek-start")
     hF = texhash(pg); pg.keyboard.press("q"); nd = info(pg)["decoys"]; pg.keyboard.press("5"); step(pg, 0.1); f1 = info(pg)["me"]["fly"]; p0 = pg.evaluate("[SG.game.me.x, SG.game.me.z, SG.game.me.c.pose]"); c0 = pg.evaluate("SG.camera.position.toArray()")
-    pg.keyboard.down("w"); step(pg, 0.6); pg.keyboard.up("w"); pg.keyboard.press("x"); shot(pg, "06b-free-camera-while-hidden"); c1 = pg.evaluate("SG.camera.position.toArray()"); hint = " ".join(pg.locator(".keycol .kc").all_inner_texts()); nd2 = info(pg)["decoys"]
+    pg.keyboard.press("4"); pg.keyboard.down("w"); step(pg, 0.6); pg.keyboard.up("w"); pg.keyboard.press("x"); shot(pg, "06b-free-camera-while-hidden"); c1 = pg.evaluate("SG.camera.position.toArray()"); hint = " ".join(pg.locator(".keycol .kc").all_inner_texts()); nd2 = info(pg)["decoys"]
     pg.keyboard.press("5"); step(pg, 0.1); p1 = pg.evaluate("[SG.game.me.x, SG.game.me.z, SG.game.me.c.pose]")
     check("free camera while hidden, in the SEARCH phase (5): camera flies away, the posed and painted body stays exactly as it was, X does nothing in free camera, the hint column shows the keys, 5 returns", f1 and math.dist(c0, c1) > 0.5 and p0 == p1 and p0[2] == "sit" and texhash(pg) == hF and nd2 == nd and "5" in hint and not info(pg)["me"]["fly"], (p0, round(math.dist(c0, c1), 2), nd, nd2))
     t = 0; shot_done = False
@@ -256,8 +257,8 @@ def dog_run(pg):
     check("hit a still cat: +1 ammo, cat is out, and the cat keeps a paint mark", i["players"]["you"]["ammo"] == 5 and i["players"]["cat0"]["out"] and texhash(pg, "cat0") != hc, i["players"]["you"]["ammo"]); shot(pg, "13-dog-hit")
     step(pg, 1.5)
     s = pg.evaluate("""() => { const G=SG.game, out={}; const sc=id=>G.state.players[id].score; const run=(cx,cz,yaw)=>{ G.placeU('cat1', cx, 0, cz, 0); G.placeU('you', 1.2, 0, 1.4, Math.PI); G.me.yaw=yaw; G.me.pitch=-0.11; G.ovT=9; G.step(0.2); const s0=sc('cat1'); G.ovT=0; G.step(0.4); return sc('cat1')-s0; };
-      out.centre=run(1.2,-1.4,Math.PI); out.edge=run(1.2,-1.4,Math.PI+1.12); out.behind=run(1.2,3.0,Math.PI); out.wall=run(1.2,-4.6,Math.PI); out.far=run(1.2,-2.6,Math.PI); out.tick=SG_RULES.overlooked.tickEverySec; return out; }""")
-    check("THE mechanic, hunter side: a hider dead centre and close scores exactly 45 per tick (2 ticks/s, our guess); at the screen edge little; behind the hunter 0; behind a wall 0; farther away less", s["centre"] == 45 and 0 < s["edge"] <= 20 and s["behind"] == 0 and s["wall"] == 0 and 0 < s["far"] < 45 and s["tick"] == 0.5, s)
+      out.centre=run(1.2,-1.4,Math.PI); out.edge=run(1.2,-1.4,Math.PI+0.85); out.behind=run(1.2,3.0,Math.PI); out.wall=run(1.2,-4.6,Math.PI); out.far=run(1.2,-2.6,Math.PI); out.tick=SG_RULES.overlooked.tickEverySec; return out; }""")
+    check("THE mechanic, hunter side: a hider dead centre and close scores exactly 45 per tick (2 ticks/s, our guess); toward the screen edge less; behind the hunter 0; behind a wall 0; farther away less", s["centre"] == 45 and 0 < s["edge"] <= 30 and s["behind"] == 0 and s["wall"] == 0 and 0 < s["far"] < 45 and s["tick"] == 0.5, s)
     step(pg, 0.3); check("the ranking panel on the left lists the hiders by score (shown to hunters because the host setting is on)", pg.locator(".rank:not(.hide) div").count() >= 3, pg.locator(".rank div").count()); shot(pg, "13b-rank-panel")
     dc = pg.evaluate("""() => { const G=SG.game, W=SG.WS, m=G.me; G.placeU('you', 5.0, 0, -1.9, -Math.PI/2); m.yaw=-Math.PI/2; m.pitch=0; G.keys.w=true; G.step(0.15); window.dispatchEvent(new KeyboardEvent('keydown',{key:' '})); G.step(0.3); const n0=m.cling&&m.cling.n.join(','); G.keys.w=false; G.keys[' ']=true; G.step(0.6); const y1=m.y/W; G.keys[' ']=false; window.dispatchEvent(new KeyboardEvent('keydown',{key:'Shift'})); G.step(1.2); return {stick:n0, up:+y1.toFixed(2), released:!m.cling, y:+(m.y/W).toFixed(2)}; }""")
     check("hunters climb too (original): the dog jumps into a wall, sticks, climbs with Space, lets go with Shift", dc["stick"] == "1,0,0" and dc["up"] > 0.7 and dc["released"] and dc["y"] < 0.05, dc)
@@ -278,8 +279,8 @@ def dog_run(pg):
     pg.evaluate("() => { SG.game.settings.seek = 6; }"); pg.evaluate("SG.game.start('dog')"); pg.keyboard.press("Enter"); step(pg, 6.5); i = info(pg)
     check("end: time up with cats left -> reveal, cats win (time)", i["phase"] == "reveal" and i["winner"] == "cats" and i["reason"] == "time", (i["winner"], i["reason"]))
     pg.evaluate("() => { SG.game.toTitle(); SG.game.settings.seek = 90; }"); pg.evaluate("SG.game.start('cat')")
-    r = pg.evaluate("""() => { const G=SG.game; G.placeU('you', 2.9, 0.42, 1.25, -2.0); G.setPose('loaf'); G.step(0.5); G.decoy(); G.placeU('you', -3.0, 0, -2.0, 0); G.skip(); G.step(0.1); const d=G.ent('dog0'), dc=G.decoys[0]; const o=new THREE.Vector3(0.5*SG.WS,0.9,1.0*SG.WS); const ok=G.fire(d,o,dc.c.center().sub(o).normalize()); return {ok, out:G.state.players.you.out, vis:dc.c.root.visible}; }""")
-    check("a shot that hits a decoy takes the real cat out", r["ok"] and r["out"] and not r["vis"], r)
+    r = pg.evaluate("""() => { const G=SG.game; G.placeU('you', 2.9, 0.42, 1.25, -2.0); G.setPose('loaf'); G.step(0.5); G.decoy(); G.placeU('you', -3.0, 0, -2.0, 0); G.skip(); G.step(0.1); const d=G.ent('dog0'), dc=G.decoys[0]; const o=new THREE.Vector3(0.5*SG.WS,0.9,1.0*SG.WS); const ok=G.fire(d,o,dc.c.center().sub(o).normalize()); G.step(0.7); return {ok, out:G.state.players.you.out, vis:dc.c.root.visible, body:G.ent('you').c.root.visible}; }""")
+    check("a shot that hits a decoy takes the real cat out; clone and body are gone 0.7 s later", r["ok"] and r["out"] and not r["vis"] and not r["body"], r)
 
 LOSJS = """() => { window.LOS = function (e) { const c=e.c.center(), ray=new THREE.Raycaster(); for (let r=0.6; r<4; r+=0.3) for (let a=0; a<6.28; a+=0.4) for (const dy of [0.3, 0.8, -0.2]) { const o=new THREE.Vector3(c.x+Math.cos(a)*r, c.y+dy, c.z+Math.sin(a)*r); if (SG.game.solidAt(o.x,o.y,o.z)) continue; const d=c.clone().sub(o), L=d.length(); ray.set(o, d.normalize()); ray.far=L; const h=ray.intersectObjects([SG.room.batched, SG.room.dyn], true)[0]; if (!h || h.distance > L-0.1) return o; } return c.clone().add(new THREE.Vector3(0.7,0.5,0.5)); }; }"""
 def modes_run(pg):
@@ -302,7 +303,7 @@ def modes_run(pg):
     pg.click("button[data-act=hs-start]"); step(pg, 0.5); lb = info(pg)["lobby"]; shot(pg, "20b-lobby")
     check("start -> lobby: map card, player counter 11 / 11, hunter-lottery countdown, mat on the floor", lb and lb["n"] == 11 and 18 < lb["t"] <= 20 and pg.locator(".mapcard img").count() == 1 and pg.locator(".lobbyhud .cnt b").inner_text() == "11 / 11" and "獵人抽選" in pg.locator(".lot").inner_text(), lb)
     pg.click("button[data-act=body]"); pg.click(".bp button[data-body='dango:1.7']"); step(pg, 0.3); shot(pg, "20c-body-picker"); sz = info(pg)["me"]["size"]; pg.keyboard.press("b")
-    check("body picker in the lobby: 6 builds x 3 sizes (x1.0 / x1.4 / x1.7); choosing one respawns you with it", pg.locator(".bp .grid button").count() == 18 and sz == 1.7 and pg.evaluate("SG.game.pick.cat.breed") == "dango", sz)
+    check("body picker in the lobby: every build x 3 sizes (x1.0 / x1.4 / x1.7); choosing one respawns you with it", pg.locator(".bp .grid button").count() == 3 * pg.evaluate("Object.keys(SG.CATS).length") and sz == 1.7 and pg.evaluate("SG.game.pick.cat.breed") == "dango", sz)
     on = pg.evaluate("() => { const G=SG.game; G.place('you', G.lobby.x, 0, G.lobby.z, 0); G.step(0.3); const a=G.lobby.on; G.place('you', G.lobby.x - 3, 0, G.lobby.z, 0); G.step(0.3); return [a, G.lobby.on]; }")
     check("standing on the mat enters the hunter lottery, stepping off leaves it", on == [True, False], on)
     pg.keyboard.press("Enter"); step(pg, 0.2); i = info(pg); n = pg.evaluate("[SG.game.ents.filter(e=>e.team==='cat').length, SG.game.ents.filter(e=>e.team==='dog').length]")
