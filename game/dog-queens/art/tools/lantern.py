@@ -1,0 +1,22 @@
+# Lantern token for the second scene (night garden). L1 = unlit glow kept low, L2 = bright glow for the win hop.
+import os
+OUT = os.path.join(os.path.dirname(__file__), '..', 'out')
+def lantern(glow):
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><defs>
+<radialGradient id="g" cx="50%" cy="52%" r="50%"><stop offset="0" stop-color="#FFE9A8" stop-opacity="{glow}"/><stop offset=".55" stop-color="#FFB24A" stop-opacity="{glow*.45:.2f}"/><stop offset="1" stop-color="#FF8A2A" stop-opacity="0"/></radialGradient>
+<radialGradient id="b" cx="42%" cy="40%" r="70%"><stop offset="0" stop-color="#FFE48A"/><stop offset=".35" stop-color="#FF9A3D"/><stop offset=".8" stop-color="#E9482F"/><stop offset="1" stop-color="#B92C22"/></radialGradient>
+<linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#C98A1C"/></linearGradient>
+<filter id="bl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter></defs>
+<circle cx="256" cy="262" r="250" fill="url(#g)"/>
+<ellipse cx="256" cy="474" rx="110" ry="12" fill="#000" opacity=".22" filter="url(#bl)"/>
+<path d="M256 26 C236 26 232 52 256 60 C280 52 276 26 256 26Z" fill="none" stroke="#C98A1C" stroke-width="9"/>
+<rect x="196" y="58" width="120" height="34" rx="12" fill="url(#cap)"/>
+<path d="M256 88 C150 88 96 170 96 262 C96 354 150 436 256 436 C362 436 416 354 416 262 C416 170 362 88 256 88Z" fill="url(#b)"/>
+<g fill="none" stroke="#8E1F18" stroke-width="5" opacity=".45"><path d="M256 90 C200 150 200 374 256 434"/><path d="M256 90 C312 150 312 374 256 434"/><path d="M200 100 C120 170 120 354 200 424"/><path d="M312 100 C392 170 392 354 312 424"/></g>
+<ellipse cx="256" cy="270" rx="92" ry="120" fill="#FFF1B0" opacity="{.25+glow*.45:.2f}" filter="url(#bl)"/>
+<ellipse cx="190" cy="178" rx="34" ry="58" fill="#fff" opacity=".42" transform="rotate(22 190 178)" filter="url(#bl)"/>
+<rect x="196" y="430" width="120" height="30" rx="11" fill="url(#cap)"/>
+<path d="M240 460 v30 M256 460 v40 M272 460 v30" stroke="#E9482F" stroke-width="8" stroke-linecap="round"/>
+</svg>'''
+for n, g in (('L1_lantern', .55), ('L2_lantern_glow', 1.0)):
+    open(os.path.join(OUT, n + '.svg'), 'w').write(lantern(g))

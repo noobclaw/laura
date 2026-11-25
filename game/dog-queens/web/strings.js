@@ -123,4 +123,19 @@ ar:{title:"حديقة شيبا",tag:"جرو واحد في كل صف وعمود �
  easy:"سهل",medium:"متوسط",tricky:"صعب",oops:"ليس هنا!",statFast:"أسرع من متوسطك بـ {n} ثانية",statClean:"{n} لوحات متتالية بلا أخطاء",
  checkin:"الحضور اليومي",dayN:"اليوم {n}",giftHint:"تلميحات +{h}",giftGot:"تلميحات +{h} · كرات +{b}",
  tutTitle:"طريقة اللعب",tut1:"ضع جرواً واحداً في كل صف وكل عمود وكل لون.",tut2:"الجرو يحجب صفه وعموده ولونه والخانات المحيطة به. ضع عليها × لتجد المكان التالي.",gotIt:"فهمت",noBalls:"لا توجد كرات. تجد المزيد في المتجر."}};
+// Second scene: the lantern night garden from version 1.0. Same rules and items; only the wording of the piece changes.
+// The hint texts and the title are the 1.0 lantern texts, taken from i18n.js before the puppy texts are laid over it.
+const LAN={
+en:{tag:"One lantern in every row, column and colour.",r1:"One per colour",r2:"One per row and column",r3:"Lanterns never touch",how:"Tap a tile once to cross it out, twice to light a lantern.",tut1:"Light one lantern in every row, every column and every colour.",tut2:"A lantern blocks its row, its column, its colour and the tiles around it. Cross those out to find the next one."},
+"zh-Hant":{tag:"每一行、每一列、每種顏色各一盞燈籠。",r1:"一種顏色一盞",r2:"同行同列各一盞",r3:"燈籠不能相鄰",how:"點一下打叉，再點一下點亮燈籠。",tut1:"每一行、每一列、每種顏色各點亮一盞燈籠。",tut2:"燈籠會擋住它的行、列、顏色，還有周圍一圈的格子。把這些格子打叉，就能找到下一盞的位置。"},
+ja:{tag:"どの行・列・色にも灯籠を1つずつ。",r1:"1色に1つ",r2:"行と列に1つずつ",r3:"灯籠はとなり合わない",how:"1回タップで×、もう1回で灯籠をともします。",tut1:"どの行・列・色にも灯籠を1つずつともします。",tut2:"灯籠は自分の行・列・色と、まわりのマスをふさぎます。そこに×をつけると次の場所が見つかります。"},
+ko:{tag:"모든 행, 열, 색마다 등불 하나.",r1:"색마다 하나",r2:"행과 열에 하나씩",r3:"등불은 서로 붙지 않아요",how:"한 번 누르면 ×, 한 번 더 누르면 등불을 켜요.",tut1:"모든 행, 열, 색마다 등불을 하나씩 켜세요.",tut2:"등불은 자기 행, 열, 색과 주변 칸을 막아요. 그 칸에 ×를 표시하면 다음 자리를 찾을 수 있어요."},
+de:{tag:"Eine Laterne in jeder Reihe, Spalte und Farbe.",r1:"Eine pro Farbe",r2:"Eine pro Reihe und Spalte",r3:"Laternen berühren sich nie",how:"Einmal tippen: Feld ankreuzen. Zweimal tippen: Laterne anzünden.",tut1:"Zünde eine Laterne in jeder Reihe, jeder Spalte und jeder Farbe an.",tut2:"Eine Laterne sperrt ihre Reihe, ihre Spalte, ihre Farbe und die Felder um sie herum. Kreuze sie an, um den nächsten Platz zu finden."},
+fr:{tag:"Une lanterne dans chaque ligne, colonne et couleur.",r1:"Une par couleur",r2:"Une par ligne et colonne",r3:"Les lanternes ne se touchent pas",how:"Touchez une case une fois pour la barrer, deux fois pour allumer une lanterne.",tut1:"Allumez une lanterne dans chaque ligne, chaque colonne et chaque couleur.",tut2:"Une lanterne bloque sa ligne, sa colonne, sa couleur et les cases autour d'elle. Barrez-les pour trouver la suivante."},
+es:{tag:"Un farol en cada fila, columna y color.",r1:"Uno por color",r2:"Uno por fila y columna",r3:"Los faroles no se tocan",how:"Toca una casilla una vez para tacharla y dos veces para encender un farol.",tut1:"Enciende un farol en cada fila, cada columna y cada color.",tut2:"Un farol bloquea su fila, su columna, su color y las casillas que lo rodean. Táchalas para encontrar el siguiente."},
+ar:{tag:"فانوس واحد في كل صف وعمود ولون.",r1:"فانوس لكل لون",r2:"فانوس لكل صف وعمود",r3:"الفوانيس لا تتلامس",how:"اضغط مرة لوضع علامة ×، ومرتين لإضاءة فانوس.",tut1:"أضئ فانوساً واحداً في كل صف وكل عمود وكل لون.",tut2:"الفانوس يحجب صفه وعموده ولونه والخانات المحيطة به. ضع عليها × لتجد المكان التالي."}};
+const KEEP=["title","hRow","hCol","hReg","hAdj","hOnlyRow","hOnlyCol","hOnlyReg","hLockRow","hLockCol","hLockReg","hStarve","hGroup","hBadMark","hGive"];
+for(const l of Object.keys(LAN))for(const k of KEEP)LAN[l][k]=T[l][k];
 for(const l of Object.keys(DOG))Object.assign(T[l],DOG[l]);
+// Puts the wording of one scene into the live table. `scene` is "shiba" or "lantern".
+function sceneText(scene){for(const l of Object.keys(DOG))Object.assign(T[l],DOG[l],scene==="lantern"?LAN[l]:{})}

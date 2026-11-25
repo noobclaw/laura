@@ -5,10 +5,14 @@
 const sysLang=(()=>{const l=(navigator.language||"en").toLowerCase(),c=l.split("-")[0];return l.startsWith("zh")?"zh-Hant":LANGS.some(x=>x[0]===c)?c:"en"})();
 const fmtN=(k,n)=>tr(k).replace("{n}",n),fill=(k,o)=>tr(k).replace(/\{(\w)\}/g,(m,c)=>o[c]);
 const S={lang:LANGS.some(x=>x[0]===load("lang",sysLang))?load("lang",sysLang):"en",inv:{hints:load("inv.hints",0),blasts:load("inv.blasts",1)},screen:"home",mode:"levels",level:load("level",1),
-  p:null,cells:[],no:[],undo:[],hints:3,used:0,bones:3,t0:0,tick:0,done:false,failed:false,run:0,combo:0,hintCell:-1,auto:load("auto",false),sound:load("sound",true),music:load("music",true)};
+  p:null,cells:[],no:[],undo:[],hints:3,used:0,bones:3,t0:0,tick:0,done:false,failed:false,run:0,combo:0,hintCell:-1,auto:false,scene:load("scene","shiba")==="lantern"?"lantern":"shiba",sound:load("sound",true),music:load("music",true)};
 // Ten region colours, picked to stay apart for the common colour-blind types as well (checked by eye on a simulator, not measured).
 const COLORS=["#FF9EBB","#7FDDB4","#8CC4FF","#FFD86B","#BFA2F7","#FFB07C","#5CCBD6","#B9E26A","#D9A38F","#A9B8D6"];
 const ART="assets/art/",board=$("board"),fxl=$("fxl");let els=[];
+// Two scenes share one game: the puppy garden (default) and the lantern night garden. Only the piece, the palette and the wording differ.
+// Four puppies with different coats share a board: which one sits on a tile depends on its row and the level, so it stays put.
+const DOGS=[["C1_token","C2_token_joy"],["K1_token","K2_token"],["S1_token","S2_token"],["G1_token","G2_token"]];
+const piece=(joy,k)=>S.scene==="lantern"?(joy?"L2_lantern_glow":"L1_lantern"):DOGS[k==null||!S.p?0:(Math.floor(k/S.p.n)+S.level)%DOGS.length][joy?1:0];
 
 // ---------- small effects (DOM only) ----------
 function pop(x,y,txt,bad){if(calm)return;const d=document.createElement("div");d.className="pop"+(bad?" bad":"");d.textContent=txt;d.style.left=Math.max(70,Math.min(innerWidth-70,x))+"px";d.style.top=Math.max(90,y)+"px";fxl.appendChild(d);d.addEventListener("animationend",()=>d.remove())}
@@ -24,7 +28,7 @@ function buildBoard(){const n=S.p.n;board.innerHTML="";board.style.gridTemplateC
   for(let k=0;k<n*n;k++){const d=document.createElement("div");d.className="cell";d.dataset.k=k;d.style.background=COLORS[S.p.g[k]%COLORS.length];board.appendChild(d);els.push(d)}
   S.cells.forEach((v,k)=>sync(k))}
 function sync(k,face){const el=els[k],v=S.cells[k];el.classList.toggle("x",v===1);el.classList.toggle("no",v===1&&!!S.no[k]);el.classList.toggle("hint",k===S.hintCell);
-  const im=el.firstChild;if(v===2){const src=ART+(face||"C1_token")+".png";if(!im){const i=new Image();i.src=src;i.alt="";el.appendChild(i)}else if(!im.src.endsWith(src))im.src=src}else if(im)im.remove()}
+  const im=el.firstChild;if(v===2){const src=ART+piece(face,k)+".png";if(!im){const i=new Image();i.src=src;i.alt="";el.appendChild(i)}else if(!im.src.endsWith(src))im.src=src}else if(im)im.remove()}
 function hud(){const n=S.p?S.p.n:0,c=S.cells.filter(v=>v===2).length;$("count").textContent=c+"/"+n;[...$("bones").children].forEach((b,i)=>b.classList.toggle("gone",i>=S.bones));
   $("hintN").textContent=S.hints+S.inv.hints;$("hintN").classList.toggle("zero",S.hints+S.inv.hints===0);$("ballN").textContent=S.inv.blasts;$("ballN").classList.toggle("zero",S.inv.blasts===0);
   Music.set(S.screen==="game"&&!S.done?(3-S.bones)/3*.7:0)}
@@ -59,7 +63,7 @@ function check(){const n=S.p.n;if(S.cells.filter(v=>v===2).length!==n)return;S.d
   else{save("level",S.level+1);$("next").style.display=""}
   [...$("stars").children].forEach((s,i)=>s.classList.toggle("got",i<got));$("winInfo").textContent=info;$("winStat").textContent=stat;$("t-win").textContent=tr(got===3?"win3":got===2?"win2":"win");
   const run=S.run,live=()=>S.run===run&&S.done&&!S.failed;let i=0;
-  els.forEach((el,k)=>{if(S.cells[k]===2){const d=120+i*110;setTimeout(()=>{if(!live())return;sync(k,"C2_token_joy");again(el,"hop");sfx.rise(i%8)},d);i++}});
+  els.forEach((el,k)=>{if(S.cells[k]===2){const d=120+i*110;setTimeout(()=>{if(!live())return;sync(k,true);again(el,"hop");sfx.rise(i%8)},d);i++}});
   setTimeout(()=>{if(live()){sfx.win();confetti()}},350);buzz([30,60,30,60,60]);
   setTimeout(()=>{if(live()){$("win").classList.add("on");confetti(30)}},calm?300:500+n*110+500)}
 function fail(){S.done=true;S.failed=true;S.failAt=Date.now();failText();clearInterval(S.tick);hud();const run=S.run;setTimeout(()=>{if(S.run===run&&S.failed)$("fail").classList.add("on")},calm?200:800)}
@@ -142,7 +146,7 @@ const MINI={r1:"xxnxdnnnn",r2:"nxnxdxnxn",r3:"xxxxdxxxx"}; // x crossed, d puppy
 const mini=k=>`<span class="mini">${[...MINI[k]].map(c=>`<i class="${c}"></i>`).join("")}</span>`;
 function rulesHtml(){return["r1","r2","r3"].map(k=>`<div class="rule">${mini(k)}<span>${tr(k)}</span></div>`).join("")}
 function demoRun(){const d=$("demo");d.innerHTML="";const cs=[];for(let k=0;k<25;k++){const i=document.createElement("i");d.appendChild(i);cs.push(i)}
-  const run=++demoRun.n;setTimeout(()=>{if(demoRun.n!==run)return;cs[12].className="dog";cs[12].innerHTML=`<img src="${ART}C1_token.png" alt="">`;
+  const run=++demoRun.n;setTimeout(()=>{if(demoRun.n!==run)return;cs[12].className="dog";cs[12].innerHTML=`<img src="${ART}${piece()}.png" alt="">`;
     for(let k=0;k<25;k++){if(k===12)continue;const y=Math.floor(k/5),x=k%5,hit=y===2||x===2||(Math.abs(y-2)<2&&Math.abs(x-2)<2);if(hit){cs[k].className="hit";cs[k].style.animationDelay=.4+Math.hypot(x-2,y-2)*.22+"s"}}},350)}
 demoRun.n=0;
 function openTut(){$("tut").classList.add("on");demoRun()}
@@ -151,11 +155,11 @@ $("howChip").onclick=()=>{sfx.tap();openTut()};
 
 // ---------- screens and text ----------
 function show(s){S.screen=s;$("home").classList.toggle("on",s==="home");$("game").classList.toggle("on",s==="game");if(s==="game")requestAnimationFrame(fit)}
-function text(){document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";document.title=tr("title");
+function text(){sceneText(S.scene);document.body.classList.toggle("night",S.scene==="lantern");$("countImg").src=ART+piece()+".png";document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==="ar"?"rtl":"ltr";document.title=tr("title");
   for(const k of["title","tag","play","daily","checkin","undo","hint","ball","reset","fail","shop","lang","snd","sfx","mus","tutTitle","tut1","tut2","how"])$("t-"+k).textContent=tr(k);
   $("playSub").textContent=fmtN("levelN",load("level",1));$("dailySub").textContent=tr(load("dailyLast",0)===todayKey()?"doneToday":"newToday");
   $("lang").textContent="🌐 "+LANGS.find(x=>x[0]===S.lang)[1];$("snd").textContent="♪ "+tr("snd");$("shopChip").textContent="＋ "+tr("shop");$("howChip").textContent="? "+tr("tutTitle");
-  $("auto").textContent=(S.auto?"✓ ":"✕ ")+tr("auto");$("auto").classList.toggle("off",!S.auto);
+  $("scene").textContent="✦ "+tr("title");
   $("lvl").textContent=S.mode==="daily"?tr("daily"):fmtN("levelN",S.level);const g=S.p?S.p.grade||1:1,d=$("diff");d.textContent=tr(g<=1?"easy":g<=3?"medium":"tricky");d.className=g<=1?"":g<=3?"g2":"g3";
   $("rules").innerHTML=$("rules3").innerHTML=rulesHtml();$("next").textContent=tr("next");$("homeBtn").textContent=tr("home");$("retry").textContent=tr("retry");$("shopClose").textContent=$("sndClose").textContent=tr("close");
   $("tutOk").textContent=$("ciOk").textContent=tr("gotIt");$("sfxT").textContent=tr(S.sound?"on":"off");$("musT").textContent=tr(S.music?"on":"off");$("sfxT").classList.toggle("alt",!S.sound);$("musT").classList.toggle("alt",!S.music);
@@ -175,7 +179,7 @@ $("snd").onclick=()=>{sfx.tap();$("sndSheet").classList.add("on")};
 $("sfxT").onclick=()=>{S.sound=!S.sound;save("sound",S.sound);text();sfx.tap()};
 $("musT").onclick=()=>{S.music=!S.music;save("music",S.music);Music.enable(S.music);text();sfx.tap()};
 $("sndSheet").onclick=e=>{if(e.target===$("sndSheet")||e.target===$("sndClose"))$("sndSheet").classList.remove("on")};
-$("auto").onclick=()=>{S.auto=!S.auto;save("auto",S.auto);text();sfx.tap()};
+$("scene").onclick=()=>{S.scene=S.scene==="lantern"?"shiba":"lantern";save("scene",S.scene);sfx.tap();text();if(S.p)S.cells.forEach((v,k)=>sync(k))};
 addEventListener("resize",fit);
 window.__lanternApi={start,setCell,tap,show,checkIn,info:()=>({music:Music.state(),buffers:Object.keys(BUF).length,audio:AC?AC.state:"none"})};
 text();

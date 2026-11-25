@@ -8,8 +8,7 @@ const p=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:2});
 const errs=[];p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});p.on('pageerror',e=>errs.push('PE '+e.message));
 const E=(f,a)=>p.evaluate(f,a),st=()=>E(()=>({n:__lantern.p.n,sol:__lantern.p.sol,done:__lantern.done,failed:__lantern.failed,bones:__lantern.bones,cells:__lantern.cells.join(''),inv:__lantern.inv}));
 const shot=n=>p.screenshot({path:path.join(out,n+'.png')});
-await p.addInitScript(()=>{try{if(!sessionStorage.getItem('k')){localStorage.clear();sessionStorage.setItem('k','1')}}catch(e){}});
-await p.goto(url);await p.waitForTimeout(700);
+await p.goto(url);await E(()=>localStorage.clear());await p.reload();await p.waitForTimeout(700); // start from an empty save
 // 1. first launch: check-in sheet with day 1 gift
 ok(await E(()=>document.getElementById('ciSheet').classList.contains('on')),'check-in sheet opens on first launch of the day');
 await shot('01_checkin');await p.click('#ciOk');await p.waitForTimeout(300);await shot('02_home');
@@ -48,9 +47,14 @@ await p.click('#back');await p.waitForTimeout(200);await p.click('#lang');await 
 await p.click('#daily');await p.waitForTimeout(600);await shot('11_daily_ar');ok((await st()).n===7,'daily board is 7x7');
 ok(await E(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal overflow in Arabic');
 await p.click('#back');await p.click('#lang');await p.click('button[data-lang="zh-Hant"]');await p.click('#shopChip');await p.waitForTimeout(300);await shot('12_shop_zh');
+// 8b. lantern scene: night palette, lantern pieces and lantern wording; back to the puppy scene afterwards
+await p.click('#shopClose');await p.click('#scene');await p.waitForTimeout(200);ok(await E(()=>document.body.classList.contains('night')&&T.en.r3==='Lanterns never touch'&&T.en.title==='Lantern Garden'),'scene chip switches to the lantern night garden');await shot('13_home_lantern');
+await p.click('#play');await p.waitForTimeout(500);await E(()=>{const S=__lantern,n=S.p.n;for(let y=0;y<3;y++)__lanternApi.setCell(y*n+S.p.sol[y],2)});await p.waitForTimeout(400);
+ok(await E(()=>document.querySelector('.cell img').src.includes('L1_lantern')),'lantern scene uses lantern pieces');await shot('14_board_lantern');
+await p.click('#back');await p.click('#scene');await p.waitForTimeout(200);ok(await E(()=>!document.body.classList.contains('night')&&T.en.r3==='Puppies never touch'),'scene chip switches back to the puppy garden');
 // 9. every language defines every key the page uses
 ok(await E(()=>{const keys=Object.keys(T.en);return Object.keys(T).every(l=>keys.every(k=>T[l][k]!=null))}),'all eight languages define every key');
 // 10. second load on the same day: no second check-in gift
-await p.reload();await p.waitForTimeout(600);ok(!(await E(()=>document.getElementById('ciSheet').classList.contains('on'))),'no second check-in on the same day');
+await p.reload();await p.waitForTimeout(1000);ok(!(await E(()=>document.getElementById('ciSheet').classList.contains('on'))),'no second check-in on the same day');
 ok(errs.length===0,'no console errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
 console.log(`\n${pass} passed, ${fail} failed`);await b.close();process.exit(fail?1:0)})();

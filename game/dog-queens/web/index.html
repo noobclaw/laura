@@ -24,7 +24,6 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 .btn.gold{background:var(--gold);box-shadow:0 5px 0 #DB8E0E,0 10px 18px rgba(219,142,14,.25)}
 .link{font-size:15px;font-weight:700;color:var(--soft);padding:12px 18px}
 .chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:20px;background:#fff;font-size:14px;font-weight:700;box-shadow:0 2px 0 #D5E2F1}
-.chip.off{color:var(--soft);background:#EEF4FA}
 .round{width:44px;height:44px;border-radius:22px;background:#fff;box-shadow:0 3px 0 #D5E2F1;display:grid;place-items:center}
 .round svg{width:22px;height:22px;stroke:var(--ink);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
 [dir=rtl] .flip{transform:scaleX(-1)}
@@ -133,6 +132,17 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
 @keyframes fall{to{transform:translate(var(--dx),108vh) rotate(var(--rot))}}
 #oopsArt{position:fixed;left:50%;bottom:calc(var(--sab) + 96px);width:150px;transform:translateX(-50%) translateY(60%) scale(.6);opacity:0;transition:transform .25s cubic-bezier(.3,1.4,.5,1),opacity .2s;z-index:15;pointer-events:none}
 #oopsArt.on{transform:translateX(-50%);opacity:1}
+/* second scene: lantern night garden */
+body.night{background:linear-gradient(#141B45,#3A2A6B);color:#F1F4FF}
+body.night .tag,body.night #msg,body.night .tool,body.night #time{color:#B9C3E6}
+body.night .chip,body.night .pill,body.night .rule,body.night .round,body.night .card,body.night .btn.alt,body.night #ci,body.night #diff{color:var(--ink)}
+body.night #bones{color:#fff}
+body.night .chip,body.night .round,body.night .rule,body.night #ci,body.night .tool span.ic,body.night .pill{box-shadow:0 3px 0 rgba(0,0,0,.35)}
+body.night #board{background:#232B63;box-shadow:0 6px 0 #0E1338,0 14px 30px rgba(0,0,0,.4)}
+body.night .cell img{inset:-9%;width:118%;height:118%}
+body.night .mini i.d{background-image:url(assets/art/L1_lantern.png)}
+body.night #win .card{color:#fff}
+body.night .cell.hint{box-shadow:0 0 0 4px #FFD76A,0 0 0 9px rgba(255,215,106,.3)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
@@ -147,7 +157,7 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
   <div id="ci"><b><span id="t-checkin"></span><span id="ciDay"></span></b><div id="ciDots"></div></div>
   <div class="chips">
     <button class="chip" id="lang"></button><button class="chip" id="snd"></button><button class="chip" id="shopChip"></button>
-    <button class="chip" id="auto"></button><button class="chip" id="howChip"></button>
+    <button class="chip" id="scene"></button><button class="chip" id="howChip"></button>
   </div>
 </div>
 
@@ -158,7 +168,7 @@ img{display:block;-webkit-user-drag:none;pointer-events:none}
     <div id="time">0:00</div>
   </div>
   <div id="hud">
-    <div class="pill"><img src="assets/art/C1_token.png" alt=""><span id="count">0/0</span></div>
+    <div class="pill"><img id="countImg" src="assets/art/C1_token.png" alt=""><span id="count">0/0</span></div>
     <div class="pill" id="bones"><img src="assets/art/D1_bone.png" alt=""><img src="assets/art/D1_bone.png" alt=""><img src="assets/art/D1_bone.png" alt=""></div>
   </div>
   <div id="rules"></div>
