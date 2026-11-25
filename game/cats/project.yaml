@@ -1,0 +1,17 @@
+# Project configuration (layout follows Donchitos/Claude-Code-Game-Studios, MIT)
+schema_version: 1
+project:
+  name: "貓躲狗找 (working title)"
+  stage: pre-production        # see production/stage.txt and production/gate-checks/
+engine:
+  name: "Web"
+  renderer: "three.js (WebGL2), vendored, version pinned in web/vendor"
+  shell: "Electron for Windows/macOS Steam builds (ADR-0001)"
+  language: "JavaScript (ES modules), GLSL"
+modes:
+  rigor: lean                  # solo developer + AI; directors' reviews are self-review, recorded as such
+  automation: unattended       # owner instruction 2026-11-24: do not stop to ask
+targets:
+  platforms: [windows, macos]
+  store: steam
+  players: "2-14 online, host-authoritative"
