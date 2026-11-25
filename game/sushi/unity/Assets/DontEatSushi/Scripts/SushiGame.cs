@@ -11,7 +11,8 @@ namespace DontEatSushi
     {
         public GameObject go;
         public Paintable paint;
-        public int shape = -1, plate = -1, slot;
+        public int shape = -1, plate = -1, slot, pose;
+        public float gloss = -1f;
         public Vector3 pos;
         public float yaw;
         public bool caught;
@@ -61,7 +62,9 @@ namespace DontEatSushi
         [System.NonSerialized] public Paintable playerPaint;
         [System.NonSerialized] public MeshRenderer playerRenderer;
         [System.NonSerialized] public bool playerAttached, playerMoving;
-        [System.NonSerialized] public float maxSuspicion;
+        [System.NonSerialized] public float maxSuspicion, overlook;
+        int pose; float curLift, gloss = 0.32f, camSendT;
+        bool gSlot, gPick, gPaint;
         [System.NonSerialized] public Color bgColor = new Color(0.30f, 0.21f, 0.16f);
 
         Transform root;
@@ -100,7 +103,9 @@ namespace DontEatSushi
 
         Net net;
         bool mp, meCaught, texDirty;
-        int hunterId = -1;
+        int mpMode;
+        readonly List<int> hunterIds = new List<int>();
+        static readonly string[] modeNames = { "基本", "越抓越多（被吃掉的壽司變成食客）", "雙食客（4 人以上時有兩個食客）" };
         float sendT, texT;
         string ipField = "127.0.0.1", netMsg = "";
         readonly Dictionary<int, Remote> remotes = new Dictionary<int, Remote>();
@@ -139,22 +144,30 @@ namespace DontEatSushi
         void HostStart()
         {
             if (lobbyIds.Count < 2) { netMsg = "至少要兩個人才能開始。"; return; }
-            int hid = lobbyIds[Random.Range(0, lobbyIds.Count)];
             var ids = new List<int>(lobbyIds);
-            net.Send("start|" + hid + "|" + string.Join(",", ids));
-            StartMp(hid, ids);
+            var hids = new List<int>();
+            hids.Add(ids[Random.Range(0, ids.Count)]);
+            if (mpMode == 2 && ids.Count >= 4)
+            {
+                int second = hids[0];
+                while (second == hids[0]) second = ids[Random.Range(0, ids.Count)];
+                hids.Add(second);
+            }
+            net.Send("start|" + string.Join(",", hids) + "|" + string.Join(",", ids) + "|" + mpMode);
+            StartMp(hids, ids, mpMode);
         }
 
-        void StartMp(int hid, List<int> ids)
+        void StartMp(List<int> hids, List<int> ids, int mode)
         {
-            hunterId = hid;
+            mpMode = mode;
+            hunterIds.Clear(); hunterIds.AddRange(hids);
             hiderIds.Clear();
-            foreach (var id in ids) if (id != hid) hiderIds.Add(id);
+            foreach (var id in ids) if (!hunterIds.Contains(id)) hiderIds.Add(id);
             caughtIds.Clear(); meCaught = false;
             if (root != null) Kill(root.gameObject);
             player = null; remotes.Clear();
             mp = true;
-            role = net.myId == hid ? Role.Hunter : Role.Hider;
+            role = hunterIds.Contains(net.myId) ? Role.Hunter : Role.Hider;
             Build();
             diner.gameObject.SetActive(false);
             timer = 45f; sendT = 0f; texT = 0f; texDirty = true;
@@ -166,6 +179,43 @@ namespace DontEatSushi
             }
             Toast(role == Role.Hunter ? "你是食客。壽司們有 45 秒躲藏。" : "你是壽司。45 秒內塗好、躲好。");
             Sfx.Beep(660f, 0.12f, 0.3f);
+        }
+
+        // 姿勢：0 平放、1 側躺、2 立起。回傳額外的旋轉，以及為了不陷進桌面要抬高多少。
+        static Quaternion PoseRot(int p) { return p == 1 ? Quaternion.Euler(90f, 0f, 0f) : p == 2 ? Quaternion.Euler(0f, 0f, 90f) : Quaternion.identity; }
+        static float PoseLift(Bounds b, int p)
+        {
+            if (p == 0) return 0f;
+            Quaternion q = PoseRot(p); float min = float.MaxValue;
+            for (int i = 0; i < 8; i++)
+            {
+                Vector3 c = b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1f : 1f, (i & 2) == 0 ? -1f : 1f, (i & 4) == 0 ? -1f : 1f));
+                min = Mathf.Min(min, (q * c).y);
+            }
+            return -min;
+        }
+        static void SetSmooth(Renderer r, float v)
+        {
+            if (r == null || r.sharedMaterial == null) return;
+            if (r.sharedMaterial.HasProperty("_Smoothness")) r.sharedMaterial.SetFloat("_Smoothness", v);
+        }
+
+        string Guide()
+        {
+            if (role == Role.Hider)
+            {
+                if (meCaught) return "你已經被吃掉了，可以繼續看其他人。";
+                if (phase == Phase.Prep)
+                {
+                    if (!gSlot) return "第 1 步：用 WASD 走到有白圈的盤子旁邊，按 G 坐進空位。（按 1 / 2 可以換身形）";
+                    if (!gPick) return "第 2 步：滑鼠指著旁邊的真壽司，按 C 吸取它的顏色。";
+                    if (!gPaint) return "第 3 步：按住滑鼠左鍵往自己身上塗。右鍵拖曳可以轉到背面。";
+                    return mp ? "繼續塗到像為止。時間一到，食客就會開始找。" : "繼續塗到像為止。準備好了就按空白鍵開始。";
+                }
+                if (phase == Phase.Hunt) return playerMoving ? "別動！移動最容易被發現。" : "黃圈是食客的視線。保持不動，撐到時間結束。";
+            }
+            else if (phase == Phase.Hunt) return "找出假壽司：顏色偏掉、花紋糊掉、留白沒塗的就是。左鍵擠醬油打它。";
+            return "";
         }
 
         Remote GetRemote(int id, int shape)
@@ -189,7 +239,7 @@ namespace DontEatSushi
         {
             if (!hiderIds.Contains(id) || caughtIds.Contains(id))
             {
-                if (left && id == hunterId && (phase == Phase.Prep || phase == Phase.Hunt)) { phase = role == Role.Hider && !meCaught ? Phase.Win : Phase.Lose; Toast("食客離開了。"); }
+                if (left && hunterIds.Remove(id) && hunterIds.Count == 0 && (phase == Phase.Prep || phase == Phase.Hunt)) { phase = role == Role.Hider && !meCaught ? Phase.Win : Phase.Lose; Toast("食客離開了。"); }
                 return;
             }
             caughtIds.Add(id);
@@ -199,6 +249,13 @@ namespace DontEatSushi
                 if (player != null) player.gameObject.SetActive(false);
                 Toast("你被吃掉了！可以繼續看其他人。");
                 Sfx.Beep(200f, 0.5f, 0.3f);
+                if (mpMode == 1 && caughtIds.Count < hiderIds.Count)
+                {
+                    role = Role.Hunter; hunterIds.Add(net.myId);
+                    ammo = MaxAmmo; ammoT = 0f; whistleT = 25f; found = 0;
+                    camDist = 11f; camPitch = 50f;
+                    Toast("你被吃掉了，現在你也變成食客，去抓其他壽司！");
+                }
             }
             else
             {
@@ -234,9 +291,10 @@ namespace DontEatSushi
                 case "start":
                 {
                     if (a.Length < 3) break;
-                    var ids = new List<int>();
+                    var hids = new List<int>(); var ids = new List<int>();
+                    foreach (var t in a[1].Split(',')) hids.Add(int.Parse(t));
                     foreach (var t in a[2].Split(',')) ids.Add(int.Parse(t));
-                    StartMp(int.Parse(a[1]), ids);
+                    StartMp(hids, ids, a.Length > 3 ? int.Parse(a[3]) : 0);
                     break;
                 }
                 case "s":
@@ -245,6 +303,12 @@ namespace DontEatSushi
                     Remote r = GetRemote(from, int.Parse(a[5]));
                     r.pos = new Vector3(P(a[1]), P(a[2]), P(a[3])); r.yaw = P(a[4]);
                     r.plate = int.Parse(a[6]); r.slot = Mathf.Clamp(int.Parse(a[7]), 0, 1);
+                    if (a.Length >= 10 && r.paint != null)
+                    {
+                        r.pose = Mathf.Clamp(int.Parse(a[8]), 0, 2);
+                        float gl = P(a[9]);
+                        if (Mathf.Abs(gl - r.gloss) > 0.01f) { r.gloss = gl; SetSmooth(r.paint.rend, gl); }
+                    }
                     break;
                 }
                 case "tx":
@@ -257,6 +321,14 @@ namespace DontEatSushi
                 }
                 case "hit":
                     if (mp && a.Length >= 2) MarkCaught(int.Parse(a[1]), false);
+                    break;
+                case "c":
+                    // 食客的視線落點：離我很近卻沒抓到我，就累積看漏分數
+                    if (mp && role == Role.Hider && !meCaught && phase == Phase.Hunt && a.Length >= 3 && player != null)
+                    {
+                        float dx = P(a[1]) - player.position.x, dz = P(a[2]) - player.position.z;
+                        if (dx * dx + dz * dz < 3.5f * 3.5f) overlook += 2.5f;
+                    }
                     break;
             }
         }
@@ -274,12 +346,12 @@ namespace DontEatSushi
                 if (r.plate >= 0 && r.plate < plates.Count)
                 {
                     var st = plates[r.plate].slots[r.slot].tr;
-                    r.go.transform.SetPositionAndRotation(st.position, st.rotation);
+                    r.go.transform.SetPositionAndRotation(st.position + Vector3.up * PoseLift(r.paint.shape.bounds, r.pose), st.rotation * PoseRot(r.pose));
                 }
                 else
                 {
-                    r.go.transform.position = Vector3.Lerp(r.go.transform.position, r.pos, Mathf.Min(1f, 12f * dt));
-                    r.go.transform.rotation = Quaternion.Euler(0f, r.yaw, 0f);
+                    r.go.transform.position = Vector3.Lerp(r.go.transform.position, r.pos + Vector3.up * PoseLift(r.paint.shape.bounds, r.pose), Mathf.Min(1f, 12f * dt));
+                    r.go.transform.rotation = Quaternion.Euler(0f, r.yaw, 0f) * PoseRot(r.pose);
                 }
             }
             if (role == Role.Hider && !meCaught && player != null && (phase == Phase.Prep || phase == Phase.Hunt))
@@ -290,8 +362,8 @@ namespace DontEatSushi
                     sendT = 0.1f;
                     int pi = -1, si = 0;
                     if (attached != null) { pi = plates.IndexOf(attached.plate); si = System.Array.IndexOf(attached.plate.slots, attached); }
-                    Vector3 p = player.position;
-                    net.Send("s|" + F(p.x) + "|" + F(p.y) + "|" + F(p.z) + "|" + F(playerYaw) + "|" + (int)playerShape + "|" + pi + "|" + si);
+                    Vector3 p = player.position - Vector3.up * curLift;
+                    net.Send("s|" + F(p.x) + "|" + F(p.y) + "|" + F(p.z) + "|" + F(playerYaw) + "|" + (int)playerShape + "|" + pi + "|" + si + "|" + pose + "|" + F(gloss));
                 }
                 texT -= dt;
                 if (texDirty && texT <= 0f)
@@ -384,6 +456,11 @@ namespace DontEatSushi
                 camTarget.z = Mathf.Clamp(camTarget.z, -10f, 9f);
             }
             if (phase != Phase.Hunt) return;
+            if (mp && net != null)
+            {
+                camSendT -= dt;
+                if (camSendT <= 0f) { camSendT = 0.25f; net.Send("c|" + F(camTarget.x) + "|" + F(camTarget.z)); }
+            }
 
             if (ammo < MaxAmmo) { ammoT += dt; if (ammoT >= 7f) { ammoT = 0f; ammo++; } }
             if (hintT > 0f) { hintT -= dt; if (hintT <= 0f && hintRing != null) hintRing.gameObject.SetActive(false); }
@@ -508,7 +585,8 @@ namespace DontEatSushi
             root = new GameObject("World").transform;
             plates.Clear(); bots.Clear(); hintRing = null;
             attached = null; playerAttached = false; playerMoving = false;
-            maxSuspicion = 0f; survived = 0f; stroke = false;
+            maxSuspicion = 0f; survived = 0f; stroke = false; overlook = 0f;
+            gSlot = false; gPick = false; gPaint = false;
             phase = Phase.Prep; timer = prepTime;
 
 
@@ -624,7 +702,7 @@ namespace DontEatSushi
             playerPaint = go.AddComponent<Paintable>();
             playerPaint.Init(SushiShapes.Get(playerShape), SushiKind.Blank, true);
             playerRenderer = playerPaint.rend;
-            texDirty = true;
+            texDirty = true; pose = 0; curLift = 0f; gloss = 0.32f;
             player = go.transform;
         }
 
@@ -781,8 +859,8 @@ namespace DontEatSushi
         {
             if (phase == Phase.Prep)
             {
-                if (In.Down(K.Digit1) && playerShape != ShapeKind.Nigiri) { playerShape = ShapeKind.Nigiri; Detach(); SpawnPlayer(player.position); }
-                if (In.Down(K.Digit2) && playerShape != ShapeKind.Maki) { playerShape = ShapeKind.Maki; Detach(); SpawnPlayer(player.position); }
+                if (In.Down(K.Digit1) && playerShape != ShapeKind.Nigiri) { playerShape = ShapeKind.Nigiri; Detach(); SpawnPlayer(player.position - Vector3.up * curLift); }
+                if (In.Down(K.Digit2) && playerShape != ShapeKind.Maki) { playerShape = ShapeKind.Maki; Detach(); SpawnPlayer(player.position - Vector3.up * curLift); }
             }
 
             Vector3 mv = Vector3.zero;
@@ -791,7 +869,16 @@ namespace DontEatSushi
             if (In.Held(K.D)) mv.x += 1f;
             if (In.Held(K.A)) mv.x -= 1f;
             playerMoving = mv.sqrMagnitude > 0f;
-            Vector3 pos = player.position;
+            if (In.Down(K.T))
+            {
+                float old = curLift;
+                pose = (pose + 1) % 3; curLift = PoseLift(playerPaint.shape.bounds, pose);
+                player.position += Vector3.up * (curLift - old);
+                Toast(pose == 0 ? "姿勢：平放" : pose == 1 ? "姿勢：側躺" : "姿勢：立起");
+            }
+            if (In.Down(K.Minus)) { gloss = Mathf.Max(0f, gloss - 0.1f); SetSmooth(playerRenderer, gloss); Toast("光澤 " + Mathf.RoundToInt(gloss * 100f)); }
+            if (In.Down(K.Equals)) { gloss = Mathf.Min(0.9f, gloss + 0.1f); SetSmooth(playerRenderer, gloss); Toast("光澤 " + Mathf.RoundToInt(gloss * 100f)); }
+            Vector3 pos = player.position - Vector3.up * curLift;
 
             if (playerMoving)
             {
@@ -817,7 +904,7 @@ namespace DontEatSushi
                     float d = Vector3.Distance(new Vector3(s.tr.position.x, 0f, s.tr.position.z), new Vector3(pos.x, 0f, pos.z));
                     if (d < bd) { bd = d; best = s; }
                 }
-                if (best != null) { attached = best; Toast("補位成功。動一下就會離開盤子。"); }
+                if (best != null) { attached = best; gSlot = true; Toast("補位成功。動一下就會離開盤子。"); }
                 else Toast("附近沒有空位。靠近缺一個壽司的盤子再按 G。");
             }
 
@@ -826,8 +913,8 @@ namespace DontEatSushi
                 if (attached.sushi != null) { Detach(); }
                 else
                 {
-                    player.SetPositionAndRotation(attached.tr.position, attached.tr.rotation);
-                    playerYaw = player.eulerAngles.y;
+                    player.SetPositionAndRotation(attached.tr.position + Vector3.up * curLift, attached.tr.rotation * PoseRot(pose));
+                    playerYaw = attached.tr.eulerAngles.y;
                     playerAttached = true;
                     return;
                 }
@@ -840,7 +927,7 @@ namespace DontEatSushi
             pos.x = Mathf.Clamp(pos.x, -18.5f, 18.5f);
             pos.z = Mathf.Clamp(pos.z, -10.3f, 10.3f);
             pos.y = Mathf.Lerp(pos.y, GroundY(pos, under), Mathf.Min(1f, 14f * dt));
-            player.SetPositionAndRotation(pos, Quaternion.Euler(0f, playerYaw, 0f));
+            player.SetPositionAndRotation(pos + Vector3.up * curLift, Quaternion.Euler(0f, playerYaw, 0f) * PoseRot(pose));
         }
 
         void Detach() { attached = null; playerAttached = false; }
@@ -867,14 +954,14 @@ namespace DontEatSushi
                         var r = hit.collider.GetComponent<Renderer>();
                         if (r != null) { Color c = Mats.GetColor(r.sharedMaterial); c.a = 1f; paintColor = c; }
                     }
-                    Toast("已取色。");
+                    Toast("已取色。"); gPick = true;
                 }
             }
 
             if (In.LmbDown && !overHud)
             {
                 stroke = true; lastMouse = mpos;
-                Sfx.Beep(700f, 0.03f, 0.12f);
+                Sfx.Beep(700f, 0.03f, 0.12f); gPaint = true;
                 playerPaint.PushUndo();
                 Physics.SyncTransforms();
                 DabAt(mpos);
@@ -998,7 +1085,14 @@ namespace DontEatSushi
                 var lc = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter };
                 GUI.Label(new Rect(W / 2f - 290f, H / 2f - 60f, 580f, 50f), netMsg, lc);
                 bool host = net != null && net.isHost;
-                if (host) GUI.Label(new Rect(W / 2f - 290f, H / 2f - 10f, 580f, 30f), "目前 " + lobbyIds.Count + " 人（含你）。系統會隨機選一個人當食客。", lc);
+                if (host)
+                {
+                    GUI.Label(new Rect(W / 2f - 290f, H / 2f - 20f, 580f, 30f), "目前 " + lobbyIds.Count + " 人（含你）。系統會隨機選人當食客。", lc);
+                    Rect bm = new Rect(W / 2f - 280f, H / 2f + 14f, 560f, 34f);
+                    Box(bm, new Color(0.18f, 0.28f, 0.52f, 0.95f));
+                    GUI.Label(bm, "模式：" + modeNames[mpMode] + "　（點這裡切換）", lc);
+                    if (GUI.Button(bm, GUIContent.none, GUIStyle.none)) mpMode = (mpMode + 1) % modeNames.Length;
+                }
                 Rect b1 = new Rect(W / 2f - 220f, H / 2f + 60f, 200f, 50f), b2 = new Rect(W / 2f + 20f, H / 2f + 60f, 200f, 50f);
                 if (host) { Box(b1, new Color(0.80f, 0.30f, 0.20f, 0.95f)); GUI.Label(b1, "開始遊戲", lc); if (GUI.Button(b1, GUIContent.none, GUIStyle.none)) HostStart(); }
                 Box(b2, new Color(0.3f, 0.3f, 0.3f, 0.95f)); GUI.Label(b2, "離開", lc);
@@ -1028,6 +1122,15 @@ namespace DontEatSushi
                 Box(new Rect(W / 2f - 150f, 64f, 300f, 14f), panel);
                 Box(new Rect(W / 2f - 148f, 66f, 296f * s, 10f), Color.Lerp(new Color(1f, 0.85f, 0.3f), new Color(1f, 0.2f, 0.15f), s));
                 GUI.Label(new Rect(W / 2f + 158f, 58f, 120f, 26f), "食客注意力 " + diner.stateLabel, sSmall);
+            }
+
+            string guide = (phase == Phase.Prep || phase == Phase.Hunt) ? Guide() : "";
+            if (guide.Length > 0)
+            {
+                Box(new Rect(W / 2f - 400f, 138f, 800f, 34f), new Color(0.10f, 0.20f, 0.30f, 0.90f));
+                Box(new Rect(W / 2f - 400f, 138f, 5f, 34f), gold);
+                var gc = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 17 };
+                GUI.Label(new Rect(W / 2f - 392f, 138f, 784f, 34f), guide, gc);
             }
 
             if (toastT > 0f && toast.Length > 0)
@@ -1065,7 +1168,7 @@ namespace DontEatSushi
                     if (GUI.Button(r, GUIContent.none, GUIStyle.none)) paintColor = palette[i];
                 }
                 GUI.Label(new Rect(x + palette.Length * 44f + 16f, y + 12f, 260f, 30f), "筆刷 " + Mathf.RoundToInt(brush * 100f) + "　身形 " + (playerShape == ShapeKind.Nigiri ? "握壽司" : "卷"), sLabel);
-                string help = "WASD 移動　Shift 跑　Q/E 轉身　右鍵拖曳 轉鏡頭　滾輪 縮放　左鍵 塗色　C 取色　[ ] 筆刷大小　F 整個塗滿　Z 撤銷　G 補位";
+                string help = "WASD 移動　Shift 跑　Q/E 轉身　T 換姿勢　右鍵拖曳 轉鏡頭　滾輪 縮放　左鍵 塗色　C 取色　[ ] 筆刷　- = 光澤　F 塗滿　Z 撤銷　G 補位";
                 if (phase == Phase.Prep) help += "　1/2 換身形　空白鍵 提前開始";
                 GUI.Label(new Rect(20f, H - 38f, W - 40f, 30f), help, sSmall);
             }
@@ -1079,11 +1182,11 @@ namespace DontEatSushi
                 string endTitle = role == Role.Hider ? (phase == Phase.Win ? "你活下來了！" : "被吃掉了…") : (phase == Phase.Win ? "全部找到了！" : "時間到，壽司贏了");
                 GUI.Label(new Rect(W / 2f - 280f, H / 2f - 115f, 560f, 70f), endTitle, sBig);
                 var c = new GUIStyle(sLabel) { alignment = TextAnchor.MiddleCenter, fontSize = 20 };
-                int score = Mathf.RoundToInt(survived * 10f);
+                int score = Mathf.RoundToInt(survived * 10f + overlook);
                 if (role == Role.Hider)
                 {
                     GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "存活 " + Mathf.FloorToInt(survived) + " 秒　得分 " + score, c);
-                    GUI.Label(new Rect(W / 2f - 280f, H / 2f + 6f, 560f, 34f), "最危險的一刻：食客注意力 " + Mathf.RoundToInt(Mathf.Clamp01(maxSuspicion) * 100f) + "%", c);
+                    GUI.Label(new Rect(W / 2f - 280f, H / 2f + 6f, 560f, 34f), "看漏分數 " + Mathf.RoundToInt(overlook) + "（食客看過你卻沒發現）", c);
                 }
                 else GUI.Label(new Rect(W / 2f - 280f, H / 2f - 30f, 560f, 34f), "找到 " + found + " / " + (mp ? hiderIds.Count : bots.Count) + "　用時 " + Mathf.FloorToInt(survived) + " 秒", c);
                 GUI.Label(new Rect(W / 2f - 280f, H / 2f + 60f, 560f, 34f), "按 R 回到選單", c);

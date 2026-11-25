@@ -197,6 +197,8 @@ namespace DontEatSushi
                         if (!game.playerAttached) gain *= 1.6f;
                         if (game.playerMoving) gain += 0.45f;
                         gain = Mathf.Min(gain * focus, 0.45f);
+                        // 看漏分數：食客正盯著你這一帶，卻沒看出來
+                        if (focus > 0.7f && gain < 0.06f) game.overlook += 10f * step;
                         if (gain > 0.06f) lastSeen = Time.time;
                     }
                     suspicion = Mathf.Clamp(suspicion + (gain - 0.05f) * step, 0f, 1.2f);
