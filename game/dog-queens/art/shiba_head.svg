@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="fur" cx="38%" cy="28%" r="80%">
+      <stop offset="0" stop-color="#FFC27A"/>
+      <stop offset="0.45" stop-color="#F59A45"/>
+      <stop offset="1" stop-color="#D9702A"/>
+    </radialGradient>
+    <radialGradient id="ear" cx="40%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#FDB264"/>
+      <stop offset="1" stop-color="#D46A25"/>
+    </radialGradient>
+    <linearGradient id="earIn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD9C2"/>
+      <stop offset="1" stop-color="#FFF1E4"/>
+    </linearGradient>
+    <radialGradient id="cream" cx="50%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#FFFDF8"/>
+      <stop offset="0.7" stop-color="#FFF1DE"/>
+      <stop offset="1" stop-color="#F6DCC0"/>
+    </radialGradient>
+    <radialGradient id="eye" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#5A3A28"/>
+      <stop offset="0.6" stop-color="#2A170E"/>
+      <stop offset="1" stop-color="#140A05"/>
+    </radialGradient>
+    <radialGradient id="nose" cx="40%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#5B4036"/>
+      <stop offset="1" stop-color="#1E120D"/>
+    </radialGradient>
+    <radialGradient id="blush" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#FF8F9A" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#FF8F9A" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="gingham" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+      <rect width="28" height="28" fill="#BDF0DD"/>
+      <rect width="14" height="28" fill="#6FD3B4" opacity=".55"/>
+      <rect width="28" height="14" fill="#6FD3B4" opacity=".55"/>
+    </pattern>
+    <linearGradient id="bandShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0B6B55" stop-opacity=".28"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <clipPath id="headClip">
+      <path d="M256 92 C268 78 286 80 292 96 C380 104 444 176 446 262 C460 286 462 316 444 330 C450 352 436 372 420 380 C388 420 330 436 256 436 C182 436 124 420 92 380 C76 372 62 352 68 330 C50 316 52 286 66 262 C68 176 132 104 220 96 C228 80 246 80 256 92Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ground shadow -->
+  <ellipse cx="256" cy="470" rx="150" ry="18" fill="#000" opacity=".12" filter="url(#soft)"/>
+
+  <!-- ears -->
+  <g>
+    <path d="M118 210 C96 150 98 92 122 58 C134 42 150 44 166 58 C196 86 222 120 238 150 Z" fill="url(#ear)"/>
+    <path d="M134 178 C122 138 124 102 138 80 C146 70 156 72 166 82 C184 102 200 124 210 146 Z" fill="url(#earIn)"/>
+    <path d="M394 210 C416 150 414 92 390 58 C378 42 362 44 346 58 C316 86 290 120 274 150 Z" fill="url(#ear)"/>
+    <path d="M378 178 C390 138 388 102 374 80 C366 70 356 72 346 82 C328 102 312 124 302 146 Z" fill="url(#earIn)"/>
+  </g>
+
+  <!-- bandana behind chin -->
+  <path d="M120 392 C190 430 322 430 392 392 L400 430 C340 470 172 470 112 430 Z" fill="url(#gingham)"/>
+  <path d="M120 392 C190 430 322 430 392 392 L400 430 C340 470 172 470 112 430 Z" fill="url(#bandShade)"/>
+  <path d="M226 446 L256 500 L286 446 Z" fill="url(#gingham)"/>
+  <path d="M226 446 L256 500 L286 446 Z" fill="url(#bandShade)"/>
+
+  <!-- head -->
+  <path d="M256 92 C268 78 286 80 292 96 C380 104 444 176 446 262 C460 286 462 316 444 330 C450 352 436 372 420 380 C388 420 330 436 256 436 C182 436 124 420 92 380 C76 372 62 352 68 330 C50 316 52 286 66 262 C68 176 132 104 220 96 C228 80 246 80 256 92Z" fill="url(#fur)"/>
+  <g clip-path="url(#headClip)">
+    <!-- urajiro: cream cheeks and muzzle -->
+    <path d="M60 306 C84 286 104 300 116 284 C134 246 170 232 204 250 C226 262 236 284 256 286 C276 284 286 262 308 250 C342 232 378 246 396 284 C408 300 428 286 452 306 L452 444 L60 444 Z" fill="url(#cream)"/>
+    <!-- soft top highlight -->
+    <ellipse cx="210" cy="150" rx="120" ry="50" fill="#FFE2B8" opacity=".35" filter="url(#soft)"/>
+    <path d="M420 180 C446 220 450 270 440 310" stroke="#FFE7C7" stroke-width="10" fill="none" opacity=".45" filter="url(#soft)"/>
+    <!-- lower rim shade -->
+    <ellipse cx="256" cy="450" rx="220" ry="60" fill="#C9935F" opacity=".25" filter="url(#soft)"/>
+  </g>
+
+  <!-- maro brow dots -->
+  <ellipse cx="186" cy="206" rx="20" ry="13" fill="#FFF3E2" opacity=".95"/>
+  <ellipse cx="326" cy="206" rx="20" ry="13" fill="#FFF3E2" opacity=".95"/>
+
+  <!-- eyes -->
+  <ellipse cx="182" cy="266" rx="34" ry="40" fill="url(#eye)"/>
+  <ellipse cx="330" cy="266" rx="34" ry="40" fill="url(#eye)"/>
+  <circle cx="170" cy="250" r="13" fill="#fff"/>
+  <circle cx="318" cy="250" r="13" fill="#fff"/>
+  <circle cx="194" cy="284" r="6" fill="#fff" opacity=".85"/>
+  <circle cx="342" cy="284" r="6" fill="#fff" opacity=".85"/>
+
+  <!-- blush -->
+  <ellipse cx="128" cy="322" rx="38" ry="24" fill="url(#blush)"/>
+  <ellipse cx="384" cy="322" rx="38" ry="24" fill="url(#blush)"/>
+
+  <!-- muzzle puff -->
+  <ellipse cx="256" cy="336" rx="70" ry="52" fill="#FFFDF8" opacity=".9"/>
+
+  <!-- nose -->
+  <path d="M232 306 C232 296 280 296 280 306 C280 320 266 330 256 332 C246 330 232 320 232 306Z" fill="url(#nose)"/>
+  <ellipse cx="248" cy="304" rx="8" ry="4" fill="#fff" opacity=".55"/>
+
+  <!-- mouth -->
+  <path d="M256 332 L256 346" stroke="#3A2218" stroke-width="5" stroke-linecap="round"/>
+  <path d="M226 344 C236 362 252 360 256 346 C260 360 276 362 286 344" fill="none" stroke="#3A2218" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M244 356 C246 376 266 376 268 356 C262 362 250 362 244 356Z" fill="#FF7E8A"/>
+</svg>
