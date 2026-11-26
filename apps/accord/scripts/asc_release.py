@@ -9,7 +9,7 @@
 App Privacy ("Data Not Collected") and territory availability are done in the web UI.
 Env: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH, BUILD_NUMBER.
 """
-import hashlib, json, os, sys, time, urllib.request, urllib.error
+import hashlib, json, os, sys, time, urllib.parse, urllib.request, urllib.error
 import jwt
 
 BUNDLE_ID = "com.noobclaw.accord"
@@ -237,7 +237,38 @@ def submit(app_id):
     print("SUBMITTED:", r["data"]["attributes"].get("state"))
 
 
+TESTER_EMAILS = ["284726777@qq.com", "zitaa233@163.com"]
+
+
+def testers(app_id):
+    """Internal TestFlight group with every build, plus the team's testers."""
+    groups = call("GET", f"/v1/apps/{app_id}/betaGroups")["data"]
+    group = next((g for g in groups if g["attributes"].get("isInternalGroup")), None)
+    if group is None:
+        group = call("POST", "/v1/betaGroups", {"data": {"type": "betaGroups", "attributes": {
+            "name": "Internal", "isInternalGroup": True, "hasAccessToAllBuilds": True},
+            "relationships": {"app": {"data": {"type": "apps", "id": app_id}}}}})["data"]
+        print("created internal group", group["id"])
+    else:
+        print("internal group", group["id"], group["attributes"]["name"])
+    ids = []
+    for email in TESTER_EMAILS:
+        found = call("GET", f"/v1/betaTesters?filter[email]={urllib.parse.quote(email)}")["data"]
+        if found:
+            ids.append(found[0]["id"])
+            print("tester", email, found[0]["id"])
+        else:
+            print("!! no tester record for", email)
+    if ids:
+        try:
+            call("POST", f"/v1/betaGroups/{group['id']}/relationships/betaTesters",
+                 {"data": [{"type": "betaTesters", "id": i} for i in ids]})
+            print("testers added")
+        except urllib.error.HTTPError as e:
+            print("!! add testers:", e.code)
+
+
 if __name__ == "__main__":
     app = call("GET", f"/v1/apps?filter[bundleId]={BUNDLE_ID}")["data"][0]
     print("app", app["id"], app["attributes"]["name"])
-    {"meta": meta, "submit": submit}[sys.argv[1]](app["id"])
+    {"meta": meta, "submit": submit, "testers": testers}[sys.argv[1]](app["id"])
