@@ -64,6 +64,8 @@
       bus.on('denied', function () { toast(G.decoyCd > 0 ? '分身冷卻中 ' + Math.ceil(G.decoyCd) + ' 秒' : '分身已達上限'); });
       bus.on('cling', function (d) { ui.cling = d.on; if (ui.hints) ui.hints(); if (d.on) toast('黏住了：空白 往上、Ctrl 往下、WASD 沿著表面爬、Shift 放開'); });
       bus.on('cursor3d', function (d) { els.ring.style.opacity = d.on ? 0 : 1; }); // on the body the brush is drawn on the body itself
+      bus.on('praise', function (d) { var e = els.praise || (els.praise = h('div', 'praise', '', els.toast.parentNode)); e.className = 'praise'; void e.offsetWidth; e.innerHTML = '<b>' + d.word + '</b><small>已塗 ' + d.painted + '%</small>'; e.className = 'praise on lv' + d.level; clearTimeout(e._t); e._t = setTimeout(function () { e.className = 'praise'; }, d.level >= 5 ? 2200 : 1400); });
+      bus.on('whiteLeft', function (d) { if (els.wl && els.wl._pct != null && els.wl._pct - d.pct >= 1) { var w = els.wl; w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); } if (els.wl) els.wl._pct = d.pct; });
       bus.on('whiteLeft', function (d) { if (!els.wl) return; els.wl.querySelector('u').style.width = d.pct + '%'; els.wl.querySelector('span').textContent = d.pct + '%'; els.wl.classList.toggle('done', d.pct <= 2); });
       var lpN = 0; bus.on('frame', function () { // eyedropper magnifier while Space is held (or the pick tool is armed)
         var on = G.paint.on && G.me && G.me.team === 'cat' && (G.keys[' '] || G.paint.tool === 'pick'); show(els.loupe, !!on); if (!on) return;

@@ -196,3 +196,16 @@
 ## 15. 還是查不到的
 
 擺姿勢時能否移動；遺漏分數的公式；各濾鏡的級數；實際公尺數；彈數限制預設開或關；穿透描繪除了鏡頭穿透外是否還影響筆刷。
+
+## Video study 2026-11-26: Husky小隊 (661), youtube.com/watch?v=dfg6eg4YU84 (owner-supplied, 11:52)
+
+Frames at about 1, 4, 8, 12, 20, 60, 110, 140, 160, 200, 240, 290, 340, 450, 505, 560, 600, 640 and 690 s were looked at (paused stills). Grade A for what is visible, but only for these maps.
+
+- **Maps are enclosed interiors.** Seen: a cave set with a boat, a nursery (pink walls, crib), an indoor farm hall (painted barn mural, cows, hay), a beige maze of corridors and pillars, a garage with barrels, a living room with arched doorways, a laundromat, and a hall with blue diamond wallpaper and checker tiles. Every shot has walls and a ceiling, and no outdoor area is visible.
+- **Ceilings are low and rooms are small.** Ceilings are about 1.4–1.6 × the figure's height. Rooms are a few body-lengths across, joined by doorways and corridors.
+- **The floors are clean.** Furniture stands along the walls, with only a few props in the middle. Our floor is covered in mats, toys and books; the owner points to this as a difference.
+- **Scale: the figures are person-sized next to real furniture** (crib, coat stands, sofa, chairs). Props are life-size.
+- **Bodies are glossy, smooth vinyl** with strong highlights. Painted colours stay glossy (pink and yellow bodies at 4 s). Players draw faces on with black strokes.
+- **Hiding:** posing as objects (lighthouse, vases/statues, a cow cut-out, wrapped round a door frame).
+- **The hunter's gun** is a long gun covered in paint splatter, seen in first person. In free camera a hunter's shot shows as a rainbow streak that leaves colourful splats on the wall.
+- **Painting UI:** a large colour wheel top-left, brightness/alpha bars, RGB/HSV sliders, a tool column below it.
