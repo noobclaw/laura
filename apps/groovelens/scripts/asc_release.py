@@ -174,6 +174,8 @@ def meta(app_id):
         rinfo = call("GET", f"/v1/apps/{ref[0]['id']}/appInfos")["data"][0]
         rdecl = call("GET", f"/v1/appInfos/{rinfo['id']}/ageRatingDeclaration")["data"]
         attrs = {k: v for k, v in rdecl["attributes"].items() if v is not None}
+        if "ageRatingOverrideV2" in attrs:
+            attrs.pop("ageRatingOverride", None)   # v1 and v2 overrides cannot both be sent
         call("PATCH", f"/v1/ageRatingDeclarations/{decl['id']}", {"data": {"type": "ageRatingDeclarations", "id": decl["id"], "attributes": attrs}})
         print("age rating copied:", len(attrs), "answers")
 
