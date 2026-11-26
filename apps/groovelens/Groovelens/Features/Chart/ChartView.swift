@@ -68,6 +68,7 @@ struct ChartView: View {
                     .frame(width: 40, height: 40).background(Circle().fill(Palette.surface))
             }
             .accessibilityLabel(Text("Back"))
+            .accessibilityIdentifier("chart-back")
             VStack(alignment: .leading, spacing: 2) {
                 Text(song.title).font(Typo.display(16)).foregroundStyle(Palette.text).lineLimit(1)
                 Text("\(Int(chart.tempo.rounded())) BPM · \(chart.meterLabel) · \(chart.hits.count) hits")

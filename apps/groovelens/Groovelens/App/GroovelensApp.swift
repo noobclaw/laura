@@ -119,6 +119,7 @@ struct NeonTabBar: View {
                 }
                 .buttonStyle(PressableStyle(scale: 0.9))
                 .accessibilityLabel(Text(t.title))
+                .accessibilityIdentifier("tab-\(t.rawValue)")
                 .accessibilityAddTraits(selection == t ? .isSelected : [])
             }
         }

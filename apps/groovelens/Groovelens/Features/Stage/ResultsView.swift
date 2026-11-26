@@ -42,6 +42,7 @@ struct ResultsView: View {
                 VStack(spacing: 12) {
                     NeonButton(title: String(localized: "Play again"), symbol: "arrow.counterclockwise") { onRetry() }
                     Button(String(localized: "Done")) { onClose() }
+                        .accessibilityIdentifier("results-done")
                         .font(Typo.body(16, weight: .semibold)).foregroundStyle(Palette.textDim)
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }

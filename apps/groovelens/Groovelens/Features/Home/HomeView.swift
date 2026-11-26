@@ -92,6 +92,13 @@ struct HomeView: View {
         } message: {
             Text(importError ?? "")
         }
+        .task {
+            // UI tour (CI screenshots): seed a synthesized demo song through the real import + analysis path.
+            if ProcessInfo.processInfo.arguments.contains("-UITour"), songs.isEmpty,
+               let url = try? DemoAudio.makeDemoFile() {
+                importFile(url, kind: .file)
+            }
+        }
         .task(id: songs.count) {
             profile.ensureQuests(songs: songs) { try? $0.files.loadChart() }
         }
@@ -226,6 +233,8 @@ struct HomeView: View {
                 LazyVStack(spacing: 8) {
                     ForEach(songs) { song in
                         SongRow(song: song, job: analysis.job(for: song.id))
+                            .accessibilityIdentifier("song-row")
+                            .accessibilityValue(Text(verbatim: song.statusRaw))
                             .onTapGesture { open(song) }
                             .contextMenu {
                                 if song.status == .failed {

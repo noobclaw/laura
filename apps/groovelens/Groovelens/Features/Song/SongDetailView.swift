@@ -33,6 +33,7 @@ struct SongDetailView: View {
                     modeCards
                     options
                     NeonButton(title: String(localized: "Start"), symbol: "play.fill") { start(chart) }
+                        .accessibilityIdentifier("start")
                         .padding(.top, 4)
                 } else if let loadError {
                     EmptyStateView(symbol: "exclamationmark.triangle", title: String(localized: "Chart unavailable"), message: loadError).glassCard()
@@ -68,6 +69,7 @@ struct SongDetailView: View {
                     .frame(width: 40, height: 40).background(Circle().fill(Palette.surface))
             }
             .accessibilityLabel(Text("Back"))
+            .accessibilityIdentifier("back")
             Spacer()
             Button { showChart = true } label: {
                 Label(String(localized: "Chart"), systemImage: "music.note.list")
@@ -75,6 +77,7 @@ struct SongDetailView: View {
                     .padding(.horizontal, 14).frame(height: 40).background(Capsule().fill(Palette.surface))
             }
             .disabled(chart == nil)
+            .accessibilityIdentifier("chart-button")
             Menu {
                 Button { export(.midi) } label: { Label("MIDI", systemImage: "pianokeys") }
                 Button { export(.musicXML) } label: { Label("MusicXML", systemImage: "doc.richtext") }
@@ -172,6 +175,7 @@ struct SongDetailView: View {
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityAddTraits(mode == m ? .isSelected : [])
+                .accessibilityIdentifier("mode-\(m.rawValue)")
             }
         }
     }

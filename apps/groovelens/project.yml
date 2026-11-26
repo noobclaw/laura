@@ -56,7 +56,28 @@ targets:
         GENERATE_INFOPLIST_FILE: "YES"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Groovelens.app/Groovelens"
         BUNDLE_LOADER: "$(TEST_HOST)"
+  GroovelensUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: GroovelensUITests
+    dependencies:
+      - target: Groovelens
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.noobclaw.groovelens.uitests
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_TARGET_NAME: Groovelens
 schemes:
+  GroovelensUITour:
+    build:
+      targets:
+        Groovelens: all
+        GroovelensUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - GroovelensUITests
   Groovelens:
     build:
       targets:

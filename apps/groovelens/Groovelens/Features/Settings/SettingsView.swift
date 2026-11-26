@@ -27,6 +27,7 @@ struct SettingsView: View {
                             Image(systemName: "chevron.right").foregroundStyle(Palette.textFaint)
                         }
                     }
+                    .accessibilityIdentifier("language-row")
                 }
 
                 section(String(localized: "PLAY")) {

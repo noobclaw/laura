@@ -45,6 +45,7 @@ struct ProSheet: View {
                                 .frame(width: 36, height: 36).background(Circle().fill(Palette.surface))
                         }
                         .accessibilityLabel(Text("Close"))
+                        .accessibilityIdentifier("close-pro")
                     }
                     emblem
                     VStack(spacing: 8) {

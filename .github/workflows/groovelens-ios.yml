@@ -44,6 +44,19 @@ jobs:
           tail -80 ci-out/build.log > ci-out/tail.txt
           exit 0
 
+      - name: UI tour (every screen, 4 languages)
+        timeout-minutes: 25
+        run: |
+          rm -rf ~/ui-shots
+          set +e
+          xcodebuild -project Groovelens.xcodeproj -scheme GroovelensUITour -destination "id=$SIM" \
+            -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test > ci-out/uitour.log 2>&1
+          echo $? > ci-out/uitour-status.txt
+          grep -E 'error:|Test Case .*(passed|failed)|\*\* TEST' ci-out/uitour.log | tail -30 > ci-out/uitour-summary.txt
+          mkdir -p ci-out/ui-shots && cp -R ~/ui-shots/. ci-out/ui-shots/ 2>/dev/null
+          find ci-out/ui-shots -name '*.png' | wc -l
+          exit 0
+
       - name: Export localizations
         run: |
           set +e

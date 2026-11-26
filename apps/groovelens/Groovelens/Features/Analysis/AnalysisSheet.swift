@@ -36,6 +36,7 @@ struct AnalysisSheet: View {
                             .frame(width: 36, height: 36).background(Circle().fill(Palette.surface))
                     }
                     .accessibilityLabel(Text("Close"))
+                    .accessibilityIdentifier("close-analysis")
                 }
                 .padding(.horizontal, 20).padding(.top, 14)
 
@@ -107,6 +108,7 @@ struct AnalysisSheet: View {
         switch song.status {
         case .ready:
             NeonButton(title: String(localized: "Open the chart"), symbol: "play.fill") { onClose(true) }
+                .accessibilityIdentifier("open-chart")
         case .failed:
             VStack(spacing: 12) {
                 Text(song.errorMessage ?? String(localized: "Analysis failed")).font(Typo.body(14)).foregroundStyle(Palette.textDim)

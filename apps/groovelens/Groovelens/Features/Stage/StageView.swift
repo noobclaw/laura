@@ -120,6 +120,7 @@ struct StageView: View {
                         .overlay(Circle().strokeBorder(Palette.stroke))
                 }
                 .accessibilityLabel(Text("Pause"))
+                .accessibilityIdentifier("pause")
                 VStack(alignment: .leading, spacing: 2) {
                     Text(song.title).font(Typo.body(14, weight: .semibold)).foregroundStyle(Palette.text).lineLimit(1)
                     HStack(spacing: 6) {
@@ -303,6 +304,7 @@ struct PauseOverlay: View {
                 NeonButton(title: String(localized: "Resume"), symbol: "play.fill") { model.togglePause() }
                 NeonButton(title: String(localized: "Restart"), symbol: "arrow.counterclockwise", fill: [Palette.violet, Palette.cyan]) { model.restart() }
                 Button(String(localized: "Quit")) { onQuit() }
+                    .accessibilityIdentifier("quit")
                     .font(Typo.body(16, weight: .semibold)).foregroundStyle(Palette.textDim).padding(.top, 6)
             }
             .padding(.horizontal, 48)
