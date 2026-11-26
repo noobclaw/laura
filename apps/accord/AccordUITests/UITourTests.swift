@@ -46,10 +46,12 @@ final class UITourTests: XCTestCase {
         sleep(1)
         shot(app, "04-product", lang)
         app.buttons["section-formula"].tap()
+        sleep(1)
 
-        // Add a line through the picker.
+        // Add a line through the picker (retry once: the first tap can land during the section animation).
         app.buttons["add-material"].tap()
-        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 5))
+        if !app.navigationBars.firstMatch.waitForExistence(timeout: 5) { app.buttons["add-material"].tap() }
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 8))
         sleep(1)
         shot(app, "05-picker", lang)
         let first = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pick-'")).element(boundBy: 0)
