@@ -85,7 +85,7 @@
     var row = function (k, label, on, dim) { return '<div class="kc' + (on ? ' on' : '') + (dim ? ' dim' : '') + '">' + key(k) + '<span>' + label + '</span></div>'; }, s = row('T', t('k_chat'));
     if (G.fly) s += G.fly.hide ? row('5', '回到身體') + row('WASD', '飛行') : row('4', t('watch')) + row('5', t('free')) + row('左鍵', t('next'));
     else if (me.team === 'cat') s += row('1', t('k_taunt')) + row('R', t('k_pose')) + row('F', t('k_paint'), G.paint.on) + row('右鍵', t('k_lock'), G.viewLock) + row('2', t('k_tags'), G.tags) + row('3', t('k_thru'), G.seeThrough !== false) + row('5', t('free')) + row('Y', '夠了（跳過）');
-    else s += row('左鍵', t('k_fire')) + row('右鍵', t('k_third'), G.third) + row('空白', t('k_jump')) + row('C', '按住：抬頭看高處', !!(G.me && G.me.rearT)) + row('Ctrl', t('k_crouch')) + row('Shift', t('k_run')) + row('2', t('k_tags'), G.tags);
+    else s += row('左鍵', t('k_fire')) + row('右鍵', t('k_third'), G.third) + row('空白', t('k_jump')) + row('Ctrl', t('k_crouch')) + row('Shift', t('k_run')) + row('2', t('k_tags'), G.tags);
     s += row('V', t('k_mic'), false, true) + row('B', t('k_ear'), false, true); c.innerHTML = s;
   }
   function cbar() {
@@ -110,10 +110,10 @@
     w.innerHTML = '<div class="hub"><b>' + t('k_pose') + '</b><small>' + (page + 1) + ' / ' + PG.length + '　點一下換頁</small><div class="amt"><i></i></div><small class="amtl"></small></div>';
     var mk = function (pose, label, ang, cls) { var ic = pose === 'stand' ? '' : poseIcon(pose), b = h('button', 'seg ' + (cls || '') + (cur && cur.pose === pose ? ' cur' : ''), (ic ? '<img src="' + ic + '" alt="">' : '') + '<span>' + label + '</span>', w); b.dataset.pose = pose; b.style.left = Math.cos(ang) * 158 + 'px'; b.style.top = Math.sin(ang) * 158 + 'px'; b.onmouseenter = function () { setHover(b); }; b.onclick = function () { pick(pose); }; return b; };
     mk('stand', '✕ ' + t('cancel'), Math.PI / 2, 'cancel');
-    for (var i = 0; i < 8; i++) { var p = PG[page][i]; if (p) mk(p, (INFO[p] && INFO[p].label) || p, Math.PI / 2 + (i + 1) * (Math.PI * 2 / 9)); }
+    var NP = PG[page].length; for (var i = 0; i < NP; i++) { var p = PG[page][i]; if (p) mk(p, (INFO[p] && INFO[p].label) || p, Math.PI / 2 + (i + 1) * (Math.PI * 2 / (NP + 1))); } // the original's second page holds ten
     var c = G.me && G.me.c, TM = ['tuck', 'straight', 'curl'], TN = { tuck: '收起', straight: '伸直', curl: '捲起' };
-    var tb = h('button', 'more tailb', '尾巴：' + TN[(c && c.tailMode) || 'tuck'], w); tb.dataset.act = 'tail'; tb.onclick = function (e) { e.stopPropagation(); G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + 1) % 3]); drawWheel(); };
-    var eb = h('button', 'more earb', '耳朵：' + (c && c.earFlat ? '貼平' : '立'), w); eb.dataset.act = 'ears'; eb.onclick = function (e) { e.stopPropagation(); G.setEars(!G.me.c.earFlat); drawWheel(); };
+    var human = G.me && G.me.spec && G.me.spec.human; if (!human) { var tb = h('button', 'more tailb', '尾巴：' + TN[(c && c.tailMode) || 'tuck'], w); tb.dataset.act = 'tail'; tb.onclick = function (e) { e.stopPropagation(); G.setTail(TM[(TM.indexOf(G.me.c.tailMode || 'tuck') + 1) % 3]); drawWheel(); };
+    var eb = h('button', 'more earb', '耳朵：' + (c && c.earFlat ? '貼平' : '立'), w); eb.dataset.act = 'ears'; eb.onclick = function (e) { e.stopPropagation(); G.setEars(!G.me.c.earFlat); drawWheel(); }; } // people have no tail or ears to set
     amount();
   }
   function setHover(b) { hover = b ? b.dataset.pose : null; els.pw2.querySelectorAll('.seg').forEach(function (x) { x.classList.toggle('hov', x === b); }); amount(); }

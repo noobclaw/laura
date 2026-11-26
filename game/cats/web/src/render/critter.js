@@ -148,14 +148,41 @@
     pawsup: { label: '揮手', amt: 0.6, f: function (a) { return { shR: [0, 0, lerp(100, 140, a)], elR: [0, 0, -25] }; } },
     roll: { label: '打滾', amt: 0.3, emote: true, f: function () { return { pivot: [0, 0, 180] }; } }
   };
-  function PT(S) { return S && S.jelly ? JPOSE : CPOSE; }
+  /* owner 2026-11-26: the figures are people now, so the wheel holds the original's human poses (names from the owner's screenshot of page 1
+     and the 23 June update for page 2, original-evidence.md section 8). The joint angles are our own. Degrees, 'YXZ'; L/R keys are one side only. */
+  var HPOSE = {
+    stand: { label: '站立', amt: 0.5, f: function (a, D) { return D.dog ? { sh: [-62, 0, 20], el: [-40, 0, 0] } : {}; } },
+    crouch: { label: '蹲', amt: 0.5, f: function () { return { hp: [-70, 0, 4], kn: [110, 0, 0], chest: [18, 0, 0], sh: [-20, 0, 6] }; } },
+    kneel: { label: '跪坐', hint: '直 ↔ 前傾', amt: 0.3, f: function (a) { return { hp: [-88, 0, 0], kn: [162, 0, 0], chest: [lerp(0, 25, a), 0, 0], sh: [-18, 0, 6], el: [-35, 0, 0] }; } },
+    lieBack: { label: '仰躺', hint: '手貼身 ↔ 手張開', amt: 0.3, f: function (a) { return { pivot: [-90, 0, 0], sh: [0, 0, -lerp(6, 75, a)], hp: [0, 0, -4] }; } },
+    bend: { label: '彎腰', hint: '小 ↔ 大', amt: 0.5, f: function (a) { var b = lerp(30, 65, a); return { body: [b, 0, 0], hp: [-b - 6, 0, 0], chest: [lerp(10, 25, a), 0, 0], sh: [-lerp(20, 45, a), 0, 4], neck: [-lerp(15, 30, a), 0, 0] }; } },
+    raiseArm: { label: '舉臂', hint: '斜 ↔ 直', amt: 0.6, f: function (a) { return { shR: [0, 0, lerp(130, 172, a)], shL: [0, 0, -6] }; } },
+    akimbo: { label: '叉腰', amt: 0.5, f: function () { return { sh: [8, 0, -42], el: [0, -20, 88] }; } },
+    bothUp: { label: '雙手過頭', hint: '斜 ↔ 直', amt: 0.6, f: function (a) { return { sh: [0, 0, -lerp(140, 176, a)], S: [0.98, 1.03, 0.98] }; } },
+    curl: { label: '蜷縮', hint: '鬆 ↔ 緊', amt: 0.6, f: function (a) { return { hp: [-lerp(105, 128, a), 0, 6], kn: [lerp(125, 150, a), 0, 0], chest: [lerp(25, 45, a), 0, 0], neck: [lerp(10, 25, a), 0, 0], sh: [-lerp(40, 62, a), 0, 18], el: [-lerp(60, 95, a), 0, 0] }; } },
+    prone: { label: '趴平', hint: '手放身旁 ↔ 手往前', amt: 0.3, f: function (a) { return { pivot: [90, 0, 0], sh: [-lerp(5, 170, a), 0, -6], neck: [-10, 0, 0] }; } },
+    tuck: { label: '蜷身', hint: '鬆 ↔ 緊', amt: 0.6, f: function (a) { return { hp: [-lerp(120, 138, a), 0, 0], kn: [lerp(140, 158, a), 0, 0], chest: [lerp(45, 70, a), 0, 0], neck: [lerp(20, 40, a), 0, 0], sh: [-lerp(70, 95, a), 0, 10], el: [-lerp(80, 110, a), 0, 0], S: [1, 0.96, 1] }; } },
+    leanBack: { label: '後仰', hint: '小 ↔ 大', amt: 0.5, f: function (a) { var b = lerp(16, 34, a); return { body: [-b, 0, 0], hp: [b - lerp(10, 30, a), 0, 0], kn: [lerp(15, 45, a), 0, 0], chest: [-lerp(10, 25, a), 0, 0], neck: [-lerp(8, 20, a), 0, 0], sh: [lerp(10, 30, a), 0, -10] }; } },
+    leanSide: { label: '斜身', hint: '微 ↔ 大', amt: 0.5, f: function (a) { var b = lerp(14, 30, a); return { body: [0, 0, b], hpL: [0, 0, -b + 3], hpR: [0, 0, -b - 3], chest: [0, 0, lerp(8, 20, a)], neck: [0, 0, -lerp(4, 12, a)], shL: [0, 0, -lerp(20, 50, a)] }; } },
+    armLean: { label: '單臂靠', hint: '低 ↔ 高', amt: 0.5, f: function (a) { return { shL: [0, 0, -lerp(70, 115, a)], elL: [0, 0, -12], chest: [0, 0, -lerp(6, 14, a)], hpR: [0, 0, 8], shR: [0, 0, 4] }; } },
+    squat: { label: '深蹲', hint: '淺 ↔ 深', amt: 0.6, f: function (a) { return { hp: [-lerp(90, 122, a), 0, 12], kn: [lerp(105, 145, a), 0, 0], chest: [lerp(18, 32, a), 0, 0], sh: [-lerp(50, 80, a), 0, 8], el: [-20, 0, 0] }; } },
+    crossLeg: { label: '盤腿', amt: 0.5, f: function () { return { hp: [-88, 0, -52], kn: [135, 0, 0], ft: [0, 0, 0], sh: [-22, 0, 10], el: [-55, 0, 0] }; } },
+    oneLeg: { label: '單腳', hint: '低 ↔ 高', amt: 0.5, f: function (a) { return { hpR: [-lerp(40, 85, a), 0, 0], knR: [lerp(60, 110, a), 0, 0], sh: [0, 0, -lerp(30, 70, a)] }; } },
+    tpose: { label: 'T 字', amt: 0.5, f: function () { return { sh: [0, 0, -88] }; } },
+    splits: { label: '劈腿', hint: '前後 ↔ 左右', amt: 0.2, f: function (a) { return a < 0.5 ? { hpL: [-86, 0, 0], hpR: [84, 0, 0], sh: [0, 0, -60] } : { hp: [0, 0, -86], sh: [0, 0, -60] }; } },
+    fold: { label: '前彎', hint: '小 ↔ 大', amt: 0.6, f: function (a) { var b = lerp(80, 110, a); return { body: [b, 0, 0], hp: [-b, 0, 0], chest: [lerp(10, 25, a), 0, 0], sh: [-lerp(70, 100, a), 0, 4], neck: [lerp(5, 20, a), 0, 0] }; } },
+    roll: { label: '打滾', amt: 0.3, emote: true, f: function () { return { pivot: [0, 0, 180] }; } }
+  };
+  ['ball', 'loaf', 'bolster', 'pancake', 'arch', 'lsit', 'tall', 'drape', 'sit', 'side', 'sphinx', 'stretch', 'belly', 'box', 'pawsup'].forEach(function (k) { if (!HPOSE[k]) HPOSE[k] = JPOSE[k] && { label: JPOSE[k].label, amt: JPOSE[k].amt, f: { ball: HPOSE.curl.f, loaf: HPOSE.crouch.f, bolster: HPOSE.lieBack.f, pancake: HPOSE.prone.f, arch: HPOSE.prone.f, lsit: HPOSE.kneel.f, tall: HPOSE.bothUp.f, drape: HPOSE.fold.f, sit: HPOSE.kneel.f, side: HPOSE.leanSide.f, sphinx: HPOSE.prone.f, stretch: HPOSE.bothUp.f, belly: HPOSE.lieBack.f, box: HPOSE.tpose.f, pawsup: HPOSE.raiseArm.f }[k] }; }); // old names still work (decoys, title screen, saved games)
+  Object.keys(HPOSE).forEach(function (k) { if (!POSES[k]) POSES[k] = {}; }); // the human names are valid pose names too
+  function PT(S) { return S && S.human ? HPOSE : S && S.jelly ? JPOSE : CPOSE; }
   var ALIAS = { hind: 'tall', hang: 'drape' };
   Object.keys(CPOSE).forEach(function (k) { if (!POSES[k]) POSES[k] = {}; }); // every name is a valid pose for both kinds
   POSES.tall = POSES.hind; POSES.drape = POSES.hang; POSES.lsit = POSES.sit; POSES.ball = POSES.curl; POSES.bolster = POSES.sphinx; POSES.pancake = POSES.sphinx;
   SG.POSES = POSES;
-  SG.POSE_PAGES = [['ball', 'loaf', 'bolster', 'pancake', 'arch', 'lsit', 'tall', 'drape'], ['sit', 'side', 'sphinx', 'stretch', 'belly', 'curl', 'box', 'pawsup']];
-  SG.POSE_INFO = {}; Object.keys(JPOSE).forEach(function (k) { SG.POSE_INFO[k] = { label: JPOSE[k].label, amount: JPOSE[k].amt, hint: JPOSE[k].hint || '' }; }); // the hiders are jelly figures: the wheel shows their poses
-  SG.POSE_LIST = [['stand', '站立']].concat(SG.POSE_PAGES[0].concat(SG.POSE_PAGES[1]).map(function (k) { return [k, JPOSE[k].label]; }));
+  SG.POSE_PAGES = [['kneel', 'lieBack', 'bend', 'raiseArm', 'akimbo', 'bothUp', 'curl', 'prone'], ['tuck', 'leanBack', 'leanSide', 'armLean', 'squat', 'crossLeg', 'oneLeg', 'tpose', 'splits', 'fold']]; // the original's two pages
+  SG.POSE_INFO = {}; Object.keys(HPOSE).forEach(function (k) { SG.POSE_INFO[k] = { label: HPOSE[k].label, amount: HPOSE[k].amt, hint: HPOSE[k].hint || '' }; });
+  SG.POSE_LIST = [['stand', '站立']].concat(SG.POSE_PAGES[0].concat(SG.POSE_PAGES[1]).map(function (k) { return [k, HPOSE[k].label]; }));
 
   /* =====================================================================================================
      mesh builder: joints + charts (vertices with skin weights and chart-space UVs) -> packed atlas, typed arrays,
@@ -447,15 +474,15 @@
     var u = 1 / 1.5, G0 = S.girth || 1, H0 = S.height || 1, i, D = {}; // figures are built in metres and stored in plan units (the game scales everything by 1.5)
     function m(v) { return v * u; }
     B.MP = [{}, {}, {}]; B.MN = [{}, {}, {}];
-    var hipY = m(0.84 * H0), yN = m(0.52 * H0), hcY = m(0.685 * H0), hR = m(0.14 * H0);
+    var hipY = m(0.84 * H0), yN = m(0.52 * H0), hcY = m(0.68 * H0), hR = m(0.152 * H0);
     B.joint('body', null); B.joint('hip', 'body', 0, m(-0.05), 0); B.joint('chest', 'body', 0, m(0.22 * H0), 0);
     B.joint('neck', 'chest', 0, yN - m(0.22 * H0), 0); B.joint('head', 'neck', 0, hcY - yN - m(0.03), 0);
     // torso keys [y, half width, half depth] in metres from the pelvis centre
-    var K = [[-0.26, 0, 0], [-0.23, 0.1, 0.08], [-0.17, 0.155, 0.115], [-0.09, 0.19, 0.13], [0.04, 0.185, 0.128], [0.15, 0.178, 0.125], [0.28, 0.19, 0.13], [0.38, 0.19, 0.122], [0.45, 0.15, 0.105], [0.5, 0.095, 0.09], [0.55, 0.085, 0.085]]; // chunky and soft, a short thick neck (owner: like the original's figure)
+    var K = [[-0.19, 0, 0], [-0.165, 0.15, 0.11], [-0.09, 0.212, 0.148], [0.04, 0.2, 0.142], [0.18, 0.19, 0.134], [0.26, 0.228, 0.13], [0.32, 0.262, 0.124], [0.375, 0.25, 0.116], [0.425, 0.198, 0.106], [0.465, 0.15, 0.1], [0.5, 0.116, 0.097], [0.53, 0.1, 0.095], [0.57, 0.1, 0.1]]; // the original's figure: a soft inflated body, sloping shoulders flowing into a short thick neck, a big round head
     function key(y, c) { var yy = y / u / H0; if (yy <= K[0][0] || yy >= K[K.length - 1][0] + 0.03) return 0; for (var j = 0; j < K.length - 1; j++) if (yy <= K[j + 1][0]) { var a = K[j], b = K[j + 1], t = (yy - a[0]) / (b[0] - a[0]), w = t * t * (3 - 2 * t); var gf = 1 + ((c === 1 ? G0 : Math.sqrt(G0)) - 1) * (1 - sstep(0.4, 0.5, yy)); return m(lerp(a[c], b[c], w)) * gf; } return m(K[K.length - 1][c]); }
     function smax(a, b, k) { var h = Math.max(k - Math.abs(a - b), 0) / k; return Math.max(a, b) + h * h * k * 0.25; }
-    function head(y, c) { var d = (y - hcY) / hR; if (Math.abs(d) >= 1) return 0; var r = Math.sqrt(1 - d * d), egg = 1 - 0.04 * d; return m(c === 1 ? 0.13 : 0.133) * H0 * r * egg; }
-    var y0 = m(-0.26 * H0), y1 = hcY + hR, NRg = 72, rings = [];
+    function head(y, c) { var d = (y - hcY) / hR; if (Math.abs(d) >= 1) return 0; var r = Math.sqrt(1 - d * d), egg = 1 - 0.02 * d; return m(c === 1 ? 0.15 : 0.148) * H0 * r * egg; }
+    var y0 = m(-0.19 * H0), y1 = hcY + hR, NRg = 80, rings = [];
     for (i = 0; i <= NRg; i++) { var t = i / NRg, y = y0 + (y1 - y0) * (0.5 - 0.5 * Math.cos(PI * t)), end = i === 0 || i === NRg;
       rings.push({ y: y, rx: end ? 0 : Math.max(0.002, smax(key(y, 1), head(y, 1), m(0.06))), rz: end ? 0 : Math.max(0.002, smax(key(y, 2), head(y, 2), m(0.06))), e: 2 }); }
     var chain = ['hip', 'body', 'chest', 'neck', 'head'], bz = [m(-0.12), m(0.06), m(0.3) * H0, hcY - m(0.06)], bw = [m(0.08), m(0.1), m(0.08), m(0.05)];
@@ -471,20 +498,20 @@
     }
     function blend(a, b, y0b, y1b) { return function (rg) { var w = sstep(y0b, y1b, rg.y); return w > 0.999 ? [[a, 1]] : w < 0.001 ? [[b, 1]] : [[a, w], [b, 1 - w]]; }; }
     // arms: shoulder -> elbow 0.29 -> wrist 0.56 -> mitten tip 0.72 (metres), hanging a little out from the body
-    var uA = m(0.28 * H0), fA = m(0.25 * H0), hA = m(0.15 * H0), aR = m(0.074) * Math.sqrt(G0);
+    var uA = m(0.24 * H0), fA = m(0.2 * H0), hA = m(0.13 * H0), aR = m(0.085) * Math.sqrt(G0);
     [['shL', 'elL', -1, 'armL'], ['shR', 'elR', 1, 'armR']].forEach(function (A) {
-      B.joint(A[0], 'chest', A[2] * m(0.175) * G0, m(0.15 * H0), 0, 0, 0, A[2] * 11); B.joint(A[1], A[0], 0, -uA, 0);
-      var P = [[m(0.075), 0], [m(0.065), aR * 0.55], [m(0.045), aR * 0.85], [m(0.015), aR], [-uA * 0.5, aR * 0.92], [-uA, aR * 0.8], [-uA - fA * 0.45, aR * 0.84], [-uA - fA, aR * 0.76], [-uA - fA - hA * 0.25, aR * 0.95, 0.75], [-uA - fA - hA * 0.6, aR * 0.98, 0.72], [-uA - fA - hA * 0.88, aR * 0.7, 0.72], [-uA - fA - hA, 0]];
+      B.joint(A[0], 'chest', A[2] * m(0.2) * G0, m(0.07 * H0), 0, 0, 0, A[2] * 8); /* the arm top sits inside the sloping shoulder, so the shoulder flows into the arm */ B.joint(A[1], A[0], 0, -uA, 0);
+      var P = [[m(0.1), 0], [m(0.088), aR * 0.62], [m(0.06), aR * 1.02], [m(0.02), aR * 1.12], [-uA * 0.3, aR * 1.0], [-uA * 0.6, aR * 0.92], [-uA, aR * 0.8], [-uA - fA * 0.45, aR * 0.84], [-uA - fA, aR * 0.8], [-uA - fA - hA * 0.3, aR * 0.92, 0.8], [-uA - fA - hA * 0.62, aR * 0.88, 0.78], [-uA - fA - hA * 0.9, aR * 0.6, 0.78], [-uA - fA - hA, 0]];
       tube(A[0], A[3], P, 0.9, blend(A[0], A[1], -uA * 1.12, -uA * 0.82));
     });
     // legs: hip -> knee 0.41 -> ankle 0.80, a rounded foot forward
-    var tL = m(0.38 * H0), sL = m(0.37 * H0), lR = m(0.11) * Math.sqrt(G0);
+    var tL = m(0.39 * H0), sL = m(0.36 * H0), lR = m(0.118) * Math.sqrt(G0);
     [['hpL', 'knL', -1, 'legL', 'footL'], ['hpR', 'knR', 1, 'legR', 'footR']].forEach(function (F) {
-      B.joint(F[0], 'hip', F[2] * m(0.098) * G0, m(-0.06), 0); B.joint(F[1], F[0], 0, -tL, 0);
-      var P = [[m(0.09), 0], [m(0.075), lR * 0.6], [m(0.045), lR * 0.9], [0, lR], [-tL * 0.5, lR * 0.86], [-tL, lR * 0.68], [-tL - sL * 0.3, lR * 0.74], [-tL - sL * 0.8, lR * 0.66], [-tL - sL, lR * 0.64], [-tL - sL - m(0.04), lR * 0.4], [-tL - sL - m(0.055), 0]];
+      B.joint(F[0], 'hip', F[2] * m(0.098) * G0, m(-0.04), 0); B.joint(F[1], F[0], 0, -tL, 0);
+      var P = [[m(0.09), 0], [m(0.075), lR * 0.6], [m(0.045), lR * 0.9], [0, lR], [-tL * 0.5, lR * 0.86], [-tL, lR * 0.68], [-tL - sL * 0.3, lR * 0.8], [-tL - sL * 0.8, lR * 0.74], [-tL - sL, lR * 0.72], [-tL - sL - m(0.045), lR * 0.45], [-tL - sL - m(0.06), 0]];
       tube(F[0], F[3], P, 0.9, blend(F[0], F[1], -tL * 1.12, -tL * 0.85));
       var fm = B.jmap[F[1]].w.clone().multiply(new THREE.Matrix4().makeTranslation(0, -sL + m(0.01), -m(0.05))).multiply(new THREE.Matrix4().makeRotationX(-PI / 2));
-      tube(F[1], F[4], [[m(0.03), 0], [m(0.01), m(0.06), 0.66], [-m(0.05), m(0.068), 0.62], [-m(0.11), m(0.062), 0.58], [-m(0.15), m(0.04), 0.55], [-m(0.165), 0]], 0.8, null, fm);
+      tube(F[1], F[4], [[m(0.03), 0], [m(0.01), m(0.075), 0.7], [-m(0.04), m(0.08), 0.66], [-m(0.09), m(0.07), 0.62], [-m(0.12), m(0.045), 0.6], [-m(0.135), 0]], 0.8, null, fm);
     });
     B.joint('t0', 'hip', 0, 0, -m(0.1), 90, 0, 0); for (i = 1; i < 4; i++) B.joint('t' + i, 't' + (i - 1), 0, -0.01, 0);
     var groundY = -hipY;
@@ -1472,11 +1499,11 @@
   };
 
   /* ---------- pose icons: a small picture of the real mesh in each pose, drawn on a 2D canvas (no extra GL context) ----------
-     SG.poseIcon(pose, { size = 96, spec = SG.CATS.mochi, amount, yaw = 0.75, pitch = 0.42, tail = 'tuck', ears = 'flat', color = '#f6f3ec', line = 'rgba(54,40,30,0.9)' }) -> canvas
+     SG.poseIcon(pose, { size = 96, spec = SG.CATS.person, amount, yaw = 0.75, pitch = 0.42, tail = 'tuck', ears = 'flat', color = '#f6f3ec', line = 'rgba(54,40,30,0.9)' }) -> canvas
      SG.poseIconURL(pose, opts) -> data URL (cached) */
   var ICONC = {}, ICONU = {};
   SG.poseIcon = function (pose, o) {
-    o = o || {}; var size = o.size || 96, spec = o.spec || CATS.mochi, yaw = o.yaw == null ? 0.75 : o.yaw, pit = o.pitch == null ? 0.42 : o.pitch, key = JSON.stringify(spec);
+    o = o || {}; var size = o.size || 96, spec = o.spec || CATS.person, yaw = o.yaw == null ? 0.75 : o.yaw, pit = o.pitch == null ? 0.42 : o.pitch, key = JSON.stringify(spec);
     var c = ICONC[key] || (ICONC[key] = new Critter(spec, { bare: true }));
     c.tailMode = o.tail || 'tuck'; c.earMode = o.ears || 'flat'; c.setPose(pose, o.amount); if (o.amount == null) c.setPose(pose, (PT(spec)[ALIAS[pose] || pose] || PT(spec).stand).amt); c.settle();
     var cvs = document.createElement('canvas'); cvs.width = cvs.height = size * 2;
