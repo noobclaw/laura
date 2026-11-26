@@ -273,9 +273,10 @@ def submit(app_id):
         sub = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"},
                    "relationships": {"app": {"data": {"type": "apps", "id": app_id}}}}})["data"]
         print("new draft", sub["id"])
-    items = call("GET", f"/v1/reviewSubmissions/{sub['id']}/items?include=appStoreVersion,inAppPurchaseV2")
-    kinds = [k for it in items["data"] for k, v in it.get("relationships", {}).items() if v.get("data")]
-    print("draft items:", kinds)
+    items = call("GET", f"/v1/reviewSubmissions/{sub['id']}/items?include=appStoreVersion")["data"]
+    has_ver = any((it.get("relationships", {}).get("appStoreVersion") or {}).get("data") for it in items)
+    kinds = (["appStoreVersion"] if has_ver else []) + (["inAppPurchaseV2"] if len(items) > int(has_ver) else [])
+    print("draft items:", len(items), kinds)
     if "appStoreVersion" not in kinds:
         call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {
             "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sub["id"]}},
