@@ -11,12 +11,19 @@ bad = []
 spec = re.compile(r"%(\d+\$)?(lld|@|lf|d|f|%)")
 for orig, ids in keys.items():
     cat = json.load(open(sys.argv[2] + "/" + orig.split("/")[-1]))["strings"]
-    for k in ids:
+    for full in ids:
+        # Plural variants export as "<key>|==|plural.<form>".
+        k, _, variant = full.partition("|==|")
+        form = variant.split(".")[-1] if variant else "other"
         locs = cat.get(k, {}).get("localizations", {})
         for lang in LANGS:
             l = locs.get(lang)
-            if not l: bad.append((lang, k)); continue
-            unit = l.get("stringUnit") or l["variations"]["plural"]["other"]["stringUnit"]
+            if not l: bad.append((lang, full)); continue
+            if "stringUnit" in l:
+                unit = l["stringUnit"]
+            else:
+                forms = l["variations"]["plural"]
+                unit = (forms.get(form) or forms["other"])["stringUnit"]
             if unit.get("state") != "translated" or not unit.get("value"): bad.append((lang, k)); continue
             if sorted(t for _, t in spec.findall(k)) != sorted(t for _, t in spec.findall(unit["value"])): bad.append((lang, k, "format"))
 print(f"{sum(len(v) for v in keys.values())} keys checked × {len(LANGS)} languages, {len(bad)} problems")
