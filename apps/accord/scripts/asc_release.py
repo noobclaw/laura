@@ -259,13 +259,14 @@ def testers(app_id):
             print("tester", email, found[0]["id"])
         else:
             print("!! no tester record for", email)
-    if ids:
+    # One at a time: a tester without access to this app makes a batch request fail as a whole.
+    for i in ids:
         try:
             call("POST", f"/v1/betaGroups/{group['id']}/relationships/betaTesters",
-                 {"data": [{"type": "betaTesters", "id": i} for i in ids]})
-            print("testers added")
+                 {"data": [{"type": "betaTesters", "id": i}]})
+            print("tester added", i)
         except urllib.error.HTTPError as e:
-            print("!! add testers:", e.code)
+            print("!! add tester", i, e.code)
 
 
 if __name__ == "__main__":
