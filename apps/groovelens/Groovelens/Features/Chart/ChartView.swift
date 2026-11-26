@@ -56,8 +56,8 @@ struct ChartView: View {
         .background(NeonBackground())
         .toolbar(.hidden, for: .navigationBar)
         .hidesTabBar()
-        .alert(String(localized: "Something went wrong"), isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button(String(localized: "OK"), role: .cancel) {}
+        .alert(String(localized: "Something went wrong", bundle: .l10n), isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button(String(localized: "OK", bundle: .l10n), role: .cancel) {}
         } message: { Text(errorMessage ?? "") }
         .onDisappear {
             ticker?.invalidate()
@@ -102,7 +102,7 @@ struct ChartView: View {
 
     private var editBar: some View {
         VStack(spacing: 6) {
-            Text(String(localized: "Pick a drum, then tap the staff to add or remove a hit."))
+            Text(String(localized: "Pick a drum, then tap the staff to add or remove a hit.", bundle: .l10n))
                 .font(Typo.body(12)).foregroundStyle(Palette.textDim)
             ScrollView(.horizontal) {
                 HStack(spacing: 6) {
@@ -140,7 +140,7 @@ struct ChartView: View {
                 engine.track = .full
                 loaded = true
             } catch {
-                errorMessage = String(localized: "This song’s audio can’t be played. Delete it and import it again.")
+                errorMessage = String(localized: "This song’s audio can’t be played. Delete it and import it again.", bundle: .l10n)
                 return
             }
         }
@@ -185,7 +185,7 @@ struct ChartView: View {
             onChange(chart)
             dirty = false
         } catch {
-            errorMessage = String(localized: "Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.")
+            errorMessage = String(localized: "Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.", bundle: .l10n)
         }
     }
 }
@@ -240,7 +240,7 @@ struct BarRow: View {
 
     private var accessibilitySummary: String {
         let counts = Dictionary(grouping: hits, by: \.piece).map { "\($0.value.count) \($0.key.displayName)" }.sorted().joined(separator: ", ")
-        return String(localized: "Bar \(bar + 1)\(isFill ? ", fill" : ""): \(counts)")
+        return String(localized: "Bar \(bar + 1)\(isFill ? ", fill" : ""): \(counts)", bundle: .l10n)
     }
 
     private func yFor(_ staffPos: Int) -> CGFloat {

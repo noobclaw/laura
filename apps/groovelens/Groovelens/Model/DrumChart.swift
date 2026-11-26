@@ -22,12 +22,12 @@ enum DrumPiece: String, Codable, CaseIterable, Identifiable, Hashable {
     /// Full, translated name.
     var displayName: String {
         switch self {
-        case .kick: return String(localized: "Kick")
-        case .snare: return String(localized: "Snare")
-        case .hihat: return String(localized: "Hi-hat")
-        case .tom: return String(localized: "Tom")
-        case .ride: return String(localized: "Ride")
-        case .crash: return String(localized: "Crash")
+        case .kick: return String(localized: "Kick", bundle: .l10n)
+        case .snare: return String(localized: "Snare", bundle: .l10n)
+        case .hihat: return String(localized: "Hi-hat", bundle: .l10n)
+        case .tom: return String(localized: "Tom", bundle: .l10n)
+        case .ride: return String(localized: "Ride", bundle: .l10n)
+        case .crash: return String(localized: "Crash", bundle: .l10n)
         }
     }
 
@@ -78,12 +78,12 @@ enum SectionKind: String, Codable, CaseIterable {
 
     var title: String {
         switch self {
-        case .intro: return String(localized: "Intro")
-        case .verse: return String(localized: "Verse")
-        case .chorus: return String(localized: "Chorus")
-        case .bridge: return String(localized: "Bridge")
-        case .outro: return String(localized: "Outro")
-        case .part: return String(localized: "Part")
+        case .intro: return String(localized: "Intro", bundle: .l10n)
+        case .verse: return String(localized: "Verse", bundle: .l10n)
+        case .chorus: return String(localized: "Chorus", bundle: .l10n)
+        case .bridge: return String(localized: "Bridge", bundle: .l10n)
+        case .outro: return String(localized: "Outro", bundle: .l10n)
+        case .part: return String(localized: "Part", bundle: .l10n)
         }
     }
 }

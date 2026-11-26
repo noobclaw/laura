@@ -66,15 +66,21 @@ final class LanguageTests: XCTestCase {
     func testInAppLanguageSwitchChangesLookups() {
         defer { LocalizedBundle.use("en") }
         LocalizedBundle.use("ja")
-        XCTAssertEqual(String(localized: "Settings"), "設定")
+        XCTAssertEqual(String(localized: "Settings", bundle: .l10n), "設定")
         XCTAssertEqual(Bundle.main.localizedString(forKey: "Settings", value: nil, table: nil), "設定")
         LocalizedBundle.use("de")
-        XCTAssertEqual(String(localized: "Settings"), "Einstellungen")
+        XCTAssertEqual(String(localized: "Settings", bundle: .l10n), "Einstellungen")
         LocalizedBundle.use("zh-Hant")
-        XCTAssertEqual(String(localized: "Settings"), "設定")
-        XCTAssertEqual(String(localized: "Delete"), "刪除")
+        XCTAssertEqual(String(localized: "Settings", bundle: .l10n), "設定")
+        XCTAssertEqual(String(localized: "Delete", bundle: .l10n), "刪除")
+        LocalizedBundle.use("ja")
+        let n = 3
+        XCTAssertEqual(String(localized: "\(n) free songs left", bundle: .l10n), "無料であと 3 曲")
+        LocalizedBundle.use("de")
+        XCTAssertEqual(String(localized: "\(1) free songs left", bundle: .l10n), "Noch 1 Song gratis")
         LocalizedBundle.use("en")
-        XCTAssertEqual(String(localized: "Settings"), "Settings")
+        XCTAssertEqual(String(localized: "Settings", bundle: .l10n), "Settings")
+        XCTAssertEqual(String(localized: "\(1) free songs left", bundle: .l10n), "1 free song left")
     }
 
     func testLanguageCodesNormalize() {

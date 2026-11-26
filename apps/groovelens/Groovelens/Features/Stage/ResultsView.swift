@@ -24,7 +24,7 @@ struct ResultsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Text(isWatch ? String(localized: "SESSION COMPLETE") : String(localized: "RESULTS")).hudLabel(Palette.cyan)
+                Text(isWatch ? String(localized: "SESSION COMPLETE", bundle: .l10n) : String(localized: "RESULTS", bundle: .l10n)).hudLabel(Palette.cyan)
                     .padding(.top, 24)
                 Text(song.title).font(Typo.display(20)).foregroundStyle(Palette.text).multilineTextAlignment(.center).lineLimit(2)
                 Text(result.setup.rangeLabel).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
@@ -40,8 +40,8 @@ struct ResultsView: View {
                     unlocks(report)
                 }
                 VStack(spacing: 12) {
-                    NeonButton(title: String(localized: "Play again"), symbol: "arrow.counterclockwise") { onRetry() }
-                    Button(String(localized: "Done")) { onClose() }
+                    NeonButton(title: String(localized: "Play again", bundle: .l10n), symbol: "arrow.counterclockwise") { onRetry() }
+                    Button(String(localized: "Done", bundle: .l10n)) { onClose() }
                         .accessibilityIdentifier("results-done")
                         .font(Typo.body(16, weight: .semibold)).foregroundStyle(Palette.textDim)
                         .frame(maxWidth: .infinity, minHeight: 44)
@@ -109,12 +109,12 @@ struct ResultsView: View {
     private var timingMap: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(String(localized: "TIMING BY BAR")).hudLabel()
+                Text(String(localized: "TIMING BY BAR", bundle: .l10n)).hudLabel()
                 Spacer()
                 HStack(spacing: 10) {
-                    legend(Palette.cyan, String(localized: "Early"))
-                    legend(Palette.mint, String(localized: "On it"))
-                    legend(Palette.danger, String(localized: "Late"))
+                    legend(Palette.cyan, String(localized: "Early", bundle: .l10n))
+                    legend(Palette.mint, String(localized: "On it", bundle: .l10n))
+                    legend(Palette.danger, String(localized: "Late", bundle: .l10n))
                 }
             }
             let cols = Array(repeating: GridItem(.flexible(), spacing: 4), count: 8)
@@ -150,9 +150,9 @@ struct ResultsView: View {
         guard !played.isEmpty else { return "" }
         let mean = played.reduce(0) { $0 + $1.meanOffset } / Double(played.count)
         let ms = Int((abs(mean) * 1000).rounded())
-        if ms <= 10 { return String(localized: "Dead in the pocket — on average within \(ms) ms.") }
-        return mean < 0 ? String(localized: "You’re rushing by about \(ms) ms. Lean back.")
-                        : String(localized: "You’re dragging by about \(ms) ms. Push a little.")
+        if ms <= 10 { return String(localized: "Dead in the pocket — on average within \(ms) ms.", bundle: .l10n) }
+        return mean < 0 ? String(localized: "You’re rushing by about \(ms) ms. Lean back.", bundle: .l10n)
+                        : String(localized: "You’re dragging by about \(ms) ms. Push a little.", bundle: .l10n)
     }
 
     // MARK: XP
@@ -163,7 +163,7 @@ struct ResultsView: View {
                 Text("+\(result.xp + (report?.questXP ?? 0)) XP").font(Typo.hud(22, weight: .bold)).foregroundStyle(Palette.brand)
                 Spacer()
                 if let r = report, r.levelAfter > r.levelBefore {
-                    Text(String(localized: "LEVEL UP!")).font(Typo.display(14, weight: .heavy)).foregroundStyle(Palette.gold)
+                    Text(String(localized: "LEVEL UP!", bundle: .l10n)).font(Typo.display(14, weight: .heavy)).foregroundStyle(Palette.gold)
                         .neonGlow(Palette.gold, radius: 10)
                         .scaleEffect(shown > 0.99 ? 1 : 0.5).opacity(shown > 0.99 ? 1 : 0)
                         .animation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.8), value: shown)
@@ -191,15 +191,15 @@ struct ResultsView: View {
 
     private func unlocks(_ r: PlayerProfile.RunReport) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "UNLOCKED")).hudLabel(Palette.gold)
+            Text(String(localized: "UNLOCKED", bundle: .l10n)).hudLabel(Palette.gold)
             ForEach(r.newAchievements) { a in
                 unlockRow(symbol: a.symbol, color: Palette.gold, title: a.title, detail: a.detail)
             }
             ForEach(r.completedQuests) { q in
-                unlockRow(symbol: "checkmark.seal.fill", color: Palette.mint, title: q.title, detail: String(localized: "Quest complete · +\(q.xpReward) XP"))
+                unlockRow(symbol: "checkmark.seal.fill", color: Palette.mint, title: q.title, detail: String(localized: "Quest complete · +\(q.xpReward) XP", bundle: .l10n))
             }
             ForEach(r.unlockedSkins) { s in
-                unlockRow(symbol: "paintpalette.fill", color: Palette.violet, title: String(localized: "\(s.title) stage"), detail: String(localized: "New stage skin — pick it in Progress."))
+                unlockRow(symbol: "paintpalette.fill", color: Palette.violet, title: String(localized: "\(s.title) stage", bundle: .l10n), detail: String(localized: "New stage skin — pick it in Progress.", bundle: .l10n))
             }
         }
         .glassCard()

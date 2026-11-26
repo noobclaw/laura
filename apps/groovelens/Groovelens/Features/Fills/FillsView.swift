@@ -27,8 +27,8 @@ struct FillsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(String(localized: "Fills")).font(Typo.display(28)).foregroundStyle(Palette.text)
-                    Text(String(localized: "Pulled from your songs. Each drill loops the bar before the fill, then the fill."))
+                    Text(String(localized: "Fills", bundle: .l10n)).font(Typo.display(28)).foregroundStyle(Palette.text)
+                    Text(String(localized: "Pulled from your songs. Each drill loops the bar before the fill, then the fill.", bundle: .l10n))
                         .font(Typo.body(14)).foregroundStyle(Palette.textDim)
                 }
                 .padding(.top, 14)
@@ -37,8 +37,8 @@ struct FillsView: View {
                     ProgressView().tint(Palette.brand).frame(maxWidth: .infinity, minHeight: 200)
                 } else if items.isEmpty {
                     EmptyStateView(symbol: "flame",
-                                   title: String(localized: "No fills yet"),
-                                   message: String(localized: "Chart a song with some drum fills and they’ll collect here automatically."))
+                                   title: String(localized: "No fills yet", bundle: .l10n),
+                                   message: String(localized: "Chart a song with some drum fills and they’ll collect here automatically.", bundle: .l10n))
                         .glassCard()
                 } else {
                     ForEach(Array(items.enumerated()), id: \.element.id) { i, item in
@@ -64,7 +64,7 @@ struct FillsView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.song.title).font(Typo.body(15, weight: .semibold)).foregroundStyle(Palette.text).lineLimit(1)
-                    Text([item.section, String(localized: "bar \(item.bar + 1)"), "\(Int(item.chart.tempo.rounded())) BPM"]
+                    Text([item.section, String(localized: "bar \(item.bar + 1)", bundle: .l10n), "\(Int(item.chart.tempo.rounded())) BPM"]
                         .compactMap { $0 }.joined(separator: " · "))
                         .font(Typo.hud(12)).foregroundStyle(Palette.textDim)
                 }
@@ -79,7 +79,7 @@ struct FillsView: View {
             Button {
                 if locked { proReason = .fills; return }
                 let setup = StageSetup(mode: .tap, bars: max(0, item.bar - 1)..<(item.bar + 1),
-                                       rangeLabel: String(localized: "Fill · bar \(item.bar + 1)"), isFill: true,
+                                       rangeLabel: String(localized: "Fill · bar \(item.bar + 1)", bundle: .l10n), isFill: true,
                                        speed: 0.8, track: item.song.files.hasStems ? .drumless : .full,
                                        click: true, loop: true, speedTrainer: store.isPro)
                 drill = (item.song, item.chart, setup)
@@ -87,7 +87,7 @@ struct FillsView: View {
             } label: {
                 HStack {
                     Image(systemName: locked ? "lock.fill" : "repeat")
-                    Text(locked ? String(localized: "Unlock with Pro") : String(localized: "Drill this fill"))
+                    Text(locked ? String(localized: "Unlock with Pro", bundle: .l10n) : String(localized: "Drill this fill", bundle: .l10n))
                     Spacer()
                     if locked { ProBadge() } else { Image(systemName: "chevron.right") }
                 }
@@ -105,9 +105,9 @@ struct FillsView: View {
         let bpmFactor = item.chart.tempo / 120
         let score = density * bpmFactor
         switch score {
-        case ..<2.5: return String(localized: "EASY")
-        case ..<4.5: return String(localized: "MEDIUM")
-        default: return String(localized: "HARD")
+        case ..<2.5: return String(localized: "EASY", bundle: .l10n)
+        case ..<4.5: return String(localized: "MEDIUM", bundle: .l10n)
+        default: return String(localized: "HARD", bundle: .l10n)
         }
     }
 

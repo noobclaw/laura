@@ -9,13 +9,13 @@ enum ProReason: String, Identifiable {
 
     var headline: String {
         switch self {
-        case .songLimit: return String(localized: "You’ve charted your 3 free songs")
-        case .kitMode: return String(localized: "Score your real kit")
-        case .speedTrainer: return String(localized: "Climb to full tempo")
-        case .fills: return String(localized: "Every fill, one tap away")
-        case .export: return String(localized: "Take your charts anywhere")
-        case .skins: return String(localized: "Unlock every stage")
-        case .settings: return String(localized: "Groovelens Pro")
+        case .songLimit: return String(localized: "You’ve charted your 3 free songs", bundle: .l10n)
+        case .kitMode: return String(localized: "Score your real kit", bundle: .l10n)
+        case .speedTrainer: return String(localized: "Climb to full tempo", bundle: .l10n)
+        case .fills: return String(localized: "Every fill, one tap away", bundle: .l10n)
+        case .export: return String(localized: "Take your charts anywhere", bundle: .l10n)
+        case .skins: return String(localized: "Unlock every stage", bundle: .l10n)
+        case .settings: return String(localized: "Groovelens Pro", bundle: .l10n)
         }
     }
 }
@@ -80,7 +80,7 @@ final class ProStore {
     func purchase() async {
         if product == nil { await load() }
         guard let product else {
-            message = String(localized: "The App Store isn’t reachable right now. Check your connection and try again.")
+            message = String(localized: "The App Store isn’t reachable right now. Check your connection and try again.", bundle: .l10n)
             return
         }
         isPurchasing = true
@@ -91,14 +91,14 @@ final class ProStore {
             case .success(let verification):
                 await handle(verification)
             case .pending:
-                message = String(localized: "Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.")
+                message = String(localized: "Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.", bundle: .l10n)
             case .userCancelled:
                 break
             @unknown default:
                 break
             }
         } catch {
-            message = String(localized: "The purchase didn’t go through: \(error.localizedDescription)")
+            message = String(localized: "The purchase didn’t go through: \(error.localizedDescription)", bundle: .l10n)
         }
     }
 
@@ -108,15 +108,15 @@ final class ProStore {
         do {
             try await AppStore.sync()
             await refreshEntitlements()
-            message = isPro ? String(localized: "Pro restored. Welcome back!") : String(localized: "No previous Pro purchase was found for this Apple ID.")
+            message = isPro ? String(localized: "Pro restored. Welcome back!", bundle: .l10n) : String(localized: "No previous Pro purchase was found for this Apple ID.", bundle: .l10n)
         } catch {
-            message = String(localized: "Restore failed: \(error.localizedDescription)")
+            message = String(localized: "Restore failed: \(error.localizedDescription)", bundle: .l10n)
         }
     }
 
     private func handle(_ result: VerificationResult<Transaction>) async {
         guard case .verified(let t) = result else {
-            message = String(localized: "The App Store couldn’t verify this purchase.")
+            message = String(localized: "The App Store couldn’t verify this purchase.", bundle: .l10n)
             return
         }
         if t.productID == ProStore.productID {

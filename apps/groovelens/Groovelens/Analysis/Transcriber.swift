@@ -71,6 +71,15 @@ struct SpectralDrumTranscriber: DrumTranscriber {
             let eHigh = attack(Band.high.rawValue), eAir = attack(Band.air.rawValue)
             let time = Double(f) / fr
             var produced: Set<DrumPiece> = []
+            // Spectral shape from raw (per-bin) energy: a snare's noise reaches well below 2.5 kHz,
+            // a hi-hat's barely does. Normalized flux alone can't tell them apart.
+            func rawAttack(_ b: Int) -> Float {
+                var m: Float = 0
+                for i in f...min(F - 1, f + 2) { m = max(m, features.energy[b][i]) }
+                return m
+            }
+            let midOverHigh = rawAttack(Band.mid.rawValue) / max(rawAttack(Band.high.rawValue), 1e-12)
+            let snareShaped = midOverHigh > 0.4
 
             // Kick: sub-band onset that dominates the low end.
             let subShare = eSub / max(eSub + eLow, 1e-6)
@@ -82,7 +91,7 @@ struct SpectralDrumTranscriber: DrumTranscriber {
             // Snare: broadband noise burst with a body, short decay.
             let body = max(fx[Band.low.rawValue], fx[Band.mid.rawValue])
             let highDecay = decay(Band.high.rawValue, d6)
-            if fx[Band.high.rawValue] > 0.20 && body > 0.14 && highDecay < 0.5 {
+            if fx[Band.high.rawValue] > 0.20 && body > 0.14 && highDecay < 0.5 && snareShaped {
                 hits.append(RawHit(time: time, piece: .snare, velocity: clampVel(fx[Band.high.rawValue]), isOpen: false))
                 produced.insert(.snare)
             } else if fx[Band.low.rawValue] > 0.30 && eHigh < 0.35 * max(eLow, 1e-6) && !produced.contains(.kick) {

@@ -4,8 +4,8 @@ import SwiftUI
 
 /// In-app language switching (no trip to iOS Settings, no restart).
 ///
-/// Bundle.main is re-classed so every localized lookup (SwiftUI `Text`, `String(localized:)`,
-/// `LocalizedStringKey`) reads from the chosen `.lproj`. The choice is stored in our own key and
+/// SwiftUI `Text` follows the injected `\.locale` and the re-classed Bundle.main; strings built in code
+/// use `String(localized: …, bundle: .l10n)`. Both read from the chosen `.lproj`. The choice is stored in our own key and
 /// re-applied at launch before any UI is built; `AppleLanguages` is left to the system.
 @MainActor
 @Observable
@@ -85,5 +85,13 @@ final class LocalizedBundle: Bundle, @unchecked Sendable {
         }
         let target = Bundle.main.path(forResource: code, ofType: "lproj").flatMap(Bundle.init(path:))
         objc_setAssociatedObject(Bundle.main, &overrideBundleKey, target, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        Bundle.l10n = target ?? .main
     }
+}
+
+extension Bundle {
+    /// Where `String(localized:…, bundle: .l10n)` looks strings up: the selected language's `.lproj`.
+    /// (Swift's `String(localized:)` does not go through `Bundle.main.localizedString`, so the
+    /// re-classing above only covers SwiftUI `Text`; code-built strings pass this bundle explicitly.)
+    nonisolated(unsafe) static var l10n: Bundle = .main
 }

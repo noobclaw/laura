@@ -6,16 +6,16 @@ enum PlayMode: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .tap: return String(localized: "Tap")
-        case .kit: return String(localized: "Kit")
-        case .watch: return String(localized: "Watch")
+        case .tap: return String(localized: "Tap", bundle: .l10n)
+        case .kit: return String(localized: "Kit", bundle: .l10n)
+        case .watch: return String(localized: "Watch", bundle: .l10n)
         }
     }
     var subtitle: String {
         switch self {
-        case .tap: return String(localized: "Play the pads on screen")
-        case .kit: return String(localized: "Play your real kit — the mic scores you")
-        case .watch: return String(localized: "Just watch and listen")
+        case .tap: return String(localized: "Play the pads on screen", bundle: .l10n)
+        case .kit: return String(localized: "Play your real kit — the mic scores you", bundle: .l10n)
+        case .watch: return String(localized: "Just watch and listen", bundle: .l10n)
         }
     }
     var symbol: String {
@@ -62,10 +62,10 @@ enum Judgement: String, Codable {
 
     var title: String {
         switch self {
-        case .perfect: return String(localized: "PERFECT")
-        case .great: return String(localized: "GREAT")
-        case .good: return String(localized: "GOOD")
-        case .miss: return String(localized: "MISS")
+        case .perfect: return String(localized: "PERFECT", bundle: .l10n)
+        case .great: return String(localized: "GREAT", bundle: .l10n)
+        case .good: return String(localized: "GOOD", bundle: .l10n)
+        case .miss: return String(localized: "MISS", bundle: .l10n)
         }
     }
 }

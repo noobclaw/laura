@@ -33,11 +33,11 @@ struct SongDetailView: View {
                     sectionPicker(chart)
                     modeCards
                     options
-                    NeonButton(title: String(localized: "Start"), symbol: "play.fill") { start(chart) }
+                    NeonButton(title: String(localized: "Start", bundle: .l10n), symbol: "play.fill") { start(chart) }
                         .accessibilityIdentifier("start")
                         .padding(.top, 4)
                 } else if let loadError {
-                    EmptyStateView(symbol: "exclamationmark.triangle", title: String(localized: "Chart unavailable"), message: loadError).glassCard()
+                    EmptyStateView(symbol: "exclamationmark.triangle", title: String(localized: "Chart unavailable", bundle: .l10n), message: loadError).glassCard()
                 } else {
                     ProgressView().tint(Palette.brand).frame(maxWidth: .infinity, minHeight: 300)
                 }
@@ -57,11 +57,11 @@ struct SongDetailView: View {
         .navigationDestination(isPresented: $showChart) {
             if let chart { ChartView(song: song, chart: chart) { updated in self.chart = updated } }
         }
-        .alert(String(localized: "Heads up"), isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
+        .alert(String(localized: "Heads up", bundle: .l10n), isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
             if micDenied {
-                Button(String(localized: "Open Settings")) { micDenied = false; MicPermission.openSettings() }
+                Button(String(localized: "Open Settings", bundle: .l10n)) { micDenied = false; MicPermission.openSettings() }
             }
-            Button(String(localized: "OK"), role: .cancel) { micDenied = false }
+            Button(String(localized: "OK", bundle: .l10n), role: .cancel) { micDenied = false }
         } message: { Text(notice ?? "") }
     }
 
@@ -77,7 +77,7 @@ struct SongDetailView: View {
             .accessibilityIdentifier("back")
             Spacer()
             Button { showChart = true } label: {
-                Label(String(localized: "Chart"), systemImage: "music.note.list")
+                Label(String(localized: "Chart", bundle: .l10n), systemImage: "music.note.list")
                     .font(Typo.body(14, weight: .semibold)).foregroundStyle(Palette.text)
                     .padding(.horizontal, 14).frame(height: 40).background(Capsule().fill(Palette.surface))
             }
@@ -105,9 +105,9 @@ struct SongDetailView: View {
                 HStack(spacing: 8) {
                     GradeBadge(grade: song.bestGrade, size: 28)
                     if song.bestAccuracy > 0 {
-                        Text(String(localized: "Best \(Int((song.bestAccuracy * 100).rounded()))%")).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
+                        Text(String(localized: "Best \(Int((song.bestAccuracy * 100).rounded()))%", bundle: .l10n)).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
                     } else {
-                        Text(String(localized: "Not played yet")).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
+                        Text(String(localized: "Not played yet", bundle: .l10n)).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
                     }
                     StarsView(stars: song.bestStars, size: 11)
                 }
@@ -119,23 +119,23 @@ struct SongDetailView: View {
 
     private func statsRow(_ chart: DrumChart) -> some View {
         HStack(spacing: 10) {
-            StatTile(label: String(localized: "TEMPO"), value: "\(Int(chart.tempo.rounded()))", unit: "BPM", accent: Palette.cyan)
-            StatTile(label: String(localized: "METER"), value: chart.meterLabel, accent: Palette.violet)
-            StatTile(label: String(localized: "FEEL"), value: chart.swing > 0.15 ? String(localized: "Swing") : String(localized: "Straight"), accent: Palette.gold)
-            StatTile(label: String(localized: "BARS"), value: "\(chart.barCount)", accent: Palette.mint)
+            StatTile(label: String(localized: "TEMPO", bundle: .l10n), value: "\(Int(chart.tempo.rounded()))", unit: "BPM", accent: Palette.cyan)
+            StatTile(label: String(localized: "METER", bundle: .l10n), value: chart.meterLabel, accent: Palette.violet)
+            StatTile(label: String(localized: "FEEL", bundle: .l10n), value: chart.swing > 0.15 ? String(localized: "Swing", bundle: .l10n) : String(localized: "Straight", bundle: .l10n), accent: Palette.gold)
+            StatTile(label: String(localized: "BARS", bundle: .l10n), value: "\(chart.barCount)", accent: Palette.mint)
         }
     }
 
     private func sectionPicker(_ chart: DrumChart) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(String(localized: "PRACTICE RANGE")).hudLabel()
+                Text(String(localized: "PRACTICE RANGE", bundle: .l10n)).hudLabel()
                 Spacer()
                 Button {
                     selectedSection = nil
                     Haptics.select()
                 } label: {
-                    Text(String(localized: "Whole song")).font(Typo.body(13, weight: .semibold))
+                    Text(String(localized: "Whole song", bundle: .l10n)).font(Typo.body(13, weight: .semibold))
                         .foregroundStyle(selectedSection == nil ? Palette.brand : Palette.textDim)
                 }
             }
@@ -188,7 +188,7 @@ struct SongDetailView: View {
     private var options: some View {
         VStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(String(localized: "BACKING TRACK")).hudLabel()
+                Text(String(localized: "BACKING TRACK", bundle: .l10n)).hudLabel()
                 Picker("", selection: $track) {
                     ForEach(PlaybackTrack.allCases) { t in Text(t.title).tag(t) }
                 }
@@ -196,7 +196,7 @@ struct SongDetailView: View {
             }
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text(String(localized: "SPEED")).hudLabel()
+                    Text(String(localized: "SPEED", bundle: .l10n)).hudLabel()
                     Spacer()
                     Text("\(Int((speed * 100).rounded()))%").font(Typo.hud(15, weight: .bold)).foregroundStyle(Palette.gold)
                         .contentTransition(.numericText())
@@ -206,15 +206,15 @@ struct SongDetailView: View {
                     .onChange(of: speed) { _, _ in Haptics.select() }
             }
             Divider().overlay(Palette.stroke)
-            Toggle(isOn: $click) { optionLabel("metronome.fill", String(localized: "Click track"), Palette.cyan) }
-            Toggle(isOn: $loop) { optionLabel("repeat", String(localized: "Loop the range"), Palette.mint) }
+            Toggle(isOn: $click) { optionLabel("metronome.fill", String(localized: "Click track", bundle: .l10n), Palette.cyan) }
+            Toggle(isOn: $loop) { optionLabel("repeat", String(localized: "Loop the range", bundle: .l10n), Palette.mint) }
             Toggle(isOn: Binding(get: { trainer }, set: { on in
                 if on && !store.isPro { proReason = .speedTrainer; return }
                 trainer = on
                 if on { loop = true; speed = min(speed, 0.7) }
             })) {
                 HStack {
-                    optionLabel("speedometer", String(localized: "Speed trainer"), Palette.ember)
+                    optionLabel("speedometer", String(localized: "Speed trainer", bundle: .l10n), Palette.ember)
                     if !store.isPro { ProBadge() }
                 }
             }
@@ -238,7 +238,7 @@ struct SongDetailView: View {
             chart = try song.files.loadChart()
             if !song.files.hasStems { track = .full }
         } catch {
-            loadError = String(localized: "This chart couldn’t be read. Delete the song and import it again.")
+            loadError = String(localized: "This chart couldn’t be read. Delete the song and import it again.", bundle: .l10n)
         }
     }
 
@@ -246,13 +246,13 @@ struct SongDetailView: View {
         if let id = selectedSection, let s = chart.sections.first(where: { $0.id == id }) {
             return (s.startBar..<s.endBar, s.label)
         }
-        return (0..<chart.barCount, String(localized: "Whole song"))
+        return (0..<chart.barCount, String(localized: "Whole song", bundle: .l10n))
     }
 
     private func rangeDescription(_ chart: DrumChart) -> String {
         let (r, label) = range(chart)
         let secs = chart.barStart(r.upperBound) - chart.barStart(r.lowerBound)
-        return String(localized: "\(label) · bars \(r.lowerBound + 1)–\(r.upperBound) · \(formatDuration(secs))")
+        return String(localized: "\(label) · bars \(r.lowerBound + 1)–\(r.upperBound) · \(formatDuration(secs))", bundle: .l10n)
     }
 
     private func start(_ chart: DrumChart) {
@@ -267,12 +267,12 @@ struct SongDetailView: View {
             case .undetermined:
                 Task {
                     if await MicPermission.request() { stageSetup = setup }
-                    else { micDenied = true; notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.") }
+                    else { micDenied = true; notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.", bundle: .l10n) }
                 }
                 return
             case .denied:
                 micDenied = true
-                notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.")
+                notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.", bundle: .l10n)
                 return
             }
         }

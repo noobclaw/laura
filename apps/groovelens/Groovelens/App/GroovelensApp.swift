@@ -32,10 +32,10 @@ enum AppTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .stage: return String(localized: "Stage")
-        case .fills: return String(localized: "Fills")
-        case .progress: return String(localized: "Progress")
-        case .settings: return String(localized: "Settings")
+        case .stage: return String(localized: "Stage", bundle: .l10n)
+        case .fills: return String(localized: "Fills", bundle: .l10n)
+        case .progress: return String(localized: "Progress", bundle: .l10n)
+        case .settings: return String(localized: "Settings", bundle: .l10n)
         }
     }
     var symbol: String {
@@ -89,7 +89,7 @@ struct RootView: View {
         profile.refreshStreak()
         for song in songs where song.status == .analyzing && analysis.job(for: song.id) == nil {
             song.status = .failed
-            song.errorMessage = String(localized: "Analysis stopped when the app closed. Tap to try again.")
+            song.errorMessage = String(localized: "Analysis stopped when the app closed. Tap to try again.", bundle: .l10n)
             profile.refundAnalysis()
         }
         try? context.save()

@@ -8,10 +8,10 @@ enum AnalysisStage: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .isolating: return String(localized: "Isolating the drums")
-        case .beatGrid: return String(localized: "Mapping the beat grid")
-        case .namingHits: return String(localized: "Naming every hit")
-        case .engraving: return String(localized: "Writing the chart")
+        case .isolating: return String(localized: "Isolating the drums", bundle: .l10n)
+        case .beatGrid: return String(localized: "Mapping the beat grid", bundle: .l10n)
+        case .namingHits: return String(localized: "Naming every hit", bundle: .l10n)
+        case .engraving: return String(localized: "Writing the chart", bundle: .l10n)
         }
     }
 }
@@ -178,7 +178,7 @@ final class AnalysisCenter {
                     guard alive() else { return }
                     self?.profile?.refundAnalysis()
                     song.status = .failed
-                    song.errorMessage = String(localized: "Analysis was cancelled.")
+                    song.errorMessage = String(localized: "Analysis was cancelled.", bundle: .l10n)
                     job.error = song.errorMessage
                     try? context.save()
                 }

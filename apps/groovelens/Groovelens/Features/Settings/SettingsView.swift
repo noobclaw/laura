@@ -14,14 +14,14 @@ struct SettingsView: View {
         @Bindable var profile = profile
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Text(String(localized: "Settings")).font(Typo.display(28)).foregroundStyle(Palette.text).padding(.top, 14)
+                Text(String(localized: "Settings", bundle: .l10n)).font(Typo.display(28)).foregroundStyle(Palette.text).padding(.top, 14)
 
                 proCard
 
-                section(String(localized: "LANGUAGE")) {
+                section(String(localized: "LANGUAGE", bundle: .l10n)) {
                     Button { showLanguages = true } label: {
                         HStack {
-                            row("globe", String(localized: "App language"), nil, Palette.cyan)
+                            row("globe", String(localized: "App language", bundle: .l10n), nil, Palette.cyan)
                             Spacer()
                             Text(AppLanguage.nativeName(language.code)).font(Typo.body(14, weight: .medium)).foregroundStyle(Palette.textDim)
                             Image(systemName: "chevron.right").foregroundStyle(Palette.textFaint)
@@ -30,39 +30,39 @@ struct SettingsView: View {
                     .accessibilityIdentifier("language-row")
                 }
 
-                section(String(localized: "PLAY")) {
+                section(String(localized: "PLAY", bundle: .l10n)) {
                     Toggle(isOn: $profile.leftHanded) {
-                        row("hand.raised.fill", String(localized: "Left-handed layout"), String(localized: "Mirrors the lanes and pads."), Palette.violet)
+                        row("hand.raised.fill", String(localized: "Left-handed layout", bundle: .l10n), String(localized: "Mirrors the lanes and pads.", bundle: .l10n), Palette.violet)
                     }
                     Divider().overlay(Palette.stroke)
                     VStack(alignment: .leading, spacing: 8) {
-                        row("metronome.fill", String(localized: "Click volume"), nil, Palette.cyan)
+                        row("metronome.fill", String(localized: "Click volume", bundle: .l10n), nil, Palette.cyan)
                         Slider(value: $profile.clickVolume, in: 0...1).tint(Palette.cyan)
                     }
                     Divider().overlay(Palette.stroke)
                     Button { showCalibration = true } label: {
                         HStack {
-                            row("timer", String(localized: "Timing calibration"),
-                                String(localized: "Current offset: \(Int((profile.latencyOffset * 1000).rounded())) ms"), Palette.gold)
+                            row("timer", String(localized: "Timing calibration", bundle: .l10n),
+                                String(localized: "Current offset: \(Int((profile.latencyOffset * 1000).rounded())) ms", bundle: .l10n), Palette.gold)
                             Spacer()
                             Image(systemName: "chevron.right").foregroundStyle(Palette.textFaint)
                         }
                     }
                 }
 
-                section(String(localized: "PRIVACY")) {
-                    row("lock.shield.fill", String(localized: "Everything stays on this iPhone"),
-                        String(localized: "Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking."), Palette.mint)
+                section(String(localized: "PRIVACY", bundle: .l10n)) {
+                    row("lock.shield.fill", String(localized: "Everything stays on this iPhone", bundle: .l10n),
+                        String(localized: "Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking.", bundle: .l10n), Palette.mint)
                 }
 
-                section(String(localized: "ABOUT")) {
+                section(String(localized: "ABOUT", bundle: .l10n)) {
                     HStack {
-                        row("info.circle.fill", String(localized: "Version"), nil, Palette.textDim)
+                        row("info.circle.fill", String(localized: "Version", bundle: .l10n), nil, Palette.textDim)
                         Spacer()
                         Text(appVersion).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
                     }
                 }
-                Text(String(localized: "Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong."))
+                Text(String(localized: "Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong.", bundle: .l10n))
                     .font(Typo.body(12)).foregroundStyle(Palette.textFaint).padding(.horizontal, 4)
             }
             .tint(Palette.brand)
@@ -89,11 +89,11 @@ struct SettingsView: View {
                 Spacer()
                 if store.isPro { Image(systemName: "checkmark.seal.fill").foregroundStyle(Palette.gold) }
             }
-            Text(store.isPro ? String(localized: "Unlocked. Every feature is yours.")
-                 : String(localized: "Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages."))
+            Text(store.isPro ? String(localized: "Unlocked. Every feature is yours.", bundle: .l10n)
+                 : String(localized: "Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages.", bundle: .l10n))
                 .font(Typo.body(14)).foregroundStyle(Palette.textDim)
             if !store.isPro {
-                NeonButton(title: store.displayPrice.map { String(localized: "Unlock Pro — \($0)") } ?? String(localized: "Unlock Pro"),
+                NeonButton(title: store.displayPrice.map { String(localized: "Unlock Pro — \($0)", bundle: .l10n) } ?? String(localized: "Unlock Pro", bundle: .l10n),
                            symbol: "lock.open.fill") { proReason = .settings }
             }
             Button {
@@ -101,7 +101,7 @@ struct SettingsView: View {
             } label: {
                 HStack(spacing: 6) {
                     if store.isRestoring { ProgressView().controlSize(.small) }
-                    Text(String(localized: "Restore purchases"))
+                    Text(String(localized: "Restore purchases", bundle: .l10n))
                 }
                 .font(Typo.body(14, weight: .semibold)).foregroundStyle(Palette.textDim)
             }
@@ -229,8 +229,8 @@ struct CalibrationSheet: View {
             NeonBackground()
             VStack(spacing: 20) {
                 Capsule().fill(Color.white.opacity(0.25)).frame(width: 40, height: 5).padding(.top, 10)
-                Text(String(localized: "Timing calibration")).font(Typo.display(22)).foregroundStyle(Palette.text)
-                Text(String(localized: "Use the headphones or speaker you play with. Tap the big pad exactly on each click."))
+                Text(String(localized: "Timing calibration", bundle: .l10n)).font(Typo.display(22)).foregroundStyle(Palette.text)
+                Text(String(localized: "Use the headphones or speaker you play with. Tap the big pad exactly on each click.", bundle: .l10n))
                     .font(Typo.body(14)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center).padding(.horizontal, 30)
 
                 HStack(spacing: 10) {
@@ -250,7 +250,7 @@ struct CalibrationSheet: View {
                     Circle()
                         .fill(RadialGradient(colors: [Palette.brand.opacity(flash ? 0.9 : 0.5), Palette.violet.opacity(0.3)], center: .center, startRadius: 0, endRadius: 120))
                         .overlay(Circle().strokeBorder(Palette.brand, lineWidth: 2))
-                        .overlay(Text(cal.running ? String(localized: "TAP") : "").font(Typo.display(26, weight: .heavy)).foregroundStyle(.white))
+                        .overlay(Text(cal.running ? String(localized: "TAP", bundle: .l10n) : "").font(Typo.display(26, weight: .heavy)).foregroundStyle(.white))
                         .frame(width: 220, height: 220)
                         .shadow(color: Palette.brand.opacity(0.6), radius: flash ? 30 : 14)
                 }
@@ -260,11 +260,11 @@ struct CalibrationSheet: View {
                 if let r = cal.result, !cal.running {
                     VStack(spacing: 6) {
                         Text("\(r >= 0 ? "+" : "")\(Int((r * 1000).rounded())) ms").font(Typo.hud(36, weight: .bold)).foregroundStyle(Palette.gold)
-                        Text(r >= 0 ? String(localized: "You tap a little after the click. We’ll correct for it.")
-                                    : String(localized: "You tap a little ahead of the click. We’ll correct for it."))
+                        Text(r >= 0 ? String(localized: "You tap a little after the click. We’ll correct for it.", bundle: .l10n)
+                                    : String(localized: "You tap a little ahead of the click. We’ll correct for it.", bundle: .l10n))
                             .font(Typo.body(13)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center)
                     }
-                    NeonButton(title: String(localized: "Save"), symbol: "checkmark") {
+                    NeonButton(title: String(localized: "Save", bundle: .l10n), symbol: "checkmark") {
                         profile.latencyOffset = r
                         Haptics.success()
                         dismiss()
@@ -272,14 +272,14 @@ struct CalibrationSheet: View {
                     .padding(.horizontal, 30)
                 } else if !cal.running {
                     if !cal.offsets.isEmpty {
-                        Text(String(localized: "Not enough taps landed near the clicks. Try again."))
+                        Text(String(localized: "Not enough taps landed near the clicks. Try again.", bundle: .l10n))
                             .font(Typo.body(13)).foregroundStyle(Palette.danger)
                     }
-                    NeonButton(title: String(localized: "Start"), symbol: "play.fill") { cal.start() }.padding(.horizontal, 30)
+                    NeonButton(title: String(localized: "Start", bundle: .l10n), symbol: "play.fill") { cal.start() }.padding(.horizontal, 30)
                 } else {
-                    Text(String(localized: "\(cal.offsets.count) taps")).font(Typo.hud(14)).foregroundStyle(Palette.textDim)
+                    Text(String(localized: "\(cal.offsets.count) taps", bundle: .l10n)).font(Typo.hud(14)).foregroundStyle(Palette.textDim)
                 }
-                Button(String(localized: "Reset to 0 ms")) { profile.latencyOffset = 0; dismiss() }
+                Button(String(localized: "Reset to 0 ms", bundle: .l10n)) { profile.latencyOffset = 0; dismiss() }
                     .font(Typo.body(13)).foregroundStyle(Palette.textFaint)
                 Spacer()
             }
@@ -298,7 +298,7 @@ struct LanguagePickerSheet: View {
         NavigationStack {
             List {
                 Section {
-                    choice(nil, title: String(localized: "Use system language"), detail: AppLanguage.nativeName(language.systemCode))
+                    choice(nil, title: String(localized: "Use system language", bundle: .l10n), detail: AppLanguage.nativeName(language.systemCode))
                 }
                 Section {
                     ForEach(AppLanguage.supported, id: \.self) { code in
@@ -308,10 +308,10 @@ struct LanguagePickerSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(NeonBackground())
-            .navigationTitle(String(localized: "App language"))
+            .navigationTitle(String(localized: "App language", bundle: .l10n))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button(String(localized: "Done")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(String(localized: "Done", bundle: .l10n)) { dismiss() } }
             }
         }
     }

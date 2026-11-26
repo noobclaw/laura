@@ -57,7 +57,7 @@ final class Recorder: NSObject, AVAudioRecorderDelegate {
             r.delegate = self
             r.isMeteringEnabled = true
             guard r.record(forDuration: Recorder.maxSeconds) else {
-                errorMessage = String(localized: "Recording couldn’t start. Check that no other app is using the microphone.")
+                errorMessage = String(localized: "Recording couldn’t start. Check that no other app is using the microphone.", bundle: .l10n)
                 return
             }
             recorder = r
@@ -99,6 +99,6 @@ final class Recorder: NSObject, AVAudioRecorderDelegate {
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         timer?.invalidate()
         isRecording = false
-        if !flag { errorMessage = String(localized: "The recording was interrupted.") }
+        if !flag { errorMessage = String(localized: "The recording was interrupted.", bundle: .l10n) }
     }
 }

@@ -8,10 +8,10 @@ enum AudioDecoderError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noAudioTrack: return String(localized: "This file has no audio track.")
-        case .unreadable: return String(localized: "This audio format can’t be read.")
-        case .tooShort: return String(localized: "The recording is too short to chart — use at least 8 seconds.")
-        case .protected: return String(localized: "This song is copy-protected (for example from Apple Music) and can’t be analyzed.")
+        case .noAudioTrack: return String(localized: "This file has no audio track.", bundle: .l10n)
+        case .unreadable: return String(localized: "This audio format can’t be read.", bundle: .l10n)
+        case .tooShort: return String(localized: "The recording is too short to chart — use at least 8 seconds.", bundle: .l10n)
+        case .protected: return String(localized: "This song is copy-protected (for example from Apple Music) and can’t be analyzed.", bundle: .l10n)
         }
     }
 }

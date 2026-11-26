@@ -23,16 +23,16 @@ enum Levels {
 
     static func title(for level: Int) -> String {
         switch level {
-        case ..<5: return String(localized: "Garage Kid")
-        case 5..<10: return String(localized: "Groove Cadet")
-        case 10..<15: return String(localized: "Pocket Keeper")
-        case 15..<20: return String(localized: "Fill Hunter")
-        case 20..<25: return String(localized: "Backbeat Boss")
-        case 25..<30: return String(localized: "Session Player")
-        case 30..<35: return String(localized: "Tour Drummer")
-        case 35..<40: return String(localized: "Session Pro")
-        case 40..<45: return String(localized: "Rhythm Architect")
-        default: return String(localized: "Groove Legend")
+        case ..<5: return String(localized: "Garage Kid", bundle: .l10n)
+        case 5..<10: return String(localized: "Groove Cadet", bundle: .l10n)
+        case 10..<15: return String(localized: "Pocket Keeper", bundle: .l10n)
+        case 15..<20: return String(localized: "Fill Hunter", bundle: .l10n)
+        case 20..<25: return String(localized: "Backbeat Boss", bundle: .l10n)
+        case 25..<30: return String(localized: "Session Player", bundle: .l10n)
+        case 30..<35: return String(localized: "Tour Drummer", bundle: .l10n)
+        case 35..<40: return String(localized: "Session Pro", bundle: .l10n)
+        case 40..<45: return String(localized: "Rhythm Architect", bundle: .l10n)
+        default: return String(localized: "Groove Legend", bundle: .l10n)
         }
     }
 }
@@ -45,10 +45,10 @@ enum StageSkin: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .neon: return String(localized: "Neon")
-        case .vintage: return String(localized: "Vintage")
-        case .studio: return String(localized: "Studio")
-        case .arcade: return String(localized: "Arcade")
+        case .neon: return String(localized: "Neon", bundle: .l10n)
+        case .vintage: return String(localized: "Vintage", bundle: .l10n)
+        case .studio: return String(localized: "Studio", bundle: .l10n)
+        case .arcade: return String(localized: "Arcade", bundle: .l10n)
         }
     }
 
@@ -114,20 +114,20 @@ struct Quest: Codable, Identifiable, Hashable {
             let pct = Int(target * 100)
             if let kind = sectionKind, let t = songTitle {
                 let s = ChartSection.label(kind: kind, ordinal: sectionOrdinal ?? 1)
-                return String(localized: "Hit \(pct)% on the \(s) of “\(t)”")
+                return String(localized: "Hit \(pct)% on the \(s) of “\(t)”", bundle: .l10n)
             }
             if let s = sectionLabel, let t = songTitle {
-                return String(localized: "Hit \(pct)% on the \(s) of “\(t)”")
+                return String(localized: "Hit \(pct)% on the \(s) of “\(t)”", bundle: .l10n)
             }
-            return String(localized: "Hit \(pct)% on any section")
+            return String(localized: "Hit \(pct)% on any section", bundle: .l10n)
         case .speedClear:
-            return String(localized: "Clear a run at \(Int(target * 100))% speed")
+            return String(localized: "Clear a run at \(Int(target * 100))% speed", bundle: .l10n)
         case .tapCombo:
-            return String(localized: "Reach a \(Int(target))-note combo in Tap mode")
+            return String(localized: "Reach a \(Int(target))-note combo in Tap mode", bundle: .l10n)
         case .practiceMinutes:
-            return String(localized: "Practice for \(Int(target)) minutes")
+            return String(localized: "Practice for \(Int(target)) minutes", bundle: .l10n)
         case .fillClear:
-            return String(localized: "Nail a fill with 80% accuracy")
+            return String(localized: "Nail a fill with 80% accuracy", bundle: .l10n)
         }
     }
 
@@ -144,22 +144,22 @@ struct Achievement: Identifiable, Hashable {
 
     /// Computed so titles follow an in-app language switch.
     static var all: [Achievement] { [
-        Achievement(id: "first_chart", title: String(localized: "First Chart"), detail: String(localized: "Chart your first song"), symbol: "music.note.list"),
-        Achievement(id: "first_clear", title: String(localized: "Sound Check"), detail: String(localized: "Finish your first run"), symbol: "checkmark.seal.fill"),
-        Achievement(id: "first_s", title: String(localized: "Flawless"), detail: String(localized: "Earn an S grade"), symbol: "crown.fill"),
-        Achievement(id: "combo_50", title: String(localized: "In the Pocket"), detail: String(localized: "Reach a 50-note combo"), symbol: "flame.fill"),
-        Achievement(id: "combo_100", title: String(localized: "Locked In"), detail: String(localized: "Reach a 100-note combo"), symbol: "bolt.fill"),
-        Achievement(id: "combo_250", title: String(localized: "Metronome Heart"), detail: String(localized: "Reach a 250-note combo"), symbol: "heart.fill"),
-        Achievement(id: "streak_3", title: String(localized: "Habit Forming"), detail: String(localized: "Practice 3 days in a row"), symbol: "calendar"),
-        Achievement(id: "streak_7", title: String(localized: "Week of Grooves"), detail: String(localized: "Practice 7 days in a row"), symbol: "calendar.badge.checkmark"),
-        Achievement(id: "streak_30", title: String(localized: "Iron Wrists"), detail: String(localized: "Practice 30 days in a row"), symbol: "medal.fill"),
-        Achievement(id: "songs_5", title: String(localized: "Setlist"), detail: String(localized: "Chart 5 songs"), symbol: "square.stack.3d.up.fill"),
-        Achievement(id: "full_speed", title: String(localized: "Full Tempo"), detail: String(localized: "Clear a run at 100% speed with an A or better"), symbol: "speedometer"),
-        Achievement(id: "kit_mode", title: String(localized: "Real Sticks"), detail: String(localized: "Finish a run in Kit mode"), symbol: "mic.fill"),
-        Achievement(id: "fill_master", title: String(localized: "Fill Master"), detail: String(localized: "Nail 10 fills"), symbol: "sparkles"),
-        Achievement(id: "level_10", title: String(localized: "Pocket Keeper"), detail: String(localized: "Reach level 10"), symbol: "star.circle.fill"),
-        Achievement(id: "level_25", title: String(localized: "Session Player"), detail: String(localized: "Reach level 25"), symbol: "star.square.fill"),
-        Achievement(id: "hours_10", title: String(localized: "Ten Hours In"), detail: String(localized: "Practice for 10 hours total"), symbol: "clock.fill")
+        Achievement(id: "first_chart", title: String(localized: "First Chart", bundle: .l10n), detail: String(localized: "Chart your first song", bundle: .l10n), symbol: "music.note.list"),
+        Achievement(id: "first_clear", title: String(localized: "Sound Check", bundle: .l10n), detail: String(localized: "Finish your first run", bundle: .l10n), symbol: "checkmark.seal.fill"),
+        Achievement(id: "first_s", title: String(localized: "Flawless", bundle: .l10n), detail: String(localized: "Earn an S grade", bundle: .l10n), symbol: "crown.fill"),
+        Achievement(id: "combo_50", title: String(localized: "In the Pocket", bundle: .l10n), detail: String(localized: "Reach a 50-note combo", bundle: .l10n), symbol: "flame.fill"),
+        Achievement(id: "combo_100", title: String(localized: "Locked In", bundle: .l10n), detail: String(localized: "Reach a 100-note combo", bundle: .l10n), symbol: "bolt.fill"),
+        Achievement(id: "combo_250", title: String(localized: "Metronome Heart", bundle: .l10n), detail: String(localized: "Reach a 250-note combo", bundle: .l10n), symbol: "heart.fill"),
+        Achievement(id: "streak_3", title: String(localized: "Habit Forming", bundle: .l10n), detail: String(localized: "Practice 3 days in a row", bundle: .l10n), symbol: "calendar"),
+        Achievement(id: "streak_7", title: String(localized: "Week of Grooves", bundle: .l10n), detail: String(localized: "Practice 7 days in a row", bundle: .l10n), symbol: "calendar.badge.checkmark"),
+        Achievement(id: "streak_30", title: String(localized: "Iron Wrists", bundle: .l10n), detail: String(localized: "Practice 30 days in a row", bundle: .l10n), symbol: "medal.fill"),
+        Achievement(id: "songs_5", title: String(localized: "Setlist", bundle: .l10n), detail: String(localized: "Chart 5 songs", bundle: .l10n), symbol: "square.stack.3d.up.fill"),
+        Achievement(id: "full_speed", title: String(localized: "Full Tempo", bundle: .l10n), detail: String(localized: "Clear a run at 100% speed with an A or better", bundle: .l10n), symbol: "speedometer"),
+        Achievement(id: "kit_mode", title: String(localized: "Real Sticks", bundle: .l10n), detail: String(localized: "Finish a run in Kit mode", bundle: .l10n), symbol: "mic.fill"),
+        Achievement(id: "fill_master", title: String(localized: "Fill Master", bundle: .l10n), detail: String(localized: "Nail 10 fills", bundle: .l10n), symbol: "sparkles"),
+        Achievement(id: "level_10", title: String(localized: "Pocket Keeper", bundle: .l10n), detail: String(localized: "Reach level 10", bundle: .l10n), symbol: "star.circle.fill"),
+        Achievement(id: "level_25", title: String(localized: "Session Player", bundle: .l10n), detail: String(localized: "Reach level 25", bundle: .l10n), symbol: "star.square.fill"),
+        Achievement(id: "hours_10", title: String(localized: "Ten Hours In", bundle: .l10n), detail: String(localized: "Practice for 10 hours total", bundle: .l10n), symbol: "clock.fill")
     ] }
 }
 

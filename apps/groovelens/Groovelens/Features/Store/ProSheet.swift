@@ -18,18 +18,18 @@ struct ProSheet: View {
 
     private var perks: [Perk] {
         [
-            Perk(symbol: "infinity", color: Palette.brand, title: String(localized: "Unlimited songs"),
-                 detail: String(localized: "Chart your whole setlist, not just three tracks.")),
-            Perk(symbol: "mic.fill", color: Palette.cyan, title: String(localized: "Kit mode"),
-                 detail: String(localized: "Play your real drums — the mic scores every hit.")),
-            Perk(symbol: "speedometer", color: Palette.gold, title: String(localized: "Speed trainer"),
-                 detail: String(localized: "Start slow, climb 5% after every clean loop.")),
-            Perk(symbol: "flame.fill", color: Palette.ember, title: String(localized: "Fill library"),
-                 detail: String(localized: "Every fill from every song, ready to drill.")),
-            Perk(symbol: "square.and.arrow.up.fill", color: Palette.mint, title: String(localized: "MIDI, MusicXML & PDF"),
-                 detail: String(localized: "Open your charts in your DAW or notation app.")),
-            Perk(symbol: "sparkles", color: Palette.violet, title: String(localized: "Every stage skin"),
-                 detail: String(localized: "Vintage, Studio and Arcade — no grinding."))
+            Perk(symbol: "infinity", color: Palette.brand, title: String(localized: "Unlimited songs", bundle: .l10n),
+                 detail: String(localized: "Chart your whole setlist, not just three tracks.", bundle: .l10n)),
+            Perk(symbol: "mic.fill", color: Palette.cyan, title: String(localized: "Kit mode", bundle: .l10n),
+                 detail: String(localized: "Play your real drums — the mic scores every hit.", bundle: .l10n)),
+            Perk(symbol: "speedometer", color: Palette.gold, title: String(localized: "Speed trainer", bundle: .l10n),
+                 detail: String(localized: "Start slow, climb 5% after every clean loop.", bundle: .l10n)),
+            Perk(symbol: "flame.fill", color: Palette.ember, title: String(localized: "Fill library", bundle: .l10n),
+                 detail: String(localized: "Every fill from every song, ready to drill.", bundle: .l10n)),
+            Perk(symbol: "square.and.arrow.up.fill", color: Palette.mint, title: String(localized: "MIDI, MusicXML & PDF", bundle: .l10n),
+                 detail: String(localized: "Open your charts in your DAW or notation app.", bundle: .l10n)),
+            Perk(symbol: "sparkles", color: Palette.violet, title: String(localized: "Every stage skin", bundle: .l10n),
+                 detail: String(localized: "Vintage, Studio and Arcade — no grinding.", bundle: .l10n))
         ]
     }
 
@@ -50,7 +50,7 @@ struct ProSheet: View {
                     emblem
                     VStack(spacing: 8) {
                         Text(reason.headline).font(Typo.display(24)).foregroundStyle(Palette.text).multilineTextAlignment(.center)
-                        Text(String(localized: "One purchase. Yours forever. No subscription."))
+                        Text(String(localized: "One purchase. Yours forever. No subscription.", bundle: .l10n))
                             .font(Typo.body(15)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center)
                     }
                     VStack(spacing: 10) {
@@ -74,15 +74,15 @@ struct ProSheet: View {
 
                     VStack(spacing: 12) {
                         if store.isPro {
-                            Label(String(localized: "Pro is unlocked. Thank you!"), systemImage: "checkmark.seal.fill")
+                            Label(String(localized: "Pro is unlocked. Thank you!", bundle: .l10n), systemImage: "checkmark.seal.fill")
                                 .font(Typo.body(16, weight: .semibold)).foregroundStyle(Palette.mint)
                                 .frame(maxWidth: .infinity, minHeight: 56)
                         } else {
                             if store.loadFailed && store.product == nil {
                                 VStack(spacing: 10) {
-                                    Text(String(localized: "The App Store isn’t reachable right now. Check your connection and try again."))
+                                    Text(String(localized: "The App Store isn’t reachable right now. Check your connection and try again.", bundle: .l10n))
                                         .font(Typo.body(14)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center)
-                                    NeonButton(title: String(localized: "Try again"), symbol: "arrow.clockwise", busy: store.isLoadingProduct) {
+                                    NeonButton(title: String(localized: "Try again", bundle: .l10n), symbol: "arrow.clockwise", busy: store.isLoadingProduct) {
                                         Task { await store.load() }
                                     }
                                 }
@@ -98,7 +98,7 @@ struct ProSheet: View {
                         } label: {
                             HStack(spacing: 6) {
                                 if store.isRestoring { ProgressView().controlSize(.small).tint(Palette.textDim) }
-                                Text(String(localized: "Restore purchases"))
+                                Text(String(localized: "Restore purchases", bundle: .l10n))
                             }
                             .font(Typo.body(14, weight: .semibold)).foregroundStyle(Palette.textDim)
                         }
@@ -106,7 +106,7 @@ struct ProSheet: View {
                         if let m = store.message {
                             Text(m).font(Typo.body(13)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center)
                         }
-                        Text(String(localized: "Payment is charged to your Apple Account. Family Sharing supported."))
+                        Text(String(localized: "Payment is charged to your Apple Account. Family Sharing supported.", bundle: .l10n))
                             .font(Typo.body(11)).foregroundStyle(Palette.textFaint).multilineTextAlignment(.center)
                     }
                 }
@@ -125,8 +125,8 @@ struct ProSheet: View {
     }
 
     private var buyTitle: String {
-        if let price = store.displayPrice { return String(localized: "Unlock Pro — \(price)") }
-        return String(localized: "Unlock Pro")
+        if let price = store.displayPrice { return String(localized: "Unlock Pro — \(price)", bundle: .l10n) }
+        return String(localized: "Unlock Pro", bundle: .l10n)
     }
 
     private var emblem: some View {

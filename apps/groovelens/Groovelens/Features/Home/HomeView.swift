@@ -89,11 +89,11 @@ struct HomeView: View {
             .presentationBackground(.clear)
         }
         .sheet(item: $proReason) { reason in ProSheet(reason: reason) }
-        .alert(String(localized: "Couldn’t import"), isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
+        .alert(String(localized: "Couldn’t import", bundle: .l10n), isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
             if micDenied {
-                Button(String(localized: "Open Settings")) { micDenied = false; MicPermission.openSettings() }
+                Button(String(localized: "Open Settings", bundle: .l10n)) { micDenied = false; MicPermission.openSettings() }
             }
-            Button(String(localized: "OK"), role: .cancel) { micDenied = false }
+            Button(String(localized: "OK", bundle: .l10n), role: .cancel) { micDenied = false }
         } message: {
             Text(importError ?? "")
         }
@@ -116,7 +116,7 @@ struct HomeView: View {
             LevelRing(level: profile.level, progress: profile.levelProgress)
             VStack(alignment: .leading, spacing: 3) {
                 Text("GROOVELENS").font(Typo.display(15, weight: .bold)).tracking(0.6).foregroundStyle(Palette.text)
-                Text(String(localized: "LV \(profile.level) · \(profile.title)"))
+                Text(String(localized: "LV \(profile.level) · \(profile.title)", bundle: .l10n))
                     .font(Typo.hud(12)).foregroundStyle(Palette.textDim).lineLimit(1)
             }
             Spacer()
@@ -126,7 +126,7 @@ struct HomeView: View {
                     Text("\(profile.streak)").font(Typo.hud(17, weight: .bold)).foregroundStyle(Palette.ember)
                         .contentTransition(.numericText())
                 }
-                Text(String(localized: "STREAK")).hudLabel(size: 9)
+                Text(String(localized: "STREAK", bundle: .l10n)).hudLabel(size: 9)
             }
             .padding(.horizontal, 12).frame(height: 44)
             .background(RoundedRectangle(cornerRadius: 14).fill(Palette.surface)
@@ -149,9 +149,9 @@ struct HomeView: View {
                 .padding(.horizontal, -16)
             HStack(spacing: 16) {
                 Menu {
-                    Button { startImport { showFileImporter = true } } label: { Label(String(localized: "Audio file"), systemImage: "doc.fill") }
-                    Button { startImport { showVideoPicker = true } } label: { Label(String(localized: "Video from Photos"), systemImage: "video.fill") }
-                    Button { startImport { requestRecording() } } label: { Label(String(localized: "Record now"), systemImage: "mic.fill") }
+                    Button { startImport { showFileImporter = true } } label: { Label(String(localized: "Audio file", bundle: .l10n), systemImage: "doc.fill") }
+                    Button { startImport { showVideoPicker = true } } label: { Label(String(localized: "Video from Photos", bundle: .l10n), systemImage: "video.fill") }
+                    Button { startImport { requestRecording() } } label: { Label(String(localized: "Record now", bundle: .l10n), systemImage: "mic.fill") }
                 } label: {
                     ZStack {
                         Circle().stroke(Palette.brand.opacity(0.6), lineWidth: 2).frame(width: 84, height: 84)
@@ -167,12 +167,12 @@ struct HomeView: View {
                 .buttonStyle(PressableStyle(scale: 0.92))
                 .accessibilityLabel(Text("Chart a new song"))
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(String(localized: "Drop any song.")).font(Typo.display(20)).foregroundStyle(Palette.text)
-                    Text(String(localized: "We pull the drums out and build your track — right on this iPhone."))
+                    Text(String(localized: "Drop any song.", bundle: .l10n)).font(Typo.display(20)).foregroundStyle(Palette.text)
+                    Text(String(localized: "We pull the drums out and build your track — right on this iPhone.", bundle: .l10n))
                         .font(Typo.body(13)).foregroundStyle(Palette.textDim)
                         .fixedSize(horizontal: false, vertical: true)
                     if !store.isPro {
-                        Text(String(localized: "\(max(0, ProStore.freeSongLimit - profile.analysesStarted)) free songs left"))
+                        Text(String(localized: "\(max(0, ProStore.freeSongLimit - profile.analysesStarted)) free songs left", bundle: .l10n))
                             .font(Typo.hud(12)).foregroundStyle(Palette.gold)
                     }
                 }
@@ -186,9 +186,9 @@ struct HomeView: View {
     private var questsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(String(localized: "DAILY QUESTS")).hudLabel(Palette.cyan)
+                Text(String(localized: "DAILY QUESTS", bundle: .l10n)).hudLabel(Palette.cyan)
                 Spacer()
-                Text(String(localized: "Resets at midnight")).font(Typo.body(11)).foregroundStyle(Palette.textFaint)
+                Text(String(localized: "Resets at midnight", bundle: .l10n)).font(Typo.body(11)).foregroundStyle(Palette.textFaint)
             }
             ForEach(profile.quests) { q in
                 VStack(alignment: .leading, spacing: 6) {
@@ -223,7 +223,7 @@ struct HomeView: View {
     private var tracks: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(String(localized: "Tracks")).font(Typo.display(17)).foregroundStyle(Palette.text)
+                Text(String(localized: "Tracks", bundle: .l10n)).font(Typo.display(17)).foregroundStyle(Palette.text)
                 Spacer()
                 if !songs.isEmpty {
                     Text("\(songs.count)").font(Typo.hud(13)).foregroundStyle(Palette.textFaint)
@@ -232,11 +232,11 @@ struct HomeView: View {
             if songs.isEmpty {
                 VStack(spacing: 14) {
                     EmptyStateView(symbol: "music.note",
-                                   title: String(localized: "Your stage is empty"),
-                                   message: String(localized: "Tap + and pick a song, a rehearsal video, or record your band. Charts appear here."))
-                    NeonButton(title: String(localized: "Try the demo song"), symbol: "sparkles", busy: preparingDemo) { importDemo() }
+                                   title: String(localized: "Your stage is empty", bundle: .l10n),
+                                   message: String(localized: "Tap + and pick a song, a rehearsal video, or record your band. Charts appear here.", bundle: .l10n))
+                    NeonButton(title: String(localized: "Try the demo song", bundle: .l10n), symbol: "sparkles", busy: preparingDemo) { importDemo() }
                         .accessibilityIdentifier("demo-song")
-                    Text(String(localized: "Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings."))
+                    Text(String(localized: "Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings.", bundle: .l10n))
                         .font(Typo.body(12)).foregroundStyle(Palette.textFaint).multilineTextAlignment(.center)
                 }
                 .glassCard()
@@ -249,9 +249,9 @@ struct HomeView: View {
                             .onTapGesture { open(song) }
                             .contextMenu {
                                 if song.status == .failed {
-                                    Button { retry(song) } label: { Label(String(localized: "Try again"), systemImage: "arrow.clockwise") }
+                                    Button { retry(song) } label: { Label(String(localized: "Try again", bundle: .l10n), systemImage: "arrow.clockwise") }
                                 }
-                                Button(role: .destructive) { delete(song) } label: { Label(String(localized: "Delete"), systemImage: "trash") }
+                                Button(role: .destructive) { delete(song) } label: { Label(String(localized: "Delete", bundle: .l10n), systemImage: "trash") }
                             }
                             .transition(.asymmetric(insertion: .scale(scale: 0.9).combined(with: .opacity), removal: .opacity))
                     }
@@ -279,7 +279,7 @@ struct HomeView: View {
         Task {
             let url = try? await Task.detached(priority: .userInitiated) { try DemoAudio.makeDemoFile() }.value
             preparingDemo = false
-            guard let url else { importError = String(localized: "This audio format can’t be read."); return }
+            guard let url else { importError = String(localized: "This audio format can’t be read.", bundle: .l10n); return }
             importFile(url, kind: .file)
             profile.refundAnalysis()
         }
@@ -291,11 +291,11 @@ struct HomeView: View {
         case .undetermined:
             Task {
                 if await MicPermission.request() { showRecorder = true }
-                else { micDenied = true; importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.") }
+                else { micDenied = true; importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.", bundle: .l10n) }
             }
         case .denied:
             micDenied = true
-            importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.")
+            importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.", bundle: .l10n)
         }
     }
 
@@ -303,7 +303,7 @@ struct HomeView: View {
         let title = url.deletingPathExtension().lastPathComponent
             .replacingOccurrences(of: "_", with: " ")
             .replacingOccurrences(of: "import-", with: "")
-        let display = kind == .video ? String(localized: "Video — \(Date.now.formatted(date: .abbreviated, time: .shortened))") : title
+        let display = kind == .video ? String(localized: "Video — \(Date.now.formatted(date: .abbreviated, time: .shortened))", bundle: .l10n) : title
         do {
             let song = try analysis.importAndAnalyze(source: url, kind: kind, title: display, context: context, profile: profile)
             analyzingSong = song
@@ -323,7 +323,7 @@ struct HomeView: View {
 
     private func retry(_ song: Song) {
         guard FileManager.default.fileExists(atPath: song.files.original.path) else {
-            importError = String(localized: "The original audio for this song is missing. Delete it and import again.")
+            importError = String(localized: "The original audio for this song is missing. Delete it and import again.", bundle: .l10n)
             return
         }
         guard store.canAnalyzeAnotherSong(started: profile.analysesStarted) else { proReason = .songLimit; return }
@@ -389,7 +389,7 @@ struct SongRow: View {
                     case .analyzing:
                         Text((job?.stage ?? AnalysisStage(rawValue: song.stageRaw) ?? .isolating).title)
                     case .failed:
-                        Text(song.errorMessage ?? String(localized: "Analysis failed")).lineLimit(1)
+                        Text(song.errorMessage ?? String(localized: "Analysis failed", bundle: .l10n)).lineLimit(1)
                     }
                 }
                 .font(Typo.hud(12)).foregroundStyle(Palette.textDim)

@@ -15,14 +15,14 @@ struct RecorderSheet: View {
             VStack(spacing: 22) {
                 Capsule().fill(Color.white.opacity(0.25)).frame(width: 40, height: 5).padding(.top, 10)
                 HStack {
-                    Text(String(localized: "Record")).font(Typo.display(22)).foregroundStyle(Palette.text)
+                    Text(String(localized: "Record", bundle: .l10n)).font(Typo.display(22)).foregroundStyle(Palette.text)
                     Spacer()
-                    Button(String(localized: "Cancel")) { cancel() }
+                    Button(String(localized: "Cancel", bundle: .l10n)) { cancel() }
                         .font(Typo.body(15, weight: .semibold)).foregroundStyle(Palette.textDim)
                 }
                 .padding(.horizontal, 20)
 
-                Text(String(localized: "Put your iPhone near the band, not on the kit. Up to 10 minutes."))
+                Text(String(localized: "Put your iPhone near the band, not on the kit. Up to 10 minutes.", bundle: .l10n))
                     .font(Typo.body(14)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center)
                     .padding(.horizontal, 30)
 
@@ -73,7 +73,7 @@ struct RecorderSheet: View {
             recorder.stop()   // onChange(isRecording) finalizes, also when the 10-minute cap stops it
         } else {
             localError = nil
-            let s = Song(title: String(localized: "Recording"), originalFileName: "original.m4a", sourceKind: .recording)
+            let s = Song(title: String(localized: "Recording", bundle: .l10n), originalFileName: "original.m4a", sourceKind: .recording)
             do {
                 try s.files.ensureDirectory()
             } catch {
@@ -91,11 +91,11 @@ struct RecorderSheet: View {
         guard let song else { return }
         self.song = nil
         guard recorder.elapsed >= 8 else {
-            localError = String(localized: "Record at least 8 seconds so we can find the beat.")
+            localError = String(localized: "Record at least 8 seconds so we can find the beat.", bundle: .l10n)
             song.files.deleteAll()
             return
         }
-        song.title = String(localized: "Recording — \(Date.now.formatted(date: .abbreviated, time: .shortened))")
+        song.title = String(localized: "Recording — \(Date.now.formatted(date: .abbreviated, time: .shortened))", bundle: .l10n)
         Haptics.success()
         dismiss()
         onFinished(song)

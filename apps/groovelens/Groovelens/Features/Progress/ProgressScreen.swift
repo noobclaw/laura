@@ -12,7 +12,7 @@ struct ProgressScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Text(String(localized: "Progress")).font(Typo.display(28)).foregroundStyle(Palette.text).padding(.top, 14)
+                Text(String(localized: "Progress", bundle: .l10n)).font(Typo.display(28)).foregroundStyle(Palette.text).padding(.top, 14)
                 levelCard
                 statsGrid
                 streakCalendar
@@ -34,8 +34,8 @@ struct ProgressScreen: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(profile.title).font(Typo.display(19)).foregroundStyle(Palette.text)
                 Text("\(profile.xpIntoLevel) / \(profile.xpForLevel) XP").font(Typo.hud(13)).foregroundStyle(Palette.textDim)
-                Text(profile.level >= Levels.maxLevel ? String(localized: "Max level reached")
-                     : String(localized: "Next title at level \(((profile.level / 5) + 1) * 5)"))
+                Text(profile.level >= Levels.maxLevel ? String(localized: "Max level reached", bundle: .l10n)
+                     : String(localized: "Next title at level \(((profile.level / 5) + 1) * 5)", bundle: .l10n))
                     .font(Typo.body(12)).foregroundStyle(Palette.textFaint)
             }
             Spacer()
@@ -46,11 +46,11 @@ struct ProgressScreen: View {
     private var statsGrid: some View {
         let minutes = Int(profile.totalPracticeSeconds / 60)
         return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-            StatTile(label: String(localized: "PRACTICE"), value: minutes >= 60 ? String(format: "%.1f", Double(minutes) / 60) : "\(minutes)",
-                     unit: minutes >= 60 ? String(localized: "h") : String(localized: "min"), accent: Palette.cyan)
-            StatTile(label: String(localized: "RUNS"), value: "\(profile.completedRuns)", accent: Palette.brand)
-            StatTile(label: String(localized: "STREAK"), value: "\(profile.streak)", unit: String(localized: "days"), accent: Palette.ember)
-            StatTile(label: String(localized: "BEST STREAK"), value: "\(profile.data.bestStreak)", unit: String(localized: "days"), accent: Palette.gold)
+            StatTile(label: String(localized: "PRACTICE", bundle: .l10n), value: minutes >= 60 ? String(format: "%.1f", Double(minutes) / 60) : "\(minutes)",
+                     unit: minutes >= 60 ? String(localized: "h", bundle: .l10n) : String(localized: "min", bundle: .l10n), accent: Palette.cyan)
+            StatTile(label: String(localized: "RUNS", bundle: .l10n), value: "\(profile.completedRuns)", accent: Palette.brand)
+            StatTile(label: String(localized: "STREAK", bundle: .l10n), value: "\(profile.streak)", unit: String(localized: "days", bundle: .l10n), accent: Palette.ember)
+            StatTile(label: String(localized: "BEST STREAK", bundle: .l10n), value: "\(profile.data.bestStreak)", unit: String(localized: "days", bundle: .l10n), accent: Palette.gold)
         }
     }
 
@@ -66,9 +66,9 @@ struct ProgressScreen: View {
         let mondayFirst = Array(symbols[1...]) + [symbols[0]]
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(String(localized: "LAST 5 WEEKS")).hudLabel()
+                Text(String(localized: "LAST 5 WEEKS", bundle: .l10n)).hudLabel()
                 Spacer()
-                Label(String(localized: "1 rest day a week keeps your streak"), systemImage: "moon.zzz.fill")
+                Label(String(localized: "1 rest day a week keeps your streak", bundle: .l10n), systemImage: "moon.zzz.fill")
                     .font(Typo.body(11)).foregroundStyle(Palette.textFaint)
             }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 7), spacing: 6) {
@@ -95,7 +95,7 @@ struct ProgressScreen: View {
     private var trendChart: some View {
         let runs = Array(sessions.filter { $0.modeRaw != PlayMode.watch.rawValue }.prefix(20).reversed())
         return VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "ACCURACY · LAST \(runs.count) RUNS")).hudLabel()
+            Text(String(localized: "ACCURACY · LAST \(runs.count) RUNS", bundle: .l10n)).hudLabel()
             Chart(Array(runs.enumerated()), id: \.offset) { i, s in
                 AreaMark(x: .value("Run", i), y: .value("Accuracy", s.accuracy * 100))
                     .foregroundStyle(LinearGradient(colors: [Palette.brand.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom))
@@ -123,7 +123,7 @@ struct ProgressScreen: View {
 
     private var skins: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "STAGE SKINS")).hudLabel()
+            Text(String(localized: "STAGE SKINS", bundle: .l10n)).hudLabel()
             ScrollView(.horizontal) {
                 HStack(spacing: 10) {
                     ForEach(StageSkin.allCases) { skin in
@@ -149,8 +149,8 @@ struct ProgressScreen: View {
                                 .frame(width: 120, height: 76)
                                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                 Text(skin.title).font(Typo.body(14, weight: .semibold)).foregroundStyle(Palette.text)
-                                Text(unlocked ? (selected ? String(localized: "In use") : String(localized: "Tap to use"))
-                                     : String(localized: "Level \(skin.unlockLevel) or Pro"))
+                                Text(unlocked ? (selected ? String(localized: "In use", bundle: .l10n) : String(localized: "Tap to use", bundle: .l10n))
+                                     : String(localized: "Level \(skin.unlockLevel) or Pro", bundle: .l10n))
                                     .font(Typo.hud(11)).foregroundStyle(selected ? Palette.brand : Palette.textFaint)
                             }
                             .padding(8)
@@ -169,7 +169,7 @@ struct ProgressScreen: View {
     private var achievements: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(String(localized: "ACHIEVEMENTS")).hudLabel()
+                Text(String(localized: "ACHIEVEMENTS", bundle: .l10n)).hudLabel()
                 Spacer()
                 Text("\(Achievement.all.filter { profile.hasAchievement($0.id) }.count)/\(Achievement.all.count)")
                     .font(Typo.hud(12)).foregroundStyle(Palette.textDim)

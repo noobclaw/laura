@@ -64,9 +64,9 @@ struct AnalysisSheet: View {
 
     private var headline: String {
         switch song.status {
-        case .ready: return String(localized: "CHART READY")
-        case .failed: return String(localized: "SOMETHING WENT WRONG")
-        case .analyzing: return String(localized: "ANALYZING ON DEVICE")
+        case .ready: return String(localized: "CHART READY", bundle: .l10n)
+        case .failed: return String(localized: "SOMETHING WENT WRONG", bundle: .l10n)
+        case .analyzing: return String(localized: "ANALYZING ON DEVICE", bundle: .l10n)
         }
     }
 
@@ -98,22 +98,22 @@ struct AnalysisSheet: View {
 
     private var liveTiles: some View {
         HStack(spacing: 10) {
-            StatTile(label: String(localized: "TEMPO"), value: job?.tempo.map { "\(Int($0.rounded()))" } ?? (song.status == .ready ? "\(Int(song.tempo.rounded()))" : "—"), unit: "BPM", accent: Palette.cyan)
-            StatTile(label: String(localized: "METER"), value: (job?.beatsPerBar ?? (song.status == .ready ? song.beatsPerBar : nil)).map { "\($0)/4" } ?? "—", accent: Palette.violet)
-            StatTile(label: String(localized: "HITS"), value: (job?.hitCount ?? 0) > 0 ? "\(job!.hitCount)" : (song.hitCount > 0 ? "\(song.hitCount)" : "—"), accent: Palette.gold)
+            StatTile(label: String(localized: "TEMPO", bundle: .l10n), value: job?.tempo.map { "\(Int($0.rounded()))" } ?? (song.status == .ready ? "\(Int(song.tempo.rounded()))" : "—"), unit: "BPM", accent: Palette.cyan)
+            StatTile(label: String(localized: "METER", bundle: .l10n), value: (job?.beatsPerBar ?? (song.status == .ready ? song.beatsPerBar : nil)).map { "\($0)/4" } ?? "—", accent: Palette.violet)
+            StatTile(label: String(localized: "HITS", bundle: .l10n), value: (job?.hitCount ?? 0) > 0 ? "\(job!.hitCount)" : (song.hitCount > 0 ? "\(song.hitCount)" : "—"), accent: Palette.gold)
         }
     }
 
     @ViewBuilder private var footer: some View {
         switch song.status {
         case .ready:
-            NeonButton(title: String(localized: "Open the chart"), symbol: "play.fill") { onClose(true) }
+            NeonButton(title: String(localized: "Open the chart", bundle: .l10n), symbol: "play.fill") { onClose(true) }
                 .accessibilityIdentifier("open-chart")
         case .failed:
             VStack(spacing: 12) {
-                Text(song.errorMessage ?? String(localized: "Analysis failed")).font(Typo.body(14)).foregroundStyle(Palette.textDim)
+                Text(song.errorMessage ?? String(localized: "Analysis failed", bundle: .l10n)).font(Typo.body(14)).foregroundStyle(Palette.textDim)
                     .multilineTextAlignment(.center)
-                NeonButton(title: String(localized: "Try again"), symbol: "arrow.clockwise", fill: [Palette.danger, Palette.brand]) {
+                NeonButton(title: String(localized: "Try again", bundle: .l10n), symbol: "arrow.clockwise", fill: [Palette.danger, Palette.brand]) {
                     if store.canAnalyzeAnotherSong(started: profile.analysesStarted) {
                         analysis.retry(song: song, context: context)
                     } else {
@@ -122,7 +122,7 @@ struct AnalysisSheet: View {
                 }
             }
         case .analyzing:
-            Text(String(localized: "Nothing leaves your iPhone. You can close this — analysis keeps going."))
+            Text(String(localized: "Nothing leaves your iPhone. You can close this — analysis keeps going.", bundle: .l10n))
                 .font(Typo.body(13)).foregroundStyle(Palette.textFaint).multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }

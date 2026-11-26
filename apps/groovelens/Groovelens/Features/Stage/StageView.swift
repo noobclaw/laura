@@ -97,8 +97,8 @@ struct StageView: View {
                 if case .paused = model.phase { PauseOverlay(model: model, onQuit: { dismiss() }) }
                 if case .failed(let message) = model.phase {
                     VStack(spacing: 16) {
-                        EmptyStateView(symbol: "speaker.slash.fill", title: String(localized: "Playback couldn’t start"), message: message)
-                        NeonButton(title: String(localized: "Back"), symbol: "chevron.left") { dismiss() }.frame(width: 220)
+                        EmptyStateView(symbol: "speaker.slash.fill", title: String(localized: "Playback couldn’t start", bundle: .l10n), message: message)
+                        NeonButton(title: String(localized: "Back", bundle: .l10n), symbol: "chevron.left") { dismiss() }.frame(width: 220)
                     }
                     .glassCard().padding(30).frame(maxHeight: .infinity)
                 }
@@ -126,7 +126,7 @@ struct StageView: View {
                     HStack(spacing: 6) {
                         Text(setup.rangeLabel)
                         if setup.speedTrainer || model.speed < 0.999 { Text("· \(Int((model.speed * 100).rounded()))%").foregroundStyle(Palette.gold) }
-                        if setup.loop && model.passes > 0 { Text(String(localized: "· pass \(model.passes + 1)")) }
+                        if setup.loop && model.passes > 0 { Text(String(localized: "· pass \(model.passes + 1)", bundle: .l10n)) }
                     }
                     .font(Typo.hud(11)).foregroundStyle(Palette.textDim)
                 }
@@ -137,7 +137,7 @@ struct StageView: View {
                             .font(Typo.hud(26, weight: .bold)).foregroundStyle(.white)
                             .contentTransition(.numericText())
                             .monospacedDigit()
-                        Text(String(localized: "ACCURACY")).hudLabel(size: 9)
+                        Text(String(localized: "ACCURACY", bundle: .l10n)).hudLabel(size: 9)
                     }
                 }
             }
@@ -153,7 +153,7 @@ struct StageView: View {
                 HStack(spacing: 4) {
                     Text("\(model.judge.combo)").font(Typo.hud(20, weight: .bold)).foregroundStyle(Palette.gold)
                         .contentTransition(.numericText())
-                    Text(String(localized: "COMBO")).hudLabel(Palette.gold, size: 10)
+                    Text(String(localized: "COMBO", bundle: .l10n)).hudLabel(Palette.gold, size: 10)
                 }
                 .neonGlow(Palette.gold, radius: 8)
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -185,7 +185,7 @@ struct JudgementPopup: View {
                 .foregroundStyle(LinearGradient(colors: [.white, color], startPoint: .top, endPoint: .bottom))
                 .neonGlow(color, radius: 14)
             if event.judgement != .miss && abs(event.offset) > Judgement.perfectWindow {
-                Text(event.offset < 0 ? String(localized: "EARLY") : String(localized: "LATE"))
+                Text(event.offset < 0 ? String(localized: "EARLY", bundle: .l10n) : String(localized: "LATE", bundle: .l10n))
                     .font(Typo.hud(12, weight: .bold)).foregroundStyle(color.opacity(0.85))
             }
         }
@@ -272,7 +272,7 @@ struct KitListeningBar: View {
     var body: some View {
         VStack(spacing: 8) {
             if showHeadphoneTip {
-                Label(String(localized: "Use headphones — otherwise the mic hears the backing track too."), systemImage: "headphones")
+                Label(String(localized: "Use headphones — otherwise the mic hears the backing track too.", bundle: .l10n), systemImage: "headphones")
                     .font(Typo.body(12, weight: .medium)).foregroundStyle(Palette.gold)
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(Capsule().fill(Palette.gold.opacity(0.14)))
@@ -280,7 +280,7 @@ struct KitListeningBar: View {
             HStack(spacing: 8) {
                 Circle().fill(Palette.danger).frame(width: 8, height: 8)
                     .scaleEffect(pulse ? 1.3 : 0.8).opacity(pulse ? 1 : 0.6)
-                Text(String(localized: "LISTENING TO YOUR KIT")).hudLabel(Palette.text, size: 11)
+                Text(String(localized: "LISTENING TO YOUR KIT", bundle: .l10n)).hudLabel(Palette.text, size: 11)
             }
             .padding(.horizontal, 14).padding(.vertical, 8)
             .background(Capsule().fill(.black.opacity(0.4)))
@@ -298,12 +298,12 @@ struct PauseOverlay: View {
             Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
             Color.black.opacity(0.35).ignoresSafeArea()
             VStack(spacing: 14) {
-                Text(String(localized: "PAUSED")).font(Typo.display(30, weight: .heavy)).foregroundStyle(.white)
+                Text(String(localized: "PAUSED", bundle: .l10n)).font(Typo.display(30, weight: .heavy)).foregroundStyle(.white)
                     .neonGlow(Palette.brand, radius: 18)
                     .padding(.bottom, 12)
-                NeonButton(title: String(localized: "Resume"), symbol: "play.fill") { model.togglePause() }
-                NeonButton(title: String(localized: "Restart"), symbol: "arrow.counterclockwise", fill: [Palette.violet, Palette.cyan]) { model.restart() }
-                Button(String(localized: "Quit")) { onQuit() }
+                NeonButton(title: String(localized: "Resume", bundle: .l10n), symbol: "play.fill") { model.togglePause() }
+                NeonButton(title: String(localized: "Restart", bundle: .l10n), symbol: "arrow.counterclockwise", fill: [Palette.violet, Palette.cyan]) { model.restart() }
+                Button(String(localized: "Quit", bundle: .l10n)) { onQuit() }
                     .accessibilityIdentifier("quit")
                     .font(Typo.body(16, weight: .semibold)).foregroundStyle(Palette.textDim).padding(.top, 6)
             }

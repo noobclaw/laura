@@ -6,9 +6,9 @@ enum PlaybackTrack: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .full: return String(localized: "Full mix")
-        case .drumless: return String(localized: "No drums")
-        case .drumsOnly: return String(localized: "Drums only")
+        case .full: return String(localized: "Full mix", bundle: .l10n)
+        case .drumless: return String(localized: "No drums", bundle: .l10n)
+        case .drumsOnly: return String(localized: "Drums only", bundle: .l10n)
         }
     }
     var symbol: String {
