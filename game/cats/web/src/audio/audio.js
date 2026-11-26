@@ -49,6 +49,10 @@
     heart: function (c, o, t, p) { var k = (p && p.v) || 0.5; osc(c, 'sine', 64, 44, t, 0.11, o, 0.35 + k * 0.4); osc(c, 'sine', 58, 40, t + 0.15, 0.1, o, 0.22 + k * 0.3); },
     sneeze: function (c, o, t, p) { var k = (p && p.vol) || 0.5; nz(c, 'bandpass', 2600, 1.5, t, 0.05, o, 0.25 * k, 5200); nz(c, 'highpass', 3000, 0.7, t + 0.06, 0.12, o, 0.4 * k); osc(c, 'sine', 900, 500, t + 0.06, 0.08, o, 0.12 * k); },
     giggle: function (c, o, t) { [0, 0.09, 0.18, 0.27].forEach(function (d, i) { osc(c, 'sine', 980 + i * 60, 760 + i * 40, t + d, 0.06, o, 0.1); }); },
+    praise: function (c, o, t, p) { var L = (p && p.level) || 1, sc = [523, 587, 659, 784, 880, 1047, 1175, 1319, 1568], n = 2 + Math.min(4, L), b = L - 1; // a rising run that climbs higher at each quarter; the last one ends on a held chord
+      for (var i = 0; i < n; i++) pluck(c, o, t + i * 0.065, sc[Math.min(sc.length - 1, b + i)], 0.22 + i * 0.02, 0.32 + 0.03 * L);
+      if (L >= 3) osc(c, 'sine', 3136, 3136, t + n * 0.065, 0.5, o, 0.035, 0.002);
+      if (L >= 5) { [523, 659, 784, 1047].forEach(function (f) { osc(c, 'triangle', f, f, t + n * 0.065 + 0.05, 0.9, o, 0.07, 0.01); }); nz(c, 'highpass', 5000, 0.7, t + n * 0.065, 0.5, o, 0.06, 3000); } },
     like: function (c, o, t) { pluck(c, o, t, 880, 0.2, 0.3); pluck(c, o, t + 0.08, 1175, 0.2, 0.4); },
     splat: function (c, o, t) { nz(c, 'lowpass', 900, 1, t, 0.07, o, 0.3, 200); osc(c, 'sine', 240, 120, t, 0.06, o, 0.18); },
     chime: function (c, o, t, p) { var f = 2100 * ((p && p.k) || 1); osc(c, 'sine', f, f, t, 1.6, o, 0.1, 0.002); osc(c, 'sine', f * 2.76, f * 2.76, t, 0.8, o, 0.04, 0.002); osc(c, 'sine', f * 5.4, f * 5.4, t, 0.3, o, 0.02, 0.002); },
@@ -61,7 +65,7 @@
   var A = (SG.audio = {
     volume: 0.7, ctx: null, sounds: S,
     init: function () {
-      var bus = SG.bus, map = { meow: 'meow', blast: 'blast', pump: 'pump', giggle: 'giggle', like: 'like', bounce: 'splat', ovltick: 'score', miss: 'miss', dryfire: 'dryfire', picked: 'pick', fill: 'fill', undo: 'undo', pose: 'pose', jump: 'jump', land: 'land', paintmode: 'paintmode', alert: 'alert', lowBalls: 'lowBalls', decoy: 'decoy', bump: 'bump' };
+      var bus = SG.bus, map = { meow: 'meow', blast: 'blast', pump: 'pump', giggle: 'giggle', like: 'like', praise: 'praise', bounce: 'splat', ovltick: 'score', miss: 'miss', dryfire: 'dryfire', picked: 'pick', fill: 'fill', undo: 'undo', pose: 'pose', jump: 'jump', land: 'land', paintmode: 'paintmode', alert: 'alert', lowBalls: 'lowBalls', decoy: 'decoy', bump: 'bump' };
       Object.keys(map).forEach(function (ev) { bus.on(ev, function (d) { A.play(map[ev], d); }); });
       bus.on('hit', function () { A.play('meowHit'); });
       bus.on('fidget', function (d) { if (d.sneeze && SG.game.me && SG.game.me.team === 'dog' && d.d < 6) A.play('sneeze', { vol: 1 - d.d / 7 }); });

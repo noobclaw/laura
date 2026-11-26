@@ -741,7 +741,7 @@
     else {
       this.alb = new Uint8Array(A * A * 4).fill(255);
       this.orm = new Uint8Array(A * A * 4);
-      var rb = Math.round((cv ? 0.9 : 0.82) * 255);
+      var rb = Math.round((this.spec && this.spec.jelly ? 0.3 : cv ? 0.9 : 0.82) * 255); // jelly bodies are glossy vinyl like the original's figures (owner 2026-11-26 video)
       for (i = 0; i < A * A * 4; i += 4) { this.orm[i] = 255; this.orm[i + 1] = rb; this.orm[i + 2] = 0; this.orm[i + 3] = 255; }
       this.texA = new THREE.DataTexture(this.alb, A, A, THREE.RGBAFormat); this.texA.colorSpace = THREE.SRGBColorSpace;
       this.texO = new THREE.DataTexture(this.orm, A, A, THREE.RGBAFormat);
@@ -1091,6 +1091,7 @@
     }
     if (A.launch > 0) { A.launch = Math.max(0, A.launch - dt / 0.24); e = 1 - A.launch; var q0 = e < 0.3 ? -Math.sin(e / 0.3 * PI) * 0.2 : Math.sin((e - 0.3) / 0.7 * PI) * 0.14; sy *= 1 + q0; sx *= 1 - q0 * 0.5; sz *= 1 - q0 * 0.5; }
     if (this.squash > 0) { this.squash = Math.max(0, this.squash - dt * 5.5); var q2 = Math.sin(this.squash * PI) * (cv ? 0.45 : 0.26); sy *= 1 - q2; sx *= 1 + q2 * 0.45; sz *= 1 + q2 * 0.45; } // splat
+    if (this.jig > 0) { this.jig = Math.max(0, this.jig - dt * 2.4); var wj = Math.sin(t * 24) * this.jig * (cv ? 0.09 : 0.05); sy *= 1 + wj; sx *= 1 - wj * 0.55; sz *= 1 - wj * 0.55; } // jelly wobble while being painted (owner 2026-11-26: painting must feel good)
     if (this._emote && live) { roll += Math.sin(t * 3.4) * 0.95; addRot(J.shL, Math.sin(t * 6.8) * 0.3, 0, 0); addRot(J.shR, -Math.sin(t * 6.8) * 0.3, 0, 0); addRot(J.hpL, -Math.sin(t * 6.8) * 0.25, 0, 0); addRot(J.hpR, Math.sin(t * 6.8) * 0.25, 0, 0); }
     if (this.tilt) addRot(J.head, 0, 0, this.tilt);
     if (live) { // idle life: only ever on a body that is not frozen

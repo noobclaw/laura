@@ -12,7 +12,7 @@
   var G = (SG.game = { electron: ELECTRON,
     mode: 'boot', side: null, state: null, ents: [], me: null, time: 0, roundT: 0, simT: 0,
     cam: { yaw: 0.6, pitch: 0.32, dist: 2.6, free: null }, keys: {}, mouse: { x: 0, y: 0, down: [false, false, false] },
-    paint: { on: false, rgb: [47, 75, 124], rough: 0.8, metal: 0, size: RULES.paint.brushDefaultCm / 100, hard: true, tool: 'brush', undo: [], last: null },
+    paint: { on: false, rgb: [47, 75, 124], rough: 0.35, metal: 0, size: RULES.paint.brushDefaultCm / 100, hard: true, tool: 'brush', undo: [], last: null },
     shots: [], marks: [], confetti: [], decoys: [], decoyCd: 0, decoySlots: [{ cd: 0, e: null }, { cd: 0, e: null }], guide: 0, hitstop: 0, labels: []
   });
   G.opts = { sens: 1, invertY: false, fov: 105, res: 1, shadows: true, post: true, lang: 'zh', sfx: 1, amb: 0.3, music: 0.125, searchMusic: false, fpsCap: 0, showFps: false, quality: Q.get('q') === 'low' ? 'low' : 'high' };
@@ -235,7 +235,7 @@
     G.pick.cat.breed = breed; G.pick.cat.size = size; var m = G.me; if (!G.lobby || !m) return;
     var o = { x: m.x, y: m.y, z: m.z, yaw: m.yaw, name: '你', size: size }; scene.remove(m.c.root); m.c.dispose(); G.ents.splice(G.ents.indexOf(m), 1); m.ghost = null; G.seeThrough = false; G.me = spawn('you', specOf('cat'), 'cat', o); bus.emit('body', { breed: breed, size: size });
   };
-  G.start = function (side, breed) {
+  G.start = function (side, breed) { G.mile = 0;
     G.lobby = null; if (lobbyMat) scene.remove(lobbyMat);
     clearEnts(); G.mode = 'play'; G.roundT = 0; G.cam.free = null; G.fly = null; G.liked = false; G.likes = {}; G.seeThrough = true; G.cam.kk = null; G.cam.t3 = null; G.cam.look = null; G.third = false; G.paint.on = false; G.moved = 0; G.guide = 0; G.paint.undo = []; G.decoyCd = 0; G.decoySlots = [{ cd: 0, e: null }, { cd: 0, e: null }]; G.embedT = 0;
     var WS = SG.WS, S = G.settings, mode = S.mode, players = [], nd = Math.max(1, Math.min(3, S.dogs || (side === 'cat' && mode !== 'double' ? RULES.solo.botDogsWhenCat : RULES.solo.botDogsWhenDog + 1)));
@@ -764,10 +764,24 @@
         if (d < P.size * 4 && d > 1e-6) { var m = Math.floor((SP.acc + d) / sp); for (var q = 1; q <= m && SP.n < 8000; q++) dabAt(tmp2.lerpVectors(SP.last, h, (q * sp - SP.acc) / d)); SP.acc = SP.acc + d - m * sp; SP.dist += d; }
         else if (d >= P.size * 4) { dabAt(h); SP.acc = 0; } // jumped across a gap in the silhouette: no paint through the air
         SP.last.copy(h); }
-      else { SP.last = h.clone(); dabAt(h); SP.acc = 0; if (!SP.touched) { SP.touched = true; bus.emit('touch', { size: P.size }); } }
+      else { SP.last = h.clone(); dabAt(h); SP.acc = 0; if (!SP.touched) { SP.touched = true; touchFx(h); bus.emit('touch', { size: P.size }); } }
       SP.nrm = hit.face && hit.face.normal ? hit.face.normal : null;
     }
   }
+  /* ---- paint feel (owner 2026-11-26: 「畫畫的快感不夠」). Three tiers, as the production skill asks:
+     small  = the brush touching: the jelly wobbles, three or four flecks jump off, a wet squelch;
+     medium = every quarter of the body covered: a word, a rising chime, a burst of flecks in the paint colour, a bounce;
+     large  = the whole body done: the biggest word, a little fanfare, a big burst and a big bounce.
+     Praise only counts how much is covered (never whether it matches the room), so it cannot be used to find the answer. */
+  function touchFx(pt) { var c = G.me.c, c0 = c.center(tmp), P = G.paint; c.jig = Math.max(c.jig || 0, 0.7);
+    for (var i = 0; i < 4; i++) { var nx = pt.x - c0.x, ny = pt.y - c0.y, nz = pt.z - c0.z, nl = Math.hypot(nx, ny, nz) || 1, k = 0.6 + rnd() * 0.6;
+      G.fx.spray(pt, tmp2.set(nx / nl * k + (rnd() - 0.5) * 0.9, ny / nl * k + 0.9 + rnd() * 0.6, nz / nl * k + (rnd() - 0.5) * 0.9), P.rgb, P.size * (0.04 + rnd() * 0.05)); } }
+  var MILES = [[25, '不錯！'], [50, '漂亮！'], [75, '超讚！'], [90, '快好了！'], [98, '全身完成！']];
+  function milestone(pct) { var painted = 100 - pct, L = 0; for (var i = 0; i < MILES.length; i++) if (painted >= MILES[i][0]) L = i + 1;
+    if (L <= (G.mile || 0)) return; G.mile = L; var me = G.me, c = me.c, c0 = c.center(tmp).clone(), P = G.paint, n = [8, 11, 15, 20, 36][L - 1], sp = L >= 5 ? 2.2 : 1.4;
+    c.squash = L >= 5 ? 1 : 0.55 + L * 0.08; c.jig = 1;
+    for (var j = 0; j < n; j++) { var a = rnd() * Math.PI * 2, u = 0.4 + rnd() * 0.8; G.fx.spray(c0, tmp2.set(Math.cos(a) * u * sp, (1.2 + rnd() * 1.4) * (L >= 5 ? 1.4 : 1), Math.sin(a) * u * sp), j % 3 === 2 && L >= 5 ? [255, 236, 150] : P.rgb, 0.012 + rnd() * 0.016 + L * 0.002); }
+    bus.emit('praise', { level: L, word: MILES[L - 1][1], painted: Math.min(100, Math.round(painted)) }); }
   function paintAt(x, y, first) {
     var P = G.paint, t0 = performance.now(), n0 = SP.n;
     if (P.pattern) return paintPattern(x, y, first);
@@ -776,7 +790,7 @@
       SP.pts = [[x, y]]; SP.last = null; SP.acc = 0; SP.n = 0; SP.dist = 0; SP.touched = false; SP.tPrev = t0; SP.drop = 0;
       var h0 = brushHit(x, y);
       if (h0 && h0.blocked) bus.emit('blocked');
-      else if (h0) { SP.last = h0.point.clone(); dabAt(h0.point); SP.touched = true; bus.emit('touch', { size: P.size }); bus.emit('stroke', { size: P.size, speed: 0 }); }
+      else if (h0) { SP.last = h0.point.clone(); dabAt(h0.point); SP.touched = true; touchFx(h0.point); bus.emit('touch', { size: P.size }); bus.emit('stroke', { size: P.size, speed: 0 }); }
     } else {
       var pts = SP.pts, a = pts[pts.length - 1]; if (Math.abs(x - a[0]) + Math.abs(y - a[1]) < 0.5) return true;
       var d0 = SP.dist, done = false;
@@ -790,7 +804,7 @@
       if (!done) strokeSeg(a[0], a[1], x, y);
       pts.push([x, y]); if (pts.length > 4) pts.shift();
       var dtS = Math.max(0.004, (t0 - SP.tPrev) / 1000), speed = (SP.dist - d0) / dtS; SP.tPrev = t0; SP.speed = speed;
-      if (SP.last) bus.emit('stroke', { size: P.size, speed: speed });
+      if (SP.last) { bus.emit('stroke', { size: P.size, speed: speed }); G.me.c.jig = Math.max(G.me.c.jig || 0, Math.min(0.55, speed * 0.25)); }
       // droplets fly off a fast stroke
       if (SP.last && speed > 1.1) { SP.drop += (SP.dist - d0); while (SP.drop > 0.07) { SP.drop -= 0.07; var c0 = G.me.c.center(tmp), nx = SP.last.x - c0.x, ny = SP.last.y - c0.y, nz = SP.last.z - c0.z, nl = Math.hypot(nx, ny, nz) || 1, k = 0.5 + rnd() * 0.7;
           G.fx.spray(SP.last, tmp2.set(nx / nl * k + (rnd() - 0.5) * 0.6, ny / nl * k + 0.7 + rnd() * 0.5, nz / nl * k + (rnd() - 0.5) * 0.6), P.rgb, P.size * (0.05 + rnd() * 0.06)); } }
@@ -801,7 +815,7 @@
   }
   G.undo = function () { var c = G.me.c; if (c._fx && c._fx.fillJob) G.fx.finishFill(c); var s = G.paint.undo.pop(); if (s) { c.undoStroke(s); if (c._fx) G.fx.reflag(c, s.parts); bus.emit('undo', { left: G.paint.undo.length }); } return !!s; };
   /* fill: the colour wipes down over the body (or over one body part: double-click it) */
-  G.fillAll = function (parts) { var c = G.me.c; if (G.stroking) { G.stroking = false; pushUndo(c.endStroke()); } if (c._fx && c._fx.fillJob) G.fx.finishFill(c); c.beginStroke(); bus.emit('fill', { part: !!parts });
+  G.fillAll = function (parts) { var c = G.me.c; if (G.stroking) { G.stroking = false; pushUndo(c.endStroke()); } if (c._fx && c._fx.fillJob) G.fx.finishFill(c); c.beginStroke(); bus.emit('fill', { part: !!parts }); c.squash = Math.max(c.squash || 0, 0.7); c.jig = 1; var fc = c.center(tmp).clone(); for (var fi = 0; fi < (parts ? 6 : 12); fi++) { var fa = rnd() * Math.PI * 2; G.fx.spray(fc, tmp2.set(Math.cos(fa) * 1.1, 1.6 + rnd() * 1.2, Math.sin(fa) * 1.1), G.paint.rgb, 0.014 + rnd() * 0.014); }
     G.fx.fill(c, G.paint.rgb.slice(), G.paint.rough, G.paint.metal, parts || null, parts ? 0.28 : 0.45, function () { pushUndo(c.endStroke()); bus.emit('strokeEnd', { undo: G.paint.undo.length }); }); if (G.guide === 4) setGuide(5); };
   G.fillPartAt = function (x, y) { var c = G.me.c, hit = brushHit(x, y); if (!hit || hit.blocked) return false; var pi = -1; c.parts.forEach(function (p, i) { if (p === hit.part || (p.mesh === hit.object && !hit.part)) pi = i; }); if (pi < 0) return false; var ps = {}; ps[pi] = true; G.fillAll(ps); return true; };
   function pushUndo(s) { if (!s) return; G.paint.undo.push(s); if (G.paint.undo.length > RULES.paint.undoSteps) G.paint.undo.shift(); }
@@ -1036,7 +1050,7 @@
     else if (!G.orbiting && !G.zooming) { var hit = brushHit(G.mouse.x, G.mouse.y); if (hit && !hit.blocked) { cu.on = true; cu.pos.copy(hit.point); } }
     cu.c = me.c; cu.cam = camera; cu.r = P.size; cu.hard = P.hard ? RULES.paint.hardnessHard : RULES.paint.hardnessSoft; cu.rgb = P.rgb; cu.dot = !(G.keys[' '] || P.tool === 'pick');
     if (cu.on !== !!G.cur3d) { G.cur3d = cu.on; bus.emit('cursor3d', { on: cu.on }); }
-    G.wlT = (G.wlT || 0) - dt; if (G.wlT <= 0) { G.wlT = 0.1; var pct = fx.whiteLeft(me.c, sideBlocked); if (pct !== G.whiteLeft) { G.whiteLeft = pct; bus.emit('whiteLeft', { pct: pct }); } }
+    G.wlT = (G.wlT || 0) - dt; if (G.wlT <= 0) { G.wlT = 0.1; var pct = fx.whiteLeft(me.c, sideBlocked); if (pct !== G.whiteLeft) { G.whiteLeft = pct; bus.emit('whiteLeft', { pct: pct }); milestone(pct); } }
   }
   /* forced meow, suspicion meter, buried-too-deep warning, torch */
   var torch = null;
@@ -1064,7 +1078,7 @@
     // a cat pushed too far into an object gets a warning, then is exposed (GDD round-flow, edge cases)
     if (me && me.team === 'cat' && !me.out && st.phase !== 'reveal') {
       G.embedC = (G.embedC || 0) - dt;
-      if (G.embedC <= 0) { G.embedC = 0.12; var was = me.embed; me.embedR = embedRatio(me); me.embed = me.embedR > (RULES.cat.embedMax || 1 / 3); if (me.embed && !was) { if (!me.exposed) me.c.glow.value.setRGB(0.9, 0.08, 0.04); bus.emit('embed', { state: 'warn' }); } if (!me.embed && was) { me.exposed = false; me.c.glow.value.setRGB(0, 0, 0); bus.emit('embed', { state: 'ok' }); } } // owner 2026-11-26: more than a third in -> red at once
+      if (G.embedC <= 0) { G.embedC = 0.12; var was = me.embed; me.embedR = embedRatio(me); if (me.embedR > (RULES.cat.embedMax || 1 / 3) * 0.8 && !me.out && depenetrate(me)) me.embedR = embedRatio(me); me.embed = me.embedR > (RULES.cat.embedMax || 1 / 3); if (me.embed && !was) { if (!me.exposed) me.c.glow.value.setRGB(0.9, 0.08, 0.04); bus.emit('embed', { state: 'warn' }); } if (!me.embed && was) { me.exposed = false; me.c.glow.value.setRGB(0, 0, 0); bus.emit('embed', { state: 'ok' }); } } // owner 2026-11-26: more than a third in -> red at once
       if (me.embed) { G.embedT += dt; if (G.embedT > RULES.cat.embedSec && !me.exposed) { me.exposed = true; me.c.glow.value.setRGB(0.9, 0.45, 0.05); bus.emit('embed', { state: 'exposed' }); } } else G.embedT = 0;
     }
     // torch for the leading dog at night
@@ -1092,6 +1106,15 @@
     return best;
   }
   G.embedRatio = embedRatio;
+  /* owner 2026-11-26: a pose (or anything else) that leaves the body sunk into a wall or object pushes the body out to the nearest
+     place where it fits, instead of leaving it there. Only when nothing within half a metre fits does the red warning stay. */
+  function depenetrate(e) { var lim = (RULES.cat.embedMax || 1 / 3) * 0.55, n = e.cling && e.cling.n, D = [];
+    for (var a = 0; a < 8; a++) { var ang = a * Math.PI / 4, x = Math.cos(ang), z = Math.sin(ang), y = 0;
+      if (n) { var dn = x * n[0] + z * n[2]; x -= n[0] * dn; z -= n[2] * dn; if (n[1] !== 0) { y = 0; } else { y = Math.sin(ang); x = Math.cos(ang) * -n[2]; z = Math.cos(ang) * n[0]; } } // on a surface: slide along it only
+      var l = Math.hypot(x, y, z); if (l > 1e-3) D.push([x / l, y / l, z / l]); }
+    if (!n) D.push([0, 1, 0]);
+    for (var d = 0.04; d <= 0.5; d += 0.04) for (var i = 0; i < D.length; i++) { var o = D[i]; if (embedRatio(e, o[0] * d, o[1] * d, o[2] * d) <= lim && !solidAt(e.x + o[0] * d, e.y + o[1] * d + 0.05, e.z + o[2] * d)) { e.x += o[0] * d; e.y += o[1] * d; e.z += o[2] * d; place(e); return true; } }
+    return false; }
   /* would moving the body by (dx, dy, dz) push it deeper than allowed? (moving out, or moving while already that deep but not deeper, is fine) */
   function tooDeep(e, dx, dy, dz) { var lim = (RULES.cat.embedMax || 1 / 3) * 0.8, /* stop a little short of the line so the limbs settling into a pose do not tip it over */ r1 = embedRatio(e, dx, dy, dz); if (r1 <= lim) return false; return r1 > embedRatio(e, 0, 0, 0) + 0.005; }
   function embedDepth(e) { // how deep the body centre sits inside any solid
@@ -1219,6 +1242,13 @@
     if (!(dt > 0)) return cur; var om = 2 / smoothTime, x = om * dt, ex = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x), ch = cur - target, mc = maxSpeed * smoothTime; if (ch > mc) ch = mc; else if (ch < -mc) ch = -mc;
     var t2 = cur - ch, tmpv = (vel.v + om * ch) * dt; vel.v = (vel.v - om * tmpv) * ex; var out = t2 + (ch + tmpv) * ex; if ((target - cur > 0) === (out > target)) { out = target; vel.v = 0; } return out;
   }
+  /* owner 2026-11-26: the camera went into walls. The boom now stops at any solid (walls, ceilings, furniture), and it is a thick boom:
+     five rays (centre and four around it, 0.14 m out) so the lens edge does not slip into a wall it grazes. Returns the free share 0..1. */
+  function camBoom(ax, ay, az, dx, dy, dz) { var L = Math.hypot(dx, dy, dz) || 1, ux = dx / L, uy = dy / L, uz = dz / L, sx = -uz, sz = ux, sl = Math.hypot(sx, sz) || 1, r = 0.14, best = 1;
+    sx /= sl; sz /= sl; var vx = uy * sz, vy = uz * sx - ux * sz, vz = -uy * sx; // side and up vectors across the boom
+    var O = [[0, 0, 0], [sx * r, 0, sz * r], [-sx * r, 0, -sz * r], [vx * r, vy * r, vz * r], [-vx * r, -vy * r, -vz * r]];
+    for (var i = 0; i < O.length; i++) { var t = room.segSolid(ax + O[i][0] * 0.3, ay + O[i][1] * 0.3, az + O[i][2] * 0.3, ax + dx + O[i][0], ay + dy + O[i][1], az + dz + O[i][2]); if (t < best) best = t; }
+    return Math.max(0, best - 0.12 / L); }
   function updateCamera(dt) {
     var me = G.me, cm = G.cam;
     if (G.mode === 'title') {
@@ -1240,7 +1270,7 @@
         var cn = me.cling.n, dn = ox * cn[0] + oy * cn[1] + oz * cn[2], need = dist * 0.3; ty = ctr.y + cn[1] * 0.14; ctr.x += cn[0] * 0.14; ctr.z += cn[2] * 0.14;
         if (dn < need) { ox += cn[0] * (need - dn); oy += cn[1] * (need - dn); oz += cn[2] * (need - dn); } }
       var thru = G.paint.on && G.seeThrough !== false; // camera pass-through: in paint mode the camera goes through things and whatever is between it and you is cut away
-      var tw = thru ? 1 : room.segWalls(ctr.x, ty, ctr.z, ctr.x + ox * 1.12, ty + oy * 1.12, ctr.z + oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
+      var tw = thru ? 1 : camBoom(ctr.x, ty, ctr.z, ox * 1.12, oy * 1.12, oz * 1.12), kk = Math.max(0.12, Math.min(1, tw * 1.12 - 0.1 / dist));
       // the boom length follows a damped spring with a speed limit (never a jump); while the camera is still on its way in, whatever stands between
       // it and the body is cut away with the near plane instead, so the view is never blocked and the picture never jolts
       cm.kv = cm.kv || { v: 0 }; cm.kk = cm.kk == null ? kk : smoothDamp(cm.kk, kk, cm.kv, kk < cm.kk ? 0.16 : 0.5, 2.6 / Math.max(0.5, dist), dt); var lagK = Math.max(0, cm.kk - kk); kk = cm.kk;
@@ -1254,7 +1284,7 @@
       var dx = Math.sin(me.yaw) * Math.cos(me.pitch), dy = Math.sin(me.pitch), dz = Math.cos(me.yaw) * Math.cos(me.pitch);
       camera.fov = G.opts.fov;
       if (fp) { var bob = me.speed > 0.2 ? Math.sin(G.simT * 11) * 0.006 : 0, ef = me.eyeF != null ? me.eyeF + (me.eyeFHi - me.eyeF) * me.rear : 0.12; camera.near = 0.03; camera.position.set(me.x + Math.sin(me.yaw) * ef, me.y + eh + bob, me.z + Math.cos(me.yaw) * ef); camera.lookAt(camera.position.x + dx, camera.position.y + dy, camera.position.z + dz); }
-      else { var t3w = Math.max(0.15, room.segWalls(me.x, me.y + eh, me.z, me.x - dx * 1.7, me.y + eh + 0.75 - dy * 1.1, me.z - dz * 1.7) - 0.06); cm.t3v = cm.t3v || { v: 0 }; cm.t3 = cm.t3 == null ? t3w : smoothDamp(cm.t3, t3w, cm.t3v, t3w < cm.t3 ? 0.16 : 0.5, 1.6, dt); var t3 = cm.t3; camera.near = cm.t3 - t3w > 0.004 ? Math.min(1.2 * t3, (cm.t3 - t3w) * 1.9 + 0.14) : 0.03; camera.position.set(me.x - dx * 1.5 * t3, me.y + eh + (0.7 - dy * 1.0) * t3, me.z - dz * 1.5 * t3); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
+      else { var t3w = Math.max(0.15, camBoom(me.x, me.y + eh, me.z, -dx * 1.7, 0.75 - dy * 1.1, -dz * 1.7) - 0.06); cm.t3v = cm.t3v || { v: 0 }; cm.t3 = cm.t3 == null ? t3w : smoothDamp(cm.t3, t3w, cm.t3v, t3w < cm.t3 ? 0.16 : 0.5, 1.6, dt); var t3 = cm.t3; camera.near = cm.t3 - t3w > 0.004 ? Math.min(1.2 * t3, (cm.t3 - t3w) * 1.9 + 0.14) : 0.03; camera.position.set(me.x - dx * 1.5 * t3, me.y + eh + (0.7 - dy * 1.0) * t3, me.z - dz * 1.5 * t3); camera.lookAt(me.x + dx, me.y + eh + dy, me.z + dz); }
       if (G.vm) { // idle sway, walk bob, recoil kick, pump stroke during the reload interval
         G.recoil = Math.max(0, G.recoil - dt * 3.0); G.punch = Math.max(0, (G.punch || 0) - dt * 5.5); camera.rotateX(G.punch * G.punch * 0.045); camera.fov = G.opts.fov + G.punch * 2.5; /* the shot punches the view up and out */ var rc = G.recoil * G.recoil, since = G.simT - G.state.players.you.lastShot, pu = since > 0.35 && since < 1.05 ? Math.sin((since - 0.35) / 0.7 * Math.PI) : 0, mv = me.speed > 0.2 ? 1 : 0;
         G.vm.position.set(0.2 + Math.sin(G.time * 1.3) * 0.004 + Math.sin(G.simT * 5.5) * 0.007 * mv, -0.21 + Math.sin(G.time * 1.9) * 0.004 - Math.abs(Math.sin(G.simT * 5.5)) * 0.012 * mv + pu * 0.012, -0.4 + rc * 0.2);

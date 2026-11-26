@@ -42,9 +42,9 @@
     this.R = renderer; this.scene = scene; this.t = 0; this.stats = { dabs: 0, dabMs: 0, dabMax: 0, flushMs: 0, flushMax: 0, texels: 0, sub: 0, full: 0 };
     this.cur = { on: false, pos: new THREE.Vector3(), r: 0.06, hard: 0.85, rgb: [0, 0, 0] }; this.hi = 0;
     // droplets: one instanced draw call, only visible while some are alive
-    var dm = this.drops = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 7, 5), new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0 }), 40);
+    var dm = this.drops = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 7, 5), new THREE.MeshStandardMaterial({ roughness: 0.12, metalness: 0 }), 64);
     dm.instanceMatrix.setUsage(THREE.DynamicDrawUsage); dm.count = 0; dm.visible = false; dm.frustumCulled = false; dm.castShadow = false; dm.layers.set(1); scene.add(dm);
-    this.dl = []; for (var i = 0; i < 40; i++) { this.dl.push({ t: 0, p: new THREE.Vector3(), v: new THREE.Vector3(), s: 0 }); dm.setColorAt(i, new THREE.Color(1, 1, 1)); }
+    this.dl = []; for (var i = 0; i < 64; i++) { this.dl.push({ t: 0, p: new THREE.Vector3(), v: new THREE.Vector3(), s: 0 }); dm.setColorAt(i, new THREE.Color(1, 1, 1)); }
     this.rt = new THREE.WebGLRenderTarget(40, 40, { type: THREE.UnsignedByteType, depthBuffer: true }); this.px = new Uint8Array(40 * 40 * 4);
     this.wcam = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0.01, 6);
     this.wmat = new THREE.ShaderMaterial({ uniforms: { map: { value: null }, uWet: { value: null } },
@@ -101,7 +101,7 @@
   P.reflag = function (c, parts, keep) {
     var fx = c._fx, A = c.A, alb = c.alb, w = fx.wet; if (!fx.fast) return;
     for (var pi = 0; pi < c.parts.length; pi++) { if (parts && !parts[pi]) continue; var p = c.parts[pi];
-      for (var j = 0; j < p.th; j++) for (var o = ((p.ry + j) * A + p.rx) * 4, e = o + p.tw * 4; o < e; o += 4) { var wh = alb[o] === 255 && alb[o + 1] === 255 && alb[o + 2] === 255; if (!wh) w[o + 2] = 255; else if (!keep) w[o + 2] = 0; } }
+      for (var j = 0; j < p.th; j++) for (var o = ((p.ry + j) * A + p.rx) * 4, e = o + p.tw * 4; o < e; o += 4) { var r0 = alb[o], g0 = alb[o + 1], b0 = alb[o + 2], wh = r0 >= 240 && g0 >= 240 && b0 >= 236 && Math.max(r0, g0, b0) - Math.min(r0, g0, b0) <= 10; /* the jelly blank coat is an off-white (246,245,241), not pure white */ if (!wh) w[o + 2] = 255; else if (!keep) w[o + 2] = 0; } }
     if (fx.tex) fx.tex.needsUpdate = true;
   };
   P.tick = function () { return 1 + (Math.floor(this.t * TICK) % WRAP); };
@@ -205,7 +205,7 @@
   /* droplets flung off a fast stroke */
   P.spray = function (pos, vel, rgb, size) {
     var d = null; for (var i = 0; i < this.dl.length; i++) if (this.dl[i].t <= 0) { d = this.dl[i]; this.drops.setColorAt(i, new THREE.Color().setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, THREE.SRGBColorSpace)); break; }
-    if (!d) return; d.t = 0.55; d.p.copy(pos); d.v.copy(vel); d.s = size; this.drops.instanceColor.needsUpdate = true;
+    if (!d) return; d.t = 0.55 + Math.min(0.35, vel.y * 0.08); d.p.copy(pos); d.v.copy(vel); d.s = size; this.drops.instanceColor.needsUpdate = true;
   };
   P.update = function (dt, c) {
     this.t += dt;

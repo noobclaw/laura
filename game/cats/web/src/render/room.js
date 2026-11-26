@@ -679,10 +679,10 @@
       return false;
     }
     /* first wall between two points (third-person camera): returns 0..1 along a->b */
-    function segWalls(ax, ay, az, bx, by, bz) {
+    function segWalls(ax, ay, az, bx, by, bz, all) { // all: every solid (walls, ceilings, furniture) except slivers, for the camera boom
       var best = 1, dx = bx - ax, dy = by - ay, dz = bz - az;
       for (var i = 0; i < platforms.length; i++) {
-        var p = platforms[i]; if (!p.wall) continue;
+        var p = platforms[i]; if (all ? (p.x1 - p.x0 < 0.05 || p.z1 - p.z0 < 0.05 || p.y1 - p.y0 < 0.03 || (ax > p.x0 && ax < p.x1 && ay > p.y0 && ay < p.y1 && az > p.z0 && az < p.z1)) : !p.wall) continue;
         var t0 = 0, t1 = best, lo, hi, a, d, k, t;
         for (k = 0; k < 3; k++) {
           a = k === 0 ? ax : k === 1 ? ay : az; d = k === 0 ? dx : k === 1 ? dy : dz; lo = k === 0 ? p.x0 : k === 1 ? p.y0 : p.z0; hi = k === 0 ? p.x1 : k === 1 ? p.y1 : p.z1;
@@ -849,6 +849,7 @@
     ret.groundAt = function (x, z, y, rad) { return groundAt(x / WS, z / WS, y / WS, (rad || 0) / WS) * WS; };
     ret.blocked = function (x, z, y, rad, step, h) { return blocked(x / WS, z / WS, y / WS, rad / WS, step / WS, h / WS); };
     ret.segWalls = function (a, b, c, d, e, f) { return segWalls(a / WS, b / WS, c / WS, d / WS, e / WS, f / WS); };
+    ret.segSolid = function (a, b, c, d, e, f) { return segWalls(a / WS, b / WS, c / WS, d / WS, e / WS, f / WS, true); };
     ret.base = function (x, z) { return base(x / WS, z / WS) * WS; };
     ret.stepProps = function (dt, bumpers, onBump) { return stepProps(dt, bumpers.map(function (b) { return { x: b.x / WS, y: b.y / WS, z: b.z / WS, r: b.r / WS, speed: b.speed }; }), onBump && function (k, landed) { onBump({ type: k.type, x: k.x * WS, z: k.z * WS, shot: k.shot }, landed); }); };
     ret.stepTriggers = function (dt, bodies) { return stepTriggers(dt, bodies.map(function (e) { return { x: e.x / WS, y: e.y / WS, z: e.z / WS, speed: e.speed }; })); };

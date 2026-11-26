@@ -264,3 +264,18 @@ svg.ic { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.14em; }
 .pw2 .tailb { top: 44px !important; left: -52px; } .pw2 .earb { top: 44px !important; left: 52px; }
 .pw2 .hub { width: 150px; height: 150px; border-radius: 50%; background: rgba(40, 24, 12, 0.86); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 0 2px rgba(255, 243, 214, 0.35); }
 .pw2 .tailb { top: 80px !important; } .pw2 .earb { top: 80px !important; }
+
+/* paint feel (2026-11-26): the coverage word pops in, grows with each quarter, and floats away */
+.praise { position: absolute; left: 50%; top: 20%; transform: translate(-50%, 0) scale(0.4); opacity: 0; pointer-events: none; text-align: center; z-index: 40; font-weight: 900; color: #fff8ea; text-shadow: 0 3px 0 #b86a2a, 0 6px 14px rgba(80, 40, 10, 0.45); }
+.praise b { display: block; font-size: 34px; letter-spacing: 0.08em; }
+.praise small { display: block; font-size: 14px; letter-spacing: 0.15em; opacity: 0.85; margin-top: 2px; }
+.praise.on { animation: praisePop 1.4s cubic-bezier(.2, .9, .3, 1.35) forwards; }
+.praise.lv2 b { font-size: 38px; } .praise.lv3 b { font-size: 44px; color: #fff1c9; } .praise.lv4 b { font-size: 48px; color: #ffe7a6; }
+.praise.lv5 b { font-size: 60px; color: #ffe08a; text-shadow: 0 3px 0 #c2521e, 0 0 22px rgba(255, 200, 90, 0.8), 0 8px 18px rgba(80, 40, 10, 0.5); }
+.praise.lv5.on { animation-duration: 2.2s; }
+@keyframes praisePop { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.4); } 14% { opacity: 1; transform: translate(-50%, 0) scale(1.18); } 26% { transform: translate(-50%, 0) scale(0.96); } 36% { transform: translate(-50%, 0) scale(1); } 78% { opacity: 1; transform: translate(-50%, -6px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -26px) scale(1); } }
+.wl.bump i u { animation: wlBump 0.35s ease-out; }
+@keyframes wlBump { 0% { filter: brightness(1.6); } 100% { filter: brightness(1); } }
+.wl.bump span { animation: wlNum 0.3s cubic-bezier(.2, .9, .3, 1.5); display: inline-block; }
+@keyframes wlNum { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .praise.on { animation: none; opacity: 1; transform: translate(-50%, 0); } .wl.bump i u, .wl.bump span { animation: none; } }
