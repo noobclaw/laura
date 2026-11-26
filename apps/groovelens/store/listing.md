@@ -66,7 +66,7 @@ Automatic transcription can miss or mislabel hits on dense mixes; the chart edit
 - **Beschreibung**：Wirf einen Song rein und spiel seine Drums. Groovelens trennt auf dem iPhone die Drums vom Mix, findet den Beat, schreibt lesbare Noten und macht daraus ein Rhythmusspiel – auf dem Bildschirm oder an deinem echten Kit. Alles läuft auf dem Gerät, kein Upload, kein Konto. Pro ist ein Einmalkauf, kein Abo.
 
 ## Français
-- **Nom**：Groovelens : partition batterie
+- **Nom**：Groovelens: partition batterie
 - **Sous-titre**：Tes morceaux en jeu de rythme
 - **Mots-clés**：batterie,partition,transcription,métronome,jeu de rythme,MIDI,break,pratique,groove
 - **Description**：Choisis un morceau et joue sa batterie. Groovelens isole la batterie sur ton iPhone, trouve la pulsation, écrit une partition lisible et la transforme en jeu de rythme, à l’écran ou sur ta vraie batterie. Tout reste sur l’appareil, sans envoi ni compte. Pro s’achète une fois, sans abonnement.
