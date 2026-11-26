@@ -115,7 +115,8 @@ final class Formula {
 
     var sortedLines: [FormulaLine] { lines.sorted { $0.order < $1.order } }
 
-    var totalGrams: Double { lines.reduce(0) { $0 + max($1.grams, 0) } }
+    /// Lines whose material or base was deleted are ignored everywhere (they show as "Missing material").
+    var totalGrams: Double { lines.filter(\.isResolved).reduce(0) { $0 + max($1.grams, 0) } }
 
     func touch() { updatedAt = Date() }
 
@@ -176,6 +177,8 @@ final class FormulaLine {
         get { LineFlag(rawValue: flagRaw) ?? .none }
         set { flagRaw = newValue.rawValue }
     }
+
+    var isResolved: Bool { material != nil || base != nil }
 
     var displayName: String {
         material?.name ?? base?.name ?? String(localized: "Missing material", bundle: .l10n)

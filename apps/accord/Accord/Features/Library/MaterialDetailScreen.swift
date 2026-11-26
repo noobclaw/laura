@@ -10,7 +10,7 @@ struct MaterialDetailScreen: View {
     @Environment(AppState.self) private var state
     @Environment(ProStore.self) private var store
     @State private var confirmDelete = false
-    @State private var trackDates = false
+    @State private var pendingDelete = false
     @FocusState private var nameFocused: Bool
 
     var body: some View {
@@ -123,19 +123,25 @@ struct MaterialDetailScreen: View {
             .listRowBackground(Theme.card)
         }
         .scrollContentBackground(.hidden)
+        .keyboardDoneButton()
         .background(PaperBackground())
         .navigationTitle(Text(verbatim: material.name))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
         .onAppear { if isNew { nameFocused = true } }
         .onDisappear {
+            // Delete only after the screen is gone, so nothing renders a deleted model.
+            if pendingDelete {
+                context.delete(material)
+                try? context.save()
+                return
+            }
             if material.name.trimmingCharacters(in: .whitespaces).isEmpty { material.name = String(localized: "Unnamed material", bundle: .l10n) }
             try? context.save()
         }
         .confirmationDialog(Text("Delete “\(material.name)”?"), isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete material", role: .destructive) {
-                context.delete(material)
-                try? context.save()
+                pendingDelete = true
                 dismiss()
             }
         } message: {

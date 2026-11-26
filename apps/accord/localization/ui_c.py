@@ -194,4 +194,7 @@ T = {
 "share": [S]*9,
 "v%lld": [S]*9,
 "–": [S]*9,
+"Wax, soap or carrier base": ["蠟、皂基或基底油", "蜡、皂基或基底油", "ワックス・石けん素地・キャリア", "왁스, 비누 베이스 또는 캐리어", "Wachs, Seifen- oder Trägerbasis", "Cire, base savon ou support", "Cera, base de jabón o portador", "Cera, base de sabonete ou veículo", "Cera, base sapone o supporto"],
+"Container size": ["容器容量", "容器容量", "容器の容量", "용기 용량", "Behältergröße", "Taille du contenant", "Tamaño del envase", "Tamanho do recipiente", "Capacità del contenitore"],
+"%lld formulas use it as a base; those lines will show “Missing material”.": ["有 %lld 個配方把它當基底；那些行會顯示「缺少原料」。", "有 %lld 个配方把它当基底；那些行会显示“缺少原料”。", "%lld 件の処方がベースとして使っています。その行は「原料がありません」と表示されます。", "%lld개 처방이 베이스로 사용 중입니다. 해당 줄은 '원료 없음'으로 표시됩니다.", "%lld Rezepte nutzen es als Basis; diese Zeilen zeigen dann „Fehlender Rohstoff“.", "%lld formules l’utilisent comme base ; ces lignes afficheront « Matière manquante ».", "%lld fórmulas lo usan como base; esas líneas mostrarán «Material que falta».", "%lld fórmulas usam isto como base; essas linhas mostrarão “Material ausente”.", "%lld formule la usano come base; quelle righe mostreranno «Materiale mancante»."],
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SwiftData
 import LocalAuthentication
 
@@ -107,7 +108,29 @@ final class AppLock {
         isLocked = on
     }
 
-    func lockIfNeeded() { if isEnabled { isLocked = true } }
+    @ObservationIgnored private var window: UIWindow?
+
+    func lockIfNeeded() {
+        guard isEnabled else { return }
+        isLocked = true
+        showWindow()
+    }
+
+    /// A separate window above everything, so open sheets are covered too.
+    func showWindow() {
+        guard isLocked, window == nil,
+              let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else { return }
+        let w = UIWindow(windowScene: scene)
+        w.windowLevel = .alert + 1
+        w.rootViewController = UIHostingController(rootView: LockScreen().environment(self))
+        w.makeKeyAndVisible()
+        window = w
+    }
+
+    private func hideWindow() {
+        window?.isHidden = true
+        window = nil
+    }
 
     func unlock() {
         let context = LAContext()
@@ -115,11 +138,12 @@ final class AppLock {
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
             // No passcode on the device: a lock cannot be enforced, so don't trap the user's data.
             isLocked = false
+            hideWindow()
             return
         }
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: String(localized: "Unlock your formula book", bundle: .l10n)) { ok, err in
             Task { @MainActor in
-                if ok { self.isLocked = false; self.failure = nil } else { self.failure = err?.localizedDescription }
+                if ok { self.isLocked = false; self.failure = nil; self.hideWindow() } else { self.failure = err?.localizedDescription }
             }
         }
     }

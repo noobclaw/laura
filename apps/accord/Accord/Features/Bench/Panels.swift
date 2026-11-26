@@ -97,7 +97,7 @@ struct AnalysisPanel: View {
     private func bottleCost(_ batchCost: Double, ml: Double) -> Double {
         let plan = ScalePlan.make(FormulaActions.scaleInput(formula),
                                   mode: .bottle(ml: ml, concentration: formula.concentration, waterShare: 0))
-        let alcoholPerKg = UserDefaults.standard.double(forKey: "accord.alcoholPerKg")
+        let alcoholPerKg = formula.product.isAlcoholic ? UserDefaults.standard.double(forKey: "accord.alcoholPerKg") : 0
         return batchCost * plan.factor + plan.ethanolGrams / 1000 * alcoholPerKg
     }
 }

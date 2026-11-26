@@ -115,8 +115,10 @@ enum CSVImport {
             return nil
         }
         func dilution(_ s: String?) -> Double? {
-            guard let v = number(s), v > 0 else { return nil }
-            return v > 1 ? min(v / 100, 1) : v
+            guard let s, let v = number(s), v > 0 else { return nil }
+            // "10%", "1 %", "0.5%" are percentages; bare numbers above 1 are too ("10"); bare 0…1 is a fraction.
+            if s.contains("%") || v > 1 { return min(v / 100, 1) }
+            return v
         }
 
         let kind = detect(header)

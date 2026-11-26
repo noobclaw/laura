@@ -109,7 +109,13 @@ struct ShelfScreen: View {
                 }
                 toDelete = nil
             }
-        } message: { Text("Batches you already made keep their records.") }
+        } message: {
+            if let f = toDelete, !f.usedAsBaseIn.isEmpty {
+                Text("\(Set(f.usedAsBaseIn.compactMap { $0.formula?.id }).count) formulas use it as a base; those lines will show “Missing material”.")
+            } else {
+                Text("Batches you already made keep their records.")
+            }
+        }
     }
 
     private func startNew() {

@@ -98,6 +98,7 @@ struct SettingsScreen: View {
                 .listRowBackground(Theme.card)
             }
             .scrollContentBackground(.hidden)
+            .keyboardDoneButton()
             .background(PaperBackground())
             .navigationTitle(Text("Settings"))
             .navigationBarTitleDisplayMode(.inline)
@@ -106,6 +107,9 @@ struct SettingsScreen: View {
             .sheet(item: $proReason) { ProSheet(reason: $0) }
             .sheet(item: $share) { item in ActivityView(items: [item.url]).ignoresSafeArea() }
             .fileImporter(isPresented: $restoring, allowedContentTypes: [.json]) { result in restore(result) }
+            .onChange(of: store.message) { _, new in
+                if let new, proReason == nil { message = new; store.message = nil }
+            }
             .alert(Text(verbatim: message ?? ""), isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
                 Button("OK", role: .cancel) {}
             }

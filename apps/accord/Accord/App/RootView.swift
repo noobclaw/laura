@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SwiftData
 
 struct RootView: View {
@@ -8,6 +9,7 @@ struct RootView: View {
     @Environment(AppState.self) private var state
     @Environment(AppLock.self) private var lock
     @State private var showStoreError = false
+    @State private var keyboardShown = false
 
     var body: some View {
         @Bindable var state = state
@@ -26,18 +28,21 @@ struct RootView: View {
                 // Paper behind the status bar so scrolled content doesn't run under the clock.
                 Theme.paper.ignoresSafeArea(edges: .top).frame(height: 0)
             }
-            TabBar()
+            // Hidden while typing so it doesn't ride up on the keyboard.
+            if !keyboardShown { TabBar() }
         }
         .background(PaperBackground())
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardShown = true }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardShown = false }
         .sheet(item: $state.proReason) { reason in ProSheet(reason: reason) }
-        .overlay { if lock.isLocked { LockScreen().transition(.opacity) } }
         .onAppear {
             if let first = SampleData.seedIfNeeded(context), state.currentFormulaID == nil { state.currentFormulaID = first.id }
             if storeFailed { showStoreError = true }
-            if ProcessInfo.processInfo.arguments.contains("-UITour") { lock.isLocked = false }
+            if ProcessInfo.processInfo.arguments.contains("-UITour") { lock.isLocked = false } else { lock.showWindow() }
         }
         .onChange(of: phase) { _, new in
             if new == .background { lock.lockIfNeeded() }
+            if new == .active, lock.isLocked { lock.unlock() }
             if new == .background { try? context.save() }
         }
         .alert(Text("Your formula book couldn’t be opened"), isPresented: $showStoreError) {
@@ -101,6 +106,5 @@ struct LockScreen: View {
                     .padding(Theme.Space.l)
             }
         }
-        .onAppear { lock.unlock() }
     }
 }

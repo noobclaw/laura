@@ -1089,6 +1089,70 @@
         }
       }
     },
+    "%lld formulas use it as a base; those lines will show “Missing material”.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld formulas use it as a base; those lines will show “Missing material”."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個配方把它當基底；那些行會顯示「缺少原料」。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 个配方把它当基底；那些行会显示“缺少原料”。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 件の処方がベースとして使っています。その行は「原料がありません」と表示されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld개 처방이 베이스로 사용 중입니다. 해당 줄은 '원료 없음'으로 표시됩니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Rezepte nutzen es als Basis; diese Zeilen zeigen dann „Fehlender Rohstoff“."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld formules l’utilisent comme base ; ces lignes afficheront « Matière manquante »."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld fórmulas lo usan como base; esas líneas mostrarán «Material que falta»."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld fórmulas usam isto como base; essas linhas mostrarão “Material ausente”."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld formule la usano come base; quelle righe mostreranno «Materiale mancante»."
+          }
+        }
+      }
+    },
     "%lld formulas use it; those lines will show “Missing material”.": {
       "localizations": {
         "en": {
@@ -7869,6 +7933,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Solo concentrato"
+          }
+        }
+      }
+    },
+    "Container size": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container size"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器容量"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器容量"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器の容量"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "용기 용량"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behältergröße"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taille du contenant"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamaño del envase"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho do recipiente"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capacità del contenitore"
           }
         }
       }
@@ -27645,6 +27773,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chetone d’anguria"
+          }
+        }
+      }
+    },
+    "Wax, soap or carrier base": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wax, soap or carrier base"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蠟、皂基或基底油"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蜡、皂基或基底油"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワックス・石けん素地・キャリア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왁스, 비누 베이스 또는 캐리어"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachs, Seifen- oder Trägerbasis"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cire, base savon ou support"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cera, base de jabón o portador"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cera, base de sabonete ou veículo"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cera, base sapone o supporto"
           }
         }
       }

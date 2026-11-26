@@ -20,6 +20,8 @@ struct LineEditorSheet: View {
     @State private var note = ""
     @State private var customDilution = false
     @State private var loaded = false
+    @State private var loadedText = ""
+    @State private var loadedUnit: AmountUnit = .grams
     @State private var proReason: ProReason?
     @FocusState private var amountFocused: Bool
 
@@ -151,16 +153,20 @@ struct LineEditorSheet: View {
             if let line {
                 Section {
                     Button(role: .destructive) {
-                        context.delete(line)
-                        formula.touch()
-                        try? context.save()
                         dismiss()
+                        let ctx = context, f = formula
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                            ctx.delete(line)
+                            f.touch()
+                            try? ctx.save()
+                        }
                     } label: { Text("Remove from formula") }
                 }
                 .listRowBackground(Theme.card)
             }
         }
         .scrollContentBackground(.hidden)
+        .keyboardDoneButton()
     }
 
     private func equivalents(_ g: Double) -> String {
@@ -187,6 +193,8 @@ struct LineEditorSheet: View {
             flag = line.flag
             note = line.note
             amountText = display(line.grams, in: unit)
+            loadedText = amountText
+            loadedUnit = unit
             customDilution = ![1, 0.5, 0.1, 0.01, 0.001].contains { abs($0 - line.dilution) < 1e-9 }
         } else {
             unit = formula.lines.max { $0.order < $1.order }?.unit ?? .grams
@@ -204,7 +212,13 @@ struct LineEditorSheet: View {
     }
 
     private func convert(to new: AmountUnit) {
-        if let g = grams { amountText = display(g, in: new) }
+        if let line, amountText == loadedText, unit == loadedUnit {
+            amountText = display(line.grams, in: new)
+            loadedText = amountText
+            loadedUnit = new
+        } else if let g = grams {
+            amountText = display(g, in: new)
+        }
         unit = new
     }
 
@@ -227,8 +241,10 @@ struct LineEditorSheet: View {
     }
 
     private func save() {
-        guard let g = grams else { return }
+        guard var g = grams else { return }
         if let line {
+            // Re-deriving grams from a rounded display would drift; keep the stored value if the amount wasn't touched.
+            if amountText == loadedText && unit == loadedUnit { g = line.grams }
             line.grams = g
             line.unit = unit
             line.dilution = dilution

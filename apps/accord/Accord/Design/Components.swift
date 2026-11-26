@@ -220,6 +220,18 @@ struct Dot: View {
 }
 
 extension View {
+    /// Adds a "Done" button above the keyboard; decimal pads have no return key.
+    func keyboardDoneButton() -> some View {
+        toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            }
+        }
+    }
+
     /// Standard screen padding.
     func screenPadding() -> some View { padding(.horizontal, Theme.Space.m) }
 

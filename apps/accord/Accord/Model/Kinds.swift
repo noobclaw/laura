@@ -100,6 +100,12 @@ enum ProductType: String, CaseIterable, Codable, Identifiable, Sendable {
         }
     }
 
+    /// What fills the rest of the bottle/jar on the weighing sheet.
+    var diluentName: String {
+        isAlcoholic ? String(localized: "Perfumer’s alcohol", bundle: .l10n)
+                    : String(localized: "Wax, soap or carrier base", bundle: .l10n)
+    }
+
     /// Whether the balance of the product is perfumer's alcohol (so the weighing sheet adds ethanol).
     var isAlcoholic: Bool {
         switch self {

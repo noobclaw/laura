@@ -50,7 +50,8 @@ struct ScaleSheet: View {
 
                     switch mode {
                     case .bottle:
-                        stepperRow(title: "Bottle size", value: $ml, step: 5, range: 1...1000, unit: String(localized: "ml", bundle: .l10n))
+                        stepperRow(title: formula.product.isAlcoholic || formula.product == .concentrate ? "Bottle size" : "Container size",
+                                   value: $ml, step: 5, range: 1...1000, unit: String(localized: "ml", bundle: .l10n))
                         if formula.product != .concentrate {
                             HStack {
                                 Text("Fragrance load")
@@ -89,7 +90,7 @@ struct ScaleSheet: View {
                     }
                     if plan.ethanolGrams > 0 {
                         HStack {
-                            Text("Perfumer’s alcohol").foregroundStyle(Theme.amberInk)
+                            Text(verbatim: formula.product.diluentName).foregroundStyle(Theme.amberInk)
                             Spacer()
                             Text(verbatim: Fmt.grams(plan.ethanolGrams)).font(Theme.figure(.body))
                         }
@@ -111,6 +112,7 @@ struct ScaleSheet: View {
                 .listRowBackground(Theme.card)
             }
             .scrollContentBackground(.hidden)
+            .keyboardDoneButton()
             .background(PaperBackground())
             .navigationTitle(Text("Plan a batch"))
             .navigationBarTitleDisplayMode(.inline)
@@ -134,7 +136,7 @@ struct ScaleSheet: View {
             Text(title)
             Spacer()
             TextField(text: Binding(get: { Fmt.number(value.wrappedValue, maxDecimals: 2) },
-                                    set: { if let v = Fmt.parse($0) { value.wrappedValue = min(max(v, range.lowerBound), range.upperBound) } })) {
+                                    set: { if let v = Fmt.parse($0), v > 0 { value.wrappedValue = min(v, range.upperBound) } })) {
                 Text(title)
             }
             .keyboardType(.decimalPad)
@@ -177,12 +179,12 @@ struct WeighScreen: View {
     @FocusState private var inputFocused: Bool
 
     private var steps: [Step] {
-        let lines = formula.sortedLines
+        let lines = formula.sortedLines.filter(\.isResolved)
         var s = plan.rows.map { row in
             Step(id: row.id, name: row.name, target: row.grams, dilution: row.dilution,
                  materialID: lines[safe: row.id]?.material?.id)
         }
-        if plan.ethanolGrams > 0 { s.append(Step(id: 10_000, name: String(localized: "Perfumer’s alcohol", bundle: .l10n), target: plan.ethanolGrams, dilution: 1, materialID: nil)) }
+        if plan.ethanolGrams > 0 { s.append(Step(id: 10_000, name: formula.product.diluentName, target: plan.ethanolGrams, dilution: 1, materialID: nil)) }
         if plan.waterGrams > 0 { s.append(Step(id: 10_001, name: String(localized: "Distilled water", bundle: .l10n), target: plan.waterGrams, dilution: 1, materialID: nil)) }
         return s
     }
@@ -194,6 +196,7 @@ struct WeighScreen: View {
             if done { summary(steps) } else if let step = steps[safe: index] { stepView(step, steps: steps) }
         }
         .sheet(item: $proReason) { ProSheet(reason: $0) }
+        .keyboardDoneButton()
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true; prepareInput(steps) }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
     }

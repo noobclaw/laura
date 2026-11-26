@@ -87,6 +87,6 @@ enum FormulaActions {
 
     /// Engine lines for scaling, in formula order.
     static func scaleInput(_ f: Formula) -> [(name: String, grams: Double, dilution: Double)] {
-        f.sortedLines.map { ($0.displayName, $0.grams, $0.dilution) }
+        f.sortedLines.filter(\.isResolved).map { ($0.displayName, $0.grams, $0.dilution) }
     }
 }

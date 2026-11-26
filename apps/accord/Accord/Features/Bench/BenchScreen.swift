@@ -134,7 +134,11 @@ struct BenchContent: View {
         .confirmationDialog(Text("Delete “\(formula.name)”?"), isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete formula and its lines", role: .destructive) { deleteFormula() }
         } message: {
-            Text("Batches you already made keep their records.")
+            if formula.usedAsBaseIn.isEmpty {
+                Text("Batches you already made keep their records.")
+            } else {
+                Text("\(Set(formula.usedAsBaseIn.compactMap { $0.formula?.id }).count) formulas use it as a base; those lines will show “Missing material”.")
+            }
         }
     }
 
@@ -308,10 +312,16 @@ struct BenchContent: View {
     }
 
     private func deleteFormula() {
-        let id = formula.id
-        context.delete(formula)
-        try? context.save()
-        if state.currentFormulaID == id { state.currentFormulaID = nil }
+        // Move the bench to another formula first so this view stops rendering the one being deleted.
+        let doomed = formula
+        let next = (try? context.fetch(FetchDescriptor<Formula>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)])))?
+            .first { $0.id != doomed.id }
+        state.currentFormulaID = next?.id
+        let ctx = context
+        DispatchQueue.main.async {
+            ctx.delete(doomed)
+            try? ctx.save()
+        }
     }
 }
 

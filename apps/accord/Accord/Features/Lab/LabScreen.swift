@@ -178,9 +178,12 @@ struct BatchDetailScreen: View {
         .confirmationDialog(Text("Delete this batch record?"), isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete record and its notes", role: .destructive) {
                 Reminders.cancel(batch)
-                context.delete(batch)
-                try? context.save()
                 dismiss()
+                let ctx = context, b = batch
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    ctx.delete(b)
+                    try? ctx.save()
+                }
             }
         } message: { Text("The formula itself is not affected.") }
     }
@@ -245,7 +248,14 @@ struct BatchDetailScreen: View {
                     .padding(.vertical, 8).padding(.horizontal, 12)
                     .hairDivider()
                 }
-                if batch.ethanolGrams > 0 { InfoRow(label: "Perfumer’s alcohol", value: Fmt.grams(batch.ethanolGrams)).padding(.horizontal, 12) }
+                if batch.ethanolGrams > 0 {
+                    HStack {
+                        Text(verbatim: batch.product.diluentName).foregroundStyle(Theme.inkSoft)
+                        Spacer()
+                        Text(verbatim: Fmt.grams(batch.ethanolGrams)).font(Theme.figure(.body, weight: .medium))
+                    }
+                    .padding(.vertical, 6).padding(.horizontal, 12)
+                }
                 if batch.waterGrams > 0 { InfoRow(label: "Distilled water", value: Fmt.grams(batch.waterGrams)).padding(.horizontal, 12) }
                 if batch.bottleML > 0 { InfoRow(label: "Bottle", value: Fmt.number(batch.bottleML) + " " + String(localized: "ml", bundle: .l10n)).padding(.horizontal, 12) }
             }
