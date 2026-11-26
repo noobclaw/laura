@@ -108,3 +108,11 @@
 - Why: the earlier mannequin / cardboard / flat versions were rejected as not round or cute enough; the jelly dango was approved ("這個好").
 - Body size follows the original: about 0.9–1 m tall, never paper-thin. No free stretching (the original has none); shape changes come only from fixed poses on the pose wheel and the round size setting.
 - Poses (fixed): stand, crouch, ball, loaf, bolster, pancake, arch, sit, raise arms, drape, look up, lean, sphinx, stretch, belly up, hug knees, flat box, wave.
+
+## Decision 2026-11-26 (later): follow the original first — people, not cats
+
+- Owner: 「先儘量接近原版……模型和原版一樣都是人，玩法也幾乎一樣」. Hiders and hunters are smooth, white, glossy mannequins about 1.7 m tall, which is the original's look. The shape is our own: an egg head with no face, a short thick neck, a soft torso, mitten hands and rounded feet. There are three builds: standard, plump and lanky.
+- Hunters are the same figure holding the paint gun.
+- The jelly cats/dogs are kept in the code (`SG.JELLY_CATS` / `SG.JELLY_DOGS`) but are not used.
+- A human walk/run gait replaces the waddle for these figures.
+- Still to do in this direction: painting (front close camera, wet glossy paint with drips), the map (enclosed house, small rooms, low ceilings, clean floors, human scale), and the controls/rules check against original-evidence.md.
