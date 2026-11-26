@@ -1,0 +1,13 @@
+Running altool at path '/Applications/Xcode_26.3.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+2026-11-26 10:52:54.379  INFO: [ContentDelivery.Uploader.600002184040] 
+==========================================
+UPLOAD SUCCEEDED with no errors, 1 warning
+Delivery UUID: 4f87dcc3-dd31-4176-914e-4fc1cccd9be4
+Transferred 3153261 bytes in 0.086 seconds (36.5MB/s, 292.099Mbps)
+==========================================
+2026-11-26 10:52:54.380  WARN: [altool.600002184040] SDK version issue. This app was built with the iOS 26.2 SDK. Starting April 2027, iOS and iPadOS apps must be built with the iOS 27 SDK or later, included in Xcode 27 or later, in order to be uploaded to App Store Connect or submitted for distribution. (90725)
+   server_warning : 
+      code : 90725
+      description : SDK version issue. This app was built with the iOS 26.2 SDK. Starting April 2027, iOS and iPadOS apps must be built with the iOS 27 SDK or later, included in Xcode 27 or later, in order to be uploaded to App Store Connect or submitted for distribution.
+No errors, 1 warnings, uploading archive at 'build/ipa/Groovelens.ipa'.

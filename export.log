@@ -1,0 +1,4 @@
+2026-11-26 10:52:01.144 xcodebuild[3676:14464] [MT] IDEDistribution: -[IDEDistributionLogging _createLoggingBundleAtPath:]: Created bundle at path "/var/folders/9d/l02zfgrs7c16twd3wbpdmhkc0000gn/T/Groovelens_2026-11-26_10-52-01.128.xcdistributionlogs".
+Exported Groovelens to: /Users/runner/work/laura/laura/apps/groovelens/build/ipa
+** EXPORT SUCCEEDED **
+
