@@ -122,7 +122,8 @@ struct EvaporationChart: View {
                 }
             }
             .contentShape(Rectangle())
-            .gesture(DragGesture(minimumDistance: 0).onChanged { g in
+            // Simultaneous, so a vertical swipe over the chart still scrolls the bench.
+            .simultaneousGesture(DragGesture(minimumDistance: 0).onChanged { g in
                 let t = min(max(g.location.x / max(width, 1), 0), 1)
                 let newHour = (Double(t) * Double(t)) * 24
                 if Int(newHour) != Int(hour) { Haptics.select() }

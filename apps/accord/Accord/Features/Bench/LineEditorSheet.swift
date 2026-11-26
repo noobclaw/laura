@@ -166,6 +166,7 @@ struct LineEditorSheet: View {
             }
         }
         .scrollContentBackground(.hidden)
+            .textCase(nil)
         .keyboardDoneButton()
     }
 
@@ -356,6 +357,7 @@ struct MaterialPicker: View {
             .listRowBackground(Theme.card)
         }
         .scrollContentBackground(.hidden)
+        .textCase(nil)
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Search or type a new name"))
     }
 

@@ -224,6 +224,7 @@ struct NewFormulaSheet: View {
                 .listRowBackground(Theme.card)
             }
             .scrollContentBackground(.hidden)
+            .textCase(nil)
             .background(PaperBackground())
             .navigationTitle(Text("New formula"))
             .navigationBarTitleDisplayMode(.inline)

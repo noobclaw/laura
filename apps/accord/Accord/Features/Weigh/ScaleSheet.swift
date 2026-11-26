@@ -112,6 +112,7 @@ struct ScaleSheet: View {
                 .listRowBackground(Theme.card)
             }
             .scrollContentBackground(.hidden)
+            .textCase(nil)
             .keyboardDoneButton()
             .background(PaperBackground())
             .navigationTitle(Text("Plan a batch"))

@@ -123,6 +123,7 @@ struct MaterialDetailScreen: View {
             .listRowBackground(Theme.card)
         }
         .scrollContentBackground(.hidden)
+            .textCase(nil)
         .keyboardDoneButton()
         .background(PaperBackground())
         .navigationTitle(Text(verbatim: material.name))
