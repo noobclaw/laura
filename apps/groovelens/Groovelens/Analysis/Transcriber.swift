@@ -283,8 +283,13 @@ enum ChartBuilder {
     static func build(raw: [RawHit], grid: BeatGrid, duration: Double) -> DrumChart {
         let beats = grid.beatTimes
         let (beatsPerBar, phase) = detectMeter(raw: raw, beats: beats)
+        // Hits before the first downbeat (a pickup) get a partial bar 0 instead of being dropped.
+        var offset = phase
+        if phase > 0, phase < beats.count, raw.contains(where: { $0.time < beats[phase] - 0.07 }) {
+            offset = phase - beatsPerBar
+        }
 
-        var chart = DrumChart(duration: duration, beatTimes: beats, beatsPerBar: beatsPerBar, downbeatOffset: phase,
+        var chart = DrumChart(duration: duration, beatTimes: beats, beatsPerBar: beatsPerBar, downbeatOffset: offset,
                               tempo: grid.tempo, swing: 0.5, hits: [], sections: [], fillBars: [])
         chart.swing = detectSwing(raw: raw, beats: beats)
         chart.hits = quantize(raw: raw, chart: chart)

@@ -81,6 +81,16 @@ final class ChartBuilderTests: XCTestCase {
         XCTAssertEqual(chart.hits.count, 32 * 12)
     }
 
+    func testPickupBeatsAreKeptInAPartialFirstBar() {
+        // Groove starts on beat 3 of a bar: the two beats before the first downbeat must survive.
+        var raw = Fixture.rockRaw(bars: 16).map { RawHit(time: $0.time + 1.0, piece: $0.piece, velocity: $0.velocity, isOpen: $0.isOpen) }
+        raw.insert(RawHit(time: 0, piece: .snare, velocity: 0.9, isOpen: false), at: 0)
+        raw.insert(RawHit(time: 0.5, piece: .snare, velocity: 0.9, isOpen: false), at: 1)
+        let chart = ChartBuilder.build(raw: raw, grid: BeatGrid(beatTimes: Fixture.beats(count: 16 * 4 + 3), tempo: 120), duration: 33)
+        XCTAssertEqual(chart.hits.count, raw.count)
+        XCTAssertEqual(chart.hits.first?.time ?? -1, 0, accuracy: 1e-9)
+    }
+
     func testNoDuplicateHitsOnTheSameTick() {
         let chart = Fixture.rockChart()
         let keys = chart.hits.map { "\($0.piece)-\($0.bar)-\($0.tick)" }
