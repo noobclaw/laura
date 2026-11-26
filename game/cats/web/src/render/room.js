@@ -200,10 +200,10 @@
     var leafM = sway(tx('leaf', function () { return P.plaster('#5d8a45', 55); }, 0.4, 0.9), 0.02, 1.6, 'leaf'), leafD = sway(tx('leafD', function () { return P.plaster('#3f6b3a', 56); }, 0.4, 0.9), 0.02, 1.3, 'leaf');
     var mapleM = sway(tx('maple', function () { return P.plaster('#d0552e', 57); }, 0.4, 0.9), 0.035, 1.4, 'leaf'), mapleO = sway(tx('mapleO', function () { return P.plaster('#e58a36', 58); }, 0.4, 0.9), 0.035, 1.7, 'leaf');
     [[-4.6, 4.6, 0.6], [-3.5, 5.6, 0.75], [3.2, 5.3, 0.7], [4.6, 3.4, 0.55], [5.6, 5.2, 0.8], [-5.8, 3.6, 0.6], [2.3, 6.0, 0.5]].forEach(function (b, i) {
-      begin('灌木', b[0], -0.3, EN + b[1] - 2.2);
+      begin('灌木', b[0], -0.3, EN + b[1] - 2.2); var br = b[2] * 0.75; plat(b[0] - br, b[0] + br, EN + b[1] - 2.2 - br, EN + b[1] - 2.2 + br, -0.3 + b[2] * 1.05, -0.3); // owner bug report: cats hid inside bushes. Bushes are solid now
       for (var k = 0; k < 4; k++) S(b[2] * (0.55 + r() * 0.3), k & 1 ? leafM : leafD, (r() - 0.5) * b[2], b[2] * (0.4 + r() * 0.3), (r() - 0.5) * b[2], 1, 0.8, 1);
     });
-    begin('楓樹', 3.6, -0.3, EN + 2.6);
+    begin('楓樹', 3.6, -0.3, EN + 2.6); plat(3.5, 3.72, EN + 2.5, EN + 2.72, 1.9, -0.3);
     add(G.tube([[0, 0, 0], [0.08, 0.7, 0.03], [-0.1, 1.4, -0.02], [0.05, 2.0, 0.05]], 0.09, 12, 8), darker);
     add(G.tube([[-0.05, 1.2, 0], [-0.5, 1.7, 0.2], [-0.9, 1.9, 0.3]], 0.04, 8, 6), darker); add(G.tube([[0, 1.4, 0], [0.5, 1.9, -0.2], [0.8, 2.3, -0.3]], 0.04, 8, 6), darker);
     for (var mi = 0; mi < 9; mi++) S(0.42 + r() * 0.3, mi & 1 ? mapleM : mapleO, (r() - 0.5) * 1.9, 2.0 + r() * 0.8, (r() - 0.5) * 1.4, 1.2, 0.7, 1.1);
@@ -346,7 +346,8 @@
     }
     begin('收音機', 1.6, 0.412, -D + 0.24); B(0.32, 0.18, 0.12, col(0x7a9a54, 0.5), 0, 0, 0, 0.03); C(0.055, 0.055, 0.01, black, -0.07, 0.035, 0.062, 16).rotation.x = Math.PI / 2; C(0.02, 0.02, 0.02, brass, 0.09, 0.1, 0.062, 10).rotation.x = Math.PI / 2; C(0.02, 0.02, 0.02, brass, 0.09, 0.04, 0.062, 10).rotation.x = Math.PI / 2;
     function plantPot(x, y, z, s, c, type, leaves) {
-      begin(type, x, y, z); L([[0, 0], [0.07 * s, 0], [0.1 * s, 0.14 * s], [0.105 * s, 0.15 * s]], col(c, 0.5)); C(0.095 * s, 0.095 * s, 0.01, col(0x3a2a1e, 1), 0, 0.14 * s, 0, 12);
+      begin(type, x, y, z);
+      var pr = (leaves === monstera ? 0.34 : leaves === snake ? 0.1 : 0.16) * s, ph = (leaves === monstera ? 0.62 : leaves === snake ? 0.56 : 0.5) * s; plat(x - pr, x + pr, z - pr, z + pr, y + ph, y); // owner bug report: a cat could hide inside a plant. Pot and leaves are solid now L([[0, 0], [0.07 * s, 0], [0.1 * s, 0.14 * s], [0.105 * s, 0.15 * s]], col(c, 0.5)); C(0.095 * s, 0.095 * s, 0.01, col(0x3a2a1e, 1), 0, 0.14 * s, 0, 12);
       leaves(s);
     }
     function snake(s) { for (var i = 0; i < 7; i++) { var a = i * 0.9, m = add(new THREE.ConeGeometry(0.03 * s, (0.35 + (i % 3) * 0.1) * s, 5), i & 1 ? leafM : leafD, Math.cos(a) * 0.04 * s, (0.15 + 0.2) * s, Math.sin(a) * 0.04 * s, Math.sin(a) * 0.2, 0, -Math.cos(a) * 0.2); m.scale.z = 0.35; } }
@@ -396,7 +397,8 @@
     // cardboard boxes by the genkan door
     var card = tx('card', null, 0.5, 0.9);
     function cbox(x, y, z, w, h, d, ry, label, open) {
-      var g = begin('紙箱', x, y, z, ry); B(w, h, d, card, 0, 0, 0, 0.008, true); B(0.07, h * 1.004, d * 1.01, cream, 0, 0, 0, 0.003);
+      var g = begin('紙箱', x, y, z, ry); B(w, h, d, card, 0, 0, 0, 0.008, true);
+      var cr = Math.abs(Math.cos(ry || 0)), sr = Math.abs(Math.sin(ry || 0)), hx = cr * w / 2 + sr * d / 2, hz = sr * w / 2 + cr * d / 2; plat(x - hx, x + hx, z - hz, z + hz, y + h, y); // owner bug report: cats walked into boxes. Boxes are solid now (and so count for the buried-too-deep warning) B(0.07, h * 1.004, d * 1.01, cream, 0, 0, 0, 0.003);
       if (label) PL(w * 0.5, h * 0.5, mat('lab' + label, { map: SG.tex('lab' + label, function () { return P.label(label, '#c9a36c', '#7a3a1e'); }), roughness: 0.9 }), w * 0.2, h * 0.5, d / 2 + 0.002);
       if (open) { B(w, 0.01, d * 0.48, card, 0, h, -d * 0.7, 0.003).rotation.x = 0.9; B(w, 0.01, d * 0.48, card, 0, h, d * 0.7, 0.003).rotation.x = -0.9; }
       platG(g, w, d, h); return g;

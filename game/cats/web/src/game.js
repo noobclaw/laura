@@ -171,9 +171,9 @@
     clearEnts(); G.mode = 'title'; G.side = null; G.state = null; G.fly = null;
     var C = SG.CATS, Dg = SG.DOGS;
     spawn('t1', C.mochi, 'cat', { size: SG.WS, x: -0.55 * SG.WS, z: -0.25 * SG.WS, y: 0.38 * SG.WS, yaw: 0.35, pose: 'loaf' });
-    var b = spawn('t2', C.soba, 'cat', { size: SG.WS, x: -1.8 * SG.WS, z: 1.3 * SG.WS, yaw: 0.7, pose: 'sit' });
-    spawn('t3', C.wata, 'cat', { size: SG.WS, x: 0.57 * SG.WS, z: -0.25 * SG.WS, y: 0.12 * SG.WS, yaw: -0.6, pose: 'sit' });
-    spawn('t4', C.dango, 'cat', { size: SG.WS, x: -0.75 * SG.WS, z: 1.75 * SG.WS, yaw: 0.9, pose: 'stretch' });
+    var b = spawn('t2', C.daifuku, 'cat', { size: SG.WS, x: -1.8 * SG.WS, z: 1.3 * SG.WS, yaw: 0.7, pose: 'sit' });
+    spawn('t3', C.azuki, 'cat', { size: SG.WS, x: 0.57 * SG.WS, z: -0.25 * SG.WS, y: 0.12 * SG.WS, yaw: -0.6, pose: 'sit' });
+    spawn('t4', C.mochi, 'cat', { size: SG.WS, x: -0.75 * SG.WS, z: 1.75 * SG.WS, yaw: 0.9, pose: 'stretch' });
     spawn('t5', Dg.shiba, 'dog', { size: SG.WS, x: 2.15 * SG.WS, z: 1.5 * SG.WS, yaw: -0.75, pose: 'sit' }).c.wag = 1;
     spawn('t6', Dg.corgi, 'dog', { size: SG.WS, x: 1.35 * SG.WS, z: 1.95 * SG.WS, yaw: -0.5 });
     calico(b.c);
@@ -946,7 +946,7 @@
     if (G.mode === 'play' && st) {
       if (G.lobby) { var Lb = G.lobby; Lb.t -= dt; Lb.on = !!me && !me.cling && Math.hypot(me.x - Lb.x, me.z - Lb.z) < Lb.r;
         if (Lb.t <= 0) { var sd = Lb.on ? 'dog' : 'cat'; bus.emit('lottery', { side: sd }); G.start(G.settings.mode === 'double' ? 'cat' : sd); return; } }
-      if (st.phase !== 'lobby') { dispatch({ type: 'tick', dt: dt }); if (G.state !== st) return; } // the round ended inside this tick (reveal -> lobby clears the state): stop here, the next frame starts clean
+      if (st.phase !== 'lobby') { var mode0 = G.mode; dispatch({ type: 'tick', dt: dt }); if (!G.state || G.mode !== mode0 || (G.state.phase === 'lobby' && st.phase !== 'lobby')) return; st = G.state; } // the round ended inside this tick (reveal -> lobby clears the state): stop here, the next frame starts clean. (Core.apply always returns a fresh copy, so compare the phase, not the object)
       var dcd = 0, dfree = false; G.decoySlots.forEach(function (sl) { sl.cd = Math.max(0, sl.cd - dt); if (!sl.e) { dcd = dfree ? Math.min(dcd, sl.cd) : sl.cd; dfree = true; } }); G.decoyCd = dcd; // shortest wait among the empty slots (0 when both clones are out)
       if (me && !me.out && st.phase !== 'reveal' && !G.fly) {
         var f = (k.w || k.ArrowUp && me.team === 'cat' ? 1 : 0) - (k.s || k.ArrowDown && me.team === 'cat' ? 1 : 0), s = (k.d ? 1 : 0) - (k.a ? 1 : 0);
@@ -991,7 +991,7 @@
     var bumpers = [];
     for (var i = 0; i < G.ents.length; i++) {
       var e = G.ents[i];
-      if (G.mode === 'play') physEnt(e, dt);
+      if (G.mode === 'play') { physEnt(e, dt); if (!e.out && !G.noContain) containment(e); }
       e.c.speed = e.team === 'cat' && e.c.pose !== 'stand' && e.c.pose !== 'crouch' ? 0 : e.speed || 0; e.c.air = e.air ? 1 : 0;
       var dy = e.yaw - (e.pyaw == null ? e.yaw : e.pyaw); while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI; e.c.turn = dt > 0 ? dy / dt : 0; e.pyaw = e.yaw;
       // GDD hider-cat: a posed cat is perfectly still for everyone but its owner
@@ -1134,6 +1134,7 @@
       var c3 = c2.slice(), q; c3[a] += sg * rad; for (i = 0; i < 3; i++) c3[i] -= n[i] * rad * 1.35;
       q = c3.slice(); q[a] -= sg * (rad + 0.06); var s2 = solidAt(q[0], q[1], q[2]);
       if (s2 && s2 !== FLOOR && !solidAt(c3[0], c3[1], c3[2])) {
+        if (a === 1 && sg > 0 && !roomFor(e, c3[0], pHi(s2, 1), c3[2])) break; // owner bug report: climbing a wall went through the ceiling. Only stand on a top that has a ceiling over it with room for the body
         if (a === 1 && sg > 0) { e.x = c3[0]; e.z = c3[2]; e.y = pHi(s2, 1); e.yaw = Math.atan2(-n[0], -n[2]); e.cling = null; e.vy = 0; e.air = false; if (e === G.me) bus.emit('cling', { on: false, top: true }); return; } // over the top edge: stand up there
         var on2 = n.slice(); n = [0, 0, 0]; n[a] = sg; c3[a] = (sg > 0 ? pHi(s2, a) : pLo(s2, a)) + sg * rad; c = c3; cl.n = n; var back = [-on2[0], -on2[1], -on2[2]]; cl.f = lock ? fixF(cl.f, n, back) : back; cl.carry = { sig: sig, mv: back.slice() }; moved = true;
       }
@@ -1141,6 +1142,25 @@
     }
     e.x = c[0] - n[0] * rad; e.y = c[1] - n[1] * rad; e.z = c[2] - n[2] * rad; e.speed = moved ? sp : 0;
   }
+  /* is there room for a body standing at (x, y, z)? nothing solid in its height, and a ceiling above it (no ceiling = the roof space or outside) */
+  function roomFor(e, x, y, z) {
+    var h = Math.max(0.2, e.h || 0.3), P = room.platforms, ceil = false;
+    if (solidAt(x, y + 0.04, z) || solidAt(x, y + h * 0.5, z) || solidAt(x, y + h, z)) return false;
+    for (var i = 0; i < P.length; i++) { var p = P[i]; if (x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1 && p.y0 >= y + h && p.y0 < y + 6) { ceil = true; break; } }
+    return ceil || y + h < SG.ROOM.H * SG.WS - 0.1; // outdoors (no ceiling) is fine below the eaves
+  }
+  /* last line of defence (owner bug reports: through the ceiling, into a box): every frame, a body that has ended up somewhere no body can be
+     (inside a solid, above the ceiling, outside the house bounds) goes back to the last place it was fine */
+  function containment(e) {
+    var b = room.bounds, m = 0.2, inside = e.x > b.x0 - m && e.x < b.x1 + m && e.z > b.z0 - m && e.z < b.z1 + m, /* the bounds sit a little inside the outer walls' faces, where a clinging cat rests */ P = room.platforms, ceil = false, y = e.y + (e.cling ? -0.05 : 0.05); /* a cat hanging under a ceiling sits right on its face */
+    for (var i = 0; i < P.length && inside; i++) { var p = P[i]; if (e.x > p.x0 && e.x < p.x1 && e.z > p.z0 && e.z < p.z1 && p.y0 >= y) { ceil = true; break; } }
+    var ok = inside && (ceil || e.y < SG.ROOM.H * SG.WS - 0.3) && (e.cling || !solidAt(e.x, e.y + Math.max(0.08, (e.h || 0.3) * 0.5), e.z));
+    if (ok) { if (!e.good) e.good = [0, 0, 0]; e.good[0] = e.x; e.good[1] = e.y; e.good[2] = e.z; e.goodCling = e.cling ? { n: e.cling.n.slice(), f: e.cling.f.slice() } : null; return; }
+    if (!e.good) return;
+    e.x = e.good[0]; e.y = e.good[1]; e.z = e.good[2]; e.vy = 0; e.velx = e.velz = 0; e.cling = e.goodCling ? { n: e.goodCling.n.slice(), f: e.goodCling.f.slice() } : null; e.air = !e.cling && e.air;
+    G.contained = (G.contained || 0) + 1; var why = !inside ? 'outside' : !(ceil || e.y < SG.ROOM.H * SG.WS - 0.3) ? 'roof' : 'solid'; G.containWhy = G.containWhy || {}; G.containWhy[why] = (G.containWhy[why] || 0) + 1; if (!G.containAt) G.containAt = [e.x, e.y, e.z, e.cling ? e.cling.n.join() : '-', why];
+  }
+  G.roomFor = roomFor;
   function fixF(f, n, alt) { return Math.abs(f[0] * n[0] + f[1] * n[1] + f[2] * n[2]) > 0.5 ? alt : f; } // the head direction must stay in the surface
   /* bots: put a cat on a wall, a pillar or a ceiling somewhere reachable from (x, z) */
   function stickSomewhere(e, r) {

@@ -80,3 +80,10 @@
 - [ ] 腳本：朝牆跳→貼住→上爬 1 m→放開，狀態正確。
 - [ ] 分身被打中時本體出局。
 - [ ] 在另一個視角觀察擺好姿勢的貓，連續 60 幀像素差為 0（不含場景動態）。
+
+## Collision rules (2026-11-26, owner bug reports)
+
+- Cardboard boxes, potted plants, garden bushes and tree trunks are solid: a cat cannot walk into them.
+- Climbing over the top of a wall is only allowed where there is a ceiling above with room for the body; no climbing into the roof space.
+- Last line of defence: every frame, a body that ends up inside a solid, above the ceiling or outside the house goes back to the last place it was fine.
+- Verified by `web/tools/containcheck.py` (random walks + a climb on every tall wall face): PASS with the guard on; with the guard off, cats still get above the ceiling, so the guard is what holds this today.

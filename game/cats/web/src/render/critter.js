@@ -35,27 +35,24 @@
      jump class game.js reads (< 0.1 = low jumper). Top of the back when standing = stub + 2 * hh. */
   var TAB = { len: 0.07, r0: 0.045, r1: 0.036, up: 90, curl: 0, flat: 0.3, y: 0 }; // default tail: a short flat tab at the rear, in the plane of the body
   function tab(k) { return { len: TAB.len * k, r0: TAB.r0 * k, r1: TAB.r1 * k, up: 90, curl: 0, flat: 0.3, y: 0 }; }
+  /* jelly figures (owner 2026-11-25, concept JARM/JSIZE): a soft white "dango" — a round body with a round head on it, two small ears,
+     two short arms, two stubby feet, no tail. Rb/Rh = body / head radius, hc = head centre above the body centre, neck = how soft the
+     waist between them is. Standing height at size 1 is about 0.9 m (owner: not too small, or hiding gets too easy).
+     bellyR/headR/leg are kept for game.js (collision radius, jump class). */
+  var JT = { len: 0.05, r0: 0.02, r1: 0.016, up: 90, curl: 0, none: true, y: 0 };
   var CATS = {
-    mochi: { name: '麻糬', tag: '圓墊', kind: 'cat', len: 0.42, hw: 0.18, hh: 0.055, sq: 5, plan: 0.15, stub: 0.03, leg: 0.18, legRad: 0.04, paw: 0.044, headW: 0.115, headH: 0.068, headD: 0.075, ear: { type: 'tab', h: 0.04, w: 0.04, spread: 0.74, tilt: 46 }, tail: tab(1) },
-    soba: { name: '蕎麥', tag: '長毯', kind: 'cat', len: 0.6, hw: 0.125, hh: 0.05, sq: 5, plan: 0.07, stub: 0.03, leg: 0.18, legRad: 0.036, paw: 0.04, headW: 0.095, headH: 0.062, headD: 0.07, ear: { type: 'tab', h: 0.038, w: 0.034, spread: 0.74, tilt: 44 }, tail: tab(0.85) },
-    wata: { name: '棉花', tag: '厚墊', kind: 'cat', len: 0.46, hw: 0.2, hh: 0.078, sq: 4, plan: 0.12, stub: 0.035, leg: 0.18, legRad: 0.048, paw: 0.052, headW: 0.13, headH: 0.088, headD: 0.085, ear: { type: 'tab', h: 0.042, w: 0.044, spread: 0.74, tilt: 46 }, tail: tab(1.2) },
-    dango: { name: '糰子', tag: '矮圓', kind: 'cat', len: 0.34, hw: 0.19, hh: 0.045, sq: 5, plan: 0.17, stub: 0.02, leg: 0.07, legRad: 0.04, paw: 0.044, headW: 0.11, headH: 0.058, headD: 0.07, ear: { type: 'tab', h: 0.034, w: 0.04, spread: 0.74, tilt: 52 }, tail: tab(0.9) },
-    azuki: { name: '小豆', tag: '迷你', kind: 'cat', scale: 0.7, len: 0.36, hw: 0.165, hh: 0.055, sq: 4.4, plan: 0.13, stub: 0.03, leg: 0.18, legRad: 0.04, paw: 0.044, headW: 0.12, headH: 0.072, headD: 0.08, ear: { type: 'tab', h: 0.046, w: 0.044, spread: 0.72, tilt: 42 }, tail: tab(0.9) },
-    chikuwa: { name: '竹輪', tag: '大耳', kind: 'cat', len: 0.44, hw: 0.165, hh: 0.052, sq: 5, plan: 0.1, stub: 0.04, leg: 0.18, legRad: 0.038, paw: 0.042, headW: 0.11, headH: 0.066, headD: 0.075, ear: { type: 'point', h: 0.085, w: 0.056, spread: 0.72, tilt: 40 }, tail: tab(0.9) },
-    tofu: { name: '豆腐', tag: '方磚', kind: 'cat', len: 0.4, hw: 0.18, hh: 0.06, sq: 9, plan: 0.02, stub: 0.03, leg: 0.18, legRad: 0.04, paw: 0.042, headW: 0.11, headH: 0.07, headD: 0.07, ear: { type: 'tab', h: 0.038, w: 0.04, spread: 0.74, tilt: 40 }, tail: tab(1) }
+    mochi: { name: '糰子', tag: '圓頭', kind: 'cat', jelly: true, Rb: 0.245, Rh: 0.178, hc: 0.36, neck: 0.075, depth: 0.95, arm: 0.2, armR: 0.048, foot: 0.06, ear: { type: 'point', h: 0.1, w: 0.052, spread: 0.55, tilt: 18 }, tail: JT, coat: 'jcat' },
+    daifuku: { name: '大福', tag: '矮胖', kind: 'cat', jelly: true, Rb: 0.27, Rh: 0.19, hc: 0.3, neck: 0.11, depth: 0.95, arm: 0.19, armR: 0.052, foot: 0.064, ear: { type: 'round', h: 0.075, w: 0.056, spread: 0.56, tilt: 22 }, tail: JT, coat: 'jcat' },
+    azuki: { name: '小豆', tag: '小隻', kind: 'cat', jelly: true, scale: 0.82, Rb: 0.245, Rh: 0.185, hc: 0.37, neck: 0.075, depth: 0.95, arm: 0.19, armR: 0.048, foot: 0.06, ear: { type: 'point', h: 0.11, w: 0.054, spread: 0.55, tilt: 16 }, tail: JT, coat: 'jcat' }
   };
-  Object.keys(CATS).forEach(function (k) { var c = CATS[k]; c.bellyR = c.chestR = c.hipR = c.hw; c.headR = c.headW; });
-  /* dogs: the same flat family, a little bigger and more rectangular, with a blunt snout, ear flaps, a tail tab, small eyes and a nose,
-     and the paint blaster riding on the back. gun: false leaves the blaster off. */
+  Object.keys(CATS).forEach(function (k) { var c = CATS[k]; c.bellyR = c.chestR = c.hipR = c.Rb; c.headR = c.headW = c.Rh; c.leg = 0.18; c.len = 2 * c.Rb; });
+  /* hunters: the same jelly figure with floppy ears, a snout, dark eyes and the toy paint blaster held in front */
   var DOGS = {
-    shiba: { name: '小柴', tag: '柴系', kind: 'dog', len: 0.5, hw: 0.19, hh: 0.065, sq: 7, plan: 0.05, stub: 0.04, leg: 0.3, legRad: 0.046, paw: 0.05, headW: 0.115, headH: 0.078, headD: 0.11, faceSq: 5, ear: { type: 'point', h: 0.06, w: 0.046, spread: 0.72, tilt: 30 }, tail: { len: 0.11, r0: 0.045, r1: 0.04, up: 108, curl: 26, flat: 0.5, y: 0.01 }, eye: 0.013, coat: 'shiba' },
-    corgi: { name: '短短', tag: '柯基系', kind: 'dog', len: 0.48, hw: 0.21, hh: 0.06, sq: 7, plan: 0.06, stub: 0.028, leg: 0.115, legRad: 0.046, paw: 0.05, headW: 0.115, headH: 0.074, headD: 0.105, faceSq: 5, ear: { type: 'point', h: 0.085, w: 0.056, spread: 0.72, tilt: 28 }, tail: { len: 0.05, r0: 0.04, r1: 0.034, up: 90, curl: 0, flat: 0.5, y: 0 }, eye: 0.013, coat: 'corgi' },
-    bull: { name: '阿虎', tag: '鬥牛系', kind: 'dog', len: 0.44, hw: 0.235, hh: 0.075, sq: 6.5, plan: 0.07, stub: 0.035, leg: 0.135, legRad: 0.056, paw: 0.062, headW: 0.15, headH: 0.088, headD: 0.085, faceSq: 6, ear: { type: 'tab', h: 0.04, w: 0.044, spread: 0.76, tilt: 60 }, tail: { len: 0.05, r0: 0.03, r1: 0.026, up: 90, curl: 0, flat: 0.6, y: 0 }, eye: 0.014, coat: 'bull' },
-    poodle: { name: '捲捲', tag: '貴賓系', kind: 'dog', len: 0.5, hw: 0.165, hh: 0.07, sq: 5.5, plan: 0.07, stub: 0.05, leg: 0.36, legRad: 0.04, paw: 0.05, headW: 0.1, headH: 0.08, headD: 0.105, faceSq: 4, ear: { type: 'flop', h: 0.085, w: 0.05, spread: 0.8, tilt: 100 }, tail: { len: 0.09, r0: 0.03, r1: 0.05, up: 100, curl: 0, bushy: true, flat: 0.8, y: 0.01 }, eye: 0.012, coat: 'poodle' },
-    dachs: { name: '長長', tag: '臘腸系', kind: 'dog', len: 0.74, hw: 0.15, hh: 0.056, sq: 6.5, plan: 0.05, stub: 0.028, leg: 0.1, legRad: 0.04, paw: 0.044, headW: 0.095, headH: 0.068, headD: 0.125, faceSq: 4.5, ear: { type: 'flop', h: 0.09, w: 0.05, spread: 0.8, tilt: 104 }, tail: { len: 0.16, r0: 0.03, r1: 0.018, up: 92, curl: 2, flat: 0.5, y: 0 }, eye: 0.012, coat: 'dachs' },
-    husky: { name: '阿雪', tag: '哈士奇系', kind: 'dog', len: 0.58, hw: 0.2, hh: 0.07, sq: 7, plan: 0.05, stub: 0.045, leg: 0.34, legRad: 0.048, paw: 0.054, headW: 0.12, headH: 0.084, headD: 0.115, faceSq: 5, ear: { type: 'point', h: 0.07, w: 0.048, spread: 0.7, tilt: 26 }, tail: { len: 0.15, r0: 0.045, r1: 0.06, up: 104, curl: 18, bushy: true, flat: 0.55, y: 0.01 }, eye: 0.013, eyeColor: 0x6fb7e8, coat: 'husky' }
+    shiba: { name: '小柴', tag: '柴色', kind: 'dog', jelly: true, Rb: 0.255, Rh: 0.185, hc: 0.37, neck: 0.075, depth: 0.95, arm: 0.19, armR: 0.048, foot: 0.064, snout: 0.075, ear: { type: 'flop', h: 0.13, w: 0.06, spread: 0.95, tilt: 168 }, tail: JT, eye: 0.02, coat: 'jshiba' },
+    corgi: { name: '短短', tag: '橘白', kind: 'dog', jelly: true, Rb: 0.27, Rh: 0.18, hc: 0.33, neck: 0.09, depth: 0.95, arm: 0.18, armR: 0.05, foot: 0.066, snout: 0.07, ear: { type: 'point', h: 0.11, w: 0.06, spread: 0.62, tilt: 20 }, tail: JT, eye: 0.02, coat: 'jcorgi' },
+    husky: { name: '阿雪', tag: '灰白', kind: 'dog', jelly: true, Rb: 0.255, Rh: 0.185, hc: 0.37, neck: 0.075, depth: 0.95, arm: 0.19, armR: 0.048, foot: 0.064, snout: 0.08, ear: { type: 'point', h: 0.1, w: 0.056, spread: 0.6, tilt: 16 }, tail: JT, eye: 0.02, eyeColor: 0x6fb7e8, coat: 'jhusky' }
   };
-  Object.keys(DOGS).forEach(function (k) { var c = DOGS[k]; c.bellyR = c.chestR = c.hipR = c.hw; c.headR = c.headW; });
+  Object.keys(DOGS).forEach(function (k) { var c = DOGS[k]; c.bellyR = c.chestR = c.hipR = c.Rb; c.headR = c.headW = c.Rh; c.leg = 0.18; c.len = 2 * c.Rb; });
   SG.CATS = CATS; SG.DOGS = DOGS;
   /* ears / tail / collar can be chosen separately from the build */
   SG.CRITTER_OPTIONS = {
@@ -121,13 +118,37 @@
     pawsup: { label: '斜靠', hint: '斜 ↔ 貼牆', amt: 0.5, f: function (a) { return { pivot: [-lerp(38, 84, a), 0, 0], leg: [0, 0] }; } },
     roll: { label: '打滾', amt: 0.3, emote: true, f: function () { return { pivot: [0, 0, 180], leg: [1.4, 1.4] }; } }
   };
+  /* jelly poses: the original's fixed poses (no free stretching, owner 2026-11-25). S = whole-figure scale (volume kept roughly the same),
+     leg [arms, feet]: 0 = drawn into the body. Arms: sh/el (mirrored for R), feet: hp. */
+  var JPOSE = {
+    stand: { label: '站立', amt: 0.5, f: function (a, D) { return D.dog ? { sh: [-62, 0, 28], el: [-38, 0, 0] } : {}; } },
+    crouch: { label: '壓低', amt: 0.5, f: function () { return { S: [1.06, 0.84, 1.06] }; } },
+    ball: { label: '縮成球', hint: '鬆 ↔ 緊', amt: 0.6, f: function (a) { return { leg: [0, 0], S: [lerp(1.05, 1.0, a), lerp(0.9, 0.84, a), lerp(1.05, 1.0, a)], neck: [lerp(8, 22, a), 0, 0] }; } },
+    loaf: { label: '壓低', hint: '微扁 ↔ 很扁', amt: 0.5, f: function (a) { return { leg: [0, 0.3], S: [lerp(1.08, 1.2, a), lerp(0.84, 0.68, a), lerp(1.08, 1.2, a)] }; } },
+    bolster: { label: '側躺', hint: '伸手 ↔ 收手', amt: 0.6, f: function (a) { var lg = a > 0.5 ? 0 : 1; return { pivot: [0, 0, 90], leg: [lg, lg], S: [1, lerp(1, 0.88, a), 1] }; } },
+    pancake: { label: '攤平', hint: '厚 ↔ 薄', amt: 0.7, f: function (a) { return { leg: [0, 0], S: [lerp(1.3, 1.62, a), lerp(0.56, 0.36, a), lerp(1.3, 1.62, a)] }; } },
+    arch: { label: '趴下', hint: '手放下 ↔ 手往前', amt: 0.5, f: function (a) { return { pivot: [86, 0, 0], sh: [-lerp(60, 165, a), 0, 0], leg: [1, 0] }; } },
+    lsit: { label: '坐下', hint: '直 ↔ 後仰', amt: 0.4, f: function (a) { return { pivot: [-lerp(8, 28, a), 0, 0], hp: [-85, 0, 0], sh: [0, 0, 14] }; } },
+    tall: { label: '舉手', hint: '斜 ↔ 直', amt: 0.6, f: function (a) { return { sh: [0, 0, -lerp(115, 160, a)], S: [0.96, 1.06, 0.96] }; } },
+    drape: { label: '掛邊', hint: '斜掛 ↔ 垂直', amt: 0.7, f: function (a) { return { chest: [lerp(40, 95, a), 0, 0], sh: [-lerp(30, 70, a), 0, 0] }; } },
+    sit: { label: '抬頭', hint: '低 ↔ 高', amt: 0.5, f: function (a) { return { neck: [-lerp(12, 38, a), 0, 0], head: [-lerp(4, 14, a), 0, 0] }; } },
+    side: { label: '側傾', hint: '微傾 ↔ 很斜', amt: 0.5, f: function (a) { return { pivot: [0, 0, lerp(25, 62, a)], sh: [0, 0, 20] }; } },
+    sphinx: { label: '趴臥', hint: '低頭 ↔ 仰頭', amt: 0.5, f: function (a) { return { pivot: [84, 0, 0], neck: [-lerp(0, 40, a), 0, 0], sh: [-90, 0, 10], leg: [1, 0] }; } },
+    stretch: { label: '伸懶腰', hint: '小 ↔ 大', amt: 0.5, f: function (a) { return { sh: [-lerp(120, 172, a), 0, -12], S: [0.95, lerp(1.04, 1.1, a), 0.95] }; } },
+    belly: { label: '翻肚', hint: '收手 ↔ 張開', amt: 0.4, f: function (a) { return { pivot: [-86, 0, 0], sh: [0, 0, -lerp(10, 80, a)], hp: [-lerp(10, 40, a), 0, 0] }; } },
+    curl: { label: '抱膝', hint: '鬆 ↔ 緊', amt: 0.6, f: function (a) { return { chest: [lerp(12, 32, a), 0, 0], neck: [lerp(8, 20, a), 0, 0], sh: [-lerp(40, 70, a), 0, 24], el: [-lerp(50, 85, a), 0, 0] }; } },
+    box: { label: '扁平', hint: '略扁 ↔ 很扁', amt: 0.6, f: function (a) { return { leg: [0, 0], S: [lerp(1.12, 1.24, a), 1.02, lerp(0.7, 0.56, a)] }; } },
+    pawsup: { label: '揮手', amt: 0.6, f: function (a) { return { shR: [0, 0, lerp(100, 140, a)], elR: [0, 0, -25] }; } },
+    roll: { label: '打滾', amt: 0.3, emote: true, f: function () { return { pivot: [0, 0, 180] }; } }
+  };
+  function PT(S) { return S && S.jelly ? JPOSE : CPOSE; }
   var ALIAS = { hind: 'tall', hang: 'drape' };
   Object.keys(CPOSE).forEach(function (k) { if (!POSES[k]) POSES[k] = {}; }); // every name is a valid pose for both kinds
   POSES.tall = POSES.hind; POSES.drape = POSES.hang; POSES.lsit = POSES.sit; POSES.ball = POSES.curl; POSES.bolster = POSES.sphinx; POSES.pancake = POSES.sphinx;
   SG.POSES = POSES;
   SG.POSE_PAGES = [['ball', 'loaf', 'bolster', 'pancake', 'arch', 'lsit', 'tall', 'drape'], ['sit', 'side', 'sphinx', 'stretch', 'belly', 'curl', 'box', 'pawsup']];
-  SG.POSE_INFO = {}; Object.keys(CPOSE).forEach(function (k) { SG.POSE_INFO[k] = { label: CPOSE[k].label, amount: CPOSE[k].amt, hint: CPOSE[k].hint || '' }; });
-  SG.POSE_LIST = [['stand', '站立']].concat(SG.POSE_PAGES[0].concat(SG.POSE_PAGES[1]).map(function (k) { return [k, CPOSE[k].label]; }));
+  SG.POSE_INFO = {}; Object.keys(JPOSE).forEach(function (k) { SG.POSE_INFO[k] = { label: JPOSE[k].label, amount: JPOSE[k].amt, hint: JPOSE[k].hint || '' }; }); // the hiders are jelly figures: the wheel shows their poses
+  SG.POSE_LIST = [['stand', '站立']].concat(SG.POSE_PAGES[0].concat(SG.POSE_PAGES[1]).map(function (k) { return [k, JPOSE[k].label]; }));
 
   /* =====================================================================================================
      mesh builder: joints + charts (vertices with skin weights and chart-space UVs) -> packed atlas, typed arrays,
@@ -412,6 +433,67 @@
     return D;
   }
 
+  /* ---------- jelly figures ----------
+     one continuous skin for body + head (a tube of rings along y whose radius is the smooth union of the two circles), with arms, feet,
+     ears (and a dog's snout) as small tubes on their own joints. Joint names match the mat cats, so poses and animation keep working. */
+  function buildJelly(S, B) {
+    var Rb = S.Rb, Rh = S.Rh, hc = S.hc, kN = S.neck, dog = S.kind === 'dog', i, D = {};
+    B.MP = [{}, {}, {}]; B.MN = [{}, {}, {}]; // no shape targets
+    var yN = hc - Rh * 0.82, yH = hc - Rh * 0.45;
+    B.joint('body', null); B.joint('hip', 'body', 0, -0.1, 0); B.joint('chest', 'body', 0, 0.06, 0);
+    B.joint('neck', 'chest', 0, yN - 0.06, 0); B.joint('head', 'neck', 0, yH - yN, 0);
+    function smax(a, b, k) { var h = Math.max(k - Math.abs(a - b), 0) / k; return Math.max(a, b) + h * h * k * 0.25; }
+    function rad(y) { var a = Math.abs(y) < Rb ? Math.sqrt(Rb * Rb - y * y) : -Rb + (Rb - Math.abs(y)), d = y - hc, b = Math.abs(d) < Rh ? Math.sqrt(Rh * Rh - d * d) : -Rh + (Rh - Math.abs(d)); return Math.max(0, smax(a, b, kN)); }
+    var y0 = -Rb, y1 = hc + Rh, NRg = 64, rings = [];
+    for (i = 0; i <= NRg; i++) { var t = i / NRg, y = y0 + (y1 - y0) * (0.5 - 0.5 * Math.cos(PI * t)), r = (i === 0 || i === NRg) ? 0 : rad(y); rings.push({ y: y, rx: r, rz: r * S.depth, e: 2 }); }
+    var chain = ['hip', 'body', 'chest', 'neck', 'head'], bz = [-0.12, 0.05, yN - 0.015, yH], bw = [0.06, 0.07, 0.05, 0.04];
+    var G = tubeGrid(B.jmap.body.w, rings, 44, -PI / 2, function (rg) { return chainW(chain, bz, bw, rg.y); });
+    var kb = 9, kt = NRg - 10;
+    B.gridChart('bottom', G, 0, kb, 'planar', { ax: [0, 2], flip: true, dens: 0.8 });
+    B.gridChart('body', G, kb, kt, 'unroll', { dens: 1.15 });
+    B.gridChart('top', G, kt, NRg, 'planar', { ax: [0, 2], dens: 1.1 });
+    // a small tube on a joint, pointing down its -y: rings [y, r] then a round end
+    function tube(jn, name, prof, k2, wfn, M) {
+      var R = prof.map(function (p) { return { y: p[0], rx: p[1], rz: p[1] * (p[2] || 1), e: 2 }; });
+      var g = tubeGrid(M || B.jmap[jn].w, R, 14, 0, wfn || function () { return [[jn, 1]]; });
+      B.gridChart(name, g, 0, g.NR, 'unroll', { dens: k2 || 0.9 }); return g;
+    }
+    function capProf(L, r0, r1, top) { var P = [[top, 0], [top * 0.6, r0 * 0.75], [0, r0]], n = 5, j; for (j = 1; j <= n; j++) P.push([-(L - r1) * j / n, lerp(r0, r1, j / n)]); for (j = 1; j <= 4; j++) { var be = j / 4 * PI / 2; P.push([-(L - r1) - r1 * Math.sin(be), r1 * Math.cos(be)]); } P[P.length - 1][1] = 0; return P; }
+    // arms: from the sides of the body, tilted outwards; elbow half way
+    var aL = S.arm, aR = S.armR, ay = Rb * 0.42, ax = Math.sqrt(Rb * Rb - ay * ay) * 0.92, az = 0.03;
+    [['shL', 'elL', -1, 'armL'], ['shR', 'elR', 1, 'armR']].forEach(function (A) {
+      var sj = B.joint(A[0], 'chest', A[2] * ax, ay - 0.06, az, 0, 0, A[2] * 48); B.joint(A[1], A[0], 0, -aL * 0.48, 0);
+      tube(A[0], A[3], capProf(aL, aR, aR * 0.95, 0.035), 0.9, function (rg) { var w = sstep(-aL * 0.62, -aL * 0.34, rg.y); return w > 0.999 ? [[A[0], 1]] : w < 0.001 ? [[A[1], 1]] : [[A[0], w], [A[1], 1 - w]]; });
+    });
+    // feet: stubby, just poking out under the body
+    var fr = S.foot;
+    [['hpL', 'knL', -1, 'footL'], ['hpR', 'knR', 1, 'footR']].forEach(function (F) {
+      B.joint(F[0], 'hip', F[2] * Rb * 0.4, -Rb * 0.72 + 0.1, 0.06); B.joint(F[1], F[0], 0, -0.03, 0);
+      tube(F[0], F[3], [[0.045, 0], [0.03, fr * 0.7], [0, fr], [-0.03, fr * 1.02], [-0.05, fr * 0.92], [-0.065, fr * 0.6], [-0.074, 0]], 0.8);
+    });
+    // no tail: the joints are there for the animation code, with nothing on them
+    B.joint('t0', 'hip', 0, 0.05, -Rb * 0.9 + 0.0, 90, 0, 0); for (i = 1; i < 4; i++) B.joint('t' + i, 't' + (i - 1), 0, -0.012, 0);
+    // ears
+    var E = S.ear, flop = E.type === 'flop', round = E.type === 'round';
+    [-1, 1].forEach(function (s) {
+      var ex = s * Rh * E.spread, ey = flop ? hc + Rh * 0.35 : hc + Math.sqrt(Math.max(0, Rh * Rh - ex * ex)) - 0.012, ez = -0.01, nm = s < 0 ? 'earL' : 'earR', hj = B.jmap.head.w.elements;
+      var ej = B.joint(nm, 'head', ex - hj[12], ey - hj[13], ez - hj[14], 0, 0, -s * (flop ? E.tilt : E.tilt));
+      var P = [[-0.02, 0]], n = 6, j; for (j = 0; j <= n; j++) { var t2 = j / n, w = round ? E.w * Math.sqrt(Math.max(0, 1 - t2 * t2 * 0.92)) : E.w * (Math.pow(1 - t2, 0.85) * 0.9 + 0.1 * (1 - t2)); P.push([-0.01 + (E.h + 0.01) * t2, w, flop ? 0.38 : 0.55]); }
+      P.push([E.h + 0.008, 0]);
+      tube(nm, nm, P, 0.8);
+    });
+    if (dog) { // snout: a short soft tube forward from the face
+      var hm = B.jmap.head.w.clone().multiply(new THREE.Matrix4().makeTranslation(0, hc - 0.035 - yH, Rh * 0.72)).multiply(new THREE.Matrix4().makeRotationX(-PI / 2));
+      tube('head', 'snout', [[0.01, 0], [0, 0.05], [-0.03, 0.058], [-S.snout + 0.03, 0.054], [-S.snout + 0.012, 0.042], [-S.snout, 0]], 0.9, null, hm);
+    }
+    D.L = 2 * Rb; D.leg = 0.18; D.tuck = 0.03; D.hy = hc; D.hH = Rh; D.zH = 0; D.hW = Rh; D.hD = Rh; D.zF = Rh + (dog ? S.snout : 0); D.hh = Rb * 0.9; D.dog = dog;
+    D.eyeP = [Rh * 0.36, hc + 0.035, Rh * 0.92]; D.noseP = [0, hc - 0.035, Rh * 0.72 + (dog ? S.snout : 0.2) - 0.004]; D.mouthP = [0, hc - 0.075, Rh * 0.72 + (dog ? S.snout * 0.6 : 0.2)];
+    D.gunY = -0.04; D.gunZ = Rb * 0.9; D.muzzleP = [0, D.gunY + 0.066, D.gunZ + 0.26];
+    D.shoulder = Rb + ay; D.top = hc + Rh; D.eye = hc + 0.035; D.zb3 = 0; D.vol = 4 / 3 * PI * (Rb * Rb * Rb + Rh * Rh * Rh * 0.8);
+    B.D = D; B.body = G;
+    return D;
+  }
+
   /* ---------- dogs: lathe parts on rigid joints (the older look) ---------- */
   function lathe(B, name, jn, o) {
     var tw = o.tw || 96, th = o.th || 64, su = o.su || 20, sv = o.sv || 12, sx = o.sx || 1, sz = o.sz || 1, prof = o.prof, g = 4;
@@ -520,7 +602,7 @@
   var BPC = {};
   function blueprint(S, A) {
     var key = A + ':' + JSON.stringify(S); if (BPC[key]) return BPC[key];
-    var B = new Builder(A), canvas = !S.legacy, D = canvas ? buildCat(S, B) : buildDog(S, B);
+    var B = new Builder(A), canvas = !S.legacy, D = canvas ? (S.jelly ? buildJelly(S, B) : buildCat(S, B)) : buildDog(S, B);
     var nv = B.P.length / 3, nt = B.I.length / 3, i, k, g = Math.max(2, Math.round((canvas ? 8 : 4) * (A || 1024) / 1024)), AA = A || 1024; // gutter: wide enough that distant mip levels do not pull in the neighbouring chart
     if (canvas) { var lo = 100, hi = 4000; for (i = 0; i < 18; i++) { var mid = (lo + hi) / 2; if (pack(B, mid, AA, g)) lo = mid; else hi = mid; } pack(B, lo, AA, g); B.ppu = lo; }
     else if (!pack(B, 0, AA, g)) console.warn('critter atlas full', S.name);
@@ -702,7 +784,7 @@
     this._off = new THREE.Vector3(); this.liftY = 0; this.bob = 0; this._minY = 0;
     this.scale = (opt.scale || 1) * (S.scale || 1); this.root.scale.setScalar(this.scale);
     this._blend(1); this._morph(); this._pose(); this._limbs(); this._solve(true); this._lift0 = this.liftY;
-    if (S.coat && !bare) this.applyCoat((cv ? FCOATS : COATS)[S.coat]);
+    if (S.coat && !bare) this.applyCoat(JCOATS[S.coat] || (cv ? FCOATS : COATS)[S.coat]);
     if (cv && S.collar && !bare) this._collar();
   }
   var P = Critter.prototype;
@@ -760,7 +842,7 @@
     tg.scale.set(1, 1, 0.01); this.tongue = tg; this.tongue0 = tg.position.clone(); this.tongueFlat = true;
     if (S.collar === 'bell') this._deco(this.joints.neck, new THREE.SphereGeometry(0.02, 10, 8), new THREE.MeshStandardMaterial({ color: 0xd9a93a, roughness: 0.3, metalness: 0.8 }), 0, D.hh * 0.7 + 0.02, 0);
     if (S.gun !== false) { // a chunky toy blaster on a saddle: base, body, barrel with a fat muzzle ring, paint tank
-      var y0 = D.gunY, M = function (geo, col, x, y, z, rx, r) { var m = self._deco(body, geo, new THREE.MeshStandardMaterial({ color: col, roughness: r || 0.5 }), x, y, z); if (rx) m.rotation.x = rx; return m; };
+      var y0 = D.gunY, gz = D.gunZ || 0, M = function (geo, col, x, y, z, rx, r) { var m = self._deco(body, geo, new THREE.MeshStandardMaterial({ color: col, roughness: r || 0.5 }), x, y, z + gz); if (rx) m.rotation.x = rx; return m; };
       M(new THREE.CylinderGeometry(0.055, 0.07, 0.03, 16), 0x3a3f46, 0, y0 + 0.012, 0.0);
       M(SG.geo.rbox(0.075, 0.06, 0.17, 0.016), 0xf29a4a, 0, y0 + 0.06, 0.02);
       M(new THREE.CylinderGeometry(0.02, 0.02, 0.14, 12), 0x596270, 0, y0 + 0.066, 0.17, Math.PI / 2, 0.35);
@@ -778,7 +860,7 @@
   };
   /* collar: painted on (a band across the neck), so it stays flat */
   P._collar = function () {
-    var D = this.bp.D, col = { red: [200, 69, 46], bell: [47, 75, 124], scarf: [217, 169, 58] }[this.spec.collar] || [200, 69, 46], z0 = D.zb3 - 0.012, w = this.spec.collar === 'scarf' ? 0.032 : 0.016, po = this.pivot.position;
+    if (this.spec.jelly) return; var D = this.bp.D, col = { red: [200, 69, 46], bell: [47, 75, 124], scarf: [217, 169, 58] }[this.spec.collar] || [200, 69, 46], z0 = D.zb3 - 0.012, w = this.spec.collar === 'scarf' ? 0.032 : 0.016, po = this.pivot.position;
     this.root.updateMatrixWorld(true); var inv = new THREE.Matrix4().copy(this.root.matrixWorld).invert().elements;
     this.eachTexel(function (x, y, z) { var lz = inv[2] * x + inv[6] * y + inv[10] * z + inv[14] - po.z; return Math.abs(lz - z0) < w ? col : null; });
   };
@@ -807,7 +889,7 @@
   /* c.setPose(name, amount): amount 0..1 is optional (each pose has its own default); it can also be changed later through c.poseAmount */
   P.setPose = function (name, amount) {
     if (!POSES[name]) return;
-    var d = CPOSE[ALIAS[name] || name];
+    var d = PT(this.spec)[ALIAS[name] || name];
     if (name !== this.pose || amount != null) this.poseAmount = amount != null ? clamp(+amount, 0, 1) : d ? d.amt : 0.5;
     this.pose = name;
   };
@@ -815,8 +897,8 @@
   /* move the current pose towards the target by k (1 = jump). Returns true when it has arrived. */
   P._blend = function (k) {
     var S = this.spec, cv = this.canvas, posed = this.pose !== 'stand' && this.pose !== 'crouch', P0, done = true, i, n, v, sc, T = S.tail, tm = this.tailMode;
-    if (cv) P0 = (CPOSE[ALIAS[this.pose] || this.pose] || CPOSE.stand).f(clamp(+this.poseAmount || 0, 0, 1), this.bp.D); else P0 = POSES[this.pose] || POSES.stand;
-    if (cv && this.rearUp > 0 && !posed) { var ru = clamp(this.rearUp, 0, 1), Q = {}; for (var qk in P0) Q[qk] = P0[qk]; Q.pivot = [-38 * ru, 0, 0]; Q.chest = [-42 * ru, 0, 0]; Q.neck = [36 * ru, 0, 0]; Q.head = [34 * ru, 0, 0]; P0 = Q; } // c.rearUp 0..1: the front end lifts to look over things
+    var PTb = PT(S); if (cv) P0 = (PTb[ALIAS[this.pose] || this.pose] || PTb.stand).f(clamp(+this.poseAmount || 0, 0, 1), this.bp.D); else P0 = POSES[this.pose] || POSES.stand;
+    if (cv && this.rearUp > 0 && !posed) { var ru = clamp(this.rearUp, 0, 1), Q = {}; for (var qk in P0) Q[qk] = P0[qk]; if (S.jelly) { Q.S = [1 - 0.06 * ru, 1 + 0.16 * ru, 1 - 0.06 * ru]; Q.neck = [-14 * ru, 0, 0]; } else { Q.pivot = [-38 * ru, 0, 0]; Q.chest = [-42 * ru, 0, 0]; Q.neck = [36 * ru, 0, 0]; Q.head = [34 * ru, 0, 0]; } P0 = Q; } // c.rearUp 0..1: the front end lifts to look over things
     for (i = 0; i < this.names.length; i++) {
       n = this.names[i]; v = poseEuler(P0, n); sc = null;
       var c0 = n.charAt(0), c1 = n.charAt(1);
@@ -843,7 +925,7 @@
     var m2 = m[2] || 0, dd = Math.abs(ps.x - s3[0]) + Math.abs(ps.y - s3[1]) + Math.abs(ps.z - s3[2]) + Math.abs(cm[0] - m[0]) + Math.abs(cm[1] - m[1]) + Math.abs(cm[2] - m2);
     if (k >= 1 || (1 - Math.abs(this.pq.dot(_q)) < 1e-7 && dd < 2e-4)) { this.pq.copy(_q); ps.set(s3[0], s3[1], s3[2]); cm[0] = m[0]; cm[1] = m[1]; cm[2] = m2; }
     else { this.pq.slerp(_q, k); ps.x += (s3[0] - ps.x) * k; ps.y += (s3[1] - ps.y) * k; ps.z += (s3[2] - ps.z) * k; cm[0] += (m[0] - cm[0]) * k; cm[1] += (m[1] - cm[1]) * k; cm[2] += (m2 - cm[2]) * k; done = false; }
-    this.gz = P0.g || null; this._emote = cv ? !!(CPOSE[this.pose] && CPOSE[this.pose].emote) : !!P0.emote;
+    this.gz = P0.g || null; this._emote = cv ? !!(PTb[this.pose] && PTb[this.pose].emote) : !!P0.emote;
     return done;
   };
   /* shape targets are blended on the CPU into the rest mesh, so every mesh that shares this geometry (see-through ghost, answer-check shell) follows */
@@ -1273,6 +1355,14 @@
     dachs: function (p, h, name, D) { var u = Math.max(under(p, D, name), (p[2] - (D.zH + D.hD * 0.3)) * 30 - (p[1] > D.hy ? 3 : 0)), c = mix3([112, 62, 36], [206, 150, 96], u), n = vnoise(p[0] * 90, p[1] * 90, p[2] * 90) * 10 - 5; return [c[0] + n, c[1] + n, c[2] + n]; },
     husky: function (p, h, name, D) { var mask = p[2] > D.zb4 ? (D.hW * 0.42 - Math.abs(p[0])) * 50 + (p[2] - D.zH) * 20 : -1, u = Math.max(under(p, D, name) + vnoise(p[0] * 20, p[1] * 20, p[2] * 20) * 0.8 - 0.4, mask, name === 'tail' ? (-p[2] - D.L / 2 - 0.07) * 50 : -1), c = mix3([96, 102, 112], [250, 250, 246], u), n = vnoise(p[0] * 90, p[1] * 90, p[2] * 90) * 10 - 5; if (name.indexOf('ear') === 0) c = [96, 102, 112]; return [c[0] + n, c[1] + n, c[2] + n]; }
   };
+  /* jelly coats. Cats: plain white with two light-grey eye dots, all of it paintable. Dogs: one soft colour, darker ears, light snout */
+  function jEyes(p, D, rgb) { var e = D.eyeP, dx = Math.abs(p[0]) - e[0], dy = p[1] - e[1]; return p[2] > D.hD * 0.45 && dx * dx / (0.017 * 0.017) + dy * dy / (0.024 * 0.024) < 1 ? rgb : null; }
+  var JCOATS = {
+    jcat: function (p, h, name, D) { return (name === 'body' && jEyes(p, D, [132, 126, 118])) || [246, 245, 241]; },
+    jshiba: function (p, h, name, D) { if (name.indexOf('ear') === 0) return [150, 98, 58]; if (name === 'snout' || (name === 'body' && p[1] < 0 && p[2] > 0.05)) return [248, 236, 214]; var n = vnoise(p[0] * 40, p[1] * 40, p[2] * 40) * 8 - 4; return [222 + n, 168 + n, 108 + n]; },
+    jcorgi: function (p, h, name, D) { if (name === 'snout' || (name === 'body' && p[2] > 0.08 && Math.abs(p[0]) < 0.08)) return [252, 246, 236]; return [232, 150, 72]; },
+    jhusky: function (p, h, name, D) { if (name.indexOf('ear') === 0) return [96, 102, 112]; if (name === 'snout' || (name === 'body' && (p[1] < D.hy - 0.05 ? p[2] > 0.05 : p[2] > D.hD * 0.5 && Math.abs(p[0]) < 0.07))) return [250, 250, 246]; return [120, 126, 136]; }
+  };
   P.applyCoat = function (fn) {
     var self = this, S = this.spec, ext = { len: S.len, headR: S.headR }, po = this.pivot.position;
     this.root.updateMatrixWorld(true);
@@ -1301,7 +1391,7 @@
   SG.poseIcon = function (pose, o) {
     o = o || {}; var size = o.size || 96, spec = o.spec || CATS.mochi, yaw = o.yaw == null ? 0.75 : o.yaw, pit = o.pitch == null ? 0.42 : o.pitch, key = JSON.stringify(spec);
     var c = ICONC[key] || (ICONC[key] = new Critter(spec, { bare: true }));
-    c.tailMode = o.tail || 'tuck'; c.earMode = o.ears || 'flat'; c.setPose(pose, o.amount); if (o.amount == null) c.setPose(pose, (CPOSE[ALIAS[pose] || pose] || CPOSE.stand).amt); c.settle();
+    c.tailMode = o.tail || 'tuck'; c.earMode = o.ears || 'flat'; c.setPose(pose, o.amount); if (o.amount == null) c.setPose(pose, (PT(spec)[ALIAS[pose] || pose] || PT(spec).stand).amt); c.settle();
     var cvs = document.createElement('canvas'); cvs.width = cvs.height = size * 2;
     var g = cvs.getContext('2d'), PV = c.PV, idx = c.bp.idx, nt = c.bp.nt, nv = c.bp.nv, X = new Float32Array(nv), Y = new Float32Array(nv), Z = new Float32Array(nv), i;
     var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pit), sp = Math.sin(pit), mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9;

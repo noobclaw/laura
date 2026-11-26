@@ -100,3 +100,11 @@
 - 「寫實」只做到光與表面細節；家具與小物的造型仍然是簡單幾何體，貼圖是程式畫的。沒有法線貼圖、沒有磨損邊緣、沒有接觸陰影的加強。
 - 浴室和幾個小房間地上的東西偏多，看起來有點亂；沒有人看過並判斷好不好看。
 - 視角較廣時 draw call 超過 300（客廳角落 354、庭院 392），這一輪沒有處理。
+
+## Decision 2026-11-26: jelly characters (owner approved)
+
+- Hiders are jelly cats: one smooth "dango" body (round body + round head), two short arms, small ears, stubby feet, **no tail**. White, unpainted; faint grey eye dots that paint covers like the rest of the body.
+- Seekers are jelly dogs (shiba / corgi / husky coats) holding the paint blaster with both arms forward.
+- Why: the earlier mannequin / cardboard / flat versions were rejected as not round or cute enough; the jelly dango was approved ("這個好").
+- Body size follows the original: about 0.9–1 m tall, never paper-thin. No free stretching (the original has none); shape changes come only from fixed poses on the pose wheel and the round size setting.
+- Poses (fixed): stand, crouch, ball, loaf, bolster, pancake, arch, sit, raise arms, drape, look up, lean, sphinx, stretch, belly up, hug knees, flat box, wave.
