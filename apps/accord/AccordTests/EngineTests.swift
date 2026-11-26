@@ -135,6 +135,33 @@ final class ProductTests: XCTestCase {
     }
 }
 
+final class DilutionTests: XCTestCase {
+    func testMakeFromNeat() {
+        let p = DilutionPlan.make(total: 10, target: 0.1)!
+        XCTAssertEqual(p.material, 1, accuracy: 1e-9)
+        XCTAssertEqual(p.solvent, 9, accuracy: 1e-9)
+    }
+
+    func testDiluteDownFromExistingDilution() {
+        // 20 g of 1 % from a 10 % stock: 2 g stock + 18 g solvent.
+        let p = DilutionPlan.make(total: 20, target: 0.01, source: 0.1)!
+        XCTAssertEqual(p.material, 2, accuracy: 1e-9)
+        XCTAssertEqual(p.solvent, 18, accuracy: 1e-9)
+    }
+
+    func testFromMaterialYouHave() {
+        let p = DilutionPlan.fromMaterial(2.5, target: 0.1)!
+        XCTAssertEqual(p.total, 25, accuracy: 1e-9)
+    }
+
+    func testRejectsImpossibleTargets() {
+        XCTAssertNil(DilutionPlan.make(total: 10, target: 0.2, source: 0.1))
+        XCTAssertNil(DilutionPlan.make(total: 0, target: 0.1))
+        XCTAssertNil(DilutionPlan.make(total: 10, target: 0))
+        XCTAssertNotNil(DilutionPlan.make(total: 10, target: 1, source: 1))
+    }
+}
+
 final class CSVTests: XCTestCase {
     func testParsesQuotesAndSemicolons() {
         let rows = CSVImport.parse("Name;Grams\n\"Rose; absolute\";1,5\nLinalool;10\n")
@@ -243,6 +270,15 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(r.created, 1)
         XCTAssertEqual(try ctx.fetchCount(FetchDescriptor<Material>()), before + 1)
         XCTAssertEqual(r.formula?.sortedLines.last?.dilution ?? 0, 0.1, accuracy: 1e-9)
+    }
+
+    func testShareCardRenders() throws {
+        let ctx = try container().mainContext
+        let f = SampleData.seedIfNeeded(ctx)!
+        let img = ShareCard.render(ShareCard(formula: f, mix: f.mix(), showAmounts: true))
+        XCTAssertNotNil(img)
+        XCTAssertEqual(img?.size.width ?? 0, ShareCard.size.width, accuracy: 1)
+        XCTAssertEqual((img?.size.width ?? 0) * (img?.scale ?? 0), 1080, accuracy: 1)
     }
 
     func testInventoryDeductsNeatGrams() throws {

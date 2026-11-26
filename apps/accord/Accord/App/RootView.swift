@@ -10,6 +10,8 @@ struct RootView: View {
     @Environment(AppLock.self) private var lock
     @State private var showStoreError = false
     @State private var keyboardShown = false
+    @Query private var batches: [Batch]
+    @Query private var formulas: [Formula]
 
     var body: some View {
         @Bindable var state = state
@@ -40,10 +42,13 @@ struct RootView: View {
             if storeFailed { showStoreError = true }
             if ProcessInfo.processInfo.arguments.contains("-UITour") { lock.isLocked = false } else { lock.showWindow() }
         }
+        .onAppear { WidgetBridge.write(batches, formulas: formulas) }
+        .onChange(of: batches.map { "\($0.id)\($0.rating)" }) { _, _ in WidgetBridge.write(batches, formulas: formulas) }
+        .onOpenURL { url in if url.host == "batches" { state.tab = .lab } }
         .onChange(of: phase) { _, new in
             if new == .background { lock.lockIfNeeded() }
             if new == .active, lock.isLocked { lock.unlock() }
-            if new == .background { try? context.save() }
+            if new == .background { try? context.save(); WidgetBridge.write(batches, formulas: formulas) }
         }
         .alert(Text("Your formula book couldn’t be opened"), isPresented: $showStoreError) {
             Button("OK", role: .cancel) {}

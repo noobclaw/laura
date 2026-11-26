@@ -59,6 +59,8 @@ struct BenchContent: View {
     @State private var editingNotes = false
     @State private var comparing = false
     @State private var exporting = false
+    @State private var sharingCard = false
+    @State private var sprayAt: Date?
     @State private var confirmDelete = false
     @State private var newName = ""
 
@@ -123,6 +125,7 @@ struct BenchContent: View {
         .sheet(isPresented: $editingNotes) { NotesSheet(formula: formula) }
         .sheet(isPresented: $comparing) { ComparePickerSheet(base: formula) }
         .sheet(isPresented: $exporting) { ExportSheet(formula: formula) }
+        .sheet(isPresented: $sharingCard) { ShareCardSheet(formula: formula) }
         .alert(Text("Rename formula"), isPresented: $renaming) {
             TextField(text: $newName) { Text("Name") }
             Button("Save") {
@@ -153,24 +156,57 @@ struct BenchContent: View {
                 Spacer()
                 formulaMenu
             }
-            Text(verbatim: formula.name)
-                .font(Theme.display(36, relativeTo: .largeTitle))
-                .foregroundStyle(Theme.ink)
-                .lineLimit(2)
-                .minimumScaleFactor(0.7)
-                .onTapGesture { newName = formula.name; renaming = true }
-                .accessibilityAddTraits(.isHeader)
-                .accessibilityIdentifier("bench-title")
-            Text(verbatim: String(localized: "\(Fmt.grams(formula.totalGrams)) · \(lines.count) ingredients", bundle: .l10n))
-                .font(.subheadline)
-                .foregroundStyle(Theme.inkSoft)
+            HStack(alignment: .bottom, spacing: Theme.Space.m) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(verbatim: formula.name)
+                        .font(Theme.display(36, relativeTo: .largeTitle))
+                        .foregroundStyle(Theme.ink)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                        .onTapGesture { newName = formula.name; renaming = true }
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("bench-title")
+                    Text(verbatim: String(localized: "\(Fmt.grams(formula.totalGrams)) · \(lines.count) ingredients", bundle: .l10n))
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.inkSoft)
+                }
+                Spacer(minLength: 0)
+                heroBottle(mix: mix)
+            }
         }
+    }
+
+    /// The formula as a bottle. Tap it to spray.
+    private func heroBottle(mix: MixResult) -> some View {
+        let layers = Tier.Layer.allCases.map { layer in Tier.allCases.filter { $0.layer == layer }.reduce(0) { $0 + mix.grams(in: $1) } }
+        let colors = Tier.Layer.allCases.filter { layers[$0.rawValue] > 0 }.map { Theme.color($0) }
+        return FlaconView(layers: layers.reduce(0, +) > 0 ? layers : [1, 1, 1], fill: layers.reduce(0, +) > 0 ? 0.8 : 0)
+            .frame(width: 56, height: 76)
+            .overlay(alignment: .top) {
+                if let sprayAt {
+                    MistBurst(start: sprayAt, colors: colors.isEmpty ? [Theme.amber] : colors)
+                        .frame(width: 170, height: 150)
+                        .offset(y: -128)
+                        .id(sprayAt)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                sprayAt = Date()
+                UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.9)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.4) }
+            }
+            .accessibilityElement()
+            .accessibilityLabel(Text("Spray"))
+            .accessibilityAddTraits(.isButton)
+            .accessibilityIdentifier("spray")
     }
 
     private var formulaMenu: some View {
         Menu {
             Button { newName = formula.name; renaming = true } label: { Label("Rename", systemImage: "pencil") }
             Button { editingNotes = true } label: { Label("Notes", systemImage: "note.text") }
+            Button { sharingCard = true } label: { Label("Share card", systemImage: "photo.on.rectangle") }
             Button { duplicateAsVersion() } label: { Label("Save as new version", systemImage: "plus.square.on.square") }
             Button {
                 if store.isPro { comparing = true } else { state.proReason = .compare }

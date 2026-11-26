@@ -58,6 +58,12 @@ struct PaperBackground: View {
 
     var body: some View {
         Theme.paper
+            .overlay {
+                if Theme.isNoir {
+                    // A warm glow from above, like a lit perfume counter.
+                    RadialGradient(colors: [Theme.amber.opacity(0.16), .clear], center: .top, startRadius: 10, endRadius: 520)
+                }
+            }
             .overlay(Image(uiImage: PaperGrain.tile(dark: scheme == .dark)).resizable(resizingMode: .tile).opacity(1))
             .ignoresSafeArea()
     }
@@ -104,7 +110,13 @@ struct PrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(Theme.onAmber)
             .padding(.horizontal, Theme.Space.l)
             .frame(maxWidth: wide ? .infinity : nil, minHeight: 52)
-            .background(Theme.amber, in: RoundedRectangle(cornerRadius: Theme.Radius.pill, style: .continuous))
+            .background(
+                RoundedRectangle(cornerRadius: Theme.Radius.pill, style: .continuous)
+                    .fill(Theme.isNoir
+                          ? AnyShapeStyle(LinearGradient(colors: [Color(UIColor(hex: 0xF1D79A)), Color(UIColor(hex: 0xC89B4A)), Color(UIColor(hex: 0x9C7A35))],
+                                                         startPoint: .topLeading, endPoint: .bottomTrailing))
+                          : AnyShapeStyle(Theme.amber))
+            )
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(Theme.Motion.quick, value: configuration.isPressed)
     }
@@ -146,6 +158,20 @@ struct SectionTitle: View {
         .padding(.top, Theme.Space.l)
         .padding(.bottom, Theme.Space.s)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// Form section header: display italic, sentence case, readable size (not the system's small caps).
+struct FormHeader: View {
+    let text: LocalizedStringKey
+    init(_ text: LocalizedStringKey) { self.text = text }
+    var body: some View {
+        Text(text)
+            .font(Theme.display(17, italic: true, relativeTo: .headline))
+            .foregroundStyle(Theme.amberInk)
+            .textCase(nil)
+            .padding(.leading, -4)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 

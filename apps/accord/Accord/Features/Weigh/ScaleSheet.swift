@@ -169,6 +169,7 @@ struct WeighScreen: View {
         let target: Double
         let dilution: Double
         let materialID: UUID?
+        var color: Color = Theme.heartNote
     }
 
     @State private var index = 0
@@ -181,12 +182,14 @@ struct WeighScreen: View {
 
     private var steps: [Step] {
         let lines = formula.sortedLines.filter(\.isResolved)
+        let clear = Theme.isNoir ? Color.white.opacity(0.16) : Color(UIColor(hex: 0xDCE7EA))
         var s = plan.rows.map { row in
             Step(id: row.id, name: row.name, target: row.grams, dilution: row.dilution,
-                 materialID: lines[safe: row.id]?.material?.id)
+                 materialID: lines[safe: row.id]?.material?.id,
+                 color: Theme.color(lines[safe: row.id]?.tier ?? .heart))
         }
-        if plan.ethanolGrams > 0 { s.append(Step(id: 10_000, name: formula.product.diluentName, target: plan.ethanolGrams, dilution: 1, materialID: nil)) }
-        if plan.waterGrams > 0 { s.append(Step(id: 10_001, name: String(localized: "Distilled water", bundle: .l10n), target: plan.waterGrams, dilution: 1, materialID: nil)) }
+        if plan.ethanolGrams > 0 { s.append(Step(id: 10_000, name: formula.product.diluentName, target: plan.ethanolGrams, dilution: 1, materialID: nil, color: clear)) }
+        if plan.waterGrams > 0 { s.append(Step(id: 10_001, name: String(localized: "Distilled water", bundle: .l10n), target: plan.waterGrams, dilution: 1, materialID: nil, color: clear)) }
         return s
     }
 
@@ -224,16 +227,23 @@ struct WeighScreen: View {
             if step.dilution < 0.9999 {
                 Tag(text: String(localized: "Use your \(Fmt.dilution(step.dilution)) dilution", bundle: .l10n), tint: Theme.amberInk)
             }
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Add").font(.subheadline).foregroundStyle(Theme.inkSoft)
-                Text(verbatim: Fmt.grams(step.target))
-                    .font(.system(size: 64, weight: .semibold, design: .default).monospacedDigit())
-                    .foregroundStyle(Theme.ink)
-                    .minimumScaleFactor(0.5)
-                    .accessibilityIdentifier("weigh-target")
-                if cumulative {
-                    Text("Scale should read \(Fmt.grams(before + step.target))")
-                        .font(Theme.figure(.title3, weight: .medium)).foregroundStyle(Theme.amberInk)
+            HStack(alignment: .bottom, spacing: Theme.Space.m) {
+                BeakerView(layers: steps.prefix(index).map { ($0.color, actual[$0.id] ?? $0.target) },
+                           pending: step.target, pendingColor: step.color,
+                           capacity: steps.reduce(0) { $0 + $1.target } * 1.08)
+                    .frame(width: 92, height: 150)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Add").font(.subheadline).foregroundStyle(Theme.inkSoft)
+                    Text(verbatim: Fmt.grams(step.target))
+                        .font(.system(size: 58, weight: .semibold, design: .default).monospacedDigit())
+                        .foregroundStyle(Theme.ink)
+                        .minimumScaleFactor(0.4)
+                        .lineLimit(1)
+                        .accessibilityIdentifier("weigh-target")
+                    if cumulative {
+                        Text("Scale should read \(Fmt.grams(before + step.target))")
+                            .font(Theme.figure(.title3, weight: .medium)).foregroundStyle(Theme.amberInk)
+                    }
                 }
             }
             HStack {

@@ -3,27 +3,53 @@ import UIKit
 
 /// Design tokens. Colours, radii, spacing, durations and fonts come only from here.
 enum Theme {
-    // MARK: Colour (light / dark)
+    // MARK: Look
 
-    static let paper = dynamic(0xF6F1E7, 0x1C1916)
-    static let card = dynamic(0xFCF9F2, 0x26221E)
-    static let sunken = dynamic(0xEDE5D6, 0x14120F)
-    static let ink = dynamic(0x2A2420, 0xEDE6D8)
-    static let inkSoft = dynamic(0x6B6158, 0xA89E90)
-    static let hair = dynamic(0x2A2420, 0xEDE6D8, alpha: 0.12)
-    static let amber = dynamic(0xC8941E, 0xE0AE3C)
-    /// Amber dark enough to read as text on paper.
-    static let amberInk = dynamic(0x8A6210, 0xE8BC55)
-    static let onAmber = dynamic(0x2A2420, 0x1C1916)
-    static let kraft = dynamic(0xEADBC0, 0x3A3127)
+    /// Two art directions. Atelier: warm paper perfumer's lab (follows light/dark). Noir: black and gold boutique (always dark).
+    enum Look: String, CaseIterable, Identifiable {
+        case atelier, noir
+        var id: String { rawValue }
+        var name: String {
+            switch self {
+            case .atelier: return String(localized: "Atelier", bundle: .l10n)
+            case .noir: return String(localized: "Noir", bundle: .l10n)
+            }
+        }
+        var detail: String {
+            switch self {
+            case .atelier: return String(localized: "Warm paper, amber and kraft labels", bundle: .l10n)
+            case .noir: return String(localized: "Black glass and gold, like a perfume counter", bundle: .l10n)
+            }
+        }
+    }
 
-    static let topNote = dynamic(0x8FAE8B, 0xA9C6A4)
-    static let heartNote = dynamic(0xC47F8F, 0xD8A0AD)
-    static let baseNote = dynamic(0x7A5A44, 0xB08A6C)
+    static let lookKey = "accord.look"
+    /// Read live by every colour provider, so switching only needs a view rebuild.
+    static var look: Look { Look(rawValue: UserDefaults.standard.string(forKey: lookKey) ?? "") ?? .atelier }
 
-    static let ok = dynamic(0x4F7A52, 0x8FBF8F)
-    static let warn = dynamic(0xA8770F, 0xE0AE3C)
-    static let danger = dynamic(0xB3412E, 0xE07A63)
+    // MARK: Colour (atelier light / atelier dark / noir)
+
+    static let paper = tone(0xF6F1E7, 0x1C1916, 0x0D0B09)
+    static let card = tone(0xFCF9F2, 0x26221E, 0x17140F)
+    static let sunken = tone(0xEDE5D6, 0x14120F, 0x060504)
+    static let ink = tone(0x2A2420, 0xEDE6D8, 0xF3EADB)
+    static let inkSoft = tone(0x6B6158, 0xA89E90, 0xA99B84)
+    static let hair = tone(0x2A2420, 0xEDE6D8, 0xD4AF63, alpha: 0.12, noirAlpha: 0.22)
+    static let amber = tone(0xC8941E, 0xE0AE3C, 0xD4AF63)
+    /// Amber dark enough to read as text on paper (gold on noir).
+    static let amberInk = tone(0x8A6210, 0xE8BC55, 0xE6C47E)
+    static let onAmber = tone(0x2A2420, 0x1C1916, 0x120F0B)
+    static let kraft = tone(0xEADBC0, 0x3A3127, 0x2A2116)
+
+    static let topNote = tone(0x8FAE8B, 0xA9C6A4, 0x8CC7AE)
+    static let heartNote = tone(0xC47F8F, 0xD8A0AD, 0xE08EA5)
+    static let baseNote = tone(0x7A5A44, 0xB08A6C, 0xC08A55)
+
+    static let ok = tone(0x4F7A52, 0x8FBF8F, 0x8FC79A)
+    static let warn = tone(0xA8770F, 0xE0AE3C, 0xE6C47E)
+    static let danger = tone(0xB3412E, 0xE07A63, 0xEB8770)
+
+    static var isNoir: Bool { look == .noir }
 
     static func color(_ layer: Tier.Layer) -> Color {
         switch layer {
@@ -36,9 +62,9 @@ enum Theme {
     static func color(_ tier: Tier) -> Color {
         switch tier {
         case .top: return topNote
-        case .topHeart: return blend(0x8FAE8B, 0xC47F8F, 0xA9C6A4, 0xD8A0AD)
+        case .topHeart: return blend(0x8FAE8B, 0xC47F8F, 0xA9C6A4, 0xD8A0AD, 0x8CC7AE, 0xE08EA5)
         case .heart: return heartNote
-        case .heartBase: return blend(0xC47F8F, 0x7A5A44, 0xD8A0AD, 0xB08A6C)
+        case .heartBase: return blend(0xC47F8F, 0x7A5A44, 0xD8A0AD, 0xB08A6C, 0xE08EA5, 0xC08A55)
         case .base: return baseNote
         }
     }
@@ -117,8 +143,17 @@ enum Theme {
         })
     }
 
-    private static func blend(_ a: UInt32, _ b: UInt32, _ da: UInt32, _ db: UInt32) -> Color {
+    /// Atelier light / atelier dark / noir.
+    static func tone(_ light: UInt32, _ dark: UInt32, _ noir: UInt32, alpha: CGFloat = 1, noirAlpha: CGFloat? = nil) -> Color {
         Color(UIColor { traits in
+            if look == .noir { return UIColor(hex: noir, alpha: noirAlpha ?? alpha) }
+            return UIColor(hex: traits.userInterfaceStyle == .dark ? dark : light, alpha: alpha)
+        })
+    }
+
+    private static func blend(_ a: UInt32, _ b: UInt32, _ da: UInt32, _ db: UInt32, _ na: UInt32, _ nb: UInt32) -> Color {
+        Color(UIColor { traits in
+            if look == .noir { return UIColor(hex: na).mixed(with: UIColor(hex: nb), 0.5) }
             let dark = traits.userInterfaceStyle == .dark
             return UIColor(hex: dark ? da : a).mixed(with: UIColor(hex: dark ? db : b), 0.5)
         })

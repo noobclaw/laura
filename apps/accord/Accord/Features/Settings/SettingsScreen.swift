@@ -26,6 +26,14 @@ struct SettingsScreen: View {
                     .listRowBackground(Theme.card)
 
                 Section {
+                    HStack(spacing: Theme.Space.s) {
+                        ForEach(Theme.Look.allCases) { l in LookChoice(look: l) }
+                    }
+                    .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
+                } header: { FormHeader("Look") }
+                .listRowBackground(Color.clear)
+
+                Section {
                     Button { showLanguage = true } label: {
                         HStack {
                             Label { Text("App language").foregroundStyle(Theme.ink) } icon: { Image(systemName: "globe").foregroundStyle(Theme.amberInk) }
@@ -48,7 +56,7 @@ struct SettingsScreen: View {
                             .multilineTextAlignment(.trailing)
                             .frame(width: 90)
                     }
-                } header: { Text("Preferences") }
+                } header: { FormHeader("Preferences") }
                 .listRowBackground(Theme.card)
 
                 Section {
@@ -62,7 +70,7 @@ struct SettingsScreen: View {
                     })) {
                         Label { Text("App Lock") } icon: { Image(systemName: "faceid").foregroundStyle(Theme.amberInk) }
                     }
-                } header: { Text("Privacy") } footer: {
+                } header: { FormHeader("Privacy") } footer: {
                     Text("Accord has no account and no server. Your formulas never leave this iPhone unless you export them.")
                 }
                 .listRowBackground(Theme.card)
@@ -74,7 +82,7 @@ struct SettingsScreen: View {
                     Button { proGate(.importData) { restoring = true } } label: {
                         Label { Text("Restore from a backup").foregroundStyle(Theme.ink) } icon: { Image(systemName: "arrow.counterclockwise").foregroundStyle(Theme.amberInk) }
                     }
-                } header: { Text("Your data") } footer: {
+                } header: { FormHeader("Your data") } footer: {
                     Text("A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone.")
                 }
                 .listRowBackground(Theme.card)
@@ -92,7 +100,7 @@ struct SettingsScreen: View {
                         Text(verbatim: "\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""))")
                             .foregroundStyle(Theme.inkSoft)
                     }
-                } header: { Text("About") } footer: {
+                } header: { FormHeader("About") } footer: {
                     Text("Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials.")
                 }
                 .listRowBackground(Theme.card)
@@ -119,7 +127,7 @@ struct SettingsScreen: View {
 
     @ViewBuilder private var proCard: some View {
         HStack(spacing: Theme.Space.m) {
-            FlaconView(layers: [0.3, 0.35, 0.35]).frame(width: 40, height: 54)
+            FlaconView(layers: [0.3, 0.35, 0.35], live: false).frame(width: 40, height: 54)
             VStack(alignment: .leading, spacing: 2) {
                 Text(store.isPro ? "Accord Pro" as LocalizedStringKey : "Accord Free").font(Theme.display(20, relativeTo: .headline))
                 Text(store.isPro ? "Everything is unlocked. Thank you." as LocalizedStringKey : "5 formulas, full calculator and analysis.")
@@ -208,5 +216,47 @@ struct LanguagePickerSheet: View {
         }
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("lang-\(code ?? "system")")
+    }
+}
+
+/// One look as a tiny preview: its own background, bottle and accent, regardless of the current look.
+struct LookChoice: View {
+    let look: Theme.Look
+    @AppStorage(Theme.lookKey) private var current = Theme.Look.atelier.rawValue
+
+    var body: some View {
+        let selected = current == look.rawValue
+        let bg = look == .noir ? Color(UIColor(hex: 0x0D0B09)) : Color(UIColor(hex: 0xF6F1E7))
+        let ink = look == .noir ? Color(UIColor(hex: 0xF3EADB)) : Color(UIColor(hex: 0x2A2420))
+        let accent = look == .noir ? Color(UIColor(hex: 0xD4AF63)) : Color(UIColor(hex: 0xC8941E))
+        Button {
+            Haptics.select()
+            withAnimation(.easeInOut(duration: 0.3)) { current = look.rawValue }
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                ZStack {
+                    bg
+                    if look == .noir { RadialGradient(colors: [accent.opacity(0.25), .clear], center: .top, startRadius: 2, endRadius: 90) }
+                    HStack(alignment: .bottom, spacing: 6) {
+                        ForEach([(0x8FAE8B, 0x8CC7AE), (0xC47F8F, 0xE08EA5), (0x7A5A44, 0xC08A55)], id: \.0) { pair in
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(Color(UIColor(hex: UInt32(look == .noir ? pair.1 : pair.0))))
+                                .frame(width: 18, height: CGFloat(22 + (pair.0 % 7) * 4))
+                                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(look == .noir ? accent : ink, lineWidth: 1))
+                        }
+                    }
+                }
+                .frame(height: 74)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous)
+                    .strokeBorder(selected ? accent : Theme.hair, lineWidth: selected ? 2 : 1))
+                Text(verbatim: look.name).font(Theme.display(17, relativeTo: .headline)).foregroundStyle(Theme.ink)
+                Text(verbatim: look.detail).font(.caption2).foregroundStyle(Theme.inkSoft).lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("look-\(look.rawValue)")
     }
 }

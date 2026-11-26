@@ -9,6 +9,7 @@ struct AccordApp: App {
     @State private var store = ProStore()
     @State private var state = AppState()
     @State private var lock = AppLock()
+    @AppStorage(Theme.lookKey) private var look = Theme.Look.atelier.rawValue
     private let container: ModelContainer
     private let storeFailed: Bool
 
@@ -33,7 +34,8 @@ struct AccordApp: App {
                 .environment(state)
                 .environment(lock)
                 .environment(\.locale, language.locale)
-                .id(language.code)
+                .preferredColorScheme(look == Theme.Look.noir.rawValue ? .dark : nil)
+                .id(language.code + look)
                 .tint(Theme.amberInk)
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         }

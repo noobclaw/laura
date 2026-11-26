@@ -43,6 +43,47 @@ targets:
         SUPPORTS_MACCATALYST: "NO"
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: "NO"
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: "NO"
+    entitlements:
+      path: Accord/Accord.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.noobclaw.accord
+    dependencies:
+      - target: AccordWidget
+  AccordWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: AccordWidget
+      - path: Accord/Resources/Localizable.xcstrings
+      - path: Accord/Resources/Fonts/BodoniModa-MediumItalic.ttf
+      - path: Accord/Resources/Fonts/BodoniModa-Medium.ttf
+    info:
+      path: AccordWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Accord
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        CFBundleAllowMixedLocalizations: true
+        UIAppFonts:
+          - BodoniModa-Medium.ttf
+          - BodoniModa-MediumItalic.ttf
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: AccordWidget/AccordWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.noobclaw.accord
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.noobclaw.accord.widget
+        PRODUCT_NAME: AccordWidget
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: "YES"
+        GENERATE_INFOPLIST_FILE: "NO"
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: ""
   AccordTests:
     type: bundle.unit-test
     platform: iOS

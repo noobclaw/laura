@@ -108,7 +108,7 @@ struct LineEditorSheet: View {
                     Text(unit == .percent ? "A single line can’t be 100 % while others are in the formula." as LocalizedStringKey : "Enter a number.")
                         .font(.footnote).foregroundStyle(Theme.danger)
                 }
-            } header: { Text("Amount") }
+            } header: { FormHeader("Amount") }
             .listRowBackground(Theme.card)
 
             Section {
@@ -136,7 +136,7 @@ struct LineEditorSheet: View {
                         ForEach(Solvent.allCases.filter { $0 != .none }) { s in Text(verbatim: s.name).tag(s) }
                     } label: { Text("Diluted in") }
                 }
-            } header: { Text("Dilution") } footer: {
+            } header: { FormHeader("Dilution") } footer: {
                 Text("Weigh the solution; Accord counts only the active material in the analysis.")
             }
             .listRowBackground(Theme.card)
@@ -147,7 +147,7 @@ struct LineEditorSheet: View {
                 } label: { Text("After smelling") }
                 TextField(text: $note, axis: .vertical) { Text("Note") }
                     .lineLimit(1...4)
-            } header: { Text("Trial notes") }
+            } header: { FormHeader("Trial notes") }
             .listRowBackground(Theme.card)
 
             if let line {
@@ -331,7 +331,7 @@ struct MaterialPicker: View {
             }
 
             if query.isEmpty && family == nil && !recent.isEmpty {
-                Section { ForEach(recent) { m in row(m) } } header: { Text("Recently used") }
+                Section { ForEach(recent) { m in row(m) } } header: { FormHeader("Recently used") }
                     .listRowBackground(Theme.card)
             }
 
@@ -347,13 +347,13 @@ struct MaterialPicker: View {
                             }
                         }
                     }
-                } header: { Text("Your formulas as bases") }
+                } header: { FormHeader("Your formulas as bases") }
                 .listRowBackground(Theme.card)
             }
 
             Section {
                 ForEach(filtered) { m in row(m) }
-            } header: { Text("Library") }
+            } header: { FormHeader("Library") }
             .listRowBackground(Theme.card)
         }
         .scrollContentBackground(.hidden)

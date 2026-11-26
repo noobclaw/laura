@@ -286,3 +286,28 @@ enum FormulaDiff {
         return rows.values.sorted { abs($0.delta) == abs($1.delta) ? $0.name < $1.name : abs($0.delta) > abs($1.delta) }
     }
 }
+
+// MARK: - Stock dilutions
+
+/// "Make 10 g of a 10 % dilution" → grams of material and of solvent.
+struct DilutionPlan: Sendable, Equatable {
+    /// Grams of the starting material (neat, or the stronger dilution you already have).
+    var material: Double
+    var solvent: Double
+    var total: Double { material + solvent }
+
+    /// `target` and `source` are fractions (0.1 = 10 %); source 1 = neat.
+    /// Returns nil when the target is not weaker than the source or inputs are out of range.
+    static func make(total: Double, target: Double, source: Double = 1) -> DilutionPlan? {
+        guard total.isFinite, total > 0, target > 0, source > 0, source <= 1, target <= source else { return nil }
+        let material = total * target / source
+        return DilutionPlan(material: material, solvent: total - material)
+    }
+
+    /// The other direction: how much dilution you get from the material you have.
+    static func fromMaterial(_ grams: Double, target: Double, source: Double = 1) -> DilutionPlan? {
+        guard grams.isFinite, grams > 0, target > 0, source > 0, source <= 1, target <= source else { return nil }
+        let total = grams * source / target
+        return DilutionPlan(material: grams, solvent: total - grams)
+    }
+}

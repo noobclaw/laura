@@ -11,15 +11,18 @@ struct MaterialDetailScreen: View {
     @Environment(ProStore.self) private var store
     @State private var confirmDelete = false
     @State private var pendingDelete = false
+    @State private var showDilution = false
     @FocusState private var nameFocused: Bool
 
     var body: some View {
         Form {
             Section {
-                TextField(text: $material.name) { Text("Name") }
-                    .font(Theme.display(24, relativeTo: .title2))
-                    .focused($nameFocused)
-                    .accessibilityIdentifier("material-name")
+                MaterialLabel(material: material, nameFocused: $nameFocused)
+            }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+
+            Section {
                 Picker(selection: Binding(get: { material.family }, set: { material.family = $0 })) {
                     ForEach(Family.allCases) { f in
                         Label { Text(verbatim: f.name) } icon: { Image(systemName: "circle.fill").foregroundStyle(Theme.color(f)) }.tag(f)
@@ -30,7 +33,7 @@ struct MaterialDetailScreen: View {
                 } label: { Text("Evaporation") }
                 Toggle(isOn: $material.isNatural) { Text("Natural") }
                 TextField(text: $material.odor, axis: .vertical) { Text("What it smells like") }.lineLimit(1...4)
-            } header: { Text("Identity") }
+            } header: { FormHeader("Identity") }
             .listRowBackground(Theme.card)
 
             Section {
@@ -53,9 +56,13 @@ struct MaterialDetailScreen: View {
                         ForEach(Solvent.allCases.filter { $0 != .none }) { s in Text(verbatim: s.name).tag(s) }
                     } label: { Text("Diluted in") }
                 }
+                Button { showDilution = true } label: {
+                    Label("Make a dilution…", systemImage: "drop.halffull")
+                }
+                .accessibilityIdentifier("make-dilution")
                 numberRow("Drops per gram", value: Binding(get: { material.dropsPerGram }, set: { material.dropsPerGram = max($0 ?? 25, 1) }), suffix: "")
                 numberRow("Your maximum in the product", value: $material.limitPercent, suffix: "%")
-            } header: { Text("At the bench") } footer: {
+            } header: { FormHeader("At the bench") } footer: {
                 Text("Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS.")
             }
             .listRowBackground(Theme.card)
@@ -96,7 +103,7 @@ struct MaterialDetailScreen: View {
 
             Section {
                 TextField(text: $material.notes, axis: .vertical) { Text("Notes") }.lineLimit(2...8)
-            } header: { Text("Notes") }
+            } header: { FormHeader("Notes") }
             .listRowBackground(Theme.card)
 
             if !material.formulas.isEmpty {
@@ -113,7 +120,7 @@ struct MaterialDetailScreen: View {
                             }
                         }
                     }
-                } header: { Text("Used in") }
+                } header: { FormHeader("Used in") }
                 .listRowBackground(Theme.card)
             }
 
@@ -129,6 +136,7 @@ struct MaterialDetailScreen: View {
         .navigationTitle(Text(verbatim: material.name))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
+        .sheet(isPresented: $showDilution) { DilutionSheet(material: material) }
         .onAppear { if isNew { nameFocused = true } }
         .onDisappear {
             // Delete only after the screen is gone, so nothing renders a deleted model.
@@ -159,5 +167,46 @@ struct MaterialDetailScreen: View {
                 .frame(width: 110)
             if !suffix.isEmpty { Text(verbatim: suffix).foregroundStyle(Theme.inkSoft) }
         }
+    }
+}
+
+/// The material as a kraft bottle label: tier colour band, editable name, family and evaporation.
+private struct MaterialLabel: View {
+    @Bindable var material: Material
+    var nameFocused: FocusState<Bool>.Binding
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Rectangle().fill(Theme.color(material.tier)).frame(width: 10)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Dot(color: Theme.color(material.family), size: 9)
+                    Text(verbatim: material.family.name).font(.caption.weight(.semibold)).foregroundStyle(Theme.inkSoft)
+                    Text(verbatim: "·").foregroundStyle(Theme.inkSoft)
+                    Text(verbatim: material.tier.name).font(.caption.weight(.semibold)).foregroundStyle(Theme.inkSoft)
+                    Spacer()
+                    if material.isNatural {
+                        Image(systemName: "leaf.fill").font(.caption).foregroundStyle(Theme.ok).accessibilityLabel(Text("Natural"))
+                    }
+                }
+                TextField(text: $material.name, axis: .vertical) { Text("Name") }
+                    .font(Theme.display(28, relativeTo: .title))
+                    .foregroundStyle(Theme.ink)
+                    .focused(nameFocused)
+                    .accessibilityIdentifier("material-name")
+                if !material.odor.isEmpty {
+                    Text(verbatim: material.odor).font(Theme.display(15, italic: true, relativeTo: .subheadline)).foregroundStyle(Theme.inkSoft)
+                }
+                HStack(spacing: 6) {
+                    Tag(text: String(localized: "kept at", bundle: .l10n) + " " + Fmt.dilution(material.defaultDilution), tint: Theme.amberInk)
+                    if let limit = material.limitPercent { Tag(text: "≤ " + Fmt.percent(limit, decimals: 3)) }
+                    if let stock = material.stockGrams { Tag(text: Fmt.grams(stock), tint: material.isLowStock ? Theme.warn : Theme.inkSoft) }
+                }
+            }
+            .padding(Theme.Space.m)
+        }
+        .background(Theme.kraft.opacity(Theme.isNoir ? 0.9 : 0.75))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous).strokeBorder(Theme.hair))
     }
 }

@@ -63,6 +63,13 @@ for orig, key, source in units:
     e["localizations"]["en"] = {"stringUnit": {"state": "translated", "value": source}}
     target[k] = e
 
+# Info.plist keys added after the last export.
+INFO_EXTRA = {"NSPhotoLibraryAddUsageDescription": "Accord saves the share card you create to your photo library."}
+for k, source in INFO_EXTRA.items():
+    if k not in plist and source in T:
+        e = entry(source, T[source])
+        plist[k] = e
+
 # Runtime-only keys (seed data) go into Localizable too.
 for k, row in T.items():
     if k not in loc and not any(k == key for _, key, _ in units):

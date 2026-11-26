@@ -17,6 +17,17 @@
 		<string>pt-BR</string>
 		<string>it</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.noobclaw.accord</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>accord</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Accord</string>
 	<key>CFBundleExecutable</key>
@@ -43,6 +54,8 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Accord saves the share card you create to your photo library.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Accord uses Face ID to unlock your formula book when App Lock is on.</string>
 	<key>UIAppFonts</key>

@@ -13,6 +13,7 @@ struct LibraryScreen: View {
     @State private var importing = false
     @State private var importMessage: String?
     @State private var newMaterial: Material?
+    @State private var showDilution = false
 
     enum Filter: String, CaseIterable, Identifiable {
         case all, lowStock, expiring, unused
@@ -54,6 +55,12 @@ struct LibraryScreen: View {
                     Text("Materials").font(Theme.display(38, relativeTo: .largeTitle)).foregroundStyle(Theme.ink)
                         .accessibilityAddTraits(.isHeader)
                     Spacer()
+                    Button { showDilution = true } label: {
+                        Image(systemName: "drop.halffull").font(.system(size: 19, weight: .medium))
+                            .foregroundStyle(Theme.ink).frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel(Text("Dilution calculator"))
+                    .accessibilityIdentifier("open-dilution")
                     Menu {
                         Button { if store.isPro { importing = true } else { state.proReason = .importData } } label: {
                             Label("Import from spreadsheet", systemImage: "tablecells")
@@ -129,6 +136,7 @@ struct LibraryScreen: View {
                 .background(Theme.paper.opacity(0.96))
                 .accessibilityIdentifier("new-material")
         }
+        .sheet(isPresented: $showDilution) { DilutionSheet() }
         .navigationDestination(item: $newMaterial) { m in MaterialDetailScreen(material: m, isNew: true) }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText]) { result in
             handleImport(result)
