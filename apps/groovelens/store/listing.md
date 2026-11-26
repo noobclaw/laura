@@ -41,3 +41,4 @@ Automatic transcription can miss or mislabel hits on dense mixes; the chart edit
 - **描述**：放進任何一首歌，就能打它的鼓。Groovelens 在 iPhone 上把鼓聲分離出來、找到節拍、寫出鼓譜，再變成可以在螢幕上或真鼓上玩的節奏遊戲。全部端側處理，不上傳、不用帳號。Pro 一次買斷，沒有訂閱。
 
 > 其餘語言（zh-Hans、ja、ko、de、fr、es、pt-BR、it）的文案隨 M1.5 翻譯一起寫。
+- TestFlight 1.0 (build 100+run): first internal build, 2026-11-25
