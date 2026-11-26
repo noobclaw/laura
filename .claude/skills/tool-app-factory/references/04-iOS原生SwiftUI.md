@@ -50,7 +50,7 @@
 ## 本地化
 - `Localizable.xcstrings`（String Catalog），源语言 en；代码里一律 `String(localized:)` 或 `Text("...")` 字面量。
 - 显示名本地化用 `InfoPlist.xcstrings`。
-- 目标语言（2026-11 起）：en、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。翻译写进 xcstrings，不靠运行时。
+- 目标语言（2026-11 起，**必做**）：en、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。翻译写进 xcstrings，不靠运行时。key 用 `xcodebuild -exportLocalizations` 导出，不手猜；CI 加覆盖率闸门。详见 `08-多语言.md`。
 
 ## 内购（StoreKit 2）
 见 `05-变现与内购.md`。要点：`Product.products(for:)`、`Transaction.updates` 常驻监听、`currentEntitlements` 刷新、`AppStore.sync()` 恢复、价格只用 `displayPrice`、`.storekit` 文件挂在 scheme 上做本地测试。
