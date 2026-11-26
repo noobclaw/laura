@@ -45,7 +45,8 @@ window.SG_RULES = {
   "accel": 16,
   "decel": 10,
   "posedSpeed": 0.8,
-  "nudgeSpeed": 0.15
+  "nudgeSpeed": 0.15,
+  "embedMax": 0.3333
  },
  "dog": {
   "speed": 2.6,

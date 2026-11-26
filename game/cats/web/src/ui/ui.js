@@ -114,7 +114,7 @@
       /* (the 30 s board event is superseded by the live ranking panel on the left) */
       bus.on('heard', function (d) { els.heard.style.transform = 'rotate(' + (-d.angle * 180 / Math.PI) + 'deg)'; show(els.heard, true); ui.heardT = 2.2; });
       bus.on('meow', function (d) { if (d.forced && d.me) toast('強制喵叫！'); });
-      bus.on('embed', function (d) { toast(d.state === 'warn' ? '埋太深了，再不出來會被看見！' : d.state === 'exposed' ? '你露出來了！狗看得到你' : '好了，出來了'); });
+      bus.on('embed', function (d) { toast(d.state === 'warn' ? '身體嵌進去超過 1/3，這樣不允許！再不出來會被看見' : d.state === 'exposed' ? '你露出來了！狗看得到你' : '好了，出來了'); });
       bus.on('votes', function (d) { if (d.have < d.need) toast('跳過投票 ' + d.have + ' / ' + d.need); });
       bus.on('lineup', lineup);
       bus.on('undo', function () { toast('復原一步'); });

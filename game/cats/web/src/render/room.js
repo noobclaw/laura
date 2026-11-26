@@ -857,6 +857,9 @@
     ret.update = function (t) { up0(t); sync(); };
     ret.spots = ret.spots.map(function (s) { return [s[0] * WS, s[1] * WS, s[2], s[3], s[4] * WS]; });
     ret.route = ret.route.map(function (p) { return [p[0] * WS, p[1] * WS]; });
+    // a patrol goal that now sits under a solid prop (boxes and pots became solid 2026-11-26) moves just outside it, on the cheapest side
+    ret.route.forEach(function (q) { ret.platforms.forEach(function (p) { if (p.wall || p.y0 > 0.3 || p.y1 < 0.1 || q[0] <= p.x0 - 0.6 || q[0] >= p.x1 + 0.6 || q[1] <= p.z0 - 0.6 || q[1] >= p.z1 + 0.6) return;
+      var o = [[p.x0 - 0.75 - q[0], 0], [p.x1 + 0.75 - q[0], 0], [0, p.z0 - 0.75 - q[1]], [0, p.z1 + 0.75 - q[1]]].sort(function (a, b) { return Math.abs(a[0] + a[1]) - Math.abs(b[0] + b[1]); })[0]; q[0] += o[0]; q[1] += o[1]; }); });
     ret.bounds = { x0: bounds.x0 * WS, x1: bounds.x1 * WS, z0: bounds.z0 * WS, z1: bounds.z1 * WS };
     return ret;
   };

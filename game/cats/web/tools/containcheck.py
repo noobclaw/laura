@@ -14,11 +14,12 @@ JS = """(n) => { const G = SG.game, R = SG.room, P = R.platforms, b = R.bounds, 
   function solid(x, y, z) { for (const p of P) if (x > p.x0 && x < p.x1 && z > p.z0 && z < p.z1 && y > p.y0 && y < p.y1) return p; return null; }
   function bad(e) { const h = e.h || 0.3; if (!(e.x > b.x0 - 0.2 && e.x < b.x1 + 0.2 && e.z > b.z0 - 0.2 && e.z < b.z1 + 0.2)) return 'outside';
     let ceil = false; for (const p of P) if (e.x > p.x0 && e.x < p.x1 && e.z > p.z0 && e.z < p.z1 && p.y0 >= e.y + (e.cling ? -0.05 : 0.05)) { ceil = true; break; }
-    if (!ceil && e.y > H - 0.3) return 'above ceiling'; if (!e.cling && solid(e.x, e.y + Math.max(0.08, h * 0.5), e.z)) return 'inside solid'; return null; }
-  const out = { trials: 0, steps: 0, bad: {}, contained0: G.contained || 0, maxY: 0 };
+    if (!ceil && e.y > H - 0.3) return 'above ceiling'; if (!e.cling && solid(e.x, e.y + Math.max(0.08, h * 0.5), e.z)) return 'inside solid'; const er = G.embedRatio(e); out.maxEmbed = Math.max(out.maxEmbed || 0, er); if (er > 0.36) out.deepRun = (out.deepRun || 0) + 1; else out.deepRun = 0; if (er > 0.36 && out.deepRun < 6) { out.blips = (out.blips || 0) + 1; return null; } /* a frame or two while a pose settles is not a body pushed in */
+    if (er > 0.36) { if (!out.deep) out.deep = [e.x, e.y, e.z, e.cling ? e.cling.n.join() : '-', e.c.pose, !!e.c.climb, +er.toFixed(2)]; return 'more than a third in'; } return null; }
+  const out = { maxEmbed: 0, trials: 0, steps: 0, bad: {}, contained0: G.contained || 0, maxY: 0 };
   for (let t = 0; t < n; t++) {
     let x, z, y, k = 0; do { x = b.x0 + rnd() * (b.x1 - b.x0); z = b.z0 + rnd() * (b.z1 - b.z0); y = R.groundAt(x, z, 8, 0); k++; } while ((solid(x, y + 0.3, z) || y > H - 0.5) && k < 200);
-    if (G.state) G.state.left = 999; G.place('you', x, y, z, rnd() * 6.28); me.c.setPose('stand'); G.cam.yaw = me.yaw + Math.PI; G.keys.w = true; out.trials++;
+    if (G.state) G.state.left = 999; G.place('you', x, y, z, rnd() * 6.28); me.c.setPose(t % 2 ? ['pancake', 'bolster', 'tall', 'stretch', 'loaf'][t % 5] : 'stand'); G.cam.yaw = me.yaw + Math.PI; G.keys.w = true; out.trials++;
     for (let s = 0; s < 240; s++) { G.keys[' '] = (s % 50) < 3 || (s > 120 && rnd() < 0.1); { const px = me.x, pz = me.z; G.step(1 / 60); travel += Math.hypot(me.x - px, me.z - pz); } out.steps++; out.maxY = Math.max(out.maxY, me.y); const r = bad(me); if (r) out.bad[r] = (out.bad[r] || 0) + 1; if (s % 60 === 0) G.cam.yaw += (rnd() - 0.5) * 2; }
     G.keys.w = false; G.keys[' '] = false;
   }

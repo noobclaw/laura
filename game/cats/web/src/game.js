@@ -110,15 +110,22 @@
      taken from the body's own measurements, and a dog's eye height comes from its eye anchor (low by default, higher when it rears up) */
   function fitBody(e) {
     var c = e.c, pose = c.pose, amt = c.poseAmount; c.setPose('stand'); c.rearUp = 0; if (c.settle) c.settle(); c.root.updateMatrixWorld(true);
-    var ms = c.measure().size; e.rad = Math.max(0.09, ms[0] * 0.46); e.halfLen = Math.max(e.rad, ms[2] * 0.46); e.h = Math.max(0.1, ms[1] * 0.9); e.step = RULES.move.stepUp;
+    var ms = c.measure().size; e.depth = Math.max(0.06, ms[2] * 0.5); e.rad = Math.max(0.09, ms[0] * 0.46); e.halfLen = Math.max(e.rad, ms[2] * 0.46); e.h = Math.max(0.1, ms[1] * 0.9); e.step = RULES.move.stepUp;
     if (e.team === 'dog' && c.anchor) { var a = c.anchor('eye', V()); e.eyeLo = Math.max(0.12, a.y - e.y); e.eyeF = Math.hypot(a.x - e.x, a.z - e.z); c.rearUp = 1; c.settle(); c.root.updateMatrixWorld(true); a = c.anchor('eye', a); e.eyeHi = Math.max(e.eyeLo, a.y - e.y); e.eyeFHi = Math.hypot(a.x - e.x, a.z - e.z); c.rearUp = 0; e.rear = 0; if (!G.settings.breedEyes) { e.eyeLo = RULES.dog.eyeHeightDefault; e.eyeHi = RULES.dog.eyeHeightRear; } /* breeds are cosmetic: every dog looks from the same heights unless the host turns breed eye heights on */ e.eyeH0 = e.eyeH = e.eyeLo; }
     c.setPose(pose, amt); if (c.settle) c.settle();
   }
   var _bx = V(), _by = V(), _bz = V(), _bm = new THREE.Matrix4();
   function place(e) { // on the ground: yaw only. Stuck to a surface: body up = surface normal, head along cling.f
     var r = e.c.root; r.position.set(e.x, e.y + (e.cling ? 0 : e.ryOff || 0), e.z);
+    var climbing = climbStance(e); if (e.c.climb !== climbing) e.c.climb = climbing;
+    if (climbing) { // owner 2026-11-26: on a wall the body climbs (belly to the wall, head up), it does not stand out of the wall like on a floor
+      var n = e.cling.n, off = (e.depth || 0.12) + 0.01; r.position.set(e.x + n[0] * off, e.y, e.z + n[2] * off); _by.set(0, 1, 0); _bz.set(-n[0], 0, -n[2]); _bx.crossVectors(_by, _bz).normalize(); _bm.makeBasis(_bx, _by, _bz); r.quaternion.setFromRotationMatrix(_bm); return; }
     if (e.cling) { _by.fromArray(e.cling.n); _bz.fromArray(e.cling.f); _bx.crossVectors(_by, _bz); if (_bx.lengthSq() < 1e-6) _bx.set(1, 0, 0); _bx.normalize(); _bz.crossVectors(_bx, _by); _bm.makeBasis(_bx, _by, _bz); r.quaternion.setFromRotationMatrix(_bm); }
     else r.rotation.set(0, e.yaw, 0, 'YXZ');
+  }
+  function climbStance(e) { // the climbing stance is for real walls: on the side of a thin beam or a low ledge the body stays as it was (standing out from it)
+    if (!(e.cling && e.cling.n[1] === 0 && e.team === 'cat' && (e.c.pose === 'stand' || e.c.pose === 'crouch'))) return false;
+    var n = e.cling.n, p = solidAt(e.x - n[0] * 0.03, e.y + 0.02, e.z - n[2] * 0.03); return !!(p && p !== FLOOR && p.y1 - p.y0 >= (e.h || 0.3) * 0.9);
   }
   function clearEnts() {
     G.ents.forEach(function (e) { scene.remove(e.c.root); e.c.dispose(); }); G.ents = []; G.decoys = [];
@@ -697,7 +704,7 @@
     var e = { id: 'decoy' + G.decoys.length, c: c, team: 'cat', decoyOf: 'you', x: G.me.x, y: G.me.y, z: G.me.z, yaw: G.me.yaw, sus: 0, speed: 0, out: false };
     c.root.position.copy(G.me.c.root.position); c.root.quaternion.copy(G.me.c.root.quaternion); for (var k = 0; k < 20; k++) c.update(0.05, rnd); // a clone made on a wall stays on the wall
     e.slot = si; e.rad = G.me.rad; e.size = G.me.size; SL[si].e = e; SL[si].cd = RULES.cat.decoyCooldownSec; G.decoys.push(e);
-    if (embedDepth(e) > e.rad * RULES.cat.embedRatio) { e.embed = true; c.glow.value.setRGB(0.9, 0.08, 0.04); bus.emit('cloneEmbed', {}); } // a clone pushed into the scenery shows a red warning
+    if (embedRatio(e) > (RULES.cat.embedMax || 1 / 3)) { e.embed = true; c.glow.value.setRGB(0.9, 0.08, 0.04); bus.emit('cloneEmbed', {}); } // a clone pushed into the scenery shows a red warning
     bus.emit('decoy', { n: G.decoys.length }); return true;
   };
   G.recallDecoys = function () { if (G.state && G.state.mode === 'double' && G.state.phase === 'seek') return; /* Double: no clearing clones once you are a hunter */ G.decoySlots.forEach(function (sl) { sl.e = null; }); G.decoys.forEach(function (d) { scene.remove(d.c.root); d.c.dispose(); }); G.decoys = []; bus.emit('decoy', { n: 0 }); };
@@ -967,7 +974,7 @@
             var vl = Math.hypot(me.velx, me.velz); if (l <= 0.01 && vl < 0.25) { me.velx = me.velz = 0; vl = 0; } sp = vl; if (vl > 1e-4) { mvx = me.velx / vl; mvz = me.velz / vl; }
             G.runK = (G.runK || 0) + ((k.Shift && l > 0.01 ? 1 : 0) - (G.runK || 0)) * Math.min(1, dt * 5);
             if (l > 0.01 && !posed && me.c.pose !== (crouch ? 'crouch' : 'stand')) { me.c.setPose(crouch ? 'crouch' : 'stand'); bus.emit('pose', { pose: 'stand' }); }
-            me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; moveEnt(me, mvx * sp * dt, mvz * sp * dt, dt); if (me.hitWallX) me.velx = 0; if (me.hitWallZ) me.velz = 0; if (!posed && !G.viewLock && !G.mouse.down[2] && l > 0.01) me.yaw = turn(me.yaw, Math.atan2(mvx, mvz), dt * 14); if (me.air && me.vy > 0 && !me.cling) tryAttach(me, 0, 0, [[1, 1]]); /* jumping up into a ceiling or the underside of a shelf sticks too */
+            me.hitWallX = me.hitWallZ = 0; me.hitPlat = null; var wx0 = me.x, wz0 = me.z; moveEnt(me, mvx * sp * dt, mvz * sp * dt, dt); if ((me.x !== wx0 || me.z !== wz0) && tooDeep(me, me.x - wx0, 0, me.z - wz0)) { me.x = wx0; me.z = wz0; me.velx = me.velz = 0; me.hitWallX = me.hitWallZ = 1; } if (me.hitWallX) me.velx = 0; if (me.hitWallZ) me.velz = 0; if (!posed && !G.viewLock && !G.mouse.down[2] && l > 0.01) me.yaw = turn(me.yaw, Math.atan2(mvx, mvz), dt * 14); if (me.air && me.vy > 0 && !me.cling) tryAttach(me, 0, 0, [[1, 1]]); /* jumping up into a ceiling or the underside of a shelf sticks too */
             if (me.air && me.hitPlat && me.hitPlat !== true && me.y - room.groundAt(me.x, me.z, me.y + 0.1, 0) > 0.2) tryAttach(me, me.hitWallX || 0, me.hitWallX ? 0 : me.hitWallZ, [[me.hitWallX ? 0 : 2, (me.hitWallX || me.hitWallZ) > 0 ? 1 : -1]]); // jumping at anything tall sticks to it
             if (G.guide === 0 && (G.moved = (G.moved || 0) + sp * dt) > 1.5) setGuide(1);
           }
@@ -1057,7 +1064,7 @@
     // a cat pushed too far into an object gets a warning, then is exposed (GDD round-flow, edge cases)
     if (me && me.team === 'cat' && !me.out && st.phase !== 'reveal') {
       G.embedC = (G.embedC || 0) - dt;
-      if (G.embedC <= 0) { G.embedC = 0.25; var dep = embedDepth(me); me.embed = dep > me.rad * RULES.cat.embedRatio; if (me.embed && !G.embedT) bus.emit('embed', { state: 'warn' }); if (!me.embed && me.exposed) { me.exposed = false; me.c.glow.value.setRGB(0, 0, 0); bus.emit('embed', { state: 'ok' }); } }
+      if (G.embedC <= 0) { G.embedC = 0.12; var was = me.embed; me.embedR = embedRatio(me); me.embed = me.embedR > (RULES.cat.embedMax || 1 / 3); if (me.embed && !was) { if (!me.exposed) me.c.glow.value.setRGB(0.9, 0.08, 0.04); bus.emit('embed', { state: 'warn' }); } if (!me.embed && was) { me.exposed = false; me.c.glow.value.setRGB(0, 0, 0); bus.emit('embed', { state: 'ok' }); } } // owner 2026-11-26: more than a third in -> red at once
       if (me.embed) { G.embedT += dt; if (G.embedT > RULES.cat.embedSec && !me.exposed) { me.exposed = true; me.c.glow.value.setRGB(0.9, 0.45, 0.05); bus.emit('embed', { state: 'exposed' }); } } else G.embedT = 0;
     }
     // torch for the leading dog at night
@@ -1066,6 +1073,27 @@
     torch.intensity = S.night && lead && st.phase !== 'prep' ? 46 : 0;
     if (lead) { var dy = Math.sin(lead.pitch || 0), dc = Math.cos(lead.pitch || 0); torch.position.set(lead.x, lead.y + lead.eyeH, lead.z); torch.target.position.set(lead.x + Math.sin(lead.yaw) * dc * 3, lead.y + lead.eyeH + dy * 3 - 0.2, lead.z + Math.cos(lead.yaw) * dc * 3); }
   }
+  /* owner 2026-11-26: at most a third of the body may go into a wall or an object. For every solid that the posed body's own vertices
+     touch, how far would the body have to move out of it along the cheapest axis, as a share of the body's size on that axis?
+     A pillar or a shelf cutting right through the body counts as deep (about half), a body leaning into a wall as its depth. */
+  var _ep = [];
+  function embedRatio(e, dx, dy, dz) {
+    var c = e.c, PV = c.PV, nv = c.bp && c.bp.nv; if (!PV || !nv) return 0;
+    c.root.updateMatrixWorld(true); var m = c.root.matrixWorld.elements, po = c.pivot.position, sc = c.scale || 1, st = Math.max(1, Math.floor(nv / 360)), k = 0, i;
+    var mn0 = 1e9, mn1 = 1e9, mn2 = 1e9, mx0 = -1e9, mx1 = -1e9, mx2 = -1e9; dx = dx || 0; dy = dy || 0; dz = dz || 0;
+    for (i = 0; i < nv; i += st) { var lx = (PV[i * 3] + po.x) * sc, ly = (PV[i * 3 + 1] + po.y) * sc, lz = (PV[i * 3 + 2] + po.z) * sc;
+      var x = m[0] * lx + m[4] * ly + m[8] * lz + m[12] + dx, y = m[1] * lx + m[5] * ly + m[9] * lz + m[13] + dy, z = m[2] * lx + m[6] * ly + m[10] * lz + m[14] + dz;
+      _ep[k++] = x; _ep[k++] = y; _ep[k++] = z; if (x < mn0) mn0 = x; if (x > mx0) mx0 = x; if (y < mn1) mn1 = y; if (y > mx1) mx1 = y; if (z < mn2) mn2 = z; if (z > mx2) mx2 = z; }
+    var sx = Math.max(0.05, mx0 - mn0), sy = Math.max(0.05, mx1 - mn1), sz = Math.max(0.05, mx2 - mn2), P = room.platforms, best = 0, eps = 0.004;
+    for (var j = 0; j < P.length; j++) { var p = P[j]; if (p.x1 <= mn0 || p.x0 >= mx0 || p.y1 <= mn1 || p.y0 >= mx1 || p.z1 <= mn2 || p.z0 >= mx2) continue;
+      var hit = 0; for (i = 0; i < k && hit < 2; i += 3) if (_ep[i] > p.x0 + eps && _ep[i] < p.x1 - eps && _ep[i + 1] > p.y0 + eps && _ep[i + 1] < p.y1 - eps && _ep[i + 2] > p.z0 + eps && _ep[i + 2] < p.z1 - eps) hit++;
+      if (hit < 2) continue;
+      var r = Math.min(Math.min(mx0 - p.x0, p.x1 - mn0) / sx, Math.min(mx1 - p.y0, p.y1 - mn1) / sy, Math.min(mx2 - p.z0, p.z1 - mn2) / sz); if (r > best) best = r; }
+    return best;
+  }
+  G.embedRatio = embedRatio;
+  /* would moving the body by (dx, dy, dz) push it deeper than allowed? (moving out, or moving while already that deep but not deeper, is fine) */
+  function tooDeep(e, dx, dy, dz) { var lim = (RULES.cat.embedMax || 1 / 3) * 0.8, /* stop a little short of the line so the limbs settling into a pose do not tip it over */ r1 = embedRatio(e, dx, dy, dz); if (r1 <= lim) return false; return r1 > embedRatio(e, 0, 0, 0) + 0.005; }
   function embedDepth(e) { // how deep the body centre sits inside any solid
     var c = e.c.center(tmp2), best = 0, P = room.platforms;
     for (var i = 0; i < P.length; i++) { var p = P[i]; if (c.x <= p.x0 || c.x >= p.x1 || c.z <= p.z0 || c.z >= p.z1 || c.y <= p.y0 || c.y >= p.y1) continue; var d = Math.min(c.x - p.x0, p.x1 - c.x, c.z - p.z0, p.z1 - c.z, p.y1 - c.y); if (d > best) best = d; }
@@ -1092,14 +1120,15 @@
   G.solidAt = solidAt;
   function tryAttach(e, dx, dz, only) {
     if (e.cling || e.bot && e.team === 'dog') return false; // hunters climb too (original); bot dogs stay on the floor
-    var rad = e.rad, c = [e.x, e.y + rad, e.z], reach = rad + 0.16, ax = Math.abs(dx) >= Math.abs(dz) ? 0 : 2;
+    var rad = e.rad, sx = e.x, sy = e.y, sz = e.z, c = [e.x, e.y + rad, e.z], reach = rad + 0.16, ax = Math.abs(dx) >= Math.abs(dz) ? 0 : 2;
     var dirs = only || [[ax, (ax ? dz : dx) >= 0 ? 1 : -1], [2 - ax, (ax ? dx : dz) >= 0 ? 1 : -1], [1, 1]];
     for (var i = 0; i < dirs.length; i++) {
-      var a = dirs[i][0], sg = dirs[i][1], q = c.slice(); q[a] += sg * reach; if (a === 1) q[1] += rad * 0.8; // a ceiling or shelf underside just above the head
-      var p = solidAt(q[0], q[1], q[2]); if (!p || p === FLOOR) continue;
+      var a = dirs[i][0], sg = dirs[i][1], p = null; for (var dd = 0.35; dd <= 1.001 && (!p || p === FLOOR); dd += 0.13) { var q = c.slice(); q[a] += sg * reach * dd; if (a === 1) q[1] += rad * 0.8; p = solidAt(q[0], q[1], q[2]); } // a ceiling or shelf underside just above the head; several depths so a thin wall is not stepped over
+      if (!p || p === FLOOR) continue;
       if (a !== 1 && p.y1 - e.y < 0.3 && e.y - room.groundAt(e.x, e.z, e.y + 0.1, 0) < 0.05) continue; // standing next to something low: that is a step, not a wall
       var n = [0, 0, 0]; n[a] = -sg; c[a] = sg > 0 ? pLo(p, a) : pHi(p, a);
       e.x = c[0]; e.y = c[1]; e.z = c[2]; e.cling = { n: n, f: a === 1 ? [Math.sin(e.yaw), 0, Math.cos(e.yaw)] : [0, 1, 0] }; e.vy = 0; e.air = false; e.speed = 0;
+      fitClimb(e); if (e === G.me && deepNow(e)) { e.cling = null; e.x = sx; e.y = sy; e.z = sz; place(e); return false; } // no room on that wall for the body: do not stick
       if (e === G.me) bus.emit('cling', { on: true }); return true;
     }
     return false;
@@ -1112,17 +1141,17 @@
   }
   G.release = release;
   function clingMove(e, f, s, dt) {
-    var k = G.keys, cl = e.cling, n = cl.n, rad = e.rad, sp = RULES.cat.clingSpeed, mv = [0, 0, 0], cy = G.cam.yaw, a, i;
+    var k = G.keys, cl = e.cling, n = cl.n, n0 = n.slice(), ox = e.x, oy = e.y, oz = e.z, of = cl.f.slice(), wasDeep = false, rad = Math.min(e.rad, 0.12), /* the probe stays close to the surface: the wide jelly arms must not let it step over a thin beam */ sp = RULES.cat.clingSpeed, mv = [0, 0, 0], cy = G.cam.yaw, a, i;
     if (n[1] === 0) { mv[1] = (k[' '] || f > 0 ? 1 : 0) - (k.Control || f < 0 ? 1 : 0); var ta = n[0] ? 2 : 0, rr = ta ? -Math.sin(cy) : Math.cos(cy); mv[ta] = s * (rr >= 0 ? 1 : -1); }
     else { mv[0] = -Math.sin(cy) * f + Math.cos(cy) * s; mv[2] = -Math.cos(cy) * f - Math.sin(cy) * s; }
     // going round a corner keeps you going: while the same keys stay held, the direction is carried over the edge (wall -> ceiling -> beam ...)
     var sig = [f, s, k[' '] ? 1 : 0, k.Control ? 1 : 0].join(); if (cl.carry && cl.carry.sig === sig && Math.hypot(mv[0], mv[1], mv[2]) > 0.01) mv = cl.carry.mv.slice(); else cl.carry = null;
     var len = Math.hypot(mv[0], mv[1], mv[2]); e.speed = 0; if (len < 0.01) return;
-    var c = [e.x + n[0] * rad, e.y + n[1] * rad, e.z + n[2] * rad], moved = false, lock = G.viewLock && e === G.me;
+    var c = [e.x + n[0] * rad, e.y + n[1] * rad, e.z + n[2] * rad], moved = false, lock = G.viewLock && e === G.me; if (e === G.me) wasDeep = embedRatio(e) > (RULES.cat.embedMax || 1 / 3) * 0.8;
     for (a = 0; a < 3; a++) {
       if (!mv[a] || n[a]) continue;
       var step = mv[a] / len * sp * dt, sg = step > 0 ? 1 : -1, c2 = c.slice(); c2[a] += step;
-      var ah = c2.slice(); ah[a] += sg * rad * 0.9; var pa = solidAt(ah[0], ah[1], ah[2]);
+      var ah = c2.slice(); ah[a] += sg * (a === 1 && sg > 0 && climbStance(e) ? Math.max(rad * 0.9, (e.h || 0.3) * 1.12) : rad * 0.9); var pa = solidAt(ah[0], ah[1], ah[2]); // a climbing body reaches up its whole height
       if (pa) { // inside corner: carry on onto the surface that is in the way (wall -> ceiling -> beam ...)
         var face = pa === FLOOR ? room.base(c[0], c[2]) : sg > 0 ? pLo(pa, a) : pHi(pa, a);
         if (a === 1 && sg < 0) { e.x = c[0]; e.z = c[2]; e.y = face; e.yaw = Math.atan2(-n[0], -n[2]); e.cling = null; e.vy = 0; e.air = false; if (e === G.me) bus.emit('cling', { on: false }); return; } // down onto a floor or a top
@@ -1140,7 +1169,16 @@
       }
       break;
     }
-    e.x = c[0] - n[0] * rad; e.y = c[1] - n[1] * rad; e.z = c[2] - n[2] * rad; e.speed = moved ? sp : 0;
+    var nx2 = c[0] - n[0] * rad, ny2 = c[1] - n[1] * rad, nz2 = c[2] - n[2] * rad;
+    if (moved && n === cl.n && e === G.me && n[0] === n0[0] && n[1] === n0[1] && n[2] === n0[2] && tooDeep(e, nx2 - e.x, ny2 - e.y, nz2 - e.z)) { e.speed = 0; cl.carry = null; return; } // owner 2026-11-26: climbing must not take the body through walls or shelves
+    e.x = nx2; e.y = ny2; e.z = nz2; e.speed = moved ? sp : 0;
+    if (n[0] !== n0[0] || n[1] !== n0[1] || n[2] !== n0[2]) { fitClimb(e); if (e === G.me && deepNow(e) && !wasDeep) { e.x = ox; e.y = oy; e.z = oz; cl.n = n0; cl.f = of; cl.carry = null; e.speed = 0; place(e); } } // a turn that would bury the body is not taken
+  }
+  function deepNow(e) { place(e); return embedRatio(e) > (RULES.cat.embedMax || 1 / 3) * 0.8; }
+  /* a body that has just come onto a wall in the climbing stance (from a ceiling, round a corner, by jumping) stands up the wall: keep its head under whatever is above */
+  function fitClimb(e) {
+    if (!climbStance(e)) return; var n = e.cling.n, d = (e.depth || 0.12) + 0.01, x = e.x + n[0] * d, z = e.z + n[2] * d, hc = (e.h || 0.3) * 1.12;
+    for (var t = 0.05; t <= hc + 0.001; t += 0.05) { var p = solidAt(x, e.y + t, z); if (p && p !== FLOOR) { e.y = Math.max(room.base(x, z), p.y0 - hc - 0.01); return; } }
   }
   /* is there room for a body standing at (x, y, z)? nothing solid in its height, and a ceiling above it (no ceiling = the roof space or outside) */
   function roomFor(e, x, y, z) {
