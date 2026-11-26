@@ -264,19 +264,32 @@ def meta(app_id):
 
 def submit(app_id):
     ver = editable(call("GET", f"/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS")["data"])
-    iap = call("GET", f"/v1/apps/{app_id}/inAppPurchasesV2?filter[productId]={PRODUCT_ID}")["data"][0]
-    if iap["attributes"].get("state") in ("READY_TO_SUBMIT", "MISSING_METADATA", "PREPARE_FOR_SUBMISSION", None):
+    # Reuse the open draft (the first non-consumable IAP was added there in the web UI).
+    subs = call("GET", f"/v1/reviewSubmissions?filter[app]={app_id}&filter[platform]=IOS&filter[state]=READY_FOR_REVIEW")["data"]
+    if subs:
+        sub = subs[0]
+        print("reusing draft", sub["id"])
+    else:
+        sub = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"},
+                   "relationships": {"app": {"data": {"type": "apps", "id": app_id}}}}})["data"]
+        print("new draft", sub["id"])
+    items = call("GET", f"/v1/reviewSubmissions/{sub['id']}/items?include=appStoreVersion,inAppPurchaseV2")
+    kinds = [k for it in items["data"] for k, v in it.get("relationships", {}).items() if v.get("data")]
+    print("draft items:", kinds)
+    if "appStoreVersion" not in kinds:
+        call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {
+            "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sub["id"]}},
+            "appStoreVersion": {"data": {"type": "appStoreVersions", "id": ver["id"]}}}}})
+        print("version added")
+    if "inAppPurchaseV2" not in kinds:
+        iap = call("GET", f"/v1/apps/{app_id}/inAppPurchasesV2?filter[productId]={PRODUCT_ID}")["data"][0]
         try:
-            call("POST", "/v1/inAppPurchaseSubmissions", {"data": {"type": "inAppPurchaseSubmissions",
-                 "relationships": {"inAppPurchaseV2": {"data": {"type": "inAppPurchases", "id": iap["id"]}}}}})
-            print("IAP submitted")
+            call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {
+                "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sub["id"]}},
+                "inAppPurchaseV2": {"data": {"type": "inAppPurchases", "id": iap["id"]}}}}})
+            print("IAP added")
         except urllib.error.HTTPError:
-            print("IAP submission deferred (will ride with the app version)")
-    sub = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"},
-               "relationships": {"app": {"data": {"type": "apps", "id": app_id}}}}})["data"]
-    call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems", "relationships": {
-        "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sub["id"]}},
-        "appStoreVersion": {"data": {"type": "appStoreVersions", "id": ver["id"]}}}}})
+            print("!! IAP could not be added to the draft")
     r = call("PATCH", f"/v1/reviewSubmissions/{sub['id']}", {"data": {"type": "reviewSubmissions", "id": sub["id"], "attributes": {"submitted": True}}})
     print("SUBMITTED:", r["data"]["attributes"].get("state"))
 
