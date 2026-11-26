@@ -57,8 +57,9 @@
           // easing and collisions behave the same at 30 fps as at 240. Simulated time always equals displayed time: nothing needs interpolating.
           G.dtAvg = G.dtAvg == null ? raw : G.dtAvg + (raw - G.dtAvg) * 0.08;
           if (Math.abs(raw - G.dtAvg) < G.dtAvg * 0.25) { G.dtDebt = (G.dtDebt || 0) + raw - G.dtAvg; var pay = Math.max(-0.001, Math.min(0.001, G.dtDebt * 0.1)); dt = G.dtAvg + pay; G.dtDebt -= pay; } else G.dtDebt = 0;
-          if (!G.paused) { var nsub = Math.max(1, Math.ceil(dt / (1 / 90))); G.subSteps = nsub; for (var si = 0; si < nsub; si++) update(dt / nsub); }
-          render(dt);
+          // an error in one frame must never stop the game: log it, show it in a corner, keep looping
+          try { if (!G.paused) { var nsub = Math.max(1, Math.ceil(dt / (1 / 90))); G.subSteps = nsub; for (var si = 0; si < nsub; si++) update(dt / nsub); }
+          render(dt); } catch (err) { frameError(err); }
           G.frames = (G.frames || 0) + 1;
           requestAnimationFrame(frame);
         }
@@ -928,6 +929,13 @@
   function spectateNext() { var list = G.ents.filter(function (e) { return e.c.root.visible && !e.out; }); if (!list.length) return; var i = list.indexOf(G.follow); G.follow = list[(i + 1) % list.length]; bus.emit('follow', { name: G.follow.name }); }
 
   /* ------------------------------------------------------------------ update */
+  var errBox = null, errSeen = {};
+  function frameError(err) { // GDD: errors never freeze the game; the corner note lets players screenshot and report it
+    var msg = String(err && err.stack || err).split('\n').slice(0, 3).join(' | '); G.errors = (G.errors || 0) + 1; G.lastError = msg;
+    if (errSeen[msg]) return; errSeen[msg] = 1; console.error(err);
+    if (!errBox) { errBox = document.createElement('div'); errBox.id = 'errnote'; errBox.style.cssText = 'position:fixed;left:8px;bottom:8px;max-width:46vw;z-index:99;background:rgba(120,20,20,.85);color:#fff;font:12px/1.35 monospace;padding:6px 9px;border-radius:6px;pointer-events:none;white-space:pre-wrap'; document.body.appendChild(errBox); }
+    errBox.textContent = '遊戲發生錯誤（已自動繼續）：\n' + msg.slice(0, 400);
+  }
   function update(dt) {
     if (G.hitstop > 0) { G.hitstop -= dt; dt *= 0.05; }
     G.time += dt; G.simT += dt;
@@ -938,7 +946,7 @@
     if (G.mode === 'play' && st) {
       if (G.lobby) { var Lb = G.lobby; Lb.t -= dt; Lb.on = !!me && !me.cling && Math.hypot(me.x - Lb.x, me.z - Lb.z) < Lb.r;
         if (Lb.t <= 0) { var sd = Lb.on ? 'dog' : 'cat'; bus.emit('lottery', { side: sd }); G.start(G.settings.mode === 'double' ? 'cat' : sd); return; } }
-      if (st.phase !== 'lobby') dispatch({ type: 'tick', dt: dt });
+      if (st.phase !== 'lobby') { dispatch({ type: 'tick', dt: dt }); if (G.state !== st) return; } // the round ended inside this tick (reveal -> lobby clears the state): stop here, the next frame starts clean
       var dcd = 0, dfree = false; G.decoySlots.forEach(function (sl) { sl.cd = Math.max(0, sl.cd - dt); if (!sl.e) { dcd = dfree ? Math.min(dcd, sl.cd) : sl.cd; dfree = true; } }); G.decoyCd = dcd; // shortest wait among the empty slots (0 when both clones are out)
       if (me && !me.out && st.phase !== 'reveal' && !G.fly) {
         var f = (k.w || k.ArrowUp && me.team === 'cat' ? 1 : 0) - (k.s || k.ArrowDown && me.team === 'cat' ? 1 : 0), s = (k.d ? 1 : 0) - (k.a ? 1 : 0);
@@ -1026,7 +1034,7 @@
   /* forced meow, suspicion meter, buried-too-deep warning, torch */
   var torch = null;
   function roundExtras(dt) {
-    var st = G.state, me = G.me, S = G.settings;
+    var st = G.state, me = G.me, S = G.settings; if (!st) return;
     if (st.phase === 'seek' && S.forcedMeow) { G.meowT -= dt; if (G.meowT <= 0) { G.meowT = S.meowEvery; cats().forEach(function (c) { if (!c.out && !c.decoyOf && c.c.root.visible) meowFrom(c, true); }); } }
     if (me && me.team === 'cat' && st.phase === 'seek') { var v = 0, seen = false; dogsOf().forEach(function (d) { if (!d.ai) return; v = Math.max(v, d.ai.sus.you || 0); G.decoys.forEach(function (q) { v = Math.max(v, d.ai.sus[q.id] || 0); }); seen = seen || d.ai.seenMe; }); G.susT = (G.susT || 0) - dt; if (G.susT <= 0) { G.susT = 0.25; bus.emit('suspicion', { v: v, seen: seen }); } }
     if (me && me.team === 'cat' && !me.out && st.phase === 'seek') { // how close to being found: drives heartbeat + vignette (feedback only)
