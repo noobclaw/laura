@@ -1852,5 +1852,11 @@
 "id": "Opens iOS Settings for Groovelens",
 "src": "Opens iOS Settings for Groovelens",
 "note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Use system language",
+"src": "Use system language",
+"note": null
 }
 ]

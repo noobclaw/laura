@@ -40,7 +40,7 @@ jobs:
           xcodebuild -project Groovelens.xcodeproj -scheme Groovelens -destination "id=$SIM" \
             -derivedDataPath dd CODE_SIGNING_ALLOWED=NO test > ci-out/build.log 2>&1
           echo $? > ci-out/status.txt
-          grep -E 'error:|warning: .*(deprecated|will never be executed)|Test Case .*(passed|failed)|\*\* (TEST|BUILD) ' ci-out/build.log | sort -u | head -300 > ci-out/summary.txt
+          grep -E 'error:|ACCURACY|warning: .*(deprecated|will never be executed)|Test Case .*(passed|failed)|\*\* (TEST|BUILD) ' ci-out/build.log | sort -u | head -300 > ci-out/summary.txt
           tail -80 ci-out/build.log > ci-out/tail.txt
           exit 0
 

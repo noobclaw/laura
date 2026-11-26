@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct GroovelensApp: App {
+    @State private var language = AppLanguage()
     @State private var store = ProStore()
     @State private var profile = PlayerProfile()
     @State private var analysis = AnalysisCenter()
@@ -10,6 +11,10 @@ struct GroovelensApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                // Rebuild every screen when the in-app language changes; the tab survives via SceneStorage.
+                .id(language.code)
+                .environment(\.locale, language.locale)
+                .environment(language)
                 .environment(store)
                 .environment(profile)
                 .environment(analysis)
@@ -48,7 +53,7 @@ struct RootView: View {
     @Environment(AnalysisCenter.self) private var analysis
     @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \Song.createdAt, order: .reverse) private var songs: [Song]
-    @State private var tab: AppTab = .stage
+    @SceneStorage("groovelens.tab") private var tab: AppTab = .stage
 
     var body: some View {
         ZStack(alignment: .bottom) {

@@ -5,7 +5,9 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(ProStore.self) private var store
     @Environment(PlayerProfile.self) private var profile
+    @Environment(AppLanguage.self) private var language
     @State private var proReason: ProReason?
+    @State private var showLanguages = false
     @State private var showCalibration = false
 
     var body: some View {
@@ -17,16 +19,14 @@ struct SettingsView: View {
                 proCard
 
                 section(String(localized: "LANGUAGE")) {
-                    Button { openLanguageSettings() } label: {
+                    Button { showLanguages = true } label: {
                         HStack {
-                            row("globe", String(localized: "App language"),
-                                String(localized: "Pick any of 10 languages in iOS Settings."), Palette.cyan)
+                            row("globe", String(localized: "App language"), nil, Palette.cyan)
                             Spacer()
-                            Text(currentLanguageName).font(Typo.body(14, weight: .medium)).foregroundStyle(Palette.textDim)
-                            Image(systemName: "arrow.up.forward.app").foregroundStyle(Palette.textFaint)
+                            Text(AppLanguage.nativeName(language.code)).font(Typo.body(14, weight: .medium)).foregroundStyle(Palette.textDim)
+                            Image(systemName: "chevron.right").foregroundStyle(Palette.textFaint)
                         }
                     }
-                    .accessibilityHint(Text("Opens iOS Settings for Groovelens"))
                 }
 
                 section(String(localized: "PLAY")) {
@@ -71,19 +71,8 @@ struct SettingsView: View {
         .background(NeonBackground())
         .toolbar(.hidden, for: .navigationBar)
         .sheet(item: $proReason) { ProSheet(reason: $0) }
+        .sheet(isPresented: $showLanguages) { LanguagePickerSheet().presentationDetents([.large]) }
         .sheet(isPresented: $showCalibration) { CalibrationSheet() }
-    }
-
-    /// The language the app is actually running in, named in that language ("繁體中文", "Deutsch").
-    private var currentLanguageName: String {
-        let code = Bundle.main.preferredLocalizations.first ?? "en"
-        let name = Locale(identifier: code).localizedString(forIdentifier: code) ?? code
-        return name.prefix(1).uppercased() + name.dropFirst()
-    }
-
-    /// iOS keeps the per-app language picker in Settings › Groovelens › Language.
-    private func openLanguageSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
     }
 
     private var appVersion: String {
@@ -295,5 +284,57 @@ struct CalibrationSheet: View {
             }
         }
         .onDisappear { cal.stop() }
+    }
+}
+
+
+/// In-app language list: native names, instant switch.
+struct LanguagePickerSheet: View {
+    @Environment(AppLanguage.self) private var language
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    choice(nil, title: String(localized: "Use system language"), detail: AppLanguage.nativeName(language.systemCode))
+                }
+                Section {
+                    ForEach(AppLanguage.supported, id: \.self) { code in
+                        choice(code, title: AppLanguage.nativeName(code), detail: nil)
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(NeonBackground())
+            .navigationTitle(String(localized: "App language"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button(String(localized: "Done")) { dismiss() } }
+            }
+        }
+    }
+
+    private func choice(_ code: String?, title: String, detail: String?) -> some View {
+        let selected = language.override == code
+        return Button {
+            Haptics.select()
+            dismiss()
+            // Switch after the sheet starts closing so the rebuild doesn't fight the dismissal.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                withAnimation(.easeInOut(duration: 0.3)) { language.select(code) }
+            }
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: title).font(Typo.body(16, weight: .medium)).foregroundStyle(Palette.text)
+                    if let detail { Text(verbatim: detail).font(Typo.body(12)).foregroundStyle(Palette.textDim) }
+                }
+                Spacer()
+                if selected { Image(systemName: "checkmark").font(.system(size: 14, weight: .bold)).foregroundStyle(Palette.brand) }
+            }
+        }
+        .listRowBackground(Palette.surface)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }

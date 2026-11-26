@@ -56,8 +56,8 @@ enum Palette {
 /// Scripts the custom faces don't cover (CJK) fall back to the rounded system face.
 enum Typo {
     static var usesLatinDisplay: Bool {
-        let code = Locale.current.language.languageCode?.identifier ?? "en"
-        return !["ja", "ko", "zh"].contains(code)
+        let code = AppLanguage.currentCode
+        return !(code.hasPrefix("ja") || code.hasPrefix("ko") || code.hasPrefix("zh"))
     }
 
     static func display(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
