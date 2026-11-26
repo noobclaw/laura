@@ -334,7 +334,7 @@ struct LineRow: View {
                     .lineLimit(2)
                 HStack(spacing: 6) {
                     if line.base != nil {
-                        Tag(text: String(localized: "Base", bundle: .l10n), tint: Theme.amberInk)
+                        Tag(text: String(localized: "tag.base", defaultValue: "Base", bundle: .l10n), tint: Theme.amberInk)
                     } else if let m = line.material {
                         Dot(color: Theme.color(m.family))
                         Text(verbatim: m.family.name).font(.caption).foregroundStyle(Theme.inkSoft)

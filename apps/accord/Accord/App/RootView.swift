@@ -11,8 +11,8 @@ struct RootView: View {
 
     var body: some View {
         @Bindable var state = state
-        ZStack {
-            PaperBackground()
+        // The tab bar sits below the content (not over it), so each screen's own bottom bar stays visible.
+        VStack(spacing: 0) {
             Group {
                 switch state.tab {
                 case .bench: NavigationStack { BenchScreen() }
@@ -21,8 +21,14 @@ struct RootView: View {
                 case .lab: NavigationStack { LabScreen() }
                 }
             }
-            .safeAreaInset(edge: .bottom, spacing: 0) { TabBar() }
+            .frame(maxHeight: .infinity)
+            .overlay(alignment: .top) {
+                // Paper behind the status bar so scrolled content doesn't run under the clock.
+                Theme.paper.ignoresSafeArea(edges: .top).frame(height: 0)
+            }
+            TabBar()
         }
+        .background(PaperBackground())
         .sheet(item: $state.proReason) { reason in ProSheet(reason: reason) }
         .overlay { if lock.isLocked { LockScreen().transition(.opacity) } }
         .onAppear {

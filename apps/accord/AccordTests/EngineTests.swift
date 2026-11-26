@@ -158,9 +158,14 @@ final class CSVTests: XCTestCase {
 
 @MainActor
 final class StoreTests: XCTestCase {
+    /// Containers must outlive their contexts, so keep every one the test creates.
+    private var containers: [ModelContainer] = []
+
     private func container() throws -> ModelContainer {
-        try ModelContainer(for: Material.self, Formula.self, FormulaLine.self, Batch.self, AgingNote.self,
-                           configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let c = try ModelContainer(for: Material.self, Formula.self, FormulaLine.self, Batch.self, AgingNote.self,
+                                   configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        containers.append(c)
+        return c
     }
 
     func testSeedBuildsNestedSample() throws {

@@ -75,8 +75,7 @@ extension Array {
 struct EvaporationChart: View {
     let mix: MixResult
     @Binding var hour: Double
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var reveal: CGFloat = 0
+    private let reveal: CGFloat = 1
 
     private var curve: EvaporationCurve { EvaporationCurve(mix) }
 
@@ -132,7 +131,6 @@ struct EvaporationChart: View {
                 hour = newHour
             })
         }
-        .onAppear { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.8)) { reveal = 1 } }
         .accessibilityElement()
         .accessibilityLabel(Text("Evaporation timeline"))
         .accessibilityValue(Text(verbatim: Fmt.hours(hour)))

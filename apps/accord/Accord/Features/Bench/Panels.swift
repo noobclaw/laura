@@ -74,10 +74,11 @@ struct AnalysisPanel: View {
                 .padding(.bottom, 6)
                 if store.isPro {
                     let cost = mix.cost
-                    InfoRow(label: "This batch", value: Fmt.money(cost.value))
-                    InfoRow(label: "Per 100 g concentrate", value: mix.totalGrams > 0 ? Fmt.money(cost.value / mix.totalGrams * 100) : "–")
+                    let priced = cost.missing < mix.components.count
+                    InfoRow(label: "This batch", value: priced ? Fmt.money(cost.value) : "–")
+                    InfoRow(label: "Per 100 g concentrate", value: priced && mix.totalGrams > 0 ? Fmt.money(cost.value / mix.totalGrams * 100) : "–")
                     if formula.product != .concentrate {
-                        InfoRow(label: "Per 50 ml bottle", value: Fmt.money(bottleCost(cost.value, ml: 50)))
+                        InfoRow(label: "Per 50 ml bottle", value: priced ? Fmt.money(bottleCost(cost.value, ml: 50)) : "–")
                     }
                     if cost.missing > 0 {
                         Text("\(cost.missing) materials have no price yet. Add it in Materials.")
