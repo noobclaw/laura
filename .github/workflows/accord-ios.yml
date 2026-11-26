@@ -1,0 +1,107 @@
+name: Accord iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [app/accord]
+    paths:
+      - 'apps/accord/**'
+      - '.github/workflows/accord-ios.yml'
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[asc-')"
+    runs-on: macos-15
+    timeout-minutes: 50
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: apps/accord
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+
+      - name: Generate project
+        run: |
+          brew install xcodegen >/dev/null
+          xcodegen generate
+
+      - name: Build and test on the simulator
+        run: |
+          mkdir -p ci-out
+          SIM=$(xcrun simctl list devices available | grep -E 'iPhone 1[5-7]( Pro)? \(' | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')
+          echo "SIM=$SIM" >> $GITHUB_ENV
+          set +e
+          xcodebuild -project Accord.xcodeproj -scheme Accord -destination "id=$SIM" \
+            -derivedDataPath dd CODE_SIGNING_ALLOWED=NO test > ci-out/build.log 2>&1
+          echo $? > ci-out/status.txt
+          grep -E 'error:|warning: .*(deprecated|will never be executed)|Test Case .*(passed|failed)|\*\* (TEST|BUILD) ' ci-out/build.log | sort -u | head -300 > ci-out/summary.txt
+          tail -80 ci-out/build.log > ci-out/tail.txt
+          exit 0
+
+      - name: UI tour (every screen, 4 languages)
+        timeout-minutes: 25
+        run: |
+          rm -rf ~/ui-shots
+          set +e
+          xcodebuild -project Accord.xcodeproj -scheme AccordUITour -destination "id=$SIM" \
+            -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test > ci-out/uitour.log 2>&1
+          echo $? > ci-out/uitour-status.txt
+          grep -E 'error:|Test Case .*(passed|failed)|\*\* TEST' ci-out/uitour.log | tail -30 > ci-out/uitour-summary.txt
+          mkdir -p ci-out/ui-shots && cp -R ~/ui-shots/. ci-out/ui-shots/ 2>/dev/null
+          find ci-out/ui-shots -name '*.png' | wc -l
+          exit 0
+
+      - name: Export localizations
+        run: |
+          set +e
+          xcodebuild -exportLocalizations -project Accord.xcodeproj -localizationPath ci-out/loc -exportLanguage en > ci-out/loc.log 2>&1
+          XLIFF=$(find ci-out/loc -name 'en.xliff' | head -1)
+          [ -n "$XLIFF" ] && cp "$XLIFF" ci-out/en.xliff
+          rm -rf ci-out/loc
+          # Localization gate: every exported key translated in all 9 target languages.
+          python3 scripts/check_strings.py ci-out/en.xliff Accord/Resources > ci-out/l10n.txt 2>&1
+          echo $? > ci-out/l10n-status.txt
+          cat ci-out/l10n.txt | head -20
+          exit 0
+
+      - name: Launch and screenshot
+        run: |
+          APP=$(find dd/Build/Products -name 'Accord.app' -path '*iphonesimulator*' | head -1)
+          if [ -z "$APP" ]; then echo "no app"; exit 0; fi
+          xcrun simctl boot "$SIM" || true
+          xcrun simctl bootstatus "$SIM" -b
+          xcrun simctl install "$SIM" "$APP"
+          xcrun simctl launch "$SIM" com.noobclaw.accord
+          sleep 6
+          xcrun simctl io "$SIM" screenshot ci-out/home.png
+          for L in zh-Hant ja de; do
+            xcrun simctl terminate "$SIM" com.noobclaw.accord || true
+            xcrun simctl launch "$SIM" com.noobclaw.accord -AppleLanguages "($L)"
+            sleep 5
+            xcrun simctl io "$SIM" screenshot "ci-out/home-$L.png"
+          done
+          xcrun simctl spawn "$SIM" log show --last 1m --predicate 'process == "Accord"' --style compact | tail -60 > ci-out/runtime.log || true
+
+      - name: Publish results to the accord-ci branch
+        if: always()
+        run: |
+          cd ci-out
+          echo "${{ github.sha }}" > commit.txt
+          git init -q && git checkout -q -b accord-ci
+          git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -qm "ci for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" accord-ci
+
+      - name: Fail if the build, tests or localization gate failed
+        run: |
+          test "$(cat ci-out/status.txt)" = "0"
+          test "$(cat ci-out/l10n-status.txt)" = "0"
+          test "$(cat ci-out/uitour-status.txt)" = "0"
+

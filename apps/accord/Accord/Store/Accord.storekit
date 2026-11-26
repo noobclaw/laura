@@ -1,0 +1,40 @@
+{
+  "identifier" : "3F1E8C52-7A4B-4C1D-9E2F-5B6A7C8D9E01",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : true,
+      "internalID" : "7B2C3D4E-5F60-4172-8394-A5B6C7D8E9F0",
+      "localizations" : [
+        {
+          "description" : "Unlimited formulas, bases inside formulas, batches and maturation diary, inventory and cost, version compare, import and export.",
+          "displayName" : "Accord Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.noobclaw.accord.pro_unlock",
+      "referenceName" : "Accord Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
