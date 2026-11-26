@@ -31,6 +31,8 @@ struct HomeView: View {
     @State private var proReason: ProReason?
     @State private var analyzingSong: Song?
     @State private var importError: String?
+    @State private var micDenied = false
+    @State private var preparingDemo = false
     @State private var path = NavigationPath()
     @State private var openedSong: Song?
 
@@ -88,7 +90,10 @@ struct HomeView: View {
         }
         .sheet(item: $proReason) { reason in ProSheet(reason: reason) }
         .alert(String(localized: "Couldn’t import"), isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
-            Button(String(localized: "OK"), role: .cancel) {}
+            if micDenied {
+                Button(String(localized: "Open Settings")) { micDenied = false; MicPermission.openSettings() }
+            }
+            Button(String(localized: "OK"), role: .cancel) { micDenied = false }
         } message: {
             Text(importError ?? "")
         }
@@ -225,10 +230,16 @@ struct HomeView: View {
                 }
             }
             if songs.isEmpty {
-                EmptyStateView(symbol: "music.note",
-                               title: String(localized: "Your stage is empty"),
-                               message: String(localized: "Tap + and pick a song, a rehearsal video, or record your band. Charts appear here."))
-                    .glassCard()
+                VStack(spacing: 14) {
+                    EmptyStateView(symbol: "music.note",
+                                   title: String(localized: "Your stage is empty"),
+                                   message: String(localized: "Tap + and pick a song, a rehearsal video, or record your band. Charts appear here."))
+                    NeonButton(title: String(localized: "Try the demo song"), symbol: "sparkles", busy: preparingDemo) { importDemo() }
+                        .accessibilityIdentifier("demo-song")
+                    Text(String(localized: "Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings."))
+                        .font(Typo.body(12)).foregroundStyle(Palette.textFaint).multilineTextAlignment(.center)
+                }
+                .glassCard()
             } else {
                 LazyVStack(spacing: 8) {
                     ForEach(songs) { song in
@@ -260,15 +271,30 @@ struct HomeView: View {
         }
     }
 
+    /// A synthesized groove run through the real analysis, so the first result needs no file of your own.
+    /// It does not use up a free song.
+    private func importDemo() {
+        guard !preparingDemo else { return }
+        preparingDemo = true
+        Task {
+            let url = try? await Task.detached(priority: .userInitiated) { try DemoAudio.makeDemoFile() }.value
+            preparingDemo = false
+            guard let url else { importError = String(localized: "This audio format can’t be read."); return }
+            importFile(url, kind: .file)
+            profile.refundAnalysis()
+        }
+    }
+
     private func requestRecording() {
         switch MicPermission.current {
         case .granted: showRecorder = true
         case .undetermined:
             Task {
                 if await MicPermission.request() { showRecorder = true }
-                else { importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.") }
+                else { micDenied = true; importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.") }
             }
         case .denied:
+            micDenied = true
             importError = String(localized: "Microphone access is off. You can turn it on in Settings › Groovelens.")
         }
     }

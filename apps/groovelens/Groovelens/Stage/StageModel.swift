@@ -14,6 +14,8 @@ struct StageSetup: Hashable {
     var click = false
     var loop = false
     var speedTrainer = false
+    /// `ChartSection.key` of the practiced section, if any (quests match on this, not on the translated label).
+    var sectionKey: String? = nil
 }
 
 /// The outcome handed to the results screen.

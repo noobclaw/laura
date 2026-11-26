@@ -97,14 +97,25 @@ struct Quest: Codable, Identifiable, Hashable {
     var songID: UUID?
     var songTitle: String?
     var sectionLabel: String?
+    var sectionKind: SectionKind?
+    var sectionOrdinal: Int?
     var progress: Double = 0
     var completed = false
     var xpReward: Int
+
+    func matchesSection(key: String?, label: String?) -> Bool {
+        if let kind = sectionKind { return key == "\(kind.rawValue)-\(sectionOrdinal ?? 1)" }
+        return sectionLabel == nil || sectionLabel == label
+    }
 
     var title: String {
         switch kind {
         case .sectionAccuracy:
             let pct = Int(target * 100)
+            if let kind = sectionKind, let t = songTitle {
+                let s = ChartSection.label(kind: kind, ordinal: sectionOrdinal ?? 1)
+                return String(localized: "Hit \(pct)% on the \(s) of “\(t)”")
+            }
             if let s = sectionLabel, let t = songTitle {
                 return String(localized: "Hit \(pct)% on the \(s) of “\(t)”")
             }
@@ -131,7 +142,8 @@ struct Achievement: Identifiable, Hashable {
     let detail: String
     let symbol: String
 
-    static let all: [Achievement] = [
+    /// Computed so titles follow an in-app language switch.
+    static var all: [Achievement] { [
         Achievement(id: "first_chart", title: String(localized: "First Chart"), detail: String(localized: "Chart your first song"), symbol: "music.note.list"),
         Achievement(id: "first_clear", title: String(localized: "Sound Check"), detail: String(localized: "Finish your first run"), symbol: "checkmark.seal.fill"),
         Achievement(id: "first_s", title: String(localized: "Flawless"), detail: String(localized: "Earn an S grade"), symbol: "crown.fill"),
@@ -148,7 +160,7 @@ struct Achievement: Identifiable, Hashable {
         Achievement(id: "level_10", title: String(localized: "Pocket Keeper"), detail: String(localized: "Reach level 10"), symbol: "star.circle.fill"),
         Achievement(id: "level_25", title: String(localized: "Session Player"), detail: String(localized: "Reach level 25"), symbol: "star.square.fill"),
         Achievement(id: "hours_10", title: String(localized: "Ten Hours In"), detail: String(localized: "Practice for 10 hours total"), symbol: "clock.fill")
-    ]
+    ] }
 }
 
 // MARK: - Profile
@@ -303,7 +315,7 @@ final class PlayerProfile {
         var quests: [Quest] = []
         let ready = songs.filter { $0.status == .ready }
         if let song = ready.randomElement(using: &rng), let chart = charts(song), let section = chart.sections.randomElement(using: &rng) {
-            quests.append(Quest(kind: .sectionAccuracy, target: 0.9, songID: song.id, songTitle: song.title, sectionLabel: section.label, xpReward: 150))
+            quests.append(Quest(kind: .sectionAccuracy, target: 0.9, songID: song.id, songTitle: song.title, sectionKind: section.kind, sectionOrdinal: section.ordinal, xpReward: 150))
         } else {
             quests.append(Quest(kind: .tapCombo, target: 30, xpReward: 100))
         }
@@ -337,6 +349,7 @@ final class PlayerProfile {
     struct RunInput {
         var songID: UUID
         var sectionLabel: String?
+        var sectionKey: String? = nil
         var isFill: Bool
         var accuracy: Double
         var grade: Grade
@@ -378,7 +391,7 @@ final class PlayerProfile {
             var q = data.quests[i]
             switch q.kind {
             case .sectionAccuracy:
-                if (q.songID == nil || q.songID == run.songID) && (q.sectionLabel == nil || q.sectionLabel == run.sectionLabel) {
+                if (q.songID == nil || q.songID == run.songID) && q.matchesSection(key: run.sectionKey, label: run.sectionLabel) {
                     q.progress = max(q.progress, run.accuracy)
                 }
             case .speedClear:

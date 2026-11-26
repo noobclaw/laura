@@ -9671,6 +9671,64 @@
         }
       }
     },
+    "Open Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開設定"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开设置"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定を開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정 열기"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen öffnen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Réglages"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri Impostazioni"
+          }
+        }
+      }
+    },
     "Open the chart": {
       "localizations": {
         "zh-Hant": {
@@ -13983,6 +14041,64 @@
         }
       }
     },
+    "Something went wrong": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出了點問題"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出了点问题"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "問題が発生しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "문제가 발생했습니다"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etwas ist schiefgelaufen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un problème est survenu"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algo salió mal"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algo deu errado"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qualcosa è andato storto"
+          }
+        }
+      }
+    },
     "Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking.": {
       "localizations": {
         "zh-Hant": {
@@ -14037,6 +14153,64 @@
           "stringUnit": {
             "state": "translated",
             "value": "I brani vengono analizzati sul dispositivo. Nessun caricamento, nessun account, nessun tracciamento."
+          }
+        }
+      }
+    },
+    "Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從 Apple Music 購買的歌曲有版權保護，無法匯入。請使用你自己的音訊檔、影片或錄音。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 Apple Music 购买的歌曲有版权保护，无法导入。请使用你自己的音频文件、视频或录音。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Music で購入した曲はコピー保護されているため読み込めません。自分の音声ファイル、動画、録音をお使いください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Music에서 구입한 곡은 복제 방지되어 가져올 수 없습니다. 직접 가진 오디오 파일, 동영상, 녹음을 사용하세요."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bei Apple Music gekaufte Songs sind kopiergeschützt und können nicht importiert werden. Nutze eigene Audiodateien, Videos oder Aufnahmen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les morceaux achetés sur Apple Music sont protégés et ne peuvent pas être importés. Utilise tes propres fichiers audio, vidéos ou enregistrements."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las canciones compradas en Apple Music tienen protección anticopia y no se pueden importar. Usa tus propios archivos de audio, vídeos o grabaciones."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Músicas compradas no Apple Music são protegidas e não podem ser importadas. Use seus próprios arquivos de áudio, vídeos ou gravações."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I brani acquistati su Apple Music sono protetti e non possono essere importati. Usa i tuoi file audio, video o registrazioni."
           }
         }
       }
@@ -15723,6 +15897,64 @@
         }
       }
     },
+    "This song’s audio can’t be played. Delete it and import it again.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這首歌的音訊無法播放，請刪除後重新匯入。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这首歌的音频无法播放，请删除后重新导入。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この曲の音声を再生できません。削除してからもう一度読み込んでください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 곡의 오디오를 재생할 수 없습니다. 삭제하고 다시 가져오세요."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Audio dieses Songs kann nicht abgespielt werden. Lösche ihn und importiere ihn erneut."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’audio de ce morceau ne peut pas être lu. Supprime-le et importe-le à nouveau."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede reproducir el audio de esta canción. Elimínala e impórtala de nuevo."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não é possível tocar o áudio desta música. Apague e importe de novo."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile riprodurre l’audio di questo brano. Eliminalo e importalo di nuovo."
+          }
+        }
+      }
+    },
     "Timing calibration": {
       "localizations": {
         "zh-Hant": {
@@ -16009,6 +16241,64 @@
           "stringUnit": {
             "state": "translated",
             "value": "Riprova"
+          }
+        }
+      }
+    },
+    "Try the demo song": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "試玩示範歌曲"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "试玩示范歌曲"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デモ曲で試す"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "데모 곡 플레이"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo-Song ausprobieren"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essayer le morceau de démo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probar la canción de demo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar a música demo"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prova il brano demo"
           }
         }
       }
@@ -17401,6 +17691,64 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tocchi un po’ prima del click. Lo correggiamo noi."
+          }
+        }
+      }
+    },
+    "Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的修改沒能儲存。請確認 iPhone 有足夠空間，再試一次。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的修改没能保存。请确认 iPhone 有足够空间，再试一次。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編集を保存できませんでした。iPhone の空き容量を確認してもう一度お試しください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "수정 내용을 저장하지 못했습니다. iPhone 저장 공간을 확인하고 다시 시도하세요."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Änderung konnte nicht gesichert werden. Prüfe den freien Speicher deines iPhone und versuche es erneut."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta modification n’a pas pu être enregistrée. Vérifie l’espace libre de ton iPhone, puis réessaie."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar tu cambio. Comprueba que tu iPhone tenga espacio libre e inténtalo de nuevo."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível salvar sua edição. Verifique se o iPhone tem espaço livre e tente de novo."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile salvare la modifica. Controlla lo spazio libero dell’iPhone e riprova."
           }
         }
       }

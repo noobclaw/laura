@@ -97,7 +97,13 @@ struct ChartSection: Codable, Hashable, Identifiable {
     /// Exclusive.
     var endBar: Int
 
-    var label: String { ordinal > 1 ? "\(kind.title) \(ordinal)" : kind.title }
+    var label: String { ChartSection.label(kind: kind, ordinal: ordinal) }
+    /// Language-independent identity of a section ("chorus-2").
+    var key: String { "\(kind.rawValue)-\(ordinal)" }
+
+    static func label(kind: SectionKind, ordinal: Int) -> String {
+        ordinal > 1 ? "\(kind.title) \(ordinal)" : kind.title
+    }
     var barCount: Int { endBar - startBar }
 }
 

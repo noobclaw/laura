@@ -15,6 +15,7 @@ struct ChartView: View {
     @State private var editPiece: DrumPiece = .snare
     @State private var dirty = false
     @State private var ticker: Timer?
+    @State private var errorMessage: String?
 
     init(song: Song, chart: DrumChart, onChange: @escaping (DrumChart) -> Void) {
         self.song = song
@@ -54,6 +55,10 @@ struct ChartView: View {
         }
         .background(NeonBackground())
         .toolbar(.hidden, for: .navigationBar)
+        .hidesTabBar()
+        .alert(String(localized: "Something went wrong"), isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button(String(localized: "OK"), role: .cancel) {}
+        } message: { Text(errorMessage ?? "") }
         .onDisappear {
             ticker?.invalidate()
             engine.stop()
@@ -134,7 +139,10 @@ struct ChartView: View {
                 try engine.load(files: song.files, chart: chart)
                 engine.track = .full
                 loaded = true
-            } catch { return }
+            } catch {
+                errorMessage = String(localized: "This song’s audio can’t be played. Delete it and import it again.")
+                return
+            }
         }
         if playing {
             engine.pause()
@@ -166,6 +174,7 @@ struct ChartView: View {
         }
         Haptics.tap()
         dirty = true
+        persist()   // save every edit, so a failure is reported while the user is still here
     }
 
     private func persist() {
@@ -174,7 +183,10 @@ struct ChartView: View {
             song.hitCount = chart.hits.count
             song.fingerprint = chart.fingerprint()
             onChange(chart)
-        } catch {}
+            dirty = false
+        } catch {
+            errorMessage = String(localized: "Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.")
+        }
     }
 }
 

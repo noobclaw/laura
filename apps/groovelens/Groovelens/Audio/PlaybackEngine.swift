@@ -87,6 +87,11 @@ final class PlaybackEngine {
         observers.append(center.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main) { [weak self] note in
             self?.handleRouteChange(note)
         })
+        // The system stops the engine on a format/route change (Bluetooth headphones connecting,
+        // plugging in during Kit mode). Treat it as a pause so the stage shows its pause menu.
+        observers.append(center.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine, queue: .main) { [weak self] _ in
+            self?.handleConfigurationChange()
+        })
     }
 
     deinit {
@@ -276,9 +281,20 @@ final class PlaybackEngine {
         timer = t
     }
 
+    private func handleConfigurationChange() {
+        guard isPlaying else { return }
+        pausedAt = lastTickTime
+        stopPlayers()
+        isPlaying = false
+        timer?.invalidate()
+    }
+
+    @ObservationIgnored private var lastTickTime: Double = 0
+
     private func tick() {
         guard isPlaying else { return }
         let now = currentTime
+        lastTickTime = now
         if let loop = loopRange, now >= loop.upperBound {
             play(from: loop.lowerBound)
             onLoop?()

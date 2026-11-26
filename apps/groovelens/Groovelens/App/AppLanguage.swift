@@ -5,8 +5,8 @@ import SwiftUI
 /// In-app language switching (no trip to iOS Settings, no restart).
 ///
 /// Bundle.main is re-classed so every localized lookup (SwiftUI `Text`, `String(localized:)`,
-/// `LocalizedStringKey`) reads from the chosen `.lproj`. The choice is also written to
-/// `AppleLanguages` so the next cold launch starts in the same language.
+/// `LocalizedStringKey`) reads from the chosen `.lproj`. The choice is stored in our own key and
+/// re-applied at launch before any UI is built; `AppleLanguages` is left to the system.
 @MainActor
 @Observable
 final class AppLanguage {
@@ -22,6 +22,8 @@ final class AppLanguage {
     let systemCode: String
 
     init(defaults: UserDefaults = .standard) {
+        // Builds before 116 pinned AppleLanguages in the app domain, which hid the real system language.
+        defaults.removeObject(forKey: "AppleLanguages")
         let stored = defaults.string(forKey: AppLanguage.storeKey)
         // AppleLanguages may have been pinned by an earlier override; resolve the system choice without it.
         let systemPreferred = Bundle.preferredLocalizations(from: Bundle.main.localizations.filter { $0 != "Base" },
@@ -39,10 +41,8 @@ final class AppLanguage {
         let d = UserDefaults.standard
         if let newCode {
             d.set(newCode, forKey: AppLanguage.storeKey)
-            d.set([newCode], forKey: "AppleLanguages")
         } else {
             d.removeObject(forKey: AppLanguage.storeKey)
-            d.removeObject(forKey: "AppleLanguages")
         }
         apply()
     }

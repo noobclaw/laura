@@ -53,22 +53,15 @@ enum AudioDecoder {
             try Task.checkCancellation()
             guard let buffer = output.copyNextSampleBuffer() else { break }
             guard let block = CMSampleBufferGetDataBuffer(buffer) else { continue }
-            var length = 0
-            var pointer: UnsafeMutablePointer<CChar>?
-            let status = CMBlockBufferGetDataPointer(block, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &length, dataPointerOut: &pointer)
-            if status == kCMBlockBufferNoErr, let pointer {
-                let count = length / MemoryLayout<Float>.size
-                pointer.withMemoryRebound(to: Float.self, capacity: count) { fp in
-                    samples.append(contentsOf: UnsafeBufferPointer(start: fp, count: count))
-                }
-            } else {
-                // Non-contiguous block: copy out.
-                var data = [Float](repeating: 0, count: length / MemoryLayout<Float>.size)
-                data.withUnsafeMutableBytes { raw in
-                    _ = CMBlockBufferCopyDataBytes(block, atOffset: 0, dataLength: length, destination: raw.baseAddress!)
-                }
-                samples.append(contentsOf: data)
+            // Copy out (works for contiguous and non-contiguous block buffers alike).
+            let count = CMBlockBufferGetDataLength(block) / MemoryLayout<Float>.size
+            guard count > 0 else { continue }
+            var data = [Float](repeating: 0, count: count)
+            let status = data.withUnsafeMutableBytes { raw -> OSStatus in
+                guard let base = raw.baseAddress else { return -1 }
+                return CMBlockBufferCopyDataBytes(block, atOffset: 0, dataLength: count * MemoryLayout<Float>.size, destination: base)
             }
+            if status == kCMBlockBufferNoErr { samples.append(contentsOf: data) }
         }
         if reader.status == .failed { throw AudioDecoderError.unreadable }
         if samples.count < Int(analysisRate * 8) { throw AudioDecoderError.tooShort }
@@ -92,6 +85,13 @@ enum AudioDecoder {
 
     /// Writes mono Float32 samples as CAF at the analysis rate.
     static func writeCAF(_ samples: [Float], to url: URL, sampleRate: Double = AudioDecoder.analysisRate) throws {
+        defer {
+            // Stems can be regenerated from the original: exclude them from iCloud backup.
+            var values = URLResourceValues()
+            values.isExcludedFromBackup = true
+            var u = url
+            try? u.setResourceValues(values)
+        }
         try? FileManager.default.removeItem(at: url)
         guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: 1, interleaved: false) else {
             throw AudioDecoderError.unreadable

@@ -98,6 +98,7 @@ struct StatTile: View {
             Text(label).hudLabel(size: 10)
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(value).font(Typo.hud(22, weight: .bold)).foregroundStyle(accent).contentTransition(.numericText())
+                    .lineLimit(1).minimumScaleFactor(0.6)
                 if let unit { Text(unit).font(Typo.hud(12)).foregroundStyle(Palette.textFaint) }
             }
         }

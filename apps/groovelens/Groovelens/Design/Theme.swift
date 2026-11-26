@@ -87,8 +87,9 @@ enum Typo {
         usesLatinDisplay ? hud(size, weight: .bold) : .system(size: size, weight: .bold)
     }
 
+    /// Body text follows Dynamic Type (the root caps the range so fixed HUD shapes don't overflow).
     static func body(_ size: CGFloat = 15, weight: Font.Weight = .regular) -> Font {
-        .system(size: size, weight: weight)
+        .system(size: UIFontMetrics(forTextStyle: .body).scaledValue(for: size), weight: weight)
     }
 }
 

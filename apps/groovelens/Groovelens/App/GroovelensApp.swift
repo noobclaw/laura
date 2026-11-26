@@ -14,6 +14,7 @@ struct GroovelensApp: App {
                 // Rebuild every screen when the in-app language changes; the tab survives via SceneStorage.
                 .id(language.code)
                 .environment(\.locale, language.locale)
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .environment(language)
                 .environment(store)
                 .environment(profile)
@@ -54,6 +55,8 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query(sort: \Song.createdAt, order: .reverse) private var songs: [Song]
     @SceneStorage("groovelens.tab") private var tab: AppTab = .stage
+    @State private var chrome = ChromeState()
+    private var tabBarHidden: Bool { chrome.tabBarHidden }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -66,10 +69,14 @@ struct RootView: View {
                 case .settings: NavigationStack { SettingsView() }
                 }
             }
-            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 76) }
-            NeonTabBar(selection: $tab)
-                .padding(.horizontal, 14)
-                .padding(.bottom, 6)
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: tabBarHidden ? 0 : 76) }
+            .environment(chrome)
+            if !tabBarHidden {
+                NeonTabBar(selection: $tab)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 6)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .task { recoverInterruptedAnalyses() }
         .onChange(of: scenePhase) { _, phase in
@@ -83,6 +90,7 @@ struct RootView: View {
         for song in songs where song.status == .analyzing && analysis.job(for: song.id) == nil {
             song.status = .failed
             song.errorMessage = String(localized: "Analysis stopped when the app closed. Tap to try again.")
+            profile.refundAnalysis()
         }
         try? context.save()
     }
@@ -132,4 +140,26 @@ struct NeonTabBar: View {
                 .shadow(color: .black.opacity(0.5), radius: 20, y: 8)
         }
     }
+}
+
+
+/// Pushed screens (song page, chart) hide the floating tab bar while they are on screen.
+@MainActor
+@Observable
+final class ChromeState {
+    var pushedScreens = 0
+    var tabBarHidden: Bool { pushedScreens > 0 }
+}
+
+private struct HidesTabBar: ViewModifier {
+    @Environment(ChromeState.self) private var chrome
+    func body(content: Content) -> some View {
+        content
+            .onAppear { withAnimation(.easeInOut(duration: 0.25)) { chrome.pushedScreens += 1 } }
+            .onDisappear { withAnimation(.easeInOut(duration: 0.25)) { chrome.pushedScreens = max(0, chrome.pushedScreens - 1) } }
+    }
+}
+
+extension View {
+    func hidesTabBar() -> some View { modifier(HidesTabBar()) }
 }

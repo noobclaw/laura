@@ -48,13 +48,21 @@ final class ProStore {
     /// Localized price from the store; nil until loaded (UI shows a spinner, never a hard-coded price).
     var displayPrice: String? { product?.displayPrice }
 
+    /// True while products are being fetched; `loadFailed` when the store returned nothing.
+    var isLoadingProduct = false
+    var loadFailed = false
+
     func load() async {
+        isLoadingProduct = true
+        loadFailed = false
         do {
             let products = try await Product.products(for: [ProStore.productID])
             product = products.first
         } catch {
             product = nil
         }
+        loadFailed = product == nil
+        isLoadingProduct = false
         await refreshEntitlements()
     }
 

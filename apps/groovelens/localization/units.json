@@ -1858,5 +1858,41 @@
 "id": "Use system language",
 "src": "Use system language",
 "note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Open Settings",
+"src": "Open Settings",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "This song’s audio can’t be played. Delete it and import it again.",
+"src": "This song’s audio can’t be played. Delete it and import it again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.",
+"src": "Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Something went wrong",
+"src": "Something went wrong",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Try the demo song",
+"src": "Try the demo song",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings.",
+"src": "Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings.",
+"note": null
 }
 ]

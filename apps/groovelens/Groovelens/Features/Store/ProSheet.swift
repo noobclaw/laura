@@ -78,10 +78,20 @@ struct ProSheet: View {
                                 .font(Typo.body(16, weight: .semibold)).foregroundStyle(Palette.mint)
                                 .frame(maxWidth: .infinity, minHeight: 56)
                         } else {
-                            NeonButton(title: buyTitle, symbol: "lock.open.fill", busy: store.isPurchasing) {
-                                Task { await store.purchase() }
+                            if store.loadFailed && store.product == nil {
+                                VStack(spacing: 10) {
+                                    Text(String(localized: "The App Store isn’t reachable right now. Check your connection and try again."))
+                                        .font(Typo.body(14)).foregroundStyle(Palette.textDim).multilineTextAlignment(.center)
+                                    NeonButton(title: String(localized: "Try again"), symbol: "arrow.clockwise", busy: store.isLoadingProduct) {
+                                        Task { await store.load() }
+                                    }
+                                }
+                            } else {
+                                NeonButton(title: buyTitle, symbol: "lock.open.fill", busy: store.isPurchasing || store.isLoadingProduct) {
+                                    Task { await store.purchase() }
+                                }
+                                .disabled(store.product == nil)
                             }
-                            .disabled(store.product == nil)
                         }
                         Button {
                             Task { await store.restore() }

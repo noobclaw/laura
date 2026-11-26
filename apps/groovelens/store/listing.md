@@ -27,10 +27,13 @@ Groovelens listens to a track, separates the drums from the rest of the mix, fin
 Groovelens Pro is a one-time purchase — no subscription:
 unlimited songs, Kit mode, speed trainer, the full fill library, MIDI / MusicXML / PDF export and every stage skin.
 
+Works with your own audio files, videos and recordings. Songs bought from Apple Music are copy-protected and can't be imported.
 Automatic transcription can miss or mislabel hits on dense mixes; the chart editor lets you fix them.
 
 - **What's New (1.0)**: First release.
 - **Category**: Music (secondary: Education)
+- **Support URL**: https://256btc.com/support/
+- **Privacy Policy URL**: ⏳ needs a hosted page (no data collected; text in PLAN.md)
 - **In-app purchase**: Groovelens Pro (`com.noobclaw.groovelens.pro_unlock`, non-consumable) — "Unlimited songs, Kit mode scoring, speed trainer, all fills, MIDI/MusicXML/PDF export and every stage skin. One-time purchase."
 
 ## 繁體中文

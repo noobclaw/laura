@@ -223,7 +223,7 @@ struct ResultsView: View {
     private func recordOnce() {
         guard recordedID != result.id else { return }
         recordedID = result.id
-        let input = PlayerProfile.RunInput(songID: song.id, sectionLabel: result.setup.rangeLabel, isFill: result.setup.isFill,
+        let input = PlayerProfile.RunInput(songID: song.id, sectionLabel: result.setup.rangeLabel, sectionKey: result.setup.sectionKey, isFill: result.setup.isFill,
                                            accuracy: result.accuracy, grade: result.grade, maxCombo: result.maxCombo,
                                            speed: result.finalSpeed, mode: result.setup.mode, seconds: result.seconds, runXP: result.xp)
         let startProgress = profile.levelProgress

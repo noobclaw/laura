@@ -20,6 +20,7 @@ struct SongDetailView: View {
     @State private var stageSetup: StageSetup?
     @State private var showChart = false
     @State private var notice: String?
+    @State private var micDenied = false
     @State private var shareItem: ShareItem?
 
     var body: some View {
@@ -46,6 +47,7 @@ struct SongDetailView: View {
         .scrollIndicators(.hidden)
         .background(NeonBackground())
         .toolbar(.hidden, for: .navigationBar)
+        .hidesTabBar()
         .task { load() }
         .sheet(item: $proReason) { ProSheet(reason: $0) }
         .sheet(item: $shareItem) { ShareSheet(items: [$0.url]) }
@@ -56,7 +58,10 @@ struct SongDetailView: View {
             if let chart { ChartView(song: song, chart: chart) { updated in self.chart = updated } }
         }
         .alert(String(localized: "Heads up"), isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
-            Button(String(localized: "OK"), role: .cancel) {}
+            if micDenied {
+                Button(String(localized: "Open Settings")) { micDenied = false; MicPermission.openSettings() }
+            }
+            Button(String(localized: "OK"), role: .cancel) { micDenied = false }
         } message: { Text(notice ?? "") }
     }
 
@@ -253,7 +258,8 @@ struct SongDetailView: View {
     private func start(_ chart: DrumChart) {
         let (bars, label) = range(chart)
         let setup = StageSetup(mode: mode, bars: bars, rangeLabel: label, isFill: false, speed: speed, track: track,
-                               click: click, loop: loop || trainer, speedTrainer: trainer)
+                               click: click, loop: loop || trainer, speedTrainer: trainer,
+                               sectionKey: selectedSection.flatMap { id in chart.sections.first { $0.id == id }?.key })
         if mode == .kit {
             switch MicPermission.current {
             case .granted:
@@ -261,10 +267,11 @@ struct SongDetailView: View {
             case .undetermined:
                 Task {
                     if await MicPermission.request() { stageSetup = setup }
-                    else { notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.") }
+                    else { micDenied = true; notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.") }
                 }
                 return
             case .denied:
+                micDenied = true
                 notice = String(localized: "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.")
                 return
             }
