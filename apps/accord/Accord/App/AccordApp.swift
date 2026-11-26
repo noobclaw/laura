@@ -15,7 +15,9 @@ struct AccordApp: App {
 
     init() {
         let schema = Schema([Material.self, Formula.self, FormulaLine.self, Batch.self, AgingNote.self])
-        let inMemory = ProcessInfo.processInfo.arguments.contains("-UITour")
+        let args = ProcessInfo.processInfo.arguments
+        let inMemory = args.contains("-UITour")
+        if inMemory { UserDefaults.standard.set(args.contains("-UITourNoir") ? "noir" : "atelier", forKey: Theme.lookKey) }
         do {
             container = try ModelContainer(for: schema, configurations: ModelConfiguration(isStoredInMemoryOnly: inMemory))
             storeFailed = false

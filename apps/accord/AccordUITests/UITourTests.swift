@@ -17,10 +17,11 @@ final class UITourTests: XCTestCase {
         add(a)
     }
 
-    private func launch(_ lang: String, pro: Bool) -> XCUIApplication {
+    private func launch(_ lang: String, pro: Bool, noir: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-UITour", "-AppleLanguages", "(\(lang))", "-AppleLocale", lang == "en" ? "en_US" : lang]
         if pro { app.launchArguments.append("-UITourPro") }
+        if noir { app.launchArguments.append("-UITourNoir") }
         app.launch()
         return app
     }
@@ -112,6 +113,53 @@ final class UITourTests: XCTestCase {
         app.buttons["tab-lab"].tap()
         sleep(1)
         shot(app, "15-batches", lang)
+
+        app.buttons["tab-library"].tap()
+        if app.buttons["open-dilution"].waitForExistence(timeout: 5) {
+            app.buttons["open-dilution"].tap()
+            sleep(1)
+            shot(app, "16-dilution", lang)
+            app.swipeDown(velocity: .fast)
+            sleep(1)
+        }
+    }
+
+    /// Noir look: bench, weighing, shelf, share card.
+    func testTourNoir() {
+        let lang = "noir"
+        let app = launch("en", pro: true, noir: true)
+        XCTAssertTrue(app.buttons["add-material"].waitForExistence(timeout: 10))
+        sleep(2)
+        shot(app, "01-bench", lang)
+        app.buttons["spray"].tap()
+        usleep(500_000)
+        shot(app, "02-spray", lang)
+        app.buttons["weigh"].tap()
+        XCTAssertTrue(app.buttons["start-weighing"].waitForExistence(timeout: 5))
+        app.buttons["start-weighing"].tap()
+        XCTAssertTrue(app.buttons["weigh-next"].waitForExistence(timeout: 5))
+        app.buttons["weigh-next"].tap(); app.buttons["weigh-next"].tap(); app.buttons["weigh-next"].tap()
+        sleep(1)
+        shot(app, "03-weigh", lang)
+        app.buttons["Stop weighing"].firstMatch.exists ? app.buttons["Stop weighing"].firstMatch.tap() : app.buttons.element(boundBy: 0).tap()
+        sleep(1)
+        app.swipeDown(velocity: .fast)
+        sleep(1)
+        app.buttons["formula-menu"].tap()
+        let card = app.buttons["Share card"]
+        if card.waitForExistence(timeout: 3) {
+            card.tap()
+            sleep(2)
+            shot(app, "04-share-card", lang)
+            app.swipeDown(velocity: .fast)
+            sleep(1)
+        }
+        app.buttons["tab-shelf"].tap()
+        sleep(2)
+        shot(app, "05-shelf", lang)
+        app.buttons["open-settings"].tap()
+        sleep(1)
+        shot(app, "06-settings", lang)
     }
 
     /// Free user: the formula limit opens the paywall with a store price (from the .storekit file in Debug).
