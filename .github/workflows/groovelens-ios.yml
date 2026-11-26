@@ -44,6 +44,15 @@ jobs:
           tail -80 ci-out/build.log > ci-out/tail.txt
           exit 0
 
+      - name: Export localizations
+        run: |
+          set +e
+          xcodebuild -exportLocalizations -project Groovelens.xcodeproj -localizationPath ci-out/loc -exportLanguage en > ci-out/loc.log 2>&1
+          XLIFF=$(find ci-out/loc -name 'en.xliff' | head -1)
+          [ -n "$XLIFF" ] && cp "$XLIFF" ci-out/en.xliff
+          rm -rf ci-out/loc
+          exit 0
+
       - name: Launch and screenshot
         run: |
           APP=$(find dd/Build/Products -name 'Groovelens.app' -path '*iphonesimulator*' | head -1)
