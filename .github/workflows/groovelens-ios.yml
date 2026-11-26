@@ -51,6 +51,10 @@ jobs:
           XLIFF=$(find ci-out/loc -name 'en.xliff' | head -1)
           [ -n "$XLIFF" ] && cp "$XLIFF" ci-out/en.xliff
           rm -rf ci-out/loc
+          # Localization gate: every exported key translated in all 9 target languages.
+          python3 scripts/check_strings.py ci-out/en.xliff Groovelens/Resources > ci-out/l10n.txt 2>&1
+          echo $? > ci-out/l10n-status.txt
+          cat ci-out/l10n.txt | head -20
           exit 0
 
       - name: Launch and screenshot
@@ -63,6 +67,12 @@ jobs:
           xcrun simctl launch "$SIM" com.noobclaw.groovelens
           sleep 6
           xcrun simctl io "$SIM" screenshot ci-out/home.png
+          for L in zh-Hant ja de; do
+            xcrun simctl terminate "$SIM" com.noobclaw.groovelens || true
+            xcrun simctl launch "$SIM" com.noobclaw.groovelens -AppleLanguages "($L)"
+            sleep 5
+            xcrun simctl io "$SIM" screenshot "ci-out/home-$L.png"
+          done
           xcrun simctl spawn "$SIM" log show --last 1m --predicate 'process == "Groovelens"' --style compact | tail -60 > ci-out/runtime.log || true
 
       - name: Publish results to the groovelens-ci branch
@@ -75,8 +85,10 @@ jobs:
           git add -A && git commit -qm "ci for ${{ github.sha }}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" groovelens-ci
 
-      - name: Fail if the build or tests failed
-        run: test "$(cat ci-out/status.txt)" = "0"
+      - name: Fail if the build, tests or localization gate failed
+        run: |
+          test "$(cat ci-out/status.txt)" = "0"
+          test "$(cat ci-out/l10n-status.txt)" = "0"
 
   testflight:
     needs: build
@@ -120,6 +132,19 @@ jobs:
           security import ~/asc/dev.p12 -k build.keychain -P "$P12_PASS" -A -f pkcs12
           security list-keychains -d user -s build.keychain login.keychain
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci build.keychain >/dev/null
+
+      - name: App Store Connect setup (app record check, in-app purchase)
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography || python3 -m pip install --quiet pyjwt cryptography
+          mkdir -p ci-tf
+          set +e
+          ASC_KEY_PATH=~/asc/AuthKey.p8 python3 scripts/asc_setup.py 2>&1 | tee ci-tf/asc.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          if [ $rc -ne 0 ]; then echo FAIL > ci-tf/status.txt; exit 1; fi
 
       - name: Archive
         env:

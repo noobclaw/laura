@@ -143,3 +143,18 @@
 
 ## 評價請求觸發點
 第 3 次完成結算（非 Watch 模式），90 天冷卻。
+
+## 術語表（10 語言，依 tool-app-factory 08）
+| en | zh-Hant | zh-Hans | ja | ko | de | fr | es | pt-BR | it |
+|---|---|---|---|---|---|---|---|---|---|
+| Kick | 大鼓 | 底鼓 | キック | 킥 | Bassdrum | Grosse caisse | Bombo | Bumbo | Cassa |
+| Snare | 小鼓 | 军鼓 | スネア | 스네어 | Snare | Caisse claire | Caja | Caixa | Rullante |
+| Hi-hat | 踩鈸 | 踩镲 | ハイハット | 하이햇 | Hi-Hat | Charleston | Hi-hat | Chimbal | Charleston |
+| Tom | 通鼓 | 通鼓 | タム | 탐 | Tom | Tom | Tom | Tom | Tom |
+| Ride | 叮叮鈸 | 叮叮镲 | ライド | 라이드 | Ride | Ride | Ride | Prato de condução | Ride |
+| Crash | 碎音鈸 | 碎音镲 | クラッシュ | 크래시 | Crash | Crash | Crash | Prato de ataque | Crash |
+| Fill | 過門 | 过门 | フィル | 필인 | Fill | Break | Fill | Virada | Fill |
+| Chart | 鼓譜 | 鼓谱 | 譜面 | 악보 | Noten | Partition | Partitura | Partitura | Spartito |
+| Kit mode | 真鼓模式 | 真鼓模式 | キットモード | 키트 모드 | Kit-Modus | Mode Batterie | Modo Batería | Modo Bateria | Modalità Batteria |
+
+翻譯來源：`localization/tr_*.py`（按 `localization/units.json` 的導出順序），`scripts/build_strings.py` 生成 xcstrings，CI 以 `scripts/check_strings.py` 把關。

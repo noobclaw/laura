@@ -1,0 +1,198 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        }
+      }
+    },
+    "CFBundleName": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens 會用麥克風錄下你想扒譜的歌曲；在真鼓模式中也會聽你打鼓，為節奏打分。聲音不會離開你的 iPhone。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens 会用麦克风录下你想扒谱的歌曲；在真鼓模式中也会听你打鼓，为节奏打分。声音不会离开你的 iPhone。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens はマイクを使って、譜面にしたい曲を録音します。キットモードではあなたのドラム演奏を聴いてタイミングを採点します。音声が iPhone の外に出ることはありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens는 악보로 만들 곡을 녹음하고, 키트 모드에서는 드럼 연주를 듣고 타이밍을 채점하기 위해 마이크를 사용합니다. 오디오는 iPhone 밖으로 나가지 않습니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens nutzt das Mikrofon, um Songs aufzunehmen, die du notieren möchtest, und im Kit-Modus, um dein Spiel zu hören und dein Timing zu bewerten. Audio verlässt nie dein iPhone."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens utilise le micro pour enregistrer les morceaux à transcrire et, en mode Batterie, pour écouter ton jeu et noter ton placement. L’audio ne quitte jamais ton iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens usa el micrófono para grabar las canciones que quieres transcribir y, en el modo Batería, para escuchar cómo tocas y puntuar tu tempo. El audio nunca sale de tu iPhone."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Groovelens usa o microfone para gravar as músicas que você quer transcrever e, no modo Bateria, para ouvir você tocar e avaliar seu tempo. O áudio nunca sai do seu iPhone."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens usa il microfono per registrare i brani da trascrivere e, in modalità Batteria, per ascoltarti suonare e valutare il tuo tempo. L’audio non lascia mai il tuo iPhone."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groovelens uses the microphone to record songs you want to chart and, in Kit mode, to hear your drumming so it can score your timing. Audio never leaves your iPhone."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

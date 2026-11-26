@@ -1,0 +1,1832 @@
+[
+{
+"file": "Groovelens/Resources/InfoPlist.xcstrings",
+"id": "CFBundleDisplayName",
+"src": "Groovelens",
+"note": "Bundle display name"
+},
+{
+"file": "Groovelens/Resources/InfoPlist.xcstrings",
+"id": "CFBundleName",
+"src": "Groovelens",
+"note": "Bundle name"
+},
+{
+"file": "Groovelens/Resources/InfoPlist.xcstrings",
+"id": "NSMicrophoneUsageDescription",
+"src": "Groovelens uses the microphone to record songs you want to chart and, in Kit mode, to hear your drumming so it can score your timing. Audio never leaves your iPhone.",
+"note": "Privacy - Microphone Usage Description"
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "",
+"src": "",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%@ stage",
+"src": "%@ stage",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%@ · bars %lld–%lld · %@",
+"src": "%1$@ · bars %2$lld–%3$lld · %4$@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%@%%",
+"src": "%@%%",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%@%lld ms",
+"src": "%1$@%2$lld ms",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%@, %@. %@",
+"src": "%1$@, %2$@. %3$@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld",
+"src": "%lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld / %lld",
+"src": "%1$lld / %2$lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld / %lld XP",
+"src": "%1$lld / %2$lld XP",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld BPM · %@",
+"src": "%1$lld BPM · %2$@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld BPM · %@ · %lld hits",
+"src": "%1$lld BPM · %2$@ · %3$lld hits",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld BPM · %lld/4 · %@",
+"src": "%1$lld BPM · %2$lld/4 · %3$@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld day streak",
+"src": "%lld day streak",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld free songs left",
+"src": "%lld free songs left",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld of 3 stars",
+"src": "%lld of 3 stars",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld taps",
+"src": "%lld taps",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld%%",
+"src": "%lld%%",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "%lld/%lld",
+"src": "%1$lld/%2$lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "( )",
+"src": "( )",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "+%lld XP",
+"src": "+%lld XP",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "1 rest day a week keeps your streak",
+"src": "1 rest day a week keeps your streak",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "3",
+"src": "3",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "ABOUT",
+"src": "ABOUT",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "ACCURACY",
+"src": "ACCURACY",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "ACCURACY · LAST %lld RUNS",
+"src": "ACCURACY · LAST %lld RUNS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "ACHIEVEMENTS",
+"src": "ACHIEVEMENTS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "ANALYZING ON DEVICE",
+"src": "ANALYZING ON DEVICE",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Accuracy",
+"src": "Accuracy",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Analysis failed",
+"src": "Analysis failed",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Analysis stopped when the app closed. Tap to try again.",
+"src": "Analysis stopped when the app closed. Tap to try again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Analysis was cancelled.",
+"src": "Analysis was cancelled.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Arcade",
+"src": "Arcade",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Audio file",
+"src": "Audio file",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong.",
+"src": "Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "BACKING TRACK",
+"src": "BACKING TRACK",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "BARS",
+"src": "BARS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "BEST STREAK",
+"src": "BEST STREAK",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Back",
+"src": "Back",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Backbeat Boss",
+"src": "Backbeat Boss",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Bar %lld%@: %@",
+"src": "Bar %1$lld%2$@: %3$@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Best %lld%%",
+"src": "Best %lld%%",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Bridge",
+"src": "Bridge",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "CHART READY",
+"src": "CHART READY",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "COMBO",
+"src": "COMBO",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Cancel",
+"src": "Cancel",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart",
+"src": "Chart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart 5 songs",
+"src": "Chart 5 songs",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart a new song",
+"src": "Chart a new song",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart a song with some drum fills and they’ll collect here automatically.",
+"src": "Chart a song with some drum fills and they’ll collect here automatically.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart unavailable",
+"src": "Chart unavailable",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart your first song",
+"src": "Chart your first song",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chart your whole setlist, not just three tracks.",
+"src": "Chart your whole setlist, not just three tracks.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Chorus",
+"src": "Chorus",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Clear a run at %lld%% speed",
+"src": "Clear a run at %lld%% speed",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Clear a run at 100% speed with an A or better",
+"src": "Clear a run at 100% speed with an A or better",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Click track",
+"src": "Click track",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Click volume",
+"src": "Click volume",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Climb to full tempo",
+"src": "Climb to full tempo",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Close",
+"src": "Close",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Couldn’t import",
+"src": "Couldn’t import",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Count in %lld",
+"src": "Count in %lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Crash",
+"src": "Crash",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Current offset: %lld ms",
+"src": "Current offset: %lld ms",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "DAILY QUESTS",
+"src": "DAILY QUESTS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Dead in the pocket — on average within %lld ms.",
+"src": "Dead in the pocket — on average within %lld ms.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Delete",
+"src": "Delete",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Done",
+"src": "Done",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Done editing",
+"src": "Done editing",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Drill this fill",
+"src": "Drill this fill",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Drop any song.",
+"src": "Drop any song.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Drum pads",
+"src": "Drum pads",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Drum separation uses harmonic–percussive median filtering (Fitzgerald, 2010). Beat tracking follows Ellis (2007).",
+"src": "Drum separation uses harmonic–percussive median filtering (Fitzgerald, 2010). Beat tracking follows Ellis (2007).",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Drums only",
+"src": "Drums only",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "EARLY",
+"src": "EARLY",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "EASY",
+"src": "EASY",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Early",
+"src": "Early",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Earn an S grade",
+"src": "Earn an S grade",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Edit chart",
+"src": "Edit chart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Every fill from every song, ready to drill.",
+"src": "Every fill from every song, ready to drill.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Every fill, one tap away",
+"src": "Every fill, one tap away",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Every stage skin",
+"src": "Every stage skin",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Everything stays on this iPhone",
+"src": "Everything stays on this iPhone",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Export",
+"src": "Export",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "FEEL",
+"src": "FEEL",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Fill Hunter",
+"src": "Fill Hunter",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Fill Master",
+"src": "Fill Master",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Fill library",
+"src": "Fill library",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Fill · bar %lld",
+"src": "Fill · bar %lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Fills",
+"src": "Fills",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Finish a run in Kit mode",
+"src": "Finish a run in Kit mode",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Finish your first run",
+"src": "Finish your first run",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "First Chart",
+"src": "First Chart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Flawless",
+"src": "Flawless",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Fonts & licenses",
+"src": "Fonts & licenses",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Full Tempo",
+"src": "Full Tempo",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Full mix",
+"src": "Full mix",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "GOOD",
+"src": "GOOD",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "GREAT",
+"src": "GREAT",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "GROOVELENS",
+"src": "GROOVELENS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "GROOVELENS PRO",
+"src": "GROOVELENS PRO",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Garage Kid",
+"src": "Garage Kid",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Grade %@",
+"src": "Grade %@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Grade %@, %lld percent, max combo %lld",
+"src": "Grade %1$@, %2$lld percent, max combo %3$lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Groove Cadet",
+"src": "Groove Cadet",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Groove Legend",
+"src": "Groove Legend",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Groovelens Pro",
+"src": "Groovelens Pro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Groovelens uses the Unbounded and Chakra Petch typefaces under the SIL Open Font License 1.1.",
+"src": "Groovelens uses the Unbounded and Chakra Petch typefaces under the SIL Open Font License 1.1.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "HARD",
+"src": "HARD",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "HITS",
+"src": "HITS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Habit Forming",
+"src": "Habit Forming",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Heads up",
+"src": "Heads up",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Hi-hat",
+"src": "Hi-hat",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Hit %lld%% on any section",
+"src": "Hit %lld%% on any section",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Hit %lld%% on the %@ of “%@”",
+"src": "Hit %1$lld%% on the %2$@ of “%3$@”",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "In the Pocket",
+"src": "In the Pocket",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "In use",
+"src": "In use",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Intro",
+"src": "Intro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Iron Wrists",
+"src": "Iron Wrists",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Isolating the drums",
+"src": "Isolating the drums",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Just watch and listen",
+"src": "Just watch and listen",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Kick",
+"src": "Kick",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Kit",
+"src": "Kit",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Kit mode",
+"src": "Kit mode",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.",
+"src": "Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "LAST 5 WEEKS",
+"src": "LAST 5 WEEKS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "LATE",
+"src": "LATE",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "LEVEL UP!",
+"src": "LEVEL UP!",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "LISTENING TO YOUR KIT",
+"src": "LISTENING TO YOUR KIT",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "LV %lld · %@",
+"src": "LV %1$lld · %2$@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Late",
+"src": "Late",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Left-handed layout",
+"src": "Left-handed layout",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Level %lld",
+"src": "Level %lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Level %lld or Pro",
+"src": "Level %lld or Pro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Licenses",
+"src": "Licenses",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Locked In",
+"src": "Locked In",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Loop the range",
+"src": "Loop the range",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "MEDIUM",
+"src": "MEDIUM",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "METER",
+"src": "METER",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "MIDI",
+"src": "MIDI",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "MIDI, MusicXML & PDF",
+"src": "MIDI, MusicXML & PDF",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "MISS",
+"src": "MISS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Mapping the beat grid",
+"src": "Mapping the beat grid",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Max level reached",
+"src": "Max level reached",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Metronome Heart",
+"src": "Metronome Heart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Microphone access is off. You can turn it on in Settings › Groovelens.",
+"src": "Microphone access is off. You can turn it on in Settings › Groovelens.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Mirrors the lanes and pads.",
+"src": "Mirrors the lanes and pads.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "MusicXML",
+"src": "MusicXML",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Nail 10 fills",
+"src": "Nail 10 fills",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Nail a fill with 80% accuracy",
+"src": "Nail a fill with 80% accuracy",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Naming every hit",
+"src": "Naming every hit",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Neon",
+"src": "Neon",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "New stage skin — pick it in Progress.",
+"src": "New stage skin — pick it in Progress.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Next title at level %lld",
+"src": "Next title at level %lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "No drums",
+"src": "No drums",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "No fills yet",
+"src": "No fills yet",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "No previous Pro purchase was found for this Apple ID.",
+"src": "No previous Pro purchase was found for this Apple ID.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Not enough taps landed near the clicks. Try again.",
+"src": "Not enough taps landed near the clicks. Try again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Not played yet",
+"src": "Not played yet",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Nothing leaves your iPhone. You can close this — analysis keeps going.",
+"src": "Nothing leaves your iPhone. You can close this — analysis keeps going.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "OK",
+"src": "OK",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "On it",
+"src": "On it",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "One purchase. Yours forever. No subscription.",
+"src": "One purchase. Yours forever. No subscription.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Open the chart",
+"src": "Open the chart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Open your charts in your DAW or notation app.",
+"src": "Open your charts in your DAW or notation app.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Outro",
+"src": "Outro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PAUSED",
+"src": "PAUSED",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PDF",
+"src": "PDF",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PERFECT",
+"src": "PERFECT",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PLAY",
+"src": "PLAY",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PRACTICE",
+"src": "PRACTICE",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PRACTICE RANGE",
+"src": "PRACTICE RANGE",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PRIVACY",
+"src": "PRIVACY",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "PRO",
+"src": "PRO",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Part",
+"src": "Part",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pause",
+"src": "Pause",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Payment is charged to your Apple Account. Family Sharing supported.",
+"src": "Payment is charged to your Apple Account. Family Sharing supported.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pick a drum, then tap the staff to add or remove a hit.",
+"src": "Pick a drum, then tap the staff to add or remove a hit.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Play",
+"src": "Play",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Play again",
+"src": "Play again",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Play the pads on screen",
+"src": "Play the pads on screen",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Play your real drums — the mic scores every hit.",
+"src": "Play your real drums — the mic scores every hit.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Play your real kit — the mic scores you",
+"src": "Play your real kit — the mic scores you",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Playback couldn’t start",
+"src": "Playback couldn’t start",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pocket Keeper",
+"src": "Pocket Keeper",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Practice 3 days in a row",
+"src": "Practice 3 days in a row",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Practice 7 days in a row",
+"src": "Practice 7 days in a row",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Practice 30 days in a row",
+"src": "Practice 30 days in a row",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Practice for %lld minutes",
+"src": "Practice for %lld minutes",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Practice for 10 hours total",
+"src": "Practice for 10 hours total",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pro is unlocked. Thank you!",
+"src": "Pro is unlocked. Thank you!",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pro restored. Welcome back!",
+"src": "Pro restored. Welcome back!",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Progress",
+"src": "Progress",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pulled from your songs. Each drill loops the bar before the fill, then the fill.",
+"src": "Pulled from your songs. Each drill loops the bar before the fill, then the fill.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Put your iPhone near the band, not on the kit. Up to 10 minutes.",
+"src": "Put your iPhone near the band, not on the kit. Up to 10 minutes.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Quest complete · +%lld XP",
+"src": "Quest complete · +%lld XP",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Quit",
+"src": "Quit",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "RESULTS",
+"src": "RESULTS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "RUNS",
+"src": "RUNS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reach a %lld-note combo in Tap mode",
+"src": "Reach a %lld-note combo in Tap mode",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reach a 50-note combo",
+"src": "Reach a 50-note combo",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reach a 100-note combo",
+"src": "Reach a 100-note combo",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reach a 250-note combo",
+"src": "Reach a 250-note combo",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reach level 10",
+"src": "Reach level 10",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reach level 25",
+"src": "Reach level 25",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Real Sticks",
+"src": "Real Sticks",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Record",
+"src": "Record",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Record at least 8 seconds so we can find the beat.",
+"src": "Record at least 8 seconds so we can find the beat.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Record now",
+"src": "Record now",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Recording",
+"src": "Recording",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Recording couldn’t start. Check that no other app is using the microphone.",
+"src": "Recording couldn’t start. Check that no other app is using the microphone.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Recording — %@",
+"src": "Recording — %@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Reset to 0 ms",
+"src": "Reset to 0 ms",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Resets at midnight",
+"src": "Resets at midnight",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Restart",
+"src": "Restart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Restore failed: %@",
+"src": "Restore failed: %@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Restore purchases",
+"src": "Restore purchases",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Resume",
+"src": "Resume",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Rhythm Architect",
+"src": "Rhythm Architect",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Ride",
+"src": "Ride",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Run",
+"src": "Run",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "SESSION COMPLETE",
+"src": "SESSION COMPLETE",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "SOMETHING WENT WRONG",
+"src": "SOMETHING WENT WRONG",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "SPEED",
+"src": "SPEED",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "STAGE SKINS",
+"src": "STAGE SKINS",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "STREAK",
+"src": "STREAK",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Save",
+"src": "Save",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Score your real kit",
+"src": "Score your real kit",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Session Player",
+"src": "Session Player",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Session Pro",
+"src": "Session Pro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Setlist",
+"src": "Setlist",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Settings",
+"src": "Settings",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Six pads: kick, snare, hi-hat, tom, ride, crash",
+"src": "Six pads: kick, snare, hi-hat, tom, ride, crash",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Snare",
+"src": "Snare",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking.",
+"src": "Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Sound Check",
+"src": "Sound Check",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Speed",
+"src": "Speed",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Speed trainer",
+"src": "Speed trainer",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Stage",
+"src": "Stage",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Start",
+"src": "Start",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Start recording",
+"src": "Start recording",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Start slow, climb 5% after every clean loop.",
+"src": "Start slow, climb 5% after every clean loop.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Stop recording",
+"src": "Stop recording",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Straight",
+"src": "Straight",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Studio",
+"src": "Studio",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Swing",
+"src": "Swing",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "TAP",
+"src": "TAP",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "TEMPO",
+"src": "TEMPO",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "TIMING BY BAR",
+"src": "TIMING BY BAR",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Take your charts anywhere",
+"src": "Take your charts anywhere",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Tap",
+"src": "Tap",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Tap + and pick a song, a rehearsal video, or record your band. Charts appear here.",
+"src": "Tap + and pick a song, a rehearsal video, or record your band. Charts appear here.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Tap to use",
+"src": "Tap to use",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Ten Hours In",
+"src": "Ten Hours In",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "The App Store couldn’t verify this purchase.",
+"src": "The App Store couldn’t verify this purchase.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "The App Store isn’t reachable right now. Check your connection and try again.",
+"src": "The App Store isn’t reachable right now. Check your connection and try again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "The original audio for this song is missing. Delete it and import again.",
+"src": "The original audio for this song is missing. Delete it and import again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "The purchase didn’t go through: %@",
+"src": "The purchase didn’t go through: %@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "The recording is too short to chart — use at least 8 seconds.",
+"src": "The recording is too short to chart — use at least 8 seconds.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "The recording was interrupted.",
+"src": "The recording was interrupted.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "This audio format can’t be read.",
+"src": "This audio format can’t be read.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "This chart couldn’t be read. Delete the song and import it again.",
+"src": "This chart couldn’t be read. Delete the song and import it again.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "This file has no audio track.",
+"src": "This file has no audio track.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "This song is copy-protected (for example from Apple Music) and can’t be analyzed.",
+"src": "This song is copy-protected (for example from Apple Music) and can’t be analyzed.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Timing calibration",
+"src": "Timing calibration",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Tom",
+"src": "Tom",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Tour Drummer",
+"src": "Tour Drummer",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Tracks",
+"src": "Tracks",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Try again",
+"src": "Try again",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "UNLOCKED",
+"src": "UNLOCKED",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlimited songs",
+"src": "Unlimited songs",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages.",
+"src": "Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlock Pro",
+"src": "Unlock Pro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlock Pro — %@",
+"src": "Unlock Pro — %@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlock every stage",
+"src": "Unlock every stage",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlock with Pro",
+"src": "Unlock with Pro",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Unlocked. Every feature is yours.",
+"src": "Unlocked. Every feature is yours.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Use headphones — otherwise the mic hears the backing track too.",
+"src": "Use headphones — otherwise the mic hears the backing track too.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Use the headphones or speaker you play with. Tap the big pad exactly on each click.",
+"src": "Use the headphones or speaker you play with. Tap the big pad exactly on each click.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Verse",
+"src": "Verse",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Version",
+"src": "Version",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Video from Photos",
+"src": "Video from Photos",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Video — %@",
+"src": "Video — %@",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Vintage",
+"src": "Vintage",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Vintage, Studio and Arcade — no grinding.",
+"src": "Vintage, Studio and Arcade — no grinding.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Watch",
+"src": "Watch",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "We pull the drums out and build your track — right on this iPhone.",
+"src": "We pull the drums out and build your track — right on this iPhone.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Week of Grooves",
+"src": "Week of Grooves",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Whole song",
+"src": "Whole song",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Writing the chart",
+"src": "Writing the chart",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "You tap a little after the click. We’ll correct for it.",
+"src": "You tap a little after the click. We’ll correct for it.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "You tap a little ahead of the click. We’ll correct for it.",
+"src": "You tap a little ahead of the click. We’ll correct for it.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.",
+"src": "Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Your stage is empty",
+"src": "Your stage is empty",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "You’re dragging by about %lld ms. Push a little.",
+"src": "You’re dragging by about %lld ms. Push a little.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "You’re rushing by about %lld ms. Lean back.",
+"src": "You’re rushing by about %lld ms. Lean back.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "You’ve charted your 3 free songs",
+"src": "You’ve charted your 3 free songs",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "bar %lld",
+"src": "bar %lld",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "days",
+"src": "days",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "h",
+"src": "h",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "min",
+"src": "min",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "· %lld%%",
+"src": "· %lld%%",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "· pass %lld",
+"src": "· pass %lld",
+"note": null
+}
+]
