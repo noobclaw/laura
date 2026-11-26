@@ -150,7 +150,7 @@ struct BottleCard: View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
             ZStack(alignment: .topTrailing) {
                 FlaconView(layers: layers.reduce(0, +) > 0 ? layers : [1, 1, 1], fill: layers.reduce(0, +) > 0 ? 0.8 : 0.0)
-                    .frame(height: 150)
+                    .frame(height: 140)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Theme.Space.m)
                     .background(Theme.sunken.opacity(0.6), in: RoundedRectangle(cornerRadius: Theme.Radius.row, style: .continuous))

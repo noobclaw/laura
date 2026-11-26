@@ -3,6 +3,12 @@
   "strings": {
     "CFBundleDisplayName": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -52,12 +58,6 @@
           }
         },
         "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accord"
-          }
-        },
-        "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Accord"
@@ -67,6 +67,12 @@
     },
     "CFBundleName": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -120,17 +126,17 @@
             "state": "translated",
             "value": "Accord"
           }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accord"
-          }
         }
       }
     },
     "NSFaceIDUsageDescription": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord uses Face ID to unlock your formula book when App Lock is on."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -183,12 +189,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quando il blocco è attivo, Accord usa Face ID per sbloccare il tuo quaderno di formule."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accord uses Face ID to unlock your formula book when App Lock is on."
           }
         }
       }

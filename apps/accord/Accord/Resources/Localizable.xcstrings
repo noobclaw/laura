@@ -3,6 +3,12 @@
   "strings": {
     "%1$@ in %2$@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ in %2$@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -61,6 +67,12 @@
     },
     "%1$@ of %2$@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ of %2$@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -119,6 +131,12 @@
     },
     "%1$@ · %2$lld ingredients": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld ingredients"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -177,6 +195,12 @@
     },
     "%1$lld materials · %2$lld need attention": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld materials · %2$lld need attention"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -235,6 +259,12 @@
     },
     "%1$lld new materials, %2$lld updated.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld new materials, %2$lld updated."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -293,6 +323,12 @@
     },
     "%1$lld of %2$lld free formulas left · examples don’t count": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %2$lld free formulas left · examples don’t count"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -351,6 +387,12 @@
     },
     "%@ active": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ active"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -409,6 +451,12 @@
     },
     "%@ copy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ copy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -467,6 +515,12 @@
     },
     "%@ h": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ h"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -525,6 +579,12 @@
     },
     "%@ in %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ in %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -583,6 +643,12 @@
     },
     "%@ min": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ min"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -641,6 +707,12 @@
     },
     "%@ of %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ of %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -699,6 +771,12 @@
     },
     "%@ off target. It will be recorded as weighed.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ off target. It will be recorded as weighed."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -757,6 +835,12 @@
     },
     "%@ · %lld ingredients": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld ingredients"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -815,6 +899,12 @@
     },
     "%lld added": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld added"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -873,6 +963,12 @@
     },
     "%lld changed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld changed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -931,6 +1027,12 @@
     },
     "%lld days resting": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld days resting"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -989,6 +1091,12 @@
     },
     "%lld formulas use it; those lines will show “Missing material”.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld formulas use it; those lines will show “Missing material”."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1047,6 +1155,12 @@
     },
     "%lld materials have no price yet. Add it in Materials.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld materials have no price yet. Add it in Materials."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1105,6 +1219,12 @@
     },
     "%lld materials · %lld need attention": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld materials · %lld need attention"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1163,6 +1283,12 @@
     },
     "%lld new materials, %lld updated.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld new materials, %lld updated."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1221,6 +1347,12 @@
     },
     "%lld of %lld free formulas left · examples don’t count": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld free formulas left · examples don’t count"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1279,6 +1411,12 @@
     },
     "%lld of 5 stars": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 5 stars"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1337,6 +1475,12 @@
     },
     "%lld removed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld removed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1395,6 +1539,12 @@
     },
     "0": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1453,6 +1603,12 @@
     },
     "5 formulas, full calculator and analysis.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 formulas, full calculator and analysis."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1511,6 +1667,12 @@
     },
     "A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1569,6 +1731,12 @@
     },
     "A single line can’t be 100 % while others are in the formula.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A single line can’t be 100 % while others are in the formula."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1627,6 +1795,12 @@
     },
     "About": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1685,6 +1859,12 @@
     },
     "Accord": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1743,6 +1923,12 @@
     },
     "Accord Free": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord Free"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1801,6 +1987,12 @@
     },
     "Accord Pro": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord Pro"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1859,6 +2051,12 @@
     },
     "Accord Pro is one purchase. No subscription, no account, everything stays on your iPhone.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord Pro is one purchase. No subscription, no account, everything stays on your iPhone."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1917,6 +2115,12 @@
     },
     "Accord compares against the limits you enter. It is not a regulatory assessment.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord compares against the limits you enter. It is not a regulatory assessment."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1975,6 +2179,12 @@
     },
     "Accord has no account and no server. Your formulas never leave this iPhone unless you export them.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord has no account and no server. Your formulas never leave this iPhone unless you export them."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2033,6 +2243,12 @@
     },
     "Accord is locked": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord is locked"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2091,6 +2307,12 @@
     },
     "Accord is running without saving so nothing on your phone is overwritten. Restart the app; if this keeps happening, contact support from Settings.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord is running without saving so nothing on your phone is overwritten. Restart the app; if this keeps happening, contact support from Settings."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2149,6 +2371,12 @@
     },
     "Accord uses Face ID to unlock your formula book when App Lock is on.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accord uses Face ID to unlock your formula book when App Lock is on."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2207,6 +2435,12 @@
     },
     "Add": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2265,6 +2499,12 @@
     },
     "Add a maximum % to any material in Materials (from your supplier’s documents) and Accord checks every formula against it.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a maximum % to any material in Materials (from your supplier’s documents) and Accord checks every formula against it."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2323,6 +2563,12 @@
     },
     "Add material": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add material"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2381,6 +2627,12 @@
     },
     "Add materials to see how the scent unfolds.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add materials to see how the scent unfolds."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2439,6 +2691,12 @@
     },
     "Add materials to see the balance.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add materials to see the balance."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2497,6 +2755,12 @@
     },
     "Add note": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add note"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2555,6 +2819,12 @@
     },
     "Add the materials on your shelf, or import the spreadsheet you already keep.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add the materials on your shelf, or import the spreadsheet you already keep."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2613,6 +2883,12 @@
     },
     "Add your first material. Type grams, drops or a percentage, whichever you weigh in.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your first material. Type grams, drops or a percentage, whichever you weigh in."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2671,6 +2947,12 @@
     },
     "Add “%@” to materials": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add “%@” to materials"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2729,6 +3011,12 @@
     },
     "After %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2787,6 +3075,12 @@
     },
     "After smelling": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After smelling"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2845,6 +3139,12 @@
     },
     "Alcohol price per kg": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alcohol price per kg"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2903,6 +3203,12 @@
     },
     "All": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -2961,6 +3267,12 @@
     },
     "All weighed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All weighed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3019,6 +3331,12 @@
     },
     "Almond-cherry powder": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almond-cherry powder"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3077,6 +3395,12 @@
     },
     "Amber": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amber"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3135,6 +3459,12 @@
     },
     "Amber Base": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amber Base"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3193,6 +3523,12 @@
     },
     "Ambroxide": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ambroxide"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3251,6 +3587,12 @@
     },
     "Amount": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amount"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3309,6 +3651,12 @@
     },
     "Analysis": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysis"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3367,6 +3715,12 @@
     },
     "Animalic": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animalic"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3425,6 +3779,12 @@
     },
     "Animalic white-flower depth": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animalic white-flower depth"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3483,6 +3843,12 @@
     },
     "App Lock": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Lock"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3541,6 +3907,12 @@
     },
     "App language": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App language"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3599,6 +3971,12 @@
     },
     "Aquatic": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aquatic"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3657,6 +4035,12 @@
     },
     "Aromatic": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aromatic"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3715,6 +4099,12 @@
     },
     "At the bench": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At the bench"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3773,6 +4163,12 @@
     },
     "Atlas cedarwood oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atlas cedarwood oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3831,6 +4227,12 @@
     },
     "Australian sandalwood oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Australian sandalwood oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3889,6 +4291,12 @@
     },
     "Back up everything": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back up everything"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -3947,6 +4355,12 @@
     },
     "Backbone": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backbone"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4005,6 +4419,12 @@
     },
     "Base": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4063,6 +4483,12 @@
     },
     "Base: its own formula is unpacked into this one": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base: its own formula is unpacked into this one"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4121,6 +4547,12 @@
     },
     "Bases": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bases"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4179,6 +4611,12 @@
     },
     "Bases inside formulas": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bases inside formulas"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4237,6 +4675,12 @@
     },
     "Bases unpacked": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bases unpacked"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4295,6 +4739,12 @@
     },
     "Batch saved": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batch saved"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4353,6 +4803,12 @@
     },
     "Batches": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batches"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4411,6 +4867,12 @@
     },
     "Batches and maturation diary": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batches and maturation diary"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4469,6 +4931,12 @@
     },
     "Batches you already made keep their records.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batches you already made keep their records."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4527,6 +4995,12 @@
     },
     "Bench": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bench"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4585,6 +5059,12 @@
     },
     "Benzoin resinoid": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benzoin resinoid"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4643,6 +5123,12 @@
     },
     "Benzyl acetate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benzyl acetate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4701,6 +5187,12 @@
     },
     "Benzyl benzoate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benzyl benzoate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4759,6 +5251,12 @@
     },
     "Bergamot Cologne": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bergamot Cologne"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4817,6 +5315,12 @@
     },
     "Bergamot oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bergamot oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4875,6 +5379,12 @@
     },
     "Bergamot-lavender, fruity": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bergamot-lavender, fruity"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4933,6 +5443,12 @@
     },
     "Birch tar oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birch tar oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -4991,6 +5507,12 @@
     },
     "Bitter-fresh, sulphury sparkle": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitter-fresh, sulphury sparkle"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5049,6 +5571,12 @@
     },
     "Black pepper oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Black pepper oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5107,6 +5635,12 @@
     },
     "Body mist": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body mist"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5165,6 +5699,12 @@
     },
     "Bottle": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bottle"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5223,6 +5763,12 @@
     },
     "Bottle size": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bottle size"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5281,6 +5827,12 @@
     },
     "Bought or opened": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bought or opened"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5339,6 +5891,12 @@
     },
     "Bright zest, juicy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bright zest, juicy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5397,6 +5955,12 @@
     },
     "Bring in your spreadsheet": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring in your spreadsheet"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5455,6 +6019,12 @@
     },
     "Build with your own bases": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build with your own bases"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5513,6 +6083,12 @@
     },
     "By name": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By name"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5571,6 +6147,12 @@
     },
     "CAS number": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CAS number"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5629,6 +6211,12 @@
     },
     "CSV files open in Numbers, Excel and Google Sheets, and import back into Accord.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV files open in Numbers, Excel and Google Sheets, and import back into Accord."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5687,6 +6275,12 @@
     },
     "CSV, PDF, Markdown, and a full backup file.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV, PDF, Markdown, and a full backup file."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5745,6 +6339,12 @@
     },
     "Camphoraceous, herbal": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camphoraceous, herbal"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5803,6 +6403,12 @@
     },
     "Cancel": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5861,6 +6467,12 @@
     },
     "Candle": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Candle"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5919,6 +6531,12 @@
     },
     "Candy floss, caramel": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Candy floss, caramel"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -5977,6 +6595,12 @@
     },
     "Cardamom oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cardamom oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6035,6 +6659,12 @@
     },
     "Category (optional)": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Category (optional)"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6093,6 +6723,12 @@
     },
     "Change": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6151,6 +6787,12 @@
     },
     "Changes": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6209,6 +6851,12 @@
     },
     "Character": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Character"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6267,6 +6915,12 @@
     },
     "Check again": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check again"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6325,6 +6979,12 @@
     },
     "Citronellol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Citronellol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6383,6 +7043,12 @@
     },
     "Citrus": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Citrus"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6441,6 +7107,12 @@
     },
     "Clary sage oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clary sage oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6499,6 +7171,12 @@
     },
     "Clean metallic citrus, laundry fresh": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean metallic citrus, laundry fresh"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6557,6 +7235,12 @@
     },
     "Clean, sweet white musk": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean, sweet white musk"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6615,6 +7299,12 @@
     },
     "Clear search": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear search"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6673,6 +7363,12 @@
     },
     "Close": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6731,6 +7427,12 @@
     },
     "Close without saving": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close without saving"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6789,6 +7491,12 @@
     },
     "Clove bud oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clove bud oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6847,6 +7555,12 @@
     },
     "Compare versions": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare versions"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6905,6 +7619,12 @@
     },
     "Compare with…": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare with…"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -6963,6 +7683,12 @@
     },
     "Compare “%@” with": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare “%@” with"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7021,6 +7747,12 @@
     },
     "Concentrate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concentrate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7079,6 +7811,12 @@
     },
     "Concentrate only": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concentrate only"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7137,6 +7875,12 @@
     },
     "Cool, eucalyptus-spice": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cool, eucalyptus-spice"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7195,6 +7939,12 @@
     },
     "Cost": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cost"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7253,6 +8003,12 @@
     },
     "Cost per gram": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cost per gram"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7311,6 +8067,12 @@
     },
     "Couldn’t find a column for the material name (Name or Material).": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t find a column for the material name (Name or Material)."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7369,6 +8131,12 @@
     },
     "Couldn’t find an amount column (Grams, Amount, Weight or Parts).": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t find an amount column (Grams, Amount, Weight or Parts)."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7427,6 +8195,12 @@
     },
     "Couldn’t reach the App Store. Try again": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t reach the App Store. Try again"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7485,6 +8259,12 @@
     },
     "Coumarin": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coumarin"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7543,6 +8323,12 @@
     },
     "Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7601,6 +8387,12 @@
     },
     "Creamy peach": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creamy peach"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7659,6 +8451,12 @@
     },
     "Creamy, banana-floral": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creamy, banana-floral"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7717,6 +8515,12 @@
     },
     "Creamy, soft wood": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creamy, soft wood"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7775,6 +8579,12 @@
     },
     "Create": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7833,6 +8643,12 @@
     },
     "Currency": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currency"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7891,6 +8707,12 @@
     },
     "Custom": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -7949,6 +8771,12 @@
     },
     "Cut grass": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut grass"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8007,6 +8835,12 @@
     },
     "Dark, leathery amber": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark, leathery amber"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8065,6 +8899,12 @@
     },
     "Day %1$lld: smell %2$@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day %1$lld: smell %2$@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8123,6 +8963,12 @@
     },
     "Day %lld": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day %lld"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8181,6 +9027,12 @@
     },
     "Day %lld: how does it smell now?": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day %lld: how does it smell now?"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8239,6 +9091,12 @@
     },
     "Day %lld: smell %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day %lld: smell %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8297,6 +9155,12 @@
     },
     "Delete": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8355,6 +9219,12 @@
     },
     "Delete batch record": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete batch record"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8413,6 +9283,12 @@
     },
     "Delete formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8471,6 +9347,12 @@
     },
     "Delete formula and its lines": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete formula and its lines"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8529,6 +9411,12 @@
     },
     "Delete material": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete material"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8587,6 +9475,12 @@
     },
     "Delete record and its notes": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete record and its notes"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8645,6 +9539,12 @@
     },
     "Delete this batch record?": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this batch record?"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8703,6 +9603,12 @@
     },
     "Delete “%@”?": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete “%@”?"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8761,6 +9667,12 @@
     },
     "Dihydromyrcenol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dihydromyrcenol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8819,6 +9731,12 @@
     },
     "Diluted in": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diluted in"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8877,6 +9795,12 @@
     },
     "Dilution": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dilution"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8935,6 +9859,12 @@
     },
     "Distilled water": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distilled water"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -8993,6 +9923,12 @@
     },
     "Done": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9051,6 +9987,12 @@
     },
     "Drops per gram": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drops per gram"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9109,6 +10051,12 @@
     },
     "Dry, clean cedar": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dry, clean cedar"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9167,6 +10115,12 @@
     },
     "Dry, crackling pepper": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dry, crackling pepper"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9225,6 +10179,12 @@
     },
     "Duplicate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9283,6 +10243,12 @@
     },
     "Earthy green leather": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earthy green leather"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9341,6 +10307,12 @@
     },
     "Earthy, dark, camphor-chocolate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earthy, dark, camphor-chocolate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9399,6 +10371,12 @@
     },
     "Eau de Cologne": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eau de Cologne"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9457,6 +10435,12 @@
     },
     "Eau de Parfum": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eau de Parfum"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9515,6 +10499,12 @@
     },
     "Eau de Toilette": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eau de Toilette"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9573,6 +10563,12 @@
     },
     "Edit line": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit line"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9631,6 +10627,12 @@
     },
     "Enter a number.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a number."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9689,6 +10691,12 @@
     },
     "Estimated longevity": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated longevity"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9747,6 +10755,12 @@
     },
     "Ethanol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ethanol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9805,6 +10819,12 @@
     },
     "Ethyl maltol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ethyl maltol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9863,6 +10883,12 @@
     },
     "Ethyl vanillin": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ethyl vanillin"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9921,6 +10947,12 @@
     },
     "Ethylene brassylate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ethylene brassylate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -9979,6 +11011,12 @@
     },
     "Evaporation": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evaporation"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10037,6 +11075,12 @@
     },
     "Evaporation timeline": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evaporation timeline"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10095,6 +11139,12 @@
     },
     "Evening Amber": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evening Amber"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10153,6 +11203,12 @@
     },
     "Every draft, every version.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every draft, every version."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10211,6 +11267,12 @@
     },
     "Everything is unlocked. Thank you.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything is unlocked. Thank you."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10269,6 +11331,12 @@
     },
     "Example": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10327,6 +11395,12 @@
     },
     "Export failed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export failed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10385,6 +11459,12 @@
     },
     "Export “%@”": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export “%@”"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10443,6 +11523,12 @@
     },
     "Export…": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export…"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10501,6 +11587,12 @@
     },
     "Extrait": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extrait"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10559,6 +11651,12 @@
     },
     "Families": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10617,6 +11715,12 @@
     },
     "Family": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Family"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10675,6 +11779,12 @@
     },
     "Filter and import": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter and import"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10733,6 +11843,12 @@
     },
     "Finish": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10791,6 +11907,12 @@
     },
     "Finished product": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finished product"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10849,6 +11971,12 @@
     },
     "Flag": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flag"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10907,6 +12035,12 @@
     },
     "Floral": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Floral"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -10965,6 +12099,12 @@
     },
     "Floral laundry musk": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Floral laundry musk"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11023,6 +12163,12 @@
     },
     "Formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11081,6 +12227,12 @@
     },
     "Formula actions": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formula actions"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11139,6 +12291,12 @@
     },
     "Formulas": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formulas"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11197,6 +12355,12 @@
     },
     "Fragrance load": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragrance load"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11255,6 +12419,12 @@
     },
     "Fresh floral-woody, lily of the valley hint": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fresh floral-woody, lily of the valley hint"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11313,6 +12483,12 @@
     },
     "Fresh rose, waxy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fresh rose, waxy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11371,6 +12547,12 @@
     },
     "Fresh, sparkling, slightly floral peel": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fresh, sparkling, slightly floral peel"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11429,6 +12611,12 @@
     },
     "Fruity": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fruity"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11487,6 +12675,12 @@
     },
     "Galbanum oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Galbanum oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11545,6 +12739,12 @@
     },
     "Geraniol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geraniol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11603,6 +12803,12 @@
     },
     "Geranium oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geranium oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11661,6 +12867,12 @@
     },
     "Go to the bench": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go to the bench"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11719,6 +12931,12 @@
     },
     "Good until %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good until %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11777,6 +12995,12 @@
     },
     "Gourmand": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gourmand"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11835,6 +13059,12 @@
     },
     "Grams left, low-stock and expiry warnings, cost per bottle.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grams left, low-stock and expiry warnings, cost per bottle."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11893,6 +13123,12 @@
     },
     "Green": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Green"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -11951,6 +13187,12 @@
     },
     "Green, woody leaf, bitter orange": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Green, woody leaf, bitter orange"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12009,6 +13251,12 @@
     },
     "Guaiacwood oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guaiacwood oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12067,6 +13315,12 @@
     },
     "HHCB": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HHCB"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12125,6 +13379,12 @@
     },
     "Hay, almond, tobacco sweetness": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay, almond, tobacco sweetness"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12183,6 +13443,12 @@
     },
     "Hay, tonka, warm powder": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay, tonka, warm powder"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12241,6 +13507,12 @@
     },
     "Heart": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12299,6 +13571,12 @@
     },
     "Heart–base": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart–base"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12357,6 +13635,12 @@
     },
     "Heaviest first": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heaviest first"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12415,6 +13699,12 @@
     },
     "Heliotropin": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heliotropin"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12473,6 +13763,12 @@
     },
     "Help and contact": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help and contact"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12531,6 +13827,12 @@
     },
     "Herbal, floral, camphor edge": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herbal, floral, camphor edge"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12589,6 +13891,12 @@
     },
     "Herbal, tea-like, ambery": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herbal, tea-like, ambery"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12647,6 +13955,12 @@
     },
     "Identity": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Identity"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12705,6 +14019,12 @@
     },
     "Import": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12763,6 +14083,12 @@
     },
     "Import from spreadsheet": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import from spreadsheet"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12821,6 +14147,12 @@
     },
     "Import, export and backup": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import, export and backup"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12879,6 +14211,12 @@
     },
     "Imported a formula with %1$lld lines (%2$lld new materials). It’s on your bench.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported a formula with %1$lld lines (%2$lld new materials). It’s on your bench."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12937,6 +14275,12 @@
     },
     "Imported a formula with %lld lines (%lld new materials). It’s on your bench.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported a formula with %lld lines (%lld new materials). It’s on your bench."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -12995,6 +14339,12 @@
     },
     "Imported formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13053,6 +14403,12 @@
     },
     "In stock": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In stock"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13111,6 +14467,12 @@
     },
     "In the bottle": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the bottle"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13169,6 +14531,12 @@
     },
     "Indole": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indole"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13227,6 +14595,12 @@
     },
     "Intense creamy vanilla": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intense creamy vanilla"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13285,6 +14659,12 @@
     },
     "Intense green, snapped stems": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intense green, snapped stems"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13343,6 +14723,12 @@
     },
     "Isobutyl quinoline": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isobutyl quinoline"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13401,6 +14787,12 @@
     },
     "It isn’t used in any formula.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It isn’t used in any formula."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13459,6 +14851,12 @@
     },
     "Jasmine absolute": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jasmine absolute"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13517,6 +14915,12 @@
     },
     "Jasmine, pear-like": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jasmine, pear-like"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13575,6 +14979,12 @@
     },
     "Just right": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Just right"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13633,6 +15043,12 @@
     },
     "Keep a maturation diary": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep a maturation diary"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13691,6 +15107,12 @@
     },
     "Keep a record of every batch": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep a record of every batch"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13749,6 +15171,12 @@
     },
     "Keep your formulas behind Face ID.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your formulas behind Face ID."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13807,6 +15235,12 @@
     },
     "Kept at": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kept at"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13865,6 +15299,12 @@
     },
     "Know your stock and your cost": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Know your stock and your cost"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13923,6 +15363,12 @@
     },
     "Labdanum resinoid": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Labdanum resinoid"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13981,6 +15427,12 @@
     },
     "Largest deviation %@. Keep it in mind when you smell it.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largest deviation %@. Keep it in mind when you smell it."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14039,6 +15491,12 @@
     },
     "Lavender oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lavender oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14097,6 +15555,12 @@
     },
     "Leather": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leather"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14155,6 +15619,12 @@
     },
     "Lemon oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lemon oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14213,6 +15683,12 @@
     },
     "Library": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14271,6 +15747,12 @@
     },
     "Lime oil (distilled)": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lime oil (distilled)"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14329,6 +15811,12 @@
     },
     "Linalool": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linalool"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14387,6 +15875,12 @@
     },
     "Linalyl acetate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linalyl acetate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14445,6 +15939,12 @@
     },
     "Lock your formula book": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock your formula book"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14503,6 +16003,12 @@
     },
     "Low": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14561,6 +16067,12 @@
     },
     "Low stock": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low stock"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14619,6 +16131,12 @@
     },
     "Made with Accord": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Made with Accord"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14677,6 +16195,12 @@
     },
     "Mandarin oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mandarin oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14735,6 +16259,12 @@
     },
     "Marine, melon, sea breeze": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marine, melon, sea breeze"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14793,6 +16323,12 @@
     },
     "Material": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Material"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14851,6 +16387,12 @@
     },
     "Materials": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Materials"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14909,6 +16451,12 @@
     },
     "Materials (bases unpacked)": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Materials (bases unpacked)"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -14967,6 +16515,12 @@
     },
     "Maturation diary": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maturation diary"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15025,6 +16579,12 @@
     },
     "Methyl dihydrojasmonate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Methyl dihydrojasmonate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15083,6 +16643,12 @@
     },
     "Missing material": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing material"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15141,6 +16707,12 @@
     },
     "Multiply": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multiply"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15199,6 +16771,12 @@
     },
     "Multiply by": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multiply by"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15257,6 +16835,12 @@
     },
     "Musk": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musk"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15315,6 +16899,12 @@
     },
     "Name": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15373,6 +16963,12 @@
     },
     "Name, e.g. Fig Leaf 1": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name, e.g. Fig Leaf 1"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15431,6 +17027,12 @@
     },
     "Name, odour, CAS or supplier": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name, odour, CAS or supplier"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15489,6 +17091,12 @@
     },
     "Natural": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Natural"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15547,6 +17155,12 @@
     },
     "Naturals": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naturals"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15605,6 +17219,12 @@
     },
     "Neat": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neat"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15663,6 +17283,12 @@
     },
     "Neat materials": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neat materials"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15721,6 +17347,12 @@
     },
     "New formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15779,6 +17411,12 @@
     },
     "New material": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New material"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15837,6 +17475,12 @@
     },
     "No batches yet": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No batches yet"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15895,6 +17539,12 @@
     },
     "No flag": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No flag"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -15953,6 +17603,12 @@
     },
     "No formulas yet": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No formulas yet"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16011,6 +17667,12 @@
     },
     "No material matches this filter.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No material matches this filter."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16069,6 +17731,12 @@
     },
     "No materials yet": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No materials yet"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16127,6 +17795,12 @@
     },
     "No previous Pro purchase was found for this Apple ID.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No previous Pro purchase was found for this Apple ID."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16185,6 +17859,12 @@
     },
     "Not in any formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not in any formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16243,6 +17923,12 @@
     },
     "Note": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16301,6 +17987,12 @@
     },
     "Note how it has matured since you made it.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note how it has matured since you made it."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16359,6 +18051,12 @@
     },
     "Notes": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notes"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16417,6 +18115,12 @@
     },
     "Notes (Markdown)": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notes (Markdown)"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16475,6 +18179,12 @@
     },
     "Nothing here": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing here"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16533,6 +18243,12 @@
     },
     "Nothing matches": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing matches"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16591,6 +18307,12 @@
     },
     "Notifications are off for Accord.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are off for Accord."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16649,6 +18371,12 @@
     },
     "OK": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16707,6 +18435,12 @@
     },
     "OTNE": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OTNE"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16765,6 +18499,12 @@
     },
     "Off target": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off target"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16823,6 +18563,12 @@
     },
     "On the first spray": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On the first spray"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16881,6 +18627,12 @@
     },
     "Open Settings": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16939,6 +18691,12 @@
     },
     "Open a formula, tap Weigh and follow the sheet. When you finish, save it here and Accord reminds you to smell it on day 7, 14 and 28.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a formula, tap Weigh and follow the sheet. When you finish, save it here and Accord reminds you to smell it on day 7, 14 and 28."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -16997,6 +18755,12 @@
     },
     "Open on the bench": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on the bench"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17055,6 +18819,12 @@
     },
     "Open the formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17113,6 +18883,12 @@
     },
     "Other": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17171,6 +18947,12 @@
     },
     "Overall": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overall"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17229,6 +19011,12 @@
     },
     "Past shelf life": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Past shelf life"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17287,6 +19075,12 @@
     },
     "Past shelf life since %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Past shelf life since %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17345,6 +19139,12 @@
     },
     "Patchouli oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Patchouli oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17403,6 +19203,12 @@
     },
     "Pentadecanolide": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pentadecanolide"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17461,6 +19267,12 @@
     },
     "Per 100 g concentrate": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per 100 g concentrate"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17519,6 +19331,12 @@
     },
     "Per 50 ml bottle": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per 50 ml bottle"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17577,6 +19395,12 @@
     },
     "Perfume changes as it rests. Smell each batch on the days you planned and write down what moved.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perfume changes as it rests. Smell each batch on the days you planned and write down what moved."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17635,6 +19459,12 @@
     },
     "Perfumer’s alcohol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perfumer’s alcohol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17693,6 +19523,12 @@
     },
     "Petitgrain oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petitgrain oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17751,6 +19587,12 @@
     },
     "Phenylethyl alcohol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phenylethyl alcohol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17809,6 +19651,12 @@
     },
     "Pink grapefruit oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pink grapefruit oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17867,6 +19715,12 @@
     },
     "Pink pepper oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pink pepper oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17925,6 +19779,12 @@
     },
     "Plan a batch": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan a batch"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -17983,6 +19843,12 @@
     },
     "Powdery": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powdery"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18041,6 +19907,12 @@
     },
     "Preferences": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferences"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18099,6 +19971,12 @@
     },
     "Previous": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18157,6 +20035,12 @@
     },
     "Printable sheet (PDF)": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Printable sheet (PDF)"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18215,6 +20099,12 @@
     },
     "Privacy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18273,6 +20163,12 @@
     },
     "Privacy policy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy policy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18331,6 +20227,12 @@
     },
     "Pro is unlocked. Thank you!": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pro is unlocked. Thank you!"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18389,6 +20291,12 @@
     },
     "Pro restored. Welcome back!": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pro restored. Welcome back!"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18447,6 +20355,12 @@
     },
     "Product": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Product"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18505,6 +20419,12 @@
     },
     "Pyramid": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pyramid"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18563,6 +20483,12 @@
     },
     "Rating": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18621,6 +20547,12 @@
     },
     "Recently used": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recently used"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18679,6 +20611,12 @@
     },
     "Reed diffuser": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reed diffuser"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18737,6 +20675,12 @@
     },
     "Reminders": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18795,6 +20739,12 @@
     },
     "Remove from formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18853,6 +20803,12 @@
     },
     "Remove star": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove star"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18911,6 +20867,12 @@
     },
     "Rename": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -18969,6 +20931,12 @@
     },
     "Rename formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19027,6 +20995,12 @@
     },
     "Restore failed: %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore failed: %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19085,6 +21059,12 @@
     },
     "Restore from a backup": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore from a backup"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19143,6 +21123,12 @@
     },
     "Restore purchase": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore purchase"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19201,6 +21187,12 @@
     },
     "Restored %1$lld formulas, %2$lld materials and %3$lld batches.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restored %1$lld formulas, %2$lld materials and %3$lld batches."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19259,6 +21251,12 @@
     },
     "Restored %lld formulas, %lld materials and %lld batches.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restored %lld formulas, %lld materials and %lld batches."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19317,6 +21315,12 @@
     },
     "Rich, indolic, fruity jasmine": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rich, indolic, fruity jasmine"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19375,6 +21379,12 @@
     },
     "Rosemary oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosemary oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19433,6 +21443,12 @@
     },
     "Rosy, minty-green": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosy, minty-green"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19491,6 +21507,12 @@
     },
     "Rosy, peppery sparkle": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosy, peppery sparkle"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19549,6 +21571,12 @@
     },
     "Rosy, slightly citrus": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosy, slightly citrus"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19607,6 +21635,12 @@
     },
     "Running total": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running total"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19665,6 +21699,12 @@
     },
     "Save": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19723,6 +21763,12 @@
     },
     "Save as new version": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as new version"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19781,6 +21827,12 @@
     },
     "Save batch and start maturation": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save batch and start maturation"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19839,6 +21891,12 @@
     },
     "Save what you actually weighed, rate it as it matures and get a reminder on day 7, 14 and 28.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save what you actually weighed, rate it as it matures and get a reminder on day 7, 14 and 28."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19897,6 +21955,12 @@
     },
     "Scale should read %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scale should read %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -19955,6 +22019,12 @@
     },
     "Search formulas or materials": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search formulas or materials"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20013,6 +22083,12 @@
     },
     "Search or type a new name": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search or type a new name"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20071,6 +22147,12 @@
     },
     "See every material that moved between two drafts.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See every material that moved between two drafts."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20129,6 +22211,12 @@
     },
     "See exactly what changed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See exactly what changed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20187,6 +22275,12 @@
     },
     "See what each batch and bottle costs from your own material prices.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what each batch and bottle costs from your own material prices."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20245,6 +22339,12 @@
     },
     "Set a passcode on this iPhone first; App Lock needs it.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set a passcode on this iPhone first; App Lock needs it."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20303,6 +22403,12 @@
     },
     "Settings": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20361,6 +22467,12 @@
     },
     "Sharp, candied lime": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sharp, candied lime"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20419,6 +22531,12 @@
     },
     "Shelf life: %lld months": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shelf life: %lld months"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20477,6 +22595,12 @@
     },
     "Show": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20535,6 +22659,12 @@
     },
     "Show amounts as": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show amounts as"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20593,6 +22723,12 @@
     },
     "Sketch, not a measurement": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sketch, not a measurement"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20651,6 +22787,12 @@
     },
     "Smoky rose-wood": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoky rose-wood"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20709,6 +22851,12 @@
     },
     "Smoky, earthy roots": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoky, earthy roots"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20767,6 +22915,12 @@
     },
     "Smoky, tarry leather": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoky, tarry leather"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20825,6 +22979,12 @@
     },
     "Soap": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soap"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20883,6 +23043,12 @@
     },
     "Soft rose petals": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft rose petals"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20941,6 +23107,12 @@
     },
     "Soft, powdery musk": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft, powdery musk"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -20999,6 +23171,12 @@
     },
     "Soft, sweet, slightly aldehydic": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft, sweet, slightly aldehydic"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21057,6 +23235,12 @@
     },
     "Solvent from dilutions": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solvent from dilutions"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21115,6 +23299,12 @@
     },
     "Sort lines": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort lines"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21173,6 +23363,12 @@
     },
     "Spicy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spicy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21231,6 +23427,12 @@
     },
     "Spreadsheet (CSV)": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spreadsheet (CSV)"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21289,6 +23491,12 @@
     },
     "Star": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21347,6 +23555,12 @@
     },
     "Start a formula": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a formula"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21405,6 +23619,12 @@
     },
     "Start a formula and add materials by gram, drop or percent. Accord does the arithmetic.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a formula and add materials by gram, drop or percent. Accord does the arithmetic."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21463,6 +23683,12 @@
     },
     "Start weighing": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start weighing"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21521,6 +23747,12 @@
     },
     "Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21579,6 +23811,12 @@
     },
     "Stock and cost": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stock and cost"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21637,6 +23875,12 @@
     },
     "Stop weighing": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop weighing"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21695,6 +23939,12 @@
     },
     "Strength": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21753,6 +24003,12 @@
     },
     "Strength %": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength %"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21811,6 +24067,12 @@
     },
     "Subtract from stock": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtract from stock"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21869,6 +24131,12 @@
     },
     "Supplier": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supplier"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21927,6 +24195,12 @@
     },
     "Sweet orange oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet orange oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -21985,6 +24259,12 @@
     },
     "Sweet, dry pencil shavings": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet, dry pencil shavings"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22043,6 +24323,12 @@
     },
     "Sweet, round orange peel": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet, round orange peel"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22101,6 +24387,12 @@
     },
     "Switches between grams, drops and percent": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switches between grams, drops and percent"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22159,6 +24451,12 @@
     },
     "System": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22217,6 +24515,12 @@
     },
     "Take your formulas anywhere": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take your formulas anywhere"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22275,6 +24579,12 @@
     },
     "The App Store couldn’t verify this purchase.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store couldn’t verify this purchase."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22333,6 +24643,12 @@
     },
     "The App Store isn’t reachable right now. Check your connection and try again.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store isn’t reachable right now. Check your connection and try again."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22391,6 +24707,12 @@
     },
     "The file has no rows.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file has no rows."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22449,6 +24771,12 @@
     },
     "The formula itself is not affected.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The formula itself is not affected."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22507,6 +24835,12 @@
     },
     "The purchase didn’t go through: %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The purchase didn’t go through: %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22565,6 +24899,12 @@
     },
     "This batch": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This batch"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22623,6 +24963,12 @@
     },
     "This file isn’t an Accord backup.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file isn’t an Accord backup."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22681,6 +25027,12 @@
     },
     "Tonka bean absolute": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonka bean absolute"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22739,6 +25091,12 @@
     },
     "Too strong": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too strong"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22797,6 +25155,12 @@
     },
     "Too weak": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too weak"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22855,6 +25219,12 @@
     },
     "Top": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22913,6 +25283,12 @@
     },
     "Top to base": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top to base"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -22971,6 +25347,12 @@
     },
     "Top–heart": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top–heart"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23029,6 +25411,12 @@
     },
     "Total": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23087,6 +25475,12 @@
     },
     "Total on the scale": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total on the scale"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23145,6 +25539,12 @@
     },
     "Track grams left, cost per gram, shelf life and supplier for every material.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track grams left, cost per gram, shelf life and supplier for every material."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23203,6 +25603,12 @@
     },
     "Track shelf life": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track shelf life"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23261,6 +25667,12 @@
     },
     "Transparent jasmine, airy": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transparent jasmine, airy"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23319,6 +25731,12 @@
     },
     "Trial notes": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trial notes"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23377,6 +25795,12 @@
     },
     "Try another name, a category or a material.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try another name, a category or a material."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23435,6 +25859,12 @@
     },
     "Type": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23493,6 +25923,12 @@
     },
     "Unlimited formulas": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlimited formulas"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23551,6 +25987,12 @@
     },
     "Unlock": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23609,6 +26051,12 @@
     },
     "Unlock Pro for %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock Pro for %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23667,6 +26115,12 @@
     },
     "Unlock batches": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock batches"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23725,6 +26179,12 @@
     },
     "Unlock cost": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock cost"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23783,6 +26243,12 @@
     },
     "Unlock stock and cost": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock stock and cost"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23841,6 +26307,12 @@
     },
     "Unlock your formula book": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock your formula book"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23899,6 +26371,12 @@
     },
     "Unnamed material": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unnamed material"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23957,6 +26435,12 @@
     },
     "Untitled": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24015,6 +26499,12 @@
     },
     "Use system language": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use system language"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24073,6 +26563,12 @@
     },
     "Use your %@ dilution": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use your %@ dilution"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24131,6 +26627,12 @@
     },
     "Use your accords as ingredients; Accord unpacks them.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use your accords as ingredients; Accord unpacks them."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24189,6 +26691,12 @@
     },
     "Used in": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used in"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24247,6 +26755,12 @@
     },
     "Vanilla": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanilla"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24305,6 +26819,12 @@
     },
     "Vanillic, balsamic": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanillic, balsamic"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24363,6 +26883,12 @@
     },
     "Vanillin": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanillin"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24421,6 +26947,12 @@
     },
     "Velvety cedar-amber glow": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velvety cedar-amber glow"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24479,6 +27011,12 @@
     },
     "Version": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24537,6 +27075,12 @@
     },
     "Vetiver oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vetiver oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24595,6 +27139,12 @@
     },
     "Violet, orris, woody": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Violet, orris, woody"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24653,6 +27203,12 @@
     },
     "Virginia cedarwood oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virginia cedarwood oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24711,6 +27267,12 @@
     },
     "Volumes use typical densities (ethanol 0.79 g/ml, concentrate 0.95 g/ml). Weigh everything by mass.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes use typical densities (ethanol 0.79 g/ml, concentrate 0.95 g/ml). Weigh everything by mass."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24769,6 +27331,12 @@
     },
     "Warm mineral amber, skin-like": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm mineral amber, skin-like"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24827,6 +27395,12 @@
     },
     "Warm, sweet clove": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm, sweet clove"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24885,6 +27459,12 @@
     },
     "Warn below": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warn below"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -24943,6 +27523,12 @@
     },
     "Water in the diluent": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Water in the diluent"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25001,6 +27587,12 @@
     },
     "Watermelon ketone": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watermelon ketone"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25059,6 +27651,12 @@
     },
     "Weigh": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weigh"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25117,6 +27715,12 @@
     },
     "Weigh the solution; Accord counts only the active material in the analysis.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weigh the solution; Accord counts only the active material in the analysis."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25175,6 +27779,12 @@
     },
     "Weighed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weighed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25233,6 +27843,12 @@
     },
     "Weighed, next": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weighed, next"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25291,6 +27907,12 @@
     },
     "Weighing sheet": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weighing sheet"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25349,6 +27971,12 @@
     },
     "What it smells like": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What it smells like"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25407,6 +28035,12 @@
     },
     "What went in": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What went in"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25465,6 +28099,12 @@
     },
     "What you weighed, and how it smelled on day 7, 14, 28.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you weighed, and how it smelled on day 7, 14, 28."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25523,6 +28163,12 @@
     },
     "Woody": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woody"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25581,6 +28227,12 @@
     },
     "Ylang ylang oil": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ylang ylang oil"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25639,6 +28291,12 @@
     },
     "Your 5 free formulas are full": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your 5 free formulas are full"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25697,6 +28355,12 @@
     },
     "Your bench is clear": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your bench is clear"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25755,6 +28419,12 @@
     },
     "Your data": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your data"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25813,6 +28483,12 @@
     },
     "Your formula book couldn’t be opened": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your formula book couldn’t be opened"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25871,6 +28547,12 @@
     },
     "Your formulas as bases": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your formulas as bases"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25929,6 +28611,12 @@
     },
     "Your formulas live here as bottles, filled with their top, heart and base.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your formulas live here as bottles, filled with their top, heart and base."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -25987,6 +28675,12 @@
     },
     "Your limits": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your limits"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26045,6 +28739,12 @@
     },
     "Your limits allow up to %@ in this product.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your limits allow up to %@ in this product."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26103,6 +28803,12 @@
     },
     "Your maximum in the product": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your maximum in the product"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26161,6 +28867,12 @@
     },
     "Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your purchase is waiting for approval. Pro unlocks as soon as it’s approved."
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26219,6 +28931,12 @@
     },
     "alpha-Ionone": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "alpha-Ionone"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26277,6 +28995,12 @@
     },
     "and %lld more": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "and %lld more"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26335,6 +29059,12 @@
     },
     "cis-3-Hexenol": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cis-3-Hexenol"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26393,6 +29123,12 @@
     },
     "days": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "days"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26451,6 +29187,12 @@
     },
     "drops": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "drops"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26509,6 +29251,12 @@
     },
     "g": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "g"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26567,6 +29315,12 @@
     },
     "gamma-Decalactone": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gamma-Decalactone"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26625,6 +29379,12 @@
     },
     "lasts ≈ %@": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lasts ≈ %@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26683,6 +29443,12 @@
     },
     "ml": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ml"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26741,6 +29507,12 @@
     },
     "new": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "new"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26799,6 +29571,12 @@
     },
     "pts": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pts"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26857,6 +29635,12 @@
     },
     "removed": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "removed"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26915,6 +29699,12 @@
     },
     "share": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "share"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -26973,6 +29763,12 @@
     },
     "tag.base": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -27031,6 +29827,12 @@
     },
     "v%lld": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "v%lld"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -27089,6 +29891,12 @@
     },
     "–": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "–"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",

@@ -25,6 +25,12 @@ for path in tables:
             print(f"note: {k!r} defined twice; using {path}")
         T[k] = row
 
+import re
+POS = re.compile(r"%(\d+)\$")
+# Also index tables by key without positional markers ("%1$@ in %2$@" -> "%@ in %@").
+for k in list(T):
+    T.setdefault(POS.sub("%", k), T[k])
+
 # (file, key, source)
 units = []
 for f in ET.parse(xliff).getroot().iter(NS + "file"):
@@ -37,7 +43,7 @@ for f in ET.parse(xliff).getroot().iter(NS + "file"):
         units.append((orig, key, src.text or ""))
 
 def entry(source, row):
-    loc = {}
+    loc = {"en": {"stringUnit": {"state": "translated", "value": source}}}
     for lang, text in zip(LANGS, row):
         loc[lang] = {"stringUnit": {"state": "translated", "value": source if text == "=" else text}}
     return {"localizations": loc}
@@ -53,8 +59,8 @@ for orig, key, source in units:
         continue
     target = plist if orig.endswith("InfoPlist.xcstrings") else loc
     e = entry(source, row)
-    if target is plist:
-        e["localizations"]["en"] = {"stringUnit": {"state": "translated", "value": source}}
+    # English is the source language; spell it out so keys like "tag.base" resolve to their English text.
+    e["localizations"]["en"] = {"stringUnit": {"state": "translated", "value": source}}
     target[k] = e
 
 # Runtime-only keys (seed data) go into Localizable too.

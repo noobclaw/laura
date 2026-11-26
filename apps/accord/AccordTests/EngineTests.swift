@@ -271,6 +271,7 @@ final class LanguageTests: XCTestCase {
             guard let path, let b = Bundle(path: path) else { continue }
             let v = b.localizedString(forKey: "Add material", value: "§", table: "Localizable")
             XCTAssertNotEqual(v, "§", code)
+            XCTAssertEqual(b.localizedString(forKey: "tag.base", value: "§", table: "Localizable") == "tag.base", false, "tag.base unresolved in \(code)")
             if code != "en" { XCTAssertNotEqual(v, "Add material", "untranslated in \(code)") }
         }
     }

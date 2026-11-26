@@ -31,8 +31,6 @@ struct FlaconView: View {
     /// Shares of top / heart / base (any scale).
     let layers: [Double]
     var fill: Double = 0.78
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var poured = false
 
     var body: some View {
         Canvas { ctx, size in
@@ -41,7 +39,7 @@ struct FlaconView: View {
             let bodyRect = body.boundingRect
             ctx.fill(body, with: .color(Theme.card))
             let total = max(layers.reduce(0, +), 0.0001)
-            let liquidH = bodyRect.height * (poured || reduceMotion ? fill : 0)
+            let liquidH = bodyRect.height * fill
             var y = bodyRect.maxY
             ctx.drawLayer { layer in
                 layer.clip(to: body)
@@ -60,7 +58,7 @@ struct FlaconView: View {
             let capRect = CGRect(x: r.midX - r.width * 0.21, y: r.minY, width: r.width * 0.42, height: r.height * 0.18)
             ctx.fill(Path(roundedRect: capRect.insetBy(dx: 1.5, dy: 1.5), cornerRadius: r.width * 0.05), with: .color(Theme.amber))
         }
-        .onAppear { withAnimation(reduceMotion ? nil : Theme.Motion.pour) { poured = true } }
+        .aspectRatio(0.74, contentMode: .fit)
         .accessibilityHidden(true)
     }
 }
