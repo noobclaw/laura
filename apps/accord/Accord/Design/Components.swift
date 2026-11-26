@@ -99,6 +99,8 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
             .foregroundStyle(Theme.onAmber)
             .padding(.horizontal, Theme.Space.l)
             .frame(maxWidth: wide ? .infinity : nil, minHeight: 52)
@@ -113,6 +115,8 @@ struct QuietButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
             .foregroundStyle(Theme.ink)
             .padding(.horizontal, Theme.Space.l)
             .frame(maxWidth: wide ? .infinity : nil, minHeight: 52)
