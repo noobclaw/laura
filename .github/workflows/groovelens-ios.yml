@@ -179,6 +179,10 @@ jobs:
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" > ci-tf/archive.log 2>&1 || { grep -E 'error:' ci-tf/archive.log | head -40; tail -40 ci-tf/archive.log; exit 1; }
           tail -5 ci-tf/archive.log
+          # iPhone-only guard: a universal build makes App Store Connect demand iPad screenshots
+          FAM=$(/usr/libexec/PlistBuddy -c 'Print :UIDeviceFamily' build/Groovelens.xcarchive/Products/Applications/Groovelens.app/Info.plist | tr -d ' \n')
+          echo "UIDeviceFamily=$FAM" | tee -a ci-tf/archive.log
+          [ "$FAM" = "Array{1}" ] || { echo "Build is not iPhone-only"; exit 1; }
 
       - name: Export signed IPA
         env:
