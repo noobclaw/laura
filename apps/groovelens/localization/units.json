@@ -1828,5 +1828,29 @@
 "id": "· pass %lld",
 "src": "· pass %lld",
 "note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "LANGUAGE",
+"src": "LANGUAGE",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "App language",
+"src": "App language",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Pick any of 10 languages in iOS Settings.",
+"src": "Pick any of 10 languages in iOS Settings.",
+"note": null
+},
+{
+"file": "Groovelens/Resources/Localizable.xcstrings",
+"id": "Opens iOS Settings for Groovelens",
+"src": "Opens iOS Settings for Groovelens",
+"note": null
 }
 ]

@@ -1,4 +1,5 @@
 import AVFoundation
+import UIKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -6,7 +7,6 @@ struct SettingsView: View {
     @Environment(PlayerProfile.self) private var profile
     @State private var proReason: ProReason?
     @State private var showCalibration = false
-    @State private var showLicenses = false
 
     var body: some View {
         @Bindable var profile = profile
@@ -15,6 +15,19 @@ struct SettingsView: View {
                 Text(String(localized: "Settings")).font(Typo.display(28)).foregroundStyle(Palette.text).padding(.top, 14)
 
                 proCard
+
+                section(String(localized: "LANGUAGE")) {
+                    Button { openLanguageSettings() } label: {
+                        HStack {
+                            row("globe", String(localized: "App language"),
+                                String(localized: "Pick any of 10 languages in iOS Settings."), Palette.cyan)
+                            Spacer()
+                            Text(currentLanguageName).font(Typo.body(14, weight: .medium)).foregroundStyle(Palette.textDim)
+                            Image(systemName: "arrow.up.forward.app").foregroundStyle(Palette.textFaint)
+                        }
+                    }
+                    .accessibilityHint(Text("Opens iOS Settings for Groovelens"))
+                }
 
                 section(String(localized: "PLAY")) {
                     Toggle(isOn: $profile.leftHanded) {
@@ -47,14 +60,6 @@ struct SettingsView: View {
                         Spacer()
                         Text(appVersion).font(Typo.hud(13)).foregroundStyle(Palette.textDim)
                     }
-                    Divider().overlay(Palette.stroke)
-                    Button { showLicenses = true } label: {
-                        HStack {
-                            row("doc.text.fill", String(localized: "Fonts & licenses"), nil, Palette.textDim)
-                            Spacer()
-                            Image(systemName: "chevron.right").foregroundStyle(Palette.textFaint)
-                        }
-                    }
                 }
                 Text(String(localized: "Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong."))
                     .font(Typo.body(12)).foregroundStyle(Palette.textFaint).padding(.horizontal, 4)
@@ -67,7 +72,18 @@ struct SettingsView: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(item: $proReason) { ProSheet(reason: $0) }
         .sheet(isPresented: $showCalibration) { CalibrationSheet() }
-        .sheet(isPresented: $showLicenses) { LicensesView() }
+    }
+
+    /// The language the app is actually running in, named in that language ("繁體中文", "Deutsch").
+    private var currentLanguageName: String {
+        let code = Bundle.main.preferredLocalizations.first ?? "en"
+        let name = Locale(identifier: code).localizedString(forIdentifier: code) ?? code
+        return name.prefix(1).uppercased() + name.dropFirst()
+    }
+
+    /// iOS keeps the per-app language picker in Settings › Groovelens › Language.
+    private func openLanguageSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
     }
 
     private var appVersion: String {
@@ -279,41 +295,5 @@ struct CalibrationSheet: View {
             }
         }
         .onDisappear { cal.stop() }
-    }
-}
-
-struct LicensesView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    private func text(_ name: String) -> String {
-        guard let url = Bundle.main.url(forResource: name, withExtension: "txt"),
-              let s = try? String(contentsOf: url, encoding: .utf8) else { return "" }
-        return s
-    }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text(String(localized: "Groovelens uses the Unbounded and Chakra Petch typefaces under the SIL Open Font License 1.1."))
-                        .font(Typo.body(14)).foregroundStyle(Palette.text)
-                    Text(String(localized: "Drum separation uses harmonic–percussive median filtering (Fitzgerald, 2010). Beat tracking follows Ellis (2007)."))
-                        .font(Typo.body(14)).foregroundStyle(Palette.textDim)
-                    ForEach(["OFL-Unbounded", "OFL-ChakraPetch"], id: \.self) { name in
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(name).font(Typo.hud(13, weight: .bold)).foregroundStyle(Palette.gold)
-                            Text(text(name)).font(.system(size: 11, design: .monospaced)).foregroundStyle(Palette.textDim)
-                        }
-                    }
-                }
-                .padding(20)
-            }
-            .background(Palette.ground)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button(String(localized: "Done")) { dismiss() } }
-            }
-            .navigationTitle(String(localized: "Licenses"))
-            .navigationBarTitleDisplayMode(.inline)
-        }
     }
 }
