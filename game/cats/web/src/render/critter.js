@@ -41,16 +41,16 @@
      bellyR/headR/leg are kept for game.js (collision radius, jump class). */
   var JT = { len: 0.05, r0: 0.02, r1: 0.016, up: 90, curl: 0, none: true, y: 0 };
   var CATS = {
-    mochi: { name: '糰子', tag: '圓頭', kind: 'cat', jelly: true, Rb: 0.245, Rh: 0.178, hc: 0.36, neck: 0.075, depth: 0.95, arm: 0.2, armR: 0.048, foot: 0.06, ear: { type: 'point', h: 0.1, w: 0.052, spread: 0.55, tilt: 18 }, tail: JT, coat: 'jcat' },
-    daifuku: { name: '大福', tag: '矮胖', kind: 'cat', jelly: true, Rb: 0.27, Rh: 0.19, hc: 0.3, neck: 0.11, depth: 0.95, arm: 0.19, armR: 0.052, foot: 0.064, ear: { type: 'round', h: 0.075, w: 0.056, spread: 0.56, tilt: 22 }, tail: JT, coat: 'jcat' },
-    azuki: { name: '小豆', tag: '小隻', kind: 'cat', jelly: true, scale: 0.82, Rb: 0.245, Rh: 0.185, hc: 0.37, neck: 0.075, depth: 0.95, arm: 0.19, armR: 0.048, foot: 0.06, ear: { type: 'point', h: 0.11, w: 0.054, spread: 0.55, tilt: 16 }, tail: JT, coat: 'jcat' }
+    mochi: { name: '糰子', tag: '圓頭', kind: 'cat', jelly: true, Rb: 0.245, Rh: 0.178, hc: 0.394, neck: 0.075, depth: 0.5, wide: 1.14, tall: 1.14, arm: 0.26, armR: 0.0696, foot: 0.087, ear: { type: 'point', h: 0.1, w: 0.052, spread: 0.55, tilt: 18 }, tail: JT, coat: 'jcat' },
+    daifuku: { name: '大福', tag: '矮胖', kind: 'cat', jelly: true, Rb: 0.27, Rh: 0.19, hc: 0.334, neck: 0.11, depth: 0.5, wide: 1.14, tall: 1.14, arm: 0.247, armR: 0.0754, foot: 0.0928, ear: { type: 'round', h: 0.075, w: 0.056, spread: 0.56, tilt: 22 }, tail: JT, coat: 'jcat' },
+    azuki: { name: '小豆', tag: '小隻', kind: 'cat', jelly: true, scale: 0.82, Rb: 0.245, Rh: 0.185, hc: 0.404, neck: 0.075, depth: 0.5, wide: 1.14, tall: 1.14, arm: 0.247, armR: 0.0696, foot: 0.087, ear: { type: 'point', h: 0.11, w: 0.054, spread: 0.55, tilt: 16 }, tail: JT, coat: 'jcat' }
   };
   Object.keys(CATS).forEach(function (k) { var c = CATS[k]; c.bellyR = c.chestR = c.hipR = c.Rb; c.headR = c.headW = c.Rh; c.leg = 0.18; c.len = 2 * c.Rb; });
   /* hunters: the same jelly figure with floppy ears, a snout, dark eyes and the toy paint blaster held in front */
   var DOGS = {
-    shiba: { name: '小柴', tag: '柴色', kind: 'dog', jelly: true, Rb: 0.255, Rh: 0.185, hc: 0.37, neck: 0.075, depth: 0.95, arm: 0.19, armR: 0.048, foot: 0.064, snout: 0.075, ear: { type: 'flop', h: 0.13, w: 0.06, spread: 0.95, tilt: 168 }, tail: JT, eye: 0.02, coat: 'jshiba' },
-    corgi: { name: '短短', tag: '橘白', kind: 'dog', jelly: true, Rb: 0.27, Rh: 0.18, hc: 0.33, neck: 0.09, depth: 0.95, arm: 0.18, armR: 0.05, foot: 0.066, snout: 0.07, ear: { type: 'point', h: 0.11, w: 0.06, spread: 0.62, tilt: 20 }, tail: JT, eye: 0.02, coat: 'jcorgi' },
-    husky: { name: '阿雪', tag: '灰白', kind: 'dog', jelly: true, Rb: 0.255, Rh: 0.185, hc: 0.37, neck: 0.075, depth: 0.95, arm: 0.19, armR: 0.048, foot: 0.064, snout: 0.08, ear: { type: 'point', h: 0.1, w: 0.056, spread: 0.6, tilt: 16 }, tail: JT, eye: 0.02, eyeColor: 0x6fb7e8, coat: 'jhusky' }
+    shiba: { name: '小柴', tag: '柴色', kind: 'dog', jelly: true, Rb: 0.255, Rh: 0.185, hc: 0.404, neck: 0.075, depth: 0.5, wide: 1.14, tall: 1.14, arm: 0.247, armR: 0.0696, foot: 0.0928, snout: 0.075, ear: { type: 'flop', h: 0.13, w: 0.06, spread: 0.95, tilt: 168 }, tail: JT, eye: 0.02, coat: 'jshiba' },
+    corgi: { name: '短短', tag: '橘白', kind: 'dog', jelly: true, Rb: 0.27, Rh: 0.18, hc: 0.364, neck: 0.09, depth: 0.5, wide: 1.14, tall: 1.14, arm: 0.234, armR: 0.0725, foot: 0.0957, snout: 0.07, ear: { type: 'point', h: 0.11, w: 0.06, spread: 0.62, tilt: 20 }, tail: JT, eye: 0.02, coat: 'jcorgi' },
+    husky: { name: '阿雪', tag: '灰白', kind: 'dog', jelly: true, Rb: 0.255, Rh: 0.185, hc: 0.404, neck: 0.075, depth: 0.5, wide: 1.14, tall: 1.14, arm: 0.247, armR: 0.0696, foot: 0.0928, snout: 0.08, ear: { type: 'point', h: 0.1, w: 0.056, spread: 0.6, tilt: 16 }, tail: JT, eye: 0.02, eyeColor: 0x6fb7e8, coat: 'jhusky' }
   };
   Object.keys(DOGS).forEach(function (k) { var c = DOGS[k]; c.bellyR = c.chestR = c.hipR = c.Rb; c.headR = c.headW = c.Rh; c.leg = 0.18; c.len = 2 * c.Rb; });
   SG.CATS = CATS; SG.DOGS = DOGS;
@@ -437,15 +437,15 @@
      one continuous skin for body + head (a tube of rings along y whose radius is the smooth union of the two circles), with arms, feet,
      ears (and a dog's snout) as small tubes on their own joints. Joint names match the mat cats, so poses and animation keep working. */
   function buildJelly(S, B) {
-    var Rb = S.Rb, Rh = S.Rh, hc = S.hc, kN = S.neck, dog = S.kind === 'dog', i, D = {};
+    var Rb = S.Rb, Rh = S.Rh, hc = S.hc, kN = S.neck, dog = S.kind === 'dog', i, D = {}, W = S.wide || 1, RbY = Rb * (S.tall || 1), dp = S.depth; // owner 2026-11-26: flatter, wider and a little taller than a ball
     B.MP = [{}, {}, {}]; B.MN = [{}, {}, {}]; // no shape targets
     var yN = hc - Rh * 0.82, yH = hc - Rh * 0.45;
     B.joint('body', null); B.joint('hip', 'body', 0, -0.1, 0); B.joint('chest', 'body', 0, 0.06, 0);
     B.joint('neck', 'chest', 0, yN - 0.06, 0); B.joint('head', 'neck', 0, yH - yN, 0);
     function smax(a, b, k) { var h = Math.max(k - Math.abs(a - b), 0) / k; return Math.max(a, b) + h * h * k * 0.25; }
-    function rad(y) { var a = Math.abs(y) < Rb ? Math.sqrt(Rb * Rb - y * y) : -Rb + (Rb - Math.abs(y)), d = y - hc, b = Math.abs(d) < Rh ? Math.sqrt(Rh * Rh - d * d) : -Rh + (Rh - Math.abs(d)); return Math.max(0, smax(a, b, kN)); }
-    var y0 = -Rb, y1 = hc + Rh, NRg = 64, rings = [];
-    for (i = 0; i <= NRg; i++) { var t = i / NRg, y = y0 + (y1 - y0) * (0.5 - 0.5 * Math.cos(PI * t)), r = (i === 0 || i === NRg) ? 0 : rad(y); rings.push({ y: y, rx: r, rz: r * S.depth, e: 2 }); }
+    function rad(y) { var a = Math.abs(y) < RbY ? Rb * Math.sqrt(1 - y * y / (RbY * RbY)) : RbY - Math.abs(y), d = y - hc, b = Math.abs(d) < Rh ? Math.sqrt(Rh * Rh - d * d) : -Rh + (Rh - Math.abs(d)); return Math.max(0, smax(a, b, kN)); }
+    var y0 = -RbY, y1 = hc + Rh, NRg = 64, rings = [];
+    for (i = 0; i <= NRg; i++) { var t = i / NRg, y = y0 + (y1 - y0) * (0.5 - 0.5 * Math.cos(PI * t)), r = (i === 0 || i === NRg) ? 0 : rad(y); rings.push({ y: y, rx: r * W, rz: r * dp, e: 2 }); }
     var chain = ['hip', 'body', 'chest', 'neck', 'head'], bz = [-0.12, 0.05, yN - 0.015, yH], bw = [0.06, 0.07, 0.05, 0.04];
     var G = tubeGrid(B.jmap.body.w, rings, 44, -PI / 2, function (rg) { return chainW(chain, bz, bw, rg.y); });
     var kb = 9, kt = NRg - 10;
@@ -460,36 +460,36 @@
     }
     function capProf(L, r0, r1, top) { var P = [[top, 0], [top * 0.6, r0 * 0.75], [0, r0]], n = 5, j; for (j = 1; j <= n; j++) P.push([-(L - r1) * j / n, lerp(r0, r1, j / n)]); for (j = 1; j <= 4; j++) { var be = j / 4 * PI / 2; P.push([-(L - r1) - r1 * Math.sin(be), r1 * Math.cos(be)]); } P[P.length - 1][1] = 0; return P; }
     // arms: from the sides of the body, tilted outwards; elbow half way
-    var aL = S.arm, aR = S.armR, ay = Rb * 0.42, ax = Math.sqrt(Rb * Rb - ay * ay) * 0.92, az = 0.03;
+    var aL = S.arm, aR = S.armR, ay = RbY * 0.42, ax = Rb * Math.sqrt(1 - 0.42 * 0.42) * 0.9 * W, az = 0.01;
     [['shL', 'elL', -1, 'armL'], ['shR', 'elR', 1, 'armR']].forEach(function (A) {
       var sj = B.joint(A[0], 'chest', A[2] * ax, ay - 0.06, az, 0, 0, A[2] * 48); B.joint(A[1], A[0], 0, -aL * 0.48, 0);
-      tube(A[0], A[3], capProf(aL, aR, aR * 0.95, 0.035), 0.9, function (rg) { var w = sstep(-aL * 0.62, -aL * 0.34, rg.y); return w > 0.999 ? [[A[0], 1]] : w < 0.001 ? [[A[1], 1]] : [[A[0], w], [A[1], 1 - w]]; });
+      tube(A[0], A[3], capProf(aL, aR, aR * 1.08, 0.035).map(function (q) { return [q[0], q[1], 0.82]; }), 0.9, function (rg) { var w = sstep(-aL * 0.62, -aL * 0.34, rg.y); return w > 0.999 ? [[A[0], 1]] : w < 0.001 ? [[A[1], 1]] : [[A[0], w], [A[1], 1 - w]]; });
     });
     // feet: stubby, just poking out under the body
     var fr = S.foot;
     [['hpL', 'knL', -1, 'footL'], ['hpR', 'knR', 1, 'footR']].forEach(function (F) {
-      B.joint(F[0], 'hip', F[2] * Rb * 0.4, -Rb * 0.72 + 0.1, 0.06); B.joint(F[1], F[0], 0, -0.03, 0);
-      tube(F[0], F[3], [[0.045, 0], [0.03, fr * 0.7], [0, fr], [-0.03, fr * 1.02], [-0.05, fr * 0.92], [-0.065, fr * 0.6], [-0.074, 0]], 0.8);
+      B.joint(F[0], 'hip', F[2] * Rb * 0.5 * W, -RbY + Rb * 0.28 + 0.1, 0.03); B.joint(F[1], F[0], 0, -0.03, 0);
+      tube(F[0], F[3], [[0.045, 0], [0.03, fr * 0.7, 0.8], [0, fr, 0.8], [-0.03, fr * 1.02, 0.8], [-0.05, fr * 0.92, 0.8], [-0.065, fr * 0.6, 0.8], [-0.074, 0]], 0.8);
     });
     // no tail: the joints are there for the animation code, with nothing on them
-    B.joint('t0', 'hip', 0, 0.05, -Rb * 0.9 + 0.0, 90, 0, 0); for (i = 1; i < 4; i++) B.joint('t' + i, 't' + (i - 1), 0, -0.012, 0);
+    B.joint('t0', 'hip', 0, 0.05, -Rb * dp * 0.9, 90, 0, 0); for (i = 1; i < 4; i++) B.joint('t' + i, 't' + (i - 1), 0, -0.012, 0);
     // ears
     var E = S.ear, flop = E.type === 'flop', round = E.type === 'round';
     [-1, 1].forEach(function (s) {
-      var ex = s * Rh * E.spread, ey = flop ? hc + Rh * 0.35 : hc + Math.sqrt(Math.max(0, Rh * Rh - ex * ex)) - 0.012, ez = -0.01, nm = s < 0 ? 'earL' : 'earR', hj = B.jmap.head.w.elements;
+      var ex = s * Rh * E.spread * W, ey = flop ? hc + Rh * 0.35 : hc + Math.sqrt(Math.max(0, Rh * Rh - ex * ex / (W * W))) - 0.012, ez = -0.01, nm = s < 0 ? 'earL' : 'earR', hj = B.jmap.head.w.elements;
       var ej = B.joint(nm, 'head', ex - hj[12], ey - hj[13], ez - hj[14], 0, 0, -s * (flop ? E.tilt : E.tilt));
       var P = [[-0.02, 0]], n = 6, j; for (j = 0; j <= n; j++) { var t2 = j / n, w = round ? E.w * Math.sqrt(Math.max(0, 1 - t2 * t2 * 0.92)) : E.w * (Math.pow(1 - t2, 0.85) * 0.9 + 0.1 * (1 - t2)); P.push([-0.01 + (E.h + 0.01) * t2, w, flop ? 0.38 : 0.55]); }
       P.push([E.h + 0.008, 0]);
       tube(nm, nm, P, 0.8);
     });
     if (dog) { // snout: a short soft tube forward from the face
-      var hm = B.jmap.head.w.clone().multiply(new THREE.Matrix4().makeTranslation(0, hc - 0.035 - yH, Rh * 0.72)).multiply(new THREE.Matrix4().makeRotationX(-PI / 2));
+      var hm = B.jmap.head.w.clone().multiply(new THREE.Matrix4().makeTranslation(0, hc - 0.035 - yH, Rh * dp * 0.8)).multiply(new THREE.Matrix4().makeRotationX(-PI / 2));
       tube('head', 'snout', [[0.01, 0], [0, 0.05], [-0.03, 0.058], [-S.snout + 0.03, 0.054], [-S.snout + 0.012, 0.042], [-S.snout, 0]], 0.9, null, hm);
     }
-    D.L = 2 * Rb; D.leg = 0.18; D.tuck = 0.03; D.hy = hc; D.hH = Rh; D.zH = 0; D.hW = Rh; D.hD = Rh; D.zF = Rh + (dog ? S.snout : 0); D.hh = Rb * 0.9; D.dog = dog;
-    D.eyeP = [Rh * 0.36, hc + 0.035, Rh * 0.92]; D.noseP = [0, hc - 0.035, Rh * 0.72 + (dog ? S.snout : 0.2) - 0.004]; D.mouthP = [0, hc - 0.075, Rh * 0.72 + (dog ? S.snout * 0.6 : 0.2)];
-    D.gunY = -0.04; D.gunZ = Rb * 0.9; D.muzzleP = [0, D.gunY + 0.066, D.gunZ + 0.26];
-    D.shoulder = Rb + ay; D.top = hc + Rh; D.eye = hc + 0.035; D.zb3 = 0; D.vol = 4 / 3 * PI * (Rb * Rb * Rb + Rh * Rh * Rh * 0.8);
+    D.L = 2 * Rb; D.leg = 0.18; D.tuck = 0.03; D.hy = hc; D.hH = Rh; D.zH = 0; D.hW = Rh * W; D.hD = Rh * dp; D.zF = Rh * dp + (dog ? S.snout : 0); D.hh = RbY * 0.9; D.dog = dog; D.dp = dp; D.Rb = Rb;
+    D.eyeP = [Rh * 0.38 * W, hc + 0.035, Rh * dp * 0.97]; D.noseP = [0, hc - 0.035, Rh * dp * 0.8 + (dog ? S.snout : 0.2) - 0.004]; D.mouthP = [0, hc - 0.075, Rh * dp * 0.8 + (dog ? S.snout * 0.6 : 0.2)];
+    D.gunY = -0.04; D.gunZ = Rb * dp + 0.05; D.muzzleP = [0, D.gunY + 0.066, D.gunZ + 0.26];
+    D.shoulder = Rb + ay; D.top = hc + Rh; D.eye = hc + 0.035; D.zb3 = 0; D.vol = 4 / 3 * PI * (Rb * Rb * RbY + Rh * Rh * Rh * 0.8) * W * dp;
     B.D = D; B.body = G;
     return D;
   }
@@ -899,6 +899,7 @@
     var S = this.spec, cv = this.canvas, posed = this.pose !== 'stand' && this.pose !== 'crouch', P0, done = true, i, n, v, sc, T = S.tail, tm = this.tailMode;
     var PTb = PT(S); if (cv) P0 = (PTb[ALIAS[this.pose] || this.pose] || PTb.stand).f(clamp(+this.poseAmount || 0, 0, 1), this.bp.D); else P0 = POSES[this.pose] || POSES.stand;
     if (cv && this.rearUp > 0 && !posed) { var ru = clamp(this.rearUp, 0, 1), Q = {}; for (var qk in P0) Q[qk] = P0[qk]; if (S.jelly) { Q.S = [1 - 0.06 * ru, 1 + 0.16 * ru, 1 - 0.06 * ru]; Q.neck = [-14 * ru, 0, 0]; } else { Q.pivot = [-38 * ru, 0, 0]; Q.chest = [-42 * ru, 0, 0]; Q.neck = [36 * ru, 0, 0]; Q.head = [34 * ru, 0, 0]; } P0 = Q; } // c.rearUp 0..1: the front end lifts to look over things
+    if (cv && S.jelly && this.climb && !posed) { var Qc = {}; for (var qc in P0) Qc[qc] = P0[qc]; Qc.S = [1.08, 1.07, 0.84]; Qc.sh = [-12, 0, -122]; Qc.el = [0, 0, -18]; Qc.hp = [0, 0, -24]; P0 = Qc; } // owner 2026-11-26: climbing a wall the body is pulled up, flatter and wider, arms reaching up, feet spread
     for (i = 0; i < this.names.length; i++) {
       n = this.names[i]; v = poseEuler(P0, n); sc = null;
       var c0 = n.charAt(0), c1 = n.charAt(1);
@@ -992,7 +993,7 @@
     r = r || Math.random; if (!(dt > 0)) dt = 0; if (dt > 0.1) dt = 0.1;
     var cv = this.canvas, posed = this.pose !== 'stand' && this.pose !== 'crouch';
     if (this.blank && this.faceSkin.visible) this.faceSkin.visible = false;
-    var sig = this.pose + '|' + this.poseAmount + '|' + this.tailMode + '|' + this._ear + '|' + (this.frozen ? 1 : 0) + '|' + (this.rearUp || 0);
+    var sig = this.pose + '|' + this.poseAmount + '|' + this.tailMode + '|' + this._ear + '|' + (this.frozen ? 1 : 0) + '|' + (this.rearUp || 0) + '|' + (this.climb ? 1 : 0);
     if (sig !== this._sig) { this._sig = sig; this._still = false; }
     var busy = this.fidget > 0;
     if (this.frozen && this._still && !busy) return; // a frozen, settled animal costs nothing and moves nothing
@@ -1359,9 +1360,9 @@
   function jEyes(p, D, rgb) { var e = D.eyeP, dx = Math.abs(p[0]) - e[0], dy = p[1] - e[1]; return p[2] > D.hD * 0.45 && dx * dx / (0.017 * 0.017) + dy * dy / (0.024 * 0.024) < 1 ? rgb : null; }
   var JCOATS = {
     jcat: function (p, h, name, D) { return (name === 'body' && jEyes(p, D, [132, 126, 118])) || [246, 245, 241]; },
-    jshiba: function (p, h, name, D) { if (name.indexOf('ear') === 0) return [150, 98, 58]; if (name === 'snout' || (name === 'body' && p[1] < 0 && p[2] > 0.05)) return [248, 236, 214]; var n = vnoise(p[0] * 40, p[1] * 40, p[2] * 40) * 8 - 4; return [222 + n, 168 + n, 108 + n]; },
-    jcorgi: function (p, h, name, D) { if (name === 'snout' || (name === 'body' && p[2] > 0.08 && Math.abs(p[0]) < 0.08)) return [252, 246, 236]; return [232, 150, 72]; },
-    jhusky: function (p, h, name, D) { if (name.indexOf('ear') === 0) return [96, 102, 112]; if (name === 'snout' || (name === 'body' && (p[1] < D.hy - 0.05 ? p[2] > 0.05 : p[2] > D.hD * 0.5 && Math.abs(p[0]) < 0.07))) return [250, 250, 246]; return [120, 126, 136]; }
+    jshiba: function (p, h, name, D) { if (name.indexOf('ear') === 0) return [150, 98, 58]; if (name === 'snout' || (name === 'body' && p[1] < 0 && p[2] > D.Rb * D.dp * 0.4)) return [248, 236, 214]; var n = vnoise(p[0] * 40, p[1] * 40, p[2] * 40) * 8 - 4; return [222 + n, 168 + n, 108 + n]; },
+    jcorgi: function (p, h, name, D) { if (name === 'snout' || (name === 'body' && p[2] > D.Rb * D.dp * 0.55 && Math.abs(p[0]) < 0.09)) return [252, 246, 236]; return [232, 150, 72]; },
+    jhusky: function (p, h, name, D) { if (name.indexOf('ear') === 0) return [96, 102, 112]; if (name === 'snout' || (name === 'body' && (p[1] < D.hy - 0.05 ? p[2] > D.Rb * D.dp * 0.4 : p[2] > D.hD * 0.5 && Math.abs(p[0]) < 0.07))) return [250, 250, 246]; return [120, 126, 136]; }
   };
   P.applyCoat = function (fn) {
     var self = this, S = this.spec, ext = { len: S.len, headR: S.headR }, po = this.pivot.position;

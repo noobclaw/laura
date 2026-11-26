@@ -87,3 +87,12 @@
 - Climbing over the top of a wall is only allowed where there is a ceiling above with room for the body; no climbing into the roof space.
 - Last line of defence: every frame, a body that ends up inside a solid, above the ceiling or outside the house goes back to the last place it was fine.
 - Verified by `web/tools/containcheck.py` (random walks + a climb on every tall wall face): PASS with the guard on; with the guard off, cats still get above the ceiling, so the guard is what holds this today.
+
+## Owner feedback 2026-11-26 (round 2)
+
+- **Embedding limit:** at most a third of the body may go into a wall or an object. Past that, the body glows red at once with the message 「身體嵌進去超過 1/3，這樣不允許」. Staying in for 3 s exposes it, as before.
+  - Measured from the posed body's own vertices: for each solid they touch, how far the body would have to move out along the cheapest axis, as a share of the body's size on that axis. A pillar or shelf cutting through the body counts as about a half.
+  - Walking and climbing stop short of the line (0.8 × 1/3), so the player is not pushed into red by the game itself.
+- **Climbing stance:** on a wall that is at least as tall as the body, a standing or crouching cat climbs belly to the wall, head up. The body is pulled up, a little flatter and wider, with arms reaching up and feet spread. It no longer stands out of the wall as if the wall were a floor. On thin beams and low ledges the old orientation stays.
+- **Bodies:** flatter (depth 0.5 of width), 14 % wider and taller, arms and feet about 1.3–1.45× bigger.
+- **Climbable surfaces:** the original lets you stick to walls *and objects* (evidence B: Game8, atwiki — see original-evidence.md), so we keep both.
