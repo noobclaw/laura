@@ -1,0 +1,80 @@
+ACCURACY hihat recall 0.70 precision 0.89 F1 0.79 (truth 108, found 85)
+Test Case '-[GroovelensTests.EndToEndAccuracyTests testTranscriptionAccuracyOnSyntheticMix]' passed (29.124 seconds).
+Test Suite 'EndToEndAccuracyTests' passed at 2026-11-26 10:28:35.856.
+	 Executed 1 test, with 0 failures (0 unexpected) in 29.124 (29.125) seconds
+Test Suite 'ExporterTests' started at 2026-11-26 10:28:35.856.
+Test Case '-[GroovelensTests.ExporterTests testMIDIStructure]' started.
+Test Case '-[GroovelensTests.ExporterTests testMIDIStructure]' passed (0.006 seconds).
+Test Case '-[GroovelensTests.ExporterTests testMusicXMLIsWellFormedAndBarsAddUp]' started.
+Test Case '-[GroovelensTests.ExporterTests testMusicXMLIsWellFormedAndBarsAddUp]' passed (0.015 seconds).
+Test Case '-[GroovelensTests.ExporterTests testSafeFileName]' started.
+Test Case '-[GroovelensTests.ExporterTests testSafeFileName]' passed (0.002 seconds).
+Test Suite 'ExporterTests' passed at 2026-11-26 10:28:35.914.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.023 (0.057) seconds
+Test Suite 'JudgeTests' started at 2026-11-26 10:28:35.915.
+Test Case '-[GroovelensTests.JudgeTests testANoteCanOnlyBeHitOnce]' started.
+Test Case '-[GroovelensTests.JudgeTests testANoteCanOnlyBeHitOnce]' passed (0.016 seconds).
+Test Case '-[GroovelensTests.JudgeTests testBarTimingsReportRushing]' started.
+Test Case '-[GroovelensTests.JudgeTests testBarTimingsReportRushing]' passed (0.001 seconds).
+Test Case '-[GroovelensTests.JudgeTests testEarlyAndLateWindows]' started.
+Test Case '-[GroovelensTests.JudgeTests testEarlyAndLateWindows]' passed (0.001 seconds).
+Test Case '-[GroovelensTests.JudgeTests testMicHitJudgesEverythingOnThatInstant]' started.
+Test Case '-[GroovelensTests.JudgeTests testMicHitJudgesEverythingOnThatInstant]' passed (0.001 seconds).
+Test Case '-[GroovelensTests.JudgeTests testOnlyTheSelectedBarsArePlayable]' started.
+Test Case '-[GroovelensTests.JudgeTests testOnlyTheSelectedBarsArePlayable]' passed (0.001 seconds).
+Test Case '-[GroovelensTests.JudgeTests testSweepMarksMissesAndBreaksCombo]' started.
+Test Case '-[GroovelensTests.JudgeTests testSweepMarksMissesAndBreaksCombo]' passed (0.002 seconds).
+Test Case '-[GroovelensTests.JudgeTests testTapOnTimeIsPerfect]' started.
+Test Case '-[GroovelensTests.JudgeTests testTapOnTimeIsPerfect]' passed (0.002 seconds).
+Test Case '-[GroovelensTests.JudgeTests testUnplayedNotesCountAgainstFinalAccuracy]' started.
+Test Case '-[GroovelensTests.JudgeTests testUnplayedNotesCountAgainstFinalAccuracy]' passed (0.074 seconds).
+Test Case '-[GroovelensTests.JudgeTests testWatchModeNeverSweeps]' started.
+Test Case '-[GroovelensTests.JudgeTests testWatchModeNeverSweeps]' passed (0.001 seconds).
+Test Case '-[GroovelensTests.JudgeTests testWrongLaneIsIgnored]' started.
+Test Case '-[GroovelensTests.JudgeTests testWrongLaneIsIgnored]' passed (0.001 seconds).
+Test Case '-[GroovelensTests.JudgeTests testXPRewardsSpeedAndFirstClear]' started.
+Test Case '-[GroovelensTests.JudgeTests testXPRewardsSpeedAndFirstClear]' passed (0.001 seconds).
+Test Suite 'JudgeTests' passed at 2026-11-26 10:28:36.070.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.099 (0.155) seconds
+Test Suite 'LanguageTests' started at 2026-11-26 10:28:36.070.
+Test Case '-[GroovelensTests.LanguageTests testInAppLanguageSwitchChangesLookups]' started.
+Test Case '-[GroovelensTests.LanguageTests testInAppLanguageSwitchChangesLookups]' passed (0.039 seconds).
+Test Case '-[GroovelensTests.LanguageTests testLanguageCodesNormalize]' started.
+Test Case '-[GroovelensTests.LanguageTests testLanguageCodesNormalize]' passed (0.001 seconds).
+Test Suite 'LanguageTests' passed at 2026-11-26 10:28:36.128.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.039 (0.057) seconds
+Test Suite 'ProfileTests' started at 2026-11-26 10:28:36.128.
+Test Case '-[GroovelensTests.ProfileTests testAchievementsUnlockOnce]' started.
+Test Case '-[GroovelensTests.ProfileTests testAchievementsUnlockOnce]' passed (0.018 seconds).
+Test Case '-[GroovelensTests.ProfileTests testDailyQuestsAreStableAndComplete]' started.
+Test Case '-[GroovelensTests.ProfileTests testDailyQuestsAreStableAndComplete]' passed (0.010 seconds).
+Test Case '-[GroovelensTests.ProfileTests testFirstRunStartsAStreakAndGivesXP]' started.
+Test Case '-[GroovelensTests.ProfileTests testFirstRunStartsAStreakAndGivesXP]' passed (0.007 seconds).
+Test Case '-[GroovelensTests.ProfileTests testFreeSongAllowance]' started.
+Test Case '-[GroovelensTests.ProfileTests testFreeSongAllowance]' passed (0.009 seconds).
+Test Case '-[GroovelensTests.ProfileTests testProfilePersists]' started.
+Test Case '-[GroovelensTests.ProfileTests testProfilePersists]' passed (0.011 seconds).
+Test Case '-[GroovelensTests.ProfileTests testReviewIsAskedOnTheThirdRunOnly]' started.
+Test Case '-[GroovelensTests.ProfileTests testReviewIsAskedOnTheThirdRunOnly]' passed (0.227 seconds).
+Test Case '-[GroovelensTests.ProfileTests testSecondRunSameDayDoesNotGrowTheStreak]' started.
+Test Case '-[GroovelensTests.ProfileTests testSecondRunSameDayDoesNotGrowTheStreak]' passed (0.004 seconds).
+Test Case '-[GroovelensTests.ProfileTests testSkinsUnlockByLevel]' started.
+Test Case '-[GroovelensTests.ProfileTests testSkinsUnlockByLevel]' passed (0.002 seconds).
+Test Case '-[GroovelensTests.ProfileTests testWatchRunsNeverAskForReview]' started.
+Test Case '-[GroovelensTests.ProfileTests testWatchRunsNeverAskForReview]' passed (0.007 seconds).
+Test Suite 'ProfileTests' passed at 2026-11-26 10:28:36.426.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.294 (0.298) seconds
+Test Suite 'GroovelensTests.xctest' passed at 2026-11-26 10:28:36.426.
+	 Executed 45 tests, with 0 failures (0 unexpected) in 45.851 (46.165) seconds
+Test Suite 'All tests' passed at 2026-11-26 10:28:36.602.
+	 Executed 45 tests, with 0 failures (0 unexpected) in 45.851 (46.341) seconds
+2026-11-26 10:28:40.598 xcodebuild[1637:8233] [MT] IDETestOperationsObserverDebug: 169.620 elapsed -- Testing started completed.
+2026-11-26 10:28:40.599 xcodebuild[1637:8233] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-26 10:28:40.599 xcodebuild[1637:8233] [MT] IDETestOperationsObserverDebug: 169.622 sec, +169.622 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/laura/laura/apps/groovelens/dd/Logs/Test/Test-Groovelens-2026.11.26_10-25-03-+0000.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

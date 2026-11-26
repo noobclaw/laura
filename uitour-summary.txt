@@ -1,0 +1,2 @@
+Test Case '-[GroovelensUITests.UITourTests testTourAllScreens]' passed (649.194 seconds).
+** TEST SUCCEEDED **

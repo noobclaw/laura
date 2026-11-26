@@ -1,0 +1,1612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="Groovelens/Resources/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
+        <source>Groovelens</source>
+        <target state="translated">Groovelens</target>
+        <note>Bundle display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>Groovelens</source>
+        <target state="translated">Groovelens</target>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSMicrophoneUsageDescription" xml:space="preserve">
+        <source>Groovelens uses the microphone to record songs you want to chart and, in Kit mode, to hear your drumming so it can score your timing. Audio never leaves your iPhone.</source>
+        <target state="translated">Groovelens uses the microphone to record songs you want to chart and, in Kit mode, to hear your drumming so it can score your timing. Audio never leaves your iPhone.</target>
+        <note>Privacy - Microphone Usage Description</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Groovelens/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="" xml:space="preserve">
+        <source/>
+        <target state="new"/>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ stage" xml:space="preserve">
+        <source>%@ stage</source>
+        <target state="new">%@ stage</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ · bars %lld–%lld · %@" xml:space="preserve">
+        <source>%@ · bars %lld–%lld · %@</source>
+        <target state="new">%@ · bars %lld–%lld · %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@%%" xml:space="preserve">
+        <source>%@%%</source>
+        <target state="new">%@%%</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@%lld ms" xml:space="preserve">
+        <source>%@%lld ms</source>
+        <target state="new">%@%lld ms</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@, %@. %@" xml:space="preserve">
+        <source>%@, %@. %@</source>
+        <target state="new">%@, %@. %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld" xml:space="preserve">
+        <source>%lld</source>
+        <target state="new">%lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld / %lld" xml:space="preserve">
+        <source>%lld / %lld</source>
+        <target state="new">%lld / %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld / %lld XP" xml:space="preserve">
+        <source>%lld / %lld XP</source>
+        <target state="new">%lld / %lld XP</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld BPM · %@" xml:space="preserve">
+        <source>%lld BPM · %@</source>
+        <target state="new">%lld BPM · %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld BPM · %@ · %lld hits" xml:space="preserve">
+        <source>%lld BPM · %@ · %lld hits</source>
+        <target state="new">%lld BPM · %@ · %lld hits</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld BPM · %lld/4 · %@" xml:space="preserve">
+        <source>%lld BPM · %lld/4 · %@</source>
+        <target state="new">%lld BPM · %lld/4 · %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld day streak" xml:space="preserve">
+        <source>%lld day streak</source>
+        <target state="new">%lld day streak</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld free songs left|==|plural.one" xml:space="preserve">
+        <source>%lld free song left</source>
+        <target state="translated">%lld free song left</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld free songs left|==|plural.other" xml:space="preserve">
+        <source>%lld free songs left</source>
+        <target state="translated">%lld free songs left</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld of 3 stars" xml:space="preserve">
+        <source>%lld of 3 stars</source>
+        <target state="new">%lld of 3 stars</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld taps|==|plural.one" xml:space="preserve">
+        <source>%lld tap</source>
+        <target state="translated">%lld tap</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld taps|==|plural.other" xml:space="preserve">
+        <source>%lld taps</source>
+        <target state="translated">%lld taps</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld%%" xml:space="preserve">
+        <source>%lld%%</source>
+        <target state="new">%lld%%</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld/%lld" xml:space="preserve">
+        <source>%lld/%lld</source>
+        <target state="new">%lld/%lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="( )" xml:space="preserve">
+        <source>( )</source>
+        <target state="new">( )</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="+%lld XP" xml:space="preserve">
+        <source>+%lld XP</source>
+        <target state="new">+%lld XP</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="1 rest day a week keeps your streak" xml:space="preserve">
+        <source>1 rest day a week keeps your streak</source>
+        <target state="new">1 rest day a week keeps your streak</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="3" xml:space="preserve">
+        <source>3</source>
+        <target state="new">3</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="ABOUT" xml:space="preserve">
+        <source>ABOUT</source>
+        <target state="new">ABOUT</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="ACCURACY" xml:space="preserve">
+        <source>ACCURACY</source>
+        <target state="new">ACCURACY</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="ACCURACY · LAST %lld RUNS" xml:space="preserve">
+        <source>ACCURACY · LAST %lld RUNS</source>
+        <target state="new">ACCURACY · LAST %lld RUNS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="ACHIEVEMENTS" xml:space="preserve">
+        <source>ACHIEVEMENTS</source>
+        <target state="new">ACHIEVEMENTS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="ANALYZING ON DEVICE" xml:space="preserve">
+        <source>ANALYZING ON DEVICE</source>
+        <target state="new">ANALYZING ON DEVICE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accuracy" xml:space="preserve">
+        <source>Accuracy</source>
+        <target state="new">Accuracy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Analysis failed" xml:space="preserve">
+        <source>Analysis failed</source>
+        <target state="new">Analysis failed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Analysis stopped when the app closed. Tap to try again." xml:space="preserve">
+        <source>Analysis stopped when the app closed. Tap to try again.</source>
+        <target state="new">Analysis stopped when the app closed. Tap to try again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Analysis was cancelled." xml:space="preserve">
+        <source>Analysis was cancelled.</source>
+        <target state="new">Analysis was cancelled.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="App language" xml:space="preserve">
+        <source>App language</source>
+        <target state="new">App language</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Arcade" xml:space="preserve">
+        <source>Arcade</source>
+        <target state="new">Arcade</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Audio file" xml:space="preserve">
+        <source>Audio file</source>
+        <target state="new">Audio file</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong." xml:space="preserve">
+        <source>Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong.</source>
+        <target state="new">Automatic transcription can miss or mislabel hits. Use the chart editor to fix anything that looks wrong.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="BACKING TRACK" xml:space="preserve">
+        <source>BACKING TRACK</source>
+        <target state="new">BACKING TRACK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="BARS" xml:space="preserve">
+        <source>BARS</source>
+        <target state="new">BARS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="BEST STREAK" xml:space="preserve">
+        <source>BEST STREAK</source>
+        <target state="new">BEST STREAK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Back" xml:space="preserve">
+        <source>Back</source>
+        <target state="new">Back</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Backbeat Boss" xml:space="preserve">
+        <source>Backbeat Boss</source>
+        <target state="new">Backbeat Boss</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bar %lld%@: %@" xml:space="preserve">
+        <source>Bar %lld%@: %@</source>
+        <target state="new">Bar %lld%@: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Best %lld%%" xml:space="preserve">
+        <source>Best %lld%%</source>
+        <target state="new">Best %lld%%</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bridge" xml:space="preserve">
+        <source>Bridge</source>
+        <target state="new">Bridge</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="CHART READY" xml:space="preserve">
+        <source>CHART READY</source>
+        <target state="new">CHART READY</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="COMBO" xml:space="preserve">
+        <source>COMBO</source>
+        <target state="new">COMBO</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cancel" xml:space="preserve">
+        <source>Cancel</source>
+        <target state="new">Cancel</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart" xml:space="preserve">
+        <source>Chart</source>
+        <target state="new">Chart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart 5 songs" xml:space="preserve">
+        <source>Chart 5 songs</source>
+        <target state="new">Chart 5 songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart a new song" xml:space="preserve">
+        <source>Chart a new song</source>
+        <target state="new">Chart a new song</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart a song with some drum fills and they’ll collect here automatically." xml:space="preserve">
+        <source>Chart a song with some drum fills and they’ll collect here automatically.</source>
+        <target state="new">Chart a song with some drum fills and they’ll collect here automatically.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart unavailable" xml:space="preserve">
+        <source>Chart unavailable</source>
+        <target state="new">Chart unavailable</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart your first song" xml:space="preserve">
+        <source>Chart your first song</source>
+        <target state="new">Chart your first song</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chart your whole setlist, not just three tracks." xml:space="preserve">
+        <source>Chart your whole setlist, not just three tracks.</source>
+        <target state="new">Chart your whole setlist, not just three tracks.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chorus" xml:space="preserve">
+        <source>Chorus</source>
+        <target state="new">Chorus</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clear a run at %lld%% speed" xml:space="preserve">
+        <source>Clear a run at %lld%% speed</source>
+        <target state="new">Clear a run at %lld%% speed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clear a run at 100% speed with an A or better" xml:space="preserve">
+        <source>Clear a run at 100% speed with an A or better</source>
+        <target state="new">Clear a run at 100% speed with an A or better</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Click track" xml:space="preserve">
+        <source>Click track</source>
+        <target state="new">Click track</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Click volume" xml:space="preserve">
+        <source>Click volume</source>
+        <target state="new">Click volume</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Climb to full tempo" xml:space="preserve">
+        <source>Climb to full tempo</source>
+        <target state="new">Climb to full tempo</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Close" xml:space="preserve">
+        <source>Close</source>
+        <target state="new">Close</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Couldn’t import" xml:space="preserve">
+        <source>Couldn’t import</source>
+        <target state="new">Couldn’t import</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Count in %lld" xml:space="preserve">
+        <source>Count in %lld</source>
+        <target state="new">Count in %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Crash" xml:space="preserve">
+        <source>Crash</source>
+        <target state="new">Crash</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Current offset: %lld ms" xml:space="preserve">
+        <source>Current offset: %lld ms</source>
+        <target state="new">Current offset: %lld ms</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="DAILY QUESTS" xml:space="preserve">
+        <source>DAILY QUESTS</source>
+        <target state="new">DAILY QUESTS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dead in the pocket — on average within %lld ms." xml:space="preserve">
+        <source>Dead in the pocket — on average within %lld ms.</source>
+        <target state="new">Dead in the pocket — on average within %lld ms.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete" xml:space="preserve">
+        <source>Delete</source>
+        <target state="new">Delete</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Done" xml:space="preserve">
+        <source>Done</source>
+        <target state="new">Done</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Done editing" xml:space="preserve">
+        <source>Done editing</source>
+        <target state="new">Done editing</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Drill this fill" xml:space="preserve">
+        <source>Drill this fill</source>
+        <target state="new">Drill this fill</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Drop any song." xml:space="preserve">
+        <source>Drop any song.</source>
+        <target state="new">Drop any song.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Drum pads" xml:space="preserve">
+        <source>Drum pads</source>
+        <target state="new">Drum pads</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Drum separation uses harmonic–percussive median filtering (Fitzgerald, 2010). Beat tracking follows Ellis (2007)." xml:space="preserve">
+        <source>Drum separation uses harmonic–percussive median filtering (Fitzgerald, 2010). Beat tracking follows Ellis (2007).</source>
+        <target state="new">Drum separation uses harmonic–percussive median filtering (Fitzgerald, 2010). Beat tracking follows Ellis (2007).</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Drums only" xml:space="preserve">
+        <source>Drums only</source>
+        <target state="new">Drums only</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="EARLY" xml:space="preserve">
+        <source>EARLY</source>
+        <target state="new">EARLY</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="EASY" xml:space="preserve">
+        <source>EASY</source>
+        <target state="new">EASY</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Early" xml:space="preserve">
+        <source>Early</source>
+        <target state="new">Early</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Earn an S grade" xml:space="preserve">
+        <source>Earn an S grade</source>
+        <target state="new">Earn an S grade</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Edit chart" xml:space="preserve">
+        <source>Edit chart</source>
+        <target state="new">Edit chart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Every fill from every song, ready to drill." xml:space="preserve">
+        <source>Every fill from every song, ready to drill.</source>
+        <target state="new">Every fill from every song, ready to drill.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Every fill, one tap away" xml:space="preserve">
+        <source>Every fill, one tap away</source>
+        <target state="new">Every fill, one tap away</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Every stage skin" xml:space="preserve">
+        <source>Every stage skin</source>
+        <target state="new">Every stage skin</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Everything stays on this iPhone" xml:space="preserve">
+        <source>Everything stays on this iPhone</source>
+        <target state="new">Everything stays on this iPhone</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Export" xml:space="preserve">
+        <source>Export</source>
+        <target state="new">Export</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="FEEL" xml:space="preserve">
+        <source>FEEL</source>
+        <target state="new">FEEL</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fill Hunter" xml:space="preserve">
+        <source>Fill Hunter</source>
+        <target state="new">Fill Hunter</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fill Master" xml:space="preserve">
+        <source>Fill Master</source>
+        <target state="new">Fill Master</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fill library" xml:space="preserve">
+        <source>Fill library</source>
+        <target state="new">Fill library</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fill · bar %lld" xml:space="preserve">
+        <source>Fill · bar %lld</source>
+        <target state="new">Fill · bar %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fills" xml:space="preserve">
+        <source>Fills</source>
+        <target state="new">Fills</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Finish a run in Kit mode" xml:space="preserve">
+        <source>Finish a run in Kit mode</source>
+        <target state="new">Finish a run in Kit mode</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Finish your first run" xml:space="preserve">
+        <source>Finish your first run</source>
+        <target state="new">Finish your first run</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="First Chart" xml:space="preserve">
+        <source>First Chart</source>
+        <target state="new">First Chart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Flawless" xml:space="preserve">
+        <source>Flawless</source>
+        <target state="new">Flawless</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fonts &amp; licenses" xml:space="preserve">
+        <source>Fonts &amp; licenses</source>
+        <target state="new">Fonts &amp; licenses</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Full Tempo" xml:space="preserve">
+        <source>Full Tempo</source>
+        <target state="new">Full Tempo</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Full mix" xml:space="preserve">
+        <source>Full mix</source>
+        <target state="new">Full mix</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="GOOD" xml:space="preserve">
+        <source>GOOD</source>
+        <target state="new">GOOD</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="GREAT" xml:space="preserve">
+        <source>GREAT</source>
+        <target state="new">GREAT</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="GROOVELENS" xml:space="preserve">
+        <source>GROOVELENS</source>
+        <target state="new">GROOVELENS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="GROOVELENS PRO" xml:space="preserve">
+        <source>GROOVELENS PRO</source>
+        <target state="new">GROOVELENS PRO</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Garage Kid" xml:space="preserve">
+        <source>Garage Kid</source>
+        <target state="new">Garage Kid</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Grade %@" xml:space="preserve">
+        <source>Grade %@</source>
+        <target state="new">Grade %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Grade %@, %lld percent, max combo %lld" xml:space="preserve">
+        <source>Grade %@, %lld percent, max combo %lld</source>
+        <target state="new">Grade %@, %lld percent, max combo %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Groove Cadet" xml:space="preserve">
+        <source>Groove Cadet</source>
+        <target state="new">Groove Cadet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Groove Legend" xml:space="preserve">
+        <source>Groove Legend</source>
+        <target state="new">Groove Legend</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Groovelens Pro" xml:space="preserve">
+        <source>Groovelens Pro</source>
+        <target state="new">Groovelens Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Groovelens uses the Unbounded and Chakra Petch typefaces under the SIL Open Font License 1.1." xml:space="preserve">
+        <source>Groovelens uses the Unbounded and Chakra Petch typefaces under the SIL Open Font License 1.1.</source>
+        <target state="new">Groovelens uses the Unbounded and Chakra Petch typefaces under the SIL Open Font License 1.1.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="HARD" xml:space="preserve">
+        <source>HARD</source>
+        <target state="new">HARD</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="HITS" xml:space="preserve">
+        <source>HITS</source>
+        <target state="new">HITS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Habit Forming" xml:space="preserve">
+        <source>Habit Forming</source>
+        <target state="new">Habit Forming</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Heads up" xml:space="preserve">
+        <source>Heads up</source>
+        <target state="new">Heads up</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hi-hat" xml:space="preserve">
+        <source>Hi-hat</source>
+        <target state="new">Hi-hat</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hit %lld%% on any section" xml:space="preserve">
+        <source>Hit %lld%% on any section</source>
+        <target state="new">Hit %lld%% on any section</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hit %lld%% on the %@ of “%@”" xml:space="preserve">
+        <source>Hit %lld%% on the %@ of “%@”</source>
+        <target state="new">Hit %lld%% on the %@ of “%@”</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="In the Pocket" xml:space="preserve">
+        <source>In the Pocket</source>
+        <target state="new">In the Pocket</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="In use" xml:space="preserve">
+        <source>In use</source>
+        <target state="new">In use</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Intro" xml:space="preserve">
+        <source>Intro</source>
+        <target state="new">Intro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Iron Wrists" xml:space="preserve">
+        <source>Iron Wrists</source>
+        <target state="new">Iron Wrists</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Isolating the drums" xml:space="preserve">
+        <source>Isolating the drums</source>
+        <target state="new">Isolating the drums</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Just watch and listen" xml:space="preserve">
+        <source>Just watch and listen</source>
+        <target state="new">Just watch and listen</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Kick" xml:space="preserve">
+        <source>Kick</source>
+        <target state="new">Kick</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Kit" xml:space="preserve">
+        <source>Kit</source>
+        <target state="new">Kit</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Kit mode" xml:space="preserve">
+        <source>Kit mode</source>
+        <target state="new">Kit mode</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens." xml:space="preserve">
+        <source>Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.</source>
+        <target state="new">Kit mode needs the microphone to hear your drums. You can turn it on in Settings › Groovelens.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LANGUAGE" xml:space="preserve">
+        <source>LANGUAGE</source>
+        <target state="new">LANGUAGE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LAST 5 WEEKS" xml:space="preserve">
+        <source>LAST 5 WEEKS</source>
+        <target state="new">LAST 5 WEEKS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LATE" xml:space="preserve">
+        <source>LATE</source>
+        <target state="new">LATE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LEVEL UP!" xml:space="preserve">
+        <source>LEVEL UP!</source>
+        <target state="new">LEVEL UP!</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LISTENING TO YOUR KIT" xml:space="preserve">
+        <source>LISTENING TO YOUR KIT</source>
+        <target state="new">LISTENING TO YOUR KIT</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LV %lld · %@" xml:space="preserve">
+        <source>LV %lld · %@</source>
+        <target state="new">LV %lld · %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Late" xml:space="preserve">
+        <source>Late</source>
+        <target state="new">Late</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Left-handed layout" xml:space="preserve">
+        <source>Left-handed layout</source>
+        <target state="new">Left-handed layout</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Level %lld" xml:space="preserve">
+        <source>Level %lld</source>
+        <target state="new">Level %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Level %lld or Pro" xml:space="preserve">
+        <source>Level %lld or Pro</source>
+        <target state="new">Level %lld or Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Licenses" xml:space="preserve">
+        <source>Licenses</source>
+        <target state="new">Licenses</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Locked In" xml:space="preserve">
+        <source>Locked In</source>
+        <target state="new">Locked In</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Loop the range" xml:space="preserve">
+        <source>Loop the range</source>
+        <target state="new">Loop the range</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="MEDIUM" xml:space="preserve">
+        <source>MEDIUM</source>
+        <target state="new">MEDIUM</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="METER" xml:space="preserve">
+        <source>METER</source>
+        <target state="new">METER</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="MIDI" xml:space="preserve">
+        <source>MIDI</source>
+        <target state="new">MIDI</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="MIDI, MusicXML &amp; PDF" xml:space="preserve">
+        <source>MIDI, MusicXML &amp; PDF</source>
+        <target state="new">MIDI, MusicXML &amp; PDF</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="MISS" xml:space="preserve">
+        <source>MISS</source>
+        <target state="new">MISS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Mapping the beat grid" xml:space="preserve">
+        <source>Mapping the beat grid</source>
+        <target state="new">Mapping the beat grid</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Max level reached" xml:space="preserve">
+        <source>Max level reached</source>
+        <target state="new">Max level reached</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Metronome Heart" xml:space="preserve">
+        <source>Metronome Heart</source>
+        <target state="new">Metronome Heart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Microphone access is off. You can turn it on in Settings › Groovelens." xml:space="preserve">
+        <source>Microphone access is off. You can turn it on in Settings › Groovelens.</source>
+        <target state="new">Microphone access is off. You can turn it on in Settings › Groovelens.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Mirrors the lanes and pads." xml:space="preserve">
+        <source>Mirrors the lanes and pads.</source>
+        <target state="new">Mirrors the lanes and pads.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="MusicXML" xml:space="preserve">
+        <source>MusicXML</source>
+        <target state="new">MusicXML</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nail 10 fills" xml:space="preserve">
+        <source>Nail 10 fills</source>
+        <target state="new">Nail 10 fills</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nail a fill with 80% accuracy" xml:space="preserve">
+        <source>Nail a fill with 80% accuracy</source>
+        <target state="new">Nail a fill with 80% accuracy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Naming every hit" xml:space="preserve">
+        <source>Naming every hit</source>
+        <target state="new">Naming every hit</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Neon" xml:space="preserve">
+        <source>Neon</source>
+        <target state="new">Neon</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="New stage skin — pick it in Progress." xml:space="preserve">
+        <source>New stage skin — pick it in Progress.</source>
+        <target state="new">New stage skin — pick it in Progress.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Next title at level %lld" xml:space="preserve">
+        <source>Next title at level %lld</source>
+        <target state="new">Next title at level %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No drums" xml:space="preserve">
+        <source>No drums</source>
+        <target state="new">No drums</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No fills yet" xml:space="preserve">
+        <source>No fills yet</source>
+        <target state="new">No fills yet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No previous Pro purchase was found for this Apple ID." xml:space="preserve">
+        <source>No previous Pro purchase was found for this Apple ID.</source>
+        <target state="new">No previous Pro purchase was found for this Apple ID.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Not enough taps landed near the clicks. Try again." xml:space="preserve">
+        <source>Not enough taps landed near the clicks. Try again.</source>
+        <target state="new">Not enough taps landed near the clicks. Try again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Not played yet" xml:space="preserve">
+        <source>Not played yet</source>
+        <target state="new">Not played yet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nothing leaves your iPhone. You can close this — analysis keeps going." xml:space="preserve">
+        <source>Nothing leaves your iPhone. You can close this — analysis keeps going.</source>
+        <target state="new">Nothing leaves your iPhone. You can close this — analysis keeps going.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OK" xml:space="preserve">
+        <source>OK</source>
+        <target state="new">OK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="On it" xml:space="preserve">
+        <source>On it</source>
+        <target state="new">On it</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="One purchase. Yours forever. No subscription." xml:space="preserve">
+        <source>One purchase. Yours forever. No subscription.</source>
+        <target state="new">One purchase. Yours forever. No subscription.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open Settings" xml:space="preserve">
+        <source>Open Settings</source>
+        <target state="new">Open Settings</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open the chart" xml:space="preserve">
+        <source>Open the chart</source>
+        <target state="new">Open the chart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open your charts in your DAW or notation app." xml:space="preserve">
+        <source>Open your charts in your DAW or notation app.</source>
+        <target state="new">Open your charts in your DAW or notation app.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Opens iOS Settings for Groovelens" xml:space="preserve">
+        <source>Opens iOS Settings for Groovelens</source>
+        <target state="new">Opens iOS Settings for Groovelens</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Outro" xml:space="preserve">
+        <source>Outro</source>
+        <target state="new">Outro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PAUSED" xml:space="preserve">
+        <source>PAUSED</source>
+        <target state="new">PAUSED</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PDF" xml:space="preserve">
+        <source>PDF</source>
+        <target state="new">PDF</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PERFECT" xml:space="preserve">
+        <source>PERFECT</source>
+        <target state="new">PERFECT</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PLAY" xml:space="preserve">
+        <source>PLAY</source>
+        <target state="new">PLAY</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PRACTICE" xml:space="preserve">
+        <source>PRACTICE</source>
+        <target state="new">PRACTICE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PRACTICE RANGE" xml:space="preserve">
+        <source>PRACTICE RANGE</source>
+        <target state="new">PRACTICE RANGE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PRIVACY" xml:space="preserve">
+        <source>PRIVACY</source>
+        <target state="new">PRIVACY</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PRO" xml:space="preserve">
+        <source>PRO</source>
+        <target state="new">PRO</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Part" xml:space="preserve">
+        <source>Part</source>
+        <target state="new">Part</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pause" xml:space="preserve">
+        <source>Pause</source>
+        <target state="new">Pause</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Payment is charged to your Apple Account. Family Sharing supported." xml:space="preserve">
+        <source>Payment is charged to your Apple Account. Family Sharing supported.</source>
+        <target state="new">Payment is charged to your Apple Account. Family Sharing supported.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pick a drum, then tap the staff to add or remove a hit." xml:space="preserve">
+        <source>Pick a drum, then tap the staff to add or remove a hit.</source>
+        <target state="new">Pick a drum, then tap the staff to add or remove a hit.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pick any of 10 languages in iOS Settings." xml:space="preserve">
+        <source>Pick any of 10 languages in iOS Settings.</source>
+        <target state="new">Pick any of 10 languages in iOS Settings.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play" xml:space="preserve">
+        <source>Play</source>
+        <target state="new">Play</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play again" xml:space="preserve">
+        <source>Play again</source>
+        <target state="new">Play again</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play the pads on screen" xml:space="preserve">
+        <source>Play the pads on screen</source>
+        <target state="new">Play the pads on screen</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play your real drums — the mic scores every hit." xml:space="preserve">
+        <source>Play your real drums — the mic scores every hit.</source>
+        <target state="new">Play your real drums — the mic scores every hit.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play your real kit — the mic scores you" xml:space="preserve">
+        <source>Play your real kit — the mic scores you</source>
+        <target state="new">Play your real kit — the mic scores you</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Playback couldn’t start" xml:space="preserve">
+        <source>Playback couldn’t start</source>
+        <target state="new">Playback couldn’t start</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pocket Keeper" xml:space="preserve">
+        <source>Pocket Keeper</source>
+        <target state="new">Pocket Keeper</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Practice 3 days in a row" xml:space="preserve">
+        <source>Practice 3 days in a row</source>
+        <target state="new">Practice 3 days in a row</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Practice 7 days in a row" xml:space="preserve">
+        <source>Practice 7 days in a row</source>
+        <target state="new">Practice 7 days in a row</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Practice 30 days in a row" xml:space="preserve">
+        <source>Practice 30 days in a row</source>
+        <target state="new">Practice 30 days in a row</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Practice for %lld minutes|==|plural.one" xml:space="preserve">
+        <source>Practice for %lld minute</source>
+        <target state="translated">Practice for %lld minute</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Practice for %lld minutes|==|plural.other" xml:space="preserve">
+        <source>Practice for %lld minutes</source>
+        <target state="translated">Practice for %lld minutes</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Practice for 10 hours total" xml:space="preserve">
+        <source>Practice for 10 hours total</source>
+        <target state="new">Practice for 10 hours total</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pro is unlocked. Thank you!" xml:space="preserve">
+        <source>Pro is unlocked. Thank you!</source>
+        <target state="new">Pro is unlocked. Thank you!</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pro restored. Welcome back!" xml:space="preserve">
+        <source>Pro restored. Welcome back!</source>
+        <target state="new">Pro restored. Welcome back!</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Progress" xml:space="preserve">
+        <source>Progress</source>
+        <target state="new">Progress</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pulled from your songs. Each drill loops the bar before the fill, then the fill." xml:space="preserve">
+        <source>Pulled from your songs. Each drill loops the bar before the fill, then the fill.</source>
+        <target state="new">Pulled from your songs. Each drill loops the bar before the fill, then the fill.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Put your iPhone near the band, not on the kit. Up to 10 minutes." xml:space="preserve">
+        <source>Put your iPhone near the band, not on the kit. Up to 10 minutes.</source>
+        <target state="new">Put your iPhone near the band, not on the kit. Up to 10 minutes.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Quest complete · +%lld XP" xml:space="preserve">
+        <source>Quest complete · +%lld XP</source>
+        <target state="new">Quest complete · +%lld XP</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Quit" xml:space="preserve">
+        <source>Quit</source>
+        <target state="new">Quit</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="RESULTS" xml:space="preserve">
+        <source>RESULTS</source>
+        <target state="new">RESULTS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="RUNS" xml:space="preserve">
+        <source>RUNS</source>
+        <target state="new">RUNS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reach a %lld-note combo in Tap mode" xml:space="preserve">
+        <source>Reach a %lld-note combo in Tap mode</source>
+        <target state="new">Reach a %lld-note combo in Tap mode</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reach a 50-note combo" xml:space="preserve">
+        <source>Reach a 50-note combo</source>
+        <target state="new">Reach a 50-note combo</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reach a 100-note combo" xml:space="preserve">
+        <source>Reach a 100-note combo</source>
+        <target state="new">Reach a 100-note combo</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reach a 250-note combo" xml:space="preserve">
+        <source>Reach a 250-note combo</source>
+        <target state="new">Reach a 250-note combo</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reach level 10" xml:space="preserve">
+        <source>Reach level 10</source>
+        <target state="new">Reach level 10</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reach level 25" xml:space="preserve">
+        <source>Reach level 25</source>
+        <target state="new">Reach level 25</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Real Sticks" xml:space="preserve">
+        <source>Real Sticks</source>
+        <target state="new">Real Sticks</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Record" xml:space="preserve">
+        <source>Record</source>
+        <target state="new">Record</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Record at least 8 seconds so we can find the beat." xml:space="preserve">
+        <source>Record at least 8 seconds so we can find the beat.</source>
+        <target state="new">Record at least 8 seconds so we can find the beat.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Record now" xml:space="preserve">
+        <source>Record now</source>
+        <target state="new">Record now</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recording" xml:space="preserve">
+        <source>Recording</source>
+        <target state="new">Recording</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recording couldn’t start. Check that no other app is using the microphone." xml:space="preserve">
+        <source>Recording couldn’t start. Check that no other app is using the microphone.</source>
+        <target state="new">Recording couldn’t start. Check that no other app is using the microphone.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recording — %@" xml:space="preserve">
+        <source>Recording — %@</source>
+        <target state="new">Recording — %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reset to 0 ms" xml:space="preserve">
+        <source>Reset to 0 ms</source>
+        <target state="new">Reset to 0 ms</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Resets at midnight" xml:space="preserve">
+        <source>Resets at midnight</source>
+        <target state="new">Resets at midnight</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restart" xml:space="preserve">
+        <source>Restart</source>
+        <target state="new">Restart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore failed: %@" xml:space="preserve">
+        <source>Restore failed: %@</source>
+        <target state="new">Restore failed: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore purchases" xml:space="preserve">
+        <source>Restore purchases</source>
+        <target state="new">Restore purchases</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Resume" xml:space="preserve">
+        <source>Resume</source>
+        <target state="new">Resume</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rhythm Architect" xml:space="preserve">
+        <source>Rhythm Architect</source>
+        <target state="new">Rhythm Architect</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ride" xml:space="preserve">
+        <source>Ride</source>
+        <target state="new">Ride</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Run" xml:space="preserve">
+        <source>Run</source>
+        <target state="new">Run</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="SESSION COMPLETE" xml:space="preserve">
+        <source>SESSION COMPLETE</source>
+        <target state="new">SESSION COMPLETE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="SOMETHING WENT WRONG" xml:space="preserve">
+        <source>SOMETHING WENT WRONG</source>
+        <target state="new">SOMETHING WENT WRONG</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="SPEED" xml:space="preserve">
+        <source>SPEED</source>
+        <target state="new">SPEED</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="STAGE SKINS" xml:space="preserve">
+        <source>STAGE SKINS</source>
+        <target state="new">STAGE SKINS</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="STREAK" xml:space="preserve">
+        <source>STREAK</source>
+        <target state="new">STREAK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save" xml:space="preserve">
+        <source>Save</source>
+        <target state="new">Save</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Score your real kit" xml:space="preserve">
+        <source>Score your real kit</source>
+        <target state="new">Score your real kit</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Session Player" xml:space="preserve">
+        <source>Session Player</source>
+        <target state="new">Session Player</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Session Pro" xml:space="preserve">
+        <source>Session Pro</source>
+        <target state="new">Session Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Setlist" xml:space="preserve">
+        <source>Setlist</source>
+        <target state="new">Setlist</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Settings" xml:space="preserve">
+        <source>Settings</source>
+        <target state="new">Settings</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Six pads: kick, snare, hi-hat, tom, ride, crash" xml:space="preserve">
+        <source>Six pads: kick, snare, hi-hat, tom, ride, crash</source>
+        <target state="new">Six pads: kick, snare, hi-hat, tom, ride, crash</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Snare" xml:space="preserve">
+        <source>Snare</source>
+        <target state="new">Snare</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Something went wrong" xml:space="preserve">
+        <source>Something went wrong</source>
+        <target state="new">Something went wrong</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking." xml:space="preserve">
+        <source>Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking.</source>
+        <target state="new">Songs are analyzed on device. Nothing is uploaded, there are no accounts and no tracking.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings." xml:space="preserve">
+        <source>Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings.</source>
+        <target state="new">Songs bought from Apple Music are copy-protected and can’t be imported. Use your own audio files, videos or recordings.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sound Check" xml:space="preserve">
+        <source>Sound Check</source>
+        <target state="new">Sound Check</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Speed" xml:space="preserve">
+        <source>Speed</source>
+        <target state="new">Speed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Speed trainer" xml:space="preserve">
+        <source>Speed trainer</source>
+        <target state="new">Speed trainer</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Stage" xml:space="preserve">
+        <source>Stage</source>
+        <target state="new">Stage</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start" xml:space="preserve">
+        <source>Start</source>
+        <target state="new">Start</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start recording" xml:space="preserve">
+        <source>Start recording</source>
+        <target state="new">Start recording</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start slow, climb 5% after every clean loop." xml:space="preserve">
+        <source>Start slow, climb 5% after every clean loop.</source>
+        <target state="new">Start slow, climb 5% after every clean loop.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Stop recording" xml:space="preserve">
+        <source>Stop recording</source>
+        <target state="new">Stop recording</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Straight" xml:space="preserve">
+        <source>Straight</source>
+        <target state="new">Straight</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Studio" xml:space="preserve">
+        <source>Studio</source>
+        <target state="new">Studio</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Swing" xml:space="preserve">
+        <source>Swing</source>
+        <target state="new">Swing</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="TAP" xml:space="preserve">
+        <source>TAP</source>
+        <target state="new">TAP</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="TEMPO" xml:space="preserve">
+        <source>TEMPO</source>
+        <target state="new">TEMPO</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="TIMING BY BAR" xml:space="preserve">
+        <source>TIMING BY BAR</source>
+        <target state="new">TIMING BY BAR</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Take your charts anywhere" xml:space="preserve">
+        <source>Take your charts anywhere</source>
+        <target state="new">Take your charts anywhere</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap" xml:space="preserve">
+        <source>Tap</source>
+        <target state="new">Tap</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap + and pick a song, a rehearsal video, or record your band. Charts appear here." xml:space="preserve">
+        <source>Tap + and pick a song, a rehearsal video, or record your band. Charts appear here.</source>
+        <target state="new">Tap + and pick a song, a rehearsal video, or record your band. Charts appear here.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap to use" xml:space="preserve">
+        <source>Tap to use</source>
+        <target state="new">Tap to use</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ten Hours In" xml:space="preserve">
+        <source>Ten Hours In</source>
+        <target state="new">Ten Hours In</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The App Store couldn’t verify this purchase." xml:space="preserve">
+        <source>The App Store couldn’t verify this purchase.</source>
+        <target state="new">The App Store couldn’t verify this purchase.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The App Store isn’t reachable right now. Check your connection and try again." xml:space="preserve">
+        <source>The App Store isn’t reachable right now. Check your connection and try again.</source>
+        <target state="new">The App Store isn’t reachable right now. Check your connection and try again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The original audio for this song is missing. Delete it and import again." xml:space="preserve">
+        <source>The original audio for this song is missing. Delete it and import again.</source>
+        <target state="new">The original audio for this song is missing. Delete it and import again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The purchase didn’t go through: %@" xml:space="preserve">
+        <source>The purchase didn’t go through: %@</source>
+        <target state="new">The purchase didn’t go through: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The recording is too short to chart — use at least 8 seconds." xml:space="preserve">
+        <source>The recording is too short to chart — use at least 8 seconds.</source>
+        <target state="new">The recording is too short to chart — use at least 8 seconds.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The recording was interrupted." xml:space="preserve">
+        <source>The recording was interrupted.</source>
+        <target state="new">The recording was interrupted.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This audio format can’t be read." xml:space="preserve">
+        <source>This audio format can’t be read.</source>
+        <target state="new">This audio format can’t be read.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This chart couldn’t be read. Delete the song and import it again." xml:space="preserve">
+        <source>This chart couldn’t be read. Delete the song and import it again.</source>
+        <target state="new">This chart couldn’t be read. Delete the song and import it again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This file has no audio track." xml:space="preserve">
+        <source>This file has no audio track.</source>
+        <target state="new">This file has no audio track.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This song is copy-protected (for example from Apple Music) and can’t be analyzed." xml:space="preserve">
+        <source>This song is copy-protected (for example from Apple Music) and can’t be analyzed.</source>
+        <target state="new">This song is copy-protected (for example from Apple Music) and can’t be analyzed.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This song’s audio can’t be played. Delete it and import it again." xml:space="preserve">
+        <source>This song’s audio can’t be played. Delete it and import it again.</source>
+        <target state="new">This song’s audio can’t be played. Delete it and import it again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Timing calibration" xml:space="preserve">
+        <source>Timing calibration</source>
+        <target state="new">Timing calibration</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tom" xml:space="preserve">
+        <source>Tom</source>
+        <target state="new">Tom</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tour Drummer" xml:space="preserve">
+        <source>Tour Drummer</source>
+        <target state="new">Tour Drummer</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tracks" xml:space="preserve">
+        <source>Tracks</source>
+        <target state="new">Tracks</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Try again" xml:space="preserve">
+        <source>Try again</source>
+        <target state="new">Try again</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Try the demo song" xml:space="preserve">
+        <source>Try the demo song</source>
+        <target state="new">Try the demo song</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="UNLOCKED" xml:space="preserve">
+        <source>UNLOCKED</source>
+        <target state="new">UNLOCKED</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlimited songs" xml:space="preserve">
+        <source>Unlimited songs</source>
+        <target state="new">Unlimited songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages." xml:space="preserve">
+        <source>Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages.</source>
+        <target state="new">Unlimited songs, Kit mode, speed trainer, every fill, exports and all stages.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock Pro" xml:space="preserve">
+        <source>Unlock Pro</source>
+        <target state="new">Unlock Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock Pro — %@" xml:space="preserve">
+        <source>Unlock Pro — %@</source>
+        <target state="new">Unlock Pro — %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock every stage" xml:space="preserve">
+        <source>Unlock every stage</source>
+        <target state="new">Unlock every stage</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock with Pro" xml:space="preserve">
+        <source>Unlock with Pro</source>
+        <target state="new">Unlock with Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlocked. Every feature is yours." xml:space="preserve">
+        <source>Unlocked. Every feature is yours.</source>
+        <target state="new">Unlocked. Every feature is yours.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use headphones — otherwise the mic hears the backing track too." xml:space="preserve">
+        <source>Use headphones — otherwise the mic hears the backing track too.</source>
+        <target state="new">Use headphones — otherwise the mic hears the backing track too.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use system language" xml:space="preserve">
+        <source>Use system language</source>
+        <target state="new">Use system language</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use the headphones or speaker you play with. Tap the big pad exactly on each click." xml:space="preserve">
+        <source>Use the headphones or speaker you play with. Tap the big pad exactly on each click.</source>
+        <target state="new">Use the headphones or speaker you play with. Tap the big pad exactly on each click.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Verse" xml:space="preserve">
+        <source>Verse</source>
+        <target state="new">Verse</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Version" xml:space="preserve">
+        <source>Version</source>
+        <target state="new">Version</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Video from Photos" xml:space="preserve">
+        <source>Video from Photos</source>
+        <target state="new">Video from Photos</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Video — %@" xml:space="preserve">
+        <source>Video — %@</source>
+        <target state="new">Video — %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Vintage" xml:space="preserve">
+        <source>Vintage</source>
+        <target state="new">Vintage</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Vintage, Studio and Arcade — no grinding." xml:space="preserve">
+        <source>Vintage, Studio and Arcade — no grinding.</source>
+        <target state="new">Vintage, Studio and Arcade — no grinding.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Watch" xml:space="preserve">
+        <source>Watch</source>
+        <target state="new">Watch</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="We pull the drums out and build your track — right on this iPhone." xml:space="preserve">
+        <source>We pull the drums out and build your track — right on this iPhone.</source>
+        <target state="new">We pull the drums out and build your track — right on this iPhone.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Week of Grooves" xml:space="preserve">
+        <source>Week of Grooves</source>
+        <target state="new">Week of Grooves</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Whole song" xml:space="preserve">
+        <source>Whole song</source>
+        <target state="new">Whole song</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Writing the chart" xml:space="preserve">
+        <source>Writing the chart</source>
+        <target state="new">Writing the chart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You tap a little after the click. We’ll correct for it." xml:space="preserve">
+        <source>You tap a little after the click. We’ll correct for it.</source>
+        <target state="new">You tap a little after the click. We’ll correct for it.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You tap a little ahead of the click. We’ll correct for it." xml:space="preserve">
+        <source>You tap a little ahead of the click. We’ll correct for it.</source>
+        <target state="new">You tap a little ahead of the click. We’ll correct for it.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your edit couldn’t be saved. Check that your iPhone has free storage, then try again." xml:space="preserve">
+        <source>Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.</source>
+        <target state="new">Your edit couldn’t be saved. Check that your iPhone has free storage, then try again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your purchase is waiting for approval. Pro unlocks as soon as it’s approved." xml:space="preserve">
+        <source>Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.</source>
+        <target state="new">Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your stage is empty" xml:space="preserve">
+        <source>Your stage is empty</source>
+        <target state="new">Your stage is empty</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You’re dragging by about %lld ms. Push a little." xml:space="preserve">
+        <source>You’re dragging by about %lld ms. Push a little.</source>
+        <target state="new">You’re dragging by about %lld ms. Push a little.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You’re rushing by about %lld ms. Lean back." xml:space="preserve">
+        <source>You’re rushing by about %lld ms. Lean back.</source>
+        <target state="new">You’re rushing by about %lld ms. Lean back.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You’ve charted your 3 free songs" xml:space="preserve">
+        <source>You’ve charted your 3 free songs</source>
+        <target state="new">You’ve charted your 3 free songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="bar %lld" xml:space="preserve">
+        <source>bar %lld</source>
+        <target state="new">bar %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="days" xml:space="preserve">
+        <source>days</source>
+        <target state="new">days</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="h" xml:space="preserve">
+        <source>h</source>
+        <target state="new">h</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="min" xml:space="preserve">
+        <source>min</source>
+        <target state="new">min</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="· %lld%%" xml:space="preserve">
+        <source>· %lld%%</source>
+        <target state="new">· %lld%%</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="· pass %lld" xml:space="preserve">
+        <source>· pass %lld</source>
+        <target state="new">· pass %lld</target>
+        <note/>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

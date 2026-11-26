@@ -1,0 +1,60 @@
+2026-11-26 10:48:38.315 Df Groovelens[39732:1b8dc] [com.apple.BackBoard:EventDelivery] policyStatus:<BKSHIDEventDeliveryPolicyObserver: 0x600002110050; token: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.noobclaw.groovelens-default; status: ancestor> was:target
+2026-11-26 10:48:38.315 Df Groovelens[39732:1b8dc] [com.apple.BackBoard:EventDelivery] observerPolicyDidChange: 0x600002110050 -> <_UIKeyWindowSceneObserver: 0x600000c1bc30>
+2026-11-26 10:48:38.315 Df Groovelens[39732:1b8c1] [com.apple.UIKit:Application] Deactivation reason removed: 11; deactivation reasons: 6176 -> 4128; animating application lifecycle event: 1
+2026-11-26 10:48:38.316 Df Groovelens[39732:1b8de] [com.apple.UIIntelligenceSupport:xpc] establishing connection to agent
+2026-11-26 10:48:38.316 Df Groovelens[39732:1b8de] [com.apple.xpc:session] [0x600002112f30] Session created.
+2026-11-26 10:48:38.316 Df Groovelens[39732:1b8de] [com.apple.xpc:session] [0x600002112f30] Session created from connection [0x600003d04960]
+2026-11-26 10:48:38.316 Df Groovelens[39732:1b8de] [com.apple.xpc:connection] [0x600003d04960] activating connection: mach=true listener=false peer=false name=com.apple.uiintelligencesupport.agent
+2026-11-26 10:48:38.316 Df Groovelens[39732:1b8de] [com.apple.xpc:session] [0x600002112f30] Session activated
+2026-11-26 10:48:38.317 Df Groovelens[39732:1b8c1] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 2, <UIWindowScene: 0x10340e9e0> (2652666E-E500-40B2-BD7C-138C1CEAB562)
+2026-11-26 10:48:38.323 A  Groovelens[39732:1b8c1] (CoreFoundation) Updating Key-Value Observers Of Preferences
+2026-11-26 10:48:38.380 Df Groovelens[39732:1b8c1] [PrototypeTools:domain] Not observing PTDefaults on customer install.
+2026-11-26 10:48:38.385 Df Groovelens[39732:1b8de] [com.apple.xpc:connection] [0x1038099b0] activating connection: mach=true listener=false peer=false name=com.apple.fontservicesd
+2026-11-26 10:48:38.456 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x600003d251d0] activating connection: mach=true listener=false peer=false name=com.apple.distributed_notifications@1v3
+2026-11-26 10:48:38.566 Df Groovelens[39732:1b8c1] [com.apple.FrontBoard:SceneClient] [(FBSceneManager):sceneID:com.noobclaw.groovelens-default] Sending action(s): BLSInvalidateFrameSpecifiersAction
+2026-11-26 10:48:38.567 Df Groovelens[39732:1b8c1] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 2, <UIWindowScene: 0x10340e9e0> (2652666E-E500-40B2-BD7C-138C1CEAB562)
+2026-11-26 10:48:38.605 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x1037b2370] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-26 10:48:38.606 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x1037b2480] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-26 10:48:38.606 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x1037b2590] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-26 10:48:38.662 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x600003d08a50] activating connection: mach=true listener=false peer=false name=com.apple.IOSurface.Remote
+2026-11-26 10:48:38.701 Df Groovelens[39732:1b8c1] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:1 [29D57288-50D0-47C7-925A-C5C9371954A3] (reporting strategy default)>
+2026-11-26 10:48:38.701 Df Groovelens[39732:1b8c1] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:2 [737766D9-9103-4596-8BEA-43623FB994C9] (reporting strategy default)>
+2026-11-26 10:48:38.701 Df Groovelens[39732:1b8c1] [com.apple.network:activity] Set activity <nw_activity 50:1 [29D57288-50D0-47C7-925A-C5C9371954A3] (reporting strategy default)> as the global parent
+2026-11-26 10:48:38.701 Df Groovelens[39732:1b8c1] [com.apple.UIKit:BackgroundTask] Ending background task with UIBackgroundTaskIdentifier: 1
+2026-11-26 10:48:38.701 Df Groovelens[39732:1b8c1] [com.apple.UIKit:BackgroundTask] Ending task with identifier 1 and description: <_UIBackgroundTaskInfo: 0x600001706200>: taskID = 1, taskName = Launch Background Task for Coalescing, creationTime = 1519 (elapsed = 1), _expireHandler: (null)
+2026-11-26 10:48:38.701 Df Groovelens[39732:1b8c1] [com.apple.UIKit:BackgroundTask] Decrementing reference count for assertion <BKSProcessAssertion: 0x60000210c0f0> (used by background task with identifier 1: <_UIBackgroundTaskInfo: 0x600001706200>: taskID = 1, taskName = Launch Background Task for Coalescing, creationTime = 1519 (elapsed = 1))
+2026-11-26 10:48:38.702 Df Groovelens[39732:1b8c1] [com.apple.UIKit:UpdateScheduler] Target list changed: <CADisplay:LCD PurpleMain>
+2026-11-26 10:48:38.704 A  Groovelens[39732:1b8da] (RunningBoardServices) didChangeInheritances
+2026-11-26 10:48:38.719 Df Groovelens[39732:1b8c1] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.groovelens-default  persistentID: 2652666E-E500-40B2-BD7C-138C1CEAB562
+2026-11-26 10:48:38.720 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x1034190b0] activating connection: mach=true listener=false peer=false name=com.apple.storekitd
+2026-11-26 10:48:38.721 A  Groovelens[39732:1b8c1] (CoreFoundation) Updating Key-Value Observers Of Preferences
+2026-11-26 10:48:38.723 Df Groovelens[39732:1b8da] [com.apple.storekit:Default] [7671f3de_SK2] Starting product request
+2026-11-26 10:48:38.728 Df Groovelens[39732:1b8c1] [com.apple.UIKit:EventDeferring] [0x6000029038e0] Scene target of event deferring environments did update: scene: 0x10340e9e0; current systemShellManagesKeyboardFocus: 1; systemShellManagesKeyboardFocusForScene: 1; eligibleForRecordRemoval: 1;
+2026-11-26 10:48:38.728 Df Groovelens[39732:1b8c1] [com.apple.UIKit:KeyWindow] Scene became target of keyboard event deferring environment: UIWindowScene: 0x10340e9e0; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.noobclaw.groovelens-default
+2026-11-26 10:48:38.761 Df Groovelens[39732:1b8c1] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 2, <UIWindowScene: 0x10340e9e0> (2652666E-E500-40B2-BD7C-138C1CEAB562)
+2026-11-26 10:48:38.761 Df Groovelens[39732:1b8c1] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.groovelens-default  persistentID: 2652666E-E500-40B2-BD7C-138C1CEAB562
+2026-11-26 10:48:38.761 Df Groovelens[39732:1b8c1] [com.apple.UIKit:Application] Deactivation reason removed: 12; deactivation reasons: 4128 -> 32; animating application lifecycle event: 1
+2026-11-26 10:48:38.761 Df Groovelens[39732:1b8c1] [com.apple.KeyboardArbiter:Client] Send setDeactivating: N (-DeactivationReason:SuspendedEventsOnly)
+2026-11-26 10:48:38.762 Df Groovelens[39732:1b8c1] [com.apple.UIKit:Application] Deactivation reason removed: 5; deactivation reasons: 32 -> 0; animating application lifecycle event: 0
+2026-11-26 10:48:38.762 Df Groovelens[39732:1b8c1] [com.apple.KeyboardArbiter:Client] startConnection
+2026-11-26 10:48:38.763 Df Groovelens[39732:1b8c1] [com.apple.xpc:connection] [0x10371aba0] activating connection: mach=true listener=false peer=false name=com.apple.UIKit.KeyboardManagement.hosted
+2026-11-26 10:48:38.763 Df Groovelens[39732:1b8c1] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.groovelens-default  persistentID: 2652666E-E500-40B2-BD7C-138C1CEAB562
+2026-11-26 10:48:38.763 Df Groovelens[39732:1b8c1] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.groovelens-default  persistentID: 2652666E-E500-40B2-BD7C-138C1CEAB562
+2026-11-26 10:48:38.763 Df Groovelens[39732:1b8c1] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.groovelens-default  persistentID: 2652666E-E500-40B2-BD7C-138C1CEAB562
+2026-11-26 10:48:38.764 Df Groovelens[39732:1b8c1] [com.apple.UIKit:InterfaceStyle] Scene did update interface style to 1, <UIWindowScene: 0x10340e9e0> (2652666E-E500-40B2-BD7C-138C1CEAB562)
+2026-11-26 10:48:38.764 Df Groovelens[39732:1b8c1] [com.apple.UIKit:InterfaceStyle] Push traits update to screen for new style 1, <UIWindowScene: 0x10340e9e0> (2652666E-E500-40B2-BD7C-138C1CEAB562)
+2026-11-26 10:48:38.765 Df Groovelens[39732:1b8c1] [com.apple.KeyboardArbiter:Client] handleKeyboardChange: set currentKeyboard:N (wasKeyboard:N)
+2026-11-26 10:48:38.765 Df Groovelens[39732:1b8c1] [com.apple.UIKit:KeyboardSceneDelegate] forceReloadInputViews
+2026-11-26 10:48:38.765 Df Groovelens[39732:1b8c1] [com.apple.UIKit:KeyboardSceneDelegate] Reloading input views for: <(null): 0x0; > force: 1
+2026-11-26 10:48:38.765 Df Groovelens[39732:1b8c1] [com.apple.UIKit:KeyboardArbiterClientLog] isWritingToolsHandlingKeyboardTracking:Y (WT ready:Y, Arbiter ready:Y)
+2026-11-26 10:48:38.776 Df Groovelens[39732:1b8dd] [com.apple.UIKit:BackgroundTask] Ending background task with UIBackgroundTaskIdentifier: 3
+2026-11-26 10:48:38.776 Df Groovelens[39732:1b8dd] [com.apple.UIKit:BackgroundTask] Ending task with identifier 3 and description: <_UIBackgroundTaskInfo: 0x600001720340>: taskID = 3, taskName = Persistent SceneSession Map Update, creationTime = 1519 (elapsed = 1), _expireHandler: <__NSGlobalBlock__: 0x1e6965d48>
+2026-11-26 10:48:38.776 Df Groovelens[39732:1b8dd] [com.apple.UIKit:BackgroundTask] Decrementing reference count for assertion <BKSProcessAssertion: 0x60000210c0f0> (used by background task with identifier 3: <_UIBackgroundTaskInfo: 0x600001720340>: taskID = 3, taskName = Persistent SceneSession Map Update, creationTime = 1519 (elapsed = 1))
+2026-11-26 10:48:38.776 Df Groovelens[39732:1b8dd] [com.apple.UIKit:BackgroundTask] Will invalidate assertion: <BKSProcessAssertion: 0x60000210c0f0> for task identifier: 3
+2026-11-26 10:48:39.086 Df Groovelens[39732:1b8de] [com.apple.storekit:Default] [7671f3de_SK2] Finished product request
+2026-11-26 10:48:39.162 A  Groovelens[39732:1b8da] (RunningBoardServices) didChangeInheritances
+2026-11-26 10:48:39.274 A  Groovelens[39732:1b8da] (RunningBoardServices) didChangeInheritances
+2026-11-26 10:48:43.351 Df Groovelens[39732:1b8c1] [com.apple.network:activity] <nw_activity 50:1 [29D57288-50D0-47C7-925A-C5C9371954A3] (global parent) (reporting strategy default) complete (reason success)> complete with reason 2 (success), duration 6041ms
+2026-11-26 10:48:43.351 Df Groovelens[39732:1b8c1] [com.apple.network:activity] <nw_activity 50:2 [737766D9-9103-4596-8BEA-43623FB994C9] (reporting strategy default) complete (reason success)> complete with reason 2 (success), duration 6042ms
+2026-11-26 10:48:43.351 Df Groovelens[39732:1b8c1] [com.apple.network:activity] Unsetting the global parent activity <nw_activity 50:1 [29D57288-50D0-47C7-925A-C5C9371954A3] (global parent) (reporting strategy default) complete (reason success)>
+2026-11-26 10:48:43.351 Df Groovelens[39732:1b8c1] [com.apple.network:activity] Unset the global parent activity
