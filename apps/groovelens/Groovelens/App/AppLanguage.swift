@@ -10,7 +10,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class AppLanguage {
-    static let supported = ["en", "zh-Hant", "zh-Hans", "ja", "ko", "de", "fr", "es", "pt-BR", "it"]
+    nonisolated static let supported = ["en", "zh-Hant", "zh-Hans", "ja", "ko", "de", "fr", "es", "pt-BR", "it"]
     private static let storeKey = "groovelens.language"
 
     /// Code of the language in effect, readable from anywhere (fonts, formatters).
@@ -53,12 +53,12 @@ final class AppLanguage {
     }
 
     /// Native name, e.g. "繁體中文", "Deutsch".
-    static func nativeName(_ code: String) -> String {
+    nonisolated static func nativeName(_ code: String) -> String {
         let name = Locale(identifier: code).localizedString(forIdentifier: code) ?? code
         return name.prefix(1).uppercased() + name.dropFirst()
     }
 
-    static func normalize(_ code: String) -> String {
+    nonisolated static func normalize(_ code: String) -> String {
         if supported.contains(code) { return code }
         let lower = code.lowercased()
         if lower.hasPrefix("zh") { return lower.contains("hans") || lower.hasSuffix("cn") || lower.hasSuffix("sg") ? "zh-Hans" : "zh-Hant" }
