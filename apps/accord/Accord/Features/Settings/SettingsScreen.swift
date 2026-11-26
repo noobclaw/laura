@@ -31,6 +31,7 @@ struct SettingsScreen: View {
                     }
                     .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
                 } header: { FormHeader("Look") }
+                .headerProminence(.increased)
                 .listRowBackground(Color.clear)
 
                 Section {
@@ -57,6 +58,7 @@ struct SettingsScreen: View {
                             .frame(width: 90)
                     }
                 } header: { FormHeader("Preferences") }
+                .headerProminence(.increased)
                 .listRowBackground(Theme.card)
 
                 Section {
@@ -73,6 +75,7 @@ struct SettingsScreen: View {
                 } header: { FormHeader("Privacy") } footer: {
                     Text("Accord has no account and no server. Your formulas never leave this iPhone unless you export them.")
                 }
+                .headerProminence(.increased)
                 .listRowBackground(Theme.card)
 
                 Section {
@@ -85,6 +88,7 @@ struct SettingsScreen: View {
                 } header: { FormHeader("Your data") } footer: {
                     Text("A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone.")
                 }
+                .headerProminence(.increased)
                 .listRowBackground(Theme.card)
 
                 Section {
@@ -103,6 +107,7 @@ struct SettingsScreen: View {
                 } header: { FormHeader("About") } footer: {
                     Text("Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials.")
                 }
+                .headerProminence(.increased)
                 .listRowBackground(Theme.card)
             }
             .scrollContentBackground(.hidden)

@@ -185,8 +185,8 @@ struct BenchContent: View {
             .overlay(alignment: .top) {
                 if let sprayAt {
                     MistBurst(start: sprayAt, colors: colors.isEmpty ? [Theme.amber] : colors)
-                        .frame(width: 170, height: 150)
-                        .offset(y: -128)
+                        .frame(width: 200, height: 130)
+                        .offset(y: -96)
                         .id(sprayAt)
                 }
             }

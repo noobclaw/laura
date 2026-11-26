@@ -124,8 +124,8 @@ struct MistBurst: View {
                     guard life > 0 else { continue }
                     let p = life / (duration - 0.3)
                     guard p < 1 else { continue }
-                    let ang = (-90.0 + Double(Int(rng.next() % 70) - 35)) * .pi / 180
-                    let speed = 60 + Double(rng.next() % 120)
+                    let ang = (-100.0 + Double(Int(rng.next() % 80) - 40)) * .pi / 180
+                    let speed = 35 + Double(rng.next() % 80)
                     let ease = 1 - pow(1 - p, 2.2)
                     let x = origin.x + CGFloat(cos(ang) * speed * ease)
                     let y = origin.y + CGFloat(sin(ang) * speed * ease) - CGFloat(p * 10)

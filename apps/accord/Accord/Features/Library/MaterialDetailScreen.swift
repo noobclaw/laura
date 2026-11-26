@@ -34,6 +34,7 @@ struct MaterialDetailScreen: View {
                 Toggle(isOn: $material.isNatural) { Text("Natural") }
                 TextField(text: $material.odor, axis: .vertical) { Text("What it smells like") }.lineLimit(1...4)
             } header: { FormHeader("Identity") }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
 
             Section {
@@ -65,6 +66,7 @@ struct MaterialDetailScreen: View {
             } header: { FormHeader("At the bench") } footer: {
                 Text("Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS.")
             }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
 
             Section {
@@ -104,6 +106,7 @@ struct MaterialDetailScreen: View {
             Section {
                 TextField(text: $material.notes, axis: .vertical) { Text("Notes") }.lineLimit(2...8)
             } header: { FormHeader("Notes") }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
 
             if !material.formulas.isEmpty {
@@ -121,6 +124,7 @@ struct MaterialDetailScreen: View {
                         }
                     }
                 } header: { FormHeader("Used in") }
+                .headerProminence(.increased)
                 .listRowBackground(Theme.card)
             }
 

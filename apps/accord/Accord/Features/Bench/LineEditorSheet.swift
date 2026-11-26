@@ -109,6 +109,7 @@ struct LineEditorSheet: View {
                         .font(.footnote).foregroundStyle(Theme.danger)
                 }
             } header: { FormHeader("Amount") }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
 
             Section {
@@ -139,6 +140,7 @@ struct LineEditorSheet: View {
             } header: { FormHeader("Dilution") } footer: {
                 Text("Weigh the solution; Accord counts only the active material in the analysis.")
             }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
 
             Section {
@@ -148,6 +150,7 @@ struct LineEditorSheet: View {
                 TextField(text: $note, axis: .vertical) { Text("Note") }
                     .lineLimit(1...4)
             } header: { FormHeader("Trial notes") }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
 
             if let line {
@@ -332,6 +335,7 @@ struct MaterialPicker: View {
 
             if query.isEmpty && family == nil && !recent.isEmpty {
                 Section { ForEach(recent) { m in row(m) } } header: { FormHeader("Recently used") }
+                    .headerProminence(.increased)
                     .listRowBackground(Theme.card)
             }
 
@@ -348,12 +352,14 @@ struct MaterialPicker: View {
                         }
                     }
                 } header: { FormHeader("Your formulas as bases") }
+                .headerProminence(.increased)
                 .listRowBackground(Theme.card)
             }
 
             Section {
                 ForEach(filtered) { m in row(m) }
             } header: { FormHeader("Library") }
+            .headerProminence(.increased)
             .listRowBackground(Theme.card)
         }
         .scrollContentBackground(.hidden)
