@@ -156,6 +156,15 @@ struct BenchContent: View {
                 if formula.version > 1 { Tag(text: String(localized: "v\(formula.version)", bundle: .l10n)) }
                 if !formula.category.isEmpty { Tag(text: formula.category) }
                 Spacer()
+                Button { sharingCard = true } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(Theme.ink)
+                        .frame(width: 40, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel(Text("Share card"))
+                .accessibilityIdentifier("bench-share")
                 Button { showSettings = true } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 17, weight: .medium))
