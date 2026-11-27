@@ -58,6 +58,20 @@ jobs:
           find ci-out/ui-shots -name '*.png' | wc -l
           exit 0
 
+      - name: Review video (English tour, recorded on the simulator)
+        timeout-minutes: 10
+        run: |
+          set +e
+          xcrun simctl io "$SIM" recordVideo --codec=h264 --force ci-out/review-tour.mp4 &
+          REC=$!
+          sleep 3
+          xcodebuild -project Accord.xcodeproj -scheme AccordUITour -destination "id=$SIM" \
+            -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test-without-building \
+            -only-testing:AccordUITests/UITourTests/testTourEnglish > ci-out/video.log 2>&1
+          kill -INT $REC; wait $REC
+          ls -la ci-out/review-tour.mp4
+          exit 0
+
       - name: Export localizations
         run: |
           set +e

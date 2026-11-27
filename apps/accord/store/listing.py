@@ -79,7 +79,10 @@ REVIEW_NOTES = ("No account or login is needed. The app opens on a sample formul
                 "families; Product shows the limit check. Pro is a one-time non-consumable purchase: creating a sixth formula, "
                 "comparing versions, exporting, or saving a batch opens the paywall with Restore Purchase. Notifications are "
                 "requested only when a batch is saved (maturation reminders). Face ID is used only if the user turns on App Lock. "
-                "No data leaves the device.")
+                "The share button on the Bench makes an image card of the formula (amounts hidden by default). "
+                "Settings (gear on the Bench) has the in-app language switch and the Atelier / Noir look. "
+                "A home-screen widget shows maturing batches. A screen recording of the full flow is attached. "
+                "No data leaves the device; there is no server.")
 
 if __name__ == "__main__":
     # Length check and listing.md

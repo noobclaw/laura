@@ -178,6 +178,16 @@ def meta(app_id):
              "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
     print("review detail set; contact fields:", sorted(k for k, v in contact.items() if v))
 
+    # Screen recording for App Review (avoids a Guideline 2.1 "Information Needed" round trip).
+    video = os.path.join(STORE, "review", "accord-tour.mp4")
+    rdid = (mine["data"]["id"] if mine and mine.get("data") else
+            call("GET", f"/v1/appStoreVersions/{vid}/appStoreReviewDetail")["data"]["id"])
+    if os.path.exists(video):
+        old = call("GET", f"/v1/appStoreReviewDetails/{rdid}/appStoreReviewAttachments")["data"]
+        if not any(a["attributes"].get("fileName") == os.path.basename(video) for a in old):
+            print("attachment uploaded", upload("/v1/appStoreReviewAttachments", "appStoreReviewDetail",
+                  "appStoreReviewDetails", rdid, video, "appStoreReviewAttachments"))
+
     # Free app.
     sched = call("GET", f"/v1/apps/{app_id}/appPriceSchedule", ok404=True)
     if not sched or not sched.get("data"):
@@ -200,7 +210,7 @@ def meta(app_id):
                os.path.join(STORE, "screenshots", "iap-review.jpg"), "inAppPurchaseAppStoreReviewScreenshots")
         print("IAP review screenshot uploaded")
     call("PATCH", f"/v2/inAppPurchases/{iap['id']}", {"data": {"type": "inAppPurchases", "id": iap["id"],
-         "attributes": {"reviewNote": "Non-consumable one-time unlock. Open any song, tap Kit mode (PRO) to see the paywall. Restore Purchases is on the paywall and in Settings."}}})
+         "attributes": {"reviewNote": "Non-consumable one-time unlock (unlimited formulas, compare, export, batches). Tap + on the Bench to create a sixth formula, or tap Compare, to see the paywall. Restore Purchase is on the paywall and in Settings."}}})
     print("IAP state:", iap["attributes"].get("state"))
 
 
