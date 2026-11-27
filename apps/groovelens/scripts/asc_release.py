@@ -295,7 +295,56 @@ def submit(app_id):
     print("SUBMITTED:", r["data"]["attributes"].get("state"))
 
 
+RESUBMIT_NOTES = """Screen recording: attached (recorded on iPhone, iOS 26). It starts at launch, plays the bundled demo song in the rhythm game, opens the song page with its PRO features (Kit mode, Speed trainer, exports) that open the one-time Pro purchase.
+
+1. Purpose and audience: Groovelens turns a song the user already owns (audio file, video, or a recording made in the app) into a drum chart on the iPhone, then lets them practise it as a rhythm game: on-screen pads (Tap), their real drum kit heard through the microphone (Kit), or a play-along view (Watch). It is for hobby and student drummers who want to learn the drum part of a song without searching for sheet music.
+
+2. How to use it: no account or login. On the home screen tap "Try the demo song": a built-in groove is analysed on the device and opens as a chart. Tap Start to play. Songs from Files or Photos can be added with the + button. The first 3 song analyses are free; Pro is a one-time non-consumable purchase (Settings or any PRO badge, with Restore Purchases).
+
+3. External services: none. Drum separation and transcription run entirely on the device. No server, no analytics, no ads, no third-party SDKs. Payments use Apple In-App Purchase only.
+
+4. Regional differences: none. The app works the same in every region; the interface is available in 10 languages chosen inside the app.
+
+5. Regulated industry / third-party material: not applicable. The app ships no copyrighted music; the demo song is synthesized by the app itself. Users analyse only audio they import themselves, and DRM-protected Apple Music tracks cannot be imported."""
+
+
+def resubmit(app_id):
+    vers = call("GET", f"/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS")["data"]
+    ver = editable(vers)
+    print("version", ver["id"], ver["attributes"].get("appStoreState"))
+    rd = call("GET", f"/v1/appStoreVersions/{ver['id']}/appStoreReviewDetail", ok404=True)
+    rid = rd["data"]["id"]
+    call("PATCH", f"/v1/appStoreReviewDetails/{rid}", {"data": {"type": "appStoreReviewDetails", "id": rid,
+         "attributes": {"notes": RESUBMIT_NOTES}}})
+    print("notes updated", len(RESUBMIT_NOTES))
+    existing = call("GET", f"/v1/appStoreReviewDetails/{rid}/appStoreReviewAttachments")["data"]
+    if any(a["attributes"].get("fileName") == "groovelens-demo.mp4" for a in existing):
+        print("attachment already there")
+    else:
+        aid = upload("/v1/appStoreReviewAttachments", "appStoreReviewDetail", "appStoreReviewDetails", rid,
+                     os.path.join(STORE, "review", "groovelens-demo.mp4"), "appStoreReviewAttachments")
+        print("attachment uploaded", aid)
+    subs = call("GET", f"/v1/reviewSubmissions?filter[app]={app_id}&filter[platform]=IOS")["data"]
+    for sub in subs:
+        print("submission", sub["id"], sub["attributes"].get("state"))
+    open_sub = next((x for x in subs if x["attributes"].get("state") in ("UNRESOLVED_ISSUES", "READY_FOR_REVIEW")), None)
+    if not open_sub:
+        print("!! no submission to resubmit")
+        return
+    for it in call("GET", f"/v1/reviewSubmissions/{open_sub['id']}/items")["data"]:
+        if it["attributes"].get("state") in ("REJECTED", "UNRESOLVED"):
+            try:
+                call("PATCH", f"/v1/reviewSubmissionItems/{it['id']}", {"data": {"type": "reviewSubmissionItems", "id": it["id"],
+                     "attributes": {"resolved": True}}})
+                print("item resolved", it["id"])
+            except urllib.error.HTTPError:
+                pass
+    r = call("PATCH", f"/v1/reviewSubmissions/{open_sub['id']}", {"data": {"type": "reviewSubmissions", "id": open_sub["id"],
+             "attributes": {"submitted": True}}})
+    print("RESUBMITTED:", r["data"]["attributes"].get("state"))
+
+
 if __name__ == "__main__":
     app = call("GET", f"/v1/apps?filter[bundleId]={BUNDLE_ID}")["data"][0]
     print("app", app["id"], app["attributes"]["name"])
-    {"meta": meta, "submit": submit}[sys.argv[1]](app["id"])
+    {"meta": meta, "submit": submit, "resubmit": resubmit}[sys.argv[1]](app["id"])
