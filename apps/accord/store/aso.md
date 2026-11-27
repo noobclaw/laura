@@ -7,3 +7,4 @@
 - **First screenshot = the ad:** bench with the evaporation timeline and "After 2 h" label; second: weighing mode big number; third: bottle shelf; fourth: analysis (pyramid + families); fifth: compare versions; sixth: maturation diary.
 - **Categories:** Productivity (primary), Lifestyle (secondary).
 - **Re-check ranking** for "perfume formula" in US, JP, DE two weeks after release.
+
