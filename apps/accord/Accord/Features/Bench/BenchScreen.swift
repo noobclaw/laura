@@ -61,6 +61,7 @@ struct BenchContent: View {
     @State private var exporting = false
     @State private var sharingCard = false
     @State private var sprayAt: Date?
+    @State private var showSettings = false
     @State private var confirmDelete = false
     @State private var newName = ""
 
@@ -126,6 +127,7 @@ struct BenchContent: View {
         .sheet(isPresented: $comparing) { ComparePickerSheet(base: formula) }
         .sheet(isPresented: $exporting) { ExportSheet(formula: formula) }
         .sheet(isPresented: $sharingCard) { ShareCardSheet(formula: formula) }
+        .sheet(isPresented: $showSettings) { SettingsScreen() }
         .alert(Text("Rename formula"), isPresented: $renaming) {
             TextField(text: $newName) { Text("Name") }
             Button("Save") {
@@ -154,6 +156,15 @@ struct BenchContent: View {
                 if formula.version > 1 { Tag(text: String(localized: "v\(formula.version)", bundle: .l10n)) }
                 if !formula.category.isEmpty { Tag(text: formula.category) }
                 Spacer()
+                Button { showSettings = true } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(Theme.ink)
+                        .frame(width: 40, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel(Text("Settings"))
+                .accessibilityIdentifier("bench-settings")
                 formulaMenu
             }
             HStack(alignment: .bottom, spacing: Theme.Space.m) {

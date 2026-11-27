@@ -26,15 +26,6 @@ struct SettingsScreen: View {
                     .listRowBackground(Theme.card)
 
                 Section {
-                    HStack(spacing: Theme.Space.s) {
-                        ForEach(Theme.Look.allCases) { l in LookChoice(look: l) }
-                    }
-                    .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
-                } header: { FormHeader("Look") }
-                .headerProminence(.increased)
-                .listRowBackground(Color.clear)
-
-                Section {
                     Button { showLanguage = true } label: {
                         HStack {
                             Label { Text("App language").foregroundStyle(Theme.ink) } icon: { Image(systemName: "globe").foregroundStyle(Theme.amberInk) }
@@ -60,6 +51,15 @@ struct SettingsScreen: View {
                 } header: { FormHeader("Preferences") }
                 .headerProminence(.increased)
                 .listRowBackground(Theme.card)
+
+                Section {
+                    HStack(spacing: Theme.Space.s) {
+                        ForEach(Theme.Look.allCases) { l in LookChoice(look: l) }
+                    }
+                    .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
+                } header: { FormHeader("Look") }
+                .headerProminence(.increased)
+                .listRowBackground(Color.clear)
 
                 Section {
                     Toggle(isOn: Binding(get: { lock.isEnabled }, set: { on in

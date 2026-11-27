@@ -36,7 +36,7 @@ struct ShelfScreen: View {
                         .accessibilityAddTraits(.isHeader)
                     Spacer()
                     Button { showSettings = true } label: {
-                        Image(systemName: "slider.horizontal.3").font(.system(size: 18, weight: .medium))
+                        Image(systemName: "gearshape").font(.system(size: 18, weight: .medium))
                             .foregroundStyle(Theme.ink).frame(width: 44, height: 44)
                     }
                     .accessibilityLabel(Text("Settings"))
