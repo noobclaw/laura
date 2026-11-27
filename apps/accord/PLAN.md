@@ -1,6 +1,6 @@
 # Accord — PLAN
 
-> 状态：🟢在做（M1+M2 代码完成，CI 验证中）　　路线：原生 SwiftUI（iOS 17，iPhone 竖屏）　　Bundle：`com.noobclaw.accord`
+> 状态：🧪待验收（M1–M3 + 第二轮：黑金外观、活液体、稀释计算、分享卡、小工具；TestFlight 打包中）　　路线：原生 SwiftUI（iOS 17，iPhone 竖屏）　　Bundle：`com.noobclaw.accord`
 > 商店名（暂定）：**Accord: Perfume Formula Lab**　　用户 2026-11-26 点名（五个 App 之二，排在 Groovelens 之后）
 
 ## 1. 一句话定位
