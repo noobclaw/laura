@@ -1,0 +1,19 @@
+{
+ "TC-SAVE-04": {
+  "status": "pass",
+  "detail": {
+   "secondTab": "dialog \"Progress could not be saved\" with Reload (qa/evidence/r-second-tab.jpg); first run of this script only looked at toast/heading and misread it",
+   "newerSaveKept": true
+  }
+ },
+ "TC-SAVE-06": {
+  "status": "pass",
+  "detail": {
+   "mainUnchanged": true,
+   "keys": [
+    "sorting-playthrough-v1",
+    "sorting-lab-checkpoint"
+   ]
+  }
+ }
+}

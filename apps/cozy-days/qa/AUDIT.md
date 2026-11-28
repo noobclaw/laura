@@ -30,6 +30,8 @@
 | AUD-18 | P2 | `PlayerJournal` 接受 `ratings` 為字串、道具餘額為負數的存檔（使用時有 `> 0` 檢查，不能刷） | TC-SAVE-02 | 交 Codex CR-11（順手補驗證） |
 | AUD-19 | P2 | 前 4 關一局不到 1 分鐘（22–53 秒，估算），低於 casual 標準的 1–5 分鐘；作為教學關可接受 | TC-LVL-07 | 記錄，策劃確認 |
 | AUD-20 | P2 | 第 1–20 關暫存欄峰值都是 0：每一步都有可直接送的物品，沒有任何取捨；第 21 關又突然變成不可解。難度曲線從「零決策」直接跳到「不可能」 | `kernel-cases.json` levels[].trayPeak | 和 AUD-04 一起處理 |
+| AUD-22 | P1 | 每幀的 `frame()` 沒有錯誤保護，任何一幀拋錯就永久凍住遊戲 | `r-frame-error-before.jpg`、`remaining-browser.json` | **已修** C-08 |
+| AUD-23 | P1 | 新存檔的活動時區固定是 Asia/Shanghai，美國和中東玩家每日競速在錯的時間重置 | `verify-zone.json`、`src/playthrough.js` 預設 `zone = 'Asia/Shanghai'` | **已修** C-09（新存檔）；舊存檔是否遷移交 Codex 決定，見 CR-15 |
 | AUD-21 | 資訊 | 生圖沒有用 gameartstyle.loopyhop.com 的提示詞（工具寫的是 built-in image_gen），和用戶流程不同 | `presentation/american-v1/prompts/*.txt` | 交 Codex 說明，見 `INTAKE.md` |
 
 ## 二、代碼審計（完工清單第 4 道）

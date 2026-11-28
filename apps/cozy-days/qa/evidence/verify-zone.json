@@ -1,0 +1,18 @@
+{
+ "before:America/Los_Angeles": {
+  "zone": "Asia/Shanghai",
+  "eventsZone": "Asia/Shanghai"
+ },
+ "before:Asia/Riyadh": {
+  "zone": "Asia/Shanghai",
+  "eventsZone": "Asia/Shanghai"
+ },
+ "after:America/Los_Angeles": {
+  "zone": "America/Los_Angeles",
+  "eventsZone": "America/Los_Angeles"
+ },
+ "after:Asia/Riyadh": {
+  "zone": "Asia/Riyadh",
+  "eventsZone": "Asia/Riyadh"
+ }
+}

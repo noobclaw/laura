@@ -24,6 +24,7 @@
 | CR-12 | P2 | 重跑 `pnpm run build` | 待修 |
 | CR-13 | P1 | Steam 版：買斷制，關掉體力和內購，橫屏版面 | 待修 |
 | CR-14 | P2 | 新手工具包每個玩家限購 1 次 | 待修 |
+| CR-15 | P2 | 舊存檔時區遷移；`Playthrough` 預設時區改成玩家本地 | 待修 |
 
 ## CR-00 補齊策劃文件
 
@@ -73,6 +74,7 @@
 ## CR-06 第一批 7 種語言（P1）
 
 - 證據：`examples/strings.js` 每個鍵只有 [簡中, 繁中, 英文]。
+- 另外：`web/scenes.jsx` 第 15 行（圖形中斷提示）和第 281 行（主頁玩具提示）的文案寫在字串表外，要搬進 `examples/strings.js`。
 - 要求：補 ar、ja、ko、de、fr、es（英文已有），阿拉伯語要由右至左、和數字混排正確；設定的語言選單用各語言自己的名字；每種語言截圖檢查溢出。
 - 驗收方法：Claude 逐語言截全部畫面檢查。
 
@@ -117,6 +119,13 @@
 - 依據：同類遊戲的新手包通常限購（`MONETIZATION.md` 第三節）。
 - 要求：`cozy.toolbox.welcome` 每個玩家只能買一次，買過後從商店消失；恢復購買不重複發放消耗型道具。
 - 驗收方法：購買一次後商店不再出現該商品。
+
+## CR-15 時區
+
+- 證據：`qa/evidence/verify-zone.json`；`src/playthrough.js` 構造參數 `zone = 'Asia/Shanghai'`。
+- Claude 已修 C-09：正式入口建立新存檔時傳入玩家時區。
+- 要求：`Playthrough` 的預設值改成 `Intl.DateTimeFormat().resolvedOptions().timeZone`（不依賴呼叫方）；決定已有存檔要不要遷移到本地時區（建議在當前每日、每週週期結束後遷移，避免重複或少發獎勵）。
+- 驗收方法：`qa/tools/verify-zone.mjs`。
 
 ## CR-12 重新構建
 

@@ -937,38 +937,49 @@ let previous = performance.now(),
   sinceSave = 0,
   sinceHeader = 0;
 
+let frameErrorShown = false;
+// A failing frame must not stop the loop: log it, tell the player once, keep running.
 function frame(at) {
-  const elapsed = Math.max(0, Math.min(.25, (at - previous) / 1000));
-  previous = at;
-  if (game && view === 'game' && !modal.open && !uiBusy && !document.hidden && byId('play-board')?.dataset.graphics !== 'lost' && game.round?.inspect().phase === 'live') {
-    const signals = game.advance(elapsed);
-    if (signals.length) {
-      showSignals(signals);
-      board?.draw();
+  try {
+    const elapsed = Math.max(0, Math.min(.25, (at - previous) / 1000));
+    previous = at;
+    if (game && view === 'game' && !modal.open && !uiBusy && !document.hidden && byId('play-board')?.dataset.graphics !== 'lost' && game.round?.inspect().phase === 'live') {
+      const signals = game.advance(elapsed);
+      if (signals.length) {
+        showSignals(signals);
+        board?.draw();
+      }
+      const second = Math.floor(game.round.inspect().seconds);
+      if (second !== lastSecond && byId('play-time')) {
+        byId('play-time').textContent = clockText(second);
+        lastSecond = second;
+      }
+      sinceSave += elapsed;
+      if (sinceSave >= 5) {
+        sinceSave = 0;
+        task(() => game.save());
+      }
     }
-    const second = Math.floor(game.round.inspect().seconds);
-    if (second !== lastSecond && byId('play-time')) {
-      byId('play-time').textContent = clockText(second);
-      lastSecond = second;
+    sinceHeader += elapsed;
+    if (game && sinceHeader >= 1 && !uiBusy) {
+      sinceHeader = 0;
+      const power = game.powerStatus();
+      meter('power', 'heart', `${power.amount}/${power.capacity}`, t('energy', {
+        n: power.amount,
+        max: power.capacity
+      }));
+      const note = byId('energy-note');
+      if (note) note.textContent = `${t('entry')} · ${power.refillIn === null ? t('full') : t('refill', { time: clockText(power.refillIn) })}`;
     }
-    sinceSave += elapsed;
-    if (sinceSave >= 5) {
-      sinceSave = 0;
-      task(() => game.save());
+  } catch (error) {
+    console.error('Frame error', error);
+    if (!frameErrorShown) {
+      frameErrorShown = true;
+      toast(t('frameError'));
     }
+  } finally {
+    requestAnimationFrame(frame);
   }
-  sinceHeader += elapsed;
-  if (game && sinceHeader >= 1 && !uiBusy) {
-    sinceHeader = 0;
-    const power = game.powerStatus();
-    meter('power', 'heart', `${power.amount}/${power.capacity}`, t('energy', {
-      n: power.amount,
-      max: power.capacity
-    }));
-    const note = byId('energy-note');
-    if (note) note.textContent = `${t('entry')} · ${power.refillIn === null ? t('full') : t('refill', { time: clockText(power.refillIn) })}`;
-  }
-  requestAnimationFrame(frame);
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && game && !uiBusy) task(() => game.save());
@@ -989,6 +1000,8 @@ try {
   document.documentElement.dataset.motion = localStorage.getItem('sorting-motion') ?? 'on';
   const boot = record => new Playthrough({
     record,
+    // Daily and weekly events follow the player's own time zone (new saves only).
+    zone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     loadStage,
     contentEdition: CAMPAIGN_EDITION,
     persist: async snapshot => {

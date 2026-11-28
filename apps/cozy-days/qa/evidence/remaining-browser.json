@@ -1,0 +1,166 @@
+{
+ "TC-LIFE-01": {
+  "status": "pass",
+  "detail": {
+   "before": 2,
+   "afterHidden6s": 3,
+   "afterVisible3s": 6
+  }
+ },
+ "TC-LIFE-02": {
+  "status": "pass",
+  "detail": {
+   "pauseOpened": 6,
+   "after6s": 6
+  }
+ },
+ "TC-RULE-12": {
+  "status": "pass",
+  "detail": {
+   "objectsLeftBefore": 18,
+   "afterZoomDrag": 18
+  }
+ },
+ "TC-LIFE-04": {
+  "status": "pass",
+  "detail": {
+   "contextLost": true,
+   "ui": {
+    "graphics": "lost",
+    "text": "The graphics were interrupted. Your saved progress is safe.\n\nReload"
+   },
+   "timer": [
+    11,
+    11
+   ],
+   "objectsLeft": [
+    18,
+    18
+   ]
+  }
+ },
+ "TC-CHEAT-04": {
+  "status": "pass",
+  "detail": {
+   "energyBefore": "5/5",
+   "afterEntryAndReload": "4/5",
+   "homeButton": "Continue\nLevel 1"
+  }
+ },
+ "TC-SAVE-04": {
+  "status": "fail",
+  "detail": {
+   "toast": "",
+   "body": "4/5\n0\nCOZY\nDAYS\n\nA sunny little neighborhood\n\nAlbum\nUnlocks at level 5\nEvents\nUnlocks at level 12\nYour journey\nContinue\nLevel 1\n0/160 levels complete\nPlay\nAlbum\nAchievements\nEvents\nRankings\nProgress c"
+  }
+ },
+ "TC-SAVE-06": {
+  "status": "fail",
+  "detail": {
+   "mainUnchanged": false,
+   "keys": [
+    "sorting-playthrough-v1",
+    "sorting-lab-checkpoint"
+   ]
+  }
+ },
+ "LIFE-06-before": {
+  "timerBefore": 2,
+  "timerAfter5s": 2,
+  "toast": "",
+  "errors": [
+   "Error: QA injected frame failure"
+  ]
+ },
+ "LIFE-06-after": {
+  "timerBefore": 2,
+  "timerAfter5s": 7,
+  "toast": "Something went wrong drawing the game; it keeps running. If this repeats, please send us a screenshot.",
+  "errors": [
+   "Frame error Error: QA injected frame failure\n    at Document.getElementById (eval at evaluate (:311:30), <anonymous>:1:183)\n    at Wt (http://127.0.0.1:18771/build/game-SWW4RGOU.js:5675:844990)\n    at"
+  ]
+ },
+ "TC-LIFE-06": {
+  "status": "fixed",
+  "detail": {
+   "before": {
+    "timerBefore": 2,
+    "timerAfter5s": 2,
+    "toast": "",
+    "errors": [
+     "Error: QA injected frame failure"
+    ]
+   },
+   "after": {
+    "timerBefore": 2,
+    "timerAfter5s": 7,
+    "toast": "Something went wrong drawing the game; it keeps running. If this repeats, please send us a screenshot.",
+    "errors": [
+     "Frame error Error: QA injected frame failure\n    at Document.getElementById (eval at evaluate (:311:30), <anonymous>:1:183)\n    at Wt (http://127.0.0.1:18771/build/game-SWW4RGOU.js:5675:844990)\n    at"
+    ]
+   }
+  }
+ },
+ "TC-PERF-03": {
+  "status": "pass",
+  "detail": {
+   "start": {
+    "heapMB": 19.4,
+    "nodes": 93,
+    "canvases": 1
+   },
+   "afterEach": [
+    {
+     "heapMB": 28.1,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 26.1,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 22.2,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 25.2,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 24.8,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 24.8,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 25.3,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 25,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 24.9,
+     "nodes": 101,
+     "canvases": 1
+    },
+    {
+     "heapMB": 26.1,
+     "nodes": 101,
+     "canvases": 1
+    }
+   ]
+  }
+ }
+}

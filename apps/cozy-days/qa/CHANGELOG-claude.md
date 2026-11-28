@@ -10,9 +10,11 @@
 | C-04 | `c204268` | `examples/play.js`：首次啟動按 `navigator.languages` 選 zh-TW／zh-CN／en，不支援的語言用英文（原本固定 zh-CN） | AUD-03 | 修前：`qa/evidence/m-home-first-launch.jpg`（en-US 瀏覽器顯示中文）；修後：`qa/evidence/fix-first-launch-en.jpg`；`verify-fixes.mjs` 輸出 en-US→en、zh-TW→zh-TW、zh-CN→zh-CN、ar-SA→en | 同上 |
 | C-05 | `c204268` | `build/game-SWW4RGOU.js`：手動套上 C-03、C-04 的同等邏輯 | 這個環境不能安裝依賴，無法跑 `pnpm run build`；手改是為了能在瀏覽器實測 | 同 C-03、C-04 | **Codex 請重跑 `pnpm run build`**，會從源碼重新產生並覆蓋這個手改版本 |
 | C-07 | `9416991` | `src/progress.js` completeRound：bonus 類入場（正常闖關）每次勝利都返還入場體力，不再只限首通或星級提升；`build/` 手改同一處 | AUD-05、用戶決定（每次贏都返還） | 修前：`kernel-cases.json` TC-ECO-03（重玩三星關卡勝利不返還） | `test/claude-qa.test.js` AUD-05 兩項（修前失敗 1 項）；全部測試 60/60 |
+| C-08 | 本次提交 | `examples/play.js` 每幀的 `frame()` 包上 try/catch/finally：出錯時記錄到主控台、提示玩家一次，下一幀照常排程；`strings.js` 新增 `frameError`（三語）；`build/` 手改同一處 | 原本任何一幀拋錯都會讓遊戲永久凍住（完工清單第 4 道「單幀出錯不凍住」） | 修前：`r-frame-error-before.jpg`（注入錯誤後計時停在 2 秒）；修後：`r-frame-error-after.jpg`（計時走到 7 秒、出提示），`remaining-browser.json` LIFE-06 | 瀏覽器腳本 `qa/tools/remaining-browser.mjs` |
+| C-09 | 本次提交 | `examples/play.js` 建立存檔時傳入玩家的時區（`Intl.DateTimeFormat().resolvedOptions().timeZone`）；`build/` 手改同一處 | 原本新存檔一律用 `Asia/Shanghai`，美國和中東玩家的每日競速、週聯賽會在錯的時間重置 | 修前／修後：`verify-zone.json`（洛杉磯、利雅得：修前都是 Asia/Shanghai，修後是本地時區） | `qa/tools/verify-zone.mjs`；已存在的舊存檔保持原時區 |
 | C-06 | `2cba9f8` | 新增 `qa/` 全部文件、`qa/tools/` 驗收腳本、`qa/evidence/` 證據 | 驗收記錄 | — | — |
 
-**注意**：C-02 只改了 `src/progress.js`，網頁版要等 Codex 重新構建後才會生效。目前的 `build/` 手改了 C-03、C-04、C-07。
+**注意**：C-02 只改了 `src/progress.js`，網頁版要等 Codex 重新構建後才會生效。目前的 `build/` 手改了 C-03、C-04、C-07、C-08、C-09。
 
 ## 怎麼重現
 
