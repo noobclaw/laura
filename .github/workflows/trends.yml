@@ -1,0 +1,23 @@
+name: Google Trends check
+on:
+  workflow_dispatch:
+    inputs:
+      words: {description: "words separated by |", default: "synology music"}
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pytrends
+      - name: Run
+        run: |
+          IFS='|' read -ra W <<< "${{ inputs.words }}"
+          python3 collectors/google_trends.py --date out "${W[@]}" | tee table.md
+          mkdir -p out && cp data/out/google_trends.json out/ && cp table.md out/
+      - name: Push results
+        run: |
+          cd out
+          git init -q -b trends && git add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -qm "trends $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" trends
