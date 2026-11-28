@@ -170,8 +170,11 @@ export class PlayerJournal {
       const duration = Math.ceil(seconds),
         record = s.durations[number] === undefined || duration < s.durations[number];
       const extra = s.attempt?.lifePolicy === 'bonus2' ? 2 : s.attempt?.lifePolicy === 'bonus1' ? 1 : 0;
-      // Every win returns the entry energy (bonus policies); other policies reward only improved results.
-      const reward = extra || (improved ? this.#limits.victoryRefill : 0);
+      // Every win returns the entry energy (bonus policies). Anything above the entry charge,
+      // and the classic victory refill, is paid only for a first clear or better stars,
+      // so replaying a cleared stage can never earn energy.
+      const refund = extra ? Math.min(extra, this.#limits.entryCharge) : 0;
+      const reward = refund + (improved ? (extra ? Math.max(0, extra - refund) : this.#limits.victoryRefill) : 0);
       const power = reward ? this.#projectPower(s) : {
         amount: s.power,
         anchor: s.powerAt

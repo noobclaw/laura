@@ -58,7 +58,7 @@ const systemLocale = () => {
   return 'en';
 };
 let locale = localStorage.getItem('sorting-language') ?? systemLocale();
-if (!['zh-CN', 'zh-TW', 'en'].includes(locale)) locale = 'zh-CN';
+if (!['zh-CN', 'zh-TW', 'en'].includes(locale)) locale = systemLocale();
 document.documentElement.lang = locale;
 let t = translator(locale),
   view = 'home',
@@ -937,7 +937,8 @@ let previous = performance.now(),
   sinceSave = 0,
   sinceHeader = 0;
 
-let frameErrorShown = false;
+let frameErrorShown = false,
+  frameErrors = 0;
 // A failing frame must not stop the loop: log it, tell the player once, keep running.
 function frame(at) {
   try {
@@ -972,7 +973,8 @@ function frame(at) {
       if (note) note.textContent = `${t('entry')} · ${power.refillIn === null ? t('full') : t('refill', { time: clockText(power.refillIn) })}`;
     }
   } catch (error) {
-    console.error('Frame error', error);
+    // Log the first few only, so a repeating failure does not flood the console every frame.
+    if (++frameErrors <= 5) console.error('Frame error', error);
     if (!frameErrorShown) {
       frameErrorShown = true;
       toast(t('frameError'));
@@ -1011,14 +1013,21 @@ try {
       cachedRaw = raw;
     }
   }).initialize();
-  // A damaged save must not lock the player out: keep a copy, then start a fresh save.
+  // A damaged save must not lock the player out: keep one backup copy, then start a fresh save.
+  // Only parse and validation errors count as damage. A stage that failed to download
+  // (offline, timeout) keeps the save untouched and shows the reload screen instead.
+  const damaged = error => error instanceof SyntaxError || error instanceof RangeError ||
+    (error instanceof TypeError && !/fetch|network|load failed/i.test(error.message));
   let recovered = false;
   try {
     game = await boot(cachedRaw ? JSON.parse(cachedRaw) : undefined);
   } catch (error) {
-    if (!cachedRaw) throw error;
+    if (!cachedRaw || !damaged(error)) throw error;
     console.error('Damaged save set aside', error);
-    localStorage.setItem(`${SAVE_KEY}-damaged-${Date.now()}`, cachedRaw);
+    try {
+      localStorage.setItem(`${SAVE_KEY}-damaged`, cachedRaw);
+    } catch {
+      /* No room for a backup; starting fresh still beats a locked game. */ }
     localStorage.removeItem(SAVE_KEY);
     cachedRaw = null;
     game = await boot(undefined);
@@ -1030,6 +1039,7 @@ try {
   if (recovered) toast(t('saveRecovered'));
   requestAnimationFrame(frame);
 } catch (error) {
-  content.replaceChildren(el('h1', '', t('saveError')), el('p', '', error.message));
+  // The save is untouched here; offer a reload instead of a dead end.
+  content.replaceChildren(el('h1', '', t('loadError')), el('p', '', error.message), button(t('reload'), () => location.reload(), 'primary'));
   console.error('Preview initialization failed', error);
 }
