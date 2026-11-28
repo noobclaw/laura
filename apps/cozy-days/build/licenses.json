@@ -1,1 +1,154 @@
-[]
+[
+  {
+    "name": "@babel/runtime",
+    "version": "7.29.15",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "@dimforge/rapier3d-compat",
+    "version": "0.19.2",
+    "license": "Apache-2.0",
+    "files": [
+      "rapier-js.txt"
+    ]
+  },
+  {
+    "name": "@react-three/drei",
+    "version": "10.7.9",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "@react-three/fiber",
+    "version": "9.8.2",
+    "license": "MIT",
+    "files": [
+      "react-three-fiber.txt"
+    ]
+  },
+  {
+    "name": "@react-three/rapier",
+    "version": "2.2.0",
+    "license": "See bundled notices",
+    "files": [
+      "react-three-rapier.txt"
+    ]
+  },
+  {
+    "name": "animejs",
+    "version": "4.5.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE.md"
+    ]
+  },
+  {
+    "name": "its-fine",
+    "version": "2.1.1",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "postprocessing",
+    "version": "6.39.6",
+    "license": "Zlib",
+    "files": [
+      "LICENSE.md"
+    ]
+  },
+  {
+    "name": "quarks.core",
+    "version": "0.18.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "react",
+    "version": "19.3.1",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "react-dom",
+    "version": "19.3.1",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "react-use-measure",
+    "version": "2.1.7",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "scheduler",
+    "version": "0.28.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "suspend-react",
+    "version": "0.1.3",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "three",
+    "version": "0.187.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "three-stdlib",
+    "version": "2.36.1",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "three.quarks",
+    "version": "0.18.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "use-sync-external-store",
+    "version": "1.7.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  },
+  {
+    "name": "zustand",
+    "version": "5.1.0",
+    "license": "MIT",
+    "files": [
+      "LICENSE"
+    ]
+  }
+]
