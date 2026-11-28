@@ -1,0 +1,32 @@
+Use case: stylized-concept. TRANSPARENT PNG production sprite atlas, EXACTLY 6 columns x 6 rows, 36 equal cells. True alpha=0 clear cutout background in all gutters and outside objects. NO white background, NO opaque backdrop, NO painted checkerboard, NO grid lines, NO haze. One isolated category object per cell, centered with a generous 14% completely empty margin. All objects fully visible and separated. American cozy household game art: polished sculpted 3D illustration, cream/sage/denim/terracotta, upper-left soft light, tactile wood/leather/knit/metal textures, strong clean silhouette at 64px. New independent designs; no brands, logos, text or watermark. 2048x2048 square. Reference for style only. EXACT row-major order:
+1. record hard cases
+2. record players
+3. garden watering cans
+4. cooler boxes
+5. window squeegees
+6. Swim Skirts
+7. Swim Rings
+8. foam rollers
+9. pilates rings
+10. electric hair trimmer with black comb guard
+11. neck dusting brushes
+12. hair rollers
+13. hair straighteners
+14. Cupcakes & Puddings
+15. Desserts
+16. Chewing Gum
+17. Straw Bales
+18. Fireworks
+19. Pizza Peel
+20. potting soil bags
+21. yoga mats
+22. Tires
+23. small automotive engine block
+24. Wheel Rims
+25. folded cream protective cloth
+26. Rice Cookers
+27. Salon Capes
+28. computer mouse
+29. over ear headphones
+Cells 30 through 36 must be completely empty and transparent.
+No objects outside their assigned cell, no repeats or substitutions.

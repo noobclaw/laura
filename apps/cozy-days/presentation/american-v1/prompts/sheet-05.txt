@@ -1,0 +1,38 @@
+Use case: stylized-concept. NEW production transparent game sprite atlas. EXACTLY 6 columns by 6 rows, 36 equal square cells. One centered isolated object per cell. All outer edges fully visible, 12% TRANSPARENT empty margin on every cell, no object crosses its cell. Clear TRUE ALPHA transparent background, no haze or colored noise, no background shadows, no frames, no labels, no writing, no real brands. Square 2048x2048. Cohesive American cozy home casual-game art: sculpted painterly 3D, crisp rounded silhouettes, tactile materials, cream/sage/denim/terracotta palette, upper-left soft light, clean contrast legible at 64px. American everyday household styling: wood, denim, knit, canvas, suburban family life. Reference gives STYLE ONLY. Exact objects LEFT TO RIGHT TOP TO BOTTOM:
+1. Movie Tickets
+2. Serving & Cutting Boards
+3. small acoustic guitar
+4. Walkie-Talkies
+5. Game Cards
+6. Chew Toys
+7. Staples
+8. Bells
+9. Paints
+10. electric hair clipper
+11. Nail Files
+12. Sheet Masks
+13. Rubber Stamps
+14. Tape
+15. Price Tags
+16. Frozen Desserts
+17. Jigsaw Puzzles
+18. Ink Pads
+19. Lighters
+20. a pair of ivory domino tiles with black dots
+21. Pour-over Kettles
+22. cassette cases
+23. Flower Baskets
+24. Dog Food
+25. green wine bottle with burgundy neck foil, no text
+26. Cotton Swabs
+27. postcard with a painted American mountain lake
+28. Money Counters
+29. Grip Trainers
+30. Instant Noodles
+31. Meat & Fish
+32. Ketchup
+33. Toothbrushes
+34. Garment Bags
+35. Lollipops
+36. Desk Phones
+No omit, duplicate, substitute, or extra objects. Only independently sliceable sprites.

@@ -1,0 +1,33 @@
+{
+  "name": "sorting-engine",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./geometry": "./src/spatial.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node examples/play.mjs",
+    "build": "node web/build.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@react-three/rapier": "2.2.0",
+    "@types/three": "0.187.0",
+    "animejs": "4.5.0",
+    "postprocessing": "6.39.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "0.187.0",
+    "three.quarks": "0.18.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

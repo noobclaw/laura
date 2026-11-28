@@ -1,0 +1,39 @@
+Use case: stylized-concept. TRANSPARENT PNG production sprite atlas, EXACTLY 6 columns x 6 rows, 36 equal cells. True alpha=0 clear cutout background in all gutters and outside objects. NO white background, NO opaque backdrop, NO painted checkerboard, NO grid lines, NO haze. One isolated category object per cell, centered with a generous 14% completely empty margin. All objects fully visible and separated. American cozy household game art: polished sculpted 3D illustration, cream/sage/denim/terracotta, upper-left soft light, tactile wood/leather/knit/metal textures, strong clean silhouette at 64px. New independent designs; no brands, logos, text or watermark. 2048x2048 square. Reference for style only. EXACT row-major order:
+1. Badges
+2. dice trays
+3. Garden hand trowels
+4. garden pruners
+5. blue car wash soap bottle with tire symbol, no text
+6. wooden paddle hair brush
+7. desktop computer mouse, scroll wheel
+8. Nail Drills
+9. Wrist Support
+10. Wired headphones
+11. Toy Capsule
+12. pottery clay blocks
+13. board game boxes
+14. playing card holders
+15. yoga blocks
+16. loop resistance bands
+17. dumbbells
+18. white food preparation gloves
+19. small wire pet travel carrier
+20. Shower Heads
+21. automotive spring shock absorber
+22. Windshield Wipers
+23. Cigars
+24. Game Boxes
+25. Yo-Yo
+26. Token Box
+27. Spring Toy
+28. Flour
+29. Dental Forceps
+30. Dental Floss
+31. Cotton Rolls
+32. sewing fabric bundles
+33. sewing machines
+34. audio amplifiers
+35. small brass trumpet
+36. audio speakers
+
+No objects outside their assigned cell, no repeats or substitutions.

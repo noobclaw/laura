@@ -1,0 +1,39 @@
+Use case: stylized-concept. TRANSPARENT PNG production sprite atlas, EXACTLY 6 columns x 6 rows, 36 equal cells. True alpha=0 clear cutout background in all gutters and outside objects. NO white background, NO opaque backdrop, NO painted checkerboard, NO grid lines, NO haze. One isolated category object per cell, centered with a generous 14% completely empty margin. All objects fully visible and separated. American cozy household game art: polished sculpted 3D illustration, cream/sage/denim/terracotta, upper-left soft light, tactile wood/leather/knit/metal textures, strong clean silhouette at 64px. New independent designs; no brands, logos, text or watermark. 2048x2048 square. Reference for style only. EXACT row-major order:
+1. Cranberry Sauce
+2. orange and blue foam dart toy pistol
+3. Bowling Pin
+4. Bowling Ball
+5. Bowling Bag
+6. white plaster bust
+7. pottery loop tools
+8. Score Sheet
+9. Game Boards
+10. High Heels
+11. Tall Boots
+12. Leather Shoes
+13. Jack-o’-Lanterns
+14. Wizard Hats
+15. Drones
+16. Tea Sets
+17. pink playground ball
+18. Cheese
+19. Buns
+20. pair of yellow rubber dishwashing gloves
+21. plant label stakes
+22. blue silicone swim cap
+23. soft sided pet carriers
+24. dog harnesses
+25. Staple Foods
+26. steel nail clipper
+27. Cat Wands
+28. Turkey
+29. Oven Mitts
+30. Crystal Balls
+31. Candy Baskets
+32. purple playground ball
+33. green playground ball
+34. red striped playground ball
+35. golden playground ball
+36. orange playground ball
+
+No objects outside their assigned cell, no repeats or substitutions.

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cozy Days</title><link rel="stylesheet" href="./examples/game.css?v=5d693ab361e4">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+</head>
+<body>
+<main class="app" id="app">
+  <header class="masthead">
+
+    <div class="account"><span id="power" aria-live="polite"></span><span id="stars"></span></div>
+    <div class="header-actions"><button id="shop" class="round-button shop-button" type="button" aria-label="补给站 / Supply shop"></button><button id="settings" class="round-button" type="button" aria-label="设置 / Settings">⚙</button></div>
+    <label class="language" hidden><span class="sr-only">Language</span><select id="language" aria-label="Language"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="en">English</option></select></label>
+  </header>
+  <div id="content"></div>
+  <nav id="navigation" class="navigation" aria-label="Main navigation"></nav>
+  <footer class="app-footer"><span id="save-status"></span><a id="lab-link" href="./lab.html"></a></footer>
+</main>
+<dialog id="modal" aria-labelledby="modal-title"><div id="modal-content"></div><form method="dialog"><button id="modal-close" class="secondary"></button></form></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="./build/game-SWW4RGOU.js"></script>
+</body>
+</html>

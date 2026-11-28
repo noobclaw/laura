@@ -1,0 +1,4678 @@
+{
+  "status": "passed",
+  "stages": 160,
+  "runs": 320,
+  "newItemDrawings": 425,
+  "newRoomDrawings": 8,
+  "referencedRooms": [
+    "porch",
+    "laundry",
+    "garage",
+    "playroom",
+    "kitchen",
+    "studio",
+    "garden",
+    "market"
+  ],
+  "retainedImageReferences": 0,
+  "files": [
+    {
+      "path": "presentation/american-v1/items/item-038.webp",
+      "bytes": 48168,
+      "sha256": "651c3e819fd3a230a06eeecdd995651982df98c14d5194c39c89e5f67ff5a8c3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-103.webp",
+      "bytes": 28732,
+      "sha256": "c34108961094faff0dea5320654df88f9701d1ef460661c9a5d9d0b2b9b77c88"
+    },
+    {
+      "path": "presentation/american-v1/items/item-046.webp",
+      "bytes": 42974,
+      "sha256": "8a5f09fda25d100f9443c10f31eba73178f0620e3ba6de84dbc81c97d1c73583"
+    },
+    {
+      "path": "presentation/american-v1/items/item-060.webp",
+      "bytes": 28730,
+      "sha256": "e94fdfecb3e0449367aea1b215b8dbe2a8628617e32e6953d0477910bf402ea5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-389.webp",
+      "bytes": 30686,
+      "sha256": "07dc9ca7a332bd17468e264fe3cb14815b7dcf1e47d84ff0eb9e97a269b7ad17"
+    },
+    {
+      "path": "presentation/american-v1/items/item-388.webp",
+      "bytes": 25800,
+      "sha256": "2e3a8aa7c9a43d38bb912850be1b605ae40c3b66ca06c8377fc04c0df3af5816"
+    },
+    {
+      "path": "presentation/american-v1/items/item-056.webp",
+      "bytes": 48242,
+      "sha256": "0cd9a9f809569c56be598c5a1c8ed27c473fcf57eb44ed91ad67d989642f1054"
+    },
+    {
+      "path": "presentation/american-v1/room-porch.webp",
+      "bytes": 481976,
+      "sha256": "1706d8d1f001f51aff3faa2d3affacfa693f3dc89f9df5df949b126b06c8cb80"
+    },
+    {
+      "path": "presentation/american-v1/items/item-065.webp",
+      "bytes": 53164,
+      "sha256": "623c73b03bd2df3bab90df84a33895488eb044dadcd8f930d8a31fb031cf1fb5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-003.webp",
+      "bytes": 42006,
+      "sha256": "796d3256d2fea8c7ba2d345e6a73827777dceffc0c4233d10a5a2adace303b65"
+    },
+    {
+      "path": "presentation/american-v1/items/item-025.webp",
+      "bytes": 41018,
+      "sha256": "0aa6595280a32415afde3619c60ec03f5056bab14b9d7fd1a5716e7b95017b33"
+    },
+    {
+      "path": "presentation/american-v1/items/item-091.webp",
+      "bytes": 38680,
+      "sha256": "36f87704b6dfc2e426134781cb48986bdd8eb23c1d68a66b80a10b627e9de033"
+    },
+    {
+      "path": "presentation/american-v1/items/item-021.webp",
+      "bytes": 40790,
+      "sha256": "a6fcffcb0361228120c76d211462ca8e278e33bcfce2f26ce5a3af0f546282ce"
+    },
+    {
+      "path": "presentation/american-v1/items/item-135.webp",
+      "bytes": 44756,
+      "sha256": "34a62b3dc70c5cf9176a41dee679d8d2320f50599c1a39fc67ed6c409f096604"
+    },
+    {
+      "path": "presentation/american-v1/items/item-013.webp",
+      "bytes": 48728,
+      "sha256": "353a58af68c4213a5900e3ce0f57c0d4b3bf988c0474295b3bd834dcd8a4cf4f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-116.webp",
+      "bytes": 48856,
+      "sha256": "8b7d4480a3e14ae32a4b077519f287f1db08805170ab2dd6839a67f3f2ce98d2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-186.webp",
+      "bytes": 50994,
+      "sha256": "f6193f777d87ee681526fb403710fcf9ec9242be5eafaaed383e9d9eb2e9f00f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-077.webp",
+      "bytes": 40510,
+      "sha256": "209c16592acace17508cbdf1399deea885eb9e8340544bf372653fb5e78cc223"
+    },
+    {
+      "path": "presentation/american-v1/items/item-101.webp",
+      "bytes": 38160,
+      "sha256": "984c3d812fb7ce1e1f7a2b4c913684613d5b7a669ae77d8ed1540f4d830c32ee"
+    },
+    {
+      "path": "presentation/american-v1/items/item-008.webp",
+      "bytes": 31696,
+      "sha256": "c1d66d3569224f18b8a0084097573963a15857abae05f2557c13116bcd07b2bb"
+    },
+    {
+      "path": "presentation/american-v1/items/item-158.webp",
+      "bytes": 29842,
+      "sha256": "b8111736c321a75c4b481a23b50e12f0db4d6fac9db1eca1c7306b44bec8435c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-136.webp",
+      "bytes": 39606,
+      "sha256": "fe090e14867c620d8a74bc25770bcbdbf4dc2e08d34faddaa86e1c08cf92bfd5"
+    },
+    {
+      "path": "presentation/american-v1/room-laundry.webp",
+      "bytes": 362116,
+      "sha256": "a2e651ffebe798a6a83c1377425c84b6e1d468a8e7ca84491e517bd8392038e5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-149.webp",
+      "bytes": 30454,
+      "sha256": "613fede34d739687f1587ea0f7ed260e1ed843df1589d3dd288840b056623a7f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-184.webp",
+      "bytes": 40744,
+      "sha256": "9cc07c4aa77ca7c548f2796634f1844942abc75a2be50a617a522f37fe50df0e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-036.webp",
+      "bytes": 33042,
+      "sha256": "afac9eea5f1ccf7ea2ce0d63d4f8cf069de2ca35b9910ff9e10090386c14a85e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-138.webp",
+      "bytes": 35580,
+      "sha256": "f840abe25dbd412403d8a9179e67299bc73077f055f0ef2d5d482fad7a840978"
+    },
+    {
+      "path": "presentation/american-v1/items/item-026.webp",
+      "bytes": 26062,
+      "sha256": "3ca217ea8080032a459cc0fedc5ba24fd0588784252b7e71e8d3af2fab8c45b3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-010.webp",
+      "bytes": 25890,
+      "sha256": "73398d60c3f4dca8eef1c0b51c4d455ad9ee30ded8a6acb77a1f34eb41042c6c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-069.webp",
+      "bytes": 33780,
+      "sha256": "890ce81d09622e15f6d9767014babeaaed1b2c575472daeaa01c0f4313ef60e6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-412.webp",
+      "bytes": 37498,
+      "sha256": "a4a4db0df56c437f25bb0cef61976afad6a479e0de59e9fe8f01be5004856f15"
+    },
+    {
+      "path": "presentation/american-v1/items/item-121.webp",
+      "bytes": 30906,
+      "sha256": "17195ff30d193fd4a10d293a2200d59b72a61e7eefc9923c035814f89b913005"
+    },
+    {
+      "path": "presentation/american-v1/items/item-237.webp",
+      "bytes": 21724,
+      "sha256": "69c392fb1b728236db9f1befd5ccb576ea3947df3fcb72aa49b25d4d4c3bcb90"
+    },
+    {
+      "path": "presentation/american-v1/items/item-034.webp",
+      "bytes": 45606,
+      "sha256": "27d8895d51efcf944a9af888d776b23fa331120eb1865f6ec0095859293dd320"
+    },
+    {
+      "path": "presentation/american-v1/items/item-035.webp",
+      "bytes": 42336,
+      "sha256": "7878f886adaaa2ccb8cec2103daba997fc210916f49db9ba95d700920c861665"
+    },
+    {
+      "path": "presentation/american-v1/items/item-031.webp",
+      "bytes": 41316,
+      "sha256": "7360394e0f11716be1e9635ddec44cf5dfa37b43f293f48eb02f377a30a3627e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-097.webp",
+      "bytes": 40542,
+      "sha256": "d09873aa2a019a253de1110bb8d479397cbeb370c623a4efdb3ea886bbc4bb68"
+    },
+    {
+      "path": "presentation/american-v1/items/item-029.webp",
+      "bytes": 18876,
+      "sha256": "6f5dfd561c202b860c208abcb5bf95d323fb3c645b4a10e8d74b0a6f2bdb27df"
+    },
+    {
+      "path": "presentation/american-v1/items/item-011.webp",
+      "bytes": 38370,
+      "sha256": "da158e196d2c4d5781507c601e0d3dac7ef2ff09136de64bee98d682365a8d96"
+    },
+    {
+      "path": "presentation/american-v1/items/item-413.webp",
+      "bytes": 53062,
+      "sha256": "6f4c419987d102510a53f57b3aad2450170960565f8fe744277d49cfe8e09cb4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-414.webp",
+      "bytes": 37546,
+      "sha256": "40a313ac738a7107d222633b274295ef1d2cf16a08f0f98f50b3e14a2d830203"
+    },
+    {
+      "path": "presentation/american-v1/items/item-016.webp",
+      "bytes": 45358,
+      "sha256": "bbec77e80005de60f16db9f6a5dce5305a440615980a6f5282b5a95af3a086a4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-420.webp",
+      "bytes": 42352,
+      "sha256": "d68e01c929a0e89c0095b005f7548f7cdc5091974e93ad03f9747ea69d5ddc7c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-037.webp",
+      "bytes": 17148,
+      "sha256": "c05af32629d2622d6262b08c67305023bde13da02b35ec08f5cbe99f01426b3f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-006.webp",
+      "bytes": 25306,
+      "sha256": "bc0f2b006a283881064757e5cd1241e839ccbddebc305812e07c7dc4b03aa3a0"
+    },
+    {
+      "path": "presentation/american-v1/room-garage.webp",
+      "bytes": 258116,
+      "sha256": "03389eaa449d05abd2419e0d28341fd5d11e39a7f48aa103e1da9aa157d8efdd"
+    },
+    {
+      "path": "presentation/american-v1/items/item-076.webp",
+      "bytes": 26910,
+      "sha256": "b5f7b1a7dcd47d9b79f7cee6e55372498d95ecf61ecbeba606dbff557db52767"
+    },
+    {
+      "path": "presentation/american-v1/items/item-394.webp",
+      "bytes": 33404,
+      "sha256": "174cc9cdb77837411a3e028b6f76939638ddadeb518f2616b4760b2b7fb03c27"
+    },
+    {
+      "path": "presentation/american-v1/items/item-014.webp",
+      "bytes": 28222,
+      "sha256": "74ddeb462a1f0181adb7999f167c82a24c82826bab69cf4d41987510f135c760"
+    },
+    {
+      "path": "presentation/american-v1/items/item-004.webp",
+      "bytes": 25168,
+      "sha256": "80dfb2dc9592ac7c4891855b9340e64ff128ef627ceb804d5ca0b7167a068a1a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-084.webp",
+      "bytes": 38940,
+      "sha256": "a947ee446fe2b3a75a0e8a2a15f5c6ea9fcbcda04bb5c5635ebf4898bdd5b0fd"
+    },
+    {
+      "path": "presentation/american-v1/items/item-332.webp",
+      "bytes": 39556,
+      "sha256": "44a5657ef117e793b671a8f7ba7ad3f3bed576ffed83d76b15c28330c9ccf3fa"
+    },
+    {
+      "path": "presentation/american-v1/items/item-219.webp",
+      "bytes": 31894,
+      "sha256": "933f995f734b02187eaec9c658ab8d5141e1afb6aca75513d62318e26c89e6a6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-238.webp",
+      "bytes": 43590,
+      "sha256": "c7aa3524fb724f22d511df4954c05b6aad6013718781b2679a8d1e859c20b862"
+    },
+    {
+      "path": "presentation/american-v1/items/item-193.webp",
+      "bytes": 44684,
+      "sha256": "475a2a93849cb54612bd40fbb4134e8acd2bae96a47af72f5f19cce93c3af3b8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-017.webp",
+      "bytes": 43204,
+      "sha256": "8d9c954576a299b5111edf8a15517cfeba78a9422448680971ebe504a040b32c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-007.webp",
+      "bytes": 25170,
+      "sha256": "7cd563b90b7a0cb18f5753160aad560b71af7116a8e7ad167b4af43506a20c56"
+    },
+    {
+      "path": "presentation/american-v1/items/item-096.webp",
+      "bytes": 26560,
+      "sha256": "03e2e158012093a46e863b50f98fadcfcf41461d023d8adaa558599bf023cba8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-112.webp",
+      "bytes": 32060,
+      "sha256": "212786cefd078019fc455e9a097b339c1235d98e281e7897b947a48812270043"
+    },
+    {
+      "path": "presentation/american-v1/items/item-078.webp",
+      "bytes": 28550,
+      "sha256": "658741cc028a5fb7ac08e59475239288ab4b0328f972ef09dec021c7c710d3ee"
+    },
+    {
+      "path": "presentation/american-v1/items/item-080.webp",
+      "bytes": 34786,
+      "sha256": "b3e447646c590491b670645b325b25d9e48f4a670d089a8791bab7a762b03db1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-390.webp",
+      "bytes": 28450,
+      "sha256": "92cc48476c99fe23d49f025c7528dfae51c2e75843e38cd0f2d412dcf673e504"
+    },
+    {
+      "path": "presentation/american-v1/items/item-022.webp",
+      "bytes": 24332,
+      "sha256": "5ff027b2e13aa98eb611e682fd07195f33a5e4f4f9b50bd5e622031c4fe99183"
+    },
+    {
+      "path": "presentation/american-v1/items/item-128.webp",
+      "bytes": 26970,
+      "sha256": "faeecd769c618a3135936f701fb1b5962993ccbbd91852d63a006ecd10fb7491"
+    },
+    {
+      "path": "presentation/american-v1/items/item-155.webp",
+      "bytes": 26210,
+      "sha256": "cfd60848c392c41bd31792083ba59b1565b59e05c5a73cb36028049ac44ebfcf"
+    },
+    {
+      "path": "presentation/american-v1/items/item-043.webp",
+      "bytes": 29766,
+      "sha256": "497b20d00f91ada413fb1ee1e26e403719d7646d0653fbd7ca6c7a78d1a5ded6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-099.webp",
+      "bytes": 39812,
+      "sha256": "5f2119081a260a8643108eec2af07f3fb45f84a56d523f0f44d575d9ad967811"
+    },
+    {
+      "path": "presentation/american-v1/items/item-027.webp",
+      "bytes": 25862,
+      "sha256": "ba7a27ddc436fcbf5ab13f3bd4042ee47c430fb0ba2e69a1e277543888b5c683"
+    },
+    {
+      "path": "presentation/american-v1/items/item-012.webp",
+      "bytes": 37462,
+      "sha256": "ee6aee82c19d95f8a3d1f39704c2305f2d18e03809e00d225bebce2386e4c28b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-001.webp",
+      "bytes": 42342,
+      "sha256": "6b7ef6344a3ce428760692fcb53a51868bc13f114de0362241e5486898e14609"
+    },
+    {
+      "path": "presentation/american-v1/items/item-131.webp",
+      "bytes": 17990,
+      "sha256": "01c0d162d4a043d352a9b23729853f0e0ed2a5ec885af3c30fae7e70179b05e1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-044.webp",
+      "bytes": 40644,
+      "sha256": "f28baa7f2cb13a1cf1348786bb47a1f30e6233c4d9c90227983e593db9ed9959"
+    },
+    {
+      "path": "presentation/american-v1/items/item-059.webp",
+      "bytes": 37644,
+      "sha256": "d11155a51d29c14ec7b74642c08ef5c5a64be7fe9c9f1bc033b92a4b04ffb835"
+    },
+    {
+      "path": "presentation/american-v1/room-playroom.webp",
+      "bytes": 328448,
+      "sha256": "7453324a4a893443fa3d26cda30cfa69230de914af6d99ec4f16adb40cb0335d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-079.webp",
+      "bytes": 27380,
+      "sha256": "565ba1ea783a9b3a99aefe76d1472a785be713ef35725adee7a81a6cf3b0c3c4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-040.webp",
+      "bytes": 35094,
+      "sha256": "b4c6d52d19b90fd431250cf43c2b51c6a1aff477815fe4b80a18b0c30734211b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-047.webp",
+      "bytes": 43746,
+      "sha256": "7633c6fa30f79807de4a5485913e3906adca2f3f97377cd087078810bdb88129"
+    },
+    {
+      "path": "presentation/american-v1/items/item-023.webp",
+      "bytes": 43838,
+      "sha256": "a70f2a626fcb4336e639612bb386c9e3b580a58b9a091dc85acb61ba806c0401"
+    },
+    {
+      "path": "presentation/american-v1/items/item-147.webp",
+      "bytes": 26900,
+      "sha256": "1456867133452c844b91ddee307ed34aef0caf2e9c9c0eca21d81b543c1d0599"
+    },
+    {
+      "path": "presentation/american-v1/items/item-070.webp",
+      "bytes": 43762,
+      "sha256": "7cfafda397dec7fcebc581295fc7c45ce67da392f3f2e4a5cae1980d81009d96"
+    },
+    {
+      "path": "presentation/american-v1/items/item-005.webp",
+      "bytes": 30916,
+      "sha256": "3037509b56c79fc765ce1330dd6fa139593249c18ae845908f3f3bd88b3871f2"
+    },
+    {
+      "path": "presentation/american-v1/room-kitchen.webp",
+      "bytes": 359982,
+      "sha256": "bf64c0283d465cf0ed679afbee48f37800c10fb9bd0a0b00cb973105d98f534c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-102.webp",
+      "bytes": 44126,
+      "sha256": "bad2cd7b714bade3c9b20497023f4039f6afffea37054ad93fe8ce441fe1b83e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-058.webp",
+      "bytes": 34028,
+      "sha256": "1ca998dc3dd50659cb4e1d837a7960210d1be48caf6841aba5a7a576a9999aa9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-063.webp",
+      "bytes": 18596,
+      "sha256": "a2b155d512740c3a486095dbd6b29cbc75f1c61067a7677762e5d5cf0979cd38"
+    },
+    {
+      "path": "presentation/american-v1/items/item-073.webp",
+      "bytes": 34478,
+      "sha256": "30be4db8327a0dc398ccab0b44db6cf4b30bc029310ccfc1fa4b1c7952f5dd6e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-139.webp",
+      "bytes": 45314,
+      "sha256": "6eb703d95fa150289b22eda6930c08cb806ddfb3fec24d2c7984f24f1eb2fd60"
+    },
+    {
+      "path": "presentation/american-v1/room-studio.webp",
+      "bytes": 349328,
+      "sha256": "8746604994c89287f13db1b311350199a0020f4c54345b6d0c01d712e5ef8519"
+    },
+    {
+      "path": "presentation/american-v1/items/item-062.webp",
+      "bytes": 41262,
+      "sha256": "c41511934aede6290809f533a3398d335eaf45efb6a9c9834e0259f6caba6766"
+    },
+    {
+      "path": "presentation/american-v1/items/item-030.webp",
+      "bytes": 29460,
+      "sha256": "99708396bd4a2cc7cfd324c2fa1f1b85a75e548d78b923e77c9f0f06cd306f0e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-042.webp",
+      "bytes": 23984,
+      "sha256": "2f477a74acbb4d313e1f43ef8ea76fde8614453921b4229b867b14150003e241"
+    },
+    {
+      "path": "presentation/american-v1/items/item-068.webp",
+      "bytes": 36816,
+      "sha256": "78f87626583dfe70e3d55ca98b440c056794439f19a5e8df538760cabe1a22de"
+    },
+    {
+      "path": "presentation/american-v1/items/item-052.webp",
+      "bytes": 34776,
+      "sha256": "d7a845b9344f310f9eb5bca84fe348c656808562487c2d3a7777162be460b4ba"
+    },
+    {
+      "path": "presentation/american-v1/items/item-054.webp",
+      "bytes": 32220,
+      "sha256": "23ea6b9ece39cd632620be2b5bf195c1e9a818b23d1bb529ec45959b64f4f4c6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-110.webp",
+      "bytes": 31864,
+      "sha256": "95a7d4d283c7c179038ed082c493dd3e775e345f8b11093390b9c019ca424ac8"
+    },
+    {
+      "path": "presentation/american-v1/room-garden.webp",
+      "bytes": 507122,
+      "sha256": "bc8658e130dbafed25c52af4e2a48a537717afb3cb76d00fdfcdd32a9579dc09"
+    },
+    {
+      "path": "presentation/american-v1/items/item-137.webp",
+      "bytes": 34640,
+      "sha256": "9341f941f6a3b1a5127e9d396d1366c72f0ed9a168a9e4dc99fd093bb76e616b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-109.webp",
+      "bytes": 30318,
+      "sha256": "27dcc6b148f0c29e9e16de6cac35d1462490685ef04fd3ce30fec9f10625e982"
+    },
+    {
+      "path": "presentation/american-v1/items/item-083.webp",
+      "bytes": 23544,
+      "sha256": "c8532abfc421f82c8b0a243c41d3ff83de095ed4d19f46f96fb179af81ade481"
+    },
+    {
+      "path": "presentation/american-v1/items/item-144.webp",
+      "bytes": 33036,
+      "sha256": "33ecccba8557e826ab59821a78a52568b41561199554b79b66cc2c622a4133b9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-092.webp",
+      "bytes": 22474,
+      "sha256": "495cf2fdafad63dbf88aef305eb410ebc228931d7a2748353027f18cfbb43587"
+    },
+    {
+      "path": "presentation/american-v1/items/item-048.webp",
+      "bytes": 34444,
+      "sha256": "a2f6ad1dbb7519ed8365e921cee81e7f867741131921e32c984c09d1f0f1f103"
+    },
+    {
+      "path": "presentation/american-v1/items/item-113.webp",
+      "bytes": 31054,
+      "sha256": "7af3f1bb94b82335797cad0833c8e7754f2c4cfabfee5edc632f885c3e29be1d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-053.webp",
+      "bytes": 38382,
+      "sha256": "b82dff53e9ffe047b50d5cd0a0a79af533743b876cf81f75fb8641d69776b276"
+    },
+    {
+      "path": "presentation/american-v1/room-market.webp",
+      "bytes": 340452,
+      "sha256": "33e8409fe7b859135a750b27a28b6799916c47dfe8fb2dc71b37f6a2cfa37557"
+    },
+    {
+      "path": "presentation/american-v1/items/item-015.webp",
+      "bytes": 37800,
+      "sha256": "c341c39364360a0afdf92786ec8240d73020cc8300c3b3729de706aebda728e2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-055.webp",
+      "bytes": 24408,
+      "sha256": "7d034dc1722acc1fb745d807bad4f1c39a47a47352ca2183fdf024343262c797"
+    },
+    {
+      "path": "presentation/american-v1/items/item-045.webp",
+      "bytes": 39574,
+      "sha256": "4cc0f9072bf10b59b8e4c17a7b69a2099e641d01965b4cb6fcbed984bc2712ee"
+    },
+    {
+      "path": "presentation/american-v1/items/item-049.webp",
+      "bytes": 37416,
+      "sha256": "f640d94cc2a8bc089998ac39786a665466db1a801414fdcf6c3f92e6c0a728d1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-057.webp",
+      "bytes": 20738,
+      "sha256": "0d99dca5c04284d5e4945c349cec4c6b830a454755398cf55297d99439133796"
+    },
+    {
+      "path": "presentation/american-v1/items/item-244.webp",
+      "bytes": 43400,
+      "sha256": "07c596da47773628808e0f82e7c106437abcbb7e12990c5af8e4ebee646be155"
+    },
+    {
+      "path": "presentation/american-v1/items/item-020.webp",
+      "bytes": 36394,
+      "sha256": "c54789684d9bf489fc9654be8e09e54f372104d1fd50bf3626e1f1c35403848d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-100.webp",
+      "bytes": 34368,
+      "sha256": "647b5134f3defad58e7f1a5a816b7f8512427ee5757c38276a2687179b57514b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-391.webp",
+      "bytes": 36368,
+      "sha256": "01a4f4796b4d9a793605d60827f230e21732fbe25e1607509d0d1f1b615f3417"
+    },
+    {
+      "path": "presentation/american-v1/items/item-304.webp",
+      "bytes": 37914,
+      "sha256": "9f376bc6a63959201cb704c1605abf50432e95f20aafcc789d8826d3fbe5af1d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-066.webp",
+      "bytes": 38990,
+      "sha256": "484c519399d6d7904097fc7f011a4d2d9d06e2c517a11c2c93a1bb8aa91f1f33"
+    },
+    {
+      "path": "presentation/american-v1/items/item-187.webp",
+      "bytes": 46390,
+      "sha256": "21f30d18fc78857934928bcbdd8aa5fd0229e0f50f31869f641ae7ffc86aba80"
+    },
+    {
+      "path": "presentation/american-v1/items/item-140.webp",
+      "bytes": 39394,
+      "sha256": "d8aeaac8439126142a8cf841384b03cf9916422a272246c8ec3733a20c9f21ae"
+    },
+    {
+      "path": "presentation/american-v1/items/item-157.webp",
+      "bytes": 30640,
+      "sha256": "c5dedbd520fe4764b165bdaaf211704e8be80d741915cc0d222501e1bd9215e3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-409.webp",
+      "bytes": 34610,
+      "sha256": "37ddf41d64085e4d3db9f290e3c13194cccd954e7219a6c884aef76a55f0de04"
+    },
+    {
+      "path": "presentation/american-v1/items/item-051.webp",
+      "bytes": 47996,
+      "sha256": "4a903d695e74fe4855bfd52e089a2fa6a64c6af3a99246851c125ec079713916"
+    },
+    {
+      "path": "presentation/american-v1/items/item-087.webp",
+      "bytes": 25576,
+      "sha256": "7d20c450a95efbf6acaae58ffb6f72c8b8fb905bf9260abed5710315e9afd5d0"
+    },
+    {
+      "path": "presentation/american-v1/items/item-402.webp",
+      "bytes": 45046,
+      "sha256": "38bac2d91f1efe7c2b13ff5f490518f6b54e9c72fcfcfe08f97df2ac39bc9fb8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-174.webp",
+      "bytes": 38512,
+      "sha256": "21c8cfd6ef5c49548ac88cfd45c35a5a51e87c3becf4bed1ef68c473b551b629"
+    },
+    {
+      "path": "presentation/american-v1/items/item-213.webp",
+      "bytes": 36010,
+      "sha256": "919dc1161f6c101aa7871b242b0f60124c9ada01459d03a3fbd7ba871c906e9c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-095.webp",
+      "bytes": 38654,
+      "sha256": "84e28df9dc2122a580d3d7ef98b334fd4bd9cd9b9ca3da990b67d0de64b00e47"
+    },
+    {
+      "path": "presentation/american-v1/items/item-114.webp",
+      "bytes": 45442,
+      "sha256": "176b9d504c31711bebad0525e395af983f5f37f0a127ba14665fcd5e5beb8dc5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-223.webp",
+      "bytes": 37704,
+      "sha256": "46026e681dbfb8fc8ebe6c6cc80f11b70895760e9805be3ec2ef5224d2b095bb"
+    },
+    {
+      "path": "presentation/american-v1/items/item-179.webp",
+      "bytes": 33808,
+      "sha256": "0c5d843a76ff4740ef4c8c2c2546ed71df296dd3f70132a5721efcd251b40a65"
+    },
+    {
+      "path": "presentation/american-v1/items/item-169.webp",
+      "bytes": 13048,
+      "sha256": "00cfaddde80d46196e8235dda540e3bd3902e60fa2e91ed3292065d756786383"
+    },
+    {
+      "path": "presentation/american-v1/items/item-024.webp",
+      "bytes": 43372,
+      "sha256": "1e1ec742b74b9004b762b0dc44bfd93c7c134e5bbbb94760f21d307f5b8a8f18"
+    },
+    {
+      "path": "presentation/american-v1/items/item-075.webp",
+      "bytes": 27618,
+      "sha256": "f979ee59d40c7e99eab0570327b5bc82986f6e760430780bcc3be474cca02f28"
+    },
+    {
+      "path": "presentation/american-v1/items/item-159.webp",
+      "bytes": 38004,
+      "sha256": "e5a37a13ca2b27768581d5bf9e44dfe86c4ad64bca89963e5d786a615a4d5ce7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-074.webp",
+      "bytes": 41950,
+      "sha256": "771469ba3a4d9770f18e18505e034da6ce42a2aa850dfc740009a91c4e2239b5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-392.webp",
+      "bytes": 43166,
+      "sha256": "742957873bc6bb30ab584f19a2d8a48db70dc3396a62f4ffacd9faba36e8c94f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-175.webp",
+      "bytes": 45704,
+      "sha256": "6a681533bac4a0318505c13894ef7c25f98fc6a4dd21e423a6076a4acaa5e89e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-126.webp",
+      "bytes": 31970,
+      "sha256": "f6c7ce63584bf44004a4fa0762a6620db336d750b396bef2d9207273cf194b4b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-088.webp",
+      "bytes": 39402,
+      "sha256": "c270e567a99f4b260f574030c62346632221e16bcafc851f03b059983a9950b0"
+    },
+    {
+      "path": "presentation/american-v1/items/item-081.webp",
+      "bytes": 49122,
+      "sha256": "722d1a8daeeb1f6fec1aca780daee408eb6a1cf3c13647d1bc88451731d96ede"
+    },
+    {
+      "path": "presentation/american-v1/items/item-348.webp",
+      "bytes": 43642,
+      "sha256": "8ae6489aa02542cd6bc4de3f7410ae3ce6ba66b34d8df47e3a7b896375820820"
+    },
+    {
+      "path": "presentation/american-v1/items/item-199.webp",
+      "bytes": 48794,
+      "sha256": "ba7ae1eafcb63dd4434c25aa23b8bc7754165b25fd8e1bb410fff9b527e97c49"
+    },
+    {
+      "path": "presentation/american-v1/items/item-124.webp",
+      "bytes": 33756,
+      "sha256": "0d32af9962095ab9715eef66a251986f818a896569308f6fd8c777578b83f93d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-180.webp",
+      "bytes": 34886,
+      "sha256": "9a5b1c178689d75265894dc0ab9cc14475d777b850d92b53d6baa1e931a76289"
+    },
+    {
+      "path": "presentation/american-v1/items/item-162.webp",
+      "bytes": 36062,
+      "sha256": "d8bc071e96881932c09bcf3dd640737b01f456aeb94ea40f61b88d4491ecfb10"
+    },
+    {
+      "path": "presentation/american-v1/items/item-148.webp",
+      "bytes": 28560,
+      "sha256": "40dde794c46f11c60e47e7d71ca31c90e150b7017fdb03b84ffdf74b69884cc8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-064.webp",
+      "bytes": 38998,
+      "sha256": "4c1178ccceb18f004aaf8e451638d973bac3e638d86988c9372405410e566d12"
+    },
+    {
+      "path": "presentation/american-v1/items/item-120.webp",
+      "bytes": 35672,
+      "sha256": "7ed7f102f4549150368806cf1d494d7bc179d40103ad29d8d6397793eba4fd11"
+    },
+    {
+      "path": "presentation/american-v1/items/item-406.webp",
+      "bytes": 29006,
+      "sha256": "cf9f8253207f782f51f1c1de5fe314cdd4d8480c164b10ba8bec174b4df275b4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-173.webp",
+      "bytes": 36446,
+      "sha256": "2fc547a7e408ff5cc8d054058081122e81478ab739e4e1746da945be39725d5f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-122.webp",
+      "bytes": 36452,
+      "sha256": "051eb1fe0d9de845460c95a0bc3a45d29f68aee17d131477a214f551ec6b5bce"
+    },
+    {
+      "path": "presentation/american-v1/items/item-105.webp",
+      "bytes": 29148,
+      "sha256": "1835e5f8b467e55a569d360c9c614fcad1a83f58ae35c1dbaf0c50d699b0a0c5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-117.webp",
+      "bytes": 43654,
+      "sha256": "8cd296711edc98c3d4dc9a9f836e4f72bff2ed14420e04815c9d0da7ca90baec"
+    },
+    {
+      "path": "presentation/american-v1/items/item-133.webp",
+      "bytes": 44228,
+      "sha256": "cf60666f6ac9f01095e61cdc0cf670d02a7c1757435f45fdc8702b0e0357194a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-205.webp",
+      "bytes": 40694,
+      "sha256": "e5258544fd99069d6250e2d6fcdab711b95cf530a8c934370b04223b01ef31a9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-320.webp",
+      "bytes": 36576,
+      "sha256": "9c51555759f7b66345f74543bdddb40c9446e60e20b85b7ff4cbda9353a714cc"
+    },
+    {
+      "path": "presentation/american-v1/items/item-321.webp",
+      "bytes": 34944,
+      "sha256": "424ffbec3155fdac680ea0c8b703078fe0a0384794d491a4f07bf28a564a6293"
+    },
+    {
+      "path": "presentation/american-v1/items/item-206.webp",
+      "bytes": 46090,
+      "sha256": "ba64b78494e65e1556e9fc13451bf7162f085648c0a0add9086705020defdec1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-322.webp",
+      "bytes": 37380,
+      "sha256": "ee636e37b5fd441000eb1cdd877975676cf07bb722ce3f97386377fab76cb555"
+    },
+    {
+      "path": "presentation/american-v1/items/item-305.webp",
+      "bytes": 34104,
+      "sha256": "22df9993db7dd64114b7cb04b52cad441324ac571085c15cf5626c57f153d43d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-106.webp",
+      "bytes": 43616,
+      "sha256": "e68761389b39e5f65bc6e6c9c16c61e9f354edf5fae578447eac834c1f9bbae7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-323.webp",
+      "bytes": 35362,
+      "sha256": "0e440eca7b20a405f622ae48f31c7f73225cdd0520acaf117744e141a94b6545"
+    },
+    {
+      "path": "presentation/american-v1/items/item-127.webp",
+      "bytes": 40628,
+      "sha256": "30d64f7d5c8d5273498684085f6cabd793fc128f0f0990f793fd5093094a4115"
+    },
+    {
+      "path": "presentation/american-v1/items/item-290.webp",
+      "bytes": 34956,
+      "sha256": "85f61e8fffd86219c3b59c16f2040672c60a65346522c8b0f88a7e553b5f2411"
+    },
+    {
+      "path": "presentation/american-v1/items/item-324.webp",
+      "bytes": 36210,
+      "sha256": "cfdd107bb6888061910823d2606ae4c88005b72cd907a67f82bbc9115e57e19c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-132.webp",
+      "bytes": 45760,
+      "sha256": "317a8b4356684dd3c55861b79657ab8f3fa3bb83e2d9cb9ce3eae92f2d5a561c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-145.webp",
+      "bytes": 35594,
+      "sha256": "c1e1493279d9d8b4b4c38acae39e922ac3f81d7404b51c91e3504b57c3db1fc9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-085.webp",
+      "bytes": 33522,
+      "sha256": "6f8e0c7a9d19788a65ab92cd15062d1115b9f9a7f50e2831fd54efc30688bd51"
+    },
+    {
+      "path": "presentation/american-v1/items/item-141.webp",
+      "bytes": 48806,
+      "sha256": "c22e90fee3735ecdc0577883d28861c773490edcee56eefe6073a0500f835786"
+    },
+    {
+      "path": "presentation/american-v1/items/item-082.webp",
+      "bytes": 20406,
+      "sha256": "38bca72ca416dc20a9ee5d459decb0efa8d98072871be7fa3b7d8b5f50c808de"
+    },
+    {
+      "path": "presentation/american-v1/items/item-156.webp",
+      "bytes": 42340,
+      "sha256": "252b0124138e4e6ab2a2d71bf774c50df3d66859eba432d55baa739056b883bc"
+    },
+    {
+      "path": "presentation/american-v1/items/item-009.webp",
+      "bytes": 44610,
+      "sha256": "f93ee78b61a54c7d22d95bdba82df4f81abe5435fc9e3edc4efed7c242f203f8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-130.webp",
+      "bytes": 43694,
+      "sha256": "069679098b5c24e8b6be0f119c3d7e99313bb9989ce719d9402c6620ef5f6343"
+    },
+    {
+      "path": "presentation/american-v1/items/item-019.webp",
+      "bytes": 36124,
+      "sha256": "abd135ebe424f3418279b76a4003ccc4adfce5e747c57a351f95e7b1530e26fc"
+    },
+    {
+      "path": "presentation/american-v1/items/item-090.webp",
+      "bytes": 23580,
+      "sha256": "070aece81dfffc83dd9ba7438ca444a14b962edb68159c1ea1daa7427e7a7f8d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-028.webp",
+      "bytes": 32232,
+      "sha256": "da69782eb26e1ca7a9d38ad43ac18852e7fd7cc3c2680926fc8ef9febdf8d0ab"
+    },
+    {
+      "path": "presentation/american-v1/items/item-108.webp",
+      "bytes": 21960,
+      "sha256": "f525ff82362d4021e6925125c78cb256ceae18c8be334ce877077a42c3e22772"
+    },
+    {
+      "path": "presentation/american-v1/items/item-067.webp",
+      "bytes": 20548,
+      "sha256": "1c5aa5ec9ccf31b6cbebe3f8a5f69eebd07b0d14cb0d2d5f8a3380c68094aa5e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-094.webp",
+      "bytes": 29992,
+      "sha256": "73b2bd0f835da845dc149a07f81478d15202843c78ab056e62faf5536c21de5b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-033.webp",
+      "bytes": 38888,
+      "sha256": "24a64d40cbbd9100d973341e19ac6cc33457a4fd11794af98aa2b16e3341a2d4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-093.webp",
+      "bytes": 33856,
+      "sha256": "f7ff1b920c2f326d0880a8cd9782df463634544f43b3133026511ebaa0929850"
+    },
+    {
+      "path": "presentation/american-v1/items/item-072.webp",
+      "bytes": 41654,
+      "sha256": "5c6ecffc224b3393ae0266d00d5ba4db3ddda7c087577d476407dea2c0c7bd7e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-039.webp",
+      "bytes": 29608,
+      "sha256": "3ddfc31d4013267181c5d1b9759249f3cfc5486884bfdf5deb2590b2ca3f72b1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-050.webp",
+      "bytes": 29530,
+      "sha256": "0a1e9c390b98ad55fb95a3e23bfa1a695f13837417ef5f283d8a7a4a6255ad86"
+    },
+    {
+      "path": "presentation/american-v1/items/item-086.webp",
+      "bytes": 42424,
+      "sha256": "ab4f186908381c366d085f07e6c4af19876ccbc3b97683d3878c5b2f9a4e17f8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-098.webp",
+      "bytes": 43404,
+      "sha256": "a01d71222f74d34905486ac8992e50887f481829ce03a22aa3ef4156be96020e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-089.webp",
+      "bytes": 33644,
+      "sha256": "194124f7e630312728cf225233c3f822370e25b8fb529cc3fa7af53cc2204d4b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-143.webp",
+      "bytes": 46240,
+      "sha256": "f8eb2fce52179e29328a756e0fe5d19a26d76eabd8e49b7e1b45fb05b0df10aa"
+    },
+    {
+      "path": "presentation/american-v1/items/item-160.webp",
+      "bytes": 43460,
+      "sha256": "bda094efcd0421ba4ac752ef337e896a853c129e23100dc8a769604b1e12994a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-119.webp",
+      "bytes": 32576,
+      "sha256": "50fac1b7ad579b85f8cd7088b3651ab7debb144a5fb312327cf1efbbb832b475"
+    },
+    {
+      "path": "presentation/american-v1/items/item-166.webp",
+      "bytes": 39978,
+      "sha256": "d37d79c236005e9e98bae730750576bdb79817bc4c37c4962c0fb80110b71e7b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-146.webp",
+      "bytes": 34922,
+      "sha256": "e6173b4b26e192a7320c44342534835cc3dfd8a4797fb5cdd87bd749f28fdb51"
+    },
+    {
+      "path": "presentation/american-v1/items/item-104.webp",
+      "bytes": 35118,
+      "sha256": "b4db7cd9a98f8ea38a6abccaff1ad7d46f75cf187b981006156e6a712b89d729"
+    },
+    {
+      "path": "presentation/american-v1/items/item-125.webp",
+      "bytes": 35160,
+      "sha256": "d7bbd2ef92cca2ff7b661118e03d1bdd54b542f35c3e23286e23f10516342d75"
+    },
+    {
+      "path": "presentation/american-v1/items/item-207.webp",
+      "bytes": 37550,
+      "sha256": "8ea8b47ff4d7536dbb612f736fe9e39c2e754932a8de0d4289bded109a411969"
+    },
+    {
+      "path": "presentation/american-v1/items/item-333.webp",
+      "bytes": 26758,
+      "sha256": "ee282541c61fcce616f1ad1b0485cae15511ede75fa9d8fc2a0b90df9136b3fe"
+    },
+    {
+      "path": "presentation/american-v1/items/item-296.webp",
+      "bytes": 37998,
+      "sha256": "801fc5bc76142d8a3c1bbb1872f7a63bd27ba178995d4cef553ff053aa806c5f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-291.webp",
+      "bytes": 13812,
+      "sha256": "d456ed6c31c421c1828d594c333674d119fc10d13a36ceac8b4ab1663d541e9f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-292.webp",
+      "bytes": 28850,
+      "sha256": "488108707993119b0beef9bf7d691dc12998806029d58e55751a82e5b6a39a93"
+    },
+    {
+      "path": "presentation/american-v1/items/item-334.webp",
+      "bytes": 38704,
+      "sha256": "0fd6f9ff6b75adfdcdb456270a548cc6960b5c045af65966f84da52a134d6d58"
+    },
+    {
+      "path": "presentation/american-v1/items/item-071.webp",
+      "bytes": 34022,
+      "sha256": "120059fcf1ee4a3d24df87e7b18731e04e1b9dc465a19a2ad449e67a21e04928"
+    },
+    {
+      "path": "presentation/american-v1/items/item-405.webp",
+      "bytes": 33440,
+      "sha256": "f232951b50c12c8259167c12890e391704f2ae995f7229037f62a02330dd9259"
+    },
+    {
+      "path": "presentation/american-v1/items/item-293.webp",
+      "bytes": 40672,
+      "sha256": "909e8d735bd47f6bedab8040418513512cd8f63bf3473f1455638580ad5f39da"
+    },
+    {
+      "path": "presentation/american-v1/items/item-270.webp",
+      "bytes": 29984,
+      "sha256": "9a8fac00578d8a1995b59d5663ebacb06161062c65b55812fecc0a6e5e5e11ce"
+    },
+    {
+      "path": "presentation/american-v1/items/item-261.webp",
+      "bytes": 36206,
+      "sha256": "a95c3cc5f4ddf5d493fc34bcd813d0e727b8b62094cc7f0d2d29727b5afded7a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-188.webp",
+      "bytes": 35094,
+      "sha256": "a45b7dedd645008d51c453183282760e068c34ede771bb27c838b55b041ac3f4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-224.webp",
+      "bytes": 32510,
+      "sha256": "5d3319e26ba620eb52aa8598d3c9c3acd1f13455f07e462797cb5127568c2951"
+    },
+    {
+      "path": "presentation/american-v1/items/item-271.webp",
+      "bytes": 30834,
+      "sha256": "7f9abe97e798ec9755b405d29456de4930394177a2e0888c174916f10f2a9f02"
+    },
+    {
+      "path": "presentation/american-v1/items/item-225.webp",
+      "bytes": 25166,
+      "sha256": "8260253b4439b93078390c9882aa994928fb9e33759cd535ad6f975f803ebcd5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-272.webp",
+      "bytes": 37212,
+      "sha256": "fe854c2348e40a36cc88adfbbd29a4d879c030cc35cbb80a3cd6bfe691dece88"
+    },
+    {
+      "path": "presentation/american-v1/items/item-245.webp",
+      "bytes": 33016,
+      "sha256": "1f598bbfadae0ebece1c254742057debf3c050bf0489df44771a37c92aeb1218"
+    },
+    {
+      "path": "presentation/american-v1/items/item-161.webp",
+      "bytes": 40490,
+      "sha256": "cb08b25c22d6423149d5262930a82da081c44d0831d4972d94035702419fab61"
+    },
+    {
+      "path": "presentation/american-v1/items/item-181.webp",
+      "bytes": 37170,
+      "sha256": "8e4238032cde1727de5de530a5eff724cdfcc65d0a624b44e783aca4489ace00"
+    },
+    {
+      "path": "presentation/american-v1/items/item-262.webp",
+      "bytes": 29836,
+      "sha256": "064bf2e7feddc27e3a37eec5e1038f28c777375ab1ef7d361ef52c0a04c84d65"
+    },
+    {
+      "path": "presentation/american-v1/items/item-227.webp",
+      "bytes": 28628,
+      "sha256": "9ab88524dc12efa7c2782aee4efacab1ecaf477f02fea40a9a67fe52f8330800"
+    },
+    {
+      "path": "presentation/american-v1/items/item-349.webp",
+      "bytes": 34866,
+      "sha256": "935a67bf264ad17a6b97124e38a8fdaa75275605078202596c4038d2d07be582"
+    },
+    {
+      "path": "presentation/american-v1/items/item-335.webp",
+      "bytes": 30032,
+      "sha256": "4aa7e29db1dcdd36f1085049cd1201252acd442cf69a315e81a568b5904f1881"
+    },
+    {
+      "path": "presentation/american-v1/items/item-263.webp",
+      "bytes": 28504,
+      "sha256": "1173908e770bcde95ed99db7bcc3911d8e93f065121c95e56da1810e3c283412"
+    },
+    {
+      "path": "presentation/american-v1/items/item-350.webp",
+      "bytes": 45056,
+      "sha256": "cbf4b2d28106c74da8a95f53fb7c5159fef215f0e7b422943d9afc68e7e9e24d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-351.webp",
+      "bytes": 47216,
+      "sha256": "30053e980f109948a6509206ca407a8887c4cde0b81e87b6248adbc45acf3629"
+    },
+    {
+      "path": "presentation/american-v1/items/item-208.webp",
+      "bytes": 56304,
+      "sha256": "fabf4d9d8213f28cdbfd8996786755ffd387e30271c5b31a46aceb66af20831a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-352.webp",
+      "bytes": 45142,
+      "sha256": "e8ce77cee020b737d911b992aa2ba6ede12a6ee6023b566cf3fc4d33ecf11ceb"
+    },
+    {
+      "path": "presentation/american-v1/items/item-061.webp",
+      "bytes": 42870,
+      "sha256": "312feb0f2fa84c9e71ecc1bcac52faab3a786e8310dc04ea4a962248647c8bbc"
+    },
+    {
+      "path": "presentation/american-v1/items/item-176.webp",
+      "bytes": 18628,
+      "sha256": "be0c07af974f8f381d295dd5d68c41f48a1b6ffa3165bdc903bd209eb9892c1f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-189.webp",
+      "bytes": 46378,
+      "sha256": "6c2f100cfd1bf8938d4a4f73247241ba76e020293edd0258af50692ec729552e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-228.webp",
+      "bytes": 28954,
+      "sha256": "312a6d6d86c14269f15e68d7ad7995552249f31e3c6e2d8dd9ed539f930e3abf"
+    },
+    {
+      "path": "presentation/american-v1/items/item-273.webp",
+      "bytes": 25338,
+      "sha256": "c2ca235ca4f3a15b229bf44b541403481e0756ad58704c907a53dcff2becfb42"
+    },
+    {
+      "path": "presentation/american-v1/items/item-379.webp",
+      "bytes": 28950,
+      "sha256": "43f7bfbc8f657e321236e13aefb98901256a5f77a2ea44470e7d23772117af9d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-239.webp",
+      "bytes": 43958,
+      "sha256": "ea9715e285e4d48f9143bf6763eccd8bf75202ecc475c55de3defbe4c9a10f0c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-274.webp",
+      "bytes": 41782,
+      "sha256": "97717719b044f9ac2cadea3565a9225c4c184e341bdb54aa1dae29fd69f43e17"
+    },
+    {
+      "path": "presentation/american-v1/items/item-306.webp",
+      "bytes": 25466,
+      "sha256": "f834a23e39983b075c6246048bd77b577ffd18553b57ef77b3bae2315fed41d8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-307.webp",
+      "bytes": 36256,
+      "sha256": "683041c9a85cc7d9e7f0afd3759d0e3f17321ae162e061d0a3d44a8adf3e44bd"
+    },
+    {
+      "path": "presentation/american-v1/items/item-250.webp",
+      "bytes": 35004,
+      "sha256": "cc390ef4c64f9fb46e4cfb47ba00bb812598fee22ed694e640d0a433854ceed7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-397.webp",
+      "bytes": 18968,
+      "sha256": "0ecc56bf82b9a2948d731d0735e4a6d2ecdbea83a7b7680d356a8a7a6bd3d2e2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-264.webp",
+      "bytes": 30624,
+      "sha256": "84c528e58fda2ef23515ce06e76d90eb669b3df9d6941a6639af76fb0c94c770"
+    },
+    {
+      "path": "presentation/american-v1/items/item-275.webp",
+      "bytes": 36278,
+      "sha256": "41fb6418af092e943cbb5880ba4ccb94528bed2c8e82fb2987ff775210859c76"
+    },
+    {
+      "path": "presentation/american-v1/items/item-276.webp",
+      "bytes": 31240,
+      "sha256": "2a59a73b3f71add74f61c34577cd2552a5af029bdac5e96017eaa8ea1d927fd0"
+    },
+    {
+      "path": "presentation/american-v1/items/item-400.webp",
+      "bytes": 38032,
+      "sha256": "1e6f8e232db98416c9aa8eac3db6e3eb15402d5a4091e269aab4ac454f49b4a4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-194.webp",
+      "bytes": 41972,
+      "sha256": "1719c1dccded0ff0175173d0410759f9a03c87d1f9584cca1f1b01b8c083f684"
+    },
+    {
+      "path": "presentation/american-v1/items/item-246.webp",
+      "bytes": 17834,
+      "sha256": "f1b2fb01a554f73828c9c77faf86ea36efff445092c19f9a67e79f5e3d4174a3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-353.webp",
+      "bytes": 26652,
+      "sha256": "96d7e17b860b162a3594a93c1af888c8789d86e8c6a49ef16594427e09419569"
+    },
+    {
+      "path": "presentation/american-v1/items/item-170.webp",
+      "bytes": 34454,
+      "sha256": "93039aaf60fd405ae41483ca5b1f20960aa9c3c1d4905387ec9fffb48e181656"
+    },
+    {
+      "path": "presentation/american-v1/items/item-177.webp",
+      "bytes": 22138,
+      "sha256": "fd63401c3ab07ae220cea648096f22eba09eb7bef91a38bb5ea23cd40eb7cece"
+    },
+    {
+      "path": "presentation/american-v1/items/item-129.webp",
+      "bytes": 22098,
+      "sha256": "cfa3c037dd25908db0d64e89d8e6de8f49dc573ba075db848f7c6ab65d25f4cc"
+    },
+    {
+      "path": "presentation/american-v1/items/item-220.webp",
+      "bytes": 32978,
+      "sha256": "69b096f1b585566d4deb5597915d11331609f0ab3c372157190fd4060bc6f863"
+    },
+    {
+      "path": "presentation/american-v1/items/item-354.webp",
+      "bytes": 28286,
+      "sha256": "1778979d9ad96742d1fc43bbe19c0d3709602419e11c1994522d6f698490faf9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-355.webp",
+      "bytes": 29762,
+      "sha256": "80cbb8f78fcc4e2b6521d40785be48dab648b689cb66f24681820314cefb223d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-277.webp",
+      "bytes": 42140,
+      "sha256": "b41e564bd2736bff69c6dbef02a9bae40264e96edfc73e7e2e6a1ecb0cfe507f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-404.webp",
+      "bytes": 33416,
+      "sha256": "fada1e1d2a845938943d44eb051bad682ed9ec9493579e6cd7ac98d54785a4f5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-407.webp",
+      "bytes": 37994,
+      "sha256": "a7d89ecf599796a3c737118ef87f66a2747beab0677bce52239894301f86f2f2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-278.webp",
+      "bytes": 39154,
+      "sha256": "ae57bed8c5b429e9c373eed3cfd71882d8cd2076b99f6d59014dae261c1f4e6e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-308.webp",
+      "bytes": 34830,
+      "sha256": "201e07c7443909e4e17098d39bf6e51576a2bbbd2d390cf468c750c8298b88d6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-165.webp",
+      "bytes": 34988,
+      "sha256": "cefbd9c88e012a8853f229d864988e9a9a7c9be23838f788063528c173eb86a7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-111.webp",
+      "bytes": 40620,
+      "sha256": "32918885978d456b86b9ab6961d36dbb664dff607a67477dbcb4b1d9f921a7f9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-200.webp",
+      "bytes": 42620,
+      "sha256": "9e2c937eee223c777c0097c1a97af140a53dcd479ca22b8f8357be2d64d23d78"
+    },
+    {
+      "path": "presentation/american-v1/items/item-178.webp",
+      "bytes": 45014,
+      "sha256": "03a23013428e7313dcccaa929819803272593a12d4dfe910b0ed13652e49844a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-214.webp",
+      "bytes": 38130,
+      "sha256": "5eb8e404e849bb301e6168cde1a1a865241a570923143abe4ef1ae2925aa6b2b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-185.webp",
+      "bytes": 25182,
+      "sha256": "71d0800ba15176b0fc826879269d5222a8618fce1fb7d156278c4a72cf6dc004"
+    },
+    {
+      "path": "presentation/american-v1/items/item-251.webp",
+      "bytes": 34874,
+      "sha256": "3b52aefeae92e316fb2122170f67fe35020148b7880422b25ef0774ea336246f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-153.webp",
+      "bytes": 39638,
+      "sha256": "f247d1efa3c7456804a1bac02926b24077097da18bdab10b30e229b92110022b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-118.webp",
+      "bytes": 36770,
+      "sha256": "f2e95694139ecce0d05aa96844f6a559d69c50a258d7b04f444c8e0b3e1185c5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-150.webp",
+      "bytes": 41292,
+      "sha256": "d3e455a46760a5908a35a2b5cf7bd7a2c03704d83c4ae177b1af55ce9258df76"
+    },
+    {
+      "path": "presentation/american-v1/items/item-279.webp",
+      "bytes": 17332,
+      "sha256": "469e432fe86285348d5629c6e7ea6db0f9989cbbf7a77b90e6cc0a8d88f894ab"
+    },
+    {
+      "path": "presentation/american-v1/items/item-190.webp",
+      "bytes": 34554,
+      "sha256": "0d2bc12f984c506b15cf108bbab7700881bd0d8872cc5bff62c2053d6bdcce4f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-167.webp",
+      "bytes": 54486,
+      "sha256": "f46ad487a3e06db12ca55cc8f49031b3f64178beb1efb7fffc8293f06ae29fae"
+    },
+    {
+      "path": "presentation/american-v1/items/item-209.webp",
+      "bytes": 26500,
+      "sha256": "9f149e2ecf7ea1e6dd75b2f40b1494734411bdd2bcc092097341f27375d59736"
+    },
+    {
+      "path": "presentation/american-v1/items/item-325.webp",
+      "bytes": 35198,
+      "sha256": "85a2d36207d4c62f1d50979453573d6cbf4e81a13c11e13daddae03240afd7ea"
+    },
+    {
+      "path": "presentation/american-v1/items/item-265.webp",
+      "bytes": 40274,
+      "sha256": "492269372e62ad0f2e0f725494bfd871b47e6d94de6b1bb7de6835dc42918f86"
+    },
+    {
+      "path": "presentation/american-v1/items/item-142.webp",
+      "bytes": 47816,
+      "sha256": "4be1741171c3d7b48276640d3a810820d51e081fcbe237cae51387fbbb0a6663"
+    },
+    {
+      "path": "presentation/american-v1/items/item-280.webp",
+      "bytes": 34262,
+      "sha256": "0ac1bc61d5d1799b38fc65d58680bc7cf594c1c111b279e18120da0cba47efc3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-356.webp",
+      "bytes": 52780,
+      "sha256": "6d908cd05c25eaf56e0b1544dd16370b46c9ce209ae567de66f58c8831b2a5e8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-357.webp",
+      "bytes": 33162,
+      "sha256": "f4bece3aaf3dc4f2f70dcfb99e87c513fceb4eff1839832d1cea196f84352129"
+    },
+    {
+      "path": "presentation/american-v1/items/item-294.webp",
+      "bytes": 24944,
+      "sha256": "f873a5fc02c98e25a1856a03a639496e737d92fdff2fa7c411eae8ae6e287b9a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-211.webp",
+      "bytes": 35120,
+      "sha256": "fe1e77f8043ed13fffbeaa4e03346ba6b73aa5f4db1093f4207048562b531f18"
+    },
+    {
+      "path": "presentation/american-v1/items/item-191.webp",
+      "bytes": 44304,
+      "sha256": "bc8d319ca16831233b4189ad92896a1047f31cb7a2055c9a4cf64324ed5fc4e8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-281.webp",
+      "bytes": 34742,
+      "sha256": "73080aab4e0418e59cfd875f1d2230f20473cfb4e18acec9fb8c05824c030e27"
+    },
+    {
+      "path": "presentation/american-v1/items/item-295.webp",
+      "bytes": 20326,
+      "sha256": "53dc2db650f1857dc77aba9971b5753311ea57e487a20551dac36cb1b073a7c6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-336.webp",
+      "bytes": 39476,
+      "sha256": "4446b01eaadfc5999875cf80b97706a724d6a32ea73f42f247a5419887819aa9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-215.webp",
+      "bytes": 39050,
+      "sha256": "c31aa962d398c0f4ab5e442077ac47fb3f4fa745d65a9e0cae207c9c266f3949"
+    },
+    {
+      "path": "presentation/american-v1/items/item-266.webp",
+      "bytes": 39678,
+      "sha256": "065efbbd6c125c6a0b212e9a3b534f8e64c7e167b4d7a99aa827c04f72119436"
+    },
+    {
+      "path": "presentation/american-v1/items/item-358.webp",
+      "bytes": 33106,
+      "sha256": "24dae144d56f225db9ea3924e74ae62b02f4face32f3b389b018595761ae360f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-359.webp",
+      "bytes": 27504,
+      "sha256": "9110ddda37e78beede6b9a96dc1d9db8ebecce72b137701de66281db2172ae1d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-401.webp",
+      "bytes": 32258,
+      "sha256": "38887f0c1f9beb120f26f5f96426c5c3ba3f30a253182c0f416e93d4b68a2a48"
+    },
+    {
+      "path": "presentation/american-v1/items/item-115.webp",
+      "bytes": 33770,
+      "sha256": "3187c009c94de0f7ee5dd7d015a25fbd73b679d9a0d69fa7896a40d318a51b34"
+    },
+    {
+      "path": "presentation/american-v1/items/item-360.webp",
+      "bytes": 41068,
+      "sha256": "696f07c8eae255173e75f7224ab868222d8521c199825b29800149c84be59e9e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-282.webp",
+      "bytes": 24284,
+      "sha256": "1a6e6618956808db392e6cb1f46ae20859130644a75dce4e3b1a2efdd7b03c9c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-361.webp",
+      "bytes": 43532,
+      "sha256": "95d09dd3cf654203e9670fc5fcc0aeba38db75ce6cd1b7ce25e0fbc494848abf"
+    },
+    {
+      "path": "presentation/american-v1/items/item-362.webp",
+      "bytes": 34516,
+      "sha256": "e264a4fb762e41054a95b557d0f51ae509a2a2960a0b1c6dd34e557426b9da3e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-267.webp",
+      "bytes": 20418,
+      "sha256": "f518720bd7f8a651f6883398b3b5362de7d89d97998b856c22cf942a7341f8f8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-198.webp",
+      "bytes": 30666,
+      "sha256": "0b81edede5dd6b5597d5c327a25c3d06dc86ac6edb6230d13fe735368b96f4ea"
+    },
+    {
+      "path": "presentation/american-v1/items/item-297.webp",
+      "bytes": 50158,
+      "sha256": "8b84b83d0fbd27b6947b1271fec08d0978ca74bf7257fc317c82165dcca9fa87"
+    },
+    {
+      "path": "presentation/american-v1/items/item-192.webp",
+      "bytes": 29688,
+      "sha256": "c3728abc758f4e69a9db541d2221836ae2428baddb7e9a641d8138457a944761"
+    },
+    {
+      "path": "presentation/american-v1/items/item-326.webp",
+      "bytes": 33382,
+      "sha256": "363b683766d496649548b5cf49c5a2a04c92fee49c1479e344a3a4c80a5a3616"
+    },
+    {
+      "path": "presentation/american-v1/items/item-337.webp",
+      "bytes": 39618,
+      "sha256": "1d36ffc4ab28f44849c2071a104bceeb1dc1cf6d07401450076b087a6cb7b6db"
+    },
+    {
+      "path": "presentation/american-v1/items/item-338.webp",
+      "bytes": 32930,
+      "sha256": "db6b1083fd86ffe6e78a2016cff15212f27d274d4fa276fa4e79c11c6032430a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-268.webp",
+      "bytes": 42736,
+      "sha256": "acbb7d18dc7098c64fec245d3ce3fd78d29b96ff601f884f0e75e2f25fadc7a1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-309.webp",
+      "bytes": 27776,
+      "sha256": "132ea31082aa0c198e0cfe79f3874d0d597272a2de4a0dea7932a4db58169ccd"
+    },
+    {
+      "path": "presentation/american-v1/items/item-327.webp",
+      "bytes": 19690,
+      "sha256": "a8796d0289896f516ab1a8742320e8a0f01890ca05bc89a8c5f9ffa514a8f510"
+    },
+    {
+      "path": "presentation/american-v1/items/item-283.webp",
+      "bytes": 38160,
+      "sha256": "2759d2f0aeb7e8fa1d3a60b67d0965896eea104387ea84cc0bb0db69106b8a01"
+    },
+    {
+      "path": "presentation/american-v1/items/item-252.webp",
+      "bytes": 43288,
+      "sha256": "3ffe5402c48f2eabbba0515bf487a72e9267ed7d5990f09e9781ea485554c525"
+    },
+    {
+      "path": "presentation/american-v1/items/item-380.webp",
+      "bytes": 45540,
+      "sha256": "2e876c65ec6c7008badda240891b3120727afdffb1d938fed73af6879bb33e46"
+    },
+    {
+      "path": "presentation/american-v1/items/item-328.webp",
+      "bytes": 25338,
+      "sha256": "a63d2f41a447ba811227685ef3fca6d8cfe6b70ad556fadf51857919d3c0ecc5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-363.webp",
+      "bytes": 27756,
+      "sha256": "e9cc65e226e81338ab9de2152ca0d8e741dc6c7fc96de5f43572da93e6d429b3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-364.webp",
+      "bytes": 32892,
+      "sha256": "26fe58daf7d4018c6e6907ba96e60a562c93ca2d4b0bf9814c6db60d2de58302"
+    },
+    {
+      "path": "presentation/american-v1/items/item-329.webp",
+      "bytes": 35546,
+      "sha256": "47b219369304a8e0f16e1d9e514ef10417cdc4cdbc5209b34162f2641b4ec02c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-365.webp",
+      "bytes": 16454,
+      "sha256": "954ad4fad1b6b36a76b2075f9e7e580d97baf286e57ef37ada72d41fe1daf4e2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-253.webp",
+      "bytes": 20794,
+      "sha256": "a8b6bec678ec392e48ba0dcadc3ba8a64ebb5c2e5ee6f861f03c10ac59facca0"
+    },
+    {
+      "path": "presentation/american-v1/items/item-201.webp",
+      "bytes": 35758,
+      "sha256": "8d9024129ad6dbc996320cf5e2530cf6b8cf3921637080c156a9aa634853f02a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-366.webp",
+      "bytes": 37760,
+      "sha256": "24506b9004a1527290ab586a6c3f68bf020f87f573310990d33bc0c21e85a220"
+    },
+    {
+      "path": "presentation/american-v1/items/item-396.webp",
+      "bytes": 25150,
+      "sha256": "9c34fac96f5245aabae43ffe5e76b5f225cb2a01065f55d15ab4eeba2d32bd4b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-310.webp",
+      "bytes": 29762,
+      "sha256": "c3885a0950687e1b32d0a19ae6e3e7b952a168cb75b492d582d93b0b4f6f4a23"
+    },
+    {
+      "path": "presentation/american-v1/items/item-367.webp",
+      "bytes": 34484,
+      "sha256": "bae6185689ec0742609e6ae066032667de8b0c0cee8d5f5841a9a5a31c600362"
+    },
+    {
+      "path": "presentation/american-v1/items/item-269.webp",
+      "bytes": 55208,
+      "sha256": "f28351b21001e912b401567b73ca520de2e301c43b05dadb6fa14f620208cfe0"
+    },
+    {
+      "path": "presentation/american-v1/items/item-381.webp",
+      "bytes": 46306,
+      "sha256": "08443fb37e2fbe35154be88a53ed45bfe2082acb7d3171e95e33448ef2bc6863"
+    },
+    {
+      "path": "presentation/american-v1/items/item-339.webp",
+      "bytes": 36700,
+      "sha256": "e3b32393f506f1c06d45fa33a3406de00cd25ce96e36b74e4c472b9fdb0519a5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-340.webp",
+      "bytes": 41364,
+      "sha256": "d319b1975cc358506b82d5570ce5a91dc5e957f48ec7717e01fe04a77852f6cf"
+    },
+    {
+      "path": "presentation/american-v1/items/item-341.webp",
+      "bytes": 30046,
+      "sha256": "eef4b8396705d43c8ac35857fb6c939bcad39c3e57f7f053dce6c3ef5a27bac2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-368.webp",
+      "bytes": 29344,
+      "sha256": "de5e6cdbb82ebcc98eb5b147f83786260f8c37d7700733e0c64b833537e7dbfa"
+    },
+    {
+      "path": "presentation/american-v1/items/item-369.webp",
+      "bytes": 17516,
+      "sha256": "4ee14bf4f95c7a2a854e14ef2860fca5c63c9957de7360de758bdc66fe0fced4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-370.webp",
+      "bytes": 18610,
+      "sha256": "38a8d90c664b13ce4f5ec07298b693ece74d2eeeb8592fc63f045731fe162adc"
+    },
+    {
+      "path": "presentation/american-v1/items/item-371.webp",
+      "bytes": 27150,
+      "sha256": "e211c86998f13e7c64b74bb46497b41e23f552512404bbb8fb10f229155d63e3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-372.webp",
+      "bytes": 38934,
+      "sha256": "768316e73fa921d81674d1abd49366d4277672d75aaab785fa0c905bc5343f25"
+    },
+    {
+      "path": "presentation/american-v1/items/item-330.webp",
+      "bytes": 31932,
+      "sha256": "d00bd8bd4ed2c8f7393ad67956e61bdc4020754bd637273e2e560d3dda131f94"
+    },
+    {
+      "path": "presentation/american-v1/items/item-373.webp",
+      "bytes": 21850,
+      "sha256": "328ceb8f4ca3bf336af8336fee28b23dfd534fafc35b013d2db167c5fecc6282"
+    },
+    {
+      "path": "presentation/american-v1/items/item-374.webp",
+      "bytes": 39934,
+      "sha256": "86015a4de137ce4ac4f2f916914c9044b7175821e66c54f62ded6984e31f784a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-210.webp",
+      "bytes": 43542,
+      "sha256": "736cf2b391113ba4231f913a30579bfcbcff43d304a9a8b8db42560ff2147e7b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-284.webp",
+      "bytes": 47790,
+      "sha256": "072dec2ad0f497c41be087cc99950223309609ce5a069a940dff67c956d754e9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-168.webp",
+      "bytes": 38666,
+      "sha256": "a8f294cd6af8addce93bc30cb4c256b67ef2179178163c7d8a35f1200d7ee425"
+    },
+    {
+      "path": "presentation/american-v1/items/item-408.webp",
+      "bytes": 32484,
+      "sha256": "59304059e78510ad1b6739f627b18e6a8f79581060c5d6b7e4dfb1019161ae9f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-285.webp",
+      "bytes": 35828,
+      "sha256": "c67fbfb384de07c9991b8dc2dfc90c6e16849f196671877e7f0f2854b04ca018"
+    },
+    {
+      "path": "presentation/american-v1/items/item-311.webp",
+      "bytes": 43472,
+      "sha256": "25733794751749f9073e68e4f21c131808fcc61b5848bc1b2431b1b1cff1a1c6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-312.webp",
+      "bytes": 40874,
+      "sha256": "5515d40a7654905f57918c0bc61996425c4338212bce5d64ab93cc29892a7ff8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-195.webp",
+      "bytes": 42400,
+      "sha256": "380e61e74ce4545ef56b3f69aadb515a466871dc5673d8b2f6b96f82c61d900f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-231.webp",
+      "bytes": 26924,
+      "sha256": "e829bd612a19a9900930dd48532100ac24616dcd403ecb9b68e147284e0de0c6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-232.webp",
+      "bytes": 34476,
+      "sha256": "27152a91ec32504652c378b0353d515af0690305aeb3c1483c907f9c52a6cb13"
+    },
+    {
+      "path": "presentation/american-v1/items/item-233.webp",
+      "bytes": 28704,
+      "sha256": "3e6f5c6c5f050f7c42ee346f176250af25a4a0835b408c95d2a7f8c468c0b94a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-234.webp",
+      "bytes": 37484,
+      "sha256": "ca5d6da3e42312cf14daec39e9c3473d90ee78525e9d41a6dcf97426f26bdc1c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-221.webp",
+      "bytes": 37454,
+      "sha256": "a6a4114af2643aa57d6a5333b536b30f2ea7da25d892f8fdb282b9058ad94f6b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-254.webp",
+      "bytes": 32066,
+      "sha256": "b0b2cf75000ed9aeaf8952bdba8739cb8167d3efaa74153a46f7dba6991fa3a7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-154.webp",
+      "bytes": 23128,
+      "sha256": "8eedd2c159e4fa1e430d636ace0a1a0483eaef9c48fcc5207fc24bf1ba778cc1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-235.webp",
+      "bytes": 30242,
+      "sha256": "52e9177fe3d0267948a47f80b9dae6dffcce32a582d28a4db39072faa845a202"
+    },
+    {
+      "path": "presentation/american-v1/items/item-164.webp",
+      "bytes": 32268,
+      "sha256": "909d9c9acbf8f290dd2ffe4ae050c65ff5f541bc4b47ad23224522e233db23d9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-163.webp",
+      "bytes": 28570,
+      "sha256": "7dd57bddb9353005324b7551ef4ba615059b59d159b2bfdf9dc5a0e8919d0a64"
+    },
+    {
+      "path": "presentation/american-v1/items/item-196.webp",
+      "bytes": 34250,
+      "sha256": "9ed781f7b273276a165b9061a87b8e27be0e12eac013e53fab1e761324a9b70e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-107.webp",
+      "bytes": 27794,
+      "sha256": "9032795301d5d0b7eb894a265db11374c73182d5ba5e6a68a3e53810ba64116f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-152.webp",
+      "bytes": 38348,
+      "sha256": "417a05c665d1dd180ff9b2239397c1fbf6ec482dfa899e2cabc3e02cf68c4531"
+    },
+    {
+      "path": "presentation/american-v1/items/item-240.webp",
+      "bytes": 31304,
+      "sha256": "9e8d3c3fe0263e7d204dbf38d60ba19dd8f4ef53194f220e6f8fe8d882caa3e2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-247.webp",
+      "bytes": 48000,
+      "sha256": "d024c74e6ae9361b152ee42cfe70aa181317a0ac35f10cf5e4574e8f80309f8d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-216.webp",
+      "bytes": 41278,
+      "sha256": "d6de28fdcca6bfb6e9da53ede7608716e7b196153d5727aa4ef2b6eae620eb52"
+    },
+    {
+      "path": "presentation/american-v1/items/item-255.webp",
+      "bytes": 29738,
+      "sha256": "227cb6d84a5d8269141aa0b77c26d89eadc0c0ae5497adfbfeed7c1c02aaad8d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-241.webp",
+      "bytes": 33250,
+      "sha256": "aaadf95a3a154e95cfcb6031a5241cb49a1ad391d408f10cda057398507ea52f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-256.webp",
+      "bytes": 23858,
+      "sha256": "f9bce18c583e236f57050ce4d963afecb1879e7a9b5c904ccc8aa6fa88047041"
+    },
+    {
+      "path": "presentation/american-v1/items/item-399.webp",
+      "bytes": 35328,
+      "sha256": "cf85203b9950d89b9208df569186cda26c02cf2a09c654951848a337e58e3ced"
+    },
+    {
+      "path": "presentation/american-v1/items/item-222.webp",
+      "bytes": 30186,
+      "sha256": "474ca42881feb299095b25ea513fb7f7b4878145ab6317afce48b219b8e12068"
+    },
+    {
+      "path": "presentation/american-v1/items/item-236.webp",
+      "bytes": 22866,
+      "sha256": "68f8f19c96d5bd92b3a55e793e067123a0e97575b5adb0928c6d6a59bccf9766"
+    },
+    {
+      "path": "presentation/american-v1/items/item-313.webp",
+      "bytes": 50320,
+      "sha256": "b426b91913e86ca3c7c065edca89c3eb952a530df162d9f5620acc1feb7efbcd"
+    },
+    {
+      "path": "presentation/american-v1/items/item-342.webp",
+      "bytes": 33796,
+      "sha256": "4491b93b2e12fd4da50db959caca54ba33442ce3178d800c22a20e2052a01e5d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-123.webp",
+      "bytes": 34266,
+      "sha256": "8c16062efe4dda5e235e052dd68c70aa6e843d87070e4514d1fbed904c273afb"
+    },
+    {
+      "path": "presentation/american-v1/items/item-242.webp",
+      "bytes": 31258,
+      "sha256": "978544261d814db259eb688558ff631da15d765954def78cad4e7a9cd3629de3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-197.webp",
+      "bytes": 46528,
+      "sha256": "fe6f503367318a84e4ece72692b6070a2a365878390cdeacb9d6998e0f12143d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-171.webp",
+      "bytes": 48558,
+      "sha256": "6ebb9bd2e8cda5250fa0249f64cf6d6b3fffd836a155160c9e9e62dcbb39f1df"
+    },
+    {
+      "path": "presentation/american-v1/items/item-182.webp",
+      "bytes": 47070,
+      "sha256": "f1d9dc12eb81bada10ed5d6296da9c8e08988ad244edccc1ffa0cb32144d002a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-183.webp",
+      "bytes": 44316,
+      "sha256": "88a02eff8c6ff37f9dbfcbf498d5ee2d56e024d43c4fac238063ee006e4af728"
+    },
+    {
+      "path": "presentation/american-v1/items/item-134.webp",
+      "bytes": 38180,
+      "sha256": "0a17c32089457d59c30a0a7c7d2bd3b4a4308181774895229cec584d883a3c4d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-172.webp",
+      "bytes": 37206,
+      "sha256": "706eb29485244fd716e385136d9fc8821d8d1f19315b05463dbd8a0d6798264a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-343.webp",
+      "bytes": 52682,
+      "sha256": "90691ab94f51af53aa891e3fff330b4d620d2cdb997dc8fa88cc18970bed5b11"
+    },
+    {
+      "path": "presentation/american-v1/items/item-393.webp",
+      "bytes": 30894,
+      "sha256": "c52d37e840d05641885c661e0993151d59d7cd0812db40aa981d9638047bb074"
+    },
+    {
+      "path": "presentation/american-v1/items/item-386.webp",
+      "bytes": 33822,
+      "sha256": "4d1b1aafce3cc2b89b93519c45c2845058e4199135cb90aed7b852b80c81d11d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-344.webp",
+      "bytes": 30498,
+      "sha256": "0bc8da5283940628cb44061ba1eb64ef9198ed0e270ff4f46e98992435143774"
+    },
+    {
+      "path": "presentation/american-v1/items/item-202.webp",
+      "bytes": 24748,
+      "sha256": "bd7ea3744b40daf586c14969a336e0aa95d55458d0b6e691f40b9167869f320c"
+    },
+    {
+      "path": "presentation/american-v1/items/item-314.webp",
+      "bytes": 23492,
+      "sha256": "714ff1f8d6669533f185e61a7f496d4d970665c58f10a2e2f6329147342abddb"
+    },
+    {
+      "path": "presentation/american-v1/items/item-229.webp",
+      "bytes": 38002,
+      "sha256": "ec90dc4721ddece148b8f4d586f4ef3db1593a0f9106d04c46f4880850c6846e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-410.webp",
+      "bytes": 33756,
+      "sha256": "c050516f15ad2aa3306dfe9a422ac4531bb458b57a16fd4cc6df34eff420cdc4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-226.webp",
+      "bytes": 41862,
+      "sha256": "44192791da5b0b5e51198232a78687fd5ed17cfed9179fe7a6f8fe620f206e61"
+    },
+    {
+      "path": "presentation/american-v1/items/item-248.webp",
+      "bytes": 23600,
+      "sha256": "540864a497e264edbcbad978efdc4777134bea0b7b94a08e9f6ed049e8dbb680"
+    },
+    {
+      "path": "presentation/american-v1/items/item-411.webp",
+      "bytes": 41700,
+      "sha256": "05584331ad95dcd68aa9f6a3e5e2e210c6702aad6cd36787b1accf7a183b68b4"
+    },
+    {
+      "path": "presentation/american-v1/items/item-257.webp",
+      "bytes": 22446,
+      "sha256": "422b1d1d2d1bdfdc79b28eddef250d49f15fcc97d9cb04c397ec2c57ef0ca335"
+    },
+    {
+      "path": "presentation/american-v1/items/item-315.webp",
+      "bytes": 27964,
+      "sha256": "c89aadf7ccf407ec770a0e05a56fbc3c2f52de9d8b1042dbea5d9480b9625bc8"
+    },
+    {
+      "path": "presentation/american-v1/items/item-395.webp",
+      "bytes": 41964,
+      "sha256": "677fe59644c398bdc4c9f117d313ae9610f79d88f747584e64e9d76b4e06d4a2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-218.webp",
+      "bytes": 34316,
+      "sha256": "19abc99d542f5ceaa96914d72c96f2fe13ffdccdbeec41babdd25d35ddb62528"
+    },
+    {
+      "path": "presentation/american-v1/items/item-345.webp",
+      "bytes": 26768,
+      "sha256": "aea075b65e6576af4715a587f2804a41b0320efa32d1c6c2a39883d754e7844e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-382.webp",
+      "bytes": 47080,
+      "sha256": "7434594d4866abf37c08f17c69338cee906a434eef20555241ac813fbd29a6a7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-383.webp",
+      "bytes": 46780,
+      "sha256": "42a10d1021d8599c0a667b9d2b6f01c018eac659a71340ff8c9604c6b2f4a723"
+    },
+    {
+      "path": "presentation/american-v1/items/item-384.webp",
+      "bytes": 41244,
+      "sha256": "0402ce02e5726a05dde9b0693023c33544dd57625fbb7037f16a0dc7f374500b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-346.webp",
+      "bytes": 23340,
+      "sha256": "f9e4ef663d620127773e9c340926fc95202a575fcde93cfd39222b19a6eaa162"
+    },
+    {
+      "path": "presentation/american-v1/items/item-387.webp",
+      "bytes": 36948,
+      "sha256": "2495118459118e49102602b0e30067a9058e6cc89e309a966c7ae9a975b8f500"
+    },
+    {
+      "path": "presentation/american-v1/items/item-212.webp",
+      "bytes": 42056,
+      "sha256": "7951214b463954cd0ec3b37a9d0ec5334d6fe27e03d237fe76b2902d3c6476cd"
+    },
+    {
+      "path": "presentation/american-v1/items/item-385.webp",
+      "bytes": 40940,
+      "sha256": "fbe903e7bbc96c53b5f6459630ab711d9ea941b1607eb310b52571845bb767d3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-243.webp",
+      "bytes": 35992,
+      "sha256": "8a5348d52c0a5625361313357c246838f2b636ea43430e1d377061f412cd6f75"
+    },
+    {
+      "path": "presentation/american-v1/items/item-298.webp",
+      "bytes": 27588,
+      "sha256": "cdd989120a1224d2b8a0c16f24439c601b863b384c091471be3c594a28baa4f2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-299.webp",
+      "bytes": 29832,
+      "sha256": "466de3b64737f20201300ee136b375ee6c227169c5c35471169fa2b18f5e96c5"
+    },
+    {
+      "path": "presentation/american-v1/items/item-300.webp",
+      "bytes": 34012,
+      "sha256": "7b09da66d865c2f37680e96a0868a27e2e6294c3d52a089635db7e3721b1eab3"
+    },
+    {
+      "path": "presentation/american-v1/items/item-286.webp",
+      "bytes": 30436,
+      "sha256": "9a6437258030169a9d66a799c1b7edc8142770516ba98ded69766d9243602be1"
+    },
+    {
+      "path": "presentation/american-v1/items/item-258.webp",
+      "bytes": 36168,
+      "sha256": "20316101d87f25506b02cf705dc6b002a6692345ea3ae6b94fbdfa5f3b4d269d"
+    },
+    {
+      "path": "presentation/american-v1/items/item-203.webp",
+      "bytes": 39144,
+      "sha256": "86515ac472de11bd816283b0b357b9d79db76b133f37025c0168dee054f4310b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-204.webp",
+      "bytes": 47522,
+      "sha256": "44caa4d649a6134ddaae66b26c80070b53565e74270847c0a84a3b0ed7c09e9a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-217.webp",
+      "bytes": 40052,
+      "sha256": "ad2215c9401318fb4a99e6400ce32a7dc948e038eb7b925e2dde88e41becc30f"
+    },
+    {
+      "path": "presentation/american-v1/items/item-403.webp",
+      "bytes": 28010,
+      "sha256": "0e426b2dfba9e6e1357af8aae5b5da440927843d28ca7722942d4f1b66a5f73a"
+    },
+    {
+      "path": "presentation/american-v1/items/item-316.webp",
+      "bytes": 43498,
+      "sha256": "8995358127f51a161b2ec4460ea4591d4d6c5139ad68ff30b95e34c31ff801a9"
+    },
+    {
+      "path": "presentation/american-v1/items/item-287.webp",
+      "bytes": 36532,
+      "sha256": "e89cd146e12ae0fb4df33dcef55163e0467986c7bd6e1fd0d1e03acb0cb7bdd2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-288.webp",
+      "bytes": 40720,
+      "sha256": "1aea7185f74b6a1f689632d373488d475405fd838c2e9f8e37d3d509647788c6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-289.webp",
+      "bytes": 37028,
+      "sha256": "c523226e902d9829dc069dcf24002fe95a6e3fe6faf2584c39dd193949cb4883"
+    },
+    {
+      "path": "presentation/american-v1/items/item-317.webp",
+      "bytes": 39042,
+      "sha256": "ff2874cccd20cd4e4d58d34c6438b5269260196ca24893363b635d17888d8cee"
+    },
+    {
+      "path": "presentation/american-v1/items/item-318.webp",
+      "bytes": 38710,
+      "sha256": "16c895b82b96b898390ca45cdbe6ee810515a86656a0dc42c1d7f771c97d1cb7"
+    },
+    {
+      "path": "presentation/american-v1/items/item-301.webp",
+      "bytes": 37852,
+      "sha256": "c45e1f7df8f247a0889aa2181b6eb253eb45f2593853b7906715061b9ec31eea"
+    },
+    {
+      "path": "presentation/american-v1/items/item-375.webp",
+      "bytes": 42754,
+      "sha256": "00734692e8f15069b15cd10e6ac1f8d44dbfc8c9cf847963088d117cceca18b6"
+    },
+    {
+      "path": "presentation/american-v1/items/item-398.webp",
+      "bytes": 34176,
+      "sha256": "afea32cc46264e74787960a746d2c356cec41af484c42184173172d8c54daf23"
+    },
+    {
+      "path": "presentation/american-v1/items/item-230.webp",
+      "bytes": 45632,
+      "sha256": "4d43ce63f649d63f8fe6e7cc1fa03e117a4cf560fb77c108f41b45fa52bd588e"
+    },
+    {
+      "path": "presentation/american-v1/items/item-302.webp",
+      "bytes": 37560,
+      "sha256": "a86c366a34116694dd30e419483d544a6c264e9920ff21c8c5b222b846d8d133"
+    },
+    {
+      "path": "presentation/american-v1/items/item-259.webp",
+      "bytes": 36002,
+      "sha256": "d75f208f52eda46828b7f0b7f5d8cd83b6a7e4c3144334c7fc97f9fb46115401"
+    },
+    {
+      "path": "presentation/american-v1/items/item-260.webp",
+      "bytes": 27394,
+      "sha256": "cc2ea8095d8854a2d8bf92a0738c24acbbcfced2e8511d0ed9b087d0fadffe73"
+    },
+    {
+      "path": "presentation/american-v1/items/item-249.webp",
+      "bytes": 50014,
+      "sha256": "245f9ed71c6d2ec4a8a574dbde46f93c38be48edca6e2a249786b5c893c60535"
+    },
+    {
+      "path": "presentation/american-v1/items/item-319.webp",
+      "bytes": 51998,
+      "sha256": "a6d9f272fe84811391290d91998cb751a423e028cb3643505d3c713b2e760765"
+    },
+    {
+      "path": "presentation/american-v1/items/item-303.webp",
+      "bytes": 27026,
+      "sha256": "cc4497e0ce7aa37c0f0051240bd2ff48bc76f42ef58c2dfa6abd96ba7a573f6b"
+    },
+    {
+      "path": "presentation/american-v1/items/item-347.webp",
+      "bytes": 35416,
+      "sha256": "f716be54bee02af47705c1ec0bdbd58ca8bc8e27b369d2853794ec12d8795baa"
+    },
+    {
+      "path": "presentation/american-v1/items/item-376.webp",
+      "bytes": 28518,
+      "sha256": "46c8bad1f605cb541f37f9302e1776fb0868da67429c2f359a502479e606c860"
+    },
+    {
+      "path": "presentation/american-v1/items/item-377.webp",
+      "bytes": 57776,
+      "sha256": "74859df525509b2b42fefceec9decc73508ab9fc808fb817f37d8ff53c75c9f2"
+    },
+    {
+      "path": "presentation/american-v1/items/item-378.webp",
+      "bytes": 36014,
+      "sha256": "8a7bcc7c928f64963a2308c6ce6cf0661553c58d6c77bfb8360229cf74b42b6a"
+    },
+    {
+      "path": "presentation/american-v1/ui-icons.webp",
+      "bytes": 1041676,
+      "sha256": "6fedaa082e8862bff14441ecc5d83aeef433b78ffe350fa7ddf1b4a66362647f"
+    },
+    {
+      "path": "presentation/american-v1/home-world.webp",
+      "bytes": 583164,
+      "sha256": "fb6cc6ab44f6634beeaaa67dce66dc6ca110bc95d0d5ca2b6f31b56f599fc0ce"
+    }
+  ],
+  "results": [
+    {
+      "stage": 1,
+      "edition": "classic",
+      "collected": 26,
+      "steps": 26,
+      "assists": 0,
+      "restores": 2
+    },
+    {
+      "stage": 1,
+      "edition": "neighborhood-3",
+      "collected": 18,
+      "steps": 18,
+      "assists": 0,
+      "restores": 2
+    },
+    {
+      "stage": 2,
+      "edition": "classic",
+      "collected": 80,
+      "steps": 78,
+      "assists": 7,
+      "restores": 5
+    },
+    {
+      "stage": 2,
+      "edition": "neighborhood-3",
+      "collected": 28,
+      "steps": 28,
+      "assists": 0,
+      "restores": 2
+    },
+    {
+      "stage": 3,
+      "edition": "classic",
+      "collected": 209,
+      "steps": 160,
+      "assists": 33,
+      "restores": 10
+    },
+    {
+      "stage": 3,
+      "edition": "neighborhood-3",
+      "collected": 36,
+      "steps": 36,
+      "assists": 0,
+      "restores": 3
+    },
+    {
+      "stage": 4,
+      "edition": "classic",
+      "collected": 194,
+      "steps": 155,
+      "assists": 29,
+      "restores": 10
+    },
+    {
+      "stage": 4,
+      "edition": "neighborhood-3",
+      "collected": 44,
+      "steps": 44,
+      "assists": 0,
+      "restores": 3
+    },
+    {
+      "stage": 5,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 185,
+      "assists": 12,
+      "restores": 11
+    },
+    {
+      "stage": 5,
+      "edition": "neighborhood-3",
+      "collected": 52,
+      "steps": 52,
+      "assists": 0,
+      "restores": 4
+    },
+    {
+      "stage": 6,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 175,
+      "assists": 25,
+      "restores": 11
+    },
+    {
+      "stage": 6,
+      "edition": "neighborhood-3",
+      "collected": 60,
+      "steps": 60,
+      "assists": 0,
+      "restores": 4
+    },
+    {
+      "stage": 7,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 187,
+      "assists": 24,
+      "restores": 11
+    },
+    {
+      "stage": 7,
+      "edition": "neighborhood-3",
+      "collected": 66,
+      "steps": 66,
+      "assists": 0,
+      "restores": 4
+    },
+    {
+      "stage": 8,
+      "edition": "classic",
+      "collected": 195,
+      "steps": 153,
+      "assists": 32,
+      "restores": 9
+    },
+    {
+      "stage": 8,
+      "edition": "neighborhood-3",
+      "collected": 72,
+      "steps": 72,
+      "assists": 0,
+      "restores": 5
+    },
+    {
+      "stage": 9,
+      "edition": "classic",
+      "collected": 193,
+      "steps": 176,
+      "assists": 15,
+      "restores": 11
+    },
+    {
+      "stage": 9,
+      "edition": "neighborhood-3",
+      "collected": 64,
+      "steps": 64,
+      "assists": 0,
+      "restores": 4
+    },
+    {
+      "stage": 10,
+      "edition": "classic",
+      "collected": 202,
+      "steps": 180,
+      "assists": 27,
+      "restores": 11
+    },
+    {
+      "stage": 10,
+      "edition": "neighborhood-3",
+      "collected": 84,
+      "steps": 84,
+      "assists": 0,
+      "restores": 5
+    },
+    {
+      "stage": 11,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 163,
+      "assists": 26,
+      "restores": 10
+    },
+    {
+      "stage": 11,
+      "edition": "neighborhood-3",
+      "collected": 76,
+      "steps": 76,
+      "assists": 0,
+      "restores": 5
+    },
+    {
+      "stage": 12,
+      "edition": "classic",
+      "collected": 204,
+      "steps": 161,
+      "assists": 28,
+      "restores": 10
+    },
+    {
+      "stage": 12,
+      "edition": "neighborhood-3",
+      "collected": 90,
+      "steps": 90,
+      "assists": 0,
+      "restores": 6
+    },
+    {
+      "stage": 13,
+      "edition": "classic",
+      "collected": 191,
+      "steps": 142,
+      "assists": 26,
+      "restores": 9
+    },
+    {
+      "stage": 13,
+      "edition": "neighborhood-3",
+      "collected": 98,
+      "steps": 98,
+      "assists": 0,
+      "restores": 6
+    },
+    {
+      "stage": 14,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 126,
+      "assists": 29,
+      "restores": 8
+    },
+    {
+      "stage": 14,
+      "edition": "neighborhood-3",
+      "collected": 84,
+      "steps": 84,
+      "assists": 0,
+      "restores": 5
+    },
+    {
+      "stage": 15,
+      "edition": "classic",
+      "collected": 202,
+      "steps": 135,
+      "assists": 37,
+      "restores": 8
+    },
+    {
+      "stage": 15,
+      "edition": "neighborhood-3",
+      "collected": 108,
+      "steps": 108,
+      "assists": 0,
+      "restores": 7
+    },
+    {
+      "stage": 16,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 174,
+      "assists": 29,
+      "restores": 11
+    },
+    {
+      "stage": 16,
+      "edition": "neighborhood-3",
+      "collected": 116,
+      "steps": 116,
+      "assists": 0,
+      "restores": 7
+    },
+    {
+      "stage": 17,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 167,
+      "assists": 21,
+      "restores": 10
+    },
+    {
+      "stage": 17,
+      "edition": "neighborhood-3",
+      "collected": 104,
+      "steps": 104,
+      "assists": 0,
+      "restores": 7
+    },
+    {
+      "stage": 18,
+      "edition": "classic",
+      "collected": 186,
+      "steps": 156,
+      "assists": 26,
+      "restores": 10
+    },
+    {
+      "stage": 18,
+      "edition": "neighborhood-3",
+      "collected": 128,
+      "steps": 128,
+      "assists": 0,
+      "restores": 8
+    },
+    {
+      "stage": 19,
+      "edition": "classic",
+      "collected": 192,
+      "steps": 141,
+      "assists": 34,
+      "restores": 9
+    },
+    {
+      "stage": 19,
+      "edition": "neighborhood-3",
+      "collected": 144,
+      "steps": 144,
+      "assists": 0,
+      "restores": 9
+    },
+    {
+      "stage": 20,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 145,
+      "assists": 34,
+      "restores": 9
+    },
+    {
+      "stage": 20,
+      "edition": "neighborhood-3",
+      "collected": 164,
+      "steps": 164,
+      "assists": 0,
+      "restores": 10
+    },
+    {
+      "stage": 21,
+      "edition": "classic",
+      "collected": 181,
+      "steps": 139,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 21,
+      "edition": "neighborhood-3",
+      "collected": 181,
+      "steps": 139,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 22,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 167,
+      "assists": 21,
+      "restores": 10
+    },
+    {
+      "stage": 22,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 167,
+      "assists": 21,
+      "restores": 10
+    },
+    {
+      "stage": 23,
+      "edition": "classic",
+      "collected": 205,
+      "steps": 150,
+      "assists": 33,
+      "restores": 9
+    },
+    {
+      "stage": 23,
+      "edition": "neighborhood-3",
+      "collected": 205,
+      "steps": 150,
+      "assists": 33,
+      "restores": 9
+    },
+    {
+      "stage": 24,
+      "edition": "classic",
+      "collected": 187,
+      "steps": 145,
+      "assists": 31,
+      "restores": 9
+    },
+    {
+      "stage": 24,
+      "edition": "neighborhood-3",
+      "collected": 187,
+      "steps": 145,
+      "assists": 31,
+      "restores": 9
+    },
+    {
+      "stage": 25,
+      "edition": "classic",
+      "collected": 196,
+      "steps": 152,
+      "assists": 26,
+      "restores": 9
+    },
+    {
+      "stage": 25,
+      "edition": "neighborhood-3",
+      "collected": 196,
+      "steps": 152,
+      "assists": 26,
+      "restores": 9
+    },
+    {
+      "stage": 26,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 26,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 27,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 27,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 28,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 28,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 29,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 29,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 30,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 30,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 31,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 31,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 32,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 32,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 33,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 142,
+      "assists": 50,
+      "restores": 9
+    },
+    {
+      "stage": 33,
+      "edition": "neighborhood-3",
+      "collected": 201,
+      "steps": 169,
+      "assists": 37,
+      "restores": 10
+    },
+    {
+      "stage": 34,
+      "edition": "classic",
+      "collected": 194,
+      "steps": 130,
+      "assists": 41,
+      "restores": 8
+    },
+    {
+      "stage": 34,
+      "edition": "neighborhood-3",
+      "collected": 194,
+      "steps": 133,
+      "assists": 38,
+      "restores": 8
+    },
+    {
+      "stage": 35,
+      "edition": "classic",
+      "collected": 209,
+      "steps": 132,
+      "assists": 57,
+      "restores": 8
+    },
+    {
+      "stage": 35,
+      "edition": "neighborhood-3",
+      "collected": 209,
+      "steps": 152,
+      "assists": 49,
+      "restores": 9
+    },
+    {
+      "stage": 36,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 110,
+      "assists": 36,
+      "restores": 7
+    },
+    {
+      "stage": 36,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 183,
+      "assists": 25,
+      "restores": 11
+    },
+    {
+      "stage": 37,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 113,
+      "assists": 34,
+      "restores": 7
+    },
+    {
+      "stage": 37,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 10,
+      "restores": 12
+    },
+    {
+      "stage": 38,
+      "edition": "classic",
+      "collected": 209,
+      "steps": 171,
+      "assists": 31,
+      "restores": 11
+    },
+    {
+      "stage": 38,
+      "edition": "neighborhood-3",
+      "collected": 209,
+      "steps": 192,
+      "assists": 15,
+      "restores": 12
+    },
+    {
+      "stage": 39,
+      "edition": "classic",
+      "collected": 192,
+      "steps": 114,
+      "assists": 41,
+      "restores": 7
+    },
+    {
+      "stage": 39,
+      "edition": "neighborhood-3",
+      "collected": 192,
+      "steps": 141,
+      "assists": 33,
+      "restores": 9
+    },
+    {
+      "stage": 40,
+      "edition": "classic",
+      "collected": 202,
+      "steps": 202,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 40,
+      "edition": "neighborhood-3",
+      "collected": 202,
+      "steps": 202,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 41,
+      "edition": "classic",
+      "collected": 176,
+      "steps": 176,
+      "assists": 0,
+      "restores": 11
+    },
+    {
+      "stage": 41,
+      "edition": "neighborhood-3",
+      "collected": 176,
+      "steps": 176,
+      "assists": 0,
+      "restores": 11
+    },
+    {
+      "stage": 42,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 187,
+      "assists": 8,
+      "restores": 11
+    },
+    {
+      "stage": 42,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 187,
+      "assists": 8,
+      "restores": 11
+    },
+    {
+      "stage": 43,
+      "edition": "classic",
+      "collected": 180,
+      "steps": 180,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 43,
+      "edition": "neighborhood-3",
+      "collected": 180,
+      "steps": 180,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 44,
+      "edition": "classic",
+      "collected": 196,
+      "steps": 196,
+      "assists": 7,
+      "restores": 12
+    },
+    {
+      "stage": 44,
+      "edition": "neighborhood-3",
+      "collected": 196,
+      "steps": 196,
+      "assists": 7,
+      "restores": 12
+    },
+    {
+      "stage": 45,
+      "edition": "classic",
+      "collected": 185,
+      "steps": 185,
+      "assists": 0,
+      "restores": 11
+    },
+    {
+      "stage": 45,
+      "edition": "neighborhood-3",
+      "collected": 185,
+      "steps": 185,
+      "assists": 0,
+      "restores": 11
+    },
+    {
+      "stage": 46,
+      "edition": "classic",
+      "collected": 194,
+      "steps": 193,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 46,
+      "edition": "neighborhood-3",
+      "collected": 194,
+      "steps": 193,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 47,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 188,
+      "assists": 13,
+      "restores": 12
+    },
+    {
+      "stage": 47,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 188,
+      "assists": 13,
+      "restores": 12
+    },
+    {
+      "stage": 48,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 48,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 49,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 49,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 50,
+      "edition": "classic",
+      "collected": 202,
+      "steps": 202,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 50,
+      "edition": "neighborhood-3",
+      "collected": 202,
+      "steps": 202,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 51,
+      "edition": "classic",
+      "collected": 176,
+      "steps": 176,
+      "assists": 0,
+      "restores": 11
+    },
+    {
+      "stage": 51,
+      "edition": "neighborhood-3",
+      "collected": 176,
+      "steps": 176,
+      "assists": 0,
+      "restores": 11
+    },
+    {
+      "stage": 52,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 188,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 52,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 188,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 53,
+      "edition": "classic",
+      "collected": 180,
+      "steps": 180,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 53,
+      "edition": "neighborhood-3",
+      "collected": 180,
+      "steps": 180,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 54,
+      "edition": "classic",
+      "collected": 196,
+      "steps": 196,
+      "assists": 7,
+      "restores": 12
+    },
+    {
+      "stage": 54,
+      "edition": "neighborhood-3",
+      "collected": 196,
+      "steps": 196,
+      "assists": 7,
+      "restores": 12
+    },
+    {
+      "stage": 55,
+      "edition": "classic",
+      "collected": 185,
+      "steps": 185,
+      "assists": 1,
+      "restores": 11
+    },
+    {
+      "stage": 55,
+      "edition": "neighborhood-3",
+      "collected": 185,
+      "steps": 185,
+      "assists": 1,
+      "restores": 11
+    },
+    {
+      "stage": 56,
+      "edition": "classic",
+      "collected": 194,
+      "steps": 192,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 56,
+      "edition": "neighborhood-3",
+      "collected": 194,
+      "steps": 192,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 57,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 188,
+      "assists": 11,
+      "restores": 12
+    },
+    {
+      "stage": 57,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 188,
+      "assists": 11,
+      "restores": 12
+    },
+    {
+      "stage": 58,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 58,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 59,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 59,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 60,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 197,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 60,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 197,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 61,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 61,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 62,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 62,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 63,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 63,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 64,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 64,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 65,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 65,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 66,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 66,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 67,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 10,
+      "restores": 12
+    },
+    {
+      "stage": 67,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 10,
+      "restores": 12
+    },
+    {
+      "stage": 68,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 68,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 69,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 197,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 69,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 197,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 70,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 70,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 71,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 71,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 72,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 72,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 73,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 197,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 73,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 197,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 74,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 74,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 75,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 75,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 76,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 76,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 77,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 77,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 78,
+      "edition": "classic",
+      "collected": 183,
+      "steps": 183,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 78,
+      "edition": "neighborhood-3",
+      "collected": 183,
+      "steps": 183,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 79,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 1,
+      "restores": 12
+    },
+    {
+      "stage": 79,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 1,
+      "restores": 12
+    },
+    {
+      "stage": 80,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 199,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 80,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 199,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 81,
+      "edition": "classic",
+      "collected": 205,
+      "steps": 204,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 81,
+      "edition": "neighborhood-3",
+      "collected": 205,
+      "steps": 204,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 82,
+      "edition": "classic",
+      "collected": 182,
+      "steps": 181,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 82,
+      "edition": "neighborhood-3",
+      "collected": 182,
+      "steps": 181,
+      "assists": 3,
+      "restores": 11
+    },
+    {
+      "stage": 83,
+      "edition": "classic",
+      "collected": 207,
+      "steps": 206,
+      "assists": 8,
+      "restores": 13
+    },
+    {
+      "stage": 83,
+      "edition": "neighborhood-3",
+      "collected": 207,
+      "steps": 206,
+      "assists": 8,
+      "restores": 13
+    },
+    {
+      "stage": 84,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 84,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 85,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 188,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 85,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 188,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 86,
+      "edition": "classic",
+      "collected": 208,
+      "steps": 208,
+      "assists": 1,
+      "restores": 13
+    },
+    {
+      "stage": 86,
+      "edition": "neighborhood-3",
+      "collected": 208,
+      "steps": 208,
+      "assists": 1,
+      "restores": 13
+    },
+    {
+      "stage": 87,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 201,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 87,
+      "edition": "neighborhood-3",
+      "collected": 201,
+      "steps": 201,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 88,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 190,
+      "assists": 5,
+      "restores": 12
+    },
+    {
+      "stage": 88,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 190,
+      "assists": 5,
+      "restores": 12
+    },
+    {
+      "stage": 89,
+      "edition": "classic",
+      "collected": 180,
+      "steps": 180,
+      "assists": 2,
+      "restores": 11
+    },
+    {
+      "stage": 89,
+      "edition": "neighborhood-3",
+      "collected": 180,
+      "steps": 180,
+      "assists": 2,
+      "restores": 11
+    },
+    {
+      "stage": 90,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 188,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 90,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 188,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 91,
+      "edition": "classic",
+      "collected": 202,
+      "steps": 201,
+      "assists": 5,
+      "restores": 12
+    },
+    {
+      "stage": 91,
+      "edition": "neighborhood-3",
+      "collected": 202,
+      "steps": 201,
+      "assists": 5,
+      "restores": 12
+    },
+    {
+      "stage": 92,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 187,
+      "assists": 2,
+      "restores": 11
+    },
+    {
+      "stage": 92,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 187,
+      "assists": 2,
+      "restores": 11
+    },
+    {
+      "stage": 93,
+      "edition": "classic",
+      "collected": 196,
+      "steps": 196,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 93,
+      "edition": "neighborhood-3",
+      "collected": 196,
+      "steps": 196,
+      "assists": 0,
+      "restores": 12
+    },
+    {
+      "stage": 94,
+      "edition": "classic",
+      "collected": 195,
+      "steps": 195,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 94,
+      "edition": "neighborhood-3",
+      "collected": 195,
+      "steps": 195,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 95,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 185,
+      "assists": 6,
+      "restores": 11
+    },
+    {
+      "stage": 95,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 185,
+      "assists": 6,
+      "restores": 11
+    },
+    {
+      "stage": 96,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 96,
+      "edition": "neighborhood-3",
+      "collected": 201,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 97,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 199,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 97,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 199,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 98,
+      "edition": "classic",
+      "collected": 192,
+      "steps": 186,
+      "assists": 14,
+      "restores": 11
+    },
+    {
+      "stage": 98,
+      "edition": "neighborhood-3",
+      "collected": 192,
+      "steps": 186,
+      "assists": 14,
+      "restores": 11
+    },
+    {
+      "stage": 99,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 197,
+      "assists": 11,
+      "restores": 12
+    },
+    {
+      "stage": 99,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 197,
+      "assists": 11,
+      "restores": 12
+    },
+    {
+      "stage": 100,
+      "edition": "classic",
+      "collected": 202,
+      "steps": 200,
+      "assists": 5,
+      "restores": 12
+    },
+    {
+      "stage": 100,
+      "edition": "neighborhood-3",
+      "collected": 202,
+      "steps": 200,
+      "assists": 5,
+      "restores": 12
+    },
+    {
+      "stage": 101,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 197,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 101,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 197,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 102,
+      "edition": "classic",
+      "collected": 198,
+      "steps": 174,
+      "assists": 15,
+      "restores": 11
+    },
+    {
+      "stage": 102,
+      "edition": "neighborhood-3",
+      "collected": 198,
+      "steps": 174,
+      "assists": 15,
+      "restores": 11
+    },
+    {
+      "stage": 103,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 186,
+      "assists": 8,
+      "restores": 11
+    },
+    {
+      "stage": 103,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 186,
+      "assists": 8,
+      "restores": 11
+    },
+    {
+      "stage": 104,
+      "edition": "classic",
+      "collected": 208,
+      "steps": 208,
+      "assists": 1,
+      "restores": 13
+    },
+    {
+      "stage": 104,
+      "edition": "neighborhood-3",
+      "collected": 208,
+      "steps": 208,
+      "assists": 1,
+      "restores": 13
+    },
+    {
+      "stage": 105,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 184,
+      "assists": 10,
+      "restores": 11
+    },
+    {
+      "stage": 105,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 184,
+      "assists": 10,
+      "restores": 11
+    },
+    {
+      "stage": 106,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 142,
+      "assists": 33,
+      "restores": 9
+    },
+    {
+      "stage": 106,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 142,
+      "assists": 33,
+      "restores": 9
+    },
+    {
+      "stage": 107,
+      "edition": "classic",
+      "collected": 207,
+      "steps": 122,
+      "assists": 40,
+      "restores": 8
+    },
+    {
+      "stage": 107,
+      "edition": "neighborhood-3",
+      "collected": 207,
+      "steps": 122,
+      "assists": 40,
+      "restores": 8
+    },
+    {
+      "stage": 108,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 147,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 108,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 147,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 109,
+      "edition": "classic",
+      "collected": 193,
+      "steps": 127,
+      "assists": 32,
+      "restores": 8
+    },
+    {
+      "stage": 109,
+      "edition": "neighborhood-3",
+      "collected": 193,
+      "steps": 127,
+      "assists": 32,
+      "restores": 8
+    },
+    {
+      "stage": 110,
+      "edition": "classic",
+      "collected": 178,
+      "steps": 135,
+      "assists": 30,
+      "restores": 8
+    },
+    {
+      "stage": 110,
+      "edition": "neighborhood-3",
+      "collected": 178,
+      "steps": 135,
+      "assists": 30,
+      "restores": 8
+    },
+    {
+      "stage": 111,
+      "edition": "classic",
+      "collected": 224,
+      "steps": 163,
+      "assists": 39,
+      "restores": 10
+    },
+    {
+      "stage": 111,
+      "edition": "neighborhood-3",
+      "collected": 224,
+      "steps": 163,
+      "assists": 39,
+      "restores": 10
+    },
+    {
+      "stage": 112,
+      "edition": "classic",
+      "collected": 188,
+      "steps": 185,
+      "assists": 6,
+      "restores": 11
+    },
+    {
+      "stage": 112,
+      "edition": "neighborhood-3",
+      "collected": 188,
+      "steps": 185,
+      "assists": 6,
+      "restores": 11
+    },
+    {
+      "stage": 113,
+      "edition": "classic",
+      "collected": 197,
+      "steps": 183,
+      "assists": 37,
+      "restores": 11
+    },
+    {
+      "stage": 113,
+      "edition": "neighborhood-3",
+      "collected": 197,
+      "steps": 183,
+      "assists": 37,
+      "restores": 11
+    },
+    {
+      "stage": 114,
+      "edition": "classic",
+      "collected": 187,
+      "steps": 176,
+      "assists": 26,
+      "restores": 11
+    },
+    {
+      "stage": 114,
+      "edition": "neighborhood-3",
+      "collected": 187,
+      "steps": 176,
+      "assists": 26,
+      "restores": 11
+    },
+    {
+      "stage": 115,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 200,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 115,
+      "edition": "neighborhood-3",
+      "collected": 201,
+      "steps": 200,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 116,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 199,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 116,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 199,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 117,
+      "edition": "classic",
+      "collected": 197,
+      "steps": 190,
+      "assists": 29,
+      "restores": 12
+    },
+    {
+      "stage": 117,
+      "edition": "neighborhood-3",
+      "collected": 197,
+      "steps": 190,
+      "assists": 29,
+      "restores": 12
+    },
+    {
+      "stage": 118,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 183,
+      "assists": 36,
+      "restores": 11
+    },
+    {
+      "stage": 118,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 183,
+      "assists": 36,
+      "restores": 11
+    },
+    {
+      "stage": 119,
+      "edition": "classic",
+      "collected": 207,
+      "steps": 174,
+      "assists": 39,
+      "restores": 11
+    },
+    {
+      "stage": 119,
+      "edition": "neighborhood-3",
+      "collected": 207,
+      "steps": 174,
+      "assists": 39,
+      "restores": 11
+    },
+    {
+      "stage": 120,
+      "edition": "classic",
+      "collected": 168,
+      "steps": 151,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 120,
+      "edition": "neighborhood-3",
+      "collected": 168,
+      "steps": 151,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 121,
+      "edition": "classic",
+      "collected": 178,
+      "steps": 138,
+      "assists": 27,
+      "restores": 9
+    },
+    {
+      "stage": 121,
+      "edition": "neighborhood-3",
+      "collected": 178,
+      "steps": 138,
+      "assists": 27,
+      "restores": 9
+    },
+    {
+      "stage": 122,
+      "edition": "classic",
+      "collected": 203,
+      "steps": 192,
+      "assists": 33,
+      "restores": 12
+    },
+    {
+      "stage": 122,
+      "edition": "neighborhood-3",
+      "collected": 203,
+      "steps": 192,
+      "assists": 33,
+      "restores": 12
+    },
+    {
+      "stage": 123,
+      "edition": "classic",
+      "collected": 168,
+      "steps": 151,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 123,
+      "edition": "neighborhood-3",
+      "collected": 168,
+      "steps": 151,
+      "assists": 30,
+      "restores": 9
+    },
+    {
+      "stage": 124,
+      "edition": "classic",
+      "collected": 197,
+      "steps": 185,
+      "assists": 30,
+      "restores": 11
+    },
+    {
+      "stage": 124,
+      "edition": "neighborhood-3",
+      "collected": 197,
+      "steps": 185,
+      "assists": 30,
+      "restores": 11
+    },
+    {
+      "stage": 125,
+      "edition": "classic",
+      "collected": 187,
+      "steps": 176,
+      "assists": 26,
+      "restores": 11
+    },
+    {
+      "stage": 125,
+      "edition": "neighborhood-3",
+      "collected": 187,
+      "steps": 176,
+      "assists": 26,
+      "restores": 11
+    },
+    {
+      "stage": 126,
+      "edition": "classic",
+      "collected": 178,
+      "steps": 138,
+      "assists": 27,
+      "restores": 9
+    },
+    {
+      "stage": 126,
+      "edition": "neighborhood-3",
+      "collected": 178,
+      "steps": 138,
+      "assists": 27,
+      "restores": 9
+    },
+    {
+      "stage": 127,
+      "edition": "classic",
+      "collected": 191,
+      "steps": 181,
+      "assists": 27,
+      "restores": 11
+    },
+    {
+      "stage": 127,
+      "edition": "neighborhood-3",
+      "collected": 191,
+      "steps": 181,
+      "assists": 27,
+      "restores": 11
+    },
+    {
+      "stage": 128,
+      "edition": "classic",
+      "collected": 197,
+      "steps": 186,
+      "assists": 30,
+      "restores": 11
+    },
+    {
+      "stage": 128,
+      "edition": "neighborhood-3",
+      "collected": 197,
+      "steps": 186,
+      "assists": 30,
+      "restores": 11
+    },
+    {
+      "stage": 129,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 178,
+      "assists": 40,
+      "restores": 11
+    },
+    {
+      "stage": 129,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 178,
+      "assists": 40,
+      "restores": 11
+    },
+    {
+      "stage": 130,
+      "edition": "classic",
+      "collected": 207,
+      "steps": 172,
+      "assists": 39,
+      "restores": 11
+    },
+    {
+      "stage": 130,
+      "edition": "neighborhood-3",
+      "collected": 207,
+      "steps": 172,
+      "assists": 39,
+      "restores": 11
+    },
+    {
+      "stage": 131,
+      "edition": "classic",
+      "collected": 168,
+      "steps": 148,
+      "assists": 35,
+      "restores": 9
+    },
+    {
+      "stage": 131,
+      "edition": "neighborhood-3",
+      "collected": 168,
+      "steps": 148,
+      "assists": 35,
+      "restores": 9
+    },
+    {
+      "stage": 132,
+      "edition": "classic",
+      "collected": 178,
+      "steps": 139,
+      "assists": 27,
+      "restores": 9
+    },
+    {
+      "stage": 132,
+      "edition": "neighborhood-3",
+      "collected": 178,
+      "steps": 139,
+      "assists": 27,
+      "restores": 9
+    },
+    {
+      "stage": 133,
+      "edition": "classic",
+      "collected": 203,
+      "steps": 190,
+      "assists": 34,
+      "restores": 12
+    },
+    {
+      "stage": 133,
+      "edition": "neighborhood-3",
+      "collected": 203,
+      "steps": 190,
+      "assists": 34,
+      "restores": 12
+    },
+    {
+      "stage": 134,
+      "edition": "classic",
+      "collected": 185,
+      "steps": 149,
+      "assists": 60,
+      "restores": 9
+    },
+    {
+      "stage": 134,
+      "edition": "neighborhood-3",
+      "collected": 185,
+      "steps": 149,
+      "assists": 60,
+      "restores": 9
+    },
+    {
+      "stage": 135,
+      "edition": "classic",
+      "collected": 180,
+      "steps": 151,
+      "assists": 35,
+      "restores": 9
+    },
+    {
+      "stage": 135,
+      "edition": "neighborhood-3",
+      "collected": 180,
+      "steps": 151,
+      "assists": 35,
+      "restores": 9
+    },
+    {
+      "stage": 136,
+      "edition": "classic",
+      "collected": 187,
+      "steps": 150,
+      "assists": 28,
+      "restores": 9
+    },
+    {
+      "stage": 136,
+      "edition": "neighborhood-3",
+      "collected": 187,
+      "steps": 150,
+      "assists": 28,
+      "restores": 9
+    },
+    {
+      "stage": 137,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 182,
+      "assists": 38,
+      "restores": 11
+    },
+    {
+      "stage": 137,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 182,
+      "assists": 38,
+      "restores": 11
+    },
+    {
+      "stage": 138,
+      "edition": "classic",
+      "collected": 173,
+      "steps": 151,
+      "assists": 44,
+      "restores": 9
+    },
+    {
+      "stage": 138,
+      "edition": "neighborhood-3",
+      "collected": 173,
+      "steps": 151,
+      "assists": 44,
+      "restores": 9
+    },
+    {
+      "stage": 139,
+      "edition": "classic",
+      "collected": 176,
+      "steps": 150,
+      "assists": 37,
+      "restores": 9
+    },
+    {
+      "stage": 139,
+      "edition": "neighborhood-3",
+      "collected": 176,
+      "steps": 150,
+      "assists": 37,
+      "restores": 9
+    },
+    {
+      "stage": 140,
+      "edition": "classic",
+      "collected": 191,
+      "steps": 176,
+      "assists": 31,
+      "restores": 11
+    },
+    {
+      "stage": 140,
+      "edition": "neighborhood-3",
+      "collected": 191,
+      "steps": 176,
+      "assists": 31,
+      "restores": 11
+    },
+    {
+      "stage": 141,
+      "edition": "classic",
+      "collected": 181,
+      "steps": 155,
+      "assists": 43,
+      "restores": 10
+    },
+    {
+      "stage": 141,
+      "edition": "neighborhood-3",
+      "collected": 181,
+      "steps": 155,
+      "assists": 43,
+      "restores": 10
+    },
+    {
+      "stage": 142,
+      "edition": "classic",
+      "collected": 183,
+      "steps": 147,
+      "assists": 37,
+      "restores": 9
+    },
+    {
+      "stage": 142,
+      "edition": "neighborhood-3",
+      "collected": 183,
+      "steps": 147,
+      "assists": 37,
+      "restores": 9
+    },
+    {
+      "stage": 143,
+      "edition": "classic",
+      "collected": 183,
+      "steps": 164,
+      "assists": 47,
+      "restores": 10
+    },
+    {
+      "stage": 143,
+      "edition": "neighborhood-3",
+      "collected": 183,
+      "steps": 164,
+      "assists": 47,
+      "restores": 10
+    },
+    {
+      "stage": 144,
+      "edition": "classic",
+      "collected": 156,
+      "steps": 136,
+      "assists": 22,
+      "restores": 8
+    },
+    {
+      "stage": 144,
+      "edition": "neighborhood-3",
+      "collected": 156,
+      "steps": 136,
+      "assists": 22,
+      "restores": 8
+    },
+    {
+      "stage": 145,
+      "edition": "classic",
+      "collected": 170,
+      "steps": 138,
+      "assists": 43,
+      "restores": 9
+    },
+    {
+      "stage": 145,
+      "edition": "neighborhood-3",
+      "collected": 170,
+      "steps": 138,
+      "assists": 43,
+      "restores": 9
+    },
+    {
+      "stage": 146,
+      "edition": "classic",
+      "collected": 198,
+      "steps": 187,
+      "assists": 12,
+      "restores": 11
+    },
+    {
+      "stage": 146,
+      "edition": "neighborhood-3",
+      "collected": 198,
+      "steps": 187,
+      "assists": 12,
+      "restores": 11
+    },
+    {
+      "stage": 147,
+      "edition": "classic",
+      "collected": 196,
+      "steps": 196,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 147,
+      "edition": "neighborhood-3",
+      "collected": 196,
+      "steps": 196,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 148,
+      "edition": "classic",
+      "collected": 195,
+      "steps": 195,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 148,
+      "edition": "neighborhood-3",
+      "collected": 195,
+      "steps": 195,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 149,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 188,
+      "assists": 13,
+      "restores": 12
+    },
+    {
+      "stage": 149,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 188,
+      "assists": 13,
+      "restores": 12
+    },
+    {
+      "stage": 150,
+      "edition": "classic",
+      "collected": 209,
+      "steps": 122,
+      "assists": 36,
+      "restores": 8
+    },
+    {
+      "stage": 150,
+      "edition": "neighborhood-3",
+      "collected": 209,
+      "steps": 122,
+      "assists": 36,
+      "restores": 8
+    },
+    {
+      "stage": 151,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 151,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 199,
+      "assists": 4,
+      "restores": 12
+    },
+    {
+      "stage": 152,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 196,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 152,
+      "edition": "neighborhood-3",
+      "collected": 201,
+      "steps": 196,
+      "assists": 9,
+      "restores": 12
+    },
+    {
+      "stage": 153,
+      "edition": "classic",
+      "collected": 192,
+      "steps": 192,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 153,
+      "edition": "neighborhood-3",
+      "collected": 192,
+      "steps": 192,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 154,
+      "edition": "classic",
+      "collected": 201,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 154,
+      "edition": "neighborhood-3",
+      "collected": 201,
+      "steps": 200,
+      "assists": 3,
+      "restores": 12
+    },
+    {
+      "stage": 155,
+      "edition": "classic",
+      "collected": 199,
+      "steps": 199,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 155,
+      "edition": "neighborhood-3",
+      "collected": 199,
+      "steps": 199,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 156,
+      "edition": "classic",
+      "collected": 209,
+      "steps": 122,
+      "assists": 36,
+      "restores": 8
+    },
+    {
+      "stage": 156,
+      "edition": "neighborhood-3",
+      "collected": 209,
+      "steps": 122,
+      "assists": 36,
+      "restores": 8
+    },
+    {
+      "stage": 157,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 157,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 198,
+      "assists": 8,
+      "restores": 12
+    },
+    {
+      "stage": 158,
+      "edition": "classic",
+      "collected": 190,
+      "steps": 188,
+      "assists": 13,
+      "restores": 12
+    },
+    {
+      "stage": 158,
+      "edition": "neighborhood-3",
+      "collected": 190,
+      "steps": 188,
+      "assists": 13,
+      "restores": 12
+    },
+    {
+      "stage": 159,
+      "edition": "classic",
+      "collected": 156,
+      "steps": 136,
+      "assists": 22,
+      "restores": 8
+    },
+    {
+      "stage": 159,
+      "edition": "neighborhood-3",
+      "collected": 156,
+      "steps": 136,
+      "assists": 22,
+      "restores": 8
+    },
+    {
+      "stage": 160,
+      "edition": "classic",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    },
+    {
+      "stage": 160,
+      "edition": "neighborhood-3",
+      "collected": 200,
+      "steps": 200,
+      "assists": 2,
+      "restores": 12
+    }
+  ],
+  "notes": "Automated assisted progression and checkpoint checks; not a claim of every level solvable without tools or manual approval of every sprite."
+}

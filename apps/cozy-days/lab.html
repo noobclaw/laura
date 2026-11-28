@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sorting Lab</title><link rel="stylesheet" href="./examples/lab.css">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+</head>
+<body>
+<main class="lab">
+<header><div><p class="eyebrow">INDEPENDENT LOGIC PREVIEW</p><h1>Sorting Lab</h1></div><label>Stage <select id="stage" aria-label="Stage"></select></label></header>
+<div class="status"><span id="phase">Loading…</span><span id="elapsed">0:00</span><span id="remaining"></span></div>
+<section id="bays" class="bays" aria-label="Delivery requests"></section>
+<div class="board"><canvas id="board" aria-label="Sorting board"></canvas><div id="message" role="status"></div></div>
+<section id="tray" class="tray" aria-label="Waiting tray"></section>
+<nav class="tools" aria-label="Tools"><button data-action="reverse">Reverse</button><button data-action="returnTray">Return 3</button><button data-action="sweepBay">Fill request</button><button data-action="scan">Scan</button><button data-action="eraseMode">Erase</button><button data-action="prompt">Hint</button></nav>
+<footer><button id="restart">Restart</button><button id="save">Save</button><button id="restore">Restore</button><label class="outlines"><input id="outlines" type="checkbox"> Outlines</label></footer>
+<p class="note">Independent sandbox · 160 stages · unlimited test tools · no progress or rewards added to normal play. <a href="./">Return to normal play</a></p>
+</main>
+<script type="module" src="./examples/lab.js"></script>
+</body>
+</html>

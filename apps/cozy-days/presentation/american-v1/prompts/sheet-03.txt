@@ -1,0 +1,38 @@
+Use case: stylized-concept. NEW production transparent game sprite atlas. EXACTLY 6 columns by 6 rows, 36 equal square cells. One centered isolated object per cell. All outer edges fully visible, 12% clear margin in every cell, no object crosses into neighboring cell. Real transparent background, no background shadows, no frames, no labels, no text, no brands, no lettering. Square 2048x2048. Cohesive American cozy family-household casual game art: sculpted painterly 3D, crisp rounded silhouettes, realistic tactile materials, cream/sage/denim/terracotta palette, top-left soft light, clean contrast readable at 64px. American everyday product designs, no Asian branded packaging. Reference image gives STYLE ONLY. Invent all objects. Exact inventory LEFT TO RIGHT TOP TO BOTTOM:
+1. Cosmetics
+2. Eggs
+3. Cooking Oil
+4. Tape Measures
+5. Combs
+6. Mirrors
+7. Hangers
+8. crumpled red cleaning rag
+9. Sandwiches
+10. yellow pencil and pink eraser
+11. Desk Lamps
+12. Chips
+13. Ashtrays
+14. Hoses
+15. closed plain cigarette packet, no lettering
+16. Plastic Bags
+17. USB Cables
+18. Bar Soap
+19. Hair Clips
+20. narrow order receipt slip with simple abstract lines
+21. Empty Flower Pots
+22. large blue laundry detergent jug with handle, no text
+23. Popcorn
+24. Knives
+25. Slippers
+26. Donuts
+27. Gift Boxes
+28. Envelopes
+29. Puzzle Cubes
+30. Picture Frames
+31. Pens
+32. Plates
+33. Hair Dryers
+34. Toy Vehicles
+35. Wine Glasses
+36. Toothpaste
+Do not omit, duplicate, substitute, or add objects. No scenic collage, only independently sliceable sprites.

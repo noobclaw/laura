@@ -1,0 +1,38 @@
+Use case: stylized-concept. Production transparent game SPRITE ATLAS, not a presentation board. EXACTLY 6 columns and 6 rows, 36 isolated single objects, one centered fully inside each equal square cell, cell boundaries precisely aligned, 12% empty gutters, absolutely no grid lines, no labels, no scenery, no ground plane, no drop shadows outside objects. Transparent background including all gutters. Output square 2048x2048 or higher. Original polished American cozy casual mobile sorting-game art: rounded sculpted 3D illustration, crisp silhouettes, warm cream/sage/denim/terracotta palette, upper-left soft key light, gentle material highlights, detailed yet legible at 64px, no thick black outlines, no brands, no lettering. Every object full and separate. Read the following exact row-major inventory LEFT TO RIGHT, TOP TO BOTTOM:
+1. tan leather work gloves
+2. sage steel insulated water bottle
+3. folded blue bath towel
+4. crumpled scrap paper
+5. cardboard shipping box
+6. cream ceramic coffee mug
+7. round eyeglasses
+8. navy baseball cap
+9. wicker storage basket
+10. car key fob with key
+11. brown leather wallet
+12. tissue box with tissue
+13. navy canvas school backpack
+14. paper takeaway cup
+15. brown paper shopping bag
+16. basketball
+17. golden snack chip bag without text
+18. red plaid folded shirt
+19. wooden scrub brush
+20. red apple
+21. striped socks
+22. smartphone
+23. terracotta leather handbag
+24. broccoli
+25. spiral notebook
+26. banana peel
+27. wireless earbuds in case
+28. toilet paper roll
+29. closed folded umbrella
+30. push broom
+31. canvas tote bag
+32. wristwatch
+33. metal bucket
+34. knitted scarf
+35. sage sofa cushion
+36. folded newspaper without readable text
+Do not repeat, omit, add or substitute objects. Each cell contains only its assigned object. Use reference for rendering style only; all subjects new.

@@ -1,0 +1,38 @@
+Use case: stylized-concept. NEW transparent production game sprite atlas, EXACTLY 6 columns x 6 rows, 36 isolated icons. True alpha=0 outside objects, no white backgrounds, no grid lines, no haze, no background shadows. Each subject centered inside its equal cell with 14% empty transparent gutters on every side, no cross-cell overlap or clipped edges. Soft sculpted painterly 3D American cozy family game art, crisp silhouettes, tactile wood, denim, canvas, cream/sage/terracotta/navy palette, top-left soft light, legible at 64px. Do not copy any brands. Inventory LEFT TO RIGHT TOP TO BOTTOM:
+1. clear blue-tinted plastic drinking water bottle with blue cap, no lettering
+2. several loose silver metal paper clips in a tiny open tin, NOT a stapler
+3. small paper sack of rice with a bread roll, staple food, NOT office staples
+4. one deep cream enamel soup cooking pot with lid and two handles, NOT a plant pot
+5. three small glass nail polish bottles with tall black caps in terracotta sage and cream
+6. a plain pet litter sack with a cat silhouette and a small scoop, no text
+7. one cream sunscreen squeeze tube with a sun emblem, no text
+8. a slotted flat frying spatula with a wooden handle, NOT a ladle
+9. an orange fox masquerade costume eye mask with ribbon ties, NOT a surgical mask
+10. one medical prescription pad with a small blue medical cross and abstract lines, no letters
+11. one blue clinical clipboard with a medical cross, abstract chart lines, no letters
+12. one short black velvet vinyl record cleaning brush with wooden grip
+13. an open plain paper pouch of spicy beef jerky strips, no writing
+14. small clear bottle of golden apple juice with an apple emblem and red cap, no text
+15. orange juice carton with an orange fruit emblem, no text
+16. a clear takeaway cup of iced lemon drink with straw, no text
+17. a navy digital wristwatch with a rectangular black display and simple glowing bars, no numbers
+18. two closed cans of pet food with simple paw emblems, no lettering
+19. a folded collapsible sage silicone dog bowl with a small carabiner
+20. small manual pencil sharpener with a short wooden pencil, NOT a kitchen knife
+21. a cream porcelain vase with delicate blue leaves, NOT a metal cooking pot
+22. one sealed small toy mystery box with a playful wooden toy star illustration, no ribbon, no text
+23. a chilled orange soda can with an orange slice emblem and no lettering
+24. one tan leather baseball catching glove, fingers and stitches clearly visible
+25. one white baseball with red curved stitching
+26. one sage camping lantern with a warm glass glow and wire handle
+27. one small golden lattice apple pie in a navy pie dish
+28. one small classic charcoal kettle barbecue grill with a closed red lid
+29. one hot dog in a soft bun with a mustard zigzag
+30. one wicker picnic basket with red gingham cloth and closed lid
+31. one brown American football with white stripes and white laces
+32. one small sage A-frame camping tent with an orange doorway
+33. one cream enamel camping mug with a denim blue rim
+34. one pair of green canvas gardening gloves
+35. one round wreath of orange maple leaves and small pinecones
+36. one clear snow globe with a tiny American clapboard house inside
+Make precisely the described object in each cell. No extra objects, omitted objects, labels, text, lettering, logos, frame or watermark. 2048x2048 square.

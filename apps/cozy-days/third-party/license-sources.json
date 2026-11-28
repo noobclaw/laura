@@ -1,0 +1,17 @@
+{
+  "@react-three/fiber": {
+    "file": "react-three-fiber.txt",
+    "url": "https://raw.githubusercontent.com/pmndrs/react-three-fiber/master/LICENSE",
+    "checked": "2026-11-28"
+  },
+  "@react-three/rapier": {
+    "file": "react-three-rapier.txt",
+    "url": "https://raw.githubusercontent.com/pmndrs/react-three-rapier/main/LICENSE",
+    "checked": "2026-11-28"
+  },
+  "@dimforge/rapier3d-compat": {
+    "file": "rapier-js.txt",
+    "url": "https://raw.githubusercontent.com/dimforge/rapier.js/master/LICENSE",
+    "checked": "2026-11-28"
+  }
+}
