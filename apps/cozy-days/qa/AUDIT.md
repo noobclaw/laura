@@ -14,7 +14,7 @@
 | AUD-02 | **P0** | 存檔損壞時開機直接顯示「保存失敗」，沒有開始按鈕，玩家永遠進不了遊戲 | `m-corrupt-save-boot.jpg`、`browser-check-2.json` corruptBoot | **已修** `c204268`，驗證圖 `fix-corrupt-save-recovered.jpg` |
 | AUD-03 | P1 | 首次啟動固定顯示簡體中文，不跟系統語言（目標市場是美國和阿拉伯地區） | `browser-check.json` TC-I18N-SYS；`m-home-first-launch.jpg` | **已修** `c204268`，驗證圖 `fix-first-launch-en.jpg` |
 | AUD-04 | **P0** | 第 21–160 關不用道具基本過不了。第 1–20 關經 `balanceStage` 重排（暫存欄峰值 0），第 21 關起沿用舊排布。免費玩家只有各一次的贈送道具，會永久卡在第 21 關 | 貪心機器人 160 關只過 21 關（1–20 + 51）：`kernel-cases.json` TC-LVL-03；beam search 第 21、22、30、60、100、160 關全部失敗：`solver-no-tools.json`；連開第 3 個需求箱 + 7 格暫存欄（等於付費空間包）第 21、30、60 關仍失敗：`solver-expanded.json`；Claude 在真實構建版親自玩第 21 關，收 10 次後暫存欄滿而輸，36 個需求只完成 2 個：`m-stage-021-start.jpg`、`m-stage-021-end.jpg` | 交 Codex CR-01；**待決定**（關卡重排方案） |
-| AUD-05 | P1 | 設定頁寫「勝利返還」體力，但代碼只在首通或星級提升時返還；重玩已三星的關卡贏了不返還 | `kernel-cases.json` TC-ECO-03；`src/progress.js` completeRound；`examples/strings.js` entry | **待決定**：改代碼（每次勝利都返還）或改文案（「首次通關或星級提升時返還」），見 CR-02 |
+| AUD-05 | P1 | 設定頁寫「勝利返還」體力，但代碼只在首通或星級提升時返還；重玩已三星的關卡贏了不返還 | `kernel-cases.json` TC-ECO-03；`src/progress.js` completeRound；`examples/strings.js` entry | **已修** `9416991`（用戶決定改代碼：每次勝利都返還） |
 | AUD-06 | P1 | 正式玩家的設定頁和頁尾露出「關卡測試（獨立沙盒）」，可以直接選全部 160 關、無限使用道具 | `m-settings-zh.jpg`、`m-settings-zhTW.jpg` | 交 Codex CR-03（上架版移除或隱藏） |
 | AUD-07 | P1 | 沒有分享功能（結算頁只有下一關、重來、回首頁） | `browser-check.json` TC-FUN-02；`m-result-001.jpg` | 交 Codex CR-04 |
 | AUD-08 | P1 | 沒有引導評論，設定裡也沒有「給我們評分」 | `browser-check.json` TC-FUN-06 | 交 Codex CR-05 |
