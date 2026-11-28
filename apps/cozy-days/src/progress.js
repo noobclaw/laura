@@ -59,6 +59,12 @@ export class PlayerJournal {
       max = record.capacity;
     let amount = record.power,
       anchor = record.powerAt;
+    // A device clock moved backwards must not push the next refill hours into the future.
+    // The clamped anchor is kept in memory and saved with the next successful write.
+    if (anchor > at) {
+      anchor = at;
+      record.powerAt = at;
+    }
     if (amount >= max) anchor = at;
     else {
       const intervals = Math.floor((at - anchor) / (this.#limits.refillSeconds * 1000));
