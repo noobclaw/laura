@@ -1,0 +1,13 @@
+Running altool at path '/Applications/Xcode_26.3.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+2026-11-28 03:06:56.065  INFO: [ContentDelivery.Uploader.600001C984C0] 
+==========================================
+UPLOAD SUCCEEDED with no errors, 1 warning
+Delivery UUID: 3a9d9271-9e9e-4e81-ab69-d4b5e9573b3c
+Transferred 3529121 bytes in 0.034 seconds (103.5MB/s, 828.028Mbps)
+==========================================
+2026-11-28 03:06:56.066  WARN: [altool.600001C984C0] SDK version issue. This app was built with the iOS 26.2 SDK. Starting April 2027, iOS and iPadOS apps must be built with the iOS 27 SDK or later, included in Xcode 27 or later, in order to be uploaded to App Store Connect or submitted for distribution. (90725)
+   server_warning : 
+      code : 90725
+      description : SDK version issue. This app was built with the iOS 26.2 SDK. Starting April 2027, iOS and iPadOS apps must be built with the iOS 27 SDK or later, included in Xcode 27 or later, in order to be uploaded to App Store Connect or submitted for distribution.
+No errors, 1 warnings, uploading archive at 'build/ipa/Accord.ipa'.

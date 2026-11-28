@@ -1,0 +1,4 @@
+2026-11-28 03:05:55.191 xcodebuild[4481:17162] [MT] IDEDistribution: -[IDEDistributionLogging _createLoggingBundleAtPath:]: Created bundle at path "/var/folders/9d/l02zfgrs7c16twd3wbpdmhkc0000gn/T/Accord_2026-11-28_03-05-55.186.xcdistributionlogs".
+Exported Accord to: /Users/runner/work/laura/laura/apps/accord/build/ipa
+** EXPORT SUCCEEDED **
+
