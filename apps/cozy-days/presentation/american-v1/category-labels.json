@@ -1,0 +1,42 @@
+{
+  "Beer Bottles": {
+    "zh-CN": "柠檬气泡水",
+    "zh-TW": "檸檬氣泡水",
+    "en": "Lemon Sparkling Water"
+  },
+  "Red Wine": {
+    "zh-CN": "橄榄油",
+    "zh-TW": "橄欖油",
+    "en": "Olive Oil"
+  },
+  "Wine Bottles": {
+    "zh-CN": "枫糖浆",
+    "zh-TW": "楓糖漿",
+    "en": "Maple Syrup"
+  },
+  "Cigarettes": {
+    "zh-CN": "彩色粉笔",
+    "zh-TW": "彩色粉筆",
+    "en": "Sidewalk Chalk"
+  },
+  "Cigars": {
+    "zh-CN": "蜡笔盒",
+    "zh-TW": "蠟筆盒",
+    "en": "Crayon Tins"
+  },
+  "Lighters": {
+    "zh-CN": "露营手电",
+    "zh-TW": "露營手電",
+    "en": "Camping Torches"
+  },
+  "Ashtrays": {
+    "zh-CN": "发夹收纳碟",
+    "zh-TW": "髮夾收納碟",
+    "en": "Hair Clip Dishes"
+  },
+  "Toy Pistols": {
+    "zh-CN": "泡泡玩具",
+    "zh-TW": "泡泡玩具",
+    "en": "Bubble Toys"
+  }
+}

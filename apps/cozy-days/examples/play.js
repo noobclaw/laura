@@ -39,6 +39,7 @@ import {
   celebrate,
   cleanupFeedback,
   finishBox,
+  praise,
   boardFeedback,
   motionAllowed
 } from './feedback.js';
@@ -57,6 +58,7 @@ let t = translator(locale),
 let cachedRaw = localStorage.getItem(SAVE_KEY),
   game,
   toastTimer;
+let collectionStreak = 0, lastCollectionAt = 0;
 const assets = new Map(),
   stageCache = new Map();
 const clockText = value => {
@@ -185,6 +187,7 @@ function meter(id, glyph, value, label) {
 }
 
 function disposeBoard() {
+  collectionStreak = 0; lastCollectionAt = 0;
   cleanupFeedback();
   board?.dispose();
   packing?.dispose();
@@ -499,7 +502,8 @@ function updateGame() {
     }, eraseMode && kind === 'rub' ? 'selected' : '');
     const unlock = toolUnlock(kind, game.inspect().roundEdition ?? 'classic');
     const count = kind === 'scan' && ((state.scanCredits ?? 0) > 0 || state.scanTokens.length) ? (state.scanCredits ?? 0) + state.scanTokens.length : game.wallet(kind);
-    node.append(icon(kind), el('b', 'tool-count', number < unlock ? String(unlock) : String(count)), el('span', '', t(kind)));
+    node.append(icon(kind), el('b', 'tool-count', number < unlock ? String(unlock) : String(count)), el('span', '', t(`${kind}Short`)));
+    node.title = t(kind);
     if (number < unlock) node.append(icon('lock'));
     node.dataset.tool = kind;
     node.setAttribute('aria-label',`${t(kind)} · ${number<unlock?t('locked',{n:unlock}):count}`);
@@ -524,6 +528,13 @@ function updateGame() {
 }
 
 function showSignals(signals = []) {
+  if (signals.some(signal => ['selectionBlocked','trayStored','selectionReversed','trayReturned','tokenErased'].includes(signal.kind))) collectionStreak = 0;
+  if (signals.some(signal => signal.kind === 'boardDelivered')) {
+    const now = performance.now();
+    collectionStreak = now-lastCollectionAt < 5000 ? collectionStreak+1 : 1;
+    lastCollectionAt = now;
+    if ([3,5,8].includes(collectionStreak)) praise(byId('play-board'), t('collectionStreak',{n:collectionStreak}));
+  }
   if (signals.some(signal => signal.kind === 'selectionBlocked')) {
     boardFeedback(byId('play-board'), 'blocked');
     toast(t('blocked'));
@@ -900,6 +911,7 @@ function openSettings() {
     input.onchange = () => {
       localStorage.setItem(key, (inverted ? !input.checked : input.checked) ? 'on' : 'off');
       document.documentElement.dataset.motion = localStorage.getItem('sorting-motion') ?? 'on';
+      if (!motionAllowed()) cleanupFeedback();
       if (view === 'home') home();
     };
     row.append(input);

@@ -115,7 +115,7 @@ function ContactShadows({payload,ids}) {
     const pixels=new Uint8Array(64*64*4);
     for(let y=0;y<64;y++)for(let x=0;x<64;x++){
       const radius=Math.hypot((x-31.5)/31.5,(y-31.5)/31.5),i=(y*64+x)*4;
-      pixels[i]=53;pixels[i+1]=43;pixels[i+2]=31;pixels[i+3]=Math.round(Math.max(0,1-radius)**1.7*65);
+      pixels[i]=53;pixels[i+1]=43;pixels[i+2]=31;pixels[i+3]=Math.round(Math.max(0,1-radius)**1.7*96);
     }
     const map=new DataTexture(pixels,64,64,RGBAFormat);map.needsUpdate=true;return map;
   },[]);

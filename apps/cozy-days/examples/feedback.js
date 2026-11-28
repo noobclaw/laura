@@ -1,6 +1,6 @@
 import { animate } from 'animejs';
 let audio, master;
-const pops=new WeakMap(), transient=new Set(), timers=new Set();
+const pops=new Map(), transient=new Set(), timers=new Set();
 export const motionAllowed=()=>localStorage.getItem('sorting-motion')!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
 const later=(fn,ms)=>{const id=setTimeout(()=>{timers.delete(id);fn();},ms);timers.add(id);return id;};
 function transientAnimation(node,options){
@@ -10,6 +10,8 @@ function transientAnimation(node,options){
   return effect;
 }
 export function cleanupFeedback(){
+  for(const [node,effect] of pops){effect.animation?.cancel();node.style.transform=effect.rest;}
+  pops.clear();
   for(const effect of transient){effect.animation?.cancel();effect.node.remove();}
   transient.clear();for(const id of timers)clearTimeout(id);timers.clear();
 }
@@ -86,6 +88,15 @@ export function finishBox(key){
       transientAnimation(leaf,{x:[0,Math.cos(angle)*42],y:[0,Math.sin(angle)*30-12,24],rotate:[0,100+i*30],opacity:[1,1,0],duration:600,ease:'out(2)'});
     }
   },440);
+}
+export function praise(host,label){
+  if(!host?.isConnected)return;
+  const r=host.getBoundingClientRect(),node=document.createElement('span');
+  node.className='collection-praise';node.textContent=label;node.setAttribute('role','status');
+  node.style.left=`${r.left+r.width/2}px`;node.style.top=`${r.top+48}px`;document.body.append(node);
+  sound('box');
+  if(!motionAllowed()){const effect={node,animation:null};transient.add(effect);later(()=>{transient.delete(effect);node.remove();},1000);return;}
+  transientAnimation(node,{y:[8,-4,-12],scale:[.92,1.04,1],opacity:[0,1,1,0],duration:1100,ease:'out(3)'});
 }
 export function boardFeedback(host,kind){
   if(!host)return;

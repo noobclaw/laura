@@ -158,6 +158,14 @@
       "imports": [],
       "format": "esm"
     },
+    "presentation/american-v1/category-labels.json": {
+      "bytes": 852,
+      "imports": [],
+      "format": "esm",
+      "with": {
+        "type": "json"
+      }
+    },
     "data/request-labels.json": {
       "bytes": 243738,
       "imports": [],
@@ -167,8 +175,16 @@
       }
     },
     "src/requests.js": {
-      "bytes": 912,
+      "bytes": 1105,
       "imports": [
+        {
+          "path": "presentation/american-v1/category-labels.json",
+          "kind": "import-statement",
+          "original": "../presentation/american-v1/category-labels.json",
+          "with": {
+            "type": "json"
+          }
+        },
         {
           "path": "data/request-labels.json",
           "kind": "import-statement",
@@ -186,7 +202,7 @@
       "format": "esm"
     },
     "examples/strings.js?v=0.2.0-2": {
-      "bytes": 13786,
+      "bytes": 14050,
       "imports": [],
       "format": "esm"
     },
@@ -6119,7 +6135,7 @@
       "format": "esm"
     },
     "presentation/american-v1/manifest.json": {
-      "bytes": 818102,
+      "bytes": 819595,
       "imports": [],
       "format": "esm",
       "with": {
@@ -6127,7 +6143,7 @@
       }
     },
     "src/art.js": {
-      "bytes": 5610,
+      "bytes": 5596,
       "imports": [
         {
           "path": "presentation/american-v1/manifest.json",
@@ -7657,7 +7673,7 @@
       "format": "esm"
     },
     "examples/feedback.js": {
-      "bytes": 6654,
+      "bytes": 7377,
       "imports": [
         {
           "path": "node_modules/.pnpm/animejs@4.5.0_@types+three@0.187.0_three@0.187.0/node_modules/animejs/dist/modules/index.js",
@@ -7668,7 +7684,7 @@
       "format": "esm"
     },
     "examples/play.js": {
-      "bytes": 36783,
+      "bytes": 37454,
       "imports": [
         {
           "path": "src/playthrough.js?v=0.2.0",
@@ -7735,20 +7751,20 @@
     }
   },
   "outputs": {
-    "build/game-SWW4RGOU.js.LEGAL.txt": {
+    "build/game-S6HKH7H6.js.LEGAL.txt": {
       "imports": [],
       "exports": [],
       "inputs": {},
       "bytes": 5061
     },
-    "build/game-SWW4RGOU.js": {
+    "build/game-S6HKH7H6.js": {
       "imports": [
         {
-          "path": "build/shared-FVC56EXR.js",
+          "path": "build/shared-KNWESRWF.js",
           "kind": "import-statement"
         },
         {
-          "path": "build/shared-XN2AVGGF.js",
+          "path": "build/shared-LUMCSMJY.js",
           "kind": "dynamic-import"
         }
       ],
@@ -7839,17 +7855,20 @@
         "src/shop.js": {
           "bytesInOutput": 688
         },
+        "presentation/american-v1/category-labels.json": {
+          "bytesInOutput": 820
+        },
         "data/request-labels.json": {
           "bytesInOutput": 294771
         },
         "src/requests.js": {
-          "bytesInOutput": 556
+          "bytesInOutput": 599
         },
         "src/opponents.js": {
           "bytesInOutput": 3774
         },
         "examples/strings.js?v=0.2.0-2": {
-          "bytesInOutput": 18518
+          "bytesInOutput": 18846
         },
         "src/view.js": {
           "bytesInOutput": 868
@@ -7864,10 +7883,10 @@
           "bytesInOutput": 169507
         },
         "node_modules/.pnpm/three@0.187.0/node_modules/three/build/three.module.js": {
-          "bytesInOutput": 366842
+          "bytesInOutput": 366852
         },
         "node_modules/.pnpm/three@0.187.0/node_modules/three/build/three.core.js": {
-          "bytesInOutput": 383664
+          "bytesInOutput": 383662
         },
         "node_modules/.pnpm/zustand@5.1.0_@types+react@19.3.3_react@19.3.1_use-sync-external-store@1.7.0_react@19.3.1_/node_modules/zustand/esm/traditional.mjs": {
           "bytesInOutput": 314
@@ -7942,10 +7961,10 @@
           "bytesInOutput": 1639
         },
         "presentation/american-v1/manifest.json": {
-          "bytesInOutput": 783644
+          "bytesInOutput": 785085
         },
         "src/art.js": {
-          "bytesInOutput": 3402
+          "bytesInOutput": 3390
         },
         "node_modules/.pnpm/animejs@4.5.0_@types+three@0.187.0_three@0.187.0/node_modules/animejs/dist/modules/core/consts.js": {
           "bytesInOutput": 1198
@@ -8008,18 +8027,18 @@
           "bytesInOutput": 0
         },
         "examples/feedback.js": {
-          "bytesInOutput": 4681
+          "bytesInOutput": 5221
         },
         "examples/play.js": {
-          "bytesInOutput": 22755
+          "bytesInOutput": 23091
         }
       },
-      "bytes": 2653790
+      "bytes": 2657294
     },
-    "build/shared-XN2AVGGF.js": {
+    "build/shared-LUMCSMJY.js": {
       "imports": [
         {
-          "path": "build/shared-FVC56EXR.js",
+          "path": "build/shared-KNWESRWF.js",
           "kind": "import-statement"
         }
       ],
@@ -8124,7 +8143,7 @@
       "inputs": {},
       "bytes": 2681
     },
-    "build/shared-FVC56EXR.js": {
+    "build/shared-KNWESRWF.js": {
       "imports": [],
       "exports": [
         "$",

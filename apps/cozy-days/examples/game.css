@@ -83,3 +83,49 @@
 .story-prop:nth-child(2n){transform:rotate(5deg)}
 @media(prefers-reduced-motion:reduce){.arrival-ring,.pickup-trail,.box-ribbon{display:none}}
 :root[data-motion=off] .arrival-ring,:root[data-motion=off] .pickup-trail,:root[data-motion=off] .box-ribbon{display:none}
+
+/* Compact portrait HUD: reserve touch space below the playfield. */
+.app[data-view=game] #content{padding-top:max(4px,env(safe-area-inset-top));padding-bottom:env(safe-area-inset-bottom)}
+.app[data-view=game] .tray{height:48px;min-height:48px;gap:5px;padding:4px 6px}
+.app[data-view=game] .tray .cell{min-height:40px;height:40px}
+.app[data-view=game] .tray .cell img{height:36px;max-width:100%;object-fit:contain}
+.app[data-view=game] .tools{height:54px;min-height:54px;gap:7px}
+.app[data-view=game] .tools button{height:48px;min-height:44px;min-width:0}
+.app[data-view=game] .tools button>span:last-of-type{max-width:68px;overflow-wrap:normal;word-break:normal;line-height:1.15;font-size:11px}
+.setting-row{gap:14px;min-height:60px}
+.setting-row select{max-width:58%;min-height:44px;border:2px solid #bd9457;border-radius:14px;background:#fff8e4;color:#684c30;padding:7px 12px;font-weight:700}
+.setting-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:54px;height:32px;min-width:54px;border:2px solid #b49365;border-radius:20px;background:#cfbea0;position:relative;cursor:pointer;box-shadow:inset 0 2px 3px #70533020}
+.setting-row input[type=checkbox]:before{content:'';display:block;width:24px;height:24px;border-radius:50%;background:#fff8e4;position:absolute;top:2px;left:2px;box-shadow:0 2px 3px #513c3540;transition:transform .16s ease}
+.setting-row input[type=checkbox]:checked{background:#43876c;border-color:#346e58}
+.setting-row input[type=checkbox]:checked:before{transform:translateX(22px)}
+.setting-row input:focus-visible{outline:3px solid #377a9c;outline-offset:4px}
+@media(max-height:620px){.app[data-view=game] .tray{height:42px;min-height:42px}.app[data-view=game] .tray .cell{height:34px;min-height:34px}.app[data-view=game] .tray .cell img{height:30px}.app[data-view=game] .tools{height:48px;min-height:48px}.app[data-view=game] .tools button{height:44px}}
+@media(prefers-reduced-motion:reduce){.setting-row input[type=checkbox]:before{transition:none}}
+:root[data-motion=off] .setting-row input[type=checkbox]:before{transition:none}
+
+.collection-praise{position:fixed;z-index:28;translate:-50% 0;pointer-events:none;border:2px solid #fff3cb;border-radius:20px;background:#427a60ed;color:#fff6db;padding:7px 15px;font-size:16px;font-weight:800;box-shadow:0 3px 0 #31564055;white-space:nowrap}
+@media(min-width:1000px) and (min-height:600px){
+ .app[data-view=game]{width:min(100%,1100px)}
+ .app[data-view=game] .game{display:grid;grid-template-columns:minmax(0,1fr) 190px;grid-template-rows:56px minmax(0,1fr) 106px;gap:10px;height:100%;position:relative}
+ .app[data-view=game] .game-head{position:relative;grid-column:2;grid-row:1;top:auto;left:auto;right:auto;width:100%;height:50px}
+ .app[data-view=game] .board{grid-column:1;grid-row:1/3;height:100%;min-height:0;margin:0}
+ .app[data-view=game] .game-status{top:12px;right:210px}
+ .app[data-view=game] .bays{grid-column:2;grid-row:2;flex-direction:column;justify-content:flex-start;align-items:stretch;height:auto;min-height:0;padding:4px;gap:12px;overflow:auto}
+ .app[data-view=game] .bay{flex:none;width:100%;max-width:none;min-height:80px}
+ .app[data-view=game] .bay.request-category{grid-template-rows:42px 20px;padding:6px 10px 12px}
+ .app[data-view=game] .request-examples{height:42px}
+ .app[data-view=game] .request-examples img{max-width:40px;height:40px}
+ .app[data-view=game] .request-count{font-size:18px}
+ .app[data-view=game] .request-name{font-size:13px;line-height:18px}
+ .app[data-view=game] .tray{grid-column:1;grid-row:3;align-self:start;height:60px;min-height:60px}
+ .app[data-view=game] .tray .cell{height:48px;min-height:48px;max-width:80px}
+ .app[data-view=game] .tray .cell img{height:44px}
+ .app[data-view=game] .tools{grid-column:2;grid-row:3;display:grid;grid-template-columns:1fr 1fr;height:106px;min-height:106px;gap:8px}
+ .app[data-view=game] .tools button{width:100%;max-width:none;height:48px;padding:3px;gap:2px}
+ .app[data-view=game] .tools .game-icon{width:28px;height:28px}
+ .app[data-view=game] .tools button>span:last-of-type{font-size:11px;max-width:48px}
+}
+
+/* WebGL canvases must not preserve their previous width as a grid minimum. */
+.app{grid-template-columns:minmax(0,1fr)}
+#content,.game,.board,#play-board{min-width:0}

@@ -1,4 +1,9 @@
 const rows = {
+  sweepShort: ['装箱','裝箱','Fill box'],
+  returnShort: ['移回','移回','Return'],
+  scanShort: ['提示','提示','Find'],
+  rubShort: ['擦除','擦除','Erase'],
+  collectionStreak: ['连续整理 {n} 件！','連續整理 {n} 件！','{n} in a row!'],
   requestContents:['这一类物品都可以放进本箱，不限于上方的一张示例图。','這一類物品都可以放進本箱，不限於上方的一張示例圖。','All of these objects belong in this category. The request is not limited to a single example.'],
   requestDetails:['查看本类物品','查看本類物品','View matching objects'],
   stageLabel:['关卡','關卡','LEVEL'],

@@ -1,0 +1,158 @@
+[
+  {
+    "key": "item-138",
+    "pixels": [
+      392,
+      309
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-138-r2.webp"
+  },
+  {
+    "key": "item-027",
+    "pixels": [
+      350,
+      392
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-027-r2.webp"
+  },
+  {
+    "key": "item-101",
+    "pixels": [
+      358,
+      392
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-101-r2.webp"
+  },
+  {
+    "key": "item-041",
+    "pixels": [
+      267,
+      392
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-041-r2.webp"
+  },
+  {
+    "key": "item-206",
+    "pixels": [
+      362,
+      392
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-206-r2.webp"
+  },
+  {
+    "key": "item-290",
+    "pixels": [
+      392,
+      377
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-290-r2.webp"
+  },
+  {
+    "key": "item-070",
+    "pixels": [
+      275,
+      387
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-070-r2.webp"
+  },
+  {
+    "key": "item-169",
+    "pixels": [
+      168,
+      392
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-169-r2.webp"
+  },
+  {
+    "key": "item-279",
+    "pixels": [
+      249,
+      392
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-279-r2.webp"
+  },
+  {
+    "key": "item-087",
+    "pixels": [
+      389,
+      370
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-087-r2.webp"
+  },
+  {
+    "key": "item-347",
+    "pixels": [
+      382,
+      388
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-347-r2.webp"
+  },
+  {
+    "key": "item-163",
+    "pixels": [
+      392,
+      291
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-163-r2.webp"
+  },
+  {
+    "key": "item-085",
+    "pixels": [
+      392,
+      317
+    ],
+    "alpha": [
+      0,
+      255
+    ],
+    "path": "presentation/american-v1/items/item-085-r2.webp"
+  }
+]

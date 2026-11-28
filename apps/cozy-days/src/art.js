@@ -47,8 +47,8 @@ export function applyAmericanArt(payload) {
     const extent=art.pixels.map(x=>x*fit);
     const scales=payload.stage.specimens.filter(token=>token.form===form).map(token=>Math.max(...token.stretch.map(Math.abs))).sort((a,b)=>a-b);
     const naturalZoom=Math.min(368/frame.extent[0],600/frame.extent[1]);
-    const nativeSize=Math.max(...extent)*scales[Math.floor(scales.length/2)]*naturalZoom;
-    const factor=Math.min(6,Math.max(1,(payload.stage.number<=2?32:46)/nativeSize));
+    const nativeSize=Math.max(...extent)*scales[scales.length-1]*naturalZoom;
+    const factor=Math.min(6,(payload.stage.number<=6?52:46)/Math.max(1,nativeSize));
     extent[0]*=factor;extent[1]*=factor;
     forms[form]={extent,grid:art.grid,outline:art.outline.map(([x,y])=>[x*extent[0],y*extent[1]]),locations:{}};
     sprites[form]=art.path;
