@@ -1,0 +1,135 @@
+name: Spindle iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [app/spindle]
+    paths:
+      - 'apps/spindle/**'
+      - '.github/workflows/spindle-ios.yml'
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[asc-')"
+    runs-on: macos-15
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: apps/spindle
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+
+      - name: Generate project
+        run: |
+          brew install xcodegen >/dev/null
+          python3 scripts/build_strings.py
+          xcodegen generate
+
+      - name: Build and run unit tests
+        run: |
+          mkdir -p ci-out
+          SIM=$(xcrun simctl list devices available | grep -E 'iPhone 1[5-7]( Pro)? \(' | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')
+          echo "SIM=$SIM" >> $GITHUB_ENV
+          set +e
+          xcodebuild -project Spindle.xcodeproj -scheme Spindle -destination "id=$SIM" \
+            -derivedDataPath dd CODE_SIGNING_ALLOWED=NO test > ci-out/build.log 2>&1
+          echo $? > ci-out/status.txt
+          grep -E 'error:|Test Case .*(passed|failed)|XCTAssert|\*\* (TEST|BUILD) ' ci-out/build.log | sort -u | head -400 > ci-out/summary.txt
+          tail -80 ci-out/build.log > ci-out/tail.txt
+          exit 0
+
+      - name: UI tests (functional + four-language tour)
+        timeout-minutes: 60
+        run: |
+          rm -rf ~/ui-shots
+          set +e
+          xcodebuild -project Spindle.xcodeproj -scheme SpindleUITour -destination "id=$SIM" \
+            -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test > ci-out/uitour.log 2>&1
+          echo $? > ci-out/uitour-status.txt
+          grep -E 'error:|Test Case .*(passed|failed)|XCTAssert|\*\* TEST' ci-out/uitour.log | tail -120 > ci-out/uitour-summary.txt
+          mkdir -p ci-out/ui-shots && cp -R ~/ui-shots/. ci-out/ui-shots/ 2>/dev/null
+          find ci-out/ui-shots -name '*.png' | wc -l
+          exit 0
+
+      - name: Review video (English tour, recorded on the simulator)
+        timeout-minutes: 12
+        run: |
+          set +e
+          xcrun simctl io "$SIM" recordVideo --codec=h264 --force ci-out/review-tour.mp4 &
+          REC=$!
+          sleep 3
+          xcodebuild -project Spindle.xcodeproj -scheme SpindleUITour -destination "id=$SIM" \
+            -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test-without-building \
+            -only-testing:SpindleUITests/UITests/testTourEnglish > ci-out/video.log 2>&1
+          kill -INT $REC; wait $REC
+          ls -la ci-out/review-tour.mp4
+          exit 0
+
+      - name: Localization gate and static checks
+        run: |
+          set +e
+          xcodebuild -exportLocalizations -project Spindle.xcodeproj -localizationPath ci-out/loc -exportLanguage en > ci-out/loc.log 2>&1
+          XLIFF=$(find ci-out/loc -name 'en.xliff' | head -1)
+          [ -n "$XLIFF" ] && cp "$XLIFF" ci-out/en.xliff
+          rm -rf ci-out/loc
+          python3 scripts/check_strings.py ci-out/en.xliff Spindle/Resources > ci-out/l10n.txt 2>&1
+          echo $? > ci-out/l10n-status.txt
+          head -40 ci-out/l10n.txt
+          python3 scripts/tc_static.py > ci-out/static.json
+          python3 - <<'PY'
+          import json
+          s = json.load(open("ci-out/static.json"))
+          s["TC-L10N-01"] = "passed" if open("ci-out/l10n-status.txt").read().strip() == "0" else "failed"
+          json.dump(s, open("ci-out/static.json", "w"), indent=1)
+          PY
+          exit 0
+
+      - name: Test-case result table
+        run: |
+          set +e
+          BUILD=$(( 100 + ${{ github.run_number }} ))
+          python3 scripts/tc_report.py "$BUILD" ci-out/build.log ci-out/uitour.log --static ci-out/static.json --manual qa/manual.md > ci-out/tc-report.txt 2>&1
+          echo $? > ci-out/tc-status.txt
+          cp qa/TC-RESULT-$BUILD.md ci-out/ 2>/dev/null
+          cat ci-out/tc-report.txt
+          exit 0
+
+      - name: Launch screenshots (four languages)
+        run: |
+          APP=$(find dd/Build/Products -name 'Spindle.app' -path '*iphonesimulator*' | head -1)
+          if [ -z "$APP" ]; then echo "no app"; exit 0; fi
+          xcrun simctl boot "$SIM" || true
+          xcrun simctl bootstatus "$SIM" -b
+          xcrun simctl install "$SIM" "$APP"
+          for L in en zh-Hant ja de; do
+            xcrun simctl terminate "$SIM" com.noobclaw.spindle || true
+            xcrun simctl launch "$SIM" com.noobclaw.spindle -AppleLanguages "($L)"
+            sleep 6
+            xcrun simctl io "$SIM" screenshot "ci-out/home-$L.png"
+          done
+          xcrun simctl spawn "$SIM" log show --last 2m --predicate 'process == "Spindle"' --style compact | tail -80 > ci-out/runtime.log || true
+
+      - name: Publish results to the spindle-ci branch
+        if: always()
+        run: |
+          cd ci-out
+          echo "${{ github.sha }}" > commit.txt
+          git init -q && git checkout -q -b spindle-ci
+          git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -qm "ci for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" spindle-ci
+
+      - name: Fail if the build, tests, localization gate or test-case table failed
+        run: |
+          test "$(cat ci-out/status.txt)" = "0"
+          test "$(cat ci-out/l10n-status.txt)" = "0"
+          test "$(cat ci-out/uitour-status.txt)" = "0"
+          test "$(cat ci-out/tc-status.txt)" = "0"
