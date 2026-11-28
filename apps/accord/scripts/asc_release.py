@@ -124,7 +124,12 @@ def meta(app_id):
     ver = editable(call("GET", f"/v1/apps/{app_id}/appStoreVersions?filter[platform]=IOS")["data"])
     vid = ver["id"]
     print("version", ver["attributes"]["versionString"], ver["attributes"].get("appStoreState"))
-    builds = call("GET", f"/v1/builds?filter[app]={app_id}&filter[version]={os.environ['BUILD_NUMBER']}")["data"]
+    for _ in range(50):   # wait up to ~25 min for the upload to appear and finish processing
+        builds = call("GET", f"/v1/builds?filter[app]={app_id}&filter[version]={os.environ['BUILD_NUMBER']}")["data"]
+        if builds and builds[0]["attributes"]["processingState"] == "VALID":
+            break
+        print("waiting for build", os.environ["BUILD_NUMBER"], builds[0]["attributes"]["processingState"] if builds else "not uploaded yet")
+        time.sleep(30)
     if not builds:
         raise SystemExit("build not found")
     print("build", builds[0]["attributes"]["version"], builds[0]["attributes"]["processingState"])
