@@ -40,16 +40,16 @@ final class AppModel {
 
     static let isUITest = ProcessInfo.processInfo.arguments.contains("-UITour")
 
-    init(library: LibraryStore = LibraryStore()) {
-        self.library = library
+    init(library: LibraryStore? = nil) {
+        self.library = library ?? LibraryStore()
         if ProcessInfo.processInfo.arguments.contains("-UITourReset") { AppModel.resetAllData() }
-        library.load()
-        if library.sources.isEmpty && !UserDefaults.standard.bool(forKey: "demo.removed") { addDemoSource() }
+        self.library.load()
+        if self.library.sources.isEmpty && !UserDefaults.standard.bool(forKey: "demo.removed") { addDemoSource() }
         // UI tests: a saved server that is never reached, so the free source slot is taken.
-        if ProcessInfo.processInfo.arguments.contains("-UITourFakeSource"), !library.sources.contains(where: { $0.kind == .webdav }) {
-            library.addSource(SourceConfig(kind: .webdav, name: "Test NAS", address: "http://127.0.0.1:9/music/", username: "test"))
+        if ProcessInfo.processInfo.arguments.contains("-UITourFakeSource"), !self.library.sources.contains(where: { $0.kind == .webdav }) {
+            self.library.addSource(SourceConfig(kind: .webdav, name: "Test NAS", address: "http://127.0.0.1:9/music/", username: "test"))
         }
-        for s in library.sources { openSource(s) }
+        for s in self.library.sources { openSource(s) }
         player.resolveURL = { [weak self] t in self?.playURL(for: t) }
         player.artwork = { [weak self] t in self?.artworkImage(albumKey: t.albumKey) }
         player.onSongCompleted = { [weak self] in
