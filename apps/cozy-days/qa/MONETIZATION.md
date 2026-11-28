@@ -72,6 +72,13 @@
 | Steam | **用戶 2026-11-28 決定：買斷制**。Steam 版關掉體力和內購、不需要伺服器（CR-13）。售價待定，上架前對照 Steam 上同類休閒遊戲再定。以下是當時的比較，留作記錄：Steam 可以做內購：走 Steamworks 的 Microtransaction API，玩家用 Steam 錢包付款。**但必須有自己的購買伺服器**：遊戲把購買請求送到我們的伺服器，伺服器用 publisher key 呼叫 `ISteamMicroTxn/InitTxn` 發起交易，玩家在 Steam 疊加介面授權後，伺服器再呼叫 `FinalizeTxn` 完成，然後才發道具。伺服器可以用 CLAUDE.md 允許的 256btc.com。也可以選買斷制（例如 $4.99–$9.99，關掉體力和內購），不需要伺服器。兩種方案待用戶選定 | 桌面殼（Electron 或 Tauri）+ Steamworks SDK；選內購時另加伺服器端 |
 | 網頁版 | 只做展示，保留標明「測試」的模擬 | — |
 
-## 六、App Store Connect 與 Play Console 由 Claude 建立
+## 六、App Store Connect 建立結果（Claude，2026-11-28）
 
-用戶 2026-11-28 定：App 記錄、內購商品、價格、本地化文字、審核截圖由 Claude 在後台建立和填寫。用戶只做登入與驗證碼、協議、銀行稅務。開始建立之前，Claude 會在對話裡列出 bundle id、App 名稱、SKU、商品 ID、類型和價格，讓用戶確認一次。**目前還沒到建立的階段**：要先過 CR-01、CR-07，並做出原生殼。
+| 項目 | 結果 |
+|---|---|
+| App ID（開發者後台） | `com.laura.cozydays`，In-App Purchase 能力已開。另有一個先建好、後因用戶改包名規則而不用的 `com.noobclaw.cozydays`，沒有綁任何 App，先留著（刪除不可逆） |
+| App 記錄 | 名稱 **Cozy Days: Sort & Tidy Up**（「Cozy Days」已被他人佔用；按 GEO 加玩法詞），Apple ID 6840346021，SKU `cozydays-ios`，主要語言 English (U.S.)，狀態 1.0 Prepare for Submission |
+| 內購 | 5 個，全部「Prepare for Submission」：`cozy.noads` 非消耗型 $4.99（Remove Ads）、`cozy.toolbox.welcome` 消耗型 $1.99（Welcome Toolbox）、`cozy.toolbox.helpers` 消耗型 $4.99（Helpful Bundle）、`cozy.space.bundle` 消耗型 $2.99（More Room Bundle）、`cozy.energy.refill` 消耗型 $0.99（Energy Refill） |
+| 每個內購的設定 | 美國基準價，其他 173 個地區用 Apple 自動換算；可售地區 174/175，**排除中國大陸**（遊戲在中國大陸需要版號）；英文、簡中、繁中三語名稱和描述，名稱與遊戲字串表一致 |
+| 還沒做 | 每個內購的審核截圖和審核備註（要等 iOS 安裝包）；App 本身的價格（免費）與可售地區；年齡分級；隱私標籤；送審（等 CR-01 關卡重排、廣告接入、原生殼完成，並先問用戶） |
+| 注意 | `cozy.noads` 對應的廣告還沒做，送審前必須先有廣告，否則這個商品會被拒 |

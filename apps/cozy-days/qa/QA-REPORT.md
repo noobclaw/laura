@@ -59,6 +59,7 @@ AUD-14～AUD-20、AF-08、AF-09、AF-11、CR-11。
 | 3 | AF-05：橫屏 | 手機鎖直屏；Steam／桌面版做橫屏版面（用戶確認） |
 | 4 | AF-10：酒類、菸草物品 | 交給 Codex 處理，用戶同意 Claude 的建議方向（替換） |
 | 5 | Steam 商業模式 | **買斷制**，關掉體力和內購（CR-13） |
+| 7 | 包名與名稱 | 遊戲一律 `com.laura.*`；Cozy Days 用 `com.laura.cozydays`；商店名「Cozy Days: Sort & Tidy Up」（按 GEO 定，名稱以後可改） |
 | 6 | 商品價格 | **已同意**；用戶要求「蘋果定價要合理」，已逐項對照 3 款同類頭部，5 個價格都在同類區間內（`MONETIZATION.md` 第三節） |
 
 ## 七、沒驗什麼

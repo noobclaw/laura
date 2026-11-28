@@ -26,6 +26,7 @@
 | CR-14 | P2 | 新手工具包每個玩家限購 1 次 | 待修 |
 | CR-15 | P2 | 舊存檔時區遷移；`Playthrough` 預設時區改成玩家本地 | 待修 |
 | CR-16 | P2 | 重玩已過關卡免費後，活動積分可以重複刷（見 `SELF-AUDIT-claude.md`） | 待用戶決定 |
+| CR-17 | P1 | iOS 原生殼：bundle id `com.laura.cozydays`，接 StoreKit，商品 ID 與 App Store Connect 已建的 5 個一致 | 待修 |
 
 ## CR-00 補齊策劃文件
 
@@ -127,6 +128,12 @@
 - Claude 已修 C-09：正式入口建立新存檔時傳入玩家時區。
 - 要求：`Playthrough` 的預設值改成 `Intl.DateTimeFormat().resolvedOptions().timeZone`（不依賴呼叫方）；決定已有存檔要不要遷移到本地時區（建議在當前每日、每週週期結束後遷移，避免重複或少發獎勵）。
 - 驗收方法：`qa/tools/verify-zone.mjs`。
+
+## CR-17 iOS 原生殼與 StoreKit
+
+- 依據：Claude 已在 App Store Connect 建好 App 記錄和 5 個內購（`MONETIZATION.md` 第六節）。
+- 要求：iOS 殼的 bundle id 必須是 `com.laura.cozydays`（遊戲一律 `com.laura.*`）；StoreKit 商品 ID 用 `cozy.noads`、`cozy.toolbox.welcome`、`cozy.toolbox.helpers`、`cozy.space.bundle`、`cozy.energy.refill`；價格從 StoreKit 取，不寫死；恢復購買；只發 iPhone 直屏。
+- 驗收方法：沙盒帳號在真機買到每個商品並恢復購買，Claude 拍審核截圖上傳。
 
 ## CR-12 重新構建
 
