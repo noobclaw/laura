@@ -43,7 +43,7 @@ AUD-14～AUD-20、AF-08、AF-09、AF-11、CR-11。
 
 ## 四、Claude 的改動
 
-見 `CHANGELOG-claude.md`（C-01～C-06），每項都有提交號、證據和回歸測試。
+見 `CHANGELOG-claude.md`（C-01～C-10）；自審結果見 `SELF-AUDIT-claude.md`（7 項代碼改動中 2 項有缺陷，已在 C-10 修正），每項都有提交號、證據和回歸測試。
 
 ## 五、交給 Codex
 
