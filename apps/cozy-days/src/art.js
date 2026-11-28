@@ -23,7 +23,7 @@ function roomFor(payload) {
 }
 
 // Presentation replacement leaves stage identity and every persisted token index
-// intact. New silhouettes are fitted inside the previous world-space envelopes.
+// intact. New silhouettes receive readable extents and shared display poses.
 export function applyAmericanArt(payload) {
   if (!manifest.complete) throw new Error('Original art production is incomplete');
   const frame=frameFor(payload), forms={}, sprites={}, roles=new Map();
@@ -53,7 +53,7 @@ export function applyAmericanArt(payload) {
     forms[form]={extent,grid:art.grid,outline:art.outline.map(([x,y])=>[x*extent[0],y*extent[1]]),locations:{}};
     sprites[form]=art.path;
   }
-  // New art needs readable native dimensions. Keep every center/rotation/scale,
+  // New art needs readable native dimensions. Keep the raw stage records intact,
   // enlarge its matching collision shape, and only expand the camera envelope
   // when required to keep a newly larger edge visible.
   const originalBoxes=payload.stage.specimens.map(token=>rectangularEnvelope(forms[token.form].extent,token));
