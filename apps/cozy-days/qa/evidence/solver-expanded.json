@@ -1,0 +1,31 @@
+{
+ "beam": 6,
+ "branch": 10,
+ "expand": true,
+ "results": [
+  {
+   "n": 21,
+   "items": 181,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 370,
+   "ms": 29027
+  },
+  {
+   "n": 30,
+   "items": 200,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 370,
+   "ms": 79902
+  },
+  {
+   "n": 60,
+   "items": 200,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 610,
+   "ms": 80590
+  }
+ ]
+}
