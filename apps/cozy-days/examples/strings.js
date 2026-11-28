@@ -113,6 +113,8 @@ const rows = {
   saveError: ['保存失败，进度没有提交。请保留本页并重试；若其他标签页已更新，请刷新本页。', '儲存失敗，進度沒有提交。請保留本頁並重試；若其他分頁已更新，請重新整理本頁。', 'Save failed; the action was not committed. Retry here, or reload if another tab updated your save.'],
   saveFailed: ['无法保存进度', '無法儲存進度', 'Progress could not be saved'],
   reload: ['重新载入', '重新載入', 'Reload'],
+  frameHaltedTitle: ['画面暂停了', '畫面暫停了', 'The game paused'],
+  frameHalted: ['画面连续出错，已暂停计时并保存进度。重新载入后可以从这一局继续。', '畫面連續出錯，已暫停計時並儲存進度。重新載入後可以從這一局繼續。', 'The screen kept failing, so the timer is paused and your progress is saved. Reload to continue this round.'],
   confirmRestart: ['重新开始会消耗 1 点体力，替换当前这一局。', '重新開始會消耗 1 點體力，替換目前這一局。', 'Restarting replaces this round and costs 1 energy.'],
   cancel: ['取消', '取消', 'Cancel']
 };

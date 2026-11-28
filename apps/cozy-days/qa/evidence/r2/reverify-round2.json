@@ -1,0 +1,207 @@
+{
+ "layout": {
+  "m390-zhTW": {
+   "home": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "stage1": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "errors": []
+  },
+  "m390-en": {
+   "home": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "stage1": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "errors": []
+  },
+  "m320-en": {
+   "home": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "stage1": {
+    "overflow": [
+     {
+      "text": "Plush toys",
+      "w": [
+       58,
+       54
+      ],
+      "h": [
+       13,
+       13
+      ]
+     }
+    ],
+    "offscreen": []
+   },
+   "errors": []
+  },
+  "land844-en": {
+   "home": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "stage1": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "errors": []
+  },
+  "d1280-en": {
+   "home": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "stage1": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "errors": []
+  },
+  "d1920-en": {
+   "home": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "stage1": {
+    "overflow": [],
+    "offscreen": []
+   },
+   "errors": []
+  }
+ },
+ "tools-m390-en": {
+  "tools": [
+   {
+    "tool": "sweep",
+    "text": "1 Fill box",
+    "clipped": false
+   },
+   {
+    "tool": "return",
+    "text": "1 Return",
+    "clipped": false
+   },
+   {
+    "tool": "scan",
+    "text": "1 Find",
+    "clipped": false
+   },
+   {
+    "tool": "rub",
+    "text": "1 Erase",
+    "clipped": false
+   }
+  ],
+  "overflow": [],
+  "settings": [],
+  "errors": []
+ },
+ "tools-m320-en": {
+  "tools": [
+   {
+    "tool": "sweep",
+    "text": "1 Fill box",
+    "clipped": false
+   },
+   {
+    "tool": "return",
+    "text": "1 Return",
+    "clipped": false
+   },
+   {
+    "tool": "scan",
+    "text": "1 Find",
+    "clipped": false
+   },
+   {
+    "tool": "rub",
+    "text": "1 Erase",
+    "clipped": false
+   }
+  ],
+  "overflow": [
+   {
+    "text": "Washi Tape",
+    "w": [
+     64,
+     54
+    ],
+    "h": [
+     13,
+     13
+    ]
+   }
+  ],
+  "settings": [],
+  "errors": []
+ },
+ "stage1": {
+  "picks": 18,
+  "praise": [
+   {
+    "pick": 3,
+    "text": [
+     "3 in a row!"
+    ]
+   },
+   {
+    "pick": 5,
+    "text": [
+     "5 in a row!"
+    ]
+   },
+   {
+    "pick": 6,
+    "text": [
+     "5 in a row!"
+    ]
+   },
+   {
+    "pick": 8,
+    "text": [
+     "8 in a row!"
+    ]
+   }
+  ],
+  "clearFrames": 22,
+  "result": "Level 1\n\nA lovely room, all sorted!\n\nYour time 0:19\n\nBest time 0:19\n\nNext level\nRestart · 1 energy\nBack home",
+  "errors": []
+ },
+ "recovery": {
+  "corrupt": {
+   "backup": "{\"broken\":",
+   "mainIsValid": true,
+   "toast": "Your save was damaged. A backup was kept and a new save was started.",
+   "play": true
+  },
+  "corruptErrors": [],
+  "backupFails": {
+   "main": "{\"broken\":",
+   "backup": null,
+   "screen": "The game didn't load. Your progress is safe. Check your connection and reload.\n\nQuotaExceededError\n\nReload"
+  },
+  "backupFailsErrors": [
+   "Preview initialization failed QuotaExceededError: QuotaExceededError"
+  ],
+  "downloadFails": {
+   "saveUnchanged": true,
+   "hadAttempt": true,
+   "backupCreated": false,
+   "screen": "The game didn't load. Your progress is safe. Check your connection and reload.\n\nFailed to fetch\n\nReload"
+  },
+  "downloadFailsErrors": [
+   "Failed to load resource: net::ERR_FAILED",
+   "Preview initialization failed TypeError: Failed to fetch\n    at e (http://127.0.0.1:18771/build/game-UXOH7NA4.js:9:54540)\n    at Vg (http://127.0.0.1:18771/build/game-UXOH7NA4.js:9:54699)\n    at CM (h"
+  ]
+ }
+}

@@ -13,6 +13,7 @@ export class PlayerJournal {
   #pending = Promise.resolve();
   #spending = false;
   #limits;
+  #clockRepair = null;
   constructor({
     stages = 160,
     clock = Date.now,
@@ -60,11 +61,14 @@ export class PlayerJournal {
       max = record.capacity;
     let amount = record.power,
       anchor = record.powerAt;
-    // A device clock moved backwards must not push the next refill hours into the future.
-    // The clamped anchor is kept in memory and saved with the next successful write.
+    // A device clock moved backwards must not push the next refill hours into the future (AUD-01).
+    // Reading never edits the player record: the clamp lives in #clockRepair and is saved by its own queued write.
     if (anchor > at) {
-      anchor = at;
-      record.powerAt = at;
+      if (this.#clockRepair?.from !== anchor || this.#clockRepair.to > at) {
+        this.#clockRepair = { from: anchor, to: at };
+        if (record === this.#record) this.#saveClockRepair();
+      }
+      anchor = this.#clockRepair.to;
     }
     if (amount >= max) anchor = at;
     else {
@@ -80,6 +84,13 @@ export class PlayerJournal {
       max,
       wait: amount >= max ? null : Math.ceil(this.#limits.refillSeconds - (at - anchor) / 1000)
     };
+  }
+  #saveClockRepair() {
+    const { from, to } = this.#clockRepair;
+    // If storage fails the in-memory clamp still applies; after a reload the clamp is simply detected again.
+    this.#write(s => {
+      if (s.powerAt === from) s.powerAt = to;
+    }).catch(() => {});
   }
   powerStatus() {
     const p = this.#projectPower();

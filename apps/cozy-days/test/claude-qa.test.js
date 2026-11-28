@@ -89,3 +89,36 @@ test('C-11 shop has no remove-ads product', async () => {
   assert.deepEqual(SHOP_PRODUCTS.map(p => p.id), ['cozy.toolbox.welcome', 'cozy.toolbox.helpers', 'cozy.space.bundle', 'cozy.energy.refill']);
   assert.ok(!SHOP_PRODUCTS.some(p => /ads?\b|noads/i.test(p.id)));
 });
+
+// C-12 (2026-11-28, Codex review of C-02): reading energy must not edit the player record.
+test('C-12 a backwards clock is repaired by a queued write, not by the read', async () => {
+  const clock = clockAt(Date.UTC(2026, 0, 2));
+  const saved = [];
+  const journal = new PlayerJournal({ clock, persist: async r => { saved.push(r); } });
+  for (let i = 0; i < 3; i++) await journal.openRound(1, `r${i}`, 'bonus1');
+  const anchorBefore = journal.inspect().powerAt;
+  const writes = saved.length;
+  clock.add(-24 * 3600 * 1000);
+  const status = journal.powerStatus();
+  assert.ok(status.refillIn > 0 && status.refillIn <= 1800);
+  assert.equal(journal.inspect().powerAt, anchorBefore, 'read left the record alone');
+  await journal.whenSettled();
+  assert.equal(saved.length, writes + 1, 'one repair write');
+  assert.equal(journal.inspect().powerAt, clock());
+  const reloaded = new PlayerJournal({ clock, record: saved.at(-1) });
+  assert.ok(reloaded.powerStatus().refillIn <= 1800, 'reload keeps the repair');
+});
+test('C-12 a failed repair write keeps energy moving and the record unchanged', async () => {
+  const clock = clockAt(Date.UTC(2026, 0, 2));
+  let fail = false;
+  const journal = new PlayerJournal({ clock, persist: async () => { if (fail) throw new Error('disk full'); } });
+  for (let i = 0; i < 3; i++) await journal.openRound(1, `f${i}`, 'bonus1');
+  const anchorBefore = journal.inspect().powerAt;
+  fail = true;
+  clock.add(-24 * 3600 * 1000);
+  assert.equal(journal.powerStatus().amount, 2);
+  await journal.whenSettled();
+  assert.equal(journal.inspect().powerAt, anchorBefore, 'failed write did not change the record');
+  clock.add(1800 * 1000);
+  assert.equal(journal.powerStatus().amount, 3, 'refill still arrives after one interval');
+});

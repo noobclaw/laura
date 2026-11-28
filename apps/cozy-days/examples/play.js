@@ -951,10 +951,21 @@ let previous = performance.now(),
   sinceHeader = 0;
 
 let frameErrorShown = false,
-  frameErrors = 0;
+  frameErrors = 0,
+  failedInARow = 0,
+  frameHalted = false,
+  frameHandle = 0;
+const HALT_AFTER = 30; // about half a second of failing frames in a row
+// Schedule the loop at most once, however many times boot or a caller asks.
+function scheduleFrame() {
+  if (!frameHandle) frameHandle = requestAnimationFrame(frame);
+}
 // A failing frame must not stop the loop: log it, tell the player once, keep running.
+// If frames keep failing, stop the round clock, save, and offer a reload (C-13, Codex review of C-08).
 function frame(at) {
+  frameHandle = 0;
   try {
+    if (frameHalted) return;
     const elapsed = Math.max(0, Math.min(.25, (at - previous) / 1000));
     previous = at;
     if (game && view === 'game' && !modal.open && !uiBusy && !document.hidden && byId('play-board')?.dataset.graphics !== 'lost' && game.round?.inspect().phase === 'live') {
@@ -985,6 +996,7 @@ function frame(at) {
       const note = byId('energy-note');
       if (note) note.textContent = `${t('entry')} · ${power.refillIn === null ? t('full') : t('refill', { time: clockText(power.refillIn) })}`;
     }
+    failedInARow = 0;
   } catch (error) {
     // Log the first few only, so a repeating failure does not flood the console every frame.
     if (++frameErrors <= 5) console.error('Frame error', error);
@@ -992,8 +1004,17 @@ function frame(at) {
       frameErrorShown = true;
       toast(t('frameError'));
     }
+    if (++failedInARow >= HALT_AFTER) {
+      frameHalted = true;
+      try {
+        game?.save()?.catch?.(() => {});
+      } catch {}
+      try {
+        dialog(t('frameHaltedTitle'), t('frameHalted'), [[t('reload'), () => location.reload(), 'primary']]);
+      } catch {}
+    }
   } finally {
-    requestAnimationFrame(frame);
+    if (!frameHalted) scheduleFrame();
   }
 }
 document.addEventListener('visibilitychange', () => {
@@ -1034,7 +1055,7 @@ try {
 
   await renderCurrent();
   if (recovered) toast(t('saveRecovered'));
-  requestAnimationFrame(frame);
+  scheduleFrame();
 } catch (error) {
   // The save is untouched here; offer a reload instead of a dead end.
   content.replaceChildren(el('h1', '', t('loadError')), el('p', '', error.message), button(t('reload'), () => location.reload(), 'primary'));

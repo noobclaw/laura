@@ -8,3 +8,4 @@ node_modules/
 release/
 !data/
 !data/*.json
+qa/tools/probe/
