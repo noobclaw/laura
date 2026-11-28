@@ -1,0 +1,80 @@
+Test Suite 'DilutionTests' passed at 2026-11-28 02:42:03.999.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.014 (0.139) seconds
+Test Suite 'LanguageTests' started at 2026-11-28 02:42:03.999.
+Test Case '-[AccordTests.LanguageTests testEveryLanguageHasABundleAndTranslatesKeyStrings]' started.
+Test Case '-[AccordTests.LanguageTests testEveryLanguageHasABundleAndTranslatesKeyStrings]' passed (0.018 seconds).
+Test Case '-[AccordTests.LanguageTests testInAppSwitchChangesCodeBuiltStrings]' started.
+Test Case '-[AccordTests.LanguageTests testInAppSwitchChangesCodeBuiltStrings]' passed (0.004 seconds).
+Test Case '-[AccordTests.LanguageTests testNormalize]' started.
+Test Case '-[AccordTests.LanguageTests testNormalize]' passed (0.001 seconds).
+Test Suite 'LanguageTests' passed at 2026-11-28 02:42:07.722.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.023 (3.723) seconds
+Test Suite 'MixTests' started at 2026-11-28 02:42:07.723.
+Test Case '-[AccordTests.MixTests testCostSkipsUnpricedMaterials]' started.
+Test Case '-[AccordTests.MixTests testCostSkipsUnpricedMaterials]' passed (0.002 seconds).
+Test Case '-[AccordTests.MixTests testDilutedBaseCarriesItsOwnSolvent]' started.
+Test Case '-[AccordTests.MixTests testDilutedBaseCarriesItsOwnSolvent]' passed (0.002 seconds).
+Test Case '-[AccordTests.MixTests testDilutionCountsOnlyActiveMaterial]' started.
+Test Case '-[AccordTests.MixTests testDilutionCountsOnlyActiveMaterial]' passed (0.001 seconds).
+Test Case '-[AccordTests.MixTests testDropsRoundTrip]' started.
+Test Case '-[AccordTests.MixTests testDropsRoundTrip]' passed (0.074 seconds).
+Test Case '-[AccordTests.MixTests testNestedBaseIsScaledToItsLineWeight]' started.
+Test Case '-[AccordTests.MixTests testNestedBaseIsScaledToItsLineWeight]' passed (0.001 seconds).
+Test Case '-[AccordTests.MixTests testPercentEntryKeepsOtherLinesFixed]' started.
+Test Case '-[AccordTests.MixTests testPercentEntryKeepsOtherLinesFixed]' passed (0.000 seconds).
+Test Case '-[AccordTests.MixTests testSameMaterialOnTwoLinesIsAggregated]' started.
+Test Case '-[AccordTests.MixTests testSameMaterialOnTwoLinesIsAggregated]' passed (0.000 seconds).
+Test Case '-[AccordTests.MixTests testZeroAndNegativeLinesAreIgnored]' started.
+Test Case '-[AccordTests.MixTests testZeroAndNegativeLinesAreIgnored]' passed (0.000 seconds).
+Test Suite 'MixTests' passed at 2026-11-28 02:42:07.808.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.081 (0.085) seconds
+Test Suite 'ProductTests' started at 2026-11-28 02:42:12.501.
+Test Case '-[AccordTests.ProductTests testBottlePlanMassBalance]' started.
+Test Case '-[AccordTests.ProductTests testBottlePlanMassBalance]' passed (0.001 seconds).
+Test Case '-[AccordTests.ProductTests testBottlePlanWithWater]' started.
+Test Case '-[AccordTests.ProductTests testBottlePlanWithWater]' passed (0.000 seconds).
+Test Case '-[AccordTests.ProductTests testComplianceUsesFinishedProductLevel]' started.
+Test Case '-[AccordTests.ProductTests testComplianceUsesFinishedProductLevel]' passed (0.001 seconds).
+Test Case '-[AccordTests.ProductTests testConcentrateAndFactorModes]' started.
+Test Case '-[AccordTests.ProductTests testConcentrateAndFactorModes]' passed (0.001 seconds).
+Test Case '-[AccordTests.ProductTests testDiffClassifiesChanges]' started.
+Test Case '-[AccordTests.ProductTests testDiffClassifiesChanges]' passed (0.006 seconds).
+Test Case '-[AccordTests.ProductTests testEvaporationFadesTopFirst]' started.
+Test Case '-[AccordTests.ProductTests testEvaporationFadesTopFirst]' passed (0.001 seconds).
+Test Case '-[AccordTests.ProductTests testNearLimitWarning]' started.
+Test Case '-[AccordTests.ProductTests testNearLimitWarning]' passed (0.000 seconds).
+Test Suite 'ProductTests' passed at 2026-11-28 02:42:12.513.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.009 (0.012) seconds
+Test Suite 'StoreTests' started at 2026-11-28 02:42:12.605.
+Test Case '-[AccordTests.StoreTests testBackupRoundTrip]' started.
+2026-11-28 02:42:12.660077+0000 Accord[6186:24184] [error] CoreData: fault: Could not materialize Objective-C class named "Array" from declared attribute value type "Array<Int>" of attribute named reminderDays
+2026-11-28 02:42:12.660524+0000 Accord[6186:24184] [error] CoreData: Could not materialize Objective-C class named "Array" from declared attribute value type "Array<Int>" of attribute named reminderDays
+Test Case '-[AccordTests.StoreTests testBackupRoundTrip]' passed (0.153 seconds).
+Test Case '-[AccordTests.StoreTests testBaseCycleDoesNotRecurseForever]' started.
+Test Case '-[AccordTests.StoreTests testBaseCycleDoesNotRecurseForever]' passed (0.009 seconds).
+Test Case '-[AccordTests.StoreTests testCSVFormulaImportCreatesMissingMaterials]' started.
+Test Case '-[AccordTests.StoreTests testCSVFormulaImportCreatesMissingMaterials]' passed (1.836 seconds).
+Test Case '-[AccordTests.StoreTests testDuplicateAsVersionKeepsLines]' started.
+Test Case '-[AccordTests.StoreTests testDuplicateAsVersionKeepsLines]' passed (0.067 seconds).
+Test Case '-[AccordTests.StoreTests testInventoryDeductsNeatGrams]' started.
+Test Case '-[AccordTests.StoreTests testInventoryDeductsNeatGrams]' passed (0.009 seconds).
+Test Case '-[AccordTests.StoreTests testSeedBuildsNestedSample]' started.
+Test Case '-[AccordTests.StoreTests testSeedBuildsNestedSample]' passed (0.032 seconds).
+Test Case '-[AccordTests.StoreTests testShareCardRenders]' started.
+Test Case '-[AccordTests.StoreTests testShareCardRenders]' passed (0.075 seconds).
+Test Suite 'StoreTests' passed at 2026-11-28 02:42:14.790.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 2.182 (2.185) seconds
+Test Suite 'AccordTests.xctest' passed at 2026-11-28 02:42:15.938.
+	 Executed 32 tests, with 0 failures (0 unexpected) in 2.314 (12.086) seconds
+Test Suite 'All tests' passed at 2026-11-28 02:42:15.939.
+	 Executed 32 tests, with 0 failures (0 unexpected) in 2.314 (12.088) seconds
+2026-11-28 02:42:25.426 xcodebuild[3965:16198] [MT] IDETestOperationsObserverDebug: 166.270 elapsed -- Testing started completed.
+2026-11-28 02:42:25.428 xcodebuild[3965:16198] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-28 02:42:25.428 xcodebuild[3965:16198] [MT] IDETestOperationsObserverDebug: 166.271 sec, +166.271 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/laura/laura/apps/accord/dd/Logs/Test/Test-Accord-2026.11.28_02-38-45-+0000.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

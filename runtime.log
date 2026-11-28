@@ -1,0 +1,60 @@
+2026-11-28 03:02:27.959 Df Accord[39117:1c969] [com.apple.UIKit:Application] Deactivation reason removed: 11; deactivation reasons: 6176 -> 4128; animating application lifecycle event: 1
+2026-11-28 03:02:27.960 Df Accord[39117:1c982] [com.apple.UIIntelligenceSupport:xpc] establishing connection to agent
+2026-11-28 03:02:27.961 Df Accord[39117:1c982] [com.apple.xpc:session] [0x600002116120] Session created.
+2026-11-28 03:02:27.961 Df Accord[39117:1c982] [com.apple.xpc:session] [0x600002116120] Session created from connection [0x600003d001e0]
+2026-11-28 03:02:27.961 Df Accord[39117:1c969] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x104c12530> (22BAD8DD-CC36-497D-B7B5-04E273264235)
+2026-11-28 03:02:27.961 Df Accord[39117:1c982] [com.apple.xpc:connection] [0x600003d001e0] activating connection: mach=true listener=false peer=false name=com.apple.uiintelligencesupport.agent
+2026-11-28 03:02:27.962 Df Accord[39117:1c982] [com.apple.xpc:session] [0x600002116120] Session activated
+2026-11-28 03:02:27.971 A  Accord[39117:1c969] (CoreFoundation) Updating Key-Value Observers Of Preferences
+2026-11-28 03:02:28.040 Df Accord[39117:1c97d] [com.apple.xpc:connection] [0x104b1be50] activating connection: mach=true listener=false peer=false name=com.apple.fontservicesd
+2026-11-28 03:02:28.131 A  Accord[39117:1c988] (CoreFoundation) Loading Preferences From User Session CFPrefsD
+2026-11-28 03:02:28.143 Df Accord[39117:1c969] [PrototypeTools:domain] Not observing PTDefaults on customer install.
+2026-11-28 03:02:28.236 Df Accord[39117:1c969] [com.apple.chrono:widget] Creating WidgetCenter connection.
+2026-11-28 03:02:28.237 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x104b33cd0] activating connection: mach=true listener=false peer=false name=com.apple.chrono.widgetcenterconnection
+2026-11-28 03:02:28.242 Df Accord[39117:1c97d] [com.apple.chrono:widget] reloadAllTimelines() - reloaded all timelines
+2026-11-28 03:02:28.357 Df Accord[39117:1c969] [com.apple.FrontBoard:SceneClient] [(FBSceneManager):sceneID:com.noobclaw.accord-default] Sending action(s): BLSInvalidateFrameSpecifiersAction
+2026-11-28 03:02:28.390 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x104a121c0] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-28 03:02:28.391 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x104a12820] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-28 03:02:28.392 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x104a131e0] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-28 03:02:28.427 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x600003d24e10] activating connection: mach=true listener=false peer=false name=com.apple.IOSurface.Remote
+2026-11-28 03:02:28.446 Df Accord[39117:1c97d] [com.apple.UIKit:BackgroundTask] Ending background task with UIBackgroundTaskIdentifier: 2
+2026-11-28 03:02:28.447 Df Accord[39117:1c97d] [com.apple.UIKit:BackgroundTask] Ending task with identifier 2 and description: <_UIBackgroundTaskInfo: 0x6000017021c0>: taskID = 2, taskName = Persistent SceneSession Map Update, creationTime = 1675 (elapsed = 1), _expireHandler: <__NSGlobalBlock__: 0x1e6965d48>
+2026-11-28 03:02:28.447 Df Accord[39117:1c97d] [com.apple.UIKit:BackgroundTask] Decrementing reference count for assertion <BKSProcessAssertion: 0x60000210a6c0> (used by background task with identifier 2: <_UIBackgroundTaskInfo: 0x6000017021c0>: taskID = 2, taskName = Persistent SceneSession Map Update, creationTime = 1675 (elapsed = 1))
+2026-11-28 03:02:28.465 Df Accord[39117:1c969] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:1 [33D82D23-797D-4733-A0BA-D82A928E2339] (reporting strategy default)>
+2026-11-28 03:02:28.466 Df Accord[39117:1c969] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:2 [A022A9E4-5E32-479B-9384-40EB784E58E6] (reporting strategy default)>
+2026-11-28 03:02:28.466 Df Accord[39117:1c969] [com.apple.network:activity] Set activity <nw_activity 50:1 [33D82D23-797D-4733-A0BA-D82A928E2339] (reporting strategy default)> as the global parent
+2026-11-28 03:02:28.466 Df Accord[39117:1c969] [com.apple.UIKit:BackgroundTask] Ending background task with UIBackgroundTaskIdentifier: 1
+2026-11-28 03:02:28.466 Df Accord[39117:1c969] [com.apple.UIKit:BackgroundTask] Ending task with identifier 1 and description: <_UIBackgroundTaskInfo: 0x600001701f00>: taskID = 1, taskName = Launch Background Task for Coalescing, creationTime = 1675 (elapsed = 1), _expireHandler: (null)
+2026-11-28 03:02:28.466 Df Accord[39117:1c969] [com.apple.UIKit:BackgroundTask] Decrementing reference count for assertion <BKSProcessAssertion: 0x60000210a6c0> (used by background task with identifier 1: <_UIBackgroundTaskInfo: 0x600001701f00>: taskID = 1, taskName = Launch Background Task for Coalescing, creationTime = 1675 (elapsed = 1))
+2026-11-28 03:02:28.466 Df Accord[39117:1c969] [com.apple.UIKit:BackgroundTask] Will invalidate assertion: <BKSProcessAssertion: 0x60000210a6c0> for task identifier: 1
+2026-11-28 03:02:28.467 Df Accord[39117:1c969] [com.apple.UIKit:UpdateScheduler] Target list changed: <CADisplay:LCD PurpleMain>
+2026-11-28 03:02:28.469 A  Accord[39117:1c97d] (RunningBoardServices) didChangeInheritances
+2026-11-28 03:02:28.480 Df Accord[39117:1c969] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.accord-default  persistentID: 22BAD8DD-CC36-497D-B7B5-04E273264235
+2026-11-28 03:02:28.481 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x104bdf560] activating connection: mach=true listener=false peer=false name=com.apple.storekitd
+2026-11-28 03:02:28.481 A  Accord[39117:1c969] (CoreFoundation) Updating Key-Value Observers Of Preferences
+2026-11-28 03:02:28.486 Df Accord[39117:1c982] [com.apple.storekit:Default] [12cc48f5_SK2] Starting product request
+2026-11-28 03:02:28.488 Df Accord[39117:1c969] [com.apple.UIKit:EventDeferring] [0x60000290cfc0] Scene target of event deferring environments did update: scene: 0x104c12530; current systemShellManagesKeyboardFocus: 1; systemShellManagesKeyboardFocusForScene: 1; eligibleForRecordRemoval: 1;
+2026-11-28 03:02:28.488 Df Accord[39117:1c969] [com.apple.UIKit:KeyWindow] Scene became target of keyboard event deferring environment: UIWindowScene: 0x104c12530; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.noobclaw.accord-default
+2026-11-28 03:02:28.489 Df Accord[39117:1c969] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x104c12530> (22BAD8DD-CC36-497D-B7B5-04E273264235)
+2026-11-28 03:02:28.490 Df Accord[39117:1c969] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.accord-default  persistentID: 22BAD8DD-CC36-497D-B7B5-04E273264235
+2026-11-28 03:02:28.491 Df Accord[39117:1c969] [com.apple.UIKit:Application] Deactivation reason removed: 12; deactivation reasons: 4128 -> 32; animating application lifecycle event: 1
+2026-11-28 03:02:28.491 Df Accord[39117:1c969] [com.apple.KeyboardArbiter:Client] Send setDeactivating: N (-DeactivationReason:SuspendedEventsOnly)
+2026-11-28 03:02:28.492 Df Accord[39117:1c969] [com.apple.UIKit:Application] Deactivation reason removed: 5; deactivation reasons: 32 -> 0; animating application lifecycle event: 0
+2026-11-28 03:02:28.494 Df Accord[39117:1c969] [com.apple.KeyboardArbiter:Client] startConnection
+2026-11-28 03:02:28.494 Df Accord[39117:1c969] [com.apple.xpc:connection] [0x104bc74e0] activating connection: mach=true listener=false peer=false name=com.apple.UIKit.KeyboardManagement.hosted
+2026-11-28 03:02:28.496 Df Accord[39117:1c969] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.accord-default  persistentID: 22BAD8DD-CC36-497D-B7B5-04E273264235
+2026-11-28 03:02:28.497 Df Accord[39117:1c969] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.accord-default  persistentID: 22BAD8DD-CC36-497D-B7B5-04E273264235
+2026-11-28 03:02:28.656 Df Accord[39117:1c97f] [com.apple.storekit:Default] [12cc48f5_SK2] Finished product request
+2026-11-28 03:02:28.823 Df Accord[39117:1c969] [com.apple.KeyboardArbiter:Client] handleKeyboardChange: set currentKeyboard:N (wasKeyboard:N)
+2026-11-28 03:02:28.823 Df Accord[39117:1c969] [com.apple.UIKit:KeyboardSceneDelegate] forceReloadInputViews
+2026-11-28 03:02:28.823 Df Accord[39117:1c969] [com.apple.UIKit:KeyboardSceneDelegate] Reloading input views for: <(null): 0x0; > force: 1
+2026-11-28 03:02:28.824 Df Accord[39117:1c969] [com.apple.UIKit:KeyboardArbiterClientLog] isWritingToolsHandlingKeyboardTracking:Y (WT ready:Y, Arbiter ready:Y)
+2026-11-28 03:02:28.901 A  Accord[39117:1c977] (RunningBoardServices) didChangeInheritances
+2026-11-28 03:02:28.984 Df Accord[39117:1c969] [com.apple.network:activity] <nw_activity 50:1 [33D82D23-797D-4733-A0BA-D82A928E2339] (global parent) (reporting strategy default) complete (reason success)> complete with reason 2 (success), duration 1704ms
+2026-11-28 03:02:28.984 Df Accord[39117:1c969] [com.apple.network:activity] <nw_activity 50:2 [A022A9E4-5E32-479B-9384-40EB784E58E6] (reporting strategy default) complete (reason success)> complete with reason 2 (success), duration 1704ms
+2026-11-28 03:02:28.984 Df Accord[39117:1c969] [com.apple.network:activity] Unsetting the global parent activity <nw_activity 50:1 [33D82D23-797D-4733-A0BA-D82A928E2339] (global parent) (reporting strategy default) complete (reason success)>
+2026-11-28 03:02:28.984 Df Accord[39117:1c969] [com.apple.network:activity] Unset the global parent activity
+2026-11-28 03:02:29.009 A  Accord[39117:1c977] (RunningBoardServices) didChangeInheritances
+2026-11-28 03:02:30.393 E  Accord[39117:1c97e] [com.apple.storekit:Default] Error enumerating unfinished transactions for first transaction listener: Error Domain=ASDErrorDomain Code=509 "No active account" UserInfo={NSLocalizedDescription=No active account}
+2026-11-28 03:02:30.393 Df Accord[39117:1c97e] [com.apple.CoreAnalytics:client] No XPC connection in Simulator
+2026-11-28 03:02:30.853 E  Accord[39117:1c982] [com.apple.storekit:Default] Error enumerating all current transactions: Error Domain=ASDErrorDomain Code=509 "No active account" UserInfo={NSLocalizedDescription=No active account}

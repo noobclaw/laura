@@ -1,0 +1,2579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="Accord/Resources/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
+        <source>Accord</source>
+        <target state="translated">Accord</target>
+        <note>Bundle display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>Accord</source>
+        <target state="translated">Accord</target>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSFaceIDUsageDescription" xml:space="preserve">
+        <source>Accord uses Face ID to unlock your formula book when App Lock is on.</source>
+        <target state="translated">Accord uses Face ID to unlock your formula book when App Lock is on.</target>
+        <note>Privacy - Face ID Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
+        <source>Accord saves the share card you create to your photo library.</source>
+        <target state="translated">Accord saves the share card you create to your photo library.</target>
+        <note>Privacy - Photo Library Additions Usage Description</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Accord/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="%1$@ in %2$@" xml:space="preserve">
+        <source>%1$@ in %2$@</source>
+        <target state="translated">%1$@ in %2$@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%1$@ of %2$@" xml:space="preserve">
+        <source>%1$@ of %2$@</source>
+        <target state="translated">%1$@ of %2$@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%1$@ · %2$lld ingredients" xml:space="preserve">
+        <source>%1$@ · %2$lld ingredients</source>
+        <target state="translated">%1$@ · %2$lld ingredients</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%1$lld materials · %2$lld need attention" xml:space="preserve">
+        <source>%1$lld materials · %2$lld need attention</source>
+        <target state="translated">%1$lld materials · %2$lld need attention</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%1$lld new materials, %2$lld updated." xml:space="preserve">
+        <source>%1$lld new materials, %2$lld updated.</source>
+        <target state="translated">%1$lld new materials, %2$lld updated.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%1$lld of %2$lld free formulas left · examples don’t count" xml:space="preserve">
+        <source>%1$lld of %2$lld free formulas left · examples don’t count</source>
+        <target state="translated">%1$lld of %2$lld free formulas left · examples don’t count</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ active" xml:space="preserve">
+        <source>%@ active</source>
+        <target state="translated">%@ active</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ copy" xml:space="preserve">
+        <source>%@ copy</source>
+        <target state="translated">%@ copy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ h" xml:space="preserve">
+        <source>%@ h</source>
+        <target state="translated">%@ h</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ in %@" xml:space="preserve">
+        <source>%@ in %@</source>
+        <target state="translated">%@ in %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ min" xml:space="preserve">
+        <source>%@ min</source>
+        <target state="translated">%@ min</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ of %@" xml:space="preserve">
+        <source>%@ of %@</source>
+        <target state="translated">%@ of %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ off target. It will be recorded as weighed." xml:space="preserve">
+        <source>%@ off target. It will be recorded as weighed.</source>
+        <target state="translated">%@ off target. It will be recorded as weighed.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ · %lld ingredients" xml:space="preserve">
+        <source>%@ · %lld ingredients</source>
+        <target state="translated">%@ · %lld ingredients</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld added" xml:space="preserve">
+        <source>%lld added</source>
+        <target state="translated">%lld added</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld changed" xml:space="preserve">
+        <source>%lld changed</source>
+        <target state="translated">%lld changed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld days resting" xml:space="preserve">
+        <source>%lld days resting</source>
+        <target state="translated">%lld days resting</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld formulas use it as a base; those lines will show “Missing material”." xml:space="preserve">
+        <source>%lld formulas use it as a base; those lines will show “Missing material”.</source>
+        <target state="translated">%lld formulas use it as a base; those lines will show “Missing material”.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld formulas use it; those lines will show “Missing material”." xml:space="preserve">
+        <source>%lld formulas use it; those lines will show “Missing material”.</source>
+        <target state="translated">%lld formulas use it; those lines will show “Missing material”.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld materials have no price yet. Add it in Materials." xml:space="preserve">
+        <source>%lld materials have no price yet. Add it in Materials.</source>
+        <target state="translated">%lld materials have no price yet. Add it in Materials.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld materials · %lld need attention" xml:space="preserve">
+        <source>%lld materials · %lld need attention</source>
+        <target state="translated">%lld materials · %lld need attention</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld new materials, %lld updated." xml:space="preserve">
+        <source>%lld new materials, %lld updated.</source>
+        <target state="translated">%lld new materials, %lld updated.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld of %lld free formulas left · examples don’t count" xml:space="preserve">
+        <source>%lld of %lld free formulas left · examples don’t count</source>
+        <target state="translated">%lld of %lld free formulas left · examples don’t count</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld of 5 stars" xml:space="preserve">
+        <source>%lld of 5 stars</source>
+        <target state="translated">%lld of 5 stars</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld removed" xml:space="preserve">
+        <source>%lld removed</source>
+        <target state="translated">%lld removed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="0" xml:space="preserve">
+        <source>0</source>
+        <target state="translated">0</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="5 formulas, full calculator and analysis." xml:space="preserve">
+        <source>5 formulas, full calculator and analysis.</source>
+        <target state="translated">5 formulas, full calculator and analysis.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone." xml:space="preserve">
+        <source>A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone.</source>
+        <target state="translated">A backup is one file with every material, formula and batch. Restoring adds what’s missing and never overwrites what’s on this iPhone.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="A single line can’t be 100 % while others are in the formula." xml:space="preserve">
+        <source>A single line can’t be 100 % while others are in the formula.</source>
+        <target state="translated">A single line can’t be 100 % while others are in the formula.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="About" xml:space="preserve">
+        <source>About</source>
+        <target state="translated">About</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord" xml:space="preserve">
+        <source>Accord</source>
+        <target state="translated">Accord</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord Free" xml:space="preserve">
+        <source>Accord Free</source>
+        <target state="translated">Accord Free</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord Pro" xml:space="preserve">
+        <source>Accord Pro</source>
+        <target state="translated">Accord Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord Pro is one purchase. No subscription, no account, everything stays on your iPhone." xml:space="preserve">
+        <source>Accord Pro is one purchase. No subscription, no account, everything stays on your iPhone.</source>
+        <target state="translated">Accord Pro is one purchase. No subscription, no account, everything stays on your iPhone.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord compares against the limits you enter. It is not a regulatory assessment." xml:space="preserve">
+        <source>Accord compares against the limits you enter. It is not a regulatory assessment.</source>
+        <target state="translated">Accord compares against the limits you enter. It is not a regulatory assessment.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord has no account and no server. Your formulas never leave this iPhone unless you export them." xml:space="preserve">
+        <source>Accord has no account and no server. Your formulas never leave this iPhone unless you export them.</source>
+        <target state="translated">Accord has no account and no server. Your formulas never leave this iPhone unless you export them.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord is locked" xml:space="preserve">
+        <source>Accord is locked</source>
+        <target state="translated">Accord is locked</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord is running without saving so nothing on your phone is overwritten. Restart the app; if this keeps happening, contact support from Settings." xml:space="preserve">
+        <source>Accord is running without saving so nothing on your phone is overwritten. Restart the app; if this keeps happening, contact support from Settings.</source>
+        <target state="translated">Accord is running without saving so nothing on your phone is overwritten. Restart the app; if this keeps happening, contact support from Settings.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord saves the share card you create to your photo library." xml:space="preserve">
+        <source>Accord saves the share card you create to your photo library.</source>
+        <target state="translated">Accord saves the share card you create to your photo library.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Accord uses Face ID to unlock your formula book when App Lock is on." xml:space="preserve">
+        <source>Accord uses Face ID to unlock your formula book when App Lock is on.</source>
+        <target state="translated">Accord uses Face ID to unlock your formula book when App Lock is on.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add" xml:space="preserve">
+        <source>Add</source>
+        <target state="translated">Add</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add %@" xml:space="preserve">
+        <source>Add %@</source>
+        <target state="translated">Add %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add a maximum % to any material in Materials (from your supplier’s documents) and Accord checks every formula against it." xml:space="preserve">
+        <source>Add a maximum % to any material in Materials (from your supplier’s documents) and Accord checks every formula against it.</source>
+        <target state="translated">Add a maximum % to any material in Materials (from your supplier’s documents) and Accord checks every formula against it.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add material" xml:space="preserve">
+        <source>Add material</source>
+        <target state="translated">Add material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add materials to see how the scent unfolds." xml:space="preserve">
+        <source>Add materials to see how the scent unfolds.</source>
+        <target state="translated">Add materials to see how the scent unfolds.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add materials to see the balance." xml:space="preserve">
+        <source>Add materials to see the balance.</source>
+        <target state="translated">Add materials to see the balance.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add note" xml:space="preserve">
+        <source>Add note</source>
+        <target state="translated">Add note</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add the materials on your shelf, or import the spreadsheet you already keep." xml:space="preserve">
+        <source>Add the materials on your shelf, or import the spreadsheet you already keep.</source>
+        <target state="translated">Add the materials on your shelf, or import the spreadsheet you already keep.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add your first material. Type grams, drops or a percentage, whichever you weigh in." xml:space="preserve">
+        <source>Add your first material. Type grams, drops or a percentage, whichever you weigh in.</source>
+        <target state="translated">Add your first material. Type grams, drops or a percentage, whichever you weigh in.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add “%@” to materials" xml:space="preserve">
+        <source>Add “%@” to materials</source>
+        <target state="translated">Add “%@” to materials</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="After %@" xml:space="preserve">
+        <source>After %@</source>
+        <target state="translated">After %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="After smelling" xml:space="preserve">
+        <source>After smelling</source>
+        <target state="translated">After smelling</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Alcohol price per kg" xml:space="preserve">
+        <source>Alcohol price per kg</source>
+        <target state="translated">Alcohol price per kg</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="All" xml:space="preserve">
+        <source>All</source>
+        <target state="translated">All</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="All weighed" xml:space="preserve">
+        <source>All weighed</source>
+        <target state="translated">All weighed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Almond-cherry powder" xml:space="preserve">
+        <source>Almond-cherry powder</source>
+        <target state="translated">Almond-cherry powder</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Amber" xml:space="preserve">
+        <source>Amber</source>
+        <target state="translated">Amber</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Amber Base" xml:space="preserve">
+        <source>Amber Base</source>
+        <target state="translated">Amber Base</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ambroxide" xml:space="preserve">
+        <source>Ambroxide</source>
+        <target state="translated">Ambroxide</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Amount" xml:space="preserve">
+        <source>Amount</source>
+        <target state="translated">Amount</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Analysis" xml:space="preserve">
+        <source>Analysis</source>
+        <target state="translated">Analysis</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Animalic" xml:space="preserve">
+        <source>Animalic</source>
+        <target state="translated">Animalic</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Animalic white-flower depth" xml:space="preserve">
+        <source>Animalic white-flower depth</source>
+        <target state="translated">Animalic white-flower depth</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="App Lock" xml:space="preserve">
+        <source>App Lock</source>
+        <target state="translated">App Lock</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="App language" xml:space="preserve">
+        <source>App language</source>
+        <target state="translated">App language</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Aquatic" xml:space="preserve">
+        <source>Aquatic</source>
+        <target state="translated">Aquatic</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Aromatic" xml:space="preserve">
+        <source>Aromatic</source>
+        <target state="translated">Aromatic</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="At the bench" xml:space="preserve">
+        <source>At the bench</source>
+        <target state="translated">At the bench</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Atelier" xml:space="preserve">
+        <source>Atelier</source>
+        <target state="translated">Atelier</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Atlas cedarwood oil" xml:space="preserve">
+        <source>Atlas cedarwood oil</source>
+        <target state="translated">Atlas cedarwood oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Australian sandalwood oil" xml:space="preserve">
+        <source>Australian sandalwood oil</source>
+        <target state="translated">Australian sandalwood oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Back up everything" xml:space="preserve">
+        <source>Back up everything</source>
+        <target state="translated">Back up everything</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Backbone" xml:space="preserve">
+        <source>Backbone</source>
+        <target state="translated">Backbone</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base" xml:space="preserve">
+        <source>Base</source>
+        <target state="translated">Base</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base: its own formula is unpacked into this one" xml:space="preserve">
+        <source>Base: its own formula is unpacked into this one</source>
+        <target state="translated">Base: its own formula is unpacked into this one</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bases" xml:space="preserve">
+        <source>Bases</source>
+        <target state="translated">Bases</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bases inside formulas" xml:space="preserve">
+        <source>Bases inside formulas</source>
+        <target state="translated">Bases inside formulas</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bases unpacked" xml:space="preserve">
+        <source>Bases unpacked</source>
+        <target state="translated">Bases unpacked</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Batch saved" xml:space="preserve">
+        <source>Batch saved</source>
+        <target state="translated">Batch saved</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Batches" xml:space="preserve">
+        <source>Batches</source>
+        <target state="translated">Batches</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Batches and maturation diary" xml:space="preserve">
+        <source>Batches and maturation diary</source>
+        <target state="translated">Batches and maturation diary</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Batches you already made keep their records." xml:space="preserve">
+        <source>Batches you already made keep their records.</source>
+        <target state="translated">Batches you already made keep their records.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bench" xml:space="preserve">
+        <source>Bench</source>
+        <target state="translated">Bench</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Benzoin resinoid" xml:space="preserve">
+        <source>Benzoin resinoid</source>
+        <target state="translated">Benzoin resinoid</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Benzyl acetate" xml:space="preserve">
+        <source>Benzyl acetate</source>
+        <target state="translated">Benzyl acetate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Benzyl benzoate" xml:space="preserve">
+        <source>Benzyl benzoate</source>
+        <target state="translated">Benzyl benzoate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bergamot Cologne" xml:space="preserve">
+        <source>Bergamot Cologne</source>
+        <target state="translated">Bergamot Cologne</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bergamot oil" xml:space="preserve">
+        <source>Bergamot oil</source>
+        <target state="translated">Bergamot oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bergamot-lavender, fruity" xml:space="preserve">
+        <source>Bergamot-lavender, fruity</source>
+        <target state="translated">Bergamot-lavender, fruity</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Birch tar oil" xml:space="preserve">
+        <source>Birch tar oil</source>
+        <target state="translated">Birch tar oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bitter-fresh, sulphury sparkle" xml:space="preserve">
+        <source>Bitter-fresh, sulphury sparkle</source>
+        <target state="translated">Bitter-fresh, sulphury sparkle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Black glass and gold, like a perfume counter" xml:space="preserve">
+        <source>Black glass and gold, like a perfume counter</source>
+        <target state="translated">Black glass and gold, like a perfume counter</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Black pepper oil" xml:space="preserve">
+        <source>Black pepper oil</source>
+        <target state="translated">Black pepper oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Body mist" xml:space="preserve">
+        <source>Body mist</source>
+        <target state="translated">Body mist</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bottle" xml:space="preserve">
+        <source>Bottle</source>
+        <target state="translated">Bottle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bottle size" xml:space="preserve">
+        <source>Bottle size</source>
+        <target state="translated">Bottle size</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bought or opened" xml:space="preserve">
+        <source>Bought or opened</source>
+        <target state="translated">Bought or opened</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bright zest, juicy" xml:space="preserve">
+        <source>Bright zest, juicy</source>
+        <target state="translated">Bright zest, juicy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bring in your spreadsheet" xml:space="preserve">
+        <source>Bring in your spreadsheet</source>
+        <target state="translated">Bring in your spreadsheet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Build with your own bases" xml:space="preserve">
+        <source>Build with your own bases</source>
+        <target state="translated">Build with your own bases</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="By name" xml:space="preserve">
+        <source>By name</source>
+        <target state="translated">By name</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="CAS number" xml:space="preserve">
+        <source>CAS number</source>
+        <target state="translated">CAS number</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="CSV files open in Numbers, Excel and Google Sheets, and import back into Accord." xml:space="preserve">
+        <source>CSV files open in Numbers, Excel and Google Sheets, and import back into Accord.</source>
+        <target state="translated">CSV files open in Numbers, Excel and Google Sheets, and import back into Accord.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="CSV, PDF, Markdown, and a full backup file." xml:space="preserve">
+        <source>CSV, PDF, Markdown, and a full backup file.</source>
+        <target state="translated">CSV, PDF, Markdown, and a full backup file.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Camphoraceous, herbal" xml:space="preserve">
+        <source>Camphoraceous, herbal</source>
+        <target state="translated">Camphoraceous, herbal</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cancel" xml:space="preserve">
+        <source>Cancel</source>
+        <target state="translated">Cancel</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Candle" xml:space="preserve">
+        <source>Candle</source>
+        <target state="translated">Candle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Candy floss, caramel" xml:space="preserve">
+        <source>Candy floss, caramel</source>
+        <target state="translated">Candy floss, caramel</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cardamom oil" xml:space="preserve">
+        <source>Cardamom oil</source>
+        <target state="translated">Cardamom oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Category (optional)" xml:space="preserve">
+        <source>Category (optional)</source>
+        <target state="translated">Category (optional)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Change" xml:space="preserve">
+        <source>Change</source>
+        <target state="translated">Change</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Changes" xml:space="preserve">
+        <source>Changes</source>
+        <target state="translated">Changes</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Character" xml:space="preserve">
+        <source>Character</source>
+        <target state="translated">Character</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Check again" xml:space="preserve">
+        <source>Check again</source>
+        <target state="translated">Check again</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Choose a material" xml:space="preserve">
+        <source>Choose a material</source>
+        <target state="translated">Choose a material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Citronellol" xml:space="preserve">
+        <source>Citronellol</source>
+        <target state="translated">Citronellol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Citrus" xml:space="preserve">
+        <source>Citrus</source>
+        <target state="translated">Citrus</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clary sage oil" xml:space="preserve">
+        <source>Clary sage oil</source>
+        <target state="translated">Clary sage oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clean metallic citrus, laundry fresh" xml:space="preserve">
+        <source>Clean metallic citrus, laundry fresh</source>
+        <target state="translated">Clean metallic citrus, laundry fresh</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clean, sweet white musk" xml:space="preserve">
+        <source>Clean, sweet white musk</source>
+        <target state="translated">Clean, sweet white musk</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clear search" xml:space="preserve">
+        <source>Clear search</source>
+        <target state="translated">Clear search</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Close" xml:space="preserve">
+        <source>Close</source>
+        <target state="translated">Close</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Close without saving" xml:space="preserve">
+        <source>Close without saving</source>
+        <target state="translated">Close without saving</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clove bud oil" xml:space="preserve">
+        <source>Clove bud oil</source>
+        <target state="translated">Clove bud oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Compare versions" xml:space="preserve">
+        <source>Compare versions</source>
+        <target state="translated">Compare versions</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Compare with…" xml:space="preserve">
+        <source>Compare with…</source>
+        <target state="translated">Compare with…</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Compare “%@” with" xml:space="preserve">
+        <source>Compare “%@” with</source>
+        <target state="translated">Compare “%@” with</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Concentrate" xml:space="preserve">
+        <source>Concentrate</source>
+        <target state="translated">Concentrate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Concentrate only" xml:space="preserve">
+        <source>Concentrate only</source>
+        <target state="translated">Concentrate only</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Container size" xml:space="preserve">
+        <source>Container size</source>
+        <target state="translated">Container size</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cool, eucalyptus-spice" xml:space="preserve">
+        <source>Cool, eucalyptus-spice</source>
+        <target state="translated">Cool, eucalyptus-spice</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cost" xml:space="preserve">
+        <source>Cost</source>
+        <target state="translated">Cost</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cost per gram" xml:space="preserve">
+        <source>Cost per gram</source>
+        <target state="translated">Cost per gram</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Couldn’t find a column for the material name (Name or Material)." xml:space="preserve">
+        <source>Couldn’t find a column for the material name (Name or Material).</source>
+        <target state="translated">Couldn’t find a column for the material name (Name or Material).</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Couldn’t find an amount column (Grams, Amount, Weight or Parts)." xml:space="preserve">
+        <source>Couldn’t find an amount column (Grams, Amount, Weight or Parts).</source>
+        <target state="translated">Couldn’t find an amount column (Grams, Amount, Weight or Parts).</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Couldn’t reach the App Store. Try again" xml:space="preserve">
+        <source>Couldn’t reach the App Store. Try again</source>
+        <target state="translated">Couldn’t reach the App Store. Try again</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Coumarin" xml:space="preserve">
+        <source>Coumarin</source>
+        <target state="translated">Coumarin</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS." xml:space="preserve">
+        <source>Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS.</source>
+        <target state="translated">Count drops from your own pipette once and enter it here; viscous materials give fewer, larger drops. Take the maximum from your supplier’s IFRA certificate or SDS.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Creamy peach" xml:space="preserve">
+        <source>Creamy peach</source>
+        <target state="translated">Creamy peach</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Creamy, banana-floral" xml:space="preserve">
+        <source>Creamy, banana-floral</source>
+        <target state="translated">Creamy, banana-floral</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Creamy, soft wood" xml:space="preserve">
+        <source>Creamy, soft wood</source>
+        <target state="translated">Creamy, soft wood</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Create" xml:space="preserve">
+        <source>Create</source>
+        <target state="translated">Create</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Currency" xml:space="preserve">
+        <source>Currency</source>
+        <target state="translated">Currency</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Custom" xml:space="preserve">
+        <source>Custom</source>
+        <target state="translated">Custom</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cut grass" xml:space="preserve">
+        <source>Cut grass</source>
+        <target state="translated">Cut grass</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dark, leathery amber" xml:space="preserve">
+        <source>Dark, leathery amber</source>
+        <target state="translated">Dark, leathery amber</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Day %1$lld: smell %2$@" xml:space="preserve">
+        <source>Day %1$lld: smell %2$@</source>
+        <target state="translated">Day %1$lld: smell %2$@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Day %lld" xml:space="preserve">
+        <source>Day %lld</source>
+        <target state="translated">Day %lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Day %lld: how does it smell now?" xml:space="preserve">
+        <source>Day %lld: how does it smell now?</source>
+        <target state="translated">Day %lld: how does it smell now?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Day %lld: smell %@" xml:space="preserve">
+        <source>Day %lld: smell %@</source>
+        <target state="translated">Day %lld: smell %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Days each batch has been maturing." xml:space="preserve">
+        <source>Days each batch has been maturing.</source>
+        <target state="translated">Days each batch has been maturing.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete" xml:space="preserve">
+        <source>Delete</source>
+        <target state="translated">Delete</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete batch record" xml:space="preserve">
+        <source>Delete batch record</source>
+        <target state="translated">Delete batch record</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete formula" xml:space="preserve">
+        <source>Delete formula</source>
+        <target state="translated">Delete formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete formula and its lines" xml:space="preserve">
+        <source>Delete formula and its lines</source>
+        <target state="translated">Delete formula and its lines</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete material" xml:space="preserve">
+        <source>Delete material</source>
+        <target state="translated">Delete material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete record and its notes" xml:space="preserve">
+        <source>Delete record and its notes</source>
+        <target state="translated">Delete record and its notes</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete this batch record?" xml:space="preserve">
+        <source>Delete this batch record?</source>
+        <target state="translated">Delete this batch record?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete “%@”?" xml:space="preserve">
+        <source>Delete “%@”?</source>
+        <target state="translated">Delete “%@”?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dihydromyrcenol" xml:space="preserve">
+        <source>Dihydromyrcenol</source>
+        <target state="translated">Dihydromyrcenol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Diluted in" xml:space="preserve">
+        <source>Diluted in</source>
+        <target state="translated">Diluted in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dilution" xml:space="preserve">
+        <source>Dilution</source>
+        <target state="translated">Dilution</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dilution calculator" xml:space="preserve">
+        <source>Dilution calculator</source>
+        <target state="translated">Dilution calculator</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Distilled water" xml:space="preserve">
+        <source>Distilled water</source>
+        <target state="translated">Distilled water</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Done" xml:space="preserve">
+        <source>Done</source>
+        <target state="translated">Done</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Drops per gram" xml:space="preserve">
+        <source>Drops per gram</source>
+        <target state="translated">Drops per gram</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dry, clean cedar" xml:space="preserve">
+        <source>Dry, clean cedar</source>
+        <target state="translated">Dry, clean cedar</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dry, crackling pepper" xml:space="preserve">
+        <source>Dry, crackling pepper</source>
+        <target state="translated">Dry, crackling pepper</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Duplicate" xml:space="preserve">
+        <source>Duplicate</source>
+        <target state="translated">Duplicate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Earthy green leather" xml:space="preserve">
+        <source>Earthy green leather</source>
+        <target state="translated">Earthy green leather</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Earthy, dark, camphor-chocolate" xml:space="preserve">
+        <source>Earthy, dark, camphor-chocolate</source>
+        <target state="translated">Earthy, dark, camphor-chocolate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Eau de Cologne" xml:space="preserve">
+        <source>Eau de Cologne</source>
+        <target state="translated">Eau de Cologne</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Eau de Parfum" xml:space="preserve">
+        <source>Eau de Parfum</source>
+        <target state="translated">Eau de Parfum</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Eau de Toilette" xml:space="preserve">
+        <source>Eau de Toilette</source>
+        <target state="translated">Eau de Toilette</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Edit line" xml:space="preserve">
+        <source>Edit line</source>
+        <target state="translated">Edit line</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enter a number." xml:space="preserve">
+        <source>Enter a number.</source>
+        <target state="translated">Enter a number.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Estimated longevity" xml:space="preserve">
+        <source>Estimated longevity</source>
+        <target state="translated">Estimated longevity</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ethanol" xml:space="preserve">
+        <source>Ethanol</source>
+        <target state="translated">Ethanol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ethyl maltol" xml:space="preserve">
+        <source>Ethyl maltol</source>
+        <target state="translated">Ethyl maltol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ethyl vanillin" xml:space="preserve">
+        <source>Ethyl vanillin</source>
+        <target state="translated">Ethyl vanillin</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ethylene brassylate" xml:space="preserve">
+        <source>Ethylene brassylate</source>
+        <target state="translated">Ethylene brassylate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Evaporation" xml:space="preserve">
+        <source>Evaporation</source>
+        <target state="translated">Evaporation</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Evaporation timeline" xml:space="preserve">
+        <source>Evaporation timeline</source>
+        <target state="translated">Evaporation timeline</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Evening Amber" xml:space="preserve">
+        <source>Evening Amber</source>
+        <target state="translated">Evening Amber</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Every draft, every version." xml:space="preserve">
+        <source>Every draft, every version.</source>
+        <target state="translated">Every draft, every version.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Everything is unlocked. Thank you." xml:space="preserve">
+        <source>Everything is unlocked. Thank you.</source>
+        <target state="translated">Everything is unlocked. Thank you.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Example" xml:space="preserve">
+        <source>Example</source>
+        <target state="translated">Example</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Export failed" xml:space="preserve">
+        <source>Export failed</source>
+        <target state="translated">Export failed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Export “%@”" xml:space="preserve">
+        <source>Export “%@”</source>
+        <target state="translated">Export “%@”</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Export…" xml:space="preserve">
+        <source>Export…</source>
+        <target state="translated">Export…</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Extrait" xml:space="preserve">
+        <source>Extrait</source>
+        <target state="translated">Extrait</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Families" xml:space="preserve">
+        <source>Families</source>
+        <target state="translated">Families</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Family" xml:space="preserve">
+        <source>Family</source>
+        <target state="translated">Family</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Filter and import" xml:space="preserve">
+        <source>Filter and import</source>
+        <target state="translated">Filter and import</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Finish" xml:space="preserve">
+        <source>Finish</source>
+        <target state="translated">Finish</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Finished product" xml:space="preserve">
+        <source>Finished product</source>
+        <target state="translated">Finished product</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Flag" xml:space="preserve">
+        <source>Flag</source>
+        <target state="translated">Flag</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Floral" xml:space="preserve">
+        <source>Floral</source>
+        <target state="translated">Floral</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Floral laundry musk" xml:space="preserve">
+        <source>Floral laundry musk</source>
+        <target state="translated">Floral laundry musk</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Formula" xml:space="preserve">
+        <source>Formula</source>
+        <target state="translated">Formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Formula actions" xml:space="preserve">
+        <source>Formula actions</source>
+        <target state="translated">Formula actions</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Formulas" xml:space="preserve">
+        <source>Formulas</source>
+        <target state="translated">Formulas</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fragrance load" xml:space="preserve">
+        <source>Fragrance load</source>
+        <target state="translated">Fragrance load</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fresh floral-woody, lily of the valley hint" xml:space="preserve">
+        <source>Fresh floral-woody, lily of the valley hint</source>
+        <target state="translated">Fresh floral-woody, lily of the valley hint</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fresh rose, waxy" xml:space="preserve">
+        <source>Fresh rose, waxy</source>
+        <target state="translated">Fresh rose, waxy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fresh, sparkling, slightly floral peel" xml:space="preserve">
+        <source>Fresh, sparkling, slightly floral peel</source>
+        <target state="translated">Fresh, sparkling, slightly floral peel</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fruity" xml:space="preserve">
+        <source>Fruity</source>
+        <target state="translated">Fruity</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Galbanum oil" xml:space="preserve">
+        <source>Galbanum oil</source>
+        <target state="translated">Galbanum oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Geraniol" xml:space="preserve">
+        <source>Geraniol</source>
+        <target state="translated">Geraniol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Geranium oil" xml:space="preserve">
+        <source>Geranium oil</source>
+        <target state="translated">Geranium oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Go to the bench" xml:space="preserve">
+        <source>Go to the bench</source>
+        <target state="translated">Go to the bench</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Good until %@" xml:space="preserve">
+        <source>Good until %@</source>
+        <target state="translated">Good until %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Gourmand" xml:space="preserve">
+        <source>Gourmand</source>
+        <target state="translated">Gourmand</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Grams left, low-stock and expiry warnings, cost per bottle." xml:space="preserve">
+        <source>Grams left, low-stock and expiry warnings, cost per bottle.</source>
+        <target state="translated">Grams left, low-stock and expiry warnings, cost per bottle.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Green" xml:space="preserve">
+        <source>Green</source>
+        <target state="translated">Green</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Green, woody leaf, bitter orange" xml:space="preserve">
+        <source>Green, woody leaf, bitter orange</source>
+        <target state="translated">Green, woody leaf, bitter orange</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Guaiacwood oil" xml:space="preserve">
+        <source>Guaiacwood oil</source>
+        <target state="translated">Guaiacwood oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="HHCB" xml:space="preserve">
+        <source>HHCB</source>
+        <target state="translated">HHCB</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hay, almond, tobacco sweetness" xml:space="preserve">
+        <source>Hay, almond, tobacco sweetness</source>
+        <target state="translated">Hay, almond, tobacco sweetness</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hay, tonka, warm powder" xml:space="preserve">
+        <source>Hay, tonka, warm powder</source>
+        <target state="translated">Hay, tonka, warm powder</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Heart" xml:space="preserve">
+        <source>Heart</source>
+        <target state="translated">Heart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Heart–base" xml:space="preserve">
+        <source>Heart–base</source>
+        <target state="translated">Heart–base</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Heaviest first" xml:space="preserve">
+        <source>Heaviest first</source>
+        <target state="translated">Heaviest first</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Heliotropin" xml:space="preserve">
+        <source>Heliotropin</source>
+        <target state="translated">Heliotropin</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Help and contact" xml:space="preserve">
+        <source>Help and contact</source>
+        <target state="translated">Help and contact</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Herbal, floral, camphor edge" xml:space="preserve">
+        <source>Herbal, floral, camphor edge</source>
+        <target state="translated">Herbal, floral, camphor edge</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Herbal, tea-like, ambery" xml:space="preserve">
+        <source>Herbal, tea-like, ambery</source>
+        <target state="translated">Herbal, tea-like, ambery</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="I have" xml:space="preserve">
+        <source>I have</source>
+        <target state="translated">I have</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="I want to make" xml:space="preserve">
+        <source>I want to make</source>
+        <target state="translated">I want to make</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Identity" xml:space="preserve">
+        <source>Identity</source>
+        <target state="translated">Identity</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Import" xml:space="preserve">
+        <source>Import</source>
+        <target state="translated">Import</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Import from spreadsheet" xml:space="preserve">
+        <source>Import from spreadsheet</source>
+        <target state="translated">Import from spreadsheet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Import, export and backup" xml:space="preserve">
+        <source>Import, export and backup</source>
+        <target state="translated">Import, export and backup</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Imported a formula with %1$lld lines (%2$lld new materials). It’s on your bench." xml:space="preserve">
+        <source>Imported a formula with %1$lld lines (%2$lld new materials). It’s on your bench.</source>
+        <target state="translated">Imported a formula with %1$lld lines (%2$lld new materials). It’s on your bench.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Imported a formula with %lld lines (%lld new materials). It’s on your bench." xml:space="preserve">
+        <source>Imported a formula with %lld lines (%lld new materials). It’s on your bench.</source>
+        <target state="translated">Imported a formula with %lld lines (%lld new materials). It’s on your bench.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Imported formula" xml:space="preserve">
+        <source>Imported formula</source>
+        <target state="translated">Imported formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="In stock" xml:space="preserve">
+        <source>In stock</source>
+        <target state="translated">In stock</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="In the bottle" xml:space="preserve">
+        <source>In the bottle</source>
+        <target state="translated">In the bottle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Indole" xml:space="preserve">
+        <source>Indole</source>
+        <target state="translated">Indole</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Intense creamy vanilla" xml:space="preserve">
+        <source>Intense creamy vanilla</source>
+        <target state="translated">Intense creamy vanilla</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Intense green, snapped stems" xml:space="preserve">
+        <source>Intense green, snapped stems</source>
+        <target state="translated">Intense green, snapped stems</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Isobutyl quinoline" xml:space="preserve">
+        <source>Isobutyl quinoline</source>
+        <target state="translated">Isobutyl quinoline</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="It isn’t used in any formula." xml:space="preserve">
+        <source>It isn’t used in any formula.</source>
+        <target state="translated">It isn’t used in any formula.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Jasmine absolute" xml:space="preserve">
+        <source>Jasmine absolute</source>
+        <target state="translated">Jasmine absolute</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Jasmine, pear-like" xml:space="preserve">
+        <source>Jasmine, pear-like</source>
+        <target state="translated">Jasmine, pear-like</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Just right" xml:space="preserve">
+        <source>Just right</source>
+        <target state="translated">Just right</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Keep a maturation diary" xml:space="preserve">
+        <source>Keep a maturation diary</source>
+        <target state="translated">Keep a maturation diary</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Keep a record of every batch" xml:space="preserve">
+        <source>Keep a record of every batch</source>
+        <target state="translated">Keep a record of every batch</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Keep this material at this strength" xml:space="preserve">
+        <source>Keep this material at this strength</source>
+        <target state="translated">Keep this material at this strength</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Keep your formulas behind Face ID." xml:space="preserve">
+        <source>Keep your formulas behind Face ID.</source>
+        <target state="translated">Keep your formulas behind Face ID.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Kept at" xml:space="preserve">
+        <source>Kept at</source>
+        <target state="translated">Kept at</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Know your stock and your cost" xml:space="preserve">
+        <source>Know your stock and your cost</source>
+        <target state="translated">Know your stock and your cost</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Labdanum resinoid" xml:space="preserve">
+        <source>Labdanum resinoid</source>
+        <target state="translated">Labdanum resinoid</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Largest deviation %@. Keep it in mind when you smell it." xml:space="preserve">
+        <source>Largest deviation %@. Keep it in mind when you smell it.</source>
+        <target state="translated">Largest deviation %@. Keep it in mind when you smell it.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lavender oil" xml:space="preserve">
+        <source>Lavender oil</source>
+        <target state="translated">Lavender oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Leather" xml:space="preserve">
+        <source>Leather</source>
+        <target state="translated">Leather</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lemon oil" xml:space="preserve">
+        <source>Lemon oil</source>
+        <target state="translated">Lemon oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Library" xml:space="preserve">
+        <source>Library</source>
+        <target state="translated">Library</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lime oil (distilled)" xml:space="preserve">
+        <source>Lime oil (distilled)</source>
+        <target state="translated">Lime oil (distilled)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Linalool" xml:space="preserve">
+        <source>Linalool</source>
+        <target state="translated">Linalool</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Linalyl acetate" xml:space="preserve">
+        <source>Linalyl acetate</source>
+        <target state="translated">Linalyl acetate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lock your formula book" xml:space="preserve">
+        <source>Lock your formula book</source>
+        <target state="translated">Lock your formula book</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Look" xml:space="preserve">
+        <source>Look</source>
+        <target state="translated">Look</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Low" xml:space="preserve">
+        <source>Low</source>
+        <target state="translated">Low</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Low stock" xml:space="preserve">
+        <source>Low stock</source>
+        <target state="translated">Low stock</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Made with Accord" xml:space="preserve">
+        <source>Made with Accord</source>
+        <target state="translated">Made with Accord</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Make a dilution…" xml:space="preserve">
+        <source>Make a dilution…</source>
+        <target state="translated">Make a dilution…</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Mandarin oil" xml:space="preserve">
+        <source>Mandarin oil</source>
+        <target state="translated">Mandarin oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Marine, melon, sea breeze" xml:space="preserve">
+        <source>Marine, melon, sea breeze</source>
+        <target state="translated">Marine, melon, sea breeze</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Material" xml:space="preserve">
+        <source>Material</source>
+        <target state="translated">Material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Material you have" xml:space="preserve">
+        <source>Material you have</source>
+        <target state="translated">Material you have</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Materials" xml:space="preserve">
+        <source>Materials</source>
+        <target state="translated">Materials</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Materials (bases unpacked)" xml:space="preserve">
+        <source>Materials (bases unpacked)</source>
+        <target state="translated">Materials (bases unpacked)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Maturation diary" xml:space="preserve">
+        <source>Maturation diary</source>
+        <target state="translated">Maturation diary</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Methyl dihydrojasmonate" xml:space="preserve">
+        <source>Methyl dihydrojasmonate</source>
+        <target state="translated">Methyl dihydrojasmonate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Missing material" xml:space="preserve">
+        <source>Missing material</source>
+        <target state="translated">Missing material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Multiply" xml:space="preserve">
+        <source>Multiply</source>
+        <target state="translated">Multiply</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Multiply by" xml:space="preserve">
+        <source>Multiply by</source>
+        <target state="translated">Multiply by</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Musk" xml:space="preserve">
+        <source>Musk</source>
+        <target state="translated">Musk</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Name" xml:space="preserve">
+        <source>Name</source>
+        <target state="translated">Name</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Name, e.g. Fig Leaf 1" xml:space="preserve">
+        <source>Name, e.g. Fig Leaf 1</source>
+        <target state="translated">Name, e.g. Fig Leaf 1</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Name, odour, CAS or supplier" xml:space="preserve">
+        <source>Name, odour, CAS or supplier</source>
+        <target state="translated">Name, odour, CAS or supplier</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Natural" xml:space="preserve">
+        <source>Natural</source>
+        <target state="translated">Natural</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Naturals" xml:space="preserve">
+        <source>Naturals</source>
+        <target state="translated">Naturals</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Neat" xml:space="preserve">
+        <source>Neat</source>
+        <target state="translated">Neat</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Neat materials" xml:space="preserve">
+        <source>Neat materials</source>
+        <target state="translated">Neat materials</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="New formula" xml:space="preserve">
+        <source>New formula</source>
+        <target state="translated">New formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="New material" xml:space="preserve">
+        <source>New material</source>
+        <target state="translated">New material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No batches yet" xml:space="preserve">
+        <source>No batches yet</source>
+        <target state="translated">No batches yet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No flag" xml:space="preserve">
+        <source>No flag</source>
+        <target state="translated">No flag</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No formulas yet" xml:space="preserve">
+        <source>No formulas yet</source>
+        <target state="translated">No formulas yet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No material matches this filter." xml:space="preserve">
+        <source>No material matches this filter.</source>
+        <target state="translated">No material matches this filter.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No materials yet" xml:space="preserve">
+        <source>No materials yet</source>
+        <target state="translated">No materials yet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No previous Pro purchase was found for this Apple ID." xml:space="preserve">
+        <source>No previous Pro purchase was found for this Apple ID.</source>
+        <target state="translated">No previous Pro purchase was found for this Apple ID.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Noir" xml:space="preserve">
+        <source>Noir</source>
+        <target state="translated">Noir</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Not in any formula" xml:space="preserve">
+        <source>Not in any formula</source>
+        <target state="translated">Not in any formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Note" xml:space="preserve">
+        <source>Note</source>
+        <target state="translated">Note</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Note how it has matured since you made it." xml:space="preserve">
+        <source>Note how it has matured since you made it.</source>
+        <target state="translated">Note how it has matured since you made it.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Notes" xml:space="preserve">
+        <source>Notes</source>
+        <target state="translated">Notes</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Notes (Markdown)" xml:space="preserve">
+        <source>Notes (Markdown)</source>
+        <target state="translated">Notes (Markdown)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nothing here" xml:space="preserve">
+        <source>Nothing here</source>
+        <target state="translated">Nothing here</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nothing matches" xml:space="preserve">
+        <source>Nothing matches</source>
+        <target state="translated">Nothing matches</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Notifications are off for Accord." xml:space="preserve">
+        <source>Notifications are off for Accord.</source>
+        <target state="translated">Notifications are off for Accord.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OK" xml:space="preserve">
+        <source>OK</source>
+        <target state="translated">OK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OTNE" xml:space="preserve">
+        <source>OTNE</source>
+        <target state="translated">OTNE</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Off target" xml:space="preserve">
+        <source>Off target</source>
+        <target state="translated">Off target</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="On the first spray" xml:space="preserve">
+        <source>On the first spray</source>
+        <target state="translated">On the first spray</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open Settings" xml:space="preserve">
+        <source>Open Settings</source>
+        <target state="translated">Open Settings</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open a formula, tap Weigh and follow the sheet. When you finish, save it here and Accord reminds you to smell it on day 7, 14 and 28." xml:space="preserve">
+        <source>Open a formula, tap Weigh and follow the sheet. When you finish, save it here and Accord reminds you to smell it on day 7, 14 and 28.</source>
+        <target state="translated">Open a formula, tap Weigh and follow the sheet. When you finish, save it here and Accord reminds you to smell it on day 7, 14 and 28.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open on the bench" xml:space="preserve">
+        <source>Open on the bench</source>
+        <target state="translated">Open on the bench</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open the formula" xml:space="preserve">
+        <source>Open the formula</source>
+        <target state="translated">Open the formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Other" xml:space="preserve">
+        <source>Other</source>
+        <target state="translated">Other</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Overall" xml:space="preserve">
+        <source>Overall</source>
+        <target state="translated">Overall</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Past shelf life" xml:space="preserve">
+        <source>Past shelf life</source>
+        <target state="translated">Past shelf life</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Past shelf life since %@" xml:space="preserve">
+        <source>Past shelf life since %@</source>
+        <target state="translated">Past shelf life since %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Patchouli oil" xml:space="preserve">
+        <source>Patchouli oil</source>
+        <target state="translated">Patchouli oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pentadecanolide" xml:space="preserve">
+        <source>Pentadecanolide</source>
+        <target state="translated">Pentadecanolide</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Per 50 ml bottle" xml:space="preserve">
+        <source>Per 50 ml bottle</source>
+        <target state="translated">Per 50 ml bottle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Per 100 g concentrate" xml:space="preserve">
+        <source>Per 100 g concentrate</source>
+        <target state="translated">Per 100 g concentrate</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Percentages are off by default so your formula stays yours." xml:space="preserve">
+        <source>Percentages are off by default so your formula stays yours.</source>
+        <target state="translated">Percentages are off by default so your formula stays yours.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Perfume changes as it rests. Smell each batch on the days you planned and write down what moved." xml:space="preserve">
+        <source>Perfume changes as it rests. Smell each batch on the days you planned and write down what moved.</source>
+        <target state="translated">Perfume changes as it rests. Smell each batch on the days you planned and write down what moved.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Perfume formula lab" xml:space="preserve">
+        <source>Perfume formula lab</source>
+        <target state="translated">Perfume formula lab</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Perfumer’s alcohol" xml:space="preserve">
+        <source>Perfumer’s alcohol</source>
+        <target state="translated">Perfumer’s alcohol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Petitgrain oil" xml:space="preserve">
+        <source>Petitgrain oil</source>
+        <target state="translated">Petitgrain oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Phenylethyl alcohol" xml:space="preserve">
+        <source>Phenylethyl alcohol</source>
+        <target state="translated">Phenylethyl alcohol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pink grapefruit oil" xml:space="preserve">
+        <source>Pink grapefruit oil</source>
+        <target state="translated">Pink grapefruit oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pink pepper oil" xml:space="preserve">
+        <source>Pink pepper oil</source>
+        <target state="translated">Pink pepper oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Plan a batch" xml:space="preserve">
+        <source>Plan a batch</source>
+        <target state="translated">Plan a batch</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Powdery" xml:space="preserve">
+        <source>Powdery</source>
+        <target state="translated">Powdery</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Preferences" xml:space="preserve">
+        <source>Preferences</source>
+        <target state="translated">Preferences</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Previous" xml:space="preserve">
+        <source>Previous</source>
+        <target state="translated">Previous</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Printable sheet (PDF)" xml:space="preserve">
+        <source>Printable sheet (PDF)</source>
+        <target state="translated">Printable sheet (PDF)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Privacy" xml:space="preserve">
+        <source>Privacy</source>
+        <target state="translated">Privacy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Privacy policy" xml:space="preserve">
+        <source>Privacy policy</source>
+        <target state="translated">Privacy policy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pro is unlocked. Thank you!" xml:space="preserve">
+        <source>Pro is unlocked. Thank you!</source>
+        <target state="translated">Pro is unlocked. Thank you!</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pro restored. Welcome back!" xml:space="preserve">
+        <source>Pro restored. Welcome back!</source>
+        <target state="translated">Pro restored. Welcome back!</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Product" xml:space="preserve">
+        <source>Product</source>
+        <target state="translated">Product</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pyramid" xml:space="preserve">
+        <source>Pyramid</source>
+        <target state="translated">Pyramid</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rating" xml:space="preserve">
+        <source>Rating</source>
+        <target state="translated">Rating</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recently used" xml:space="preserve">
+        <source>Recently used</source>
+        <target state="translated">Recently used</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reed diffuser" xml:space="preserve">
+        <source>Reed diffuser</source>
+        <target state="translated">Reed diffuser</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reminders" xml:space="preserve">
+        <source>Reminders</source>
+        <target state="translated">Reminders</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove from formula" xml:space="preserve">
+        <source>Remove from formula</source>
+        <target state="translated">Remove from formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove star" xml:space="preserve">
+        <source>Remove star</source>
+        <target state="translated">Remove star</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rename" xml:space="preserve">
+        <source>Rename</source>
+        <target state="translated">Rename</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rename formula" xml:space="preserve">
+        <source>Rename formula</source>
+        <target state="translated">Rename formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore failed: %@" xml:space="preserve">
+        <source>Restore failed: %@</source>
+        <target state="translated">Restore failed: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore from a backup" xml:space="preserve">
+        <source>Restore from a backup</source>
+        <target state="translated">Restore from a backup</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore purchase" xml:space="preserve">
+        <source>Restore purchase</source>
+        <target state="translated">Restore purchase</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restored %1$lld formulas, %2$lld materials and %3$lld batches." xml:space="preserve">
+        <source>Restored %1$lld formulas, %2$lld materials and %3$lld batches.</source>
+        <target state="translated">Restored %1$lld formulas, %2$lld materials and %3$lld batches.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restored %lld formulas, %lld materials and %lld batches." xml:space="preserve">
+        <source>Restored %lld formulas, %lld materials and %lld batches.</source>
+        <target state="translated">Restored %lld formulas, %lld materials and %lld batches.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rich, indolic, fruity jasmine" xml:space="preserve">
+        <source>Rich, indolic, fruity jasmine</source>
+        <target state="translated">Rich, indolic, fruity jasmine</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rosemary oil" xml:space="preserve">
+        <source>Rosemary oil</source>
+        <target state="translated">Rosemary oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rosy, minty-green" xml:space="preserve">
+        <source>Rosy, minty-green</source>
+        <target state="translated">Rosy, minty-green</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rosy, peppery sparkle" xml:space="preserve">
+        <source>Rosy, peppery sparkle</source>
+        <target state="translated">Rosy, peppery sparkle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rosy, slightly citrus" xml:space="preserve">
+        <source>Rosy, slightly citrus</source>
+        <target state="translated">Rosy, slightly citrus</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Running total" xml:space="preserve">
+        <source>Running total</source>
+        <target state="translated">Running total</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save" xml:space="preserve">
+        <source>Save</source>
+        <target state="translated">Save</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save a batch in Accord to watch it mature here." xml:space="preserve">
+        <source>Save a batch in Accord to watch it mature here.</source>
+        <target state="translated">Save a batch in Accord to watch it mature here.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save as new version" xml:space="preserve">
+        <source>Save as new version</source>
+        <target state="translated">Save as new version</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save batch and start maturation" xml:space="preserve">
+        <source>Save batch and start maturation</source>
+        <target state="translated">Save batch and start maturation</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save what you actually weighed, rate it as it matures and get a reminder on day 7, 14 and 28." xml:space="preserve">
+        <source>Save what you actually weighed, rate it as it matures and get a reminder on day 7, 14 and 28.</source>
+        <target state="translated">Save what you actually weighed, rate it as it matures and get a reminder on day 7, 14 and 28.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Saved" xml:space="preserve">
+        <source>Saved</source>
+        <target state="translated">Saved</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scale should read %@" xml:space="preserve">
+        <source>Scale should read %@</source>
+        <target state="translated">Scale should read %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Search formulas or materials" xml:space="preserve">
+        <source>Search formulas or materials</source>
+        <target state="translated">Search formulas or materials</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Search or type a new name" xml:space="preserve">
+        <source>Search or type a new name</source>
+        <target state="translated">Search or type a new name</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="See every material that moved between two drafts." xml:space="preserve">
+        <source>See every material that moved between two drafts.</source>
+        <target state="translated">See every material that moved between two drafts.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="See exactly what changed" xml:space="preserve">
+        <source>See exactly what changed</source>
+        <target state="translated">See exactly what changed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="See what each batch and bottle costs from your own material prices." xml:space="preserve">
+        <source>See what each batch and bottle costs from your own material prices.</source>
+        <target state="translated">See what each batch and bottle costs from your own material prices.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Set a passcode on this iPhone first; App Lock needs it." xml:space="preserve">
+        <source>Set a passcode on this iPhone first; App Lock needs it.</source>
+        <target state="translated">Set a passcode on this iPhone first; App Lock needs it.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Settings" xml:space="preserve">
+        <source>Settings</source>
+        <target state="translated">Settings</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Share card" xml:space="preserve">
+        <source>Share card</source>
+        <target state="translated">Share card</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Share card preview" xml:space="preserve">
+        <source>Share card preview</source>
+        <target state="translated">Share card preview</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Share image" xml:space="preserve">
+        <source>Share image</source>
+        <target state="translated">Share image</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sharp, candied lime" xml:space="preserve">
+        <source>Sharp, candied lime</source>
+        <target state="translated">Sharp, candied lime</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shelf life: %lld months" xml:space="preserve">
+        <source>Shelf life: %lld months</source>
+        <target state="translated">Shelf life: %lld months</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Show" xml:space="preserve">
+        <source>Show</source>
+        <target state="translated">Show</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Show amounts as" xml:space="preserve">
+        <source>Show amounts as</source>
+        <target state="translated">Show amounts as</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Show materials" xml:space="preserve">
+        <source>Show materials</source>
+        <target state="translated">Show materials</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Show percentages" xml:space="preserve">
+        <source>Show percentages</source>
+        <target state="translated">Show percentages</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sketch, not a measurement" xml:space="preserve">
+        <source>Sketch, not a measurement</source>
+        <target state="translated">Sketch, not a measurement</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Smoky rose-wood" xml:space="preserve">
+        <source>Smoky rose-wood</source>
+        <target state="translated">Smoky rose-wood</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Smoky, earthy roots" xml:space="preserve">
+        <source>Smoky, earthy roots</source>
+        <target state="translated">Smoky, earthy roots</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Smoky, tarry leather" xml:space="preserve">
+        <source>Smoky, tarry leather</source>
+        <target state="translated">Smoky, tarry leather</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Soap" xml:space="preserve">
+        <source>Soap</source>
+        <target state="translated">Soap</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Soft rose petals" xml:space="preserve">
+        <source>Soft rose petals</source>
+        <target state="translated">Soft rose petals</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Soft, powdery musk" xml:space="preserve">
+        <source>Soft, powdery musk</source>
+        <target state="translated">Soft, powdery musk</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Soft, sweet, slightly aldehydic" xml:space="preserve">
+        <source>Soft, sweet, slightly aldehydic</source>
+        <target state="translated">Soft, sweet, slightly aldehydic</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Solvent" xml:space="preserve">
+        <source>Solvent</source>
+        <target state="translated">Solvent</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Solvent from dilutions" xml:space="preserve">
+        <source>Solvent from dilutions</source>
+        <target state="translated">Solvent from dilutions</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sort lines" xml:space="preserve">
+        <source>Sort lines</source>
+        <target state="translated">Sort lines</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spicy" xml:space="preserve">
+        <source>Spicy</source>
+        <target state="translated">Spicy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spray" xml:space="preserve">
+        <source>Spray</source>
+        <target state="translated">Spray</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spreadsheet (CSV)" xml:space="preserve">
+        <source>Spreadsheet (CSV)</source>
+        <target state="translated">Spreadsheet (CSV)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Star" xml:space="preserve">
+        <source>Star</source>
+        <target state="translated">Star</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start a formula" xml:space="preserve">
+        <source>Start a formula</source>
+        <target state="translated">Start a formula</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start a formula and add materials by gram, drop or percent. Accord does the arithmetic." xml:space="preserve">
+        <source>Start a formula and add materials by gram, drop or percent. Accord does the arithmetic.</source>
+        <target state="translated">Start a formula and add materials by gram, drop or percent. Accord does the arithmetic.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start weighing" xml:space="preserve">
+        <source>Start weighing</source>
+        <target state="translated">Start weighing</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials." xml:space="preserve">
+        <source>Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials.</source>
+        <target state="translated">Starter materials carry general descriptions only. Safety limits differ by supplier and product type: always check the documents that came with your materials.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Starting from" xml:space="preserve">
+        <source>Starting from</source>
+        <target state="translated">Starting from</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Stock and cost" xml:space="preserve">
+        <source>Stock and cost</source>
+        <target state="translated">Stock and cost</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Stop weighing" xml:space="preserve">
+        <source>Stop weighing</source>
+        <target state="translated">Stop weighing</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Strength" xml:space="preserve">
+        <source>Strength</source>
+        <target state="translated">Strength</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Strength %" xml:space="preserve">
+        <source>Strength %</source>
+        <target state="translated">Strength %</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Subtract from stock" xml:space="preserve">
+        <source>Subtract from stock</source>
+        <target state="translated">Subtract from stock</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Supplier" xml:space="preserve">
+        <source>Supplier</source>
+        <target state="translated">Supplier</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sweet orange oil" xml:space="preserve">
+        <source>Sweet orange oil</source>
+        <target state="translated">Sweet orange oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sweet, dry pencil shavings" xml:space="preserve">
+        <source>Sweet, dry pencil shavings</source>
+        <target state="translated">Sweet, dry pencil shavings</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sweet, round orange peel" xml:space="preserve">
+        <source>Sweet, round orange peel</source>
+        <target state="translated">Sweet, round orange peel</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Switches between grams, drops and percent" xml:space="preserve">
+        <source>Switches between grams, drops and percent</source>
+        <target state="translated">Switches between grams, drops and percent</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="System" xml:space="preserve">
+        <source>System</source>
+        <target state="translated">System</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Take your formulas anywhere" xml:space="preserve">
+        <source>Take your formulas anywhere</source>
+        <target state="translated">Take your formulas anywhere</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Target strength" xml:space="preserve">
+        <source>Target strength</source>
+        <target state="translated">Target strength</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The App Store couldn’t verify this purchase." xml:space="preserve">
+        <source>The App Store couldn’t verify this purchase.</source>
+        <target state="translated">The App Store couldn’t verify this purchase.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The App Store isn’t reachable right now. Check your connection and try again." xml:space="preserve">
+        <source>The App Store isn’t reachable right now. Check your connection and try again.</source>
+        <target state="translated">The App Store isn’t reachable right now. Check your connection and try again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The file has no rows." xml:space="preserve">
+        <source>The file has no rows.</source>
+        <target state="translated">The file has no rows.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The formula itself is not affected." xml:space="preserve">
+        <source>The formula itself is not affected.</source>
+        <target state="translated">The formula itself is not affected.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The purchase didn’t go through: %@" xml:space="preserve">
+        <source>The purchase didn’t go through: %@</source>
+        <target state="translated">The purchase didn’t go through: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The target must be weaker than what you start from, and every number above zero." xml:space="preserve">
+        <source>The target must be weaker than what you start from, and every number above zero.</source>
+        <target state="translated">The target must be weaker than what you start from, and every number above zero.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This batch" xml:space="preserve">
+        <source>This batch</source>
+        <target state="translated">This batch</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This file isn’t an Accord backup." xml:space="preserve">
+        <source>This file isn’t an Accord backup.</source>
+        <target state="translated">This file isn’t an Accord backup.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tonka bean absolute" xml:space="preserve">
+        <source>Tonka bean absolute</source>
+        <target state="translated">Tonka bean absolute</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Too strong" xml:space="preserve">
+        <source>Too strong</source>
+        <target state="translated">Too strong</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Too weak" xml:space="preserve">
+        <source>Too weak</source>
+        <target state="translated">Too weak</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Top" xml:space="preserve">
+        <source>Top</source>
+        <target state="translated">Top</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Top to base" xml:space="preserve">
+        <source>Top to base</source>
+        <target state="translated">Top to base</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Top–heart" xml:space="preserve">
+        <source>Top–heart</source>
+        <target state="translated">Top–heart</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Total" xml:space="preserve">
+        <source>Total</source>
+        <target state="translated">Total</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Total on the scale" xml:space="preserve">
+        <source>Total on the scale</source>
+        <target state="translated">Total on the scale</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Total to make" xml:space="preserve">
+        <source>Total to make</source>
+        <target state="translated">Total to make</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Track grams left, cost per gram, shelf life and supplier for every material." xml:space="preserve">
+        <source>Track grams left, cost per gram, shelf life and supplier for every material.</source>
+        <target state="translated">Track grams left, cost per gram, shelf life and supplier for every material.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Track shelf life" xml:space="preserve">
+        <source>Track shelf life</source>
+        <target state="translated">Track shelf life</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Transparent jasmine, airy" xml:space="preserve">
+        <source>Transparent jasmine, airy</source>
+        <target state="translated">Transparent jasmine, airy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Trial notes" xml:space="preserve">
+        <source>Trial notes</source>
+        <target state="translated">Trial notes</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Try another name, a category or a material." xml:space="preserve">
+        <source>Try another name, a category or a material.</source>
+        <target state="translated">Try another name, a category or a material.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Type" xml:space="preserve">
+        <source>Type</source>
+        <target state="translated">Type</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlimited formulas" xml:space="preserve">
+        <source>Unlimited formulas</source>
+        <target state="translated">Unlimited formulas</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock" xml:space="preserve">
+        <source>Unlock</source>
+        <target state="translated">Unlock</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock Pro for %@" xml:space="preserve">
+        <source>Unlock Pro for %@</source>
+        <target state="translated">Unlock Pro for %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock batches" xml:space="preserve">
+        <source>Unlock batches</source>
+        <target state="translated">Unlock batches</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock cost" xml:space="preserve">
+        <source>Unlock cost</source>
+        <target state="translated">Unlock cost</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock stock and cost" xml:space="preserve">
+        <source>Unlock stock and cost</source>
+        <target state="translated">Unlock stock and cost</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock your formula book" xml:space="preserve">
+        <source>Unlock your formula book</source>
+        <target state="translated">Unlock your formula book</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unnamed material" xml:space="preserve">
+        <source>Unnamed material</source>
+        <target state="translated">Unnamed material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Untitled" xml:space="preserve">
+        <source>Untitled</source>
+        <target state="translated">Untitled</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use system language" xml:space="preserve">
+        <source>Use system language</source>
+        <target state="translated">Use system language</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use your %@ dilution" xml:space="preserve">
+        <source>Use your %@ dilution</source>
+        <target state="translated">Use your %@ dilution</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use your accords as ingredients; Accord unpacks them." xml:space="preserve">
+        <source>Use your accords as ingredients; Accord unpacks them.</source>
+        <target state="translated">Use your accords as ingredients; Accord unpacks them.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Used in" xml:space="preserve">
+        <source>Used in</source>
+        <target state="translated">Used in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Vanilla" xml:space="preserve">
+        <source>Vanilla</source>
+        <target state="translated">Vanilla</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Vanillic, balsamic" xml:space="preserve">
+        <source>Vanillic, balsamic</source>
+        <target state="translated">Vanillic, balsamic</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Vanillin" xml:space="preserve">
+        <source>Vanillin</source>
+        <target state="translated">Vanillin</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Velvety cedar-amber glow" xml:space="preserve">
+        <source>Velvety cedar-amber glow</source>
+        <target state="translated">Velvety cedar-amber glow</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Version" xml:space="preserve">
+        <source>Version</source>
+        <target state="translated">Version</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Vetiver oil" xml:space="preserve">
+        <source>Vetiver oil</source>
+        <target state="translated">Vetiver oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Violet, orris, woody" xml:space="preserve">
+        <source>Violet, orris, woody</source>
+        <target state="translated">Violet, orris, woody</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Virginia cedarwood oil" xml:space="preserve">
+        <source>Virginia cedarwood oil</source>
+        <target state="translated">Virginia cedarwood oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Volumes use typical densities (ethanol 0.79 g/ml, concentrate 0.95 g/ml). Weigh everything by mass." xml:space="preserve">
+        <source>Volumes use typical densities (ethanol 0.79 g/ml, concentrate 0.95 g/ml). Weigh everything by mass.</source>
+        <target state="translated">Volumes use typical densities (ethanol 0.79 g/ml, concentrate 0.95 g/ml). Weigh everything by mass.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Warm mineral amber, skin-like" xml:space="preserve">
+        <source>Warm mineral amber, skin-like</source>
+        <target state="translated">Warm mineral amber, skin-like</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Warm paper, amber and kraft labels" xml:space="preserve">
+        <source>Warm paper, amber and kraft labels</source>
+        <target state="translated">Warm paper, amber and kraft labels</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Warm, sweet clove" xml:space="preserve">
+        <source>Warm, sweet clove</source>
+        <target state="translated">Warm, sweet clove</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Warn below" xml:space="preserve">
+        <source>Warn below</source>
+        <target state="translated">Warn below</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Water in the diluent" xml:space="preserve">
+        <source>Water in the diluent</source>
+        <target state="translated">Water in the diluent</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Watermelon ketone" xml:space="preserve">
+        <source>Watermelon ketone</source>
+        <target state="translated">Watermelon ketone</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Wax, soap or carrier base" xml:space="preserve">
+        <source>Wax, soap or carrier base</source>
+        <target state="translated">Wax, soap or carrier base</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weigh" xml:space="preserve">
+        <source>Weigh</source>
+        <target state="translated">Weigh</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weigh the material" xml:space="preserve">
+        <source>Weigh the material</source>
+        <target state="translated">Weigh the material</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weigh the solution; Accord counts only the active material in the analysis." xml:space="preserve">
+        <source>Weigh the solution; Accord counts only the active material in the analysis.</source>
+        <target state="translated">Weigh the solution; Accord counts only the active material in the analysis.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weigh your %@ dilution" xml:space="preserve">
+        <source>Weigh your %@ dilution</source>
+        <target state="translated">Weigh your %@ dilution</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weighed" xml:space="preserve">
+        <source>Weighed</source>
+        <target state="translated">Weighed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weighed, next" xml:space="preserve">
+        <source>Weighed, next</source>
+        <target state="translated">Weighed, next</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weighing sheet" xml:space="preserve">
+        <source>Weighing sheet</source>
+        <target state="translated">Weighing sheet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="What it smells like" xml:space="preserve">
+        <source>What it smells like</source>
+        <target state="translated">What it smells like</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="What went in" xml:space="preserve">
+        <source>What went in</source>
+        <target state="translated">What went in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="What you weighed, and how it smelled on day 7, 14, 28." xml:space="preserve">
+        <source>What you weighed, and how it smelled on day 7, 14, 28.</source>
+        <target state="translated">What you weighed, and how it smelled on day 7, 14, 28.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Woody" xml:space="preserve">
+        <source>Woody</source>
+        <target state="translated">Woody</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ylang ylang oil" xml:space="preserve">
+        <source>Ylang ylang oil</source>
+        <target state="translated">Ylang ylang oil</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You get" xml:space="preserve">
+        <source>You get</source>
+        <target state="translated">You get</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your 5 free formulas are full" xml:space="preserve">
+        <source>Your 5 free formulas are full</source>
+        <target state="translated">Your 5 free formulas are full</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your bench is clear" xml:space="preserve">
+        <source>Your bench is clear</source>
+        <target state="translated">Your bench is clear</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your data" xml:space="preserve">
+        <source>Your data</source>
+        <target state="translated">Your data</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your formula book couldn’t be opened" xml:space="preserve">
+        <source>Your formula book couldn’t be opened</source>
+        <target state="translated">Your formula book couldn’t be opened</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your formulas as bases" xml:space="preserve">
+        <source>Your formulas as bases</source>
+        <target state="translated">Your formulas as bases</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your formulas live here as bottles, filled with their top, heart and base." xml:space="preserve">
+        <source>Your formulas live here as bottles, filled with their top, heart and base.</source>
+        <target state="translated">Your formulas live here as bottles, filled with their top, heart and base.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your limits" xml:space="preserve">
+        <source>Your limits</source>
+        <target state="translated">Your limits</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your limits allow up to %@ in this product." xml:space="preserve">
+        <source>Your limits allow up to %@ in this product.</source>
+        <target state="translated">Your limits allow up to %@ in this product.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your maximum in the product" xml:space="preserve">
+        <source>Your maximum in the product</source>
+        <target state="translated">Your maximum in the product</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your purchase is waiting for approval. Pro unlocks as soon as it’s approved." xml:space="preserve">
+        <source>Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.</source>
+        <target state="translated">Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="alpha-Ionone" xml:space="preserve">
+        <source>alpha-Ionone</source>
+        <target state="translated">alpha-Ionone</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="and %lld more" xml:space="preserve">
+        <source>and %lld more</source>
+        <target state="translated">and %lld more</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="cis-3-Hexenol" xml:space="preserve">
+        <source>cis-3-Hexenol</source>
+        <target state="translated">cis-3-Hexenol</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="days" xml:space="preserve">
+        <source>days</source>
+        <target state="translated">days</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="drops" xml:space="preserve">
+        <source>drops</source>
+        <target state="translated">drops</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="g" xml:space="preserve">
+        <source>g</source>
+        <target state="translated">g</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="gamma-Decalactone" xml:space="preserve">
+        <source>gamma-Decalactone</source>
+        <target state="translated">gamma-Decalactone</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="kept at" xml:space="preserve">
+        <source>kept at</source>
+        <target state="translated">kept at</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="lasts ≈ %@" xml:space="preserve">
+        <source>lasts ≈ %@</source>
+        <target state="translated">lasts ≈ %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="ml" xml:space="preserve">
+        <source>ml</source>
+        <target state="translated">ml</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="new" xml:space="preserve">
+        <source>new</source>
+        <target state="translated">new</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="pts" xml:space="preserve">
+        <source>pts</source>
+        <target state="translated">pts</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="removed" xml:space="preserve">
+        <source>removed</source>
+        <target state="translated">removed</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="share" xml:space="preserve">
+        <source>share</source>
+        <target state="translated">share</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="tag.base" xml:space="preserve">
+        <source>Base</source>
+        <target state="translated">Base</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="v%lld" xml:space="preserve">
+        <source>v%lld</source>
+        <target state="translated">v%lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="–" xml:space="preserve">
+        <source>–</source>
+        <target state="translated">–</target>
+        <note/>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Accord/Resources/Other Resources/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
+        <source>Accord</source>
+        <target state="new">Accord</target>
+        <note>Bundle display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>AccordWidget</source>
+        <target state="new">AccordWidget</target>
+        <note>Bundle name</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

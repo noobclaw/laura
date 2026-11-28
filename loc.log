@@ -1,0 +1,736 @@
+Command line invocation:
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -exportLocalizations -project Accord.xcodeproj -localizationPath ci-out/loc -exportLanguage en
+
+Localization Export started for Accord project
+2026-11-28 02:59:42 Started export
+2026-11-28 02:59:42 Extracting strings from code
+
+Building all targets for string extraction
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'Accord' in project 'Accord'
+        ➜ Explicit dependency on target 'AccordWidget' in project 'Accord'
+    Target 'AccordWidget' in project 'Accord' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/runner/work/laura/laura/apps/accord/Accord/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+Build description signature: 7ddc11c0dbbb7c324c28182c68762015
+Build description path: /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/XCBuildData/7ddc11c0dbbb7c324c28182c68762015.xcbuilddata
+CreateBuildDirectory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    builtin-create-build-directory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products
+
+CreateBuildDirectory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    builtin-create-build-directory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    builtin-create-build-directory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos
+
+CreateBuildDirectory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    builtin-create-build-directory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    builtin-create-build-directory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord-6b6f6e5e780b8d998334c105dcabf4ce-VFS-iphoneos/all-product-headers.yaml
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord-6b6f6e5e780b8d998334c105dcabf4ce-VFS-iphoneos/all-product-headers.yaml
+
+CreateBuildDirectory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos
+    cd /Users/runner/work/laura/laura/apps/accord/Accord.xcodeproj
+    builtin-create-build-directory /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_const_extract_protocols.json (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftFileList (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftConstValuesFileList (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.LinkFileList (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.LinkFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-OutputFileMap.json (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.hmap (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.DependencyStaticMetadataFileList (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.DependencyMetadataFileList (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-project-headers.hmap (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-project-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-own-target-headers.hmap (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-generated-files.hmap (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-generated-files.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-target-headers.hmap (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-non-framework-target-headers.hmap (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftFileList (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_const_extract_protocols.json (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftConstValuesFileList (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.LinkFileList (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.LinkFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-OutputFileMap.json (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.hmap (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.DependencyStaticMetadataFileList (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.DependencyMetadataFileList (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-project-headers.hmap (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-project-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-own-target-headers.hmap (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-generated-files.hmap (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-generated-files.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-target-headers.hmap (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-non-framework-target-headers.hmap (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-non-framework-target-headers.hmap
+
+MkDir /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /bin/mkdir -p /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex
+
+MkDir /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /bin/mkdir -p /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app
+
+SwiftDriver AccordWidget normal arm64 com.apple.xcode.tools.swift.compiler (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-SwiftDriver -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name AccordWidget -Onone -enforce-exclusivity\=checked @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -target arm64-apple-ios17.0 -g -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -parse-as-library -emit-localized-strings -emit-localized-strings-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -output-file-map /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-generated-files.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-own-target-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-project-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/include -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-Swift.h -working-directory /Users/runner/work/laura/laura/apps/accord -experimental-emit-module-separately -disable-cmo
+
+ProcessInfoPlistFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex/Info.plist /Users/runner/work/laura/laura/apps/accord/AccordWidget/Info.plist (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-infoPlistUtility /Users/runner/work/laura/laura/apps/accord/AccordWidget/Info.plist -producttype com.apple.product-type.app-extension -expandbuildsettings -format binary -platform iphoneos -requiredArchitecture arm64 -o /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex/Info.plist
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrcheck-87P693U1XMLE7VTZRH2H2TGIU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-6JW8870609X6BE3HL09C7DIOK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stddef-1EDDP4O8CD9POX6BJQTW1JAYN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdbool-AKSDME29PROEHTDL8Y54YVY5V.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ActivityKit-5C6O08PR2WR6TV939NCOQL3B4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_AvailabilityInternal-CS2LTTHBW9L0OY8LDG7LIUBCD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdarg-8WVEQ5CYW55LNNZ13DCQN3C88.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrauth-7MIJ2MIX2S3B6X5ONG3X2RH90.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_float-OVVFS985S5BI9Q21MT6JAYS1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation1-3RQZDEUYGPN4I42W60KRAKVLU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftShims-DQAHZ032V7HYB9ISRUGHGXIGO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-33NFUHS4U3FOTEQNFLWUXCS5Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_limits-HM05XJ182UJ4FP90Z236N858.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ExtensionFoundation-C0MEJ36Y9XJSU72GLE2PQ5VOZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation2-DH0SZYSO2BIUTJWAUR81YKZAN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_tgmath-52MGVSKYJGOI5AM16U7HJXVLW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdint-F2EX40L6ECRS3KWR1I1EJRUL1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/sys_types-6MN19CJCOIL3ODSPIO8WE4PV6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation3-82MDQ44S9BAVFWP0MU5MUAX0D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-8LKDA1FNI434C079QMJ5LFMI3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-4CL2Y34NWUSZY01FJUM4TM1FC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_inttypes-10GHCQS08OYTN90F2NWZ7H4IE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Darwin-17QBYAN04G74IKSASLBW5U7C4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/simd-45KQ1ANYPJXIOHTQQIB5EUDAU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MachO-CHC19V9P9RO55TNJE0KRWX20Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ObjectiveC-5OX5KWA9D72BVMULCGIHOU6UG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_object-7NPMBY5DWF2IR6FKLNLIZ85EC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_workgroup-1K0TQAK9MYWK3N10E8BSOSC9P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Spatial-A5W49CFBTQ3IJKNLR6955O1SZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Dispatch-CMV2XT20IDPLNI6DZEB1W8C3Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/XPC-74F1Q1RZU0IDLOB84QR8TJWQ6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/dnssd-EMEXYMXPJUXEQG3JLTBMUWXBJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreFoundation-3CZM5BWZRPVKGP0G6DU0XHLR5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os-CCQWG75J4BDT1F9A5ET9SFQ59.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreGraphics-9Y9544W27BZLWMBL4NWOCU919.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Security-7W9MSHEZ3RW1RB6MD4YVW7MA3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CFNetwork-98SKZOB8FKWNDA5PU8XFORGTO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Foundation-D9U8BQ7N4GTPPH2Q286QFBXCZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreText-E8Z43043394LTTV0CU5C9ZLS0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ImageIO-95T4ALBUGNANNCIHO0ZE869CS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UserNotifications-2U63GJTZEB4RJJTTSPA8IYIU6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_LocationEssentials-D3OSCLFVFOQFYDN6PH29HN230.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/FileProvider-3Z91DZ9XHNCKEHLNHT3P1E9S5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/RelevanceKit-1IYMR22HR361ZLHFF4V15LI4R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AppIntents-4O5MF85XGAA3O7X56JWCW235Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreLocation-6B4E45AFK06BYQZQEDJIGJJG9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Network-BLXTIV1WVXJ5S3YWWZDFDXP2I.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accessibility-3C0LJ3279V47KKZICWG61NMB0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-CL0TKAOQEYR2XD0HMAUL0SAYB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Intents-EC1SGL5V6R9HU4V7VZONO1PG6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/IOSurface-3UT3XCQ9NYOQRTTBWV3A4KI6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreSpotlight-E2EP4XOLGB9OCKHJJ98TGTT0L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OpenGLES-74R8CSRWRJIVUEJVLNBM2VN6L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreData-A6P68K006F2YISKMABRJDLA9L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OSLog-72NQ7SVTMAAICFBQWX2S26U9B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/WidgetKit-3FDANEAYMO9NCUYHOJIYQGA4J.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Metal-2N459C386AZHYWW4KG1WYD485.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Symbols-5PHYPMYOPR4PYCFL8POLC0UPN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreTransferable-7T1Z0BWEFYV3E4HFB1OX4J5O0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIUtilities-BQY0WNEV1NRMCR7GE5BMJTQEY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DataDetection-8DJ7GW26WK014Y1IKFG3MGN69.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreVideo-5XOV098PG1H4YA3X4OR8QGR2Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreImage-C5I48FCB65YGWPE3RNKCIPY2F.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/QuartzCore-F3YJHWY10KY1RKJXLPCN0T03R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUICore-8OB6QZYHX45GNW7SJ0M0N11QE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIKit-1FHL1M9UD5TTOTVQC3KSZYJKQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUI-CE9AKMFNXS438P0P27MH3FDNT.pcm
+
+SwiftCompile normal arm64 Compiling\ AccordWidget.swift /Users/runner/work/laura/laura/apps/accord/AccordWidget/AccordWidget.swift (in target 'AccordWidget' from project 'Accord')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/AccordWidget/AccordWidget.swift (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ AccordWidget (in target 'AccordWidget' from project 'Accord')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/AccordWidget/AccordWidget.swift (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for AccordWidget (in target 'AccordWidget' from project 'Accord')
+
+SwiftDriver\ Compilation\ Requirements AccordWidget normal arm64 com.apple.xcode.tools.swift.compiler (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name AccordWidget -Onone -enforce-exclusivity\=checked @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -target arm64-apple-ios17.0 -g -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -parse-as-library -emit-localized-strings -emit-localized-strings-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -output-file-map /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-generated-files.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-own-target-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-project-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/include -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-Swift.h -working-directory /Users/runner/work/laura/laura/apps/accord -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources/AccordWidget-Swift.h /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-Swift.h (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-swiftHeaderTool -arch arm64 /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-Swift.h -o /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources/AccordWidget-Swift.h
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/arm64-apple-ios.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftmodule (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/arm64-apple-ios.swiftmodule
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/arm64-apple-ios.swiftdoc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftdoc (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftdoc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/arm64-apple-ios.swiftdoc
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/arm64-apple-ios.abi.json /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.abi.json (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.abi.json /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/arm64-apple-ios.abi.json
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftsourceinfo (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftsourceinfo /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+GenerateAssetSymbols /Users/runner/work/laura/laura/apps/accord/Accord/Assets.xcassets (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool /Users/runner/work/laura/laura/apps/accord/Accord/Assets.xcassets --compile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/assetcatalog_dependencies --output-partial-info-plist /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --minimum-deployment-target 17.0 --platform iphoneos --bundle-identifier com.noobclaw.accord --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+SwiftDriver Accord normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-SwiftDriver -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Accord -Onone -enforce-exclusivity\=checked @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -target arm64-apple-ios17.0 -g -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -output-file-map /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-generated-files.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-own-target-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-project-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/include -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-Swift.h -working-directory /Users/runner/work/laura/laura/apps/accord -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-A1EPLALNOSDWA565BLLRJY65U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdbool-AZYXG1U6DN0SU85VZEIJLV2F1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_float-CU0VBQC790U0TRJ4IAFUF6SRP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-B7L4J4XIOZ03WTIYDXS4RE7HH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftShims-EQ6IRP839VGUZ39YRZY2OIKSE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrcheck-DTO06SOM9CEJ6YMS8WLRSJIEP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdarg-4ZTLNCNAZZA6KRZL878CS9RLU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_AvailabilityInternal-BLGX27GSTCJ4T9TU8XV57UMPO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stddef-DP7ZFN6A56KO0PEMIM5DUH7GM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation1-43JQW73YA4LGVK07WMPDQBVPE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ActivityKit-3T6JU8DELSSVZBAQCI286EPUK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrauth-7DDG2TL2Z0IU5KHNZOQGPNF0M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation2-3R2GG1F13NETO0AV1GWNJA0WV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ExtensionFoundation-4UJ788IAWNX8BV9Z3C6MT3SR7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_limits-EU97RZN1VRK7JI9STKUP1HXIK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdint-2YL1NJ06U9IJFEFF7JL7Q19ES.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/sys_types-9NV0A7TVITSA5B1RCT4JDGYJ6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_tgmath-4KBGFDYK8V2JIZJ5B220HQV2P.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-5EZ3P5ZM0E4UFLNDX11FBNNFW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation3-B4F7Q75C8B54H49RRDMLGLKWQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-2AG0MXN8PG408U24V6KDJW88F.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_inttypes-8SNGEUMWF0BAMSU5QJH4JSX2D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Darwin-LVBCGZ3QGSMCEV3IQFVSOOEX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/simd-D2FT6NPLBHEFA6LR3SDTD5X1K.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ObjectiveC-A0GYOM98Y6OVIZ6F5YZSJQNJ9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MachO-A28FBUKD657ZK6MCB0AEDLV57.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_object-84DK24N4I54MHOGRFF9301I8M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Spatial-CH4YCOW68GLNG95FJNSQJMCLR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_workgroup-6OW81NO1CF9GTRZESD87JE5FG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Dispatch-ELA0BIJIGSUWHMELLM7DQJNER.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/XPC-1MAUM015NIFP2DZR38V341V5C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreFoundation-7GQA3O52OP4DRMP0IPU3RRY1I.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/dnssd-3YJYBDJ5TRZ16R4FV6OE5OQF3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os-6493WJHN3X5X7TFXB8RPI115E.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreGraphics-DC0U7MK86MA127SSBDRAOR0CA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Security-2MAKNIN0LUWO59KC7DP57ER4Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CFNetwork-6HEEM1EI0YP6AWXA0PVDH6KL4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ImageIO-EYL6A9NYQ56SJWQJV4GP72RWC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreText-7K5C53AR0A6QXY5ASYGJ6I6WR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Foundation-990ERQR1MBY5X0UW90LJM5BHZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/FileProvider-5MYFXX8NYDVP9QWO669VDWYV8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Network-55HIH5NDXWKOCI1BMZFUFG1YY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIUtilities-2V9HI2VA9YT5XNS2NTV35C8J3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/RelevanceKit-9YP2RI5254W2BS9IYK3IO542L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Symbols-568LY1GD01HI445DA71YHBJD9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/LocalAuthentication-9TKQINMWJ2AP5YRDO6EMJG9W5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-CZVRTYVUHSVQ6LR4VPI5WODO7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/IOSurface-7OTG5K6I6E780WC927EKQCVW6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OSLog-6EM9W3811RM1HC65E2EM3IOT3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreSpotlight-2NJPAQUEOMW4VG44WE0NUJ2UT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Metal-9DOD7D8SKTIQU2RV5OII33RA1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UserNotifications-AC84XQAR5SKNTRVIEDG2O6Y5Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accessibility-8XDNNM5ZTKNBI11ZV3HTWIOXY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreTransferable-ER7MOC90ADA3FH20T8524B1RK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/BackgroundAssets-62WGIAA09D2VO2MNBLXMXUUN1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OpenGLES-6FDVHJW78MIQUHK2BZIXIELLA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_LocationEssentials-7V045OVBQO0AVKSBQWZKHT2G5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/AppIntents-3N09EVY19UBAJSNDMML9NUVGU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreVideo-3PKH0MIY2AGKCQ5LIG2KZ711Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreLocation-3DL5SEJKANQQXOZJ32RV6H52.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DataDetection-Q4KLMLRZBGC8OL1GI3ED73IO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreImage-86AA2WZHOUT5WU3ZQBS150S4E.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreMotion-78Z59GR6R2ELSZPLN72E3NAD0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Intents-KOM6G90FFWPUUK1YECUKQ6XT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreData-3UQ6KPWM0T2KHES4K7S48T6R7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/WidgetKit-4IXHKOMNWDE3RZZ711F9T9FAW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/QuartzCore-J6ECWG1RLXQWM2BUIIPFFIGC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUICore-5T515WQVHXIG89YBK92TLILU2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIKit-7CRGHYUGBG8R43BOTSFIWPWNI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/StoreKit-6CHBRIW3FEZZ6NL2MPLH2AMYF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUI-9QUYQI67LYAVVZIGTD7QKUAUI.pcm
+
+SwiftDriverJobDiscovery normal arm64 Compiling AccordWidget.swift (in target 'AccordWidget' from project 'Accord')
+
+SwiftDriver\ Compilation AccordWidget normal arm64 com.apple.xcode.tools.swift.compiler (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-Swift-Compilation -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name AccordWidget -Onone -enforce-exclusivity\=checked @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -target arm64-apple-ios17.0 -g -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -application-extension -enable-testing -index-store-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -parse-as-library -emit-localized-strings -emit-localized-strings-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -output-file-map /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-generated-files.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-own-target-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget-project-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/include -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-Swift.h -working-directory /Users/runner/work/laura/laura/apps/accord -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex/AccordWidget normal (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0 -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -O0 -L/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -L/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -filelist /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @executable_path/../../Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_dependency_info.dat -e _NSExtensionMain -fapplication-extension -fobjc-link-runtime -L/Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.swiftmodule @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget-linker-args.resp -o /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex/AccordWidget
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ Accord (in target 'Accord' from project 'Accord')
+EmitSwiftModule normal arm64 (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 Compiling\ Graphics.swift,\ Kinds.swift,\ LabScreen.swift,\ LibraryScreen.swift,\ LineEditorSheet.swift,\ Liquid.swift,\ MaterialDetailScreen.swift,\ Models.swift,\ Panels.swift,\ ProSheet.swift,\ ProStore.swift /Users/runner/work/laura/laura/apps/accord/Accord/Design/Graphics.swift /Users/runner/work/laura/laura/apps/accord/Accord/Model/Kinds.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Lab/LabScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Library/LibraryScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/LineEditorSheet.swift /Users/runner/work/laura/laura/apps/accord/Accord/Design/Liquid.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Library/MaterialDetailScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Model/Models.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/Panels.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Store/ProSheet.swift /Users/runner/work/laura/laura/apps/accord/Accord/Store/ProStore.swift (in target 'Accord' from project 'Accord')
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Design/Graphics.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Model/Kinds.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Lab/LabScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Library/LibraryScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/LineEditorSheet.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Design/Liquid.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Library/MaterialDetailScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Model/Models.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/Panels.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Store/ProSheet.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Store/ProStore.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 Compiling\ Reminders.swift,\ RootView.swift,\ SampleData.swift,\ ScaleSheet.swift,\ SettingsScreen.swift,\ ShareCardSheet.swift,\ ShelfScreen.swift,\ Theme.swift,\ WidgetBridge.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Lab/Reminders.swift /Users/runner/work/laura/laura/apps/accord/Accord/App/RootView.swift /Users/runner/work/laura/laura/apps/accord/Accord/Model/SampleData.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Weigh/ScaleSheet.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Settings/SettingsScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/ShareCardSheet.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Shelf/ShelfScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Design/Theme.swift /Users/runner/work/laura/laura/apps/accord/Accord/App/WidgetBridge.swift /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Accord' from project 'Accord')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Lab/Reminders.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/App/RootView.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Model/SampleData.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Weigh/ScaleSheet.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Settings/SettingsScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/ShareCardSheet.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Shelf/ShelfScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Design/Theme.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/App/WidgetBridge.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for Accord (in target 'Accord' from project 'Accord')
+
+SwiftCompile normal arm64 Compiling\ AccordApp.swift,\ AppLanguage.swift,\ BenchScreen.swift,\ CSVImport.swift,\ CompareScreen.swift,\ Components.swift,\ DilutionSheet.swift,\ ExportSheet.swift,\ Exporter.swift,\ FormulaActions.swift,\ FormulaMath.swift /Users/runner/work/laura/laura/apps/accord/Accord/App/AccordApp.swift /Users/runner/work/laura/laura/apps/accord/Accord/App/AppLanguage.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/BenchScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Export/CSVImport.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Compare/CompareScreen.swift /Users/runner/work/laura/laura/apps/accord/Accord/Design/Components.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Library/DilutionSheet.swift /Users/runner/work/laura/laura/apps/accord/Accord/Features/Shelf/ExportSheet.swift /Users/runner/work/laura/laura/apps/accord/Accord/Export/Exporter.swift /Users/runner/work/laura/laura/apps/accord/Accord/Model/FormulaActions.swift /Users/runner/work/laura/laura/apps/accord/Accord/Engine/FormulaMath.swift (in target 'Accord' from project 'Accord')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/App/AccordApp.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/App/AppLanguage.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Bench/BenchScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Export/CSVImport.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Compare/CompareScreen.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Design/Components.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Library/DilutionSheet.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Features/Shelf/ExportSheet.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Export/Exporter.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Model/FormulaActions.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/accord/Accord/Engine/FormulaMath.swift (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    
+
+SwiftDriver\ Compilation\ Requirements Accord normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Accord -Onone -enforce-exclusivity\=checked @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -target arm64-apple-ios17.0 -g -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -output-file-map /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-generated-files.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-own-target-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-project-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/include -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-Swift.h -working-directory /Users/runner/work/laura/laura/apps/accord -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling AccordApp.swift, AppLanguage.swift, BenchScreen.swift, CSVImport.swift, CompareScreen.swift, Components.swift, DilutionSheet.swift, ExportSheet.swift, Exporter.swift, FormulaActions.swift, FormulaMath.swift (in target 'Accord' from project 'Accord')
+
+SwiftMergeGeneratedHeaders /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/Accord-Swift.h /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-Swift.h (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-swiftHeaderTool -arch arm64 /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-Swift.h -o /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/Accord-Swift.h
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/arm64-apple-ios.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftmodule (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/arm64-apple-ios.swiftmodule
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/arm64-apple-ios.swiftdoc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftdoc (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftdoc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/arm64-apple-ios.swiftdoc
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/arm64-apple-ios.abi.json /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.abi.json (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.abi.json /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/arm64-apple-ios.abi.json
+
+Copy /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftsourceinfo (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftsourceinfo /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+ExtractAppIntentsMetadata (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.7003.10.lULKYY/Metal.xctoolchain --module-name AccordWidget --sdk-root /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk --xcode-version 17C529 --platform-family iOS --deployment-target 17.0 --bundle-identifier com.noobclaw.accord.widget --output /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex --target-triple arm64-apple-ios17.0 --binary-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex/AccordWidget --dependency-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget_dependency_info.dat --stringsdata-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftFileList --metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.DependencyMetadataFileList --static-metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/AccordWidget.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/AccordWidget.build/Objects-normal/arm64/AccordWidget.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-11-28 03:00:19.539 appintentsmetadataprocessor[35851:107616] Starting appintentsmetadataprocessor export
+2026-11-28 03:00:19.762 appintentsmetadataprocessor[35851:107616] Extracted no relevant App Intents symbols, skipping writing output
+
+Touch /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex (in target 'AccordWidget' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /usr/bin/touch -c /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/AccordWidget.appex
+
+ProcessInfoPlistFile /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app/Info.plist /Users/runner/work/laura/laura/apps/accord/Accord/Info.plist (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-infoPlistUtility /Users/runner/work/laura/laura/apps/accord/Accord/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app/PkgInfo -expandbuildsettings -format binary -platform iphoneos -requiredArchitecture arm64 -o /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app/Info.plist
+
+SwiftDriverJobDiscovery normal arm64 Compiling Reminders.swift, RootView.swift, SampleData.swift, ScaleSheet.swift, SettingsScreen.swift, ShareCardSheet.swift, ShelfScreen.swift, Theme.swift, WidgetBridge.swift, GeneratedAssetSymbols.swift (in target 'Accord' from project 'Accord')
+
+SwiftDriverJobDiscovery normal arm64 Compiling Graphics.swift, Kinds.swift, LabScreen.swift, LibraryScreen.swift, LineEditorSheet.swift, Liquid.swift, MaterialDetailScreen.swift, Models.swift, Panels.swift, ProSheet.swift, ProStore.swift (in target 'Accord' from project 'Accord')
+
+SwiftDriver\ Compilation Accord normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    builtin-Swift-Compilation -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Accord -Onone -enforce-exclusivity\=checked @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -target arm64-apple-ios17.0 -g -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -output-file-map /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-generated-files.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-own-target-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord-project-headers.hmap -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/include -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources/arm64 -Xcc -I/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-Swift.h -working-directory /Users/runner/work/laura/laura/apps/accord -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app/Accord normal (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0 -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk -O0 -L/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -L/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -F/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos -filelist /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.swiftmodule @/Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord-linker-args.resp -o /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app/Accord
+
+ExtractAppIntentsMetadata (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.7003.10.lULKYY/Metal.xctoolchain --module-name Accord --sdk-root /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk --xcode-version 17C529 --platform-family iOS --deployment-target 17.0 --bundle-identifier com.noobclaw.accord --output /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app --target-triple arm64-apple-ios17.0 --binary-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app/Accord --dependency-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord_dependency_info.dat --stringsdata-file /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftFileList --metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.DependencyMetadataFileList --static-metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Accord.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Intermediates.noindex/Accord.build/Debug-iphoneos/Accord.build/Objects-normal/arm64/Accord.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-11-28 03:00:22.843 appintentsmetadataprocessor[36079:108125] Starting appintentsmetadataprocessor export
+2026-11-28 03:00:22.973 appintentsmetadataprocessor[36079:108125] Extracted no relevant App Intents symbols, skipping writing output
+
+Touch /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app (in target 'Accord' from project 'Accord')
+    cd /Users/runner/work/laura/laura/apps/accord
+    /usr/bin/touch -c /Users/runner/Library/Developer/Xcode/DerivedData/Accord-difnjafhybqtndfoyqkthctxgmqr/Build/Products/Debug-iphoneos/Accord.app
+
+2026-11-28 03:00:23 --- WARNING: Key "CFBundleName" used with multiple values: "Accord" and "AccordWidget". Chose value "Accord"
+2026-11-28 03:00:24 Extracting strings from localizable files
+2026-11-28 03:00:24 Copying source language files
+2026-11-28 03:00:24 Exporting Accord/Assets.xcassets to en.xcloc...
+2026-11-28 03:00:24 Exporting Accord/Resources/InfoPlist.xcstrings to en.xliff...
+2026-11-28 03:00:24 Exporting Accord/Resources/Other Resources/InfoPlist.xcstrings to en.xliff...
+2026-11-28 03:00:24 Exporting Accord/Resources/Localizable.xcstrings to en.xliff...
+2026-11-28 03:00:24 Writing
+2026-11-28 03:00:24 An xcloc was created at /Users/runner/work/laura/laura/apps/accord/ci-out/loc/en.xcloc

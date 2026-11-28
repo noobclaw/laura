@@ -1,0 +1,347 @@
+Command line invocation:
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -project Accord.xcodeproj -scheme AccordUITour -destination id=0C95D7BB-B55C-4EE0-ACB9-8616BB736183 -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test-without-building "-only-testing:AccordUITests/UITourTests/testTourEnglish"
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, arch:arm64, id:0C95D7BB-B55C-4EE0-ACB9-8616BB736183, OS:18.5, name:iPhone 16 Pro }
+{ platform:iOS Simulator, arch:x86_64, id:0C95D7BB-B55C-4EE0-ACB9-8616BB736183, OS:18.5, name:iPhone 16 Pro }
+2026-11-28 02:56:41.256069+0000 AccordUITests-Runner[29989:91071] [Default] Running tests...
+Test Suite 'Selected tests' started at 2026-11-28 02:56:54.774.
+Test Suite 'AccordUITests.xctest' started at 2026-11-28 02:56:54.776.
+Test Suite 'UITourTests' started at 2026-11-28 02:56:54.777.
+Test Case '-[AccordUITests.UITourTests testTourEnglish]' started.
+    t =     0.00s Start Test at 2026-11-28 02:56:54.778
+    t =     0.97s Set Up
+    t =     0.98s Open com.noobclaw.accord
+    t =     0.99s     Launch com.noobclaw.accord
+    t =    10.09s         Setting up automation session
+    t =    11.80s         Wait for com.noobclaw.accord to idle
+    t =    14.83s Waiting 10.0s for "add-material" Button to exist
+    t =    15.89s     Checking `Expect predicate `existsNoRetry == 1` for object "add-material" Button`
+    t =    15.89s         Checking existence of `"add-material" Button`
+    t =    16.40s Added attachment named 'en-01-bench'
+    t =    16.40s Tap "section-analysis" Button
+    t =    16.41s     Wait for com.noobclaw.accord to idle
+    t =    16.41s     Find the "section-analysis" Button
+    t =    16.51s     Check for interrupting elements affecting "section-analysis" Button
+    t =    16.62s     Synthesize event
+    t =    17.11s     Wait for com.noobclaw.accord to idle
+    t =    18.51s Added attachment named 'en-02-analysis'
+    t =    18.52s Swipe up Target Application 'com.noobclaw.accord'
+    t =    18.52s     Wait for com.noobclaw.accord to idle
+    t =    18.52s     Find the Target Application 'com.noobclaw.accord'
+    t =    18.69s     Check for interrupting elements affecting "Accord" Application
+    t =    18.81s     Synthesize event
+    t =    19.27s     Wait for com.noobclaw.accord to idle
+    t =    21.62s Added attachment named 'en-03-analysis-more'
+    t =    21.62s Swipe down Target Application 'com.noobclaw.accord'
+    t =    21.62s     Wait for com.noobclaw.accord to idle
+    t =    21.63s     Find the Target Application 'com.noobclaw.accord'
+    t =    21.65s     Check for interrupting elements affecting "Accord" Application
+    t =    21.70s     Synthesize event
+    t =    22.13s     Wait for com.noobclaw.accord to idle
+    t =    23.64s Swipe down Target Application 'com.noobclaw.accord'
+    t =    23.64s     Wait for com.noobclaw.accord to idle
+    t =    23.65s     Find the Target Application 'com.noobclaw.accord'
+    t =    24.07s     Check for interrupting elements affecting "Accord" Application
+    t =    24.40s     Synthesize event
+    t =    24.89s     Wait for com.noobclaw.accord to idle
+    t =    25.37s Tap "section-product" Button
+    t =    25.37s     Wait for com.noobclaw.accord to idle
+    t =    25.37s     Find the "section-product" Button
+    t =    25.66s     Check for interrupting elements affecting "section-product" Button
+    t =    25.85s     Synthesize event
+    t =    26.24s     Wait for com.noobclaw.accord to idle
+    t =    27.62s Added attachment named 'en-04-product'
+    t =    27.62s Tap "section-formula" Button
+    t =    27.62s     Wait for com.noobclaw.accord to idle
+    t =    27.63s     Find the "section-formula" Button
+    t =    27.82s     Check for interrupting elements affecting "section-formula" Button
+    t =    27.98s     Synthesize event
+    t =    28.31s     Wait for com.noobclaw.accord to idle
+    t =    29.52s Tap "add-material" Button
+    t =    29.52s     Wait for com.noobclaw.accord to idle
+    t =    29.53s     Find the "add-material" Button
+    t =    29.71s     Check for interrupting elements affecting "add-material" Button
+    t =    29.88s     Synthesize event
+    t =    30.25s     Wait for com.noobclaw.accord to idle
+    t =    30.93s Waiting 5.0s for NavigationBar (First Match) to exist
+    t =    31.97s     Checking `Expect predicate `existsNoRetry == 1` for object NavigationBar (First Match)`
+    t =    31.97s         Checking existence of `NavigationBar (First Match)`
+    t =    32.28s Waiting 8.0s for NavigationBar (First Match) to exist
+    t =    33.32s     Checking `Expect predicate `existsNoRetry == 1` for object NavigationBar (First Match)`
+    t =    33.33s         Checking existence of `NavigationBar (First Match)`
+    t =    34.88s Added attachment named 'en-05-picker'
+    t =    34.88s Waiting 5.0s for Button (Element at index 0) to exist
+    t =    35.94s     Checking `Expect predicate `existsNoRetry == 1` for object Button (Element at index 0)`
+    t =    35.94s         Checking existence of `Button (Element at index 0)`
+    t =    36.15s Tap Button (Element at index 0)
+    t =    36.15s     Wait for com.noobclaw.accord to idle
+    t =    36.16s     Find the Button (Element at index 0)
+    t =    36.46s     Check for interrupting elements affecting "pick-Lemon oil" Button
+    t =    36.69s     Synthesize event
+    t =    37.07s     Wait for com.noobclaw.accord to idle
+    t =    38.57s Waiting 5.0s for "amount-field" TextField to exist
+    t =    39.74s     Checking `Expect predicate `existsNoRetry == 1` for object "amount-field" TextField`
+    t =    39.75s         Checking existence of `"amount-field" TextField`
+    t =    42.61s Tap "amount-field" TextField
+    t =    42.61s     Wait for com.noobclaw.accord to idle
+    t =    42.62s     Find the "amount-field" TextField
+    t =    42.85s     Check for interrupting elements affecting "amount-field" TextField
+    t =    43.11s     Synthesize event
+    t =    43.48s     Wait for com.noobclaw.accord to idle
+    t =    43.63s Type '2.5' into "amount-field" TextField
+    t =    43.63s     Wait for com.noobclaw.accord to idle
+    t =    44.01s     Find the "amount-field" TextField
+    t =    44.92s     Check for interrupting elements affecting "amount-field" TextField
+    t =    45.28s     Synthesize event
+    t =    45.63s     Wait for com.noobclaw.accord to idle
+    t =    46.55s Added attachment named 'en-06-line-editor'
+    t =    46.55s Tap "save-line" Button
+    t =    46.55s     Wait for com.noobclaw.accord to idle
+    t =    46.56s     Find the "save-line" Button
+    t =    48.08s     Check for interrupting elements affecting "save-line" Button
+    t =    49.48s     Synthesize event
+    t =    49.98s     Wait for com.noobclaw.accord to idle
+    t =    50.80s Tap "weigh" Button
+    t =    50.81s     Wait for com.noobclaw.accord to idle
+    t =    51.11s     Find the "weigh" Button
+    t =    51.75s     Check for interrupting elements affecting "weigh" Button
+    t =    52.37s     Synthesize event
+    t =    52.81s     Wait for com.noobclaw.accord to idle
+    t =    53.37s Waiting 5.0s for "start-weighing" Button to exist
+    t =    54.39s     Checking `Expect predicate `existsNoRetry == 1` for object "start-weighing" Button`
+    t =    54.39s         Checking existence of `"start-weighing" Button`
+    t =    55.19s Added attachment named 'en-07-plan'
+    t =    55.20s Tap "start-weighing" Button
+    t =    55.20s     Wait for com.noobclaw.accord to idle
+    t =    55.22s     Find the "start-weighing" Button
+    t =    55.54s     Check for interrupting elements affecting "start-weighing" Button
+    t =    55.71s     Synthesize event
+    t =    56.15s     Wait for com.noobclaw.accord to idle
+    t =    56.22s Waiting 5.0s for "weigh-next" Button to exist
+    t =    57.27s     Checking `Expect predicate `existsNoRetry == 1` for object "weigh-next" Button`
+    t =    57.27s         Checking existence of `"weigh-next" Button`
+    t =    57.89s Added attachment named 'en-08-weigh'
+    t =    57.89s Checking existence of `"save-batch" Button`
+    t =    58.11s Checking existence of `"weigh-next" Button`
+    t =    58.34s Tap "weigh-next" Button
+    t =    58.34s     Wait for com.noobclaw.accord to idle
+    t =    58.35s     Find the "weigh-next" Button
+    t =    58.54s     Check for interrupting elements affecting "weigh-next" Button
+    t =    58.69s     Synthesize event
+    t =    59.02s     Wait for com.noobclaw.accord to idle
+    t =    59.03s Checking existence of `"save-batch" Button`
+    t =    59.22s Checking existence of `"weigh-next" Button`
+    t =    59.41s Tap "weigh-next" Button
+    t =    59.41s     Wait for com.noobclaw.accord to idle
+    t =    59.42s     Find the "weigh-next" Button
+    t =    59.68s     Check for interrupting elements affecting "weigh-next" Button
+    t =    59.87s     Synthesize event
+    t =    60.21s     Wait for com.noobclaw.accord to idle
+    t =    60.22s Checking existence of `"save-batch" Button`
+    t =    60.48s Checking existence of `"weigh-next" Button`
+    t =    60.67s Tap "weigh-next" Button
+    t =    60.67s     Wait for com.noobclaw.accord to idle
+    t =    60.67s     Find the "weigh-next" Button
+    t =    60.85s     Check for interrupting elements affecting "weigh-next" Button
+    t =    61.02s     Synthesize event
+    t =    61.35s     Wait for com.noobclaw.accord to idle
+    t =    61.35s Checking existence of `"save-batch" Button`
+    t =    61.52s Checking existence of `"weigh-next" Button`
+    t =    61.70s Tap "weigh-next" Button
+    t =    61.70s     Wait for com.noobclaw.accord to idle
+    t =    61.70s     Find the "weigh-next" Button
+    t =    61.95s     Check for interrupting elements affecting "weigh-next" Button
+    t =    62.10s     Synthesize event
+    t =    62.43s     Wait for com.noobclaw.accord to idle
+    t =    62.44s Checking existence of `"save-batch" Button`
+    t =    62.62s Checking existence of `"weigh-next" Button`
+    t =    62.78s Tap "weigh-next" Button
+    t =    62.78s     Wait for com.noobclaw.accord to idle
+    t =    62.79s     Find the "weigh-next" Button
+    t =    63.00s     Check for interrupting elements affecting "weigh-next" Button
+    t =    63.17s     Synthesize event
+    t =    63.50s     Wait for com.noobclaw.accord to idle
+    t =    63.51s Checking existence of `"save-batch" Button`
+    t =    63.75s Checking existence of `"weigh-next" Button`
+    t =    63.92s Tap "weigh-next" Button
+    t =    63.92s     Wait for com.noobclaw.accord to idle
+    t =    63.93s     Find the "weigh-next" Button
+    t =    64.10s     Check for interrupting elements affecting "weigh-next" Button
+    t =    64.28s     Synthesize event
+    t =    64.59s     Wait for com.noobclaw.accord to idle
+    t =    64.60s Checking existence of `"save-batch" Button`
+    t =    64.85s Checking existence of `"weigh-next" Button`
+    t =    65.02s Tap "weigh-next" Button
+    t =    65.02s     Wait for com.noobclaw.accord to idle
+    t =    65.03s     Find the "weigh-next" Button
+    t =    65.45s     Check for interrupting elements affecting "weigh-next" Button
+    t =    65.64s     Synthesize event
+    t =    65.96s     Wait for com.noobclaw.accord to idle
+    t =    65.98s Checking existence of `"save-batch" Button`
+    t =    66.29s Checking existence of `"weigh-next" Button`
+    t =    66.45s Tap "weigh-next" Button
+    t =    66.45s     Wait for com.noobclaw.accord to idle
+    t =    66.46s     Find the "weigh-next" Button
+    t =    66.65s     Check for interrupting elements affecting "weigh-next" Button
+    t =    66.81s     Synthesize event
+    t =    67.13s     Wait for com.noobclaw.accord to idle
+    t =    67.14s Checking existence of `"save-batch" Button`
+    t =    67.30s Checking existence of `"weigh-next" Button`
+    t =    67.48s Tap "weigh-next" Button
+    t =    67.48s     Wait for com.noobclaw.accord to idle
+    t =    67.49s     Find the "weigh-next" Button
+    t =    67.64s     Check for interrupting elements affecting "weigh-next" Button
+    t =    67.79s     Synthesize event
+    t =    68.14s     Wait for com.noobclaw.accord to idle
+    t =    68.15s Checking existence of `"save-batch" Button`
+    t =    68.35s Checking existence of `"weigh-next" Button`
+    t =    68.50s Tap "weigh-next" Button
+    t =    68.50s     Wait for com.noobclaw.accord to idle
+    t =    68.51s     Find the "weigh-next" Button
+    t =    68.70s     Check for interrupting elements affecting "weigh-next" Button
+    t =    68.91s     Synthesize event
+    t =    69.24s     Wait for com.noobclaw.accord to idle
+    t =    69.25s Checking existence of `"save-batch" Button`
+    t =    69.49s Checking existence of `"weigh-next" Button`
+    t =    69.67s Tap "weigh-next" Button
+    t =    69.67s     Wait for com.noobclaw.accord to idle
+    t =    69.68s     Find the "weigh-next" Button
+    t =    69.94s     Check for interrupting elements affecting "weigh-next" Button
+    t =    70.12s     Synthesize event
+    t =    70.49s     Wait for com.noobclaw.accord to idle
+    t =    70.52s Checking existence of `"save-batch" Button`
+    t =    70.67s Waiting 5.0s for "save-batch" Button to exist
+    t =    71.72s     Checking `Expect predicate `existsNoRetry == 1` for object "save-batch" Button`
+    t =    71.72s         Checking existence of `"save-batch" Button`
+    t =    71.97s Tap "save-batch" Button
+    t =    71.97s     Wait for com.noobclaw.accord to idle
+    t =    71.98s     Find the "save-batch" Button
+    t =    72.20s     Check for interrupting elements affecting "save-batch" Button
+    t =    72.37s     Synthesize event
+    t =    72.74s     Wait for com.noobclaw.accord to idle
+    t =    74.13s Added attachment named 'en-09-weigh-done'
+    t =    74.14s Tap "weigh-close" Button
+    t =    74.14s     Wait for com.noobclaw.accord to idle
+    t =    74.15s     Find the "weigh-close" Button
+    t =    74.42s     Check for interrupting elements affecting "weigh-close" Button
+    t =    74.58s     Synthesize event
+    t =    74.91s     Wait for com.noobclaw.accord to idle
+    t =    75.25s Waiting 5.0s for "add-material" Button to exist
+    t =    76.31s     Checking `Expect predicate `existsNoRetry == 1` for object "add-material" Button`
+    t =    76.31s         Checking existence of `"add-material" Button`
+    t =    76.38s Tap "tab-shelf" Button
+    t =    76.38s     Wait for com.noobclaw.accord to idle
+    t =    76.39s     Find the "tab-shelf" Button
+    t =    76.50s     Check for interrupting elements affecting "tab-shelf" Button
+    t =    76.57s     Synthesize event
+    t =    76.89s     Wait for com.noobclaw.accord to idle
+    t =    77.01s Waiting 5.0s for "new-formula" Button to exist
+    t =    78.07s     Checking `Expect predicate `existsNoRetry == 1` for object "new-formula" Button`
+    t =    78.07s         Checking existence of `"new-formula" Button`
+    t =    78.42s Added attachment named 'en-10-shelf'
+    t =    78.43s Tap "open-settings" Button
+    t =    78.43s     Wait for com.noobclaw.accord to idle
+    t =    78.43s     Find the "open-settings" Button
+    t =    78.49s     Check for interrupting elements affecting "open-settings" Button
+    t =    78.55s     Synthesize event
+    t =    78.89s     Wait for com.noobclaw.accord to idle
+    t =    79.35s Waiting 5.0s for "language-row" Button to exist
+    t =    80.39s     Checking `Expect predicate `existsNoRetry == 1` for object "language-row" Button`
+    t =    80.39s         Checking existence of `"language-row" Button`
+    t =    81.30s Added attachment named 'en-11-settings'
+    t =    81.30s Tap "language-row" Button
+    t =    81.30s     Wait for com.noobclaw.accord to idle
+    t =    81.30s     Find the "language-row" Button
+    t =    81.50s     Check for interrupting elements affecting "language-row" Button
+    t =    81.62s     Synthesize event
+    t =    81.97s     Wait for com.noobclaw.accord to idle
+    t =    84.00s Added attachment named 'en-12-language'
+    t =    84.01s Swipe down Target Application 'com.noobclaw.accord'
+    t =    84.01s     Wait for com.noobclaw.accord to idle
+    t =    84.02s     Find the Target Application 'com.noobclaw.accord'
+    t =    84.23s     Check for interrupting elements affecting "Accord" Application
+    t =    84.39s     Synthesize event
+    t =    84.80s     Wait for com.noobclaw.accord to idle
+    t =    86.56s Swipe down Target Application 'com.noobclaw.accord'
+    t =    86.56s     Wait for com.noobclaw.accord to idle
+    t =    86.57s     Find the Target Application 'com.noobclaw.accord'
+    t =    86.72s     Check for interrupting elements affecting "Accord" Application
+    t =    86.92s     Synthesize event
+    t =    87.32s     Wait for com.noobclaw.accord to idle
+    t =    88.45s Tap "tab-library" Button
+    t =    88.45s     Wait for com.noobclaw.accord to idle
+    t =    88.46s     Find the "tab-library" Button
+    t =    88.61s     Check for interrupting elements affecting "tab-library" Button
+    t =    88.75s     Synthesize event
+    t =    89.19s     Wait for com.noobclaw.accord to idle
+    t =    89.48s Waiting 5.0s for "new-material" Button to exist
+    t =    90.53s     Checking `Expect predicate `existsNoRetry == 1` for object "new-material" Button`
+    t =    90.53s         Checking existence of `"new-material" Button`
+    t =    90.88s Added attachment named 'en-13-library'
+    t =    90.88s Waiting 3.0s for Button (Element at index 0) to exist
+    t =    91.91s     Checking `Expect predicate `existsNoRetry == 1` for object Button (Element at index 0)`
+    t =    91.91s         Checking existence of `Button (Element at index 0)`
+    t =    91.98s Tap Button (Element at index 0)
+    t =    91.98s     Wait for com.noobclaw.accord to idle
+    t =    91.98s     Find the Button (Element at index 0)
+    t =    92.06s     Check for interrupting elements affecting "material-Ambroxide" Button
+    t =    92.14s     Synthesize event
+    t =    92.46s     Wait for com.noobclaw.accord to idle
+    t =    94.01s Added attachment named 'en-14-material'
+    t =    94.01s Tap Button (Element at index 0)
+    t =    94.01s     Wait for com.noobclaw.accord to idle
+    t =    94.02s     Find the Button (Element at index 0)
+    t =    94.15s     Check for interrupting elements affecting "Back" Button
+    t =    94.21s     Synthesize event
+    t =    94.52s     Wait for com.noobclaw.accord to idle
+    t =    94.97s Tap "tab-lab" Button
+    t =    94.97s     Wait for com.noobclaw.accord to idle
+    t =    95.02s     Find the "tab-lab" Button
+    t =    95.23s     Check for interrupting elements affecting "tab-lab" Button
+    t =    95.38s     Synthesize event
+    t =    95.71s     Wait for com.noobclaw.accord to idle
+    t =    96.95s Added attachment named 'en-15-batches'
+    t =    96.96s Tap "tab-library" Button
+    t =    96.96s     Wait for com.noobclaw.accord to idle
+    t =    96.96s     Find the "tab-library" Button
+    t =    97.02s     Check for interrupting elements affecting "tab-library" Button
+    t =    97.06s     Synthesize event
+    t =    97.36s     Wait for com.noobclaw.accord to idle
+    t =    97.37s Waiting 5.0s for "open-dilution" Button to exist
+    t =    98.39s     Checking `Expect predicate `existsNoRetry == 1` for object "open-dilution" Button`
+    t =    98.39s         Checking existence of `"open-dilution" Button`
+    t =    98.53s Tap "open-dilution" Button
+    t =    98.53s     Wait for com.noobclaw.accord to idle
+    t =    98.53s     Find the "open-dilution" Button
+    t =    98.63s     Check for interrupting elements affecting "open-dilution" Button
+    t =    98.70s     Synthesize event
+    t =    99.03s     Wait for com.noobclaw.accord to idle
+    t =   100.42s Added attachment named 'en-16-dilution'
+    t =   100.43s Swipe down Target Application 'com.noobclaw.accord'
+    t =   100.43s     Wait for com.noobclaw.accord to idle
+    t =   100.43s     Find the Target Application 'com.noobclaw.accord'
+    t =   100.57s     Check for interrupting elements affecting "Accord" Application
+    t =   100.65s     Synthesize event
+    t =   101.07s     Wait for com.noobclaw.accord to idle
+    t =   102.11s Tear Down
+Test Case '-[AccordUITests.UITourTests testTourEnglish]' passed (102.370 seconds).
+Test Suite 'UITourTests' passed at 2026-11-28 02:58:37.148.
+	 Executed 1 test, with 0 failures (0 unexpected) in 102.370 (102.371) seconds
+Test Suite 'AccordUITests.xctest' passed at 2026-11-28 02:58:37.148.
+	 Executed 1 test, with 0 failures (0 unexpected) in 102.370 (102.372) seconds
+Test Suite 'Selected tests' passed at 2026-11-28 02:58:37.148.
+	 Executed 1 test, with 0 failures (0 unexpected) in 102.370 (102.374) seconds
+2026-11-28 02:59:31.081 xcodebuild[28530:85931] [MT] IDETestOperationsObserverDebug: 241.659 elapsed -- Testing started completed.
+2026-11-28 02:59:31.083 xcodebuild[28530:85931] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-28 02:59:31.083 xcodebuild[28530:85931] [MT] IDETestOperationsObserverDebug: 241.659 sec, +241.659 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/laura/laura/apps/accord/dd-ui/Logs/Test/Test-AccordUITour-2026.11.28_02-55-24-+0000.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started

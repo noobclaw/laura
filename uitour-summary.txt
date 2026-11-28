@@ -1,0 +1,7 @@
+Test Case '-[AccordUITests.UITourTests testFreePaywall]' passed (92.958 seconds).
+Test Case '-[AccordUITests.UITourTests testTourEnglish]' passed (96.650 seconds).
+Test Case '-[AccordUITests.UITourTests testTourGerman]' passed (82.419 seconds).
+Test Case '-[AccordUITests.UITourTests testTourJapanese]' passed (95.036 seconds).
+Test Case '-[AccordUITests.UITourTests testTourNoir]' passed (37.085 seconds).
+Test Case '-[AccordUITests.UITourTests testTourTraditionalChinese]' passed (82.663 seconds).
+** TEST SUCCEEDED **
