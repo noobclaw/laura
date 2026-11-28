@@ -1,0 +1,15 @@
+name: ASC EU availability check
+on: workflow_dispatch
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip install --quiet pyjwt cryptography
+          mkdir -p ~/asc && printf '%s' "$ASC_KEY_P8" > ~/asc/AuthKey.p8
+          ASC_KEY_PATH=~/asc/AuthKey.p8 python3 scripts/asc/eu_check.py
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
