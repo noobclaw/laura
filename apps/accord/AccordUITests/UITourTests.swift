@@ -146,7 +146,7 @@ final class UITourTests: XCTestCase {
         app.swipeDown(velocity: .fast)
         sleep(1)
         app.buttons["formula-menu"].tap()
-        let card = app.buttons["Share card"]
+        let card = app.buttons.matching(identifier: "Share card").firstMatch
         if card.waitForExistence(timeout: 3) {
             card.tap()
             sleep(2)

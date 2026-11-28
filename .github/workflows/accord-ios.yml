@@ -267,7 +267,7 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
           ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_API_ISSUER_ID }}
-          BUILD_NUMBER: "106"
+          BUILD_NUMBER: "120"
         run: |
           pip install --quiet pyjwt cryptography
           mkdir -p ~/asc ci-asc
