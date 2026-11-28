@@ -28,7 +28,7 @@
 | Goods Sort – Triple Master 3D | 10 個商品，最低 $0.39；評分 4.9、11.8 萬則評價 | — | apppricinglab.com/app/apple/1658958534 |
 | Match Factory!（Peak） | 金幣包、Beginner／Pro／Master／Mega／Ultra Bundle；主打無廣告 | 不做廣告 | apps.apple.com/us/app/match-factory/id6449094229 |
 
-## 三、建議商品表（待用戶拍板）
+## 三、商品表（用戶 2026-11-28 已同意價格）
 
 | 商品 ID | 內容 | 建議美區價格 | 依據 |
 |---|---|---|---|
@@ -54,7 +54,7 @@
 |---|---|---|
 | iOS | 用 WebView 殼打包（例如 Capacitor），內購走 StoreKit 插件；只發 iPhone 直屏 | 殼和插件的選型與版本，接之前先查官方文件 |
 | Android | 同一個殼，走 Google Play Billing | 同上 |
-| Steam | 二選一：A．買斷制（例如 $4.99–$9.99），關掉體力和內購；B．免費 + Steam 內購（走 Steam 的交易介面）。建議 A，因為體力機制在 PC 上評價差 | 用戶拍板；桌面殼（Electron 或 Tauri）+ Steamworks |
+| Steam | **Steam 可以做內購**：走 Steamworks 的 Microtransaction API，玩家用 Steam 錢包付款。**但必須有自己的購買伺服器**：遊戲把購買請求送到我們的伺服器，伺服器用 publisher key 呼叫 `ISteamMicroTxn/InitTxn` 發起交易，玩家在 Steam 疊加介面授權後，伺服器再呼叫 `FinalizeTxn` 完成，然後才發道具。伺服器可以用 CLAUDE.md 允許的 256btc.com。也可以選買斷制（例如 $4.99–$9.99，關掉體力和內購），不需要伺服器。兩種方案待用戶選定 | 桌面殼（Electron 或 Tauri）+ Steamworks SDK；選內購時另加伺服器端 |
 | 網頁版 | 只做展示，保留標明「測試」的模擬 | — |
 
 ## 六、App Store Connect 與 Play Console 由 Claude 建立
