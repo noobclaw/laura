@@ -1,0 +1,26 @@
+name: App Store keyword research
+on:
+  workflow_dispatch:
+    inputs:
+      keywords: {default: "cloud music player"}
+      countries: {default: "us,gb,de,jp"}
+      review_ids: {default: ""}
+      review_countries: {default: "us,gb"}
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/charts/fetch_keywords.py
+        env:
+          KEYWORDS: ${{ inputs.keywords }}
+          COUNTRIES: ${{ inputs.countries }}
+          REVIEW_IDS: ${{ inputs.review_ids }}
+          REVIEW_COUNTRIES: ${{ inputs.review_countries }}
+      - name: Push results
+        run: |
+          cd out
+          git init -q -b keywords && git add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -qm "keywords $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" keywords
