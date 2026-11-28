@@ -1,0 +1,24 @@
+name: App Store charts
+on:
+  workflow_dispatch:
+    inputs:
+      genre: {default: "6002"}
+      countries: {default: "us,gb,ca,au,de,jp,cn,tw,hk"}
+      chart: {default: "toppaidapplications"}
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/charts/fetch_charts.py
+        env:
+          GENRE: ${{ inputs.genre }}
+          COUNTRIES: ${{ inputs.countries }}
+          CHART: ${{ inputs.chart }}
+      - name: Push results
+        run: |
+          cd out
+          git init -q -b charts && git add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -qm "charts $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" charts
