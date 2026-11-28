@@ -1,3 +1,4 @@
+import { InvalidSaveError } from './save-recovery.js';
 import {
   ROUND_LIMITS,
   traySettings,
@@ -734,7 +735,7 @@ export class SortingSession {
   }
   static resume(stage, forms, saved, options = {}) {
     const ensure = (condition, issue) => {
-      if (!condition) throw new TypeError(`Invalid checkpoint: ${issue}`);
+      if (!condition) throw new InvalidSaveError(`Invalid checkpoint: ${issue}`);
     };
     ensure(saved && saved.schema === 1 && saved.settings && saved.model, 'format');
     const instance = new SortingSession(stage, forms, {

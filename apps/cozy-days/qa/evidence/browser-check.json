@@ -1,0 +1,154 @@
+{
+ "cases": {
+  "TC-I18N-SYS": {
+   "status": "fail",
+   "detail": "browser locale en-US, first launch shows lang=\"zh-CN\""
+  },
+  "TC-I18N-01": {
+   "status": "pass",
+   "detail": "clicks from home: 3 (gear 1 + select 2); first settings row: {\"text\":\"语言简体中文繁體中文English\",\"hasSelect\":true}; after switch: {\"open\":true,\"title\":\"Settings\",\"lang\":\"en\",\"nav\":[\"Play\",\"Album\",\"Achievements\",\"Events\",\"Rankings\"]}"
+  },
+  "TC-I18N-PERSIST": {
+   "status": "pass",
+   "detail": "language kept after reload"
+  },
+  "TC-PLAY-01": {
+   "status": "pass",
+   "detail": "stage 1 by keyboard: {\"picks\":18,\"seconds\":17.488,\"mirrorPhase\":\"done\"}; result buttons: [\"Next level\",\"Restart · 1 energy\",\"Back home\"]"
+  },
+  "TC-FUN-02": {
+   "status": "fail",
+   "detail": "result screen buttons: [\"Next level\",\"Restart · 1 energy\",\"Back home\"]"
+  },
+  "TC-I18N-INROUND": {
+   "status": "pass",
+   "detail": "pause menu: [\"Resume\",\"Back home\",\"Restart · 1 energy\",\"Supply shop\",\"Settings\"]"
+  },
+  "TC-I18N-MIDROUND": {
+   "status": "pass",
+   "detail": "after switching language in a round: {\"board\":true,\"lang\":\"zh-TW\"}"
+  },
+  "TC-MON-01": {
+   "status": "pass",
+   "detail": "[{\"text\":\"購買暫未開放\",\"disabled\":true}]"
+  },
+  "TC-FUN-06": {
+   "status": "fail",
+   "detail": "settings entries: [\"語言简体中文繁體中文English\",\"音效\",\"減少動效\",\"關卡測試（獨立沙盒）\"]"
+  },
+  "TC-SET-TOGGLES": {
+   "status": "info",
+   "detail": "settings entries: [\"語言简体中文繁體中文English\",\"音效\",\"減少動效\",\"關卡測試（獨立沙盒）\"]"
+  },
+  "SECTION-LOOP": {
+   "status": "error",
+   "detail": "TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#navigation button:nth-child(1)')\u001b[22m\n\u001b[2m    2 × locator resolved to <button type=\"button\" aria-label=\"闖關\" "
+  },
+  "TC-ART-09": {
+   "status": "info",
+   "detail": "reduced-motion stage 1: {\"picks\":18,\"seconds\":19.697,\"mirrorPhase\":\"done\"}; compare frames-rm-* with frames-s1-*"
+  },
+  "TC-SAVE-01": {
+   "status": "pass",
+   "detail": "storage keys []; after corrupt save: {\"play\":true,\"text\":\"5/5\\n0\\nCOZY\\nDAYS\\n\\n阳光小镇\\n\\n相册\\n第 5 关解锁\\n活动\\n第 12 关解锁\\n关卡地图\\n开始游戏\\n第 1 关\\n已完成 0/160 关\\n闯关\\n相册\\n成就\\n活动\\n排行\"}"
+  }
+ },
+ "console": [
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: [.WebGL-0x464001bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "[mobile] warning: [.WebGL-0x464001bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "[mobile] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[mobile] warning: [.WebGL-0x464001bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+  "[mobile] warning: [.WebGL-0x464001bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[mobile] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[desktop] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[desktop] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[desktop] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[landscape] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[landscape] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[landscape] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[reduced] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[reduced] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[reduced] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[corrupt] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[corrupt] warning: using deprecated parameters for the initialization function; pass a single object instead",
+  "[corrupt] warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+  "[corrupt] warning: using deprecated parameters for the initialization function; pass a single object instead"
+ ],
+ "metrics": {
+  "homeOverflowX": false,
+  "homeIdle": {
+   "fps": 60,
+   "frames": 181,
+   "longFrames": 0,
+   "worstMs": 17
+  },
+  "boardBox": {
+   "w": 368,
+   "h": 674
+  },
+  "stage1Play": {
+   "picks": 18,
+   "seconds": 17.488,
+   "mirrorPhase": "done",
+   "fps": 26,
+   "longFrames": 0,
+   "worstMs": 83
+  },
+  "stage2": {
+   "picks": 28,
+   "seconds": 28.973,
+   "mirrorPhase": "done",
+   "result": true
+  },
+  "stage3": {
+   "picks": 36,
+   "seconds": 43.385,
+   "mirrorPhase": "done",
+   "result": true
+  },
+  "stage4": {
+   "picks": 44,
+   "seconds": 72.837,
+   "mirrorPhase": "done",
+   "result": true
+  },
+  "stage5": {
+   "picks": 52,
+   "seconds": 84.747,
+   "mirrorPhase": "done",
+   "result": true
+  },
+  "stage6": {
+   "picks": 60,
+   "seconds": 121.027,
+   "mirrorPhase": "done",
+   "result": true
+  },
+  "languageClicksInRound": 4,
+  "headerVisibleAfterReload": true,
+  "sharesCaptured": [],
+  "desktopIdleInRound": {
+   "fps": 12.5,
+   "frames": 38,
+   "longFrames": 1,
+   "worstMs": 100
+  },
+  "landscapeOverflowX": false
+ }
+}

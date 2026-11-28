@@ -1,0 +1,50 @@
+{
+ "motionFrameMs": [
+  1091,
+  1850,
+  2615,
+  3467,
+  4206,
+  4896,
+  5358,
+  6099,
+  6777,
+  7492,
+  8240,
+  9010
+ ],
+ "saveKeys": [
+  "sorting-playthrough-v1"
+ ],
+ "saveTopLevel": [
+  "schema",
+  "zone",
+  "tries",
+  "album",
+  "result",
+  "player",
+  "merits",
+  "events",
+  "roundEdition"
+ ],
+ "corruptBoot": {
+  "play": false,
+  "text": "保存失败，进度没有提交。请保留本页并重试；若其他标签页已更新，请刷新本页。\n\nUnexpected end of JSON input"
+ },
+ "corruptErrors": [
+  "Preview initialization failed SyntaxError: Unexpected end of JSON input\n    at JSON.parse (<anonymous>)\n    at http://127.0.0.1:18771/build/game-SWW4RGOU.js:5675:867241"
+ ],
+ "playerPath": "found",
+ "homeAt21": "开始游戏\n第 21 关",
+ "stage21": {
+  "picks": 10,
+  "mirrorPhase": "lost",
+  "itemsLeft": 171,
+  "delivered": 2,
+  "shipments": 36,
+  "ui": null
+ },
+ "errors": [
+  "Preview initialization failed SyntaxError: Unexpected end of JSON input\n    at JSON.parse (<anonymous>)\n    at http://127.0.0.1:18771/build/game-SWW4RGOU.js:5675:867241"
+ ]
+}

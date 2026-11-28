@@ -1,3 +1,4 @@
+import { restoreSavedGame } from '../src/save-recovery.js';
 import {
   Playthrough
 } from '../src/playthrough.js?v=0.2.0';
@@ -48,8 +49,18 @@ const byId = id => document.getElementById(id);
 const content = byId('content'),
   modal = byId('modal');
 const SAVE_KEY = 'sorting-playthrough-v1';
-let locale = localStorage.getItem('sorting-language') ?? 'zh-CN';
-if (!['zh-CN', 'zh-TW', 'en'].includes(locale)) locale = 'zh-CN';
+// First launch follows the system language; unsupported languages fall back to English.
+const systemLocale = () => {
+  for (const tag of navigator.languages ?? [navigator.language]) {
+    const lower = String(tag).toLowerCase();
+    if (/^zh-(tw|hk|mo|hant)/.test(lower)) return 'zh-TW';
+    if (lower.startsWith('zh')) return 'zh-CN';
+    if (lower.startsWith('en')) return 'en';
+  }
+  return 'en';
+};
+let locale = localStorage.getItem('sorting-language') ?? systemLocale();
+if (!['zh-CN', 'zh-TW', 'en'].includes(locale)) locale = systemLocale();
 document.documentElement.lang = locale;
 let t = translator(locale),
   view = 'home',
@@ -939,38 +950,51 @@ let previous = performance.now(),
   sinceSave = 0,
   sinceHeader = 0;
 
+let frameErrorShown = false,
+  frameErrors = 0;
+// A failing frame must not stop the loop: log it, tell the player once, keep running.
 function frame(at) {
-  const elapsed = Math.max(0, Math.min(.25, (at - previous) / 1000));
-  previous = at;
-  if (game && view === 'game' && !modal.open && !uiBusy && !document.hidden && byId('play-board')?.dataset.graphics !== 'lost' && game.round?.inspect().phase === 'live') {
-    const signals = game.advance(elapsed);
-    if (signals.length) {
-      showSignals(signals);
-      board?.draw();
+  try {
+    const elapsed = Math.max(0, Math.min(.25, (at - previous) / 1000));
+    previous = at;
+    if (game && view === 'game' && !modal.open && !uiBusy && !document.hidden && byId('play-board')?.dataset.graphics !== 'lost' && game.round?.inspect().phase === 'live') {
+      const signals = game.advance(elapsed);
+      if (signals.length) {
+        showSignals(signals);
+        board?.draw();
+      }
+      const second = Math.floor(game.round.inspect().seconds);
+      if (second !== lastSecond && byId('play-time')) {
+        byId('play-time').textContent = clockText(second);
+        lastSecond = second;
+      }
+      sinceSave += elapsed;
+      if (sinceSave >= 5) {
+        sinceSave = 0;
+        task(() => game.save());
+      }
     }
-    const second = Math.floor(game.round.inspect().seconds);
-    if (second !== lastSecond && byId('play-time')) {
-      byId('play-time').textContent = clockText(second);
-      lastSecond = second;
+    sinceHeader += elapsed;
+    if (game && sinceHeader >= 1 && !uiBusy) {
+      sinceHeader = 0;
+      const power = game.powerStatus();
+      meter('power', 'heart', `${power.amount}/${power.capacity}`, t('energy', {
+        n: power.amount,
+        max: power.capacity
+      }));
+      const note = byId('energy-note');
+      if (note) note.textContent = `${t('entry')} · ${power.refillIn === null ? t('full') : t('refill', { time: clockText(power.refillIn) })}`;
     }
-    sinceSave += elapsed;
-    if (sinceSave >= 5) {
-      sinceSave = 0;
-      task(() => game.save());
+  } catch (error) {
+    // Log the first few only, so a repeating failure does not flood the console every frame.
+    if (++frameErrors <= 5) console.error('Frame error', error);
+    if (!frameErrorShown) {
+      frameErrorShown = true;
+      toast(t('frameError'));
     }
+  } finally {
+    requestAnimationFrame(frame);
   }
-  sinceHeader += elapsed;
-  if (game && sinceHeader >= 1 && !uiBusy) {
-    sinceHeader = 0;
-    const power = game.powerStatus();
-    meter('power', 'heart', `${power.amount}/${power.capacity}`, t('energy', {
-      n: power.amount,
-      max: power.capacity
-    }));
-    const note = byId('energy-note');
-    if (note) note.textContent = `${t('entry')} · ${power.refillIn === null ? t('full') : t('refill', { time: clockText(power.refillIn) })}`;
-  }
-  requestAnimationFrame(frame);
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && game && !uiBusy) task(() => game.save());
@@ -989,9 +1013,10 @@ window.addEventListener('pagehide', () => {
 });
 try {
   document.documentElement.dataset.motion = localStorage.getItem('sorting-motion') ?? 'on';
-  const record = cachedRaw ? JSON.parse(cachedRaw) : undefined;
-  game = await new Playthrough({
+  const boot = record => new Playthrough({
     record,
+    // Daily and weekly events follow the player's own time zone (new saves only).
+    zone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     loadStage,
     contentEdition: CAMPAIGN_EDITION,
     persist: async snapshot => {
@@ -1001,11 +1026,17 @@ try {
       cachedRaw = raw;
     }
   }).initialize();
+  const restored = await restoreSavedGame({raw: cachedRaw, key: SAVE_KEY, storage: localStorage, boot});
+  game = restored.game;
+  const recovered = restored.recovered;
+  if (recovered) await game.save();
   document.documentElement.dataset.artEdition='american-v1';
 
   await renderCurrent();
+  if (recovered) toast(t('saveRecovered'));
   requestAnimationFrame(frame);
 } catch (error) {
-  content.replaceChildren(el('h1', '', t('saveError')), el('p', '', error.message));
+  // The save is untouched here; offer a reload instead of a dead end.
+  content.replaceChildren(el('h1', '', t('loadError')), el('p', '', error.message), button(t('reload'), () => location.reload(), 'primary'));
   console.error('Preview initialization failed', error);
 }

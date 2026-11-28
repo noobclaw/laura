@@ -1,5 +1,10 @@
 {
   "inputs": {
+    "src/save-recovery.js": {
+      "bytes": 1643,
+      "imports": [],
+      "format": "esm"
+    },
     "src/catalog.js": {
       "bytes": 552,
       "imports": [],
@@ -59,8 +64,13 @@
       "format": "esm"
     },
     "src/session.js?v=0.2.0": {
-      "bytes": 31746,
+      "bytes": 31808,
       "imports": [
+        {
+          "path": "src/save-recovery.js",
+          "kind": "import-statement",
+          "original": "./save-recovery.js"
+        },
         {
           "path": "src/policies.js",
           "kind": "import-statement",
@@ -80,8 +90,13 @@
       "format": "esm"
     },
     "src/progress.js": {
-      "bytes": 11481,
+      "bytes": 12158,
       "imports": [
+        {
+          "path": "src/save-recovery.js",
+          "kind": "import-statement",
+          "original": "./save-recovery.js"
+        },
         {
           "path": "src/policies.js",
           "kind": "import-statement",
@@ -202,7 +217,7 @@
       "format": "esm"
     },
     "examples/strings.js?v=0.2.0-2": {
-      "bytes": 14050,
+      "bytes": 14846,
       "imports": [],
       "format": "esm"
     },
@@ -7684,8 +7699,13 @@
       "format": "esm"
     },
     "examples/play.js": {
-      "bytes": 37454,
+      "bytes": 38903,
       "imports": [
+        {
+          "path": "src/save-recovery.js",
+          "kind": "import-statement",
+          "original": "../src/save-recovery.js"
+        },
         {
           "path": "src/playthrough.js?v=0.2.0",
           "kind": "import-statement",
@@ -7751,13 +7771,13 @@
     }
   },
   "outputs": {
-    "build/game-S6HKH7H6.js.LEGAL.txt": {
+    "build/game-UXOH7NA4.js.LEGAL.txt": {
       "imports": [],
       "exports": [],
       "inputs": {},
       "bytes": 5061
     },
-    "build/game-S6HKH7H6.js": {
+    "build/game-UXOH7NA4.js": {
       "imports": [
         {
           "path": "build/shared-KNWESRWF.js",
@@ -7813,6 +7833,9 @@
         "node_modules/.pnpm/use-sync-external-store@1.7.0_react@19.3.1/node_modules/use-sync-external-store/shim/with-selector.js": {
           "bytesInOutput": 52
         },
+        "src/save-recovery.js": {
+          "bytesInOutput": 742
+        },
         "src/catalog.js": {
           "bytesInOutput": 281
         },
@@ -7835,10 +7858,10 @@
           "bytesInOutput": 65
         },
         "src/session.js?v=0.2.0": {
-          "bytesInOutput": 17255
+          "bytesInOutput": 17248
         },
         "src/progress.js": {
-          "bytesInOutput": 6229
+          "bytesInOutput": 6302
         },
         "src/calendar.js": {
           "bytesInOutput": 1170
@@ -7868,7 +7891,7 @@
           "bytesInOutput": 3774
         },
         "examples/strings.js?v=0.2.0-2": {
-          "bytesInOutput": 18846
+          "bytesInOutput": 20086
         },
         "src/view.js": {
           "bytesInOutput": 868
@@ -7883,7 +7906,7 @@
           "bytesInOutput": 169507
         },
         "node_modules/.pnpm/three@0.187.0/node_modules/three/build/three.module.js": {
-          "bytesInOutput": 366852
+          "bytesInOutput": 366862
         },
         "node_modules/.pnpm/three@0.187.0/node_modules/three/build/three.core.js": {
           "bytesInOutput": 383662
@@ -8030,10 +8053,10 @@
           "bytesInOutput": 5221
         },
         "examples/play.js": {
-          "bytesInOutput": 23091
+          "bytesInOutput": 23625
         }
       },
-      "bytes": 2657294
+      "bytes": 2659886
     },
     "build/shared-LUMCSMJY.js": {
       "imports": [

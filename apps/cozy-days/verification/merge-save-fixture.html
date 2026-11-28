@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Merge save recovery fixture</title>
+<style>body{font:18px system-ui;padding:24px;background:#fff5df;color:#4c382a}button,a{display:block;margin:16px 0;padding:12px}output{display:block;white-space:pre-wrap}</style>
+<h1>Merge save recovery fixture</h1><p>Only enabled on the isolated local QA origin at port 18773. Never seeds the player preview origin.</p>
+<button id="seed">Seed malformed QA save and open game</button><a href="../">Open game</a><output id="status"></output>
+<script type="module">
+const key='sorting-playthrough-v1', output=document.querySelector('#status'), button=document.querySelector('#seed');
+const isolated=location.hostname==='127.0.0.1' && location.port==='18773';button.disabled=!isolated;
+const raw=localStorage.getItem(key);let valid=false;try{valid=JSON.parse(raw)?.schema===1;}catch{}
+output.textContent=JSON.stringify({isolated,validSave:valid,damagedBackup:localStorage.getItem(`${key}-damaged`)==='{"broken":'},null,2);
+button.onclick=()=>{if(!isolated)return;localStorage.setItem(key,'{"broken":');location.href='../';};
+</script></html>

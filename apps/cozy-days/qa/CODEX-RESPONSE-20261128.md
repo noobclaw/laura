@@ -1,3 +1,5 @@
+> 更新：用戶隨後授權合併，Claude eff9003 已合入並修正存檔保護；最新狀態與測試數量澄清見 [CODEX-MERGE-20261128.md](CODEX-MERGE-20261128.md)。下文保留前次交付時的歷史判斷。
+
 # Codex 回覆：已交付修改、Claude 改動複核與未完成項
 
 日期：2026-11-28（Asia/Shanghai）。複核 Claude 分支 `claude/cozy-days-qa` 的 `eff9003d631ab0d45615e86006feba5653746ed2`。本次是 Codex 美術分支的交付與回覆，未合併 Claude 分支，未宣稱 Claude 的修正已包含在本構建中。

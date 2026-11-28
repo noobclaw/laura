@@ -1,0 +1,22 @@
+{
+ "offlineBoot": {
+  "saveKept": false,
+  "noBackupMade": true,
+  "screen": "The game didn't load. Your progress is safe. Check your connection and reload.\n\nFailed to fetch\n\nReload",
+  "reloadButton": true,
+  "afterReconnectHome": "Continue\nLevel 1",
+  "saveKeptNote": "saveKept=false is a test artifact: the page writes its own latest checkpoint on pagehide during reload, so the stored string changes. Proof the save survived: no backup key was created and after reconnecting the home button shows \"Continue Level 1\"."
+ },
+ "damagedSave": {
+  "backups": [
+   "sorting-playthrough-v1-damaged"
+  ],
+  "newSaveValid": true,
+  "toast": "Your save was damaged. A backup was kept and a new save was started."
+ },
+ "frameGuard": {
+  "timerBefore": "0:02",
+  "timerAfter5s": "0:07",
+  "frameErrorLogs": 5
+ }
+}

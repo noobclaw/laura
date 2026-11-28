@@ -1,0 +1,39 @@
+{
+ "beam": 6,
+ "branch": 10,
+ "expand": false,
+ "results": [
+  {
+   "n": 30,
+   "items": 200,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 980,
+   "ms": 208524
+  },
+  {
+   "n": 60,
+   "items": 200,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 250,
+   "ms": 33608
+  },
+  {
+   "n": 100,
+   "items": 202,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 550,
+   "ms": 87538
+  },
+  {
+   "n": 160,
+   "items": 200,
+   "solved": false,
+   "reason": "every branch lost",
+   "expansions": 250,
+   "ms": 25801
+  }
+ ]
+}
