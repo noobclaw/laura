@@ -1,0 +1,19 @@
+app 6839641978 Accord: Perfume Formula Lab
+reusing draft 70d5e6d2-ec10-43b3-b64a-27994929b758
+draft items: 0 []
+version added
+!! POST /v1/reviewSubmissionItems -> HTTP 409
+{
+  "errors" : [ {
+    "id" : "bbc15a16-b3d9-44ca-aa1e-8c9f72a5fd38",
+    "status" : "409",
+    "code" : "ENTITY_ERROR.RELATIONSHIP.UNKNOWN",
+    "title" : "The provided entity includes an unknown relationship",
+    "detail" : "'inAppPurchaseV2' is not a relationship on the resource 'reviewSubmissionItems'",
+    "source" : {
+      "pointer" : "/data/relationships/inAppPurchaseV2"
+    }
+  } ]
+}
+!! IAP could not be added to the draft
+SUBMITTED: WAITING_FOR_REVIEW
