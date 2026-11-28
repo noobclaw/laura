@@ -1,0 +1,238 @@
+{
+  "source": "google_trends",
+  "fetchedAt": "2026-11-28T07:47:21.892974+00:00",
+  "anchor": "guitar tuner",
+  "trendsError": null,
+  "rows": [
+    {
+      "word": "synology music player",
+      "country": "us",
+      "heat": 0.0,
+      "anchor": "guitar tuner",
+      "anchorHeat": 61.3,
+      "vsAnchor": 0.0,
+      "suggest": [
+        "synology music player",
+        "synology music player android",
+        "synology music player daemon",
+        "synology music app",
+        "synology media player",
+        "synology music app ios",
+        "synology media player iphone",
+        "synology nas music player",
+        "synology music player app",
+        "synology audio player"
+      ],
+      "toolIntent": [
+        "app"
+      ],
+      "topReviews": 96136,
+      "itunesHead": [
+        {
+          "name": "Musicana - Organizer & Player",
+          "price": "Free",
+          "rating": 4.64,
+          "reviews": 96136
+        },
+        {
+          "name": "MyMusic - Audio Player",
+          "price": "Free",
+          "rating": 4.67,
+          "reviews": 4267
+        },
+        {
+          "name": "Fileplay - Documents Player",
+          "price": "Free",
+          "rating": 4.62,
+          "reviews": 4210
+        }
+      ],
+      "heatPerCompetition": 0.0,
+      "errors": {}
+    },
+    {
+      "word": "nas music player",
+      "country": "us",
+      "heat": 0.0,
+      "anchor": "guitar tuner",
+      "anchorHeat": 61.3,
+      "vsAnchor": 0.0,
+      "suggest": [
+        "nas music player app",
+        "nas music player",
+        "nas music player android",
+        "nas music player ios",
+        "nas-music player fivem",
+        "nas music player iphone",
+        "nas media player",
+        "nas audio player",
+        "nas music app",
+        "nas media player smb stream"
+      ],
+      "toolIntent": [
+        "app"
+      ],
+      "topReviews": 96136,
+      "itunesHead": [
+        {
+          "name": "Musicana - Organizer & Player",
+          "price": "Free",
+          "rating": 4.64,
+          "reviews": 96136
+        },
+        {
+          "name": "SenPlayer - Media Player",
+          "price": "Free",
+          "rating": 4.68,
+          "reviews": 1293
+        },
+        {
+          "name": "DS Music: Synology NAS Player",
+          "price": "Free",
+          "rating": 4.26,
+          "reviews": 43
+        }
+      ],
+      "heatPerCompetition": 0.0,
+      "errors": {}
+    },
+    {
+      "word": "cloud music player",
+      "country": "us",
+      "heat": 1.2,
+      "anchor": "guitar tuner",
+      "anchorHeat": 61.3,
+      "vsAnchor": 2.0,
+      "suggest": [
+        "cloud music player - listener",
+        "cloud music player android",
+        "cloud music player app",
+        "cloud music player download",
+        "cloud music player online",
+        "cloud music player",
+        "cloud music player ios",
+        "cloud music player windows",
+        "cloud music player offline",
+        "cloud music player free"
+      ],
+      "toolIntent": [
+        "app",
+        "free",
+        "online"
+      ],
+      "topReviews": 96136,
+      "itunesHead": [
+        {
+          "name": "Musicana - Organizer & Player",
+          "price": "Free",
+          "rating": 4.64,
+          "reviews": 96136
+        },
+        {
+          "name": "Offline Music Player ‣‣",
+          "price": "Free",
+          "rating": 4.44,
+          "reviews": 57633
+        },
+        {
+          "name": "Evermusic: Cloud Music Player",
+          "price": "Free",
+          "rating": 4.64,
+          "reviews": 19352
+        }
+      ],
+      "heatPerCompetition": 0.02,
+      "errors": {}
+    },
+    {
+      "word": "ds audio",
+      "country": "us",
+      "heat": 3.6,
+      "anchor": "guitar tuner",
+      "anchorHeat": 61.3,
+      "vsAnchor": 5.8,
+      "suggest": [
+        "ds audio st-50",
+        "ds audio cartridges",
+        "ds audio st-50 stylus cleaner",
+        "ds audio optical cartridge",
+        "ds audio ionizer",
+        "ds audio sc-001",
+        "ds audio ion-001",
+        "ds audio speakers",
+        "ds audio headshell",
+        "ds audio record brush"
+      ],
+      "toolIntent": [],
+      "topReviews": 85619,
+      "itunesHead": [
+        {
+          "name": "Sony | Music Center",
+          "price": "Free",
+          "rating": 4.58,
+          "reviews": 85619
+        },
+        {
+          "name": "DS file",
+          "price": "Free",
+          "rating": 2.76,
+          "reviews": 361
+        },
+        {
+          "name": "KaiserTone Audio Player +HiRes",
+          "price": "$9.99",
+          "rating": 4.58,
+          "reviews": 215
+        }
+      ],
+      "heatPerCompetition": 0.07,
+      "errors": {}
+    },
+    {
+      "word": "music player for google drive",
+      "country": "us",
+      "heat": 0.0,
+      "anchor": "guitar tuner",
+      "anchorHeat": 61.3,
+      "vsAnchor": 0.0,
+      "suggest": [
+        "music player for google drive",
+        "music player for google drive android",
+        "music player for google drive extension",
+        "music player for google drive iphone",
+        "music player for google drive download",
+        "best music player for google drive",
+        "music player app for google drive",
+        "music cloud - songs player for google drive dropbox",
+        "cloud music - offline songs player for google drive",
+        "is there a music player for google drive"
+      ],
+      "toolIntent": [
+        "app"
+      ],
+      "topReviews": 7956312,
+      "itunesHead": [
+        {
+          "name": "Google Drive",
+          "price": "Free",
+          "rating": 4.78,
+          "reviews": 7956312
+        },
+        {
+          "name": "Musicana - Organizer & Player",
+          "price": "Free",
+          "rating": 4.64,
+          "reviews": 96136
+        },
+        {
+          "name": "Music Player : Songs, Videos",
+          "price": "Free",
+          "rating": 4.51,
+          "reviews": 63018
+        }
+      ],
+      "heatPerCompetition": 0.0,
+      "errors": {}
+    }
+  ]
+}
