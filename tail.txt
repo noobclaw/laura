@@ -1,0 +1,80 @@
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_03_mergesSameAlbumAcrossFolders]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_03_mergesSameAlbumAcrossFolders]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_04_ordersAlbumsAndTracks]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_04_ordersAlbumsAndTracks]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_05_searchesAllFields]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_05_searchesAllFields]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_07_recentlyAdded]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_07_recentlyAdded]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_08_savesAndLoadsAtomically]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_08_savesAndLoadsAtomically]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_09_recoversFromDamagedFile]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_09_recoversFromDamagedFile]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_10_artworkStoredOncePerAlbum]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_10_artworkStoredOncePerAlbum]' passed (0.002 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_11_playableFormats]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_11_playableFormats]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_12_tagsOverrideGuesses]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_12_tagsOverrideGuesses]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIFE_02_extremeNames]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIFE_02_extremeNames]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_02_TC_OFF_06_offlineFilesWinAndClear]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_02_TC_OFF_06_offlineFilesWinAndClear]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_04_TC_OFF_05_offlineLimitCountsFinishedOnly]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_04_TC_OFF_05_offlineLimitCountsFinishedOnly]' passed (0.002 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PL_01_TC_PL_03_TC_PL_04_playlists]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PL_01_TC_PL_03_TC_PL_04_playlists]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_01_queueNextPrevious]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_01_queueNextPrevious]' passed (0.004 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_02_shuffleNoRepeats]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_02_shuffleNoRepeats]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_04_TC_PLY_05_sessionPolicy]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_04_TC_PLY_05_sessionPolicy]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_06_stallWatchdog]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_06_stallWatchdog]' passed (0.000 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_07_skipsUnplayable]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_07_skipsUnplayable]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_09_sleepTimer]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_09_sleepTimer]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_14_repeatModes]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_14_repeatModes]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_01_TC_RVW_02_TC_RVW_03_reviewTiming]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_01_TC_RVW_02_TC_RVW_03_reviewTiming]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_04_loveItRequestsSystemReview]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_04_loveItRequestsSystemReview]' passed (0.044 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_05_feedbackLinkHasNoServerDetails]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_05_feedbackLinkHasNoServerDetails]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SHR_01_TC_SHR_02_shareCards]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SHR_01_TC_SHR_02_shareCards]' passed (0.008 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_01_parsesRootListing]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_01_parsesRootListing]' passed (0.008 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_02_parsesSizesDatesAbsoluteHrefs]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_02_parsesSizesDatesAbsoluteHrefs]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_03_normalizesAddresses]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_03_normalizesAddresses]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_05_TC_ERR_01_mapsErrors]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_05_TC_ERR_01_mapsErrors]' passed (0.004 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_07_scansFolderRecursively]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_07_scansFolderRecursively]' passed (0.010 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_08_TC_SRC_09_TC_IAP_05_TC_IAP_07_freeLimits]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_08_TC_SRC_09_TC_IAP_05_TC_IAP_07_freeLimits]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_10_passwordOnlyInKeychain]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_10_passwordOnlyInKeychain]' passed (0.028 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_11_TC_LIFE_01_sourcesDoNotMix]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_11_TC_LIFE_01_sourcesDoNotMix]' passed (0.001 seconds).
+Test Suite 'CoreTests' passed at 2026-11-28 12:08:44.024.
+	 Executed 37 tests, with 0 failures (0 unexpected) in 2.305 (2.351) seconds
+Test Suite 'SpindleTests.xctest' passed at 2026-11-28 12:08:44.025.
+	 Executed 37 tests, with 0 failures (0 unexpected) in 2.305 (2.352) seconds
+Test Suite 'All tests' passed at 2026-11-28 12:08:44.026.
+	 Executed 37 tests, with 0 failures (0 unexpected) in 2.305 (2.354) seconds
+2026-11-28 12:08:45.263 xcodebuild[2097:9486] [MT] IDETestOperationsObserverDebug: 181.763 elapsed -- Testing started completed.
+2026-11-28 12:08:45.263 xcodebuild[2097:9486] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-28 12:08:45.263 xcodebuild[2097:9486] [MT] IDETestOperationsObserverDebug: 181.763 sec, +181.763 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/laura/laura/apps/spindle/dd/Logs/Test/Test-Spindle-2026.11.28_12-04-58-+0000.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

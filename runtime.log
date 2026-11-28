@@ -1,0 +1,80 @@
+2026-11-28 12:30:15.414 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyWindow] UIWindowScene: 0x104a0c580: Window became key in scene: UIWindow: 0x104a0f3c0; contextId: 0x5EB22CD5: reason: UIWindowScene: 0x104a0c580: Window requested to become key in scene: 0x104a0f3c0
+2026-11-28 12:30:15.414 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyWindow] Key window needs update: 1; currentKeyWindowScene: 0x0; evaluatedKeyWindowScene: 0x104a0c580; currentApplicationKeyWindow: 0x0; evaluatedApplicationKeyWindow: 0x104a0f3c0; reason: UIWindowScene: 0x104a0c580: Window requested to become key in scene: 0x104a0f3c0
+2026-11-28 12:30:15.414 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyWindow] Window did become application key: UIWindow: 0x104a0f3c0; contextId: 0x5EB22CD5; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.noobclaw.spindle-default
+2026-11-28 12:30:15.414 Df Spindle[40362:1d38c] [com.apple.UIKit:EventDeferring] [0x60000290d9d0] Begin local event deferring requested for token: 0x60000260c900; environments: 1; reason: UIWindowScene: 0x104a0c580: Begin event deferring in keyboardFocus for window: 0x104a0f3c0
+2026-11-28 12:30:15.415 Df Spindle[40362:1d38c] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x104a0c580> (DABCC91C-726C-4AE9-90EC-75E6B0EB8E67)
+2026-11-28 12:30:15.417 Df Spindle[40362:1d38c] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.spindle-default  persistentID: DABCC91C-726C-4AE9-90EC-75E6B0EB8E67
+2026-11-28 12:30:15.417 Df Spindle[40362:1d38c] [com.apple.UIKit:Application] Ignoring already applied deactivation reason: 5; deactivation reasons: 2080
+2026-11-28 12:30:15.418 Df Spindle[40362:1d38c] [com.apple.UIKit:Application] Deactivation reason added: 12; deactivation reasons: 2080 -> 6176; animating application lifecycle event: 1
+2026-11-28 12:30:15.418 Df Spindle[40362:1d38c] [com.apple.UIKit:Application] Deactivation reason removed: 11; deactivation reasons: 6176 -> 4128; animating application lifecycle event: 1
+2026-11-28 12:30:15.423 Df Spindle[40362:1d394] [com.apple.BackBoard:EventDelivery] policyStatus:<BKSHIDEventDeliveryPolicyObserver: 0x600002116c10; token: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.noobclaw.spindle-default; status: ancestor> was:target
+2026-11-28 12:30:15.423 Df Spindle[40362:1d394] [com.apple.BackBoard:EventDelivery] observerPolicyDidChange: 0x600002116c10 -> <_UIKeyWindowSceneObserver: 0x600000c17a20>
+2026-11-28 12:30:15.423 Df Spindle[40362:1d394] [com.apple.UIIntelligenceSupport:xpc] establishing connection to agent
+2026-11-28 12:30:15.425 Df Spindle[40362:1d38c] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x104a0c580> (DABCC91C-726C-4AE9-90EC-75E6B0EB8E67)
+2026-11-28 12:30:15.436 Df Spindle[40362:1d394] [com.apple.xpc:session] [0x60000210dd10] Session created.
+2026-11-28 12:30:15.436 Df Spindle[40362:1d394] [com.apple.xpc:session] [0x60000210dd10] Session created from connection [0x600003d00960]
+2026-11-28 12:30:15.437 Df Spindle[40362:1d394] [com.apple.xpc:connection] [0x600003d00960] activating connection: mach=true listener=false peer=false name=com.apple.uiintelligencesupport.agent
+2026-11-28 12:30:15.441 A  Spindle[40362:1d38c] (CoreFoundation) Updating Key-Value Observers Of Preferences
+2026-11-28 12:30:15.442 Df Spindle[40362:1d394] [com.apple.xpc:session] [0x60000210dd10] Session activated
+2026-11-28 12:30:15.585 Df Spindle[40362:1d38c] [com.apple.UIKit:_UIVisualStyleRegistry] Warning: no visual style classes have been registered at all.
+2026-11-28 12:30:15.592 Df Spindle[40362:1d38c] [PrototypeTools:domain] Not observing PTDefaults on customer install.
+2026-11-28 12:30:15.623 Df Spindle[40362:1d394] [com.apple.xpc:connection] [0x104a18c80] activating connection: mach=true listener=false peer=false name=com.apple.fontservicesd
+2026-11-28 12:30:15.873 Df Spindle[40362:1d392] [com.apple.UIKit:BackgroundTask] Ending background task with UIBackgroundTaskIdentifier: 2
+2026-11-28 12:30:15.873 Df Spindle[40362:1d392] [com.apple.UIKit:BackgroundTask] Ending task with identifier 2 and description: <_UIBackgroundTaskInfo: 0x60000171c6c0>: taskID = 2, taskName = Persistent SceneSession Map Update, creationTime = 1635 (elapsed = 0), _expireHandler: <__NSGlobalBlock__: 0x1e6965d48>
+2026-11-28 12:30:15.873 Df Spindle[40362:1d392] [com.apple.UIKit:BackgroundTask] Decrementing reference count for assertion <BKSProcessAssertion: 0x60000210b9d0> (used by background task with identifier 2: <_UIBackgroundTaskInfo: 0x60000171c6c0>: taskID = 2, taskName = Persistent SceneSession Map Update, creationTime = 1635 (elapsed = 0))
+2026-11-28 12:30:16.025 Df Spindle[40362:1d38c] [com.apple.xpc:connection] [0x10487c480] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-28 12:30:16.027 Df Spindle[40362:1d38c] [com.apple.xpc:connection] [0x10487c590] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-28 12:30:16.027 Df Spindle[40362:1d38c] [com.apple.xpc:connection] [0x104a2e6a0] activating connection: mach=true listener=false peer=false name=com.apple.metal.simulator
+2026-11-28 12:30:16.073 Df Spindle[40362:1d38c] [com.apple.xpc:connection] [0x600003d011d0] activating connection: mach=true listener=false peer=false name=com.apple.IOSurface.Remote
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:1 [F4A49828-CE53-4332-B862-DF75361FBFF4] (reporting strategy default)>
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.network:activity] Create activity from XPC object <nw_activity 50:2 [537A78CB-02B7-48CF-B724-783E7C61CC24] (reporting strategy default)>
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.network:activity] Set activity <nw_activity 50:1 [F4A49828-CE53-4332-B862-DF75361FBFF4] (reporting strategy default)> as the global parent
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.UIKit:BackgroundTask] Ending background task with UIBackgroundTaskIdentifier: 1
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.UIKit:BackgroundTask] Ending task with identifier 1 and description: <_UIBackgroundTaskInfo: 0x60000170ed80>: taskID = 1, taskName = Launch Background Task for Coalescing, creationTime = 1635 (elapsed = 0), _expireHandler: (null)
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.UIKit:BackgroundTask] Decrementing reference count for assertion <BKSProcessAssertion: 0x60000210b9d0> (used by background task with identifier 1: <_UIBackgroundTaskInfo: 0x60000170ed80>: taskID = 1, taskName = Launch Background Task for Coalescing, creationTime = 1635 (elapsed = 0))
+2026-11-28 12:30:16.246 Df Spindle[40362:1d38c] [com.apple.UIKit:BackgroundTask] Will invalidate assertion: <BKSProcessAssertion: 0x60000210b9d0> for task identifier: 1
+2026-11-28 12:30:16.247 Df Spindle[40362:1d38c] [com.apple.UIKit:UpdateScheduler] Target list changed: <CADisplay:LCD PurpleMain>
+2026-11-28 12:30:16.248 A  Spindle[40362:1d392] (RunningBoardServices) didChangeInheritances
+2026-11-28 12:30:16.248 Df Spindle[40362:1d38c] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.spindle-default  persistentID: DABCC91C-726C-4AE9-90EC-75E6B0EB8E67
+2026-11-28 12:30:16.249 Df Spindle[40362:1d38c] [com.apple.amp.mediaplayer:RemoteControl] <MPRemoteCommandCenter: 0x104806090 (origin-iPhone-1280262988/client-com.noobclaw.spindle-40362/player-MediaRemote-DefaultPlayer)> [MPRemoteCommandCenter] setSupportedCommands (
+    "<MRCommandInfo: 0x600000290c40, SeekToPlaybackPosition, enabled = 1, options = {\134n    kMRMediaRemoteCommandInfoCanBeControlledByScrubbingKey = 0;\134n    kMRMediaRemoteCommandInfoSupportsReferencePosition = 0;\134n}>",
+    "<MRCommandInfo: 0x600000290b80, PreviousTrack, enabled = 1, options = {\134n}>",
+    "<MRCommandInfo: 0x600000290ba0, NextTrack, enabled = 1, options = {\134n}>",
+    "<MRCommandInfo: 0x600000290bc0, TogglePlayPause, enabled = 1, options = {\134n}>",
+    "<MRCommandInfo: 0x600000290900, Pause, enabled = 1, options = {\134n}>",
+    "<MRCommandInfo: 0x600000290b20, Play, enabled = 1, options = {\134n}>"
+)
+2026-11-28 12:30:16.249 Df Spindle[40362:1d38c] [com.apple.amp.mediaremote:NowPlaying] [MRNowPlaying] MRMediaRemoteSetCanBeNowPlayingForPlayer origin-iPhone-1280262988/client-com.noobclaw.spindle-40362/player-MediaRemote-DefaultPlayer set to YES
+2026-11-28 12:30:16.250 Df Spindle[40362:1d38c] [com.apple.coremedia:] -AVSystemController- +[AVSystemController sharedInstance]: Failed to allocate AVSystemController, numberOfAttempts=1
+2026-11-28 12:30:16.250 Df Spindle[40362:1d38c] [com.apple.coremedia:] -AVSystemController- +[AVSystemController sharedInstance]: Failed to allocate AVSystemController, numberOfAttempts=2
+2026-11-28 12:30:16.251 Df Spindle[40362:1d38c] [com.apple.coremedia:] -AVSystemController- +[AVSystemController sharedInstance]: Failed to allocate AVSystemController, numberOfAttempts=3
+2026-11-28 12:30:16.253 Df Spindle[40362:1d38c] [com.apple.xpc:connection] [0x104a4b620] activating connection: mach=true listener=false peer=false name=com.apple.storekitd
+2026-11-28 12:30:16.256 Df Spindle[40362:1d394] [com.apple.storekit:Default] [3a0950ce_SK2] Starting product request
+2026-11-28 12:30:16.257 A  Spindle[40362:1d38c] (CoreFoundation) Updating Key-Value Observers Of Preferences
+2026-11-28 12:30:16.274 Df Spindle[40362:1d38c] [com.apple.UIKit:EventDeferring] [0x60000290d9d0] Scene target of event deferring environments did update: scene: 0x104a0c580; current systemShellManagesKeyboardFocus: 1; systemShellManagesKeyboardFocusForScene: 1; eligibleForRecordRemoval: 1;
+2026-11-28 12:30:16.274 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyWindow] Scene became target of keyboard event deferring environment: UIWindowScene: 0x104a0c580; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.noobclaw.spindle-default
+2026-11-28 12:30:16.276 Df Spindle[40362:1d38c] [com.apple.UIKit:InterfaceStyle] Not push traits update to screen for new style 1, <UIWindowScene: 0x104a0c580> (DABCC91C-726C-4AE9-90EC-75E6B0EB8E67)
+2026-11-28 12:30:16.277 Df Spindle[40362:1d38c] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.spindle-default  persistentID: DABCC91C-726C-4AE9-90EC-75E6B0EB8E67
+2026-11-28 12:30:16.278 Df Spindle[40362:1d38c] [com.apple.UIKit:Application] Deactivation reason removed: 12; deactivation reasons: 4128 -> 32; animating application lifecycle event: 1
+2026-11-28 12:30:16.278 Df Spindle[40362:1d38c] [com.apple.KeyboardArbiter:Client] Send setDeactivating: N (-DeactivationReason:SuspendedEventsOnly)
+2026-11-28 12:30:16.280 Df Spindle[40362:1d38c] [com.apple.UIKit:Application] Deactivation reason removed: 5; deactivation reasons: 32 -> 0; animating application lifecycle event: 0
+2026-11-28 12:30:16.282 Df Spindle[40362:1d38c] [com.apple.KeyboardArbiter:Client] startConnection
+2026-11-28 12:30:16.284 Df Spindle[40362:1d38c] [com.apple.xpc:connection] [0x104b0f980] activating connection: mach=true listener=false peer=false name=com.apple.UIKit.KeyboardManagement.hosted
+2026-11-28 12:30:16.291 Df Spindle[40362:1d38c] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.spindle-default  persistentID: DABCC91C-726C-4AE9-90EC-75E6B0EB8E67
+2026-11-28 12:30:16.292 Df Spindle[40362:1d38c] [com.apple.UIKit:AppLifecycle] sceneOfRecord: sceneID: sceneID:com.noobclaw.spindle-default  persistentID: DABCC91C-726C-4AE9-90EC-75E6B0EB8E67
+2026-11-28 12:30:16.295 A  Spindle[40362:1d391] (RunningBoardServices) didChangeInheritances
+2026-11-28 12:30:16.328 Df Spindle[40362:1d38c] [com.apple.KeyboardArbiter:Client] handleKeyboardChange: set currentKeyboard:N (wasKeyboard:N)
+2026-11-28 12:30:16.328 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyboardSceneDelegate] forceReloadInputViews
+2026-11-28 12:30:16.328 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyboardSceneDelegate] Reloading input views for: <(null): 0x0; > force: 1
+2026-11-28 12:30:16.330 Df Spindle[40362:1d38c] [com.apple.UIKit:KeyboardArbiterClientLog] isWritingToolsHandlingKeyboardTracking:Y (WT ready:Y, Arbiter ready:Y)
+2026-11-28 12:30:16.354 A  Spindle[40362:1d394] (RunningBoardServices) didChangeInheritances
+2026-11-28 12:30:16.373 Df Spindle[40362:1d38c] [com.apple.network:activity] <nw_activity 50:1 [F4A49828-CE53-4332-B862-DF75361FBFF4] (global parent) (reporting strategy default) complete (reason success)> complete with reason 2 (success), duration 1687ms
+2026-11-28 12:30:16.373 A  Spindle[40362:1d394] (RunningBoardServices) didChangeInheritances
+2026-11-28 12:30:16.374 Df Spindle[40362:1d38c] [com.apple.network:activity] <nw_activity 50:2 [537A78CB-02B7-48CF-B724-783E7C61CC24] (reporting strategy default) complete (reason success)> complete with reason 2 (success), duration 1688ms
+2026-11-28 12:30:16.374 Df Spindle[40362:1d38c] [com.apple.network:activity] Unsetting the global parent activity <nw_activity 50:1 [F4A49828-CE53-4332-B862-DF75361FBFF4] (global parent) (reporting strategy default) complete (reason success)>
+2026-11-28 12:30:16.374 Df Spindle[40362:1d38c] [com.apple.network:activity] Unset the global parent activity
+2026-11-28 12:30:16.484 A  Spindle[40362:1d394] (RunningBoardServices) didChangeInheritances
+2026-11-28 12:30:16.511 Df Spindle[40362:1d392] [com.apple.storekit:Default] [3a0950ce_SK2] Finished product request
+2026-11-28 12:30:16.760 E  Spindle[40362:1d393] [com.apple.storekit:Default] Error enumerating unfinished transactions for first transaction listener: Error Domain=ASDErrorDomain Code=509 "No active account" UserInfo={NSLocalizedDescription=No active account}
+2026-11-28 12:30:16.760 Df Spindle[40362:1d393] [com.apple.CoreAnalytics:client] No XPC connection in Simulator
+2026-11-28 12:30:16.855 E  Spindle[40362:1d394] [com.apple.storekit:Default] Error enumerating all current transactions: Error Domain=ASDErrorDomain Code=509 "No active account" UserInfo={NSLocalizedDescription=No active account}

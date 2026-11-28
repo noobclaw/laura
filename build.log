@@ -1,0 +1,992 @@
+Command line invocation:
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -project Spindle.xcodeproj -scheme Spindle -destination id=0C95D7BB-B55C-4EE0-ACB9-8616BB736183 -derivedDataPath dd CODE_SIGNING_ALLOWED=NO test
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, arch:arm64, id:0C95D7BB-B55C-4EE0-ACB9-8616BB736183, OS:18.5, name:iPhone 16 Pro }
+{ platform:iOS Simulator, arch:x86_64, id:0C95D7BB-B55C-4EE0-ACB9-8616BB736183, OS:18.5, name:iPhone 16 Pro }
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'SpindleTests' in project 'Spindle'
+        ➜ Explicit dependency on target 'Spindle' in project 'Spindle'
+    Target 'Spindle' in project 'Spindle' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcstringstool compile --dry-run --output-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/InfoPlist.xcstrings
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/runner/work/laura/laura/apps/spindle/Spindle/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcstringstool compile --dry-run --output-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Localizable.xcstrings
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+ExecuteExternalTool /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+Build description signature: e8f39ec3635418a55487ab93eeec2822
+Build description path: /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/XCBuildData/e8f39ec3635418a55487ab93eeec2822.xcbuilddata
+CreateBuildDirectory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    builtin-create-build-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products
+
+ClangStatCache /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -o /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache
+
+CreateBuildDirectory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    builtin-create-build-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle-98ddb4a75f1e26131d341bc56c078a49-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle-98ddb4a75f1e26131d341bc56c078a49-VFS-iphonesimulator/all-product-headers.yaml
+
+CreateBuildDirectory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    builtin-create-build-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator
+
+CreateBuildDirectory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    builtin-create-build-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    builtin-create-build-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+    cd /Users/runner/work/laura/laura/apps/spindle/Spindle.xcodeproj
+    builtin-create-build-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.hmap (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/empty-SpindleTests.plist (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/empty-SpindleTests.plist
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyStaticMetadataFileList (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyMetadataFileList (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-project-headers.hmap (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-project-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-own-target-headers.hmap (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-generated-files.hmap (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-generated-files.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-target-headers.hmap (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-non-framework-target-headers.hmap (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_const_extract_protocols.json (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftFileList (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftConstValuesFileList (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.LinkFileList (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.LinkFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-OutputFileMap.json (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyStaticMetadataFileList (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.hmap (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyMetadataFileList (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-project-headers.hmap (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-project-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-own-target-headers.hmap (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-generated-files.hmap (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-generated-files.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-target-headers.hmap (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-non-framework-target-headers.hmap (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-DebugDylibPath-normal-arm64.txt (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-DebugDylibInstallName-normal-arm64.txt (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_const_extract_protocols.json (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftFileList (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftConstValuesFileList (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.LinkFileList (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.LinkFileList
+
+WriteAuxiliaryFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-OutputFileMap.json (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    write-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-OutputFileMap.json
+
+MkDir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /bin/mkdir -p /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest
+
+MkDir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /bin/mkdir -p /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns
+
+MkDir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /bin/mkdir -p /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+MkDir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /bin/mkdir -p /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app
+
+Ld /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/__preview.dylib normal (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -O0 -L/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -install_name @rpath/Spindle.debug.dylib -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_dependency_info.dat -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/__preview.dylib
+
+MkDir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/unthinned (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /bin/mkdir -p /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/unthinned
+
+MkDir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /bin/mkdir -p /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned
+
+GenerateAssetSymbols /Users/runner/work/laura/laura/apps/spindle/Spindle/Assets.xcassets (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool /Users/runner/work/laura/laura/apps/spindle/Spindle/Assets.xcassets --compile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_dependencies --output-partial-info-plist /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --minimum-deployment-target 17.0 --platform iphonesimulator --bundle-identifier com.noobclaw.spindle --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CpResource /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PrivacyInfo.xcprivacy /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/PrivacyInfo.xcprivacy (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/PrivacyInfo.xcprivacy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app
+
+CpResource /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/OFL-Anton.txt /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Fonts/OFL-Anton.txt (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Fonts/OFL-Anton.txt /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app
+
+CpResource /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Anton-Regular.ttf /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Fonts/Anton-Regular.ttf (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Fonts/Anton-Regular.ttf /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/libXCTestSwiftSupport.dylib /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/libXCTestBundleInject.dylib /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libXCTestBundleInject.dylib (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libXCTestBundleInject.dylib /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/XCUnit.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCUnit.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCUnit.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/XCUIAutomation.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCUIAutomation.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCUIAutomation.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/XCTestSupport.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCTestSupport.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCTestSupport.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/XCTestCore.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCTestCore.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCTestCore.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/XCTest.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/XCTest.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/XCTAutomationSupport.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCTAutomationSupport.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/XCTAutomationSupport.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks/Testing.framework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/Testing.framework (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks/Testing.framework /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks
+
+CompileXCStrings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Localizable.xcstrings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/Localizable.xcstrings
+
+CompileXCStrings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/InfoPlist.xcstrings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build /Users/runner/work/laura/laura/apps/spindle/Spindle/Resources/InfoPlist.xcstrings
+
+CompileAssetCatalogVariant thinned /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app /Users/runner/work/laura/laura/apps/spindle/Spindle/Assets.xcassets (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/actool /Users/runner/work/laura/laura/apps/spindle/Spindle/Assets.xcassets --compile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone17,1 --filter-for-device-os-version 18.5 --development-region en --target-device iphone --minimum-deployment-target 17.0 --platform iphonesimulator
+/* com.apple.actool.compilation-results */
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist_thinned
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned/Assets.car
+
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hant.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hant.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hant.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hant.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hant.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hant.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hant.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hant.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hant.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hant.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hans.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hans.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hans.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hans.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hans.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hans.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hans.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/zh-Hans.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hans.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/zh-Hans.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/pt-BR.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/pt-BR.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/pt-BR.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/pt-BR.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/pt-BR.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/pt-BR.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/pt-BR.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/pt-BR.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/pt-BR.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/pt-BR.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ko.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ko.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ko.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ko.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ko.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ko.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ko.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ko.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ko.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ko.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ja.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ja.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ja.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ja.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ja.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ja.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ja.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/ja.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ja.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ja.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/it.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/it.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/it.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/it.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/it.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/it.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/it.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/it.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/it.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/it.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/fr.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/fr.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/fr.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/fr.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/fr.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/fr.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/fr.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/fr.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/fr.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/fr.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/es.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/es.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/es.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/es.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/es.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/es.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/es.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/es.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/es.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/es.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/en.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/en.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/en.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/en.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/en.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/en.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/en.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/en.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/en.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/en.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/de.lproj/Localizable.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/de.lproj/Localizable.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename Localizable.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/de.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/de.lproj/Localizable.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/de.lproj/Localizable.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+CopyStringsFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/de.lproj/InfoPlist.strings /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/de.lproj/InfoPlist.strings (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/de.lproj -- /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/de.lproj/InfoPlist.strings
+/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/de.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'Spindle' from project 'Spindle')
+
+SwiftDriver Spindle normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-SwiftDriver -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Spindle -Onone -enforce-exclusivity\=checked @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/laura/laura/apps/spindle/dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache -output-file-map /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-generated-files.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-own-target-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-project-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-Swift.h -working-directory /Users/runner/work/laura/laura/apps/spindle -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/ptrauth-B79JN829Q6BALJXTJTDZB2VGL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_stdarg-71931NBCM50PJ7AD98AVGUGJK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_SwiftConcurrencyShims-DGQEU12L9W4HIQEOQR9LCFFIP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/DeveloperToolsSupport-9LSAIKKXBZRNCX0I9I529DPYP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_stdbool-AWUZRF81OK73W5Y5ZBEMPLAKA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_float-A08ZF1JK5ZHY0C0G9S0FQILDT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/SwiftShims-27TH2DHJ930I2MO8SHJOA3EBR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_stddef-1QUFL7QVFQ8UFWJAQQUG67UOZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_AvailabilityInternal-EBZ4GMWCHADW3H4RS2UNR5N0T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/ptrcheck-CTQX6H5UDR6HNK2VAU59Q00GS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_StoreKit_SwiftUI-7DCWFGPUFYV9CPPA4PAYGLW8N.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_DarwinFoundation1-193E7LEFXFZDSNX7Q2ZK5FBP4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/ExtensionFoundation-4II0H2WZG64B96E9DV2D7KZRK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_DarwinFoundation2-E0LXMOAZBOQ2PJ2IZZ3LJZEVW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_limits-33ZL336LRCV21VZC9FDDUKT6Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/sys_types-A42NK3TDMP9C7R8FJM0CLHBI6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_tgmath-739IYPBGBNIR1K5T22N6CUYOF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_stdint-2G7HTVDEQ93UXGIB0N4WZ0L6K.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_DarwinFoundation3-BRAHGKTI33PH4O2GQIS92N23L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_stdatomic-5KDNEG1A1R4DG6TBMBODJWNHE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_intrinsics-3ZB6WYOFB4OZ60PAAQNT6VX75.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_Builtin_inttypes-DVT2H75FPED6LRSOX1VO4DWE1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Darwin-99AL43NZDH7S4BOROC95STRB1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/simd-AXLKWU915OI1TUXSST5IMJ3KT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/ObjectiveC-DOVQ40O6C1OE3HIIKT3NPSV1A.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/MachO-DSJWFROTA0DFSELPA4CQ3OX1Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/os_object-DNBT6ELT8N7QIH3JBBFMTYJJD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/os_workgroup-B589G8XELRR8KO9CDC3OSDML5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Dispatch-5R9TWM61HH1Y5251YS7HE8LXT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Spatial-D8NMD3LEAG9SA7CVHRB20OGRY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/XPC-AIBUS7ARSD96XR7VKFQL1I7HT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/dnssd-59QTXDK9DHJI2FDNBGYCO0PWT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/os-5IS1A64U33R53J6OYJDURQEP2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreFoundation-9OGDMZ1YCO1CNHRVJFI6Y0ZAJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Security-29L0BVA9WZYQR4QH050LGO5O7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreGraphics-19H1X3VFVVYFQQ3UE2H7D34Z9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CFNetwork-ZNY60FN2VYEFWE4HG68FBN0N.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreAudioTypes-5EFFY0P8LC5JGWTH1ECSXPLBK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/ImageIO-27PQBI2PW7L3DNS3PU7BZZ78X.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreAudio-1HZBRZ48UPZ3KGEQDZBCBNSQH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Foundation-6NUCHL50VOR68Z8POFFTZ9ZJR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreText-AD0UR6KGNOB1858VILDW4BD3T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreTransferable-810B3ZUTFC4R9SJDPIV2NRKKW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/_LocationEssentials-7BGKALJFO159HBGNYBM6YSN21.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Accessibility-VXDT3TBX5OPPG032AEUSC8I.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/FileProvider-CWR4MCMAZZ5BAT64FOENYZ0SP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/OpenGLES-ER2H33AZ5WLQCUL2DQHNPF623.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/BackgroundAssets-9AYZY1EE7KN63VSZ8UF6D5830.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/IOSurface-8DJY5TYBA3VOIKLAKYHF4MAAF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/DataDetection-B1C49K5EBI333JJWXN72RF6S4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Symbols-8HBWGODX2GCXGF3RDFP5Q5JDH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Metal-BUS11ZCCG5Z0DZECUABYRMUZN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Network-DTW89WRE5PORD4D1IJDS7JC01.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/OSLog-7O5FDRDSLF8XTRAB28SGX4GO8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/AVRouting-DECOLJ62XI24O6407TCG4K3BT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreVideo-1WCAH3KGH42ADUQJ74ECCJH0D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/UIUtilities-8I0DTAQXS3LSHG3XI2SIABOPE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreData-CWA36YD1JPK02D5Y5UBRVY0OP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreMIDI-4TK0K6AD3PSM5HZK5GG93R2VE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreMedia-5IHBQ3INWDMH3771RUYZ12MZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/QuartzCore-4S89EQ7CRQG0BK7V44IBIHXV9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/LocalAuthentication-C8KA7WK64H2453CEZEMT24AE7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/SwiftUICore-2D06CSQFSCU6J6J7OXUVKZDN0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreLocation-CXPKFNHIOJKV5SFFW9Q5KVLP2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/UserNotifications-5KA6CBQQUONF0EBFMBHXUB2UJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/AudioToolbox-815NUCM3U3II9MQZ39ZI62TK7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/CoreImage-6SDKTVIB6V2SVXQ4L1C23QNLV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/UniformTypeIdentifiers-8WFI3PGUFOH1LNOC3RI7XUG8Y.pcm
+
+LinkAssetCatalog /Users/runner/work/laura/laura/apps/spindle/Spindle/Assets.xcassets (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-linkAssetCatalog --thinned /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/thinned --thinned-dependencies /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist_unthinned --output /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app --plist-output /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/AppIcon60x60@2x.png (in target 'Spindle' from project 'Spindle')
+note: Emplaced /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Assets.car (in target 'Spindle' from project 'Spindle')
+note: Emplaced /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/AppIcon76x76@2x~ipad.png (in target 'Spindle' from project 'Spindle')
+
+ProcessInfoPlistFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Info.plist /Users/runner/work/laura/laura/apps/spindle/Spindle/Info.plist (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-infoPlistUtility /Users/runner/work/laura/laura/apps/spindle/Spindle/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/assetcatalog_generated_info.plist -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Info.plist
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/AVFAudio-3Q6E9SSBSBLCQWT4EVJSOQFU3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/MediaToolbox-CMQMYZ4O6WU8QFS6J6JWOC80M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/UIKit-7F9EPYI89KM9W2N2E303O53PR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/AVFoundation-7OBU8SWMMIOIGEAOJ7YRP5LQX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Photos-8YUCMOWDWXA4HSAVQ1TE31Z3X.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/MediaPlayer-AJSS730C7UVSN7C6820A3QKOK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/SwiftUI-8D12RO1YY7P67D381SWHITF26.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/StoreKit-7T8MBGR2GCH2QVMOXOJYW3XXU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/AVKit-2XH3Z2HZ3W0D77NWXRABHHHD9.pcm
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ Spindle (in target 'Spindle' from project 'Spindle')
+
+EmitSwiftModule normal arm64 (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 Compiling\ NowPlayingView.swift,\ PathInference.swift,\ PlayQueue.swift,\ PlayerEngine.swift,\ PlaylistsView.swift,\ ProStore.swift,\ Rules.swift,\ SearchView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/NowPlaying/NowPlayingView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/PathInference.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Playback/PlayQueue.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Playback/PlayerEngine.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Playlists/PlaylistsView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Store/ProStore.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Growth/Rules.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Search/SearchView.swift (in target 'Spindle' from project 'Spindle')
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/NowPlaying/NowPlayingView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/PathInference.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Playback/PlayQueue.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Playback/PlayerEngine.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Playlists/PlaylistsView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Store/ProStore.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Growth/Rules.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Search/SearchView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 Compiling\ SettingsView.swift,\ ShareCards.swift,\ ShelfView.swift,\ SourcesView.swift,\ SpindleApp.swift,\ Theme.swift,\ WebDAV.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Settings/SettingsView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Share/ShareCards.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Shelf/ShelfView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Sources/SourcesView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/App/SpindleApp.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Design/Theme.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Sources/WebDAV.swift /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Spindle' from project 'Spindle')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Settings/SettingsView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Share/ShareCards.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Shelf/ShelfView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Sources/SourcesView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/App/SpindleApp.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Design/Theme.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Sources/WebDAV.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 Compiling\ AlbumView.swift,\ AppLanguage.swift,\ AppModel.swift,\ Graphics.swift,\ Keychain.swift,\ LibraryIndex.swift,\ LibraryStore.swift,\ LocalSources.swift,\ Models.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Album/AlbumView.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/App/AppLanguage.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/App/AppModel.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Design/Graphics.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Sources/Keychain.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/LibraryIndex.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/LibraryStore.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Sources/LocalSources.swift /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/Models.swift (in target 'Spindle' from project 'Spindle')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Features/Album/AlbumView.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/App/AppLanguage.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/App/AppModel.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Design/Graphics.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Sources/Keychain.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/LibraryIndex.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/LibraryStore.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Sources/LocalSources.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/Spindle/Model/Models.swift (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for Spindle (in target 'Spindle' from project 'Spindle')
+
+SwiftDriver\ Compilation\ Requirements Spindle normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Spindle -Onone -enforce-exclusivity\=checked @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/laura/laura/apps/spindle/dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache -output-file-map /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-generated-files.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-own-target-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-project-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-Swift.h -working-directory /Users/runner/work/laura/laura/apps/spindle -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling SettingsView.swift, ShareCards.swift, ShelfView.swift, SourcesView.swift, SpindleApp.swift, Theme.swift, WebDAV.swift, GeneratedAssetSymbols.swift (in target 'Spindle' from project 'Spindle')
+
+SwiftMergeGeneratedHeaders /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/Spindle-Swift.h /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-Swift.h (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-swiftHeaderTool -arch arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-Swift.h -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/Spindle-Swift.h
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftmodule (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftmodule /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftdoc (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftdoc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.abi.json (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.abi.json /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftsourceinfo (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftsourceinfo /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriver SpindleTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-SwiftDriver -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name SpindleTests -Onone -enforce-exclusivity\=checked @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/laura/laura/apps/spindle/dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -parse-as-library -emit-localized-strings -emit-localized-strings-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache -output-file-map /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-generated-files.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-own-target-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-project-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-Swift.h -working-directory /Users/runner/work/laura/laura/apps/spindle -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling AlbumView.swift, AppLanguage.swift, AppModel.swift, Graphics.swift, Keychain.swift, LibraryIndex.swift, LibraryStore.swift, LocalSources.swift, Models.swift (in target 'Spindle' from project 'Spindle')
+
+SwiftDriverJobDiscovery normal arm64 Compiling NowPlayingView.swift, PathInference.swift, PlayQueue.swift, PlayerEngine.swift, PlaylistsView.swift, ProStore.swift, Rules.swift, SearchView.swift (in target 'Spindle' from project 'Spindle')
+
+SwiftDriver\ Compilation Spindle normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-Swift-Compilation -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Spindle -Onone -enforce-exclusivity\=checked @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/laura/laura/apps/spindle/dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache -output-file-map /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-generated-files.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-own-target-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-project-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-Swift.h -working-directory /Users/runner/work/laura/laura/apps/spindle -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle.debug.dylib normal (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -O0 -L/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -filelist /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.LinkFileList -install_name @rpath/Spindle.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.swiftmodule @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle.debug.dylib
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCUIAutomation-C5W5GSY0L2SL5FV2TVFHUIJDC.pcm
+
+ConstructStubExecutorLinkFileList /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-ExecutorLinkFileList-normal-arm64.txt (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    construct-stub-executor-link-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle.debug.dylib /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'Spindle' from project 'Spindle')
+
+Ld /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle normal (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -O0 -L/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle-ExecutorLinkFileList-normal-arm64.txt /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle.debug.dylib -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle
+
+SwiftExplicitDependencyCompileModuleFromInterface arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCUIAutomation-18WGYB5HPP5FY.swiftmodule
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCTest-UZL6TBXW6Y65ONH3TEWSLJ3C.pcm
+
+ExtractAppIntentsMetadata (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.7003.10.G9RJnC/Metal.xctoolchain --module-name Spindle --sdk-root /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk --xcode-version 17C529 --platform-family iOS --deployment-target 17.0 --bundle-identifier com.noobclaw.spindle --output /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app --target-triple arm64-apple-ios17.0-simulator --binary-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle --dependency-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle_dependency_info.dat --stringsdata-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftFileList --metadata-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyMetadataFileList --static-metadata-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Objects-normal/arm64/Spindle.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-11-28 12:05:40.179 appintentsmetadataprocessor[2708:11337] Starting appintentsmetadataprocessor export
+2026-11-28 12:05:40.185 appintentsmetadataprocessor[2708:11337] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+CopySwiftLibs /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle.debug.dylib --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/SystemExtensions --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Extensions --platform iphonesimulator --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.7003.10.G9RJnC/Metal.xctoolchain --toolchain /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+SwiftExplicitDependencyCompileModuleFromInterface arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCTest-XNY5Y8YQQPV1.swiftmodule
+
+AppIntentsSSUTraining (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Info.plist --temp-dir-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/ssu --bundle-id com.noobclaw.spindle --product-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app --extracted-metadata-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Metadata.appintents --metadata-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/Spindle.build/Spindle.DependencyMetadataFileList --archive-ssu-assets
+2026-11-28 12:05:40.229 appintentsnltrainingprocessor[2712:11349] Parsing options for appintentsnltrainingprocessor
+2026-11-28 12:05:40.231 appintentsnltrainingprocessor[2712:11349] No AppShortcuts found - Skipping.
+
+ProcessInfoPlistFile /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Info.plist /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/empty-SpindleTests.plist (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-infoPlistUtility /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/empty-SpindleTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -format binary -platform iphonesimulator -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Info.plist
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ SpindleTests (in target 'SpindleTests' from project 'Spindle')
+
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+
+SwiftCompile normal arm64 Compiling\ CoreTests.swift /Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift (in target 'SpindleTests' from project 'Spindle')
+SwiftCompile normal arm64 /Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:332:43: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+        let list = (1...5).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:332:43: note: use a default value parameter to avoid this warning
+        let list = (1...5).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+                                            , default: <#default value#>
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:332:43: note: provide a default value to avoid this warning
+        let list = (1...5).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+                                             ?? <#default value#>
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:332:43: note: use 'String(describing:)' to silence this warning
+        let list = (1...5).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+                                          String(describing:  )
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:347:44: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+        let list = (1...20).map { track("\($0).mp3", source: s, number: $0) }
+                                           ^~
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:347:44: note: use a default value parameter to avoid this warning
+        let list = (1...20).map { track("\($0).mp3", source: s, number: $0) }
+                                           ^~
+                                             , default: <#default value#>
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:347:44: note: provide a default value to avoid this warning
+        let list = (1...20).map { track("\($0).mp3", source: s, number: $0) }
+                                           ^~
+                                              ?? <#default value#>
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:347:44: note: use 'String(describing:)' to silence this warning
+        let list = (1...20).map { track("\($0).mp3", source: s, number: $0) }
+                                           ^~
+                                           String(describing:  )
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:362:43: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+        let list = (1...3).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:362:43: note: use a default value parameter to avoid this warning
+        let list = (1...3).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+                                            , default: <#default value#>
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:362:43: note: provide a default value to avoid this warning
+        let list = (1...3).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+                                             ?? <#default value#>
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:362:43: note: use 'String(describing:)' to silence this warning
+        let list = (1...3).map { track("\($0).mp3", source: s, number: $0) }
+                                          ^~
+                                          String(describing:  )
+/Users/runner/work/laura/laura/apps/spindle/SpindleTests/CoreTests.swift:478:33: warning: main actor-isolated class property 'productID' can not be referenced from a nonisolated autoclosure; this is an error in the Swift 6 language mode
+        XCTAssertEqual(ProStore.productID, "com.noobclaw.spindle.pro_unlock")
+                                ^
+Spindle.ProStore.productID:2:31: note: class property declared here
+@MainActor internal class let productID: String}
+                              ^
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for SpindleTests (in target 'SpindleTests' from project 'Spindle')
+
+SwiftDriver\ Compilation\ Requirements SpindleTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name SpindleTests -Onone -enforce-exclusivity\=checked @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/laura/laura/apps/spindle/dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -parse-as-library -emit-localized-strings -emit-localized-strings-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache -output-file-map /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-generated-files.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-own-target-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-project-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-Swift.h -working-directory /Users/runner/work/laura/laura/apps/spindle -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources/SpindleTests-Swift.h /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-Swift.h (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-swiftHeaderTool -arch arm64 /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-Swift.h -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources/SpindleTests-Swift.h
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftmodule (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftmodule /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftdoc (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftdoc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.abi.json (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.abi.json /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftsourceinfo (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftsourceinfo /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/SpindleTests.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling CoreTests.swift (in target 'SpindleTests' from project 'Spindle')
+
+SwiftDriver\ Compilation SpindleTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-Swift-Compilation -- /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name SpindleTests -Onone -enforce-exclusivity\=checked @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/runner/work/laura/laura/apps/spindle/dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -Isystem /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -F /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -F /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -parse-as-library -emit-localized-strings -emit-localized-strings-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64 -c -j3 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/SDKStatCaches.noindex/iphonesimulator26.2-23C57-dc75598d0054f22ec865fa860f139d72e244bd9a5feaf902f95f61bf06266e52.sdkstatcache -output-file-map /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -sdk-module-cache-path /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/runner/work/laura/laura/apps/spindle/dd/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-generated-files.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-own-target-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests-project-headers.hmap -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-Swift.h -working-directory /Users/runner/work/laura/laura/apps/spindle -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/SpindleTests normal (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -bundle -isysroot /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk -O0 -L/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -L/Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib -F/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator -iframework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks -iframework /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk/Developer/Library/Frameworks -filelist /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @loader_path/Frameworks -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -bundle_loader /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle -Xlinker -object_path_lto -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.swiftmodule @/Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests-linker-args.resp -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/Spindle.debug.dylib -o /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/SpindleTests
+
+ExtractAppIntentsMetadata (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.7003.10.G9RJnC/Metal.xctoolchain --module-name SpindleTests --sdk-root /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.2.sdk --xcode-version 17C529 --platform-family iOS --deployment-target 17.0 --bundle-identifier com.noobclaw.spindle.tests --output /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest --target-triple arm64-apple-ios17.0-simulator --binary-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/SpindleTests --dependency-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests_dependency_info.dat --stringsdata-file /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftFileList --metadata-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyMetadataFileList --static-metadata-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/Objects-normal/arm64/SpindleTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-11-28 12:05:43.256 appintentsmetadataprocessor[2744:11535] Starting appintentsmetadataprocessor export
+2026-11-28 12:05:43.259 appintentsmetadataprocessor[2744:11535] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+CopySwiftLibs /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/SpindleTests --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Frameworks --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/PlugIns --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/SystemExtensions --scan-folder /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Extensions --platform iphonesimulator --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.7003.10.G9RJnC/Metal.xctoolchain --toolchain /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Frameworks --strip-bitcode --scan-executable /Applications/Xcode_26.3.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+AppIntentsSSUTraining (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /Applications/Xcode_26.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Info.plist --temp-dir-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/ssu --bundle-id com.noobclaw.spindle.tests --product-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest --extracted-metadata-path /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest/Metadata.appintents --metadata-file-list /Users/runner/work/laura/laura/apps/spindle/dd/Build/Intermediates.noindex/Spindle.build/Debug-iphonesimulator/SpindleTests.build/SpindleTests.DependencyMetadataFileList --archive-ssu-assets
+2026-11-28 12:05:43.292 appintentsnltrainingprocessor[2745:11536] Parsing options for appintentsnltrainingprocessor
+2026-11-28 12:05:43.294 appintentsnltrainingprocessor[2745:11536] No AppShortcuts found - Skipping.
+
+RegisterExecutionPolicyException /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-RegisterExecutionPolicyException /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest
+
+Touch /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest (in target 'SpindleTests' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /usr/bin/touch -c /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app/PlugIns/SpindleTests.xctest
+
+RegisterExecutionPolicyException /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-RegisterExecutionPolicyException /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app
+
+Validate /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    builtin-validationUtility /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app (in target 'Spindle' from project 'Spindle')
+    cd /Users/runner/work/laura/laura/apps/spindle
+    /usr/bin/touch -c /Users/runner/work/laura/laura/apps/spindle/dd/Build/Products/Debug-iphonesimulator/Spindle.app
+
+2026-11-28 12:08:34.403151+0000 Spindle[4490:18510] [library] load_eligibility_plist: Failed to open /Users/runner/Library/Developer/CoreSimulator/Devices/0C95D7BB-B55C-4EE0-ACB9-8616BB736183/data/Containers/Data/Application/8FA45755-BB4C-46CE-8BAD-4C451B0A55C4/private/var/db/eligibilityd/eligibility.plist: No such file or directory(2)
+2026-11-28 12:08:35.501118+0000 Spindle[4490:18510] fopen failed for data file: errno = 2 (No such file or directory)
+2026-11-28 12:08:35.501537+0000 Spindle[4490:18510] Errors found! Invalidating cache...
+2026-11-28 12:08:36.485792+0000 Spindle[4490:18510] fopen failed for data file: errno = 2 (No such file or directory)
+2026-11-28 12:08:36.486356+0000 Spindle[4490:18510] Errors found! Invalidating cache...
+Test Suite 'All tests' started at 2026-11-28 12:08:41.672.
+Test Suite 'SpindleTests.xctest' started at 2026-11-28 12:08:41.673.
+Test Suite 'CoreTests' started at 2026-11-28 12:08:41.673.
+Test Case '-[SpindleTests.CoreTests test_TC_HOME_04_spindleThickness]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_HOME_04_spindleThickness]' passed (0.005 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_HOME_06_demoShelfGenerates]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_HOME_06_demoShelfGenerates]' passed (2.130 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_IAP_01_paywallHeadlines]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_IAP_01_paywallHeadlines]' passed (0.002 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_01_infersFromPath]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_01_infersFromPath]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_02_infersWithMissingLevels]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_02_infersWithMissingLevels]' passed (0.002 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_03_mergesSameAlbumAcrossFolders]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_03_mergesSameAlbumAcrossFolders]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_04_ordersAlbumsAndTracks]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_04_ordersAlbumsAndTracks]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_05_searchesAllFields]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_05_searchesAllFields]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_07_recentlyAdded]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_07_recentlyAdded]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_08_savesAndLoadsAtomically]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_08_savesAndLoadsAtomically]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_09_recoversFromDamagedFile]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_09_recoversFromDamagedFile]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_10_artworkStoredOncePerAlbum]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_10_artworkStoredOncePerAlbum]' passed (0.002 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_11_playableFormats]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_11_playableFormats]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_12_tagsOverrideGuesses]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIB_12_tagsOverrideGuesses]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_LIFE_02_extremeNames]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_LIFE_02_extremeNames]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_02_TC_OFF_06_offlineFilesWinAndClear]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_02_TC_OFF_06_offlineFilesWinAndClear]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_04_TC_OFF_05_offlineLimitCountsFinishedOnly]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_OFF_04_TC_OFF_05_offlineLimitCountsFinishedOnly]' passed (0.002 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PL_01_TC_PL_03_TC_PL_04_playlists]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PL_01_TC_PL_03_TC_PL_04_playlists]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_01_queueNextPrevious]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_01_queueNextPrevious]' passed (0.004 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_02_shuffleNoRepeats]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_02_shuffleNoRepeats]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_04_TC_PLY_05_sessionPolicy]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_04_TC_PLY_05_sessionPolicy]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_06_stallWatchdog]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_06_stallWatchdog]' passed (0.000 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_07_skipsUnplayable]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_07_skipsUnplayable]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_09_sleepTimer]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_09_sleepTimer]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_14_repeatModes]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_PLY_14_repeatModes]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_01_TC_RVW_02_TC_RVW_03_reviewTiming]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_01_TC_RVW_02_TC_RVW_03_reviewTiming]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_04_loveItRequestsSystemReview]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_04_loveItRequestsSystemReview]' passed (0.044 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_05_feedbackLinkHasNoServerDetails]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_RVW_05_feedbackLinkHasNoServerDetails]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SHR_01_TC_SHR_02_shareCards]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SHR_01_TC_SHR_02_shareCards]' passed (0.008 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_01_parsesRootListing]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_01_parsesRootListing]' passed (0.008 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_02_parsesSizesDatesAbsoluteHrefs]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_02_parsesSizesDatesAbsoluteHrefs]' passed (0.007 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_03_normalizesAddresses]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_03_normalizesAddresses]' passed (0.003 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_05_TC_ERR_01_mapsErrors]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_05_TC_ERR_01_mapsErrors]' passed (0.004 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_07_scansFolderRecursively]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_07_scansFolderRecursively]' passed (0.010 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_08_TC_SRC_09_TC_IAP_05_TC_IAP_07_freeLimits]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_08_TC_SRC_09_TC_IAP_05_TC_IAP_07_freeLimits]' passed (0.001 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_10_passwordOnlyInKeychain]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_10_passwordOnlyInKeychain]' passed (0.028 seconds).
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_11_TC_LIFE_01_sourcesDoNotMix]' started.
+Test Case '-[SpindleTests.CoreTests test_TC_SRC_11_TC_LIFE_01_sourcesDoNotMix]' passed (0.001 seconds).
+Test Suite 'CoreTests' passed at 2026-11-28 12:08:44.024.
+	 Executed 37 tests, with 0 failures (0 unexpected) in 2.305 (2.351) seconds
+Test Suite 'SpindleTests.xctest' passed at 2026-11-28 12:08:44.025.
+	 Executed 37 tests, with 0 failures (0 unexpected) in 2.305 (2.352) seconds
+Test Suite 'All tests' passed at 2026-11-28 12:08:44.026.
+	 Executed 37 tests, with 0 failures (0 unexpected) in 2.305 (2.354) seconds
+2026-11-28 12:08:45.263 xcodebuild[2097:9486] [MT] IDETestOperationsObserverDebug: 181.763 elapsed -- Testing started completed.
+2026-11-28 12:08:45.263 xcodebuild[2097:9486] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-28 12:08:45.263 xcodebuild[2097:9486] [MT] IDETestOperationsObserverDebug: 181.763 sec, +181.763 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/laura/laura/apps/spindle/dd/Logs/Test/Test-Spindle-2026.11.28_12-04-58-+0000.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

@@ -1,0 +1,25 @@
+Test Case '-[SpindleUITests.UITests test_TC_CRASH_01_rapidTaps]' passed (80.497 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_HOME_01_TC_HOME_02_TC_HOME_03_TC_LIB_13_firstLaunchPlaysWithoutSetup]' passed (16.947 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_HOME_05_emptyStateOffersBothSources]' passed (15.171 seconds).
+/Users/runner/work/laura/laura/apps/spindle/SpindleUITests/UITests.swift:297: error: -[SpindleUITests.UITests test_TC_L10N_02_tourGerman] : Failed to tap "home-sources" Button: No matches found for Elements matching predicate '"home-sources" IN identifiers' from input {(
+Test Case '-[SpindleUITests.UITests test_TC_L10N_02_tourGerman]' failed (50.053 seconds).
+/Users/runner/work/laura/laura/apps/spindle/SpindleUITests/UITests.swift:297: error: -[SpindleUITests.UITests test_TC_L10N_02_tourJapanese] : Failed to tap "home-sources" Button: No matches found for Elements matching predicate '"home-sources" IN identifiers' from input {(
+Test Case '-[SpindleUITests.UITests test_TC_L10N_02_tourJapanese]' failed (44.984 seconds).
+/Users/runner/work/laura/laura/apps/spindle/SpindleUITests/UITests.swift:297: error: -[SpindleUITests.UITests test_TC_L10N_02_tourTraditionalChinese] : Failed to tap "home-sources" Button: No matches found for Elements matching predicate '"home-sources" IN identifiers' from input {(
+Test Case '-[SpindleUITests.UITests test_TC_L10N_02_tourTraditionalChinese]' failed (64.489 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_LIB_06_searchGroupsResults]' passed (13.598 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_LIB_14_artistPage]' passed (11.700 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_OFF_01_downloadAlbum]' passed (11.028 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_PL_01_addSongToPlaylist]' passed (23.992 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_PL_01_TC_PL_02_playlistsAndLimit]' passed (21.498 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_PLY_10_sleepTimerIsPro]' passed (16.089 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_PLY_12_TC_SHR_03_nowPlayingAndShare]' passed (21.856 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_SET_01_TC_SET_03_TC_RVW_06_settingsRows]' passed (8.686 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_SET_02_languageSwitchesInstantlyAndPersists]' passed (19.159 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_SHR_01_shareShelfCard]' passed (11.641 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_SRC_08_TC_IAP_01_secondSourceOpensPaywall]' passed (12.117 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_UX_01_largestText]' passed (42.366 seconds).
+Test Case '-[SpindleUITests.UITests test_TC_UX_02_lightAndDark]' passed (30.653 seconds).
+/Users/runner/work/laura/laura/apps/spindle/SpindleUITests/UITests.swift:297: error: -[SpindleUITests.UITests testTourEnglish] : Failed to tap "home-sources" Button: No matches found for Elements matching predicate '"home-sources" IN identifiers' from input {(
+Test Case '-[SpindleUITests.UITests testTourEnglish]' failed (35.912 seconds).
+** TEST FAILED **

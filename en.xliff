@@ -1,0 +1,837 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="Spindle/Resources/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
+        <source>Spindle</source>
+        <target state="translated">Spindle</target>
+        <note>Bundle display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>Spindle</source>
+        <target state="translated">Spindle</target>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSLocalNetworkUsageDescription" xml:space="preserve">
+        <source>Spindle connects to the music server on your home network that you add as a source.</source>
+        <target state="translated">Spindle connects to the music server on your home network that you add as a source.</target>
+        <note>Privacy - Local Network Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
+        <source>Spindle saves the share card you create to your photo library.</source>
+        <target state="translated">Spindle saves the share card you create to your photo library.</target>
+        <note>Privacy - Photo Library Additions Usage Description</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Spindle/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.3" build-num="17C529"/>
+    </header>
+    <body>
+      <trans-unit id="%@ · %@" xml:space="preserve">
+        <source>%@ · %@</source>
+        <target state="translated">%@ · %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld minutes" xml:space="preserve">
+        <source>%lld minutes</source>
+        <target state="translated">%lld minutes</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld songs" xml:space="preserve">
+        <source>%lld songs</source>
+        <target state="translated">%lld songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld songs on %lld sources. Open sources" xml:space="preserve">
+        <source>%lld songs on %lld sources. Open sources</source>
+        <target state="translated">%lld songs on %lld sources. Open sources</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="A song couldn’t be downloaded: %@" xml:space="preserve">
+        <source>A song couldn’t be downloaded: %@</source>
+        <target state="translated">A song couldn’t be downloaded: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add WebDAV" xml:space="preserve">
+        <source>Add WebDAV</source>
+        <target state="translated">Add WebDAV</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add a Source" xml:space="preserve">
+        <source>Add a Source</source>
+        <target state="translated">Add a Source</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add a WebDAV address from your NAS, or choose a folder in Files — including SMB servers you’ve connected there." xml:space="preserve">
+        <source>Add a WebDAV address from your NAS, or choose a folder in Files — including SMB servers you’ve connected there.</source>
+        <target state="translated">Add a WebDAV address from your NAS, or choose a folder in Files — including SMB servers you’ve connected there.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add as many servers as you like" xml:space="preserve">
+        <source>Add as many servers as you like</source>
+        <target state="translated">Add as many servers as you like</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add to Playlist" xml:space="preserve">
+        <source>Add to Playlist</source>
+        <target state="translated">Add to Playlist</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Address" xml:space="preserve">
+        <source>Address</source>
+        <target state="translated">Address</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AirPlay" xml:space="preserve">
+        <source>AirPlay</source>
+        <target state="translated">AirPlay</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Albums" xml:space="preserve">
+        <source>Albums</source>
+        <target state="translated">Albums</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Artists" xml:space="preserve">
+        <source>Artists</source>
+        <target state="translated">Artists</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bring back the demo shelf" xml:space="preserve">
+        <source>Bring back the demo shelf</source>
+        <target state="translated">Bring back the demo shelf</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bring your music in" xml:space="preserve">
+        <source>Bring your music in</source>
+        <target state="translated">Bring your music in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Browse folders" xml:space="preserve">
+        <source>Browse folders</source>
+        <target state="translated">Browse folders</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cancel" xml:space="preserve">
+        <source>Cancel</source>
+        <target state="translated">Cancel</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Choose a folder" xml:space="preserve">
+        <source>Choose a folder</source>
+        <target state="translated">Choose a folder</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clear" xml:space="preserve">
+        <source>Clear</source>
+        <target state="translated">Clear</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Close" xml:space="preserve">
+        <source>Close</source>
+        <target state="translated">Close</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connected. Found %lld folders and %lld songs at the top level." xml:space="preserve">
+        <source>Connected. Found %lld folders and %lld songs at the top level.</source>
+        <target state="translated">Connected. Found %lld folders and %lld songs at the top level.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Create" xml:space="preserve">
+        <source>Create</source>
+        <target state="translated">Create</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Demo shelf" xml:space="preserve">
+        <source>Demo shelf</source>
+        <target state="translated">Demo shelf</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Display font" xml:space="preserve">
+        <source>Display font</source>
+        <target state="translated">Display font</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Done" xml:space="preserve">
+        <source>Done</source>
+        <target state="translated">Done</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Download" xml:space="preserve">
+        <source>Download</source>
+        <target state="translated">Download</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Downloaded" xml:space="preserve">
+        <source>Downloaded</source>
+        <target state="translated">Downloaded</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Downloaded songs" xml:space="preserve">
+        <source>Downloaded songs</source>
+        <target state="translated">Downloaded songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="End of this song" xml:space="preserve">
+        <source>End of this song</source>
+        <target state="translated">End of this song</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enjoying Spindle?" xml:space="preserve">
+        <source>Enjoying Spindle?</source>
+        <target state="translated">Enjoying Spindle?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Every NAS, WebDAV server and folder you own" xml:space="preserve">
+        <source>Every NAS, WebDAV server and folder you own</source>
+        <target state="translated">Every NAS, WebDAV server and folder you own</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fall asleep to your music" xml:space="preserve">
+        <source>Fall asleep to your music</source>
+        <target state="translated">Fall asleep to your music</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Folder in Files (iCloud, this iPhone, SMB)" xml:space="preserve">
+        <source>Folder in Files (iCloud, this iPhone, SMB)</source>
+        <target state="translated">Folder in Files (iCloud, this iPhone, SMB)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Follow system" xml:space="preserve">
+        <source>Follow system</source>
+        <target state="translated">Follow system</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Free: one server or folder, plus the demo shelf. Pro: as many as you like." xml:space="preserve">
+        <source>Free: one server or folder, plus the demo shelf. Pro: as many as you like.</source>
+        <target state="translated">Free: one server or folder, plus the demo shelf. Pro: as many as you like.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Freed %@." xml:space="preserve">
+        <source>Freed %@.</source>
+        <target state="translated">Freed %@.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Language" xml:space="preserve">
+        <source>Language</source>
+        <target state="translated">Language</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Last scan" xml:space="preserve">
+        <source>Last scan</source>
+        <target state="translated">Last scan</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Library restored" xml:space="preserve">
+        <source>Library restored</source>
+        <target state="translated">Library restored</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Listening now" xml:space="preserve">
+        <source>Listening now</source>
+        <target state="translated">Listening now</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Listening on Spindle" xml:space="preserve">
+        <source>Listening on Spindle</source>
+        <target state="translated">Listening on Spindle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Long-press any song and choose Add to Playlist, or make an empty playlist here." xml:space="preserve">
+        <source>Long-press any song and choose Add to Playlist, or make an empty playlist here.</source>
+        <target state="translated">Long-press any song and choose Add to Playlist, or make an empty playlist here.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Love it" xml:space="preserve">
+        <source>Love it</source>
+        <target state="translated">Love it</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Make all the playlists you want" xml:space="preserve">
+        <source>Make all the playlists you want</source>
+        <target state="translated">Make all the playlists you want</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="More" xml:space="preserve">
+        <source>More</source>
+        <target state="translated">More</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="My Spindle shelf" xml:space="preserve">
+        <source>My Spindle shelf</source>
+        <target state="translated">My Spindle shelf</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="My shelf" xml:space="preserve">
+        <source>My shelf</source>
+        <target state="translated">My shelf</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="NAS music player" xml:space="preserve">
+        <source>NAS music player</source>
+        <target state="translated">NAS music player</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Name" xml:space="preserve">
+        <source>Name</source>
+        <target state="translated">Name</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Name (optional)" xml:space="preserve">
+        <source>Name (optional)</source>
+        <target state="translated">Name (optional)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="New Playlist" xml:space="preserve">
+        <source>New Playlist</source>
+        <target state="translated">New Playlist</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="New playlist name" xml:space="preserve">
+        <source>New playlist name</source>
+        <target state="translated">New playlist name</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Next" xml:space="preserve">
+        <source>Next</source>
+        <target state="translated">Next</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No previous Pro purchase was found for this Apple ID." xml:space="preserve">
+        <source>No previous Pro purchase was found for this Apple ID.</source>
+        <target state="translated">No previous Pro purchase was found for this Apple ID.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Not yet" xml:space="preserve">
+        <source>Not yet</source>
+        <target state="translated">Not yet</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nothing is playing" xml:space="preserve">
+        <source>Nothing is playing</source>
+        <target state="translated">Nothing is playing</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Nothing matches “%@”." xml:space="preserve">
+        <source>Nothing matches “%@”.</source>
+        <target state="translated">Nothing matches “%@”.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Now playing" xml:space="preserve">
+        <source>Now playing</source>
+        <target state="translated">Now playing</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Now playing: %@" xml:space="preserve">
+        <source>Now playing: %@</source>
+        <target state="translated">Now playing: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OK" xml:space="preserve">
+        <source>OK</source>
+        <target state="translated">OK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Offline" xml:space="preserve">
+        <source>Offline</source>
+        <target state="translated">Offline</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="On Synology: install WebDAV Server in Package Center, then use port 5005 (http) or 5006 (https) and the shared folder with your music. Tip: create a read-only user for Spindle." xml:space="preserve">
+        <source>On Synology: install WebDAV Server in Package Center, then use port 5005 (http) or 5006 (https) and the shared folder with your music. Tip: create a read-only user for Spindle.</source>
+        <target state="translated">On Synology: install WebDAV Server in Package Center, then use port 5005 (http) or 5006 (https) and the shared folder with your music. Tip: create a read-only user for Spindle.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="One payment, yours for good. Not a subscription. Shared with your family." xml:space="preserve">
+        <source>One payment, yours for good. Not a subscription. Shared with your family.</source>
+        <target state="translated">One payment, yours for good. Not a subscription. Shared with your family.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Password" xml:space="preserve">
+        <source>Password</source>
+        <target state="translated">Password</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pause" xml:space="preserve">
+        <source>Pause</source>
+        <target state="translated">Pause</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play" xml:space="preserve">
+        <source>Play</source>
+        <target state="translated">Play</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Play Next" xml:space="preserve">
+        <source>Play Next</source>
+        <target state="translated">Play Next</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Playlists" xml:space="preserve">
+        <source>Playlists</source>
+        <target state="translated">Playlists</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Plays next" xml:space="preserve">
+        <source>Plays next</source>
+        <target state="translated">Plays next</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Position" xml:space="preserve">
+        <source>Position</source>
+        <target state="translated">Position</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Previous" xml:space="preserve">
+        <source>Previous</source>
+        <target state="translated">Previous</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Privacy policy" xml:space="preserve">
+        <source>Privacy policy</source>
+        <target state="translated">Privacy policy</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pro restored. Welcome back!" xml:space="preserve">
+        <source>Pro restored. Welcome back!</source>
+        <target state="translated">Pro restored. Welcome back!</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rate Spindle" xml:space="preserve">
+        <source>Rate Spindle</source>
+        <target state="translated">Rate Spindle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reading tags %lld/%lld" xml:space="preserve">
+        <source>Reading tags %lld/%lld</source>
+        <target state="translated">Reading tags %lld/%lld</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recently added" xml:space="preserve">
+        <source>Recently added</source>
+        <target state="translated">Recently added</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reconnecting to your server…" xml:space="preserve">
+        <source>Reconnecting to your server…</source>
+        <target state="translated">Reconnecting to your server…</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reconnecting…" xml:space="preserve">
+        <source>Reconnecting…</source>
+        <target state="translated">Reconnecting…</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Record turning, %lld percent through the song" xml:space="preserve">
+        <source>Record turning, %lld percent through the song</source>
+        <target state="translated">Record turning, %lld percent through the song</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove Download" xml:space="preserve">
+        <source>Remove Download</source>
+        <target state="translated">Remove Download</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove downloads" xml:space="preserve">
+        <source>Remove downloads</source>
+        <target state="translated">Remove downloads</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove source" xml:space="preserve">
+        <source>Remove source</source>
+        <target state="translated">Remove source</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove source and its downloads" xml:space="preserve">
+        <source>Remove source and its downloads</source>
+        <target state="translated">Remove source and its downloads</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove this source?" xml:space="preserve">
+        <source>Remove this source?</source>
+        <target state="translated">Remove this source?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Removing a source only removes it from Spindle. Nothing on your server or in Files is deleted." xml:space="preserve">
+        <source>Removing a source only removes it from Spindle. Nothing on your server or in Files is deleted.</source>
+        <target state="translated">Removing a source only removes it from Spindle. Nothing on your server or in Files is deleted.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rename" xml:space="preserve">
+        <source>Rename</source>
+        <target state="translated">Rename</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rename Playlist" xml:space="preserve">
+        <source>Rename Playlist</source>
+        <target state="translated">Rename Playlist</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Repeat" xml:space="preserve">
+        <source>Repeat</source>
+        <target state="translated">Repeat</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore Purchases" xml:space="preserve">
+        <source>Restore Purchases</source>
+        <target state="translated">Restore Purchases</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Restore failed: %@" xml:space="preserve">
+        <source>Restore failed: %@</source>
+        <target state="translated">Restore failed: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Retry" xml:space="preserve">
+        <source>Retry</source>
+        <target state="translated">Retry</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save" xml:space="preserve">
+        <source>Save</source>
+        <target state="translated">Save</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save to Photos" xml:space="preserve">
+        <source>Save to Photos</source>
+        <target state="translated">Save to Photos</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Saved to Photos." xml:space="preserve">
+        <source>Saved to Photos.</source>
+        <target state="translated">Saved to Photos.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scan again" xml:space="preserve">
+        <source>Scan again</source>
+        <target state="translated">Scan again</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scanning… %lld found" xml:space="preserve">
+        <source>Scanning… %lld found</source>
+        <target state="translated">Scanning… %lld found</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Search" xml:space="preserve">
+        <source>Search</source>
+        <target state="translated">Search</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Search looks through every source at once, including songs you’ve downloaded." xml:space="preserve">
+        <source>Search looks through every source at once, including songs you’ve downloaded.</source>
+        <target state="translated">Search looks through every source at once, including songs you’ve downloaded.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Send feedback" xml:space="preserve">
+        <source>Send feedback</source>
+        <target state="translated">Send feedback</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Settings" xml:space="preserve">
+        <source>Settings</source>
+        <target state="translated">Settings</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Share" xml:space="preserve">
+        <source>Share</source>
+        <target state="translated">Share</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shelf" xml:space="preserve">
+        <source>Shelf</source>
+        <target state="translated">Shelf</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shuffle" xml:space="preserve">
+        <source>Shuffle</source>
+        <target state="translated">Shuffle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shuffle all" xml:space="preserve">
+        <source>Shuffle all</source>
+        <target state="translated">Shuffle all</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shuffle off" xml:space="preserve">
+        <source>Shuffle off</source>
+        <target state="translated">Shuffle off</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shuffle on" xml:space="preserve">
+        <source>Shuffle on</source>
+        <target state="translated">Shuffle on</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Skipped a song this iPhone can’t play" xml:space="preserve">
+        <source>Skipped a song this iPhone can’t play</source>
+        <target state="translated">Skipped a song this iPhone can’t play</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sleep timer" xml:space="preserve">
+        <source>Sleep timer</source>
+        <target state="translated">Sleep timer</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sleep timer with a gentle fade" xml:space="preserve">
+        <source>Sleep timer with a gentle fade</source>
+        <target state="translated">Sleep timer with a gentle fade</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Songs" xml:space="preserve">
+        <source>Songs</source>
+        <target state="translated">Songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Songs, albums, artists" xml:space="preserve">
+        <source>Songs, albums, artists</source>
+        <target state="translated">Songs, albums, artists</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sources" xml:space="preserve">
+        <source>Sources</source>
+        <target state="translated">Sources</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Space used" xml:space="preserve">
+        <source>Space used</source>
+        <target state="translated">Space used</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spindle" xml:space="preserve">
+        <source>Spindle</source>
+        <target state="translated">Spindle</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spindle Pro" xml:space="preserve">
+        <source>Spindle Pro</source>
+        <target state="translated">Spindle Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spindle Pro is unlocked" xml:space="preserve">
+        <source>Spindle Pro is unlocked</source>
+        <target state="translated">Spindle Pro is unlocked</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spindle can’t save to Photos. Allow it in Settings › Privacy › Photos, or use Share instead." xml:space="preserve">
+        <source>Spindle can’t save to Photos. Allow it in Settings › Privacy › Photos, or use Share instead.</source>
+        <target state="translated">Spindle can’t save to Photos. Allow it in Settings › Privacy › Photos, or use Share instead.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spindle collects no data. Your server passwords stay in this iPhone’s Keychain and your music goes straight from your server to you." xml:space="preserve">
+        <source>Spindle collects no data. Your server passwords stay in this iPhone’s Keychain and your music goes straight from your server to you.</source>
+        <target state="translated">Spindle collects no data. Your server passwords stay in this iPhone’s Keychain and your music goes straight from your server to you.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Spindle isn’t allowed to reach your home network. Turn on Local Network for Spindle in Settings." xml:space="preserve">
+        <source>Spindle isn’t allowed to reach your home network. Turn on Local Network for Spindle in Settings.</source>
+        <target state="translated">Spindle isn’t allowed to reach your home network. Turn on Local Network for Spindle in Settings.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="System" xml:space="preserve">
+        <source>System</source>
+        <target state="translated">System</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Test connection" xml:space="preserve">
+        <source>Test connection</source>
+        <target state="translated">Test connection</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="That folder doesn’t exist on the server. Check the path after the port." xml:space="preserve">
+        <source>That folder doesn’t exist on the server. Check the path after the port.</source>
+        <target state="translated">That folder doesn’t exist on the server. Check the path after the port.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The App Store couldn’t verify this purchase." xml:space="preserve">
+        <source>The App Store couldn’t verify this purchase.</source>
+        <target state="translated">The App Store couldn’t verify this purchase.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The App Store isn’t reachable right now. Check your connection and try again." xml:space="preserve">
+        <source>The App Store isn’t reachable right now. Check your connection and try again.</source>
+        <target state="translated">The App Store isn’t reachable right now. Check your connection and try again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The purchase didn’t go through: %@" xml:space="preserve">
+        <source>The purchase didn’t go through: %@</source>
+        <target state="translated">The purchase didn’t go through: %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The server answered with an error (%lld). Try again in a moment." xml:space="preserve">
+        <source>The server answered with an error (%lld). Try again in a moment.</source>
+        <target state="translated">The server answered with an error (%lld). Try again in a moment.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The server didn’t answer. Check that your iPhone and the NAS are on the same network." xml:space="preserve">
+        <source>The server didn’t answer. Check that your iPhone and the NAS are on the same network.</source>
+        <target state="translated">The server didn’t answer. Check that your iPhone and the NAS are on the same network.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The server rejected the user name or password." xml:space="preserve">
+        <source>The server rejected the user name or password.</source>
+        <target state="translated">The server rejected the user name or password.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The server’s security certificate isn’t trusted. Use http on your home network, or install the certificate on this iPhone." xml:space="preserve">
+        <source>The server’s security certificate isn’t trusted. Use http on your home network, or install the certificate on this iPhone.</source>
+        <target state="translated">The server’s security certificate isn’t trusted. Use http on your home network, or install the certificate on this iPhone.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This account can’t read that folder. Check its permissions on the NAS." xml:space="preserve">
+        <source>This account can’t read that folder. Check its permissions on the NAS.</source>
+        <target state="translated">This account can’t read that folder. Check its permissions on the NAS.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This address doesn’t look right. Try something like http://192.168.1.20:5005/music" xml:space="preserve">
+        <source>This address doesn’t look right. Try something like http://192.168.1.20:5005/music</source>
+        <target state="translated">This address doesn’t look right. Try something like http://192.168.1.20:5005/music</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This address isn’t a WebDAV server. On Synology, turn on WebDAV Server and use its port (5005, or 5006 for HTTPS)." xml:space="preserve">
+        <source>This address isn’t a WebDAV server. On Synology, turn on WebDAV Server and use its port (5005, or 5006 for HTTPS).</source>
+        <target state="translated">This address isn’t a WebDAV server. On Synology, turn on WebDAV Server and use its port (5005, or 5006 for HTTPS).</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This folder can’t be opened anymore. Remove the source and choose the folder again." xml:space="preserve">
+        <source>This folder can’t be opened anymore. Remove the source and choose the folder again.</source>
+        <target state="translated">This folder can’t be opened anymore. Remove the source and choose the folder again.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This format can’t play on iPhone" xml:space="preserve">
+        <source>This format can’t play on iPhone</source>
+        <target state="translated">This format can’t play on iPhone</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This playlist was deleted." xml:space="preserve">
+        <source>This playlist was deleted.</source>
+        <target state="translated">This playlist was deleted.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This song keeps stalling, so Spindle moved on." xml:space="preserve">
+        <source>This song keeps stalling, so Spindle moved on.</source>
+        <target state="translated">This song keeps stalling, so Spindle moved on.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This source was removed." xml:space="preserve">
+        <source>This source was removed.</source>
+        <target state="translated">This source was removed.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Turn off" xml:space="preserve">
+        <source>Turn off</source>
+        <target state="translated">Turn off</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlimited offline songs" xml:space="preserve">
+        <source>Unlimited offline songs</source>
+        <target state="translated">Unlimited offline songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlimited playlists" xml:space="preserve">
+        <source>Unlimited playlists</source>
+        <target state="translated">Unlimited playlists</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlimited sources, playlists and offline songs" xml:space="preserve">
+        <source>Unlimited sources, playlists and offline songs</source>
+        <target state="translated">Unlimited sources, playlists and offline songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock Pro" xml:space="preserve">
+        <source>Unlock Pro</source>
+        <target state="translated">Unlock Pro</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unlock Pro · %@" xml:space="preserve">
+        <source>Unlock Pro · %@</source>
+        <target state="translated">Unlock Pro · %@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Up next" xml:space="preserve">
+        <source>Up next</source>
+        <target state="translated">Up next</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="User" xml:space="preserve">
+        <source>User</source>
+        <target state="translated">User</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="User name" xml:space="preserve">
+        <source>User name</source>
+        <target state="translated">User name</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Version" xml:space="preserve">
+        <source>Version</source>
+        <target state="translated">Version</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="WebDAV server" xml:space="preserve">
+        <source>WebDAV server</source>
+        <target state="translated">WebDAV server</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="WebDAV server (Synology, QNAP, Nextcloud…)" xml:space="preserve">
+        <source>WebDAV server (Synology, QNAP, Nextcloud…)</source>
+        <target state="translated">WebDAV server (Synology, QNAP, Nextcloud…)</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your 20 free offline songs are used" xml:space="preserve">
+        <source>Your 20 free offline songs are used</source>
+        <target state="translated">Your 20 free offline songs are used</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your library file couldn’t be read, so Spindle started fresh. Your music on the server is untouched." xml:space="preserve">
+        <source>Your library file couldn’t be read, so Spindle started fresh. Your music on the server is untouched.</source>
+        <target state="translated">Your library file couldn’t be read, so Spindle started fresh. Your music on the server is untouched.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your library file was damaged, so Spindle restored the last good copy." xml:space="preserve">
+        <source>Your library file was damaged, so Spindle restored the last good copy.</source>
+        <target state="translated">Your library file was damaged, so Spindle restored the last good copy.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your purchase is waiting for approval. Pro unlocks as soon as it’s approved." xml:space="preserve">
+        <source>Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.</source>
+        <target state="translated">Your purchase is waiting for approval. Pro unlocks as soon as it’s approved.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You’re offline. Downloaded songs still play." xml:space="preserve">
+        <source>You’re offline. Downloaded songs still play.</source>
+        <target state="translated">You’re offline. Downloaded songs still play.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="albums" xml:space="preserve">
+        <source>albums</source>
+        <target state="translated">albums</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="songs" xml:space="preserve">
+        <source>songs</source>
+        <target state="translated">songs</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="songs on %lld sources" xml:space="preserve">
+        <source>songs on %lld sources</source>
+        <target state="translated">songs on %lld sources</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="songs on 1 source" xml:space="preserve">
+        <source>songs on 1 source</source>
+        <target state="translated">songs on 1 source</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="sources" xml:space="preserve">
+        <source>sources</source>
+        <target state="translated">sources</target>
+        <note/>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

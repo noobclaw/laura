@@ -1,0 +1,186 @@
+Command line invocation:
+    /Applications/Xcode_26.3.app/Contents/Developer/usr/bin/xcodebuild -project Spindle.xcodeproj -scheme SpindleUITour -destination id=0C95D7BB-B55C-4EE0-ACB9-8616BB736183 -derivedDataPath dd-ui CODE_SIGNING_ALLOWED=NO test-without-building "-only-testing:SpindleUITests/UITests/testTourEnglish"
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, arch:arm64, id:0C95D7BB-B55C-4EE0-ACB9-8616BB736183, OS:18.5, name:iPhone 16 Pro }
+{ platform:iOS Simulator, arch:x86_64, id:0C95D7BB-B55C-4EE0-ACB9-8616BB736183, OS:18.5, name:iPhone 16 Pro }
+2026-11-28 12:26:10.532522+0000 SpindleUITests-Runner[33503:99494] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-11-28 12:26:16.487.
+Test Suite 'SpindleUITests.xctest' started at 2026-11-28 12:26:16.488.
+Test Suite 'UITests' started at 2026-11-28 12:26:16.488.
+Test Case '-[SpindleUITests.UITests testTourEnglish]' started.
+    t =     0.00s Start Test at 2026-11-28 12:26:16.489
+    t =     0.83s Set Up
+    t =     0.85s Open com.noobclaw.spindle
+    t =     0.86s     Launch com.noobclaw.spindle
+    t =     6.64s         Setting up automation session
+    t =     8.35s         Wait for com.noobclaw.spindle to idle
+    t =    10.63s Waiting 20.0s for "home-sources" Button to exist
+    t =    11.64s     Checking `Expect predicate `existsNoRetry == 1` for object "home-sources" Button`
+    t =    11.64s         Checking existence of `"home-sources" Button`
+    t =    11.99s Waiting 25.0s for "album-Harbor Lights" Button to exist
+    t =    13.03s     Checking `Expect predicate `existsNoRetry == 1` for object "album-Harbor Lights" Button`
+    t =    13.03s         Checking existence of `"album-Harbor Lights" Button`
+    t =    13.07s Checking existence of `"album-Harbor Lights" Button`
+    t =    14.27s Added attachment named 'en-01-shelf'
+    t =    14.28s Swipe up Target Application 'com.noobclaw.spindle'
+    t =    14.28s     Wait for com.noobclaw.spindle to idle
+    t =    14.28s     Find the Target Application 'com.noobclaw.spindle'
+    t =    14.31s     Check for interrupting elements affecting "Spindle" Application
+    t =    14.35s     Synthesize event
+    t =    14.95s     Wait for com.noobclaw.spindle to idle
+    t =    15.51s Added attachment named 'en-02-shelf-albums'
+    t =    15.52s Swipe down Target Application 'com.noobclaw.spindle'
+    t =    15.52s     Wait for com.noobclaw.spindle to idle
+    t =    15.52s     Find the Target Application 'com.noobclaw.spindle'
+    t =    15.53s     Check for interrupting elements affecting "Spindle" Application
+    t =    15.60s     Synthesize event
+    t =    16.02s     Wait for com.noobclaw.spindle to idle
+    t =    16.53s Find the "album-Harbor Lights" Button
+    t =    16.76s Tap "album-Harbor Lights" Button
+    t =    16.76s     Wait for com.noobclaw.spindle to idle
+    t =    16.76s     Find the "album-Harbor Lights" Button
+    t =    16.84s     Check for interrupting elements affecting "album-Harbor Lights" Button
+    t =    16.87s     Synthesize event
+    t =    17.17s     Wait for com.noobclaw.spindle to idle
+    t =    17.35s Waiting 8.0s for "album-play" Button to exist
+    t =    18.38s     Checking `Expect predicate `existsNoRetry == 1` for object "album-play" Button`
+    t =    18.38s         Checking existence of `"album-play" Button`
+    t =    18.62s Added attachment named 'en-03-album'
+    t =    18.62s Tap "track-0" Button
+    t =    18.62s     Wait for com.noobclaw.spindle to idle
+    t =    18.62s     Find the "track-0" Button
+    t =    18.68s     Check for interrupting elements affecting "track-0" Button
+    t =    18.76s     Synthesize event
+    t =    19.09s     Wait for com.noobclaw.spindle to idle
+    t =    19.30s Waiting 8.0s for "mini-player" Button to exist
+    t =    20.35s     Checking `Expect predicate `existsNoRetry == 1` for object "mini-player" Button`
+    t =    20.35s         Checking existence of `"mini-player" Button`
+    t =    20.58s Tap "mini-player" Button
+    t =    20.58s     Wait for com.noobclaw.spindle to idle
+    t =    20.58s     Find the "mini-player" Button
+    t =    20.77s     Check for interrupting elements affecting "mini-player" Button
+    t =    20.96s     Synthesize event
+    t =    21.32s     Wait for com.noobclaw.spindle to idle
+    t =    24.16s Added attachment named 'en-04-now-playing'
+    t =    24.17s Tap "now-queue" Button
+    t =    24.17s     Wait for com.noobclaw.spindle to idle
+    t =    24.18s     Find the "now-queue" Button
+    t =    24.43s     Check for interrupting elements affecting "now-queue" Button
+    t =    24.62s     Synthesize event
+    t =    24.99s     Wait for com.noobclaw.spindle to idle
+    t =    26.25s Added attachment named 'en-05-queue'
+    t =    26.25s Tap "queue-done" Button
+    t =    26.26s     Wait for com.noobclaw.spindle to idle
+    t =    26.28s     Find the "queue-done" Button
+    t =    26.81s     Check for interrupting elements affecting "queue-done" Button
+    t =    27.03s     Synthesize event
+    t =    27.39s     Wait for com.noobclaw.spindle to idle
+    t =    27.83s Waiting 5.0s for "now-close" Button to exist
+    t =    28.92s     Checking `Expect predicate `existsNoRetry == 1` for object "now-close" Button`
+    t =    28.92s         Checking existence of `"now-close" Button`
+    t =    29.04s Tap "now-close" Button
+    t =    29.04s     Wait for com.noobclaw.spindle to idle
+    t =    29.05s     Find the "now-close" Button
+    t =    29.21s     Check for interrupting elements affecting "now-close" Button
+    t =    29.34s     Synthesize event
+    t =    29.70s     Wait for com.noobclaw.spindle to idle
+    t =    31.20s Tap Button (Element at index 0)
+    t =    31.20s     Wait for com.noobclaw.spindle to idle
+    t =    31.21s     Find the Button (Element at index 0)
+    t =    31.30s     Check for interrupting elements affecting "Back" Button
+    t =    31.39s     Synthesize event
+    t =    31.70s     Wait for com.noobclaw.spindle to idle
+    t =    32.10s Waiting 5.0s for "home-sources" Button to exist
+    t =    33.15s     Checking `Expect predicate `existsNoRetry == 1` for object "home-sources" Button`
+    t =    33.15s         Checking existence of `"home-sources" Button`
+    t =    33.21s Tap Button (Element at index 1)
+    t =    33.21s     Wait for com.noobclaw.spindle to idle
+    t =    33.21s     Find the Button (Element at index 1)
+    t =    33.30s     Check for interrupting elements affecting "magnifyingglass" Button
+    t =    33.36s     Synthesize event
+    t =    33.72s     Wait for com.noobclaw.spindle to idle
+    t =    34.30s Waiting 5.0s for "search-field" TextField to exist
+    t =    35.35s     Checking `Expect predicate `existsNoRetry == 1` for object "search-field" TextField`
+    t =    35.35s         Checking existence of `"search-field" TextField`
+    t =    35.45s Tap "search-field" TextField
+    t =    35.45s     Wait for com.noobclaw.spindle to idle
+    t =    35.45s     Find the "search-field" TextField
+    t =    35.50s     Check for interrupting elements affecting "search-field" TextField
+    t =    35.57s     Synthesize event
+    t =    35.90s     Wait for com.noobclaw.spindle to idle
+    t =    37.13s Type 'light' into "search-field" TextField
+    t =    37.13s     Wait for com.noobclaw.spindle to idle
+    t =    38.37s     Find the "search-field" TextField
+    t =    39.22s     Check for interrupting elements affecting "search-field" TextField
+    t =    39.43s     Synthesize event
+    t =    39.84s     Wait for com.noobclaw.spindle to idle
+    t =    41.02s Added attachment named 'en-06-search'
+    t =    41.02s Tap Button (Element at index 2)
+    t =    41.02s     Wait for com.noobclaw.spindle to idle
+    t =    41.02s     Find the Button (Element at index 2)
+    t =    41.59s     Check for interrupting elements affecting "music.note.list" Button
+    t =    42.04s     Synthesize event
+    t =    42.41s     Wait for com.noobclaw.spindle to idle
+    t =    42.81s Added attachment named 'en-07-playlists'
+    t =    42.81s Tap Button (Element at index 0)
+    t =    42.81s     Wait for com.noobclaw.spindle to idle
+    t =    42.83s     Find the Button (Element at index 0)
+    t =    43.64s     Check for interrupting elements affecting "square.stack.3d.up" Button
+    t =    43.97s     Synthesize event
+    t =    44.47s     Wait for com.noobclaw.spindle to idle
+    t =    44.48s Tap "home-sources" Button
+    t =    44.48s     Wait for com.noobclaw.spindle to idle
+    t =    44.53s     Find the "home-sources" Button
+    t =    45.94s         Find the "home-sources" Button (retry 1)
+    t =    47.20s         Find the "home-sources" Button (retry 2)
+    t =    47.69s Requesting snapshot of accessibility hierarchy for app with pid 33928
+/Users/runner/work/laura/laura/apps/spindle/SpindleUITests/UITests.swift:297: error: -[SpindleUITests.UITests testTourEnglish] : Failed to tap "home-sources" Button: No matches found for Elements matching predicate '"home-sources" IN identifiers' from input {(
+    Button, label: 'Emoji',
+    Button, identifier: 'dictation', label: 'Dictate',
+    Button, identifier: 'square.stack.3d.up', label: 'Shelf',
+    Button, identifier: 'magnifyingglass', label: 'Search', Selected,
+    Button, identifier: 'music.note.list', label: 'Playlists',
+    Button, identifier: 'shift', label: 'shift',
+    Button, identifier: 'Search', label: 'search',
+    Button, identifier: 'mini-player', label: 'Now playing: Lantern Walk',
+    Button, identifier: 'mini-toggle', label: 'Pause',
+    Button, identifier: 'forward.fill', label: 'Next',
+    Button, identifier: 'xmark.circle.fill', label: 'Clear',
+    Button, label: 'Harbor Lights, Spindle Demo Ensemble',
+    Button, identifier: 'search-track-0', label: 'Last Light, Spindle Demo Ensemble · Copper Sky, 0:20',
+    Button, identifier: 'search-track-1', label: 'Low Tide, Spindle Demo Ensemble · Harbor Lights, 0:20',
+    Button, identifier: 'search-track-2', label: 'Lantern Walk, Spindle Demo Ensemble · Harbor Lights, 0:20',
+    Button, identifier: 'search-track-3', label: 'Salt and Brass, Spindle Demo Ensemble · Harbor Lights, 0:20',
+    Button, identifier: 'search-track-4', label: 'Night Ferry, Spindle Demo Ensemble · Harbor Lights, 0:20'
+)}
+Possibly caused by runtime issues:
+Automation type mismatch: computed Button from legacy attributes vs Key from modern attribute. Input attributes and values: {
+    "XC_kAXXCAttributeAutomationType" = 20;
+    "XC_kAXXCAttributeElementBaseType" = UIAccessibilityElement;
+    "XC_kAXXCAttributeElementType" = UIAccessibilityElementKBKey;
+    "XC_kAXXCAttributeTraits" = 8589934641;
+}
+See test report attachments for more detail.
+    t =    49.90s Tear Down
+Test Case '-[SpindleUITests.UITests testTourEnglish]' failed (51.073 seconds).
+Test Suite 'UITests' failed at 2026-11-28 12:27:07.562.
+	 Executed 1 test, with 1 failure (0 unexpected) in 51.073 (51.074) seconds
+Test Suite 'SpindleUITests.xctest' failed at 2026-11-28 12:27:07.562.
+	 Executed 1 test, with 1 failure (0 unexpected) in 51.073 (51.074) seconds
+Test Suite 'Selected tests' failed at 2026-11-28 12:27:07.563.
+	 Executed 1 test, with 1 failure (0 unexpected) in 51.073 (51.076) seconds
+2026-11-28 12:27:49.820 xcodebuild[31369:93030] [MT] IDETestOperationsObserverDebug: 186.813 elapsed -- Testing started completed.
+2026-11-28 12:27:49.820 xcodebuild[31369:93030] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-28 12:27:49.820 xcodebuild[31369:93030] [MT] IDETestOperationsObserverDebug: 186.813 sec, +186.813 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/laura/laura/apps/spindle/dd-ui/Logs/Test/Test-SpindleUITour-2026.11.28_12-24-39-+0000.xcresult
+
+** TEST EXECUTE FAILED **
+
+Testing started
