@@ -342,7 +342,8 @@ export function toolDecision({
 }) {
   if (stage < unlockAt) return 'locked';
   if (!available) return 'unavailable';
-  return credits > 0 ? 'credit' : used ? 'ad' : 'intro';
+  // No ads in this edition (2026-11-28): an empty tool points to the shop.
+  return credits > 0 ? 'credit' : used ? 'shop' : 'intro';
 }
 export function performTool(round, kind, target) {
   if (kind === 'reverse') return false;

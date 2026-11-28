@@ -270,7 +270,7 @@ await check('TC-ECO-03', async () => {
   const afterSecond = j.powerStatus().amount;
   return {
     status: afterSecond === mid + 1 ? 'pass' : 'fail',
-    detail: `first clear refund ${first.energy ?? 0} (power ${afterFirst}); replay same 3★: before win ${mid}, after win ${afterSecond}, refund ${second.energy ?? 0}. README says a win refunds the entry point; kernel only refunds when stars improve.`
+    detail: `first clear refund ${first.energy ?? 0} (power ${afterFirst}); replay same 3★: before win ${mid}, after win ${afterSecond}, refund ${second.energy ?? 0}. README says a win refunds the entry point (fixed in C-07; before the fix the kernel only refunded when stars improved).`
   };
 });
 await check('TC-ECO-05', async () => {
@@ -331,7 +331,8 @@ await check('TC-MON-04', () => {
   const p = productPresentation(SHOP_PRODUCTS[0], store), q = productPresentation(SHOP_PRODUCTS[1], null);
   return { status: p.displayPrice === 'NT$30' && p.purchasable && q.displayPrice === null && !q.purchasable ? 'pass' : 'fail', detail: `with storefront: ${p.displayPrice}/${p.purchasable}; without: ${q.displayPrice}/${q.purchasable}` };
 });
-record('TC-MON-05', SHOP_PRODUCTS.some(p => /ad/i.test(p.kind) && /remove|noads|no-ads/i.test(p.id)) ? 'pass' : 'fail', `products: ${SHOP_PRODUCTS.map(p => p.id).join(', ')} — no remove-ads product`);
+// 2026-11-28 user decision: first edition has no ads, so there must be no remove-ads product (no-ads-scan.mjs covers the code).
+record('TC-MON-05', !SHOP_PRODUCTS.some(p => /noads|no-ads|remove.?ads/i.test(p.id) || /ads?$/i.test(p.kind)) ? 'pass' : 'fail', `products: ${SHOP_PRODUCTS.map(p => p.id).join(', ')} — no remove-ads product (none expected: no ads in this edition)`);
 record('TC-MON-07', 'n/a', 'no random loot boxes in SHOP_PRODUCTS; album photos are deterministic (see AUDIT)');
 
 // ---------- 30-day economy simulation (non-paying, no ads) ----------

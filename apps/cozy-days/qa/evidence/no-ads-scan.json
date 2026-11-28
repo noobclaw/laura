@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-28",
+  "scannedFiles": 91,
+  "dependencies": [
+    "@react-three/drei",
+    "@react-three/fiber",
+    "@react-three/rapier",
+    "@types/three",
+    "animejs",
+    "postprocessing",
+    "react",
+    "react-dom",
+    "three",
+    "three.quarks",
+    "esbuild"
+  ],
+  "staticHits": [],
+  "runtime": {
+    "steps": [
+      "entered stage 1",
+      "12 key inputs on board",
+      "shop button: "
+    ],
+    "requestHosts": {
+      "127.0.0.1:18771": 17
+    },
+    "externalHosts": [],
+    "adLikeDomNodes": []
+  },
+  "verdict": "pass: no ads code, no ad SDK dependency, no external requests"
+}

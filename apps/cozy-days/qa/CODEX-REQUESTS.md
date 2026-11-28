@@ -14,9 +14,9 @@
 | CR-02 | P1 | 體力「勝利返還」 | **Claude 已修**（C-07），Codex 不用處理 |
 | CR-03 | P1 | 上架版移除「關卡測試（獨立沙盒）」入口 | 待修 |
 | CR-04 | P1 | 分享功能 | 待修 |
-| CR-05 | P1 | 引導評論 | 待修 |
-| CR-06 | P1 | 第一批 7 種語言 | 待修 |
-| CR-07 | P1 | 變現：去廣告商品、獎勵廣告點位、道具的免費來源 | 待修 |
+| CR-05 | P1 | 引導評論（2026-11-28 更正：只用官方評分 API，不先問喜不喜歡） | 待修 |
+| CR-06 | P1 | 共 9 種語言（現有 3 + 新增 6） | 待修 |
+| CR-07 | P1 | 變現：首版不接廣告；道具的免費來源、恢復購買、付費頁 | 待修 |
 | CR-08 | P1 | 設定加「震動」「減少閃光」 | 待修 |
 | CR-09 | P1 | 英文道具按鈕和導覽文字截斷 | 待修 |
 | CR-10 | P2 | 失敗彈窗說明原因並提供「救一局」 | 待修 |
@@ -26,7 +26,7 @@
 | CR-14 | P2 | 新手工具包每個玩家限購 1 次 | 待修 |
 | CR-15 | P2 | 舊存檔時區遷移；`Playthrough` 預設時區改成玩家本地 | 待修 |
 | CR-16 | P2 | 重玩已過關卡免費後，活動積分可以重複刷（見 `SELF-AUDIT-claude.md`） | 待用戶決定 |
-| CR-17 | P1 | iOS 原生殼：bundle id `com.laura.cozydays`，接 StoreKit，商品 ID 與 App Store Connect 已建的 5 個一致 | 待修 |
+| CR-17 | P1 | iOS 原生殼：bundle id `com.laura.cozydays`，接 StoreKit，商品 ID 與 App Store Connect 的 4 個一致 | 待修 |
 
 ## CR-00 補齊策劃文件
 
@@ -70,20 +70,21 @@
 ## CR-05 引導評論（P1）
 
 - 證據：`qa/evidence/browser-check.json` TC-FUN-06（設定只有語言、音效、減少動效、沙盒）。
-- 要求（skill 4.5 節）：成就時刻觸發（首次三星、過第 N 關、集齊一頁相冊）；不在失敗後、不在首次開啟、不打斷一局；同一玩家間隔至少 30 天；兩步法（先問喜不喜歡，喜歡才叫系統評分，不喜歡引到意見回饋）；設定常駐「給我們評分」；不用獎勵換評分、不畫星星。網頁版先做好觸發邏輯，接平台時接 `requestReview` 和 Play In-App Review。
+- 要求（2026-11-28 更正，見 `CLAUDE-REPLY-20261128.md` 第二節）：成就時刻觸發（首次三星、過第 N 關、集齊一頁相冊）；不在失敗後、不在首次開啟、不打斷一局；同一玩家間隔至少 30 天。**只呼叫平台官方評分 API**（iOS `requestReview`，Android Play In-App Review），**不先問玩家喜不喜歡、不按回答篩選**（Google Play 明文禁止；Apple 要求用官方提示）；不給獎勵。設定裡另放「意見回饋」和「去商店評分」兩個獨立入口。
 - 驗收方法：Claude 用固定時鐘和存檔驗觸發條件；檢查設定項。
 
-## CR-06 第一批 7 種語言（P1）
+## CR-06 共 9 種語言（P1）
 
 - 證據：`examples/strings.js` 每個鍵只有 [簡中, 繁中, 英文]。
 - 另外：`web/scenes.jsx` 第 15 行（圖形中斷提示）和第 281 行（主頁玩具提示）的文案寫在字串表外，要搬進 `examples/strings.js`。
-- 要求：補 ar、ja、ko、de、fr、es（英文已有），阿拉伯語要由右至左、和數字混排正確；設定的語言選單用各語言自己的名字；每種語言截圖檢查溢出。
+- 要求：現有 zh-CN、zh-TW、en，補 ar、ja、ko、de、fr、es，共 9 種（2026-11-28 更正：原標題「7 種」算錯），阿拉伯語要由右至左、和數字混排正確；設定的語言選單用各語言自己的名字；每種語言截圖檢查溢出。
 - 驗收方法：Claude 逐語言截全部畫面檢查。
 
 ## CR-07 變現（P1）
 
-- 證據：`src/shop.js` 只有 4 個商品，沒有去廣告；`kernel-cases.json` TC-MON-05；`src/progress.js` 道具的唯一來源是 `grantReceipt`（購買）和一次性贈送。
-- 要求：見 `MONETIZATION.md`。至少：去廣告一次性內購；獎勵廣告點位（看廣告換一次道具或體力）；道具的免費來源（每日、成就、活動）；恢復購買入口。
+- 用戶 2026-11-28 決定：**首版不接廣告**（不放插頁、不放獎勵廣告、不做去廣告商品）。`cozy.noads` 已從 App Store Connect 刪除。無廣告證據：`qa/evidence/no-ads-scan.json`。
+- 證據：`src/shop.js` 有 4 個道具商品；`src/progress.js` 道具的唯一來源是 `grantReceipt`（購買）和一次性贈送。
+- 要求：道具的免費來源（每日、成就、活動、相冊集齊一頁）；設定和商店都有恢復購買入口；每個付費入口先出付費頁（內容、商店本地價、購買、恢復購買）。不要接任何廣告 SDK。
 - 驗收方法：`MONETIZATION.md` 的核對表。
 
 ## CR-08 設定加震動與減少閃光（P1）
@@ -132,7 +133,7 @@
 ## CR-17 iOS 原生殼與 StoreKit
 
 - 依據：Claude 已在 App Store Connect 建好 App 記錄和 5 個內購（`MONETIZATION.md` 第六節）。
-- 要求：iOS 殼的 bundle id 必須是 `com.laura.cozydays`（遊戲一律 `com.laura.*`）；StoreKit 商品 ID 用 `cozy.noads`、`cozy.toolbox.welcome`、`cozy.toolbox.helpers`、`cozy.space.bundle`、`cozy.energy.refill`；價格從 StoreKit 取，不寫死；恢復購買；只發 iPhone 直屏。
+- 要求：iOS 殼的 bundle id 必須是 `com.laura.cozydays`（遊戲一律 `com.laura.*`）；StoreKit 商品 ID 用（2026-11-28 起共 4 個，`cozy.noads` 已刪除）`cozy.toolbox.welcome`、`cozy.toolbox.helpers`、`cozy.space.bundle`、`cozy.energy.refill`；價格從 StoreKit 取，不寫死；恢復購買；只發 iPhone 直屏。
 - 驗收方法：沙盒帳號在真機買到每個商品並恢復購買，Claude 拍審核截圖上傳。
 
 ## CR-12 重新構建

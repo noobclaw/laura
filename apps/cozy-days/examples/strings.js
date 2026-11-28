@@ -69,7 +69,7 @@ const rows = {
   selectedErase: ['请选择要擦除的物品', '請選擇要擦除的物品', 'Choose an object to erase'],
   blocked: ['这件物品被遮挡了', '這件物品被遮擋了', 'That object is covered'],
   unavailable: ['目前没有可使用的目标', '目前沒有可使用的目標', 'No eligible target right now'],
-  noCredit: ['此道具余额为 0。广告与付费尚未接入，试玩不会扣款或虚构购买成功。', '此道具餘額為 0。廣告與付費尚未接入，試玩不會扣款或虛構購買成功。', 'No credits left. Ads and purchases are not connected in this preview. No payment is taken.'],
+  noCredit: ['此道具余额为 0。内购尚未接入，试玩不会扣款或虚构购买成功。', '此道具餘額為 0。內購尚未接入，試玩不會扣款或虛構購買成功。', 'No credits left. Purchases are not connected in this preview. No payment is taken.'],
   noEnergy: ['体力不足，可等待自然恢复。继续已保存的一局不重复消耗体力。', '體力不足，可等待自然恢復。繼續已儲存的一局不重複消耗體力。', 'Wait for energy to restore. Resuming a saved round costs no extra energy.'],
   next: ['下一关', '下一關', 'Next level'],
   retry: ['重新开始 · 1 体力', '重新開始 · 1 體力', 'Restart · 1 energy'],

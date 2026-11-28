@@ -76,3 +76,16 @@ test('AUD-05: the classic entry policy is unchanged (no refund on a replay)', as
   await journal.completeRound(1, 30, 18, rating);
   assert.equal(journal.powerStatus().amount, 3);
 });
+
+// C-11 (2026-11-28): first edition ships without ads.
+test('C-11 an empty tool points to the shop, never to an ad', async () => {
+  const { toolDecision } = await import('../src/progress.js');
+  assert.equal(toolDecision({ stage: 9, available: true, credits: 0, used: true }), 'shop');
+  assert.equal(toolDecision({ stage: 9, available: true, credits: 0, used: false }), 'intro');
+  assert.equal(toolDecision({ stage: 9, available: true, credits: 2, used: true }), 'credit');
+});
+test('C-11 shop has no remove-ads product', async () => {
+  const { SHOP_PRODUCTS } = await import('../src/shop.js');
+  assert.deepEqual(SHOP_PRODUCTS.map(p => p.id), ['cozy.toolbox.welcome', 'cozy.toolbox.helpers', 'cozy.space.bundle', 'cozy.energy.refill']);
+  assert.ok(!SHOP_PRODUCTS.some(p => /ads?\b|noads/i.test(p.id)));
+});

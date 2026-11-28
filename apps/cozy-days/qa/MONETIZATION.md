@@ -44,24 +44,23 @@
 
 | 商品 ID | 類型 | 內容 | 美區價格 | 和競品比 | 結論 |
 |---|---|---|---|---|---|
-| `cozy.noads` | 非消耗型 | 去插頁廣告 | $4.99 | 和 Guru 同價，低於 Goods Store 的 $7.99 | 合理 |
 | `cozy.toolbox.welcome` | 消耗型 | 新手工具包（裝箱 2、移回 2、尋物 3、擦除 1） | $1.99 | 兩家新手包都是 $1.99 | 合理；建議每個玩家限購 1 次（同類新手包的通行做法），見 CR-14 |
 | `cozy.toolbox.helpers` | 消耗型 | 小幫手工具包（5/5/5/3） | $4.99 | 中檔 $2.99–$6.99 之間 | 合理 |
 | `cozy.space.bundle` | 消耗型 | 空間包（需求箱 3、暫存欄 3） | $2.99 | 同 Endless Bundle、Bag3 | 合理 |
 | `cozy.energy.refill` | 消耗型 | 體力 5 | $0.99 | 同 Daily Bundle、Large PacK | 合理 |
 
-- 總結：5 個價格都落在同類區間內，取的是區間中間或偏低（新遊戲沒有口碑，不宜定高）。
+- 總結：4 個價格都落在同類區間內，取的是區間中間或偏低（新遊戲沒有口碑，不宜定高）。
 - 缺口：同類都有 $9.99 以上的大包，給願意多花的玩家。建議上線後看數據再加，不在首版。
 - 其他地區：用 App Store Connect 的自動等價（以美區為基準），沙烏地、阿聯酋等地由 Apple 換算成當地價格點。
 - **前提**：道具要先變成「省時間、救一局」（CR-01 完成），否則「不買就過不了」，價格再合理也會被差評。
 
 ## 四、要補的變現功能（CR-07）
 
+**用戶 2026-11-28 決定：首版不接廣告**（不放插頁、不放獎勵廣告、不賣去廣告）。無廣告掃描證據 `qa/evidence/no-ads-scan.json`。以後要加，只考慮獎勵廣告，從 AdMob 開始，另開一輪評估。
+
 1. 恢復購買（設定和商店都要有）。
-2. 獎勵廣告：道具餘額 0 時「看廣告得 1 次」、體力 0 時「看廣告 +1」；每天上限。
-3. 道具的免費來源：每日登入、成就、每日競速名次、相冊集齊一頁。
-4. 插頁廣告（如果要做）：第 10 關以後、只在結算後、不打斷一局；買了去廣告就不出現。
-5. 每個付費入口先出付費頁：列出內容、商店本地價、購買、恢復購買。
+2. 道具的免費來源：每日登入、成就、每日競速名次、相冊集齊一頁。
+3. 每個付費入口先出付費頁：列出內容、商店本地價、購買、恢復購買。
 
 ## 五、平台
 
@@ -78,7 +77,7 @@
 |---|---|
 | App ID（開發者後台） | `com.laura.cozydays`，In-App Purchase 能力已開。另有一個先建好、後因用戶改包名規則而不用的 `com.noobclaw.cozydays`，沒有綁任何 App，先留著（刪除不可逆） |
 | App 記錄 | 名稱 **Cozy Days: Sort & Tidy Up**（「Cozy Days」已被他人佔用；按 GEO 加玩法詞），Apple ID 6840346021，SKU `cozydays-ios`，主要語言 English (U.S.)，狀態 1.0 Prepare for Submission |
-| 內購 | 5 個，全部「Prepare for Submission」：`cozy.noads` 非消耗型 $4.99（Remove Ads）、`cozy.toolbox.welcome` 消耗型 $1.99（Welcome Toolbox）、`cozy.toolbox.helpers` 消耗型 $4.99（Helpful Bundle）、`cozy.space.bundle` 消耗型 $2.99（More Room Bundle）、`cozy.energy.refill` 消耗型 $0.99（Energy Refill） |
+| 內購 | 4 個，全部「Prepare for Submission」（原第 5 個 `cozy.noads` 非消耗型 Remove Ads 已於 2026-11-28 按用戶決定刪除，該 ID 不能再用）：`cozy.toolbox.welcome` 消耗型 $1.99（Welcome Toolbox）、`cozy.toolbox.helpers` 消耗型 $4.99（Helpful Bundle）、`cozy.space.bundle` 消耗型 $2.99（More Room Bundle）、`cozy.energy.refill` 消耗型 $0.99（Energy Refill） |
 | 每個內購的設定 | 美國基準價，其他 173 個地區用 Apple 自動換算；可售地區 174/175，**排除中國大陸**（遊戲在中國大陸需要版號）；英文、簡中、繁中三語名稱和描述，名稱與遊戲字串表一致 |
-| 還沒做 | 每個內購的審核截圖和審核備註（要等 iOS 安裝包）；App 本身的價格（免費）與可售地區；年齡分級；隱私標籤；送審（等 CR-01 關卡重排、廣告接入、原生殼完成，並先問用戶） |
-| 注意 | `cozy.noads` 對應的廣告還沒做，送審前必須先有廣告，否則這個商品會被拒 |
+| 還沒做 | 每個內購的審核截圖和審核備註（要等 iOS 安裝包）；App 本身的價格（免費）與可售地區；年齡分級；隱私標籤；送審（等 CR-01 關卡結論、原生殼完成，並先問用戶） |
+| 隱私 | 首版沒有廣告和追蹤：不需要 ATT 彈窗，隱私標籤可填「不追蹤」（送審前以實際 SDK 再核一次） |

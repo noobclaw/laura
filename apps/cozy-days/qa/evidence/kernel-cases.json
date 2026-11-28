@@ -1,6 +1,6 @@
 {
- "seeds": 3,
- "randomRuns": 5,
+ "seeds": 5,
+ "randomRuns": 20,
  "results": [
   {
    "id": "TC-RULE-01",
@@ -55,12 +55,12 @@
   {
    "id": "TC-LVL-03",
    "status": "fail",
-   "detail": "greedy bot (no tools, 3 seeds): solved 21/160; unsolved: 21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160; tutorial/chapter-edge unsolved: 21,40,41,60,61,80,81,100,101,120,121,140,141,160"
+   "detail": "greedy bot (no tools, 5 seeds): solved 21/160; unsolved: 21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160; tutorial/chapter-edge unsolved: 21,40,41,60,61,80,81,100,101,120,121,140,141,160"
   },
   {
    "id": "TC-LVL-04",
    "status": "fail",
-   "detail": "mean win: greedy 12.7%, random 0.0%, gap 12.7 pts"
+   "detail": "mean win: greedy 12.6%, random 0.3%, gap 12.4 pts"
   },
   {
    "id": "TC-LVL-05",
@@ -99,8 +99,8 @@
   },
   {
    "id": "TC-ECO-03",
-   "status": "fail",
-   "detail": "first clear refund 1 (power 5); replay same 3★: before win 4, after win 4, refund 0. README says a win refunds the entry point; kernel only refunds when stars improve."
+   "status": "pass",
+   "detail": "first clear refund 1 (power 5); replay same 3★: before win 4, after win 5, refund 1. README says a win refunds the entry point (fixed in C-07; before the fix the kernel only refunded when stars improved)."
   },
   {
    "id": "TC-ECO-05",
@@ -144,8 +144,8 @@
   },
   {
    "id": "TC-MON-05",
-   "status": "fail",
-   "detail": "products: cozy.toolbox.welcome, cozy.toolbox.helpers, cozy.space.bundle, cozy.energy.refill — no remove-ads product"
+   "status": "pass",
+   "detail": "products: cozy.toolbox.welcome, cozy.toolbox.helpers, cozy.space.bundle, cozy.energy.refill — no remove-ads product (none expected: no ads in this edition)"
   },
   {
    "id": "TC-MON-07",
@@ -155,7 +155,7 @@
   {
    "id": "TC-ECO-06",
    "status": "pass",
-   "detail": "model: 3 sessions/day, win chance = max(15%, 0.85×greedy bot rate); no tools, no ads, no events. Day 30 frontier 98; chapter 1 (stage 20) cleared on day 1; days with zero attempts: none; avg attempts/day 18.0"
+   "detail": "model: 3 sessions/day, win chance = max(15%, 0.85×greedy bot rate); no tools, no ads, no events. Day 30 frontier 97; chapter 1 (stage 20) cleared on day 1; days with zero attempts: none; avg attempts/day 18.0"
   },
   {
    "id": "ECO-SIM-TABLE",
@@ -259,15 +259,15 @@
     },
     {
      "day": 13,
-     "frontier": 54,
-     "attempts": 19,
-     "wins": 4,
+     "frontier": 53,
+     "attempts": 18,
+     "wins": 3,
      "power": 0,
      "sessionsBlocked": 3
     },
     {
      "day": 14,
-     "frontier": 57,
+     "frontier": 56,
      "attempts": 18,
      "wins": 3,
      "power": 0,
@@ -275,7 +275,7 @@
     },
     {
      "day": 15,
-     "frontier": 58,
+     "frontier": 57,
      "attempts": 16,
      "wins": 1,
      "power": 0,
@@ -283,7 +283,7 @@
     },
     {
      "day": 16,
-     "frontier": 60,
+     "frontier": 59,
      "attempts": 17,
      "wins": 2,
      "power": 0,
@@ -291,7 +291,7 @@
     },
     {
      "day": 17,
-     "frontier": 63,
+     "frontier": 62,
      "attempts": 18,
      "wins": 3,
      "power": 0,
@@ -299,7 +299,7 @@
     },
     {
      "day": 18,
-     "frontier": 65,
+     "frontier": 64,
      "attempts": 17,
      "wins": 2,
      "power": 0,
@@ -307,7 +307,7 @@
     },
     {
      "day": 19,
-     "frontier": 66,
+     "frontier": 65,
      "attempts": 16,
      "wins": 1,
      "power": 0,
@@ -315,7 +315,7 @@
     },
     {
      "day": 20,
-     "frontier": 71,
+     "frontier": 70,
      "attempts": 20,
      "wins": 5,
      "power": 0,
@@ -323,7 +323,7 @@
     },
     {
      "day": 21,
-     "frontier": 72,
+     "frontier": 71,
      "attempts": 16,
      "wins": 1,
      "power": 0,
@@ -331,23 +331,23 @@
     },
     {
      "day": 22,
-     "frontier": 74,
-     "attempts": 17,
-     "wins": 2,
+     "frontier": 72,
+     "attempts": 16,
+     "wins": 1,
      "power": 0,
      "sessionsBlocked": 3
     },
     {
      "day": 23,
-     "frontier": 77,
-     "attempts": 18,
-     "wins": 3,
+     "frontier": 76,
+     "attempts": 19,
+     "wins": 4,
      "power": 0,
      "sessionsBlocked": 3
     },
     {
      "day": 24,
-     "frontier": 79,
+     "frontier": 78,
      "attempts": 17,
      "wins": 2,
      "power": 0,
@@ -355,7 +355,7 @@
     },
     {
      "day": 25,
-     "frontier": 82,
+     "frontier": 81,
      "attempts": 18,
      "wins": 3,
      "power": 0,
@@ -363,7 +363,7 @@
     },
     {
      "day": 26,
-     "frontier": 85,
+     "frontier": 84,
      "attempts": 18,
      "wins": 3,
      "power": 0,
@@ -371,7 +371,7 @@
     },
     {
      "day": 27,
-     "frontier": 88,
+     "frontier": 87,
      "attempts": 18,
      "wins": 3,
      "power": 0,
@@ -379,7 +379,7 @@
     },
     {
      "day": 28,
-     "frontier": 91,
+     "frontier": 90,
      "attempts": 18,
      "wins": 3,
      "power": 0,
@@ -387,17 +387,17 @@
     },
     {
      "day": 29,
-     "frontier": 95,
-     "attempts": 19,
-     "wins": 4,
+     "frontier": 93,
+     "attempts": 18,
+     "wins": 3,
      "power": 0,
      "sessionsBlocked": 3
     },
     {
      "day": 30,
-     "frontier": 98,
-     "attempts": 18,
-     "wins": 3,
+     "frontier": 97,
+     "attempts": 19,
+     "wins": 4,
      "power": 0,
      "sessionsBlocked": 3
     }
@@ -423,7 +423,7 @@
     "medium": 100
    },
    "greedyWin": 1,
-   "randomWin": 0,
+   "randomWin": 0.4,
    "medianSteps": 18,
    "maxRewardGapSec": 10.799999999999999,
    "trayPeak": 0
@@ -623,7 +623,7 @@
    "greedyWin": 1,
    "randomWin": 0,
    "medianSteps": 90,
-   "maxRewardGapSec": 12,
+   "maxRewardGapSec": 13.2,
    "trayPeak": 0
   },
   {
@@ -713,7 +713,7 @@
    "greedyWin": 1,
    "randomWin": 0,
    "medianSteps": 104,
-   "maxRewardGapSec": 12,
+   "maxRewardGapSec": 13.2,
    "trayPeak": 0
   },
   {
@@ -1229,7 +1229,7 @@
    "satisfiable": true,
    "exact": true,
    "rating": null,
-   "greedyWin": 0.3333333333333333,
+   "greedyWin": 0.2,
    "randomWin": 0,
    "medianSteps": 176,
    "maxRewardGapSec": 10.799999999999999,

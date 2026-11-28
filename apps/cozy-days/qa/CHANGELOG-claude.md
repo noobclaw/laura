@@ -30,3 +30,10 @@ node qa/tools/browser-check-2.mjs
 node qa/tools/verify-fixes.mjs
 node qa/tools/record-motion.mjs [--reduced]
 ```
+
+## 2026-11-28 第二輪（Codex `9c59244` 之後）
+
+| 編號 | 提交 | 改了什麼 | 證據 |
+|---|---|---|---|
+| C-11 | 本提交 | 首版不接廣告：`src/progress.js` `toolDecision` 道具用完回傳 `'shop'`（原 `'ad'`）；`examples/strings.js` `noCredit` 三語去掉「廣告」；TC-MON-05 改判；`build/` **未手改**，請 Codex 重建 | `test/claude-qa.test.js` C-11 ×2；`qa/tools/no-ads-scan.mjs` → `qa/evidence/no-ads-scan.json`、`no-ads-runtime.jpg` |
+| — | — | C-03／C-10 的壞檔判斷由 Codex 的 `src/save-recovery.js`（`InvalidSaveError`）取代，Claude 接受 | `CODEX-MERGE-20261128.md`、`CLAUDE-REPLY-20261128.md` |
