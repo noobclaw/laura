@@ -13,6 +13,8 @@ enum Theme {
     static let accent = dyn(0x8A8122, 0xD9CF4A)
     static let signal = dyn(0xC2502F, 0xE86A4A)
     static let vinyl = Color(hex: 0x0E0E0F)
+    /// Edge of a record: invisible on light paper, a soft rim on the dark background.
+    static let vinylRim = Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 1, alpha: 0.16) : UIColor(white: 0, alpha: 0.05) })
     static let onAccent = dyn(0xFFFFFF, 0x121315)
 
     // Shape: the only three radii.

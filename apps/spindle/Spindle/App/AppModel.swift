@@ -42,7 +42,6 @@ final class AppModel {
 
     init(library: LibraryStore? = nil) {
         self.library = library ?? LibraryStore()
-        if ProcessInfo.processInfo.arguments.contains("-UITourReset") { AppModel.resetAllData() }
         self.library.load()
         if self.library.sources.isEmpty && !UserDefaults.standard.bool(forKey: "demo.removed") { addDemoSource() }
         // UI tests: a saved server that is never reached, so the free source slot is taken.

@@ -39,6 +39,7 @@ struct VinylView: View {
         }
         .frame(width: size, height: size)
         .rotationEffect(angle)
+        .overlay(Circle().stroke(Theme.vinylRim, lineWidth: max(1, size / 120)))
         .overlay(Circle().stroke(highlighted ? Theme.signal : .clear, lineWidth: 2))
         .accessibilityHidden(true)
     }
@@ -99,7 +100,7 @@ struct SpindleStack: View {
     var body: some View {
         Canvas { ctx, size in
             let cx = size.width / 2
-            let rx = min(size.width * 0.42, 170)
+            let rx = min(size.width * 0.42, size.height * 0.75, 170)
             let ry = rx * 0.32
             let baseY = size.height - ry - 6
             let maxStack = size.height - ry * 2 - 34
@@ -118,10 +119,7 @@ struct SpindleStack: View {
                 band.addRect(CGRect(x: cx - rx, y: y - h, width: rx * 2, height: h))
                 band.addEllipse(in: CGRect(x: cx - rx, y: y - ry, width: rx * 2, height: ry * 2))
                 ctx.fill(band, with: .color(Color(hex: 0x070708)))
-                // Edge highlight for the playing source.
-                if d.active {
-                    ctx.stroke(Path(ellipseIn: CGRect(x: cx - rx, y: y - ry, width: rx * 2, height: ry * 2)), with: .color(Theme.signal), lineWidth: 2)
-                }
+                ctx.stroke(Path(ellipseIn: CGRect(x: cx - rx, y: y - h - ry, width: rx * 2, height: ry * 2)), with: .color(Theme.vinylRim), lineWidth: 1)
                 // Top face.
                 let top = CGRect(x: cx - rx, y: y - h - ry, width: rx * 2, height: ry * 2)
                 ctx.fill(Path(ellipseIn: top), with: .color(Theme.vinyl))

@@ -2,7 +2,13 @@ import SwiftUI
 
 @main
 struct SpindleApp: App {
-    @State private var model = AppModel()
+    @State private var model: AppModel
+
+    init() {
+        // UI tests start clean: wipe stored data before any store (language, Pro, library) reads it.
+        if ProcessInfo.processInfo.arguments.contains("-UITourReset") { AppModel.resetAllData() }
+        _model = State(initialValue: AppModel())
+    }
 
     /// UI tests force a scheme to screenshot both; users follow the system.
     static var forcedScheme: ColorScheme? {
