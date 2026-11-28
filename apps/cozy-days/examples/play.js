@@ -47,7 +47,17 @@ const byId = id => document.getElementById(id);
 const content = byId('content'),
   modal = byId('modal');
 const SAVE_KEY = 'sorting-playthrough-v1';
-let locale = localStorage.getItem('sorting-language') ?? 'zh-CN';
+// First launch follows the system language; unsupported languages fall back to English.
+const systemLocale = () => {
+  for (const tag of navigator.languages ?? [navigator.language]) {
+    const lower = String(tag).toLowerCase();
+    if (/^zh-(tw|hk|mo|hant)/.test(lower)) return 'zh-TW';
+    if (lower.startsWith('zh')) return 'zh-CN';
+    if (lower.startsWith('en')) return 'en';
+  }
+  return 'en';
+};
+let locale = localStorage.getItem('sorting-language') ?? systemLocale();
 if (!['zh-CN', 'zh-TW', 'en'].includes(locale)) locale = 'zh-CN';
 document.documentElement.lang = locale;
 let t = translator(locale),
@@ -977,8 +987,7 @@ window.addEventListener('pagehide', () => {
 });
 try {
   document.documentElement.dataset.motion = localStorage.getItem('sorting-motion') ?? 'on';
-  const record = cachedRaw ? JSON.parse(cachedRaw) : undefined;
-  game = await new Playthrough({
+  const boot = record => new Playthrough({
     record,
     loadStage,
     contentEdition: CAMPAIGN_EDITION,
@@ -989,9 +998,23 @@ try {
       cachedRaw = raw;
     }
   }).initialize();
+  // A damaged save must not lock the player out: keep a copy, then start a fresh save.
+  let recovered = false;
+  try {
+    game = await boot(cachedRaw ? JSON.parse(cachedRaw) : undefined);
+  } catch (error) {
+    if (!cachedRaw) throw error;
+    console.error('Damaged save set aside', error);
+    localStorage.setItem(`${SAVE_KEY}-damaged-${Date.now()}`, cachedRaw);
+    localStorage.removeItem(SAVE_KEY);
+    cachedRaw = null;
+    game = await boot(undefined);
+    recovered = true;
+  }
   document.documentElement.dataset.artEdition='american-v1';
 
   await renderCurrent();
+  if (recovered) toast(t('saveRecovered'));
   requestAnimationFrame(frame);
 } catch (error) {
   content.replaceChildren(el('h1', '', t('saveError')), el('p', '', error.message));

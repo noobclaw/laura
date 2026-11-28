@@ -102,6 +102,7 @@ const rows = {
   points: ['积分', '積分', 'Points'],
   you: ['你', '你', 'You'],
   yourRank: ['你的排名：{n} / 10,001', '你的排名：{n} / 10,001', 'Your rank: {n} / 10,001'],
+  saveRecovered: ['存档损坏，已另存一份备份并从新存档开始。', '存檔損壞，已另存一份備份並從新存檔開始。', 'Your save was damaged. A backup was kept and a new save was started.'],
   saveError: ['保存失败，进度没有提交。请保留本页并重试；若其他标签页已更新，请刷新本页。', '儲存失敗，進度沒有提交。請保留本頁並重試；若其他分頁已更新，請重新整理本頁。', 'Save failed; the action was not committed. Retry here, or reload if another tab updated your save.'],
   saveFailed: ['无法保存进度', '無法儲存進度', 'Progress could not be saved'],
   reload: ['重新载入', '重新載入', 'Reload'],
