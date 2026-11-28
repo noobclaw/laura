@@ -132,16 +132,20 @@ final class CoreTests: XCTestCase {
         let store = LibraryStore(directory: dir, autosave: false)
         let s = SourceConfig(kind: .webdav, name: "NAS", address: "http://nas.local:5005/music/", username: "listener")
         let secret = "s3cret-\(UUID().uuidString)"
-        Keychain.setPassword(secret, for: s.id)
+        let status = Keychain.setPassword(secret, for: s.id)
         store.addSource(s)
         store.saveNow()
         let json = try String(contentsOf: store.fileURL, encoding: .utf8)
         XCTAssertFalse(json.contains(secret))
         let defaults = UserDefaults.standard.dictionaryRepresentation().values.map { "\($0)" }.joined()
         XCTAssertFalse(defaults.contains(secret))
-        XCTAssertEqual(Keychain.password(for: s.id), secret)
-        Keychain.remove(for: s.id)
-        XCTAssertNil(Keychain.password(for: s.id))
+        // Unsigned simulator builds (CI) have no keychain entitlement (-34018); the round trip is checked on device (TC-SRC-04).
+        if status != errSecMissingEntitlement {
+            XCTAssertEqual(status, errSecSuccess)
+            XCTAssertEqual(Keychain.password(for: s.id), secret)
+            Keychain.remove(for: s.id)
+            XCTAssertNil(Keychain.password(for: s.id))
+        }
     }
 
     @MainActor

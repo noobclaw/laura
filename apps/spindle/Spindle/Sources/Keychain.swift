@@ -5,7 +5,8 @@ import Security
 enum Keychain {
     private static let service = "com.noobclaw.spindle.source"
 
-    static func setPassword(_ password: String, for id: UUID) {
+    @discardableResult
+    static func setPassword(_ password: String, for id: UUID) -> OSStatus {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                     kSecAttrService as String: service,
                                     kSecAttrAccount as String: id.uuidString]
@@ -13,7 +14,7 @@ enum Keychain {
         var add = query
         add[kSecValueData as String] = Data(password.utf8)
         add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        SecItemAdd(add as CFDictionary, nil)
+        return SecItemAdd(add as CFDictionary, nil)
     }
 
     static func password(for id: UUID) -> String? {

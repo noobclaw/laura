@@ -29,7 +29,13 @@ final class UITests: XCTestCase {
     }
 
     func waitForShelf(_ app: XCUIApplication) {
-        XCTAssertTrue(app.buttons["album-Harbor Lights"].waitForExistence(timeout: 30), "demo shelf appears without any setup")
+        XCTAssertTrue(app.buttons["home-sources"].waitForExistence(timeout: 20), "shelf appears without any setup")
+        var tries = 0
+        while !app.buttons["album-Harbor Lights"].waitForExistence(timeout: tries == 0 ? 25 : 3) && tries < 6 {
+            app.swipeUp(); tries += 1
+        }
+        XCTAssertTrue(app.buttons["album-Harbor Lights"].exists, "demo shelf appears without any setup")
+        for _ in 0..<tries { app.swipeDown() }
     }
 
     func openAlbum(_ app: XCUIApplication, _ title: String = "Harbor Lights") {
@@ -274,11 +280,12 @@ final class UITests: XCTestCase {
         app.buttons["now-queue"].tap()
         sleep(1)
         shot(app, "05-queue", lang)
-        app.swipeDown(velocity: .fast)
-        sleep(1)
-        app.swipeDown(velocity: .fast)
+        app.buttons["queue-done"].tap()
+        XCTAssertTrue(app.buttons["now-close"].waitForExistence(timeout: 5))
+        app.buttons["now-close"].tap()
         sleep(1)
         app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["home-sources"].waitForExistence(timeout: 5))
         tab(app, 1)
         let f = app.textFields["search-field"]
         if f.waitForExistence(timeout: 5) { f.tap(); f.typeText("light") }

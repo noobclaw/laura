@@ -42,6 +42,7 @@ struct NowPlayingView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button { dismiss() } label: { Image(systemName: "chevron.down").frame(width: 44, height: 44) }
+                            .accessibilityIdentifier("now-close")
                             .accessibilityLabel(Text("Close"))
                     }
                     ToolbarItem(placement: .topBarTrailing) {
@@ -240,7 +241,7 @@ struct QueueView: View {
             .environment(\.editMode, .constant(.active))
             .navigationTitle(Text("Up next"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.accessibilityIdentifier("queue-done") } }
         }
     }
 }

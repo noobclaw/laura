@@ -75,7 +75,9 @@ enum WebDAVAddress {
     static func normalize(_ raw: String) -> URL? {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "")
         guard !s.isEmpty else { return nil }
-        if !s.lowercased().hasPrefix("http://") && !s.lowercased().hasPrefix("https://") { s = "http://" + s }
+        let lower = s.lowercased()
+        if lower.contains("://") && !lower.hasPrefix("http://") && !lower.hasPrefix("https://") { return nil }
+        if !lower.hasPrefix("http://") && !lower.hasPrefix("https://") { s = "http://" + s }
         if !s.hasSuffix("/") { s += "/" }
         guard let url = URL(string: s), let host = url.host, !host.isEmpty, host.contains(where: { $0.isLetter || $0.isNumber }) else { return nil }
         guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else { return nil }

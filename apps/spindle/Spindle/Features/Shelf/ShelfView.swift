@@ -88,8 +88,10 @@ struct ShelfView: View {
                         .foregroundStyle(Theme.ink)
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
-                    Text("songs on \(stats.sources) sources")
-                        .font(.subheadline).foregroundStyle(Theme.sub)
+                    Group {
+                        if stats.sources == 1 { Text("songs on 1 source") } else { Text("songs on \(stats.sources) sources") }
+                    }
+                    .font(.subheadline).foregroundStyle(Theme.sub)
                     busyLine
                     HStack(spacing: 4) {
                         Text("Sources").font(.subheadline.weight(.semibold))

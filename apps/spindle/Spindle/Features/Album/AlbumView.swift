@@ -29,10 +29,14 @@ struct AlbumView: View {
                         Text(summary(a)).font(Theme.mono).foregroundStyle(Theme.sub)
                     }
                     HStack(spacing: Theme.s2) {
-                        Button { Haptics.light(); model.player.play(a.tracks) } label: { Label("Play", systemImage: "play.fill") }
+                        Button { Haptics.light(); model.player.play(a.tracks) } label: {
+                            Label("Play", systemImage: "play.fill").lineLimit(1).fixedSize().frame(maxWidth: .infinity)
+                        }
                             .buttonStyle(PrimaryButtonStyle())
                             .accessibilityIdentifier("album-play")
-                        Button { Haptics.light(); model.player.play(a.tracks, shuffle: true) } label: { Label("Shuffle", systemImage: "shuffle") }
+                        Button { Haptics.light(); model.player.play(a.tracks, shuffle: true) } label: {
+                            Label("Shuffle", systemImage: "shuffle").lineLimit(1).fixedSize().frame(maxWidth: .infinity)
+                        }
                             .buttonStyle(SecondaryButtonStyle())
                         Button { model.download(a.tracks) } label: { Image(systemName: downloadIcon(a)).frame(width: 24) }
                             .buttonStyle(SecondaryButtonStyle())
