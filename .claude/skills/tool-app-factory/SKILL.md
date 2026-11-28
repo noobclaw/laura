@@ -5,6 +5,8 @@ description: noobclaw 工具类 App 的完整制作规范（选题→挑刺关�
 
 # Tool App Factory — noobclaw 工具 App 制作规范
 
+> **版权：noobclaw 专有，保留所有权利，不是 MIT 或任何开源许可。** 未经书面许可不得使用、复制、修改或分发。见仓库根目录 `LICENSE`。
+
 这是我们自己做了 15 个工具 App（remcard / autosnore / echo-jot / orbit / daycount / fieldstamp / goldenscout / photolift / picbox / tunekit / astropile / ohmbench / draftbook / clean-alarm / groovelens）之后沉淀下来的规矩。**每条规矩背后都有一次真实事故**，事故记录在 `references/07-教训.md`。
 
 仓库原文是最终依据：`CLAUDE.md`（选题标准）、`PIPELINE.md`（工厂 SOP）、`kb/`（知识库）。本 skill 是它们的**可执行版本**：按关卡给出检查清单和模板。两边冲突时以仓库原文为准，并回来修本 skill。
@@ -24,7 +26,7 @@ description: noobclaw 工具类 App 的完整制作规范（选题→挑刺关�
 | 审计（G5 / G8a） | `templates/audit-checklist.md` |
 | 写 PLAN.md | `templates/PLAN.md` |
 
-配套的通用 Apple 开发 skill（rshankras/claude-code-apple-skills，MIT，装在同级目录）按需调用：`ios`（HIG 审查）、`swiftui`、`swift`（并发）、`testing`、`performance`、`design`（含 game feel）、`monetization`、`app-store`、`release-review`、`legal`（隐私政策）、`security`（隐私清单）。**它们管「怎么写好 Swift」，本 skill 管「我们怎么做产品、过哪些关」。** 两者冲突时以本 skill 为准。
+配套的通用 Apple 开发 skill（rshankras/claude-code-apple-skills，**第三方、MIT 许可，仅这部分是 MIT**，装在同级目录）按需调用：`ios`（HIG 审查）、`swiftui`、`swift`（并发）、`testing`、`performance`、`design`（含 game feel）、`monetization`、`app-store`、`release-review`、`legal`（隐私政策）、`security`（隐私清单）。**它们管「怎么写好 Swift」，本 skill 管「我们怎么做产品、过哪些关」。** 两者冲突时以本 skill 为准。
 
 ## 关卡总表（顺序执行，前一关不过不进下一关）
 
