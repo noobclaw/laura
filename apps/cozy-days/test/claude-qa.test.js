@@ -33,3 +33,24 @@ test('AUD-01: clock moved backwards after a forward jump does not lock energy', 
   assert.equal(status.amount, 4);
   assert.ok(status.refillIn <= 1800, `refillIn ${status.refillIn}`);
 });
+
+test('AUD-05: every win returns the entry energy, as the settings text promises', async () => {
+  const journal = new PlayerJournal({ clock: clockAt(0) });
+  const rating = { fast: 60, medium: 100 };
+  await journal.openRound(1, 'first', 'bonus1');
+  await journal.completeRound(1, 30, 18, rating);
+  assert.equal(journal.powerStatus().amount, 5);
+  await journal.openRound(1, 'replay', 'bonus1');
+  assert.equal(journal.powerStatus().amount, 4);
+  const replay = await journal.completeRound(1, 30, 18, rating);
+  assert.equal(replay.energy, 1);
+  assert.equal(journal.powerStatus().amount, 5);
+});
+
+test('AUD-05: a loss still costs the entry energy', async () => {
+  const journal = new PlayerJournal({ clock: clockAt(0) });
+  await journal.openRound(1, 'lose', 'bonus1');
+  await journal.checkpointRound('lose', { model: { phase: 'lost' } });
+  await journal.closeLostRound('lose');
+  assert.equal(journal.powerStatus().amount, 4);
+});
