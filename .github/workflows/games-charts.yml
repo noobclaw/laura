@@ -1,0 +1,16 @@
+name: App Store game charts
+on: workflow_dispatch
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/charts/fetch_games.py
+      - name: Push results
+        run: |
+          cd out
+          git init -q -b games-charts && git add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -qm "games charts $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" games-charts
