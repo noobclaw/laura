@@ -50,10 +50,18 @@
 ## 本地化
 - `Localizable.xcstrings`（String Catalog），源语言 en；代码里一律 `String(localized:)` 或 `Text("...")` 字面量。
 - 显示名本地化用 `InfoPlist.xcstrings`。
-- 目标语言（2026-11 起，**必做**）：en、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。翻译写进 xcstrings，不靠运行时。key 用 `xcodebuild -exportLocalizations` 导出，不手猜；CI 加覆盖率闸门。详见 `08-多语言.md`。
+- 目标语言与规则见 `../../tool-app-sop/references/10-多语言规格.md`（2026-11 起，**必做**）：en、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。翻译写进 xcstrings，不靠运行时。key 用 `xcodebuild -exportLocalizations` 导出，不手猜；CI 加覆盖率闸门。详见 `08-多语言.md`。
 
 ## 内购（StoreKit 2）
-见 `05-变现与内购.md`。要点：`Product.products(for:)`、`Transaction.updates` 常驻监听、`currentEntitlements` 刷新、`AppStore.sync()` 恢复、价格只用 `displayPrice`、`.storekit` 文件挂在 scheme 上做本地测试。
+产品规则（付费页、商品 ID、免费额度、定价）见 `../../tool-app-sop/references/09-变现与付费页.md`。实现：
+
+- 启动时：`Task { for await r in Transaction.updates { … } }` 常驻；然后 `Product.products(for:)` + 遍历 `Transaction.currentEntitlements`。
+- 只认 `.verified` 交易；`revocationDate != nil` 视为退款，撤销 Pro。
+- 处理完交易必须 `await transaction.finish()`。
+- Pro 状态缓存到 UserDefaults，离线启动也能用（`currentEntitlements` 本身也走本地缓存）。
+- 恢复：`AppStore.sync()` 后重刷 entitlements，并告诉用户结果（找到/没找到）。
+- 本地测试：`.storekit` 配置文件挂在 scheme 的 Run 上；`project.yml` 里把 `*.storekit` 从 sources 排除。
+
 
 ## CI（GitHub Actions macos-15）
 - 本机没有 Xcode：一切编译、测试、截图都在 CI 上跑。

@@ -1,6 +1,6 @@
 ---
 name: tool-app-sop
-description: noobclaw 工具类 App「对标竞品 → 超越 → 创新」的标准作业流程（SOP）。凡是拿到一个热门工具 App 的竞品材料（Codex 找来的源代码 / 反编译包 / 初步产品报告 / 商店页 / 评论）要据此做我们自己的新 App 时用它：逐项拆解、功能对照（对齐 / 更好 / 不做）、创新、产品方案（必含内购、分享、好评引导）、研发里程碑、按产品文档推导详细测试用例、质量验收。研发、出包、上架的关卡仍走 tool-app-factory。
+description: noobclaw 工具类 App 的产品与验收标准作业流程（SOP），含「对标竞品 → 超越 → 创新」。凡是拿到一个热门工具 App 的竞品材料（Codex 找来的源代码 / 反编译包 / 初步产品报告 / 商店页 / 评论）要据此做我们自己的新 App、或任何工具 App 要写产品方案/测试用例/验收时用它：逐项拆解、功能对照（对齐 / 更好 / 不做）、创新、产品方案（必含内购、分享、好评引导）、研发里程碑、按产品文档推导详细测试用例、质量验收。研发、出包、上架的关卡仍走 tool-app-factory。
 ---
 
 # Tool App SOP — 对标、超越、创新
@@ -11,7 +11,7 @@ description: noobclaw 工具类 App「对标竞品 → 超越 → 创新」的�
 
 > **Codex 负责找竞品源代码、做产品功能初步整理；Claude 接收后读每一个细节，在前人的基础上创新。人家有的功能我们要有，而且要做得更好，还要做创新。** 产品方案必须有内购、分享、引导评论；要有研发计划、测试要求与质量验收。测试必须有**根据产品文档设计的详细测试用例**来验收；**UX 标准与 tool-app-factory 一模一样**。
 
-本 SOP 是 tool-app-factory 的**前半段加强版**：它产出的 PLAN.md / TEST-CASES.md / ACCEPTANCE.md 交给 tool-app-factory 的 G2 起继续走。两者冲突时：选题规矩以仓库 `CLAUDE.md` 为准，研发与上架关卡以 tool-app-factory 为准，竞品拆解、功能对照、测试用例推导以本 SOP 为准。
+本 SOP 负责产品与验收（自选题也用它的方案模板、测试用例与验收标准；有对标竞品时走全部九步）：它产出的 PLAN.md / TEST-CASES.md / ACCEPTANCE.md 交给 tool-app-factory 的 G2 起继续走。两者冲突时：选题规矩以仓库 `CLAUDE.md` 为准，研发与上架关卡以 tool-app-factory 为准，竞品拆解、功能对照、测试用例推导以本 SOP 为准。
 
 范例（第一个按本 SOP 做的 App）：`apps/haul/`（对标 Total）—— `TEARDOWN-total.md`、`PLAN.md`、`TEST-CASES.md`、`ACCEPTANCE.md`。新 App 照它的结构写。
 
@@ -28,13 +28,13 @@ description: noobclaw 工具类 App「对标竞品 → 超越 → 创新」的�
 
 | 步 | 名称 | 闸（不过不进下一步） | 产物 | 细则 |
 |---|---|---|---|---|
-| 0 | 巨头快检（拆解前） | 主词 iTunes 美区前 10：有 Apple/Google/Microsoft/Adobe/字节/腾讯/阿里，或任何 ≥10 万评价的免费真同类 → 停，换题或切更窄的楔子（Haul 教训：拆解写完才被巨头否决） | 一行结论写进 TEARDOWN 第 1 节 | factory `01` |
+| 0 | 巨头快检（拆解前） | `08` 第一步一票否决清单：主词 iTunes 美区前 10 有 Apple/Google/Microsoft/Adobe/字节/腾讯/阿里，或任何 ≥10 万评价的免费真同类；系统自带可替代；能力天花板；垃圾赛道；红海 → 停，换题或切更窄的楔子（Haul 教训：拆解写完才被巨头否决） | 一行结论写进 TEARDOWN 第 1 节 | `08` |
 | 1 | 接收交接包 | 清点：报告、源码/资源、清单文件、商店链接都在；读不到的文件列出来，不假装读过 | 清点表（写进 TEARDOWN 第 0 节材料行） | `01` |
 | 2 | 逐项拆解 | 每个页面、每个设置项、每个付费点、每个弹窗时机、每个权限都有编号 `T-区块-序号` 和证据来源；弱点 ≥8 条且每条有评论或代码证据 | `apps/<app>/TEARDOWN-<竞品>.md` | `02` |
-| 3 | 选题闸 | 按 tool-app-factory 挑刺关完整打分（四科 + 分发 + 热度/竞争 + 最危险假设实验 + 评分日期）；数据用 GitHub Actions `keywords.yml`（iTunes 头部 + 竞品评论）与 `trends.yml`（Google Trends）；没过的方案只能写「方案稿，未过挑刺关」 | BACKLOG 条目 / PLAN 第 11 节 | factory `01` |
+| 3 | 选题闸 | 按 `08` 挑刺关完整打分（四科 + 分发 + 热度/竞争 + 最危险假设实验 + 评分日期）；数据用 GitHub Actions `keywords.yml`（iTunes 头部 + 竞品评论）与 `trends.yml`（Google Trends）；没过的方案只能写「方案稿，未过挑刺关」 | BACKLOG 条目 / PLAN 第 13 节 | `08` |
 | 4 | 对照与创新 | 拆解里每个 `T-xx` 在对照表里都有一行：＝ 对齐 / ↑ 更好（写怎么更好）/ ✕ 不做（写原因：合规、需服务端、无意义）；创新 ≥5 条，每条对应一个弱点或新场景 | PLAN 第 4–5 节 | `03` |
-| 5 | 产品方案 | 模板全部章节写满；**内购、分享、好评引导三节缺一不写完**；设计简报按 factory UIUX；大型项目拆 M1/M2/M3 | `apps/<app>/PLAN.md` | `04` |
-| 6 | 测试用例 | 从 PLAN 逐条推导，每条需求 ≥1 条用例，✕ 项有「证明没做」的合规用例；字段齐全、预期可判定；统计数是脚本算的 | `apps/<app>/TEST-CASES.md` | `05` |
+| 5 | 产品方案 | `templates/PLAN.md` 19 节写满；**内购、分享、好评引导三节缺一不写完**；设计简报 `templates/design-brief.md`；大型项目拆 M1/M2/M3 | `apps/<app>/PLAN.md` | `04` `09` `10` |
+| 6 | 测试用例 | 从 PLAN 逐条推导，每条需求 ≥1 条用例；审计九面每面落成用例；✕ 项有「证明没做」的合规用例；字段齐全、预期可判定；统计数是脚本算的 | `apps/<app>/TEST-CASES.md` | `05` |
 | 7 | 验收标准 + 漏项审计 | 写验收表；开一个**没参与写作**的子代理，拿交接包对照 TEARDOWN + PLAN 找漏项，漏项补完再继续 | `apps/<app>/ACCEPTANCE.md` + 审计记录 | `06` |
 | 8 | 研发 + 跑用例验收 | 进 tool-app-factory G2→G8；功能和它的测试一起合入；每个里程碑把该里程碑全部用例跑一遍，出结果表，按 ACCEPTANCE 出口验收并追加记录 | 代码、测试代码、`qa/TC-RESULT-*.md`、验收记录 | `05` `06` + factory |
 
@@ -57,7 +57,7 @@ description: noobclaw 工具类 App「对标竞品 → 超越 → 创新」的�
 12. 审核录屏 CI 自己录，首次送审就作附件。
 13. 必须引导好评：成就时刻 + 30 天间隔、两步法、设置常驻；不奖励、不画星星、不默认五星。
 
-**出处**：选题 `01`、工厂 SOP `02`、UIUX `03`、SwiftUI `04`、变现内购 `05`、ASO 上架 `06`、教训 `07`、多语言 `08`、模板 `templates/`（均在 `tool-app-factory/`）。
+**分工（2026-11-28 定）**：本 SOP 管「产品与验收」——选题、拆解、方案模板、设计简报、变现规则、多语言规格、测试用例、审计清单、验收标准；tool-app-factory 管「研发与上架」——工厂关卡执行（`02`）、UIUX 原则与色相表（`03`）、SwiftUI 工程与 StoreKit 实现（`04`）、出包 ASO 上架（`06`）、教训（`07`）、多语言实现步骤（`08`）。
 
 ## 五条铁律（本 SOP 专属，叠加 factory 十三条）
 
@@ -78,6 +78,12 @@ description: noobclaw 工具类 App「对标竞品 → 超越 → 创新」的�
 | `references/05-测试用例推导.md` | 从 PLAN 推导用例的规则、字段、必测类别、覆盖核对 |
 | `references/06-质量验收.md` | 里程碑出口 A1–A8、发布出口 R1–R8、缺陷分级 |
 | `references/07-净室与合规.md` | 反编译使用边界、审核红线（5.2.3 等）、许可证 |
+| `references/08-选题与挑刺关.md` | 一票否决、找题渠道、四科 + 分发 + 热度/竞争打分、最危险假设实验、定价、可开工条件、Actions 取数（迁自 factory） |
+| `references/09-变现与付费页.md` | 模式、定价阶梯、商品 ID、付费页规格、免费额度规则、必写 IAP 用例（迁自 factory） |
+| `references/10-多语言规格.md` | 10 语言清单、四类覆盖范围、App 内切换、翻译规则、必写 L10N 用例（迁自 factory） |
+| `templates/PLAN.md` | 统一产品方案模板（19 节，含内购/分享/好评/权限/架构/真机清单） |
+| `templates/design-brief.md` | 设计简报 14 格 |
+| `templates/audit-checklist.md` | 审计九面清单（G5/G8a 复核用；每面先落成用例） |
 
 ## 回报格式
 

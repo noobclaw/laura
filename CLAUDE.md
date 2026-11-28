@@ -52,7 +52,7 @@ scripts/new_app.mjs  # 克隆壳→新 app
 
 ## ⭐ 做 App 的规范 skill(2026-11-25 起)
 
-做、改、审、打包、提审任何 App 前,先加载 `.claude/skills/tool-app-factory/SKILL.md`(我们自己的制作规范:关卡总表、十条铁律、检查清单、PLAN/设计简报/审计模板;Flutter 壳与原生 SwiftUI 两条路线)。通用 Apple 开发知识用同目录的 rshankras/claude-code-apple-skills(MIT)。两者冲突以 tool-app-factory 为准;tool-app-factory 与本文件/PIPELINE.md 冲突时以本文件为准,并回去修 skill。
+做、改、审、打包、提审任何 App 前,先加载 `.claude/skills/tool-app-sop/SKILL.md`(产品与验收:选题、竞品拆解、PLAN/设计简报模板、测试用例、审计清单、质量验收;2026-11-28 起)与 `.claude/skills/tool-app-factory/SKILL.md`(研发与上架:关卡总表、十三条铁律、UIUX、SwiftUI、出包上架;Flutter 壳与原生 SwiftUI 两条路线)。通用 Apple 开发知识用同目录的 rshankras/claude-code-apple-skills(MIT)。两者冲突以 tool-app-factory 为准;tool-app-factory 与本文件/PIPELINE.md 冲突时以本文件为准,并回去修 skill。
 
 ## App 落地节奏(用户 2026-07-07 拍板)
 

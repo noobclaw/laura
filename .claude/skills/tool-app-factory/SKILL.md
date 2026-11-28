@@ -15,17 +15,17 @@ description: noobclaw 工具类 App 的完整制作规范（选题→挑刺关�
 
 | 你要做的事 | 先读 |
 |---|---|
-| **拿到竞品材料（Codex 找的源码/反编译/报告）要对标做新 App** | **`../tool-app-sop/SKILL.md`**（拆解→对照→创新→方案→测试用例→验收；之后回到本页 G2 起） |
-| 判断一个点子能不能做 / 进 BACKLOG | `references/01-选题与挑刺关.md` |
+| **产品与验收（选题、拆解、方案、测试用例、验收）——任何新 App 都先走** | **`../tool-app-sop/SKILL.md`**（有对标竞品走全部九步；自选题至少用它的方案模板、用例推导和验收标准） |
+| 判断一个点子能不能做 / 进 BACKLOG | `../tool-app-sop/references/08-选题与挑刺关.md` |
 | 开工做一个 App（任何技术栈） | 本页「关卡总表」+ `references/02-工厂SOP.md` |
-| 定视觉、写界面、评审好不好看 | `references/03-UIUX.md` + `templates/design-brief.md` |
+| 定视觉、写界面、评审好不好看 | `references/03-UIUX.md` + `../tool-app-sop/templates/design-brief.md` |
 | 原生 iOS（SwiftUI）路线 | `references/04-iOS原生SwiftUI.md` |
 | Flutter 壳路线 | `PIPELINE.md` 的 G3 细则（壳 `shell/`、`new_app.mjs`） |
-| 内购、定价、付费墙 | `references/05-变现与内购.md` |
-| 多语言（10 种，必做） | `references/08-多语言.md` |
+| 内购、定价、付费墙 | 规则 `../tool-app-sop/references/09-变现与付费页.md`；StoreKit 实现 `references/04-iOS原生SwiftUI.md` |
+| 多语言（10 种，必做） | 规格 `../tool-app-sop/references/10-多语言规格.md`；实现 `references/08-多语言.md` |
 | 出包、TestFlight、ASO、提审 | `references/06-ASO与上架.md` |
-| 审计（G5 / G8a） | `templates/audit-checklist.md` |
-| 写 PLAN.md | `templates/PLAN.md` |
+| 审计（G5 / G8a） | `../tool-app-sop/templates/audit-checklist.md` |
+| 写 PLAN.md | `../tool-app-sop/templates/PLAN.md` |
 
 配套的通用 Apple 开发 skill（rshankras/claude-code-apple-skills，**第三方、MIT 许可，仅这部分是 MIT**，装在同级目录）按需调用：`ios`（HIG 审查）、`swiftui`、`swift`（并发）、`testing`、`performance`、`design`（含 game feel）、`monetization`、`app-store`、`release-review`、`legal`（隐私政策）、`security`（隐私清单）。**它们管「怎么写好 Swift」，本 skill 管「我们怎么做产品、过哪些关」。** 两者冲突时以本 skill 为准。
 
@@ -36,9 +36,9 @@ description: noobclaw 工具类 App 的完整制作规范（选题→挑刺关�
 | 挑刺 | 立项前挑刺关 | 双硬门（缺口 ≥5/15 且付费 ≥15/25）+ 分发 >0 + 热度/竞争 ≥3 + 最危险假设已实验 + 评分 ≤14 天 | BACKLOG 条目 |
 | G0 | 防撞车 | 近 2.5 天 `apps/` 无其他新 App 提交（里程碑项除外） | — |
 | G1/G1b | 取题与复核 | 取 BACKLOG 排队最高项；评分缺项/过期/硬门不过 → 退回日报 | — |
-| G2 | 立项评审 | 差异化楔子一句话、招牌功能架构、权限流程、定价、**设计简报**都写进 PLAN.md | `PLAN.md` |
+| G2 | 立项评审 | 按 tool-app-sop 统一模板写 PLAN.md（楔子、招牌功能架构、权限、定价、内购/分享/好评、**设计简报**）+ TEST-CASES.md + ACCEPTANCE.md | `PLAN.md` 等 |
 | G3 | 开发 | 先落 design token 与字体，再写页面；铁律见下 | 代码 |
-| G4 | 本地验收 | 编译零错误 + 单元测试全过 + **10 语言覆盖率 100%**（原生路线在 CI 上跑）；有 TEST-CASES.md 的 App 按用例号跑并出 `qa/TC-RESULT-<build>.md`，未测 = 不过（见 `../tool-app-sop/references/05`） | 测试报告 |
+| G4 | 本地验收 | 编译零错误 + 单元测试全过 + **10 语言覆盖率 100%**（原生路线在 CI 上跑）；按 TEST-CASES.md 用例号跑并出 `qa/TC-RESULT-<build>.md`，未测 = 不过（见 `../tool-app-sop/references/05`、`06`） | 测试报告 |
 | G5 | 独立审计 | 按「装到真机什么会坏」审一遍，修完复审 | 审计记录 |
 | G6 | 出包 + 冒烟 | CI 绿 + 模拟器启动截屏**亲眼看过**（en / zh-Hant / ja / de 四种语言） | 截屏 |
 | G6b | 美观复查 | UIUX 打分 ≥75 且无否决项 | 评分表 |
@@ -56,7 +56,7 @@ description: noobclaw 工具类 App 的完整制作规范（选题→挑刺关�
 4. **每个付费门先弹付费页。** 付费页列出 Pro 内容 + 商店真实价格 + 解锁 + 恢复购买；禁止任何入口直接拉起付款，价格禁止写死。
 5. **不许长得一样。** 每个 App 自己的色相（查色相表，±20° 不撞）、自己的字体、自己的 hero 形态、至少一处承载真实数据的自绘图形、专属图标。
 6. **首屏就是工具本身。** 不是「标题栏 + 齿轮 + 卡片列表」；冷启动 ≤2 次点击看到第一个结果。
-7. **必须完整支持 10 种语言，翻译没做完不出包（含 TestFlight）。** en（源语言、ASC 主语言 English (U.S.)）、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。范围：App 内全部文字 + 权限说明 + 显示名 + 商店文案。App 名和标题用英文，不用中文。**设置页必须有 App 内语言切换，立即生效，不跳 iOS 设置；语言行放在设置页最上方（Pro 卡片下第一行），设置入口用齿轮图标，且首屏就能一点打开（用户 2026-11-27：「语言切换在设置里更方便」）。**流程与闸门见 `references/08-多语言.md`。
+7. **必须完整支持 10 种语言，翻译没做完不出包（含 TestFlight）。** en（源语言、ASC 主语言 English (U.S.)）、zh-Hant、zh-Hans、ja、ko、de、fr、es、pt-BR、it。范围：App 内全部文字 + 权限说明 + 显示名 + 商店文案。App 名和标题用英文，不用中文。**设置页必须有 App 内语言切换，立即生效，不跳 iOS 设置；语言行放在设置页最上方（Pro 卡片下第一行），设置入口用齿轮图标，且首屏就能一点打开（用户 2026-11-27：「语言切换在设置里更方便」）。**规格见 `../tool-app-sop/references/10-多语言规格.md`，实现见 `references/08-多语言.md`。
 8. **权限：用到时才要，说清用途，拒绝有出口。** `NS*UsageDescription` 写明用途；拒绝后给「去设置」；禁止静默失败。
 9. **只发 iPhone、竖屏**（`TARGETED_DEVICE_FAMILY=1`），除非 PLAN 明确写了 iPad 设计。
 10. **必须有分享功能（用户 2026-11-27 拍板）。** 每个 App 至少一个「把成果分享出去」的入口：生成一张好看的分享图（1080×1350，带 App 名与成果，敏感数据默认隐藏，可开关）走系统分享面板；首屏有明显的分享按钮（`square.and.arrow.up`），不能只藏在「⋯」菜单里。分享图免费，它也是拉新渠道。用到保存相册时 Info.plist 必须有 `NSPhotoLibraryAddUsageDescription`（10 语言）。
